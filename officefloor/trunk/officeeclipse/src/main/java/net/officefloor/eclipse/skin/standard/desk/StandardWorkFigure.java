@@ -90,8 +90,8 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		contentPane.setBorder(new MarginBorder(2, 5, 2, 2));
 		contentPaneWrap.add(contentPane);
 		workFigure.add(contentPaneWrap);
-		workLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
-				true, false));
+		workLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL,
+				SWT.BEGINNING, true, false));
 
 		// Link to initial flow
 		ConnectorFigure initialFlowConnector = new ConnectorFigure(

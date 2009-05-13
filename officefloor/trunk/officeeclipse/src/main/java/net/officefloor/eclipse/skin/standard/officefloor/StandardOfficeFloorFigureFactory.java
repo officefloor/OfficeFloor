@@ -16,12 +16,22 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
+
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamToOfficeFloorTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
@@ -32,6 +42,9 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContex
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
 
@@ -42,12 +55,6 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
  */
 public class StandardOfficeFloorFigureFactory implements
 		OfficeFloorFigureFactory {
-
-	@Override
-	public OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
-			OfficeFloorManagedObjectDependencyFigureContext context) {
-		return new StandardOfficeFloorManagedObjectDependencyFigure(context);
-	}
 
 	@Override
 	public OfficeFloorManagedObjectSourceFigure createOfficeFloorManagedObjectSourceFigure(
@@ -68,7 +75,20 @@ public class StandardOfficeFloorFigureFactory implements
 	}
 
 	@Override
-	public DeployedOfficeFigure createDeployedOfficeFigure(DeployedOfficeFigureContext context) {
+	public OfficeFloorManagedObjectFigure createOfficeFloorManagedObjectFigure(
+			OfficeFloorManagedObjectFigureContext context) {
+		return new StandardOfficeFloorManagedObjectFigure(context);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
+			OfficeFloorManagedObjectDependencyFigureContext context) {
+		return new StandardOfficeFloorManagedObjectDependencyFigure(context);
+	}
+
+	@Override
+	public DeployedOfficeFigure createDeployedOfficeFigure(
+			DeployedOfficeFigureContext context) {
 		return new StandardDeployedOfficeFigure(context);
 	}
 
@@ -91,8 +111,59 @@ public class StandardOfficeFloorFigureFactory implements
 	}
 
 	@Override
-	public OfficeFloorTeamFigure createOfficeFloorTeamFigure(OfficeFloorTeamFigureContext context) {
+	public OfficeFloorTeamFigure createOfficeFloorTeamFigure(
+			OfficeFloorTeamFigureContext context) {
 		return new StandardOfficeFloorTeamFigure(context);
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext context) {
+		figure.setForegroundColor(ColorConstants.lightBlue);
+	}
+
+	@Override
+	public void decorateDeployedOfficeObjectToOfficeFloorManagedObjectFigure(
+			PolylineConnection figure,
+			DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateDeployedOfficeTeamToOfficeFloorTeamFigure(
+			PolylineConnection figure,
+			DeployedOfficeTeamToOfficeFloorTeamFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context) {
+		// Leave as default
 	}
 
 }

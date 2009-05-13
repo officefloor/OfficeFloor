@@ -27,18 +27,18 @@ import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
-import org.eclipse.draw2d.RoundedRectangle;
+import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 /**
- * {@link RoundedRectangle} that has a header section and content pane.
+ * {@link RectangleFigure} that has a header section and content pane.
  * 
  * @author Daniel
  */
-public class ContainerFigure extends Figure {
+public class RectangleContainerFigure extends Figure {
 
 	/**
 	 * Is public {@link Figure}.
@@ -67,14 +67,15 @@ public class ContainerFigure extends Figure {
 	 * @param includeIsPublicFigure
 	 *            <code>true</code> if including public.
 	 */
-	public ContainerFigure(String containerName, Color backgroundColour,
-			int contentPaneLeftInset, boolean includeIsPublicFigure) {
+	public RectangleContainerFigure(String containerName,
+			Color backgroundColour, int contentPaneLeftInset,
+			boolean includeIsPublicFigure) {
 
 		// Specify the layout
 		this.setLayoutManager(new NoSpacingToolbarLayout(false));
 
 		// Create the rounded rectangle container
-		RoundedRectangle container = new RoundedRectangle();
+		RectangleFigure container = new RectangleFigure();
 		NoSpacingGridLayout containerLayout = new NoSpacingGridLayout(1);
 		container.setLayoutManager(containerLayout);
 		container.setBackgroundColor(backgroundColour);

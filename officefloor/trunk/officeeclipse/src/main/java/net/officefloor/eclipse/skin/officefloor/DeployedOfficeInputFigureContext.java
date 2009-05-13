@@ -16,6 +16,8 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 
 import org.eclipse.draw2d.IFigure;
@@ -28,17 +30,17 @@ import org.eclipse.draw2d.IFigure;
 public interface DeployedOfficeInputFigureContext {
 
 	/**
-	 * Obtains the work name.
+	 * Obtains the {@link OfficeSection} name.
 	 * 
-	 * @return Work name.
+	 * @return {@link OfficeSection} name.
 	 */
-	String getWorkName();
+	String getOfficeSectionName();
 
 	/**
-	 * Obtains the task name.
+	 * Obtains the {@link OfficeSectionInput} name.
 	 * 
-	 * @return Task name.
+	 * @return {@link OfficeSectionInput} name.
 	 */
-	String getTaskName();
+	String getOfficeSectionInputName();
 
 }

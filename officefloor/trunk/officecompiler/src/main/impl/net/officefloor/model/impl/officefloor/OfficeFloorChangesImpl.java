@@ -33,13 +33,19 @@ import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -485,4 +491,302 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			}
 		};
 	}
+
+	@Override
+	public Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorManagedObject(
+			DeployedOfficeObjectModel deployedOfficeObject,
+			OfficeFloorManagedObjectModel officeFloorManagedObject) {
+
+		// TODO test (linkDeployedOfficeObjectToOfficeFloorManagedObject)
+
+		// Create the connection
+		final DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
+		conn.setDeployedOfficeObject(deployedOfficeObject);
+		conn.setOfficeFloorManagedObject(officeFloorManagedObject);
+
+		// Create change to add the connection
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> removeDeployedOfficeObjectToOfficeFloorManagedObject(
+			final DeployedOfficeObjectToOfficeFloorManagedObjectModel deployedOfficeObjectToOfficeFloorManagedObject) {
+
+		// TODO test (removeDeployedOfficeObjectToOfficeFloorManagedObject)
+
+		// Return change to remove the connection
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorManagedObjectModel>(
+				deployedOfficeObjectToOfficeFloorManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				deployedOfficeObjectToOfficeFloorManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				deployedOfficeObjectToOfficeFloorManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeployedOfficeTeamToOfficeFloorTeamModel> linkDeployedOfficeTeamToOfficeFloorTeam(
+			DeployedOfficeTeamModel deployedOfficeTeam,
+			OfficeFloorTeamModel officeFloorTeam) {
+
+		// TODO test (linkDeployedOfficeTeamToOfficeFloorTeam)
+
+		// Create the connection
+		final DeployedOfficeTeamToOfficeFloorTeamModel conn = new DeployedOfficeTeamToOfficeFloorTeamModel();
+		conn.setDeployedOfficeTeam(deployedOfficeTeam);
+		conn.setOfficeFloorTeam(officeFloorTeam);
+
+		// Return the change to add connection
+		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeployedOfficeTeamToOfficeFloorTeamModel> removeDeployedOfficeTeamToOfficeFloorTeam(
+			final DeployedOfficeTeamToOfficeFloorTeamModel deployedOfficeTeamToOfficeFloorTeam) {
+
+		// TODO test (removeDeployedOfficeTeamToOfficeFloorTeam)
+
+		// Return the change to remove the connection
+		return new AbstractChange<DeployedOfficeTeamToOfficeFloorTeamModel>(
+				deployedOfficeTeamToOfficeFloorTeam, "Remove") {
+			@Override
+			public void apply() {
+				deployedOfficeTeamToOfficeFloorTeam.remove();
+			}
+
+			@Override
+			public void revert() {
+				deployedOfficeTeamToOfficeFloorTeam.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> linkOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+			OfficeFloorManagedObjectDependencyModel officeFloorManagedObjectDependency,
+			OfficeFloorManagedObjectModel officeFloorManagedObject) {
+
+		// TODO test (linkOfficeFloorManagedObjectDependencyToOffice...)
+
+		// Create the connection
+		final OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel conn = new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel();
+		conn
+				.setOfficeFloorManagedObjectDependency(officeFloorManagedObjectDependency);
+		conn.setOfficeFloorManagedObject(officeFloorManagedObject);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> removeOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+			final OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel officeFloorManagedObjectDependencyToOfficeFloorManagedObject) {
+
+		// TODO test (removeOfficeFloorManagedObjectDependencyToOffice...)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>(
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject,
+				"Remove") {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject
+						.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectDependencyToOfficeFloorManagedObject
+						.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> linkOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+			OfficeFloorManagedObjectSourceFlowModel officeFloorManagedObjectSourceFlow,
+			DeployedOfficeInputModel deployedOfficeInput) {
+
+		// TODO test (linkOfficeFloorManagedObjectSourceFlowToDeployed...)
+
+		// Create the connection
+		final OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel();
+		conn
+				.setOfficeFloorManagedObjectSoruceFlow(officeFloorManagedObjectSourceFlow);
+		conn.setDeployedOfficeInput(deployedOfficeInput);
+
+		// Return the change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> removeOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+			final OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel officeFloorManagedObjectSourceFlowToDeployedOfficeInput) {
+
+		// TODO test (removeOfficeFloorManagedObjectSourceFlowToDeployed...)
+
+		// Return the change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput,
+				"Remove") {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput
+						.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectSourceFlowToDeployedOfficeInput
+						.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+			OfficeFloorManagedObjectSourceTeamModel officeFloorManagedObjectSourceTeam,
+			OfficeFloorTeamModel officeFloorTeam) {
+
+		// TODO test (linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam)
+
+		// Create the connection
+		final OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel conn = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel();
+		conn
+				.setOfficeFloorManagedObjectSourceTeam(officeFloorManagedObjectSourceTeam);
+		conn.setOfficeFloorTeam(officeFloorTeam);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+			final OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel officeFloorManagedObjectSourceTeamToOfficeFloorTeam) {
+
+		// TODO test (removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel>(
+				officeFloorManagedObjectSourceTeamToOfficeFloorTeam, "Remove") {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectSourceTeamToOfficeFloorTeam.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectSourceTeamToOfficeFloorTeam.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> linkOfficeFloorManagedObjectSourceToDeployedOffice(
+			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource,
+			DeployedOfficeModel deployedOffice) {
+
+		// TODO test (OfficeFloorManagedObjectSourceToDeployedOfficeModel)
+
+		// Create the connection
+		final OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = new OfficeFloorManagedObjectSourceToDeployedOfficeModel();
+		conn.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		conn.setManagingOffice(deployedOffice);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> removeOfficeFloorManagedObjectSourceToDeployedOffice(
+			final OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice) {
+
+		// TODO test (OfficeFloorManagedObjectSourceToDeployedOfficeModel)
+
+		// Returns the change to remove the connection
+		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(
+				officeFloorManagedObjectSourceToDeployedOffice, "Remove") {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectSourceToDeployedOffice.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectSourceToDeployedOffice.connect();
+			}
+		};
+	}
+
 }

@@ -61,24 +61,23 @@ public class DeployedOfficeInputEditPart
 		switch (property) {
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
-			DeployedOfficeInputEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
 			break;
 		}
 	}
 
 	/*
-	 * ====================== OfficeTaskFigureContext ====================
+	 * ================== DeployedOfficeInputFigureContext ====================
 	 */
 
 	@Override
-	public String getWorkName() {
-		return this.getCastedModel().getSectionInputName();
+	public String getOfficeSectionName() {
+		return this.getCastedModel().getSectionName();
 	}
 
 	@Override
-	public String getTaskName() {
-		// return this.getCastedModel().getTaskName();
-		return null;
+	public String getOfficeSectionInputName() {
+		return this.getCastedModel().getSectionInputName();
 	}
 
 }

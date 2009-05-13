@@ -23,8 +23,8 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
-import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel.DeployedOfficeObjectEvent;
 
 import org.eclipse.gef.EditPart;
@@ -47,11 +47,8 @@ public class DeployedOfficeObjectEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = this
-				.getCastedModel().getOfficeFloorManagedObject();
-		if (conn != null) {
-			models.add(conn);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeFloorManagedObject());
 	}
 
 	@Override
@@ -64,7 +61,7 @@ public class DeployedOfficeObjectEditPart
 			PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
-			DeployedOfficeObjectEditPart.this.refreshSourceConnections();
+			this.refreshSourceConnections();
 			break;
 		}
 	}

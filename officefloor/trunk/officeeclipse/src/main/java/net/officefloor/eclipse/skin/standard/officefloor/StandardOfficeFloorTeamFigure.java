@@ -23,17 +23,25 @@ import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeFloorTeamFigure}.
  * 
  * @author Daniel
  */
-public class StandardOfficeFloorTeamFigure extends AbstractOfficeFloorFigure implements
-		OfficeFloorTeamFigure {
+public class StandardOfficeFloorTeamFigure extends AbstractOfficeFloorFigure
+		implements OfficeFloorTeamFigure {
+
+	/**
+	 * {@link Label} containing the {@link OfficeFloorTeamModel} name.
+	 */
+	private Label officeFloorTeamName;
 
 	/**
 	 * Initiate.
@@ -43,14 +51,33 @@ public class StandardOfficeFloorTeamFigure extends AbstractOfficeFloorFigure imp
 	 */
 	public StandardOfficeFloorTeamFigure(OfficeFloorTeamFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeFloorTeamName(), ConnectorDirection.EAST, ColorConstants.black);
+				.getOfficeFloorTeamName(), ConnectorDirection.EAST,
+				ColorConstants.black);
+		this.officeFloorTeamName = figure.getLabel();
+
+		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				DeployedOfficeTeamToOfficeFloorTeamModel.class, anchor);
 		this.registerConnectionAnchor(
 				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				anchor);
+
 		this.setFigure(figure);
+	}
+
+	/*
+	 * ================== OfficeFloorTeamFigure ========================
+	 */
+
+	@Override
+	public void setOfficeFloorTeamName(String officeFloorTeamName) {
+		this.officeFloorTeamName.setText(officeFloorTeamName);
+	}
+
+	@Override
+	public IFigure getOfficeFloorTeamNameFigure() {
+		return this.officeFloorTeamName;
 	}
 
 }

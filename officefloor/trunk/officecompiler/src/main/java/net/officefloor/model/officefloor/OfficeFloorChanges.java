@@ -223,4 +223,169 @@ public interface OfficeFloorChanges {
 			OfficeFloorManagedObjectModel managedObject,
 			String newManagedObjectName);
 
+	/**
+	 * Links the {@link OfficeFloorManagedObjectSourceModel} to the
+	 * {@link DeployedOfficeModel}.
+	 * 
+	 * @param officeFloorManagedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param deployedOffice
+	 *            {@link DeployedOfficeModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> linkOfficeFloorManagedObjectSourceToDeployedOffice(
+			OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource,
+			DeployedOfficeModel deployedOffice);
+
+	/**
+	 * Removes the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceToDeployedOffice
+	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> removeOfficeFloorManagedObjectSourceToDeployedOffice(
+			OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice);
+
+	/**
+	 * Links the {@link OfficeFloorManagedObjectSourceFlowModel} to the
+	 * {@link DeployedOfficeInputModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceFlow
+	 *            {@link OfficeFloorManagedObjectSourceFlowModel}.
+	 * @param deployedOfficeInput
+	 *            {@link DeployedOfficeInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
+	 */
+	Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> linkOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+			OfficeFloorManagedObjectSourceFlowModel officeFloorManagedObjectSourceFlow,
+			DeployedOfficeInputModel deployedOfficeInput);
+
+	/**
+	 * Removes the
+	 * {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceFlow
+	 *            {@link OfficeFloorManagedObjectSourceFlowModel}.
+	 * @param deployedOfficeInput
+	 *            {@link DeployedOfficeInputModel}.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
+	 */
+	Change<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel> removeOfficeFloorManagedObjectSourceFlowToDeployedOfficeInput(
+			OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel officeFloorManagedObjectSourceFlowToDeployedOfficeInput);
+
+	/**
+	 * Links the {@link OfficeFloorManagedObjectSourceTeamModel} to the
+	 * {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceTeam
+	 *            {@link OfficeFloorManagedObjectSourceTeamModel}.
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> linkOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+			OfficeFloorManagedObjectSourceTeamModel officeFloorManagedObjectSourceTeam,
+			OfficeFloorTeamModel officeFloorTeam);
+
+	/**
+	 * Removes the
+	 * {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceTeamToOfficeFloorTeam
+	 *            {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel> removeOfficeFloorManagedObjectSourceTeamToOfficeFloorTeam(
+			OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel officeFloorManagedObjectSourceTeamToOfficeFloorTeam);
+
+	/**
+	 * Links the {@link OfficeFloorManagedObjectDependencyModel} to the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param officeFloorManagedObjectDependency
+	 *            {@link OfficeFloorManagedObjectDependencyModel}.
+	 * @param officeFloorManagedObject
+	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
+	 */
+	Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> linkOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+			OfficeFloorManagedObjectDependencyModel officeFloorManagedObjectDependency,
+			OfficeFloorManagedObjectModel officeFloorManagedObject);
+
+	/**
+	 * Removes the
+	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
+	 * 
+	 * @param officeFloorManagedObjectDependencyToOfficeFloorManagedObject
+	 *            {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
+	 */
+	Change<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel> removeOfficeFloorManagedObjectDependencyToOfficeFloorManagedObject(
+			OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel officeFloorManagedObjectDependencyToOfficeFloorManagedObject);
+
+	/**
+	 * Links the {@link DeployedOfficeObjectModel} to the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param deployedOfficeObject
+	 *            {@link DeployedOfficeObjectModel}.
+	 * @param officeFloorManagedObject
+	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
+	 */
+	Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorManagedObject(
+			DeployedOfficeObjectModel deployedOfficeObject,
+			OfficeFloorManagedObjectModel officeFloorManagedObject);
+
+	/**
+	 * Removes the {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
+	 * 
+	 * @param deployedOfficeObjectToOfficeFloorManagedObject
+	 *            {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
+	 */
+	Change<DeployedOfficeObjectToOfficeFloorManagedObjectModel> removeDeployedOfficeObjectToOfficeFloorManagedObject(
+			DeployedOfficeObjectToOfficeFloorManagedObjectModel deployedOfficeObjectToOfficeFloorManagedObject);
+
+	/**
+	 * Links the {@link DeployedOfficeTeamModel} to the
+	 * {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param deployedOfficeTeam
+	 *            {@link DeployedOfficeTeamModel}.
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
+	 */
+	Change<DeployedOfficeTeamToOfficeFloorTeamModel> linkDeployedOfficeTeamToOfficeFloorTeam(
+			DeployedOfficeTeamModel deployedOfficeTeam,
+			OfficeFloorTeamModel officeFloorTeam);
+
+	/**
+	 * Removes the {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
+	 * 
+	 * @param deployedOfficeTeamToOfficeFloorTeam
+	 *            {@link DeployedOfficeTeamToOfficeFloorTeamModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
+	 */
+	Change<DeployedOfficeTeamToOfficeFloorTeamModel> removeDeployedOfficeTeamToOfficeFloorTeam(
+			DeployedOfficeTeamToOfficeFloorTeamModel deployedOfficeTeamToOfficeFloorTeam);
+
 }

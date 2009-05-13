@@ -29,7 +29,7 @@ import org.eclipse.swt.graphics.Color;
  * 
  * @author Daniel
  */
-public class SubRoomItemFigure extends Figure {
+public class SubSectionItemFigure extends Figure {
 
 	/**
 	 * {@link Figure} indicating if public.
@@ -60,7 +60,7 @@ public class SubRoomItemFigure extends Figure {
 	 * @param colour
 	 *            {@link Color} of this {@link Figure}.
 	 */
-	public SubRoomItemFigure(String itemName, boolean isPublic,
+	public SubSectionItemFigure(String itemName, boolean isPublic,
 			ConnectorDirection connectorDirection, Color colour) {
 
 		// Specify layout

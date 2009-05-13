@@ -31,8 +31,8 @@ import org.eclipse.draw2d.ConnectionAnchor;
  * 
  * @author Daniel
  */
-public class StandardDeployedOfficeInputFigure extends AbstractOfficeFloorFigure
-		implements DeployedOfficeInputFigure {
+public class StandardDeployedOfficeInputFigure extends
+		AbstractOfficeFloorFigure implements DeployedOfficeInputFigure {
 
 	/**
 	 * Initiate.
@@ -40,14 +40,23 @@ public class StandardDeployedOfficeInputFigure extends AbstractOfficeFloorFigure
 	 * @param context
 	 *            {@link DeployedOfficeInputFigureContext}.
 	 */
-	public StandardDeployedOfficeInputFigure(DeployedOfficeInputFigureContext context) {
-		OfficeItemFigure figure = new OfficeItemFigure(context.getTaskName(),
+	public StandardDeployedOfficeInputFigure(
+			DeployedOfficeInputFigureContext context) {
+
+		// Obtain the name of the input
+		String inputName = context.getOfficeSectionName() + ":"
+				+ context.getOfficeSectionInputName();
+
+		OfficeItemFigure figure = new OfficeItemFigure(inputName,
 				ConnectorDirection.EAST, ColorConstants.black);
+
+		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this
 				.registerConnectionAnchor(
 						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
 						anchor);
+
 		this.setFigure(figure);
 	}
 

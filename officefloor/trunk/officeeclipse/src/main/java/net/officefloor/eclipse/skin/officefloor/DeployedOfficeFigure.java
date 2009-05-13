@@ -19,10 +19,33 @@ package net.officefloor.eclipse.skin.officefloor;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
  * {@link OfficeFloorFigure} for the {@link DeployedOfficeModel}.
  * 
  * @author Daniel
  */
 public interface DeployedOfficeFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change to the name of the {@link DeployedOfficeModel}.
+	 * 
+	 * @param deployedOfficeName
+	 *            Name to display for the {@link DeployedOfficeModel}.
+	 */
+	void setDeployedOfficeName(String deployedOfficeName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the {@link DeployedOfficeModel}
+	 * name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link DeployedOfficeModel} name.
+	 * 
+	 * @return {@link IFigure} containing the {@link DeployedOfficeModel} name.
+	 */
+	IFigure getDeployedOfficeNameFigure();
+
 }

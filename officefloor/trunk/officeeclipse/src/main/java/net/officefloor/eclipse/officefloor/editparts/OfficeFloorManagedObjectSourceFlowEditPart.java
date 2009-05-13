@@ -23,8 +23,8 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel.OfficeFloorManagedObjectSourceFlowEvent;
 
 import org.eclipse.gef.EditPart;
@@ -47,11 +47,8 @@ public class OfficeFloorManagedObjectSourceFlowEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = this
-				.getCastedModel().getDeployedOfficeInput();
-		if (conn != null) {
-			models.add(conn);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getDeployedOfficeInput());
 	}
 
 	@Override

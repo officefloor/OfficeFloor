@@ -19,7 +19,7 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigure;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.SubRoomItemFigure;
+import net.officefloor.eclipse.skin.standard.figure.SubSectionItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
 
@@ -42,7 +42,7 @@ public class StandardSubSectionObjectFigure extends
 	 */
 	public StandardSubSectionObjectFigure(
 			SubSectionObjectFigureContext context) {
-		SubRoomItemFigure figure = new SubRoomItemFigure(context.getSubSectionObjectName(),
+		SubSectionItemFigure figure = new SubSectionItemFigure(context.getSubSectionObjectName(),
 				false, ConnectorDirection.WEST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();

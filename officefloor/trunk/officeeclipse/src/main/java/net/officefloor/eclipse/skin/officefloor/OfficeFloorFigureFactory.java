@@ -19,9 +19,18 @@ package net.officefloor.eclipse.skin.officefloor;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -30,17 +39,6 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public interface OfficeFloorFigureFactory {
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectDependencyModel}.
-	 * 
-	 * @param context
-	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
-			OfficeFloorManagedObjectDependencyFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -74,6 +72,28 @@ public interface OfficeFloorFigureFactory {
 	 */
 	OfficeFloorManagedObjectSourceTeamFigure createOfficeFloorManagedObjectSourceTeamFigure(
 			OfficeFloorManagedObjectSourceTeamFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectFigureContext}.
+	 * @return {@link OfficeFloorManagedObjectFigure}.
+	 */
+	OfficeFloorManagedObjectFigure createOfficeFloorManagedObjectFigure(
+			OfficeFloorManagedObjectFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link ManagedObjectDependencyModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
+			OfficeFloorManagedObjectDependencyFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeModel}.
@@ -125,5 +145,98 @@ public interface OfficeFloorFigureFactory {
 	 */
 	OfficeFloorTeamFigure createOfficeFloorTeamFigure(
 			OfficeFloorTeamFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
+	 */
+	void decorateOfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext context);
+
+	/**
+	 * Decorates the {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext}
+	 */
+	void decorateDeployedOfficeObjectToOfficeFloorManagedObjectFigure(
+			PolylineConnection figure,
+			DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the {@link DeployedOfficeTeamToOfficeFloorTeamModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeployedOfficeTeamToOfficeFloorTeamFigureContext}.
+	 */
+	void decorateDeployedOfficeTeamToOfficeFloorTeamFigure(
+			PolylineConnection figure,
+			DeployedOfficeTeamToOfficeFloorTeamFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext}
+	 */
+	void decorateOfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectSourceToDeployedOffice}.
+	 */
+	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext}
+	 */
+	void decorateOfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext}
+	 */
+	void decorateOfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext context);
 
 }

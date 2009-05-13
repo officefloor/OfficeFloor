@@ -17,15 +17,19 @@
 package net.officefloor.eclipse.util;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.Model;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 /**
  * Utility class for working with the {@link Model} instances.
@@ -73,8 +77,54 @@ public class ModelUtil {
 	}
 
 	/**
+	 * Obtains the {@link ManagedObjectType} for the
+	 * {@link OfficeFloorManagedObjectSourceModel}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
+	 *         it.
+	 */
+	@SuppressWarnings("unchecked")
+	public static ManagedObjectType<?> getManagedObjectType(
+			OfficeFloorManagedObjectSourceModel managedObjectSource,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+
+		// Obtain the office floor compiler
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
+				.createCompiler(editor);
+
+		// Obtain the managed object loader
+		ManagedObjectLoader managedObjectLoader = compiler
+				.getManagedObjectLoader();
+
+		// Obtain the managed object source class
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = EclipseUtil
+				.obtainClass(managedObjectSource
+						.getManagedObjectSourceClassName(),
+						ManagedObjectSource.class, editor);
+
+		// Obtain the properties
+		PropertyList properties = compiler.createPropertyList();
+		for (net.officefloor.model.officefloor.PropertyModel property : managedObjectSource
+				.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load and return the managed object type
+		ManagedObjectType<?> managedObjectType = managedObjectLoader
+				.loadManagedObjectType(managedObjectSourceClass, properties);
+		return managedObjectType;
+	}
+
+	/**
 	 * All access via static methods.
 	 */
 	private ModelUtil() {
 	}
+
 }

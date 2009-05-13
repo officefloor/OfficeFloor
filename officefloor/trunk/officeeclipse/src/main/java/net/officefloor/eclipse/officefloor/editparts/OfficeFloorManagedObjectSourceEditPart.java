@@ -21,12 +21,17 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel.OfficeFloorManagedObjectSourceEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -36,11 +41,11 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeFloorManagedObjectSourceEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent, OfficeFloorManagedObjectSourceFigure>
 		implements OfficeFloorManagedObjectSourceFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeFloorManagedObjectSourceFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createOfficeFloorManagedObjectSourceFigure(this);
 	}
@@ -55,11 +60,43 @@ public class OfficeFloorManagedObjectSourceEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = this
-				.getCastedModel().getManagingOffice();
-		if (conn != null) {
-			models.add(conn);
-		}
+		EclipseUtil
+				.addToList(models, this.getCastedModel().getManagingOffice());
+	}
+
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getOfficeFloorManagedObjects());
+	}
+
+	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<OfficeFloorManagedObjectSourceModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectSourceModel>() {
+					@Override
+					public String getInitialValue() {
+						return OfficeFloorManagedObjectSourceEditPart.this
+								.getCastedModel()
+								.getOfficeFloorManagedObjectSourceName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return OfficeFloorManagedObjectSourceEditPart.this
+								.getOfficeFloorFigure()
+								.getOfficeFloorManagedObjectSourceNameFigure();
+					}
+
+					@Override
+					public Change<OfficeFloorManagedObjectSourceModel> createChange(
+							OfficeFloorChanges changes,
+							OfficeFloorManagedObjectSourceModel target,
+							String newValue) {
+						return changes.renameOfficeFloorManagedObjectSource(
+								target, newValue);
+					}
+				});
 	}
 
 	@Override
@@ -72,15 +109,23 @@ public class OfficeFloorManagedObjectSourceEditPart
 			OfficeFloorManagedObjectSourceEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_NAME:
+			this.getOfficeFloorFigure().setOfficeFloorManagedObjectName(
+					this.getCastedModel()
+							.getOfficeFloorManagedObjectSourceName());
+			break;
 		case CHANGE_MANAGING_OFFICE:
-			OfficeFloorManagedObjectSourceEditPart.this
-					.refreshSourceConnections();
+			this.refreshSourceConnections();
+			break;
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT:
+			this.refreshTargetConnections();
 			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
-			OfficeFloorManagedObjectSourceEditPart.this.refreshChildren();
+			this.refreshChildren();
 			break;
 		}
 	}

@@ -19,10 +19,38 @@ package net.officefloor.eclipse.skin.officefloor;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectSourceModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectSourceModel}
+ * .
  * 
  * @author Daniel
  */
 public interface OfficeFloorManagedObjectSourceFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change in name for the
+	 * {@link OfficeFloorManagedObjectSourceModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceName
+	 *            Name to display for the
+	 *            {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	void setOfficeFloorManagedObjectName(
+			String officeFloorManagedObjectSourceName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the
+	 * {@link OfficeFloorManagedObjectSourceModel} name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link OfficeFloorManagedObjectSourceModel} name.
+	 * 
+	 * @return {@link IFigure} containing the
+	 *         {@link OfficeFloorManagedObjectSourceModel} name.
+	 */
+	IFigure getOfficeFloorManagedObjectSourceNameFigure();
+
 }

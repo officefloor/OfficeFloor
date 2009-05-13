@@ -23,8 +23,8 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel.OfficeFloorManagedObjectSourceTeamEvent;
 
 import org.eclipse.gef.EditPart;
@@ -47,11 +47,8 @@ public class OfficeFloorManagedObjectSourceTeamEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel model = this
-				.getCastedModel().getOfficeFloorTeam();
-		if (model != null) {
-			models.add(model);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeFloorTeam());
 	}
 
 	@Override
