@@ -2,15 +2,15 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
-         point="net.officefloor.eclipse.workloader">
+         point="net.officefloor.eclipse.worksource">
       <workloader
-            class="net.officefloor.eclipse.socket.HttpRouteWorkLoaderExtension">
+            class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension">
       </workloader>
    </extension>
    <extension
-         point="net.officefloor.eclipse.workloader">
+         point="net.officefloor.eclipse.worksource">
       <workloader
-            class="net.officefloor.eclipse.socket.HttpFileWorkLoaderExtension">
+            class="net.officefloor.eclipse.socket.HttpFileWorkSourceExtension">
       </workloader>
    </extension>
    <extension

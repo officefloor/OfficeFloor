@@ -16,8 +16,9 @@
  */
 package net.officefloor.eclipse.socket;
 
-import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
-import net.officefloor.work.http.route.HttpRouteWorkLoader;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.plugin.work.http.route.HttpRouteWorkSource;
 
 /**
  * Entry in routing.
@@ -75,17 +76,23 @@ public class RoutingEntry {
 	}
 
 	/**
-	 * Creates the {@link WorkLoaderProperty} for this {@link RoutingEntry}.
+	 * Loads the {@link Property} for this {@link RoutingEntry} to the
+	 * {@link PropertyList}.
 	 * 
-	 * @return {@link WorkLoaderProperty} for this {@link RoutingEntry}.
+	 * @param {@link PropertyList}.
 	 */
-	public WorkLoaderProperty createWorkLoaderProperty() {
+	public void loadProperty(PropertyList propertyList) {
 
 		// Only provide prefix if name provided
 		String propertyName = ((this.name == null) || this.name.trim().length() == 0) ? ""
-				: (HttpRouteWorkLoader.ROUTE_PROPERTY_PREFIX + this.name);
+				: (HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX + this.name);
 
-		// Return the created property
-		return new WorkLoaderProperty(propertyName, this.pattern);
+		// Load the property
+		Property property = propertyList.getProperty(propertyName);
+		if (property == null) {
+			property = propertyList.addProperty(propertyName);
+		}
+		property.setValue(this.pattern);
 	}
+
 }

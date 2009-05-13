@@ -4,10 +4,5 @@ Bundle-Name: Office Floor Socket eclipse plugin
 Bundle-SymbolicName: net.officefloor.eclipse.socket;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- net.officefloor.compiler;bundle-version="1.0.0",
- net.officefloor.eclipse;bundle-version="1.0.0",
- net.officefloor.socket;bundle-version="1.0.0",
- net.officefloor.frame;bundle-version="1.0.0"
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,net.officefloor.compiler;bundle-version="1.0.0",net.officefloor.eclipse;bundle-version="1.0.0",net.officefloor.socket;bundle-version="1.0.0",net.officefloor.frame;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

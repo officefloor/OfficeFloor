@@ -16,18 +16,16 @@
  */
 package net.officefloor.eclipse.socket;
 
-import java.util.Arrays;
-import java.util.List;
-
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.managedobjectsource.InitiateProperty;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.HttpServer.HttpServerFlows;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -40,158 +38,106 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * HTTP {@link ManagedObjectSourceExtension}.
+ * {@link ManagedObjectSourceExtension} for the
+ * {@link HttpServerSocketManagedObjectSource}.
  * 
  * @author Daniel
  */
-public class HttpManagedObjectSourceExtension implements
-		ManagedObjectSourceExtension, ExtensionClasspathProvider {
-
-	/**
-	 * {@link InitiateProperty} for the
-	 * {@link ServerSocketManagedObjectSource#PROPERTY_PORT}.
-	 */
-	private final InitiateProperty portProperty = new InitiateProperty(
-			HttpServerSocketManagedObjectSource.PROPERTY_PORT, "80");
-
-	/**
-	 * {@link InitiateProperty} for the
-	 * {@link ServerSocketManagedObjectSource#PROPERTY_BUFFER_SIZE}.
-	 */
-	private final InitiateProperty bufferSizeProperty = new InitiateProperty(
-			HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE, "1024");
-
-	/**
-	 * {@link InitiateProperty} for the
-	 * {@link ServerSocketManagedObjectSource#PROPERTY_MESSAGE_SIZE}.
-	 */
-	private final InitiateProperty messageSizeProperty = new InitiateProperty(
-			HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "10");
-
-	/**
-	 * {@link InitiateProperty} for the
-	 * {@link ServerSocketManagedObjectSource#PROPERTY_MAXIMUM_CONNECTIONS}.
-	 */
-	private final InitiateProperty maxConnectionsProperty = new InitiateProperty(
-			HttpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS,
-			"64");
-
-	/**
-	 * {@link InitiateProperty} instances.
-	 */
-	private final List<InitiateProperty> properties = Arrays.asList(
-			this.portProperty, this.bufferSizeProperty,
-			this.messageSizeProperty, this.maxConnectionsProperty);
+public class HttpManagedObjectSourceExtension
+		implements
+		ManagedObjectSourceExtension<None, HttpServerFlows, HttpServerSocketManagedObjectSource>,
+		ExtensionClasspathProvider {
 
 	/*
 	 * ================= ManagedObjectSourceExtension ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#getManagedObjectSourceClass()
-	 */
 	@Override
-	public Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass() {
+	public Class<HttpServerSocketManagedObjectSource> getManagedObjectSourceClass() {
 		return HttpServerSocketManagedObjectSource.class;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#isUsable()
-	 */
 	@Override
-	public boolean isUsable() {
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#getDisplayName()
-	 */
-	@Override
-	public String getDisplayName() {
+	public String getManagedObjectSourceLabel() {
 		return "HTTP";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension
-	 * #createControl(org.eclipse.swt.widgets.Composite,
-	 * net.officefloor.eclipse.
-	 * extension.managedobjectsource.ManagedObjectSourceExtensionContext)
-	 */
 	@Override
-	public List<InitiateProperty> createControl(Composite page,
-			final ManagedObjectSourceExtensionContext context) {
+	public void createControl(Composite page,
+			ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout of page
 		page.setLayout(new GridLayout(2, false));
 
 		// Provide the properties
-		this.createPropertyDisplay("Port: ", this.portProperty, page, context);
-		this.createPropertyDisplay("Buffer size: ", this.bufferSizeProperty,
-				page, context);
+		this.createPropertyDisplay("Port: ",
+				HttpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
+				context);
+		this.createPropertyDisplay("Buffer size: ",
+				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
+				"1024", page, context);
 		this.createPropertyDisplay("Recommended segments per message: ",
-				this.messageSizeProperty, page, context);
-		this.createPropertyDisplay("Maximum connextions per listener: ",
-				this.maxConnectionsProperty, page, context);
-
-		// Return the properties
-		return this.properties;
+				HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE,
+				"10", page, context);
+		this
+				.createPropertyDisplay(
+						"Maximum connextions per listener: ",
+						HttpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS,
+						"64", page, context);
 	}
 
 	/**
-	 * Creates the display for the input {@link InitiateProperty}.
+	 * Creates the display for the input {@link Property}.
 	 * 
 	 * @param label
-	 *            Label for the property.
-	 * @param property
-	 *            {@link InitiateProperty}.
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param defaultValue
+	 *            Default value for the {@link Property}.
 	 * @param page
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link ManagedObjectSourceExtensionContext}.
 	 */
-	private void createPropertyDisplay(String label,
-			final InitiateProperty property, Composite page,
+	private void createPropertyDisplay(String label, String name,
+			String defaultValue, Composite page,
 			final ManagedObjectSourceExtensionContext context) {
+
+		// Obtain the properties
+		PropertyList properties = context.getPropertyList();
+
+		// Obtain the property
+		Property item = properties.getProperty(name);
+		if (item == null) {
+			item = properties.addProperty(name);
+		}
+		final Property property = item;
+
+		// Default the property value if blank
+		String propertyValue = property.getValue();
+		if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
+			property.setValue(defaultValue);
+		}
 
 		// Provide the label
 		new Label(page, SWT.NONE).setText(label);
 
 		// Provide the text to specify value
 		final Text text = new Text(page, SWT.SINGLE | SWT.BORDER);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		text.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		text.setText(property.getValue());
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				property.setValue(text.getText());
-				context
-						.notifyPropertiesChanged(HttpManagedObjectSourceExtension.this.properties);
+				context.notifyPropertiesChanged();
 			}
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension
-	 * #getSuggestedManagedObjectSourceName(java.util.List)
-	 */
 	@Override
-	public String getSuggestedManagedObjectSourceName(
-			List<InitiateProperty> properties) {
+	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "HTTP";
 	}
 
@@ -199,13 +145,6 @@ public class HttpManagedObjectSourceExtension implements
 	 * ========================== ExtensionClasspathProvider =================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
-	 * #getClasspathProvisions()
-	 */
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
 		return new ClasspathProvision[] { new TypeClasspathProvision(

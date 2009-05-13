@@ -102,7 +102,7 @@ public class ExtensionUtil {
 		// Create the listing of extension class path providers
 		Map<String, ExtensionClasspathProvider> providers = new HashMap<String, ExtensionClasspathProvider>();
 
-		// Obtain the extensions for work loaders
+		// Obtain the extensions for work sources
 		List<WorkSourceExtension> workLoaderExtensions = createExecutableExtensions(
 				WorkSourceExtension.EXTENSION_ID, WorkSourceExtension.class);
 		for (WorkSourceExtension workLoaderExtension : workLoaderExtensions) {
