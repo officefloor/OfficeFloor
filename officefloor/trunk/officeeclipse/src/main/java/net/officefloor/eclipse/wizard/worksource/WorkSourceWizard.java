@@ -308,6 +308,9 @@ public class WorkSourceWizard extends Wizard implements
 		WorkType<?> workType = this.selectedWorkSourceInstance.getWorkType();
 		TaskType<?, ?, ?>[] taskTypes = this.tasksPage.getSelectedTaskTypes()
 				.toArray(new TaskType[0]);
+		
+		// Normalise the properties
+		propertyList.normalise();
 
 		// Specify the work instance
 		this.workInstance = new WorkInstance(workName, workSourceClassName,

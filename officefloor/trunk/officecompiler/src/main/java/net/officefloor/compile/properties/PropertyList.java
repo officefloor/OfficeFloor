@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.properties;
 
+import java.util.Comparator;
 import java.util.Properties;
 
 /**
@@ -71,5 +72,33 @@ public interface PropertyList extends Iterable<Property> {
 	 * @return Populated {@link Properties}.
 	 */
 	Properties getProperties();
+
+	/**
+	 * Clears the {@link PropertyList}.
+	 */
+	void clear();
+
+	/**
+	 * Enable sorting the {@link Property} instances within this
+	 * {@link PropertyList}.
+	 * 
+	 * @param comparator
+	 *            {@link Comparator} to provide comparisons for sorting.
+	 */
+	void sort(Comparator<? super Property> comparator);
+
+	/**
+	 * <p>
+	 * Normalises the {@link Property} instances.
+	 * <p>
+	 * This will remove:
+	 * <ol>
+	 * <li>any {@link Property} with a blank name</li>
+	 * <li>any {@link Property} with a blank value</li>
+	 * <li>duplicate {@link Property} instances by the same name (keeps the
+	 * first {@link Property})</li>
+	 * </ol>
+	 */
+	void normalise();
 
 }

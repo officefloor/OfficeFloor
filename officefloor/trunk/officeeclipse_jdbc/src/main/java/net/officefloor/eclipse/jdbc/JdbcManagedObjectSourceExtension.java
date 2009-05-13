@@ -16,30 +16,26 @@
  */
 package net.officefloor.eclipse.jdbc;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.managedobjectsource.InitiateProperty;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
 import net.officefloor.plugin.jdbc.util.Setter;
@@ -58,19 +54,20 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel
  */
 public class JdbcManagedObjectSourceExtension implements
-		ManagedObjectSourceExtension, ExtensionClasspathProvider {
+		ManagedObjectSourceExtension<None, None, JdbcManagedObjectSource>,
+		ExtensionClasspathProvider {
 
 	/**
 	 * Sort the properties.
 	 * 
 	 * @param properties
-	 *            Properties.
+	 *            {@link PropertyList}.
 	 */
-	private static void sortProperties(List<InitiateProperty> properties) {
+	private static void sortProperties(PropertyList properties) {
 		// Sort the properties by their weighting
-		Collections.sort(properties, new Comparator<InitiateProperty>() {
+		properties.sort(new Comparator<Property>() {
 			@Override
-			public int compare(InitiateProperty a, InitiateProperty b) {
+			public int compare(Property a, Property b) {
 				// Determine wait comparison
 				int weightComparison = calculateWeighting(b)
 						- calculateWeighting(a);
@@ -86,13 +83,13 @@ public class JdbcManagedObjectSourceExtension implements
 	}
 
 	/**
-	 * Calculates the weighting of the {@link InitiateProperty} for comparison.
+	 * Calculates the weighting of the {@link Property} for comparison.
 	 * 
 	 * @param property
-	 *            {@link InitiateProperty}.
+	 *            {@link Property}.
 	 * @return Weighting.
 	 */
-	private static int calculateWeighting(InitiateProperty property) {
+	private static int calculateWeighting(Property property) {
 		int weighting = 0;
 
 		// Add to waiting based on contents of name
@@ -125,86 +122,31 @@ public class JdbcManagedObjectSourceExtension implements
 	 * ================= ManagedObjectSourceExtension ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#getManagedObjectSourceClass()
-	 */
 	@Override
-	public Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass() {
+	public Class<JdbcManagedObjectSource> getManagedObjectSourceClass() {
 		return JdbcManagedObjectSource.class;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#isUsable()
-	 */
 	@Override
-	public boolean isUsable() {
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension#getDisplayName()
-	 */
-	@Override
-	public String getDisplayName() {
+	public String getManagedObjectSourceLabel() {
 		return "JDBC";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension
-	 * #createControl(org.eclipse.swt.widgets.Composite,
-	 * net.officefloor.eclipse.
-	 * extension.managedobjectsource.ManagedObjectSourceExtensionContext)
-	 */
 	@Override
-	public List<InitiateProperty> createControl(Composite page,
+	public void createControl(Composite page,
 			final ManagedObjectSourceExtensionContext context) {
 
-		// Create the properties
-		final InitiateProperty dataSourceProperty = new InitiateProperty(
-				JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
-		final List<InitiateProperty> configureProperties = new ArrayList<InitiateProperty>();
+		// Obtain the properties
+		PropertyList properties = context.getPropertyList();
 
 		// Specify layout
 		page.setLayout(new GridLayout(1, false));
 
-		// Input to specify the configure properties
-		final BeanListInput<InitiateProperty> propertiesInput = new BeanListInput<InitiateProperty>(
-				InitiateProperty.class);
-		propertiesInput.addProperty("name", 1);
-		propertiesInput.addProperty("value", 2);
-
-		// Create the input handler for changes of configuration properties
-		final InputAdapter configurationPropertiesAdapter = new InputAdapter() {
-			public void notifyValueChanged(Object value) {
-				// Create the listing of properties
-				List<InitiateProperty> properties = new LinkedList<InitiateProperty>();
-				properties.add(dataSourceProperty);
-
-				// Load only the properties that have a value
-				for (InitiateProperty property : configureProperties) {
-					String propertyValue = property.getValue();
-					if ((propertyValue != null)
-							&& (propertyValue.trim().length() > 0)) {
-						properties.add(property);
-					}
-				}
-
-				// Notify the properties have changed
-				context.notifyPropertiesChanged(properties);
-			}
-		};
+		// Input for the properties
+		final PropertyListInput propertiesInput = new PropertyListInput(
+				properties);
+		propertiesInput
+				.hideProperty(JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
 
 		// Obtain the Data Source
 		new InputHandler<String>(page, new SubTypeSelectionInput(context
@@ -212,15 +154,17 @@ public class JdbcManagedObjectSourceExtension implements
 				new InputAdapter() {
 					@Override
 					public void notifyValueChanged(Object value) {
-						// Changed data source
-						String dataSourceClassName = (String) value;
-						dataSourceProperty.setValue(dataSourceClassName);
 
 						// Clear the configuration properties
-						for (InitiateProperty property : configureProperties) {
-							propertiesInput.removeBean(property);
-						}
-						configureProperties.clear();
+						PropertyList properties = context.getPropertyList();
+						properties.clear();
+
+						// Add the data source property
+						String dataSourceClassName = (String) value;
+						properties
+								.addProperty(
+										JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY)
+								.setValue((String) value);
 
 						// Load new property set for the data source
 						if (dataSourceClassName != null) {
@@ -237,37 +181,35 @@ public class JdbcManagedObjectSourceExtension implements
 									// Create the property for the setter
 									String propertyName = setter
 											.getPropertyName();
-									InitiateProperty property = new InitiateProperty(
-											propertyName);
-
-									// Add the property
-									configureProperties.add(property);
+									properties.addProperty(propertyName);
 								}
 
 								// Sort the properties
 								JdbcManagedObjectSourceExtension
-										.sortProperties(configureProperties);
-
-								// Add the properties
-								for (InitiateProperty property : configureProperties) {
-									propertiesInput.addBean(property);
-								}
+										.sortProperties(properties);
 
 							} catch (Exception ex) {
 								// Indicate failure to obtain properties
 								context.setErrorMessage(ex.getMessage());
-								return;
 							}
 						}
 
+						// Refresh the properties
+						propertiesInput.refreshProperties();
+
 						// Notify data source changed
-						configurationPropertiesAdapter.notifyValueChanged(null);
+						context.notifyPropertiesChanged();
 					}
 				});
 
 		// Load properties input to page
-		new InputHandler<List<InitiateProperty>>(page, propertiesInput,
-				configurationPropertiesAdapter);
+		new InputHandler<PropertyList>(page, propertiesInput,
+				new InputAdapter() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						context.notifyPropertiesChanged();
+					}
+				});
 
 		// Provide button to validate connection
 		Button button = new Button(page, SWT.PUSH);
@@ -275,13 +217,22 @@ public class JdbcManagedObjectSourceExtension implements
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// Obtain the properties for the connection
-				String dataSourceClassName = dataSourceProperty.getValue();
-				Properties properties = new Properties();
-				for (InitiateProperty property : configureProperties) {
-					properties.setProperty(property.getName(), property
-							.getValue());
+
+				// Ensure have the data source class name
+				PropertyList propertyList = context.getPropertyList();
+				Property dataSourceProperty = propertyList
+						.getProperty(JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
+				if ((dataSourceProperty == null)
+						|| (dataSourceProperty.getValue() == null)) {
+					// Indicate must select data source
+					MessageDialog.openError(null, "Test connection",
+							"Must select a data source");
+					return;
 				}
+				String dataSourceClassName = dataSourceProperty.getValue();
+
+				// Obtain the properties for the connection
+				Properties properties = propertyList.getProperties();
 
 				// Test the connection
 				try {
@@ -293,38 +244,28 @@ public class JdbcManagedObjectSourceExtension implements
 									dataSourceClassName, classLoader,
 									properties);
 
-					// Obtain connection from pool to validate ok
+					// Obtain connection from pool to validate
 					PooledConnection connection = dataSource
 							.getPooledConnection();
 					connection.close();
 
-					// Indicate connection ok
-					MessageDialog.openInformation(context.getShell(),
-							"Test connection", "Connection OK");
+					// Indicate connection successful
+					MessageDialog.openInformation(null, "Test connection",
+							"Connection successful");
 
 				} catch (Throwable ex) {
 					// Indicate failure to connect
-					MessageDialog.openError(context.getShell(),
-							"Test connection", "Connection failed: "
+					MessageDialog.openError(null, "Test connection",
+							"Connection failed\n\n"
+									+ ex.getClass().getSimpleName() + ": "
 									+ ex.getMessage());
 				}
 			}
 		});
-
-		// Initially only the data source property
-		return Arrays.asList(dataSourceProperty);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.managedobjectsource.
-	 * ManagedObjectSourceExtension
-	 * #getSuggestedManagedObjectSourceName(java.util.List)
-	 */
 	@Override
-	public String getSuggestedManagedObjectSourceName(
-			List<InitiateProperty> properties) {
+	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "JDBC";
 	}
 
@@ -332,13 +273,6 @@ public class JdbcManagedObjectSourceExtension implements
 	 * ================ ExtensionClasspathProvider ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
-	 * #getClasspathProvisions()
-	 */
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
 		return new ClasspathProvision[] { new TypeClasspathProvision(

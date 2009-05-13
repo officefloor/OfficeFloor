@@ -313,6 +313,9 @@ public class ManagedObjectSourceWizard extends Wizard implements
 				.getPropertyList();
 		ManagedObjectType<?> managedObjectType = this.selectedManagedObjectSourceInstance
 				.getManagedObjectType();
+		
+		// Normalise the properties
+		propertyList.normalise();
 
 		// Specify the managed object instance
 		this.managedObjectInstance = new ManagedObjectInstance(

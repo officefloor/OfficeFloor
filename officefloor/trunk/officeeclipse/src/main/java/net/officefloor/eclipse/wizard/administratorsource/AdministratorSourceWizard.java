@@ -299,6 +299,9 @@ public class AdministratorSourceWizard extends Wizard implements
 		AdministratorType<?, ?> administratorType = this.selectedAdministratorSourceInstance
 				.getAdministratorType();
 
+		// Normalise the properties
+		propertyList.normalise();
+
 		// Specify the administrator instance
 		this.administratorInstance = new AdministratorInstance(
 				administratorName, administratorSourceClassName, propertyList,
