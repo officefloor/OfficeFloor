@@ -65,12 +65,8 @@ public class WorkSourceWizard extends Wizard implements
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			WorkInstance workInstance) {
 
-		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
-
 		// Create and run the wizard
-		WorkSourceWizard wizard = new WorkSourceWizard(project);
+		WorkSourceWizard wizard = new WorkSourceWizard(editPart);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the work instance
 			return wizard.getWorkInstance();
@@ -139,6 +135,11 @@ public class WorkSourceWizard extends Wizard implements
 	}
 
 	/**
+	 * {@link AbstractOfficeFloorEditPart}.
+	 */
+	private final AbstractOfficeFloorEditPart<?, ?, ?> editPart;
+
+	/**
 	 * {@link WorkSourceListingWizardPage}.
 	 */
 	private final WorkSourceListingWizardPage listingPage;
@@ -172,23 +173,29 @@ public class WorkSourceWizard extends Wizard implements
 	/**
 	 * Initiate to create a new {@link WorkInstance}.
 	 * 
-	 * @param project
-	 *            {@link IProject}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
-	public WorkSourceWizard(IProject project) {
-		this(project, null);
+	public WorkSourceWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+		this(editPart, null);
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param project
-	 *            {@link IProject}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param workInstance
 	 *            {@link WorkInstance} to be edited, or <code>null</code> to
 	 *            create a new {@link WorkInstance}.
 	 */
-	public WorkSourceWizard(IProject project, WorkInstance workInstance) {
+	public WorkSourceWizard(AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			WorkInstance workInstance) {
+		this.editPart = editPart;
+
+		// Obtain the project
+		IProject project = ProjectConfigurationContext.getProject(editPart
+				.getEditor().getEditorInput());
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -308,13 +315,17 @@ public class WorkSourceWizard extends Wizard implements
 		WorkType<?> workType = this.selectedWorkSourceInstance.getWorkType();
 		TaskType<?, ?, ?>[] taskTypes = this.tasksPage.getSelectedTaskTypes()
 				.toArray(new TaskType[0]);
-		
+
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the work instance
 		this.workInstance = new WorkInstance(workName, workSourceClassName,
 				propertyList, workType, taskTypes);
+
+		// Include extension on project class path
+		this.selectedWorkSourceInstance
+				.includeExtensionOnProjectClassPath(this.editPart);
 
 		// Finished
 		return true;

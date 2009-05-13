@@ -22,9 +22,11 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -33,6 +35,7 @@ import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.gef.EditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -81,7 +84,8 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * {@link WorkSource} class.
 	 */
-	private Class<? extends WorkSource<?>> workSourceClass;
+	@SuppressWarnings("unchecked")
+	private Class<? extends WorkSource> workSourceClass;
 
 	/**
 	 * {@link PropertyList}.
@@ -132,6 +136,26 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		// Attempt to load the work type
 		this.workType = this.workLoader.loadWorkType(this.workSourceClass,
 				this.properties);
+	}
+
+	/**
+	 * Includes the {@link WorkSourceExtension} on the {@link IProject} class
+	 * path.
+	 * 
+	 * @param editPart
+	 *            {@link EditPart} adding the {@link Work}.
+	 */
+	public void includeExtensionOnProjectClassPath(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+
+		// Only include if have extension
+		if (this.workSourceExtension == null) {
+			return;
+		}
+
+		// Update the class path to include the extension
+		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+				this.workSourceClassName);
 	}
 
 	/**
@@ -239,7 +263,8 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		}
 
 		// Obtain specification properties for work source
-		this.properties = this.workLoader.loadSpecification(workSourceClass);
+		this.properties = this.workLoader
+				.loadSpecification(this.workSourceClass);
 
 		// Determine if have extension
 		if (this.workSourceExtension != null) {

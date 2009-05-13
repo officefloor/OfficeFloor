@@ -65,13 +65,9 @@ public class ManagedObjectSourceWizard extends Wizard implements
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			ManagedObjectInstance managedObjectInstance) {
 
-		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
-
 		// Create and run the wizard
 		ManagedObjectSourceWizard wizard = new ManagedObjectSourceWizard(
-				project);
+				editPart);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the managed object instance
 			return wizard.getManagedObjectInstance();
@@ -143,6 +139,11 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	}
 
 	/**
+	 * {@link AbstractOfficeFloorEditPart}.
+	 */
+	private final AbstractOfficeFloorEditPart<?, ?, ?> editPart;
+
+	/**
 	 * {@link ManagedObjectSourceListingWizardPage}.
 	 */
 	private final ManagedObjectSourceListingWizardPage listingPage;
@@ -176,25 +177,32 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	/**
 	 * Initiate to create a new {@link ManagedObjectInstance}.
 	 * 
-	 * @param project
-	 *            {@link IProject}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
-	public ManagedObjectSourceWizard(IProject project) {
-		this(project, null);
+	public ManagedObjectSourceWizard(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+		this(editPart, null);
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param project
-	 *            {@link IProject}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param managedObjectInstance
 	 *            {@link ManagedObjectInstance} to be edited, or
 	 *            <code>null</code> to create a new
 	 *            {@link ManagedObjectInstance}.
 	 */
-	public ManagedObjectSourceWizard(IProject project,
+	public ManagedObjectSourceWizard(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			ManagedObjectInstance managedObjectInstance) {
+		this.editPart = editPart;
+
+		// Obtain the project
+		IProject project = ProjectConfigurationContext.getProject(editPart
+				.getEditor().getEditorInput());
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -313,7 +321,7 @@ public class ManagedObjectSourceWizard extends Wizard implements
 				.getPropertyList();
 		ManagedObjectType<?> managedObjectType = this.selectedManagedObjectSourceInstance
 				.getManagedObjectType();
-		
+
 		// Normalise the properties
 		propertyList.normalise();
 
@@ -321,6 +329,10 @@ public class ManagedObjectSourceWizard extends Wizard implements
 		this.managedObjectInstance = new ManagedObjectInstance(
 				managedObjectName, managedObjectSourceClassName, propertyList,
 				managedObjectType, defaultTimetout);
+
+		// Include extension on project class path
+		this.selectedManagedObjectSourceInstance
+				.includeExtensionOnProjectClassPath(this.editPart);
 
 		// Finished
 		return true;
