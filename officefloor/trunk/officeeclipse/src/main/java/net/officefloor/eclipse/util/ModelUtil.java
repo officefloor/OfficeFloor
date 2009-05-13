@@ -16,6 +16,8 @@
  */
 package net.officefloor.eclipse.util;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -59,9 +61,13 @@ public class ModelUtil {
 		// Obtain the work loader
 		WorkLoader workLoader = compiler.getWorkLoader();
 
+		// Obtain the project class loader
+		ClassLoader classLoader = compiler.getClassLoader();
+
 		// Obtain the work class
-		Class<? extends WorkSource> workSourceClass = EclipseUtil.obtainClass(
-				workModel.getWorkSourceClassName(), WorkSource.class, editor);
+		Class<? extends WorkSource> workSourceClass = obtainClass(workModel
+				.getWorkSourceClassName(), WorkSource.class, classLoader,
+				editor);
 		if (workSourceClass == null) {
 			return null; // must have work source class
 		}
@@ -104,11 +110,13 @@ public class ModelUtil {
 		ManagedObjectLoader managedObjectLoader = compiler
 				.getManagedObjectLoader();
 
+		// Obtain the project class loader
+		ClassLoader classLoader = compiler.getClassLoader();
+
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource> managedObjectSourceClass = EclipseUtil
-				.obtainClass(managedObjectSource
-						.getManagedObjectSourceClassName(),
-						ManagedObjectSource.class, editor);
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = obtainClass(
+				managedObjectSource.getManagedObjectSourceClassName(),
+				ManagedObjectSource.class, classLoader, editor);
 		if (managedObjectSourceClass == null) {
 			return null; // must have managed object source class
 		}
@@ -125,6 +133,43 @@ public class ModelUtil {
 		ManagedObjectType<?> managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSourceClass, properties);
 		return managedObjectType;
+	}
+
+	/**
+	 * Obtains the {@link Class} by its name.
+	 * 
+	 * @param className
+	 *            Fully qualified name of the class.
+	 * @param superType
+	 *            Type that the class must be a sub type.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} to report issues and obtain
+	 *            the {@link IProject}.
+	 * @return {@link Class} or <code>null</code> if could not obtain.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <S> Class<S> obtainClass(String className,
+			Class<S> superType, ClassLoader classLoader,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		try {
+			// Create the class
+			Class clazz = classLoader.loadClass(className);
+
+			// Ensure correct super type
+			if (!(superType.isAssignableFrom(clazz))) {
+				editor.messageError("Class '" + clazz.getName()
+						+ "' must be a sub type of " + superType.getName());
+			}
+
+			// Return the class
+			return (Class<S>) clazz;
+
+		} catch (Throwable ex) {
+			editor.messageError("Failed to obtain class " + className, ex);
+			return null; // can not obtain class
+		}
 	}
 
 	/**
