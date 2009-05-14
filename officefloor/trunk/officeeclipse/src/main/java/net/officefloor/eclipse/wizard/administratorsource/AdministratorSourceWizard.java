@@ -19,7 +19,6 @@ package net.officefloor.eclipse.wizard.administratorsource;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.administrator.AdministratorType;
@@ -28,15 +27,15 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
-import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -109,21 +108,22 @@ public class AdministratorSourceWizard extends Wizard implements
 					AdministratorSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
+				if (ExtensionUtil.isTestSource(className, classLoader)) {
+					continue; // ignore test sources
+				}
 				administratorSourceInstances.put(className,
 						new AdministratorSourceInstance(className, null,
 								classLoader, project, context));
 			}
-		} catch (JavaModelException ex) {
-			// Do not add the types
+		} catch (Throwable ex) {
+			LogUtil.logError(
+					"Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
-		try {
-			List<AdministratorSourceExtension> administratorSourceExtensions = ExtensionUtil
-					.createExecutableExtensions(
-							AdministratorSourceExtension.EXTENSION_ID,
-							AdministratorSourceExtension.class);
-			for (AdministratorSourceExtension administratorSourceExtension : administratorSourceExtensions) {
+		for (AdministratorSourceExtension administratorSourceExtension : ExtensionUtil
+				.createAdministratorSourceExtensionList()) {
+			try {
 				Class<?> administratorSourceClass = administratorSourceExtension
 						.getAdministratorSourceClass();
 				String administratorSourceClassName = administratorSourceClass
@@ -133,9 +133,12 @@ public class AdministratorSourceWizard extends Wizard implements
 								administratorSourceClassName,
 								administratorSourceExtension, classLoader,
 								project, context));
+			} catch (Throwable ex) {
+				LogUtil
+						.logError("Failed to create source instance for "
+								+ administratorSourceExtension.getClass()
+										.getName(), ex);
 			}
-		} catch (Exception ex) {
-			// Do not add the types
 		}
 
 		// Return administrator source instances by the class name

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -32,6 +33,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
  * 
  * @author Daniel
  */
+@TestSource
 public class MockAdministratorSource<I, A extends Enum<A>> implements
 		AdministratorSource<I, A> {
 

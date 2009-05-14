@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
@@ -118,6 +119,7 @@ public class CoordinateManagedObjectTest extends
 	/**
 	 * Coordinating {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class CoordinatingManagedObjectSource extends
 			AbstractManagedObjectSource<CoordinatingDependencyKey, None> {
 

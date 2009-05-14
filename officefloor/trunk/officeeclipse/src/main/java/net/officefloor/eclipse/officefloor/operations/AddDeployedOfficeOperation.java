@@ -48,7 +48,7 @@ public class AddDeployedOfficeOperation extends
 
 	@Override
 	protected Change<?> getChange(OfficeFloorChanges changes, Context context) {
-
+		
 		// Obtain the office instance
 		OfficeInstance office = OfficeSourceWizard.getOfficeInstance(context
 				.getEditPart(), null);

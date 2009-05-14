@@ -29,6 +29,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.socket.server.spi.Connection;
@@ -247,6 +248,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/**
 	 * Mock {@link AbstractServerSocketManagedObjectSource}.
 	 */
+	@TestSource
 	public static class MockServerSocketManagedObjectSource extends
 			AbstractServerSocketManagedObjectSource<Indexed> {
 

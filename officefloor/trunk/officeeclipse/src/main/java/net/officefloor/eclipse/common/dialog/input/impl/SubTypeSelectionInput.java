@@ -19,7 +19,7 @@ package net.officefloor.eclipse.common.dialog.input.impl;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
-import net.officefloor.eclipse.java.JavaUtil;
+import net.officefloor.eclipse.util.JavaUtil;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;

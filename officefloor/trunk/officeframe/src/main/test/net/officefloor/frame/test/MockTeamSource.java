@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -31,6 +32,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
  * 
  * @author Daniel
  */
+@TestSource
 public class MockTeamSource implements TeamSource {
 
 	/**

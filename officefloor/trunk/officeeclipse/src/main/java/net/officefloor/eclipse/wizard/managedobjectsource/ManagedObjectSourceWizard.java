@@ -19,7 +19,6 @@ package net.officefloor.eclipse.wizard.managedobjectsource;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -28,15 +27,15 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -105,21 +104,22 @@ public class ManagedObjectSourceWizard extends Wizard implements
 					ManagedObjectSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
+				if (ExtensionUtil.isTestSource(className, classLoader)) {
+					continue; // ignore test sources
+				}
 				managedObjectSourceInstances.put(className,
 						new ManagedObjectSourceInstance(className, null,
 								classLoader, project, context));
 			}
-		} catch (JavaModelException ex) {
-			// Do not add the types
+		} catch (Throwable ex) {
+			LogUtil.logError(
+					"Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
-		try {
-			List<ManagedObjectSourceExtension> managedObjectSourceExtensions = ExtensionUtil
-					.createExecutableExtensions(
-							ManagedObjectSourceExtension.EXTENSION_ID,
-							ManagedObjectSourceExtension.class);
-			for (ManagedObjectSourceExtension managedObjectSourceExtension : managedObjectSourceExtensions) {
+		for (ManagedObjectSourceExtension managedObjectSourceExtension : ExtensionUtil
+				.createManagedObjectSourceExtensionList()) {
+			try {
 				Class<?> managedObjectSourceClass = managedObjectSourceExtension
 						.getManagedObjectSourceClass();
 				String managedObjectSourceClassName = managedObjectSourceClass
@@ -129,9 +129,12 @@ public class ManagedObjectSourceWizard extends Wizard implements
 								managedObjectSourceClassName,
 								managedObjectSourceExtension, classLoader,
 								project, context));
+			} catch (Throwable ex) {
+				LogUtil
+						.logError("Failed to create source instance for "
+								+ managedObjectSourceExtension.getClass()
+										.getName(), ex);
 			}
-		} catch (Exception ex) {
-			// Do not add the types
 		}
 
 		// Return managed object source instances by their class name

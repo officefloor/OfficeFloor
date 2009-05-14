@@ -24,6 +24,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -331,6 +332,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link TeamSource} for testing.
 	 */
+	@TestSource
 	public static class MockTeamSource implements TeamSource {
 
 		/**

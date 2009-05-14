@@ -20,6 +20,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -196,6 +197,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 	/**
 	 * {@link ManagedObjectSource} that fails.
 	 */
+	@TestSource
 	public static class MockManagedObjectSource extends
 			AbstractAsyncManagedObjectSource<None, None> implements
 			AsynchronousManagedObject, CoordinatingManagedObject<None> {

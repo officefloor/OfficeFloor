@@ -17,6 +17,7 @@
 package net.officefloor.frame.integrate.managedobject.flow;
 
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
@@ -26,6 +27,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel
  */
+@TestSource
 public class InputManagedObjectSource<D extends Enum<D>> extends
 		AbstractManagedObjectSource<D, InputManagedObjectSource.Flows> {
 

@@ -14,39 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.team;
+package net.officefloor.frame.spi;
 
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.frame.api.OfficeFrame;
 
 /**
- * Adapter providing empty {@link TeamSource} methods.
+ * <p>
+ * Annotation to be applied to test/mock sources so they are ignored from being
+ * dynamically &quot;discovered&quot; for use in configuration.
+ * <p>
+ * Typically source implementations will always be focused for actual deployed
+ * use, however there are many source implementations in the tests for
+ * {@link OfficeFrame} that should not be used other than for testing.
  * 
  * @author Daniel
  */
-@TestSource
-public class TeamSourceAdapter implements TeamSource {
-
-	/*
-	 * ==================== TeamSource ==================================
-	 */
-
-	@Override
-	public TeamSourceSpecification getSpecification() {
-		return null;
-	}
-
-	@Override
-	public void init(TeamSourceContext context) throws Exception {
-		// Do nothing
-	}
-
-	@Override
-	public Team createTeam() {
-		return null;
-	}
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface TestSource {
 }

@@ -43,6 +43,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -918,6 +919,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link WorkSource} for testing.
 	 */
+	@TestSource
 	public static class MockWorkSource implements WorkSource<Work> {
 
 		/**

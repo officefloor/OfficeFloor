@@ -88,7 +88,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	public static OfficeFloorSkin getSkin() {
 		return skin;
 	}
-
+	
 	/**
 	 * Creates a new {@link OfficeFloorCompiler} for the input
 	 * {@link AbstractOfficeFloorEditPart}.

@@ -36,6 +36,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
@@ -349,6 +350,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 	/**
 	 * {@link ManagedObjectSource} requiring a {@link Team}.
 	 */
+	@TestSource
 	public static class TeamManagedObject extends
 			AbstractManagedObjectSource<None, None> implements
 			WorkFactory<Work>, TaskFactory<Work, None, None> {

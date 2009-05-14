@@ -272,41 +272,21 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	 * ======================= IClasspathContainer =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
-	 */
 	@Override
 	public String getDescription() {
 		return "Office Floor";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.IClasspathContainer#getKind()
-	 */
 	@Override
 	public int getKind() {
 		return IClasspathContainer.K_APPLICATION;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
-	 */
 	@Override
 	public IPath getPath() {
 		return this.path;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
-	 */
 	@Override
 	public IClasspathEntry[] getClasspathEntries() {
 		// Return the class path entries
