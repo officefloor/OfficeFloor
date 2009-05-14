@@ -74,6 +74,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -675,6 +676,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link SectionSource}.
 	 */
+	@TestSource
 	public static class MakerSectionSource implements SectionSource,
 			SectionMakerContext {
 
@@ -949,6 +951,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class MakerManagedObjectSource extends
 			AbstractManagedObjectSource<Indexed, Indexed> implements
 			ManagedObjectMakerContext {
@@ -1175,6 +1178,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link WorkSource}.
 	 */
+	@TestSource
 	public static class MakerWorkSource implements WorkSource<Work>,
 			WorkMakerContext {
 
@@ -1422,6 +1426,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link AdministratorSource}.
 	 */
+	@TestSource
 	public static class MakerAdministratorSource extends
 			AbstractAdministratorSource<Object, Indexed> implements
 			AdministratorMakerContext {
@@ -1548,6 +1553,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link TeamSource}.
 	 */
+	@TestSource
 	public static class MakerTeamSource implements TeamSource, TeamMakerContext {
 
 		/**
@@ -1665,6 +1671,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link OfficeSource}.
 	 */
+	@TestSource
 	public static class MakerOfficeSource implements OfficeSource,
 			OfficeMakerContext {
 

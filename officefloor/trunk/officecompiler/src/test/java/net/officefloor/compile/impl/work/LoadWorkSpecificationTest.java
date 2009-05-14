@@ -30,6 +30,7 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -332,6 +333,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link WorkSource} for testing.
 	 */
+	@TestSource
 	public static class MockWorkSource implements WorkSource<Work> {
 
 		/**

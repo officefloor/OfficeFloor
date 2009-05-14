@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -332,6 +333,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link SectionSource} for testing.
 	 */
+	@TestSource
 	public static class MockSectionSource implements SectionSource {
 
 		/**

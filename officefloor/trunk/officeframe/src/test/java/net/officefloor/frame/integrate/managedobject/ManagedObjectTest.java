@@ -28,6 +28,7 @@ import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -367,6 +368,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Test {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class TestManagedObjectSource extends
 			AbstractManagedObjectSource<None, Flows> implements ManagedObject,
 			AsynchronousManagedObject {

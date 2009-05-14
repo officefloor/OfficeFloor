@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -113,6 +114,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSource} that will be failed to instantiate.
 	 */
+	@TestSource
 	public static class FailInstantiateTeamSource extends TeamSourceAdapter {
 
 		/**
@@ -158,6 +160,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSource} that obtains a property and creates a {@link Team}.
 	 */
+	@TestSource
 	public static class NoPropertyTeamSource extends TeamSourceAdapter {
 
 		/**
@@ -204,6 +207,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSource} that fails to initialise.
 	 */
+	@TestSource
 	public static class FailInitTeamSource extends TeamSourceAdapter {
 
 		/**
@@ -244,6 +248,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSource} that fails to create {@link Team}.
 	 */
+	@TestSource
 	public static class FailCreateTeamSource extends TeamSourceAdapter {
 
 		/**
@@ -309,6 +314,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TeamSource} that sources a {@link Team}.
 	 */
+	@TestSource
 	public static class SourceTeamSource extends TeamSourceAdapter {
 
 		/**

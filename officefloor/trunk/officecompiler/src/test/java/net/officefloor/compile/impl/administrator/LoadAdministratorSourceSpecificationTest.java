@@ -24,6 +24,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -347,6 +348,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	/**
 	 * Mock {@link AdministratorSource} for testing.
 	 */
+	@TestSource
 	public static class MockAdministratorSource implements
 			AdministratorSource<None, None> {
 

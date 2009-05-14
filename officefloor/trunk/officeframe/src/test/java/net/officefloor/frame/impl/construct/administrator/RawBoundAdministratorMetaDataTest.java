@@ -43,6 +43,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
@@ -919,6 +920,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link AdministratorSource}.
 	 */
+	@TestSource
 	public static class MockAdministratorSource implements
 			AdministratorSource<Object, DutyKey> {
 

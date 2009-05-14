@@ -24,6 +24,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
@@ -348,6 +349,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	/**
 	 * Mock {@link ManagedObjectSource} for testing.
 	 */
+	@TestSource
 	public static class MockManagedObjectSource implements
 			ManagedObjectSource<None, None> {
 

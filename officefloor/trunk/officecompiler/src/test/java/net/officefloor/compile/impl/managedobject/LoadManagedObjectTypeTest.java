@@ -42,6 +42,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -1644,6 +1645,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	@SuppressWarnings("unchecked")
 	public static class MockManagedObjectSource implements ManagedObjectSource {
 

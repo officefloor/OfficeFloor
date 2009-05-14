@@ -3,21 +3,17 @@
 <plugin>
    <extension
          point="net.officefloor.eclipse.worksource">
-      <workloader
-            class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension">
-      </workloader>
+      <worksource
+            class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension" />
    </extension>
    <extension
          point="net.officefloor.eclipse.worksource">
-      <workloader
-            class="net.officefloor.eclipse.socket.HttpFileWorkSourceExtension">
-      </workloader>
+      <worksource
+            class="net.officefloor.eclipse.socket.HttpFileWorkSourceExtension" />
    </extension>
    <extension
          point="net.officefloor.eclipse.managedobjectsource">
       <managedobjectsource
-            class="net.officefloor.eclipse.socket.HttpManagedObjectSourceExtension">
-      </managedobjectsource>
+            class="net.officefloor.eclipse.socket.HttpManagedObjectSourceExtension" />
    </extension>
-
 </plugin>

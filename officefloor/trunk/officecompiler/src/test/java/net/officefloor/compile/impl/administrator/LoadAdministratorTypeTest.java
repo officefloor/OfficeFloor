@@ -31,6 +31,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
@@ -437,6 +438,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link AdministratorSource}.
 	 */
+	@TestSource
 	@SuppressWarnings("unchecked")
 	public static class MockAdministratorSource implements AdministratorSource {
 

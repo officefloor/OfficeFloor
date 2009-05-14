@@ -45,6 +45,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -842,6 +843,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	@SuppressWarnings("unchecked")
 	public static class MockManagedObjectSource implements ManagedObjectSource {
 

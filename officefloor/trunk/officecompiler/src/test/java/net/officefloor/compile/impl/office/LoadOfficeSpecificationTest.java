@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -332,6 +333,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link OfficeSource} for testing.
 	 */
+	@TestSource
 	public static class MockOfficeSource implements OfficeSource {
 
 		/**

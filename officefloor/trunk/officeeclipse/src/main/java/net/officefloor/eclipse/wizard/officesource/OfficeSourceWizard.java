@@ -19,7 +19,6 @@ package net.officefloor.eclipse.wizard.officesource;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.office.OfficeType;
@@ -29,14 +28,14 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.officesource.OfficeSourceExtension;
-import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
 import net.officefloor.frame.api.manage.Office;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -108,20 +107,21 @@ public class OfficeSourceWizard extends Wizard implements
 					.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
+				if (ExtensionUtil.isTestSource(className, classLoader)) {
+					continue; // ignore test sources
+				}
 				officeSourceInstances.put(className, new OfficeSourceInstance(
 						className, null, classLoader, project, context));
 			}
-		} catch (JavaModelException ex) {
-			// Do not add the types
+		} catch (Throwable ex) {
+			LogUtil.logError(
+					"Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
-		try {
-			List<OfficeSourceExtension> officeSourceExtensions = ExtensionUtil
-					.createExecutableExtensions(
-							OfficeSourceExtension.EXTENSION_ID,
-							OfficeSourceExtension.class);
-			for (OfficeSourceExtension officeSourceExtension : officeSourceExtensions) {
+		for (OfficeSourceExtension officeSourceExtension : ExtensionUtil
+				.createOfficeSourceExtensionList()) {
+			try {
 				Class<?> officeSourceClass = officeSourceExtension
 						.getOfficeSourceClass();
 				String officeSourceClassName = officeSourceClass.getName();
@@ -129,9 +129,10 @@ public class OfficeSourceWizard extends Wizard implements
 						new OfficeSourceInstance(officeSourceClassName,
 								officeSourceExtension, classLoader, project,
 								context));
+			} catch (Throwable ex) {
+				LogUtil.logError("Failed to create source instance for "
+						+ officeSourceExtension.getClass().getName(), ex);
 			}
-		} catch (Exception ex) {
-			// Do not add the types
 		}
 
 		// Return office source instances by the office source class name

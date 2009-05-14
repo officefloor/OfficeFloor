@@ -50,6 +50,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
@@ -1308,6 +1309,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * {@link ManagedObjectSource} that should not have its methods invoked.
 	 */
+	@TestSource
 	public static class NotUseManagedObjectSource implements
 			ManagedObjectSource<Indexed, Indexed> {
 
@@ -1348,6 +1350,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * {@link WorkSource} that should not have its methods invoked.
 	 */
+	@TestSource
 	public static class NotUseWorkSource implements WorkSource<Work> {
 
 		/*
@@ -1370,6 +1373,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * {@link SectionSource} that should not have its methods invoked.
 	 */
+	@TestSource
 	public static class NotUseSectionSource implements SectionSource {
 
 		/*

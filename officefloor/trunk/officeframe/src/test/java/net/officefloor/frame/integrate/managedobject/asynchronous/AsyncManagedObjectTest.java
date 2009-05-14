@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -272,6 +273,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Test {@link ManagedObjectSource}.
 	 */
+	@TestSource
 	public static class TestManagedObjectSource extends
 			AbstractAsyncManagedObjectSource<None, None> {
 

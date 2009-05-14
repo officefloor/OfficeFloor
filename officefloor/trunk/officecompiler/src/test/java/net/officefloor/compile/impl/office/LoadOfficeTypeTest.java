@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -504,6 +505,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Mock {@link OfficeSource} for testing.
 	 */
+	@TestSource
 	public static class MockOfficeSource implements OfficeSource {
 
 		/**
