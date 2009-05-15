@@ -28,6 +28,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
@@ -475,9 +476,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		// Enrich the edit part
 		if (editPart instanceof AbstractOfficeFloorEditPart) {
 			AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
-
-			// Specify details on edit part
 			officeFloorEditPart.setOfficeFloorEditor(this);
+		} else if (editPart instanceof AbstractOfficeFloorConnectionEditPart) {
+			AbstractOfficeFloorConnectionEditPart<?, ?> officeFloorConnectionEditPart = (AbstractOfficeFloorConnectionEditPart<?, ?>) editPart;
+			officeFloorConnectionEditPart.setOfficeFloorEditor(this);
 		}
 
 		// Return the edit part

@@ -22,6 +22,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEvent;
 
 /**
  * {@link EditPart} for the
@@ -32,7 +33,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
  */
 public class OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel>
+		AbstractOfficeFloorConnectionEditPart<OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel, OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEvent>
 		implements
 		OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext {
 

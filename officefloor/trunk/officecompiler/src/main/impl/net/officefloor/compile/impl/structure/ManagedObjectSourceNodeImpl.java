@@ -370,9 +370,20 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 				.setManagingOffice(managingOffice.getDeployedOfficeName());
 
+		// Obtain the flow types for the managed object source
+		ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
+
+		// TODO test requiring process bound name.
+		// Provide process bound name if have flows
+		if (flowTypes.length > 0) {
+			// TODO ensure managed object node by same name for office.
+			// (This is necessary as decides on which is the instance)
+			managingOfficeBuilder.setProcessBoundManagedObjectName(this
+					.getManagedObjectSourceName());
+		}
+
 		// Link in the flows for the managed object source
-		for (ManagedObjectFlowType<?> flowType : managedObjectType
-				.getFlowTypes()) {
+		for (ManagedObjectFlowType<?> flowType : flowTypes) {
 
 			// Obtain the flow type details
 			String flowName = flowType.getFlowName();

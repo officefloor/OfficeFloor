@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.desk.TaskToNextTaskFigureContext;
 import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.TaskToNextTaskModel.TaskToNextTaskEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -29,9 +30,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class TaskToNextTaskEditPart extends
-		AbstractOfficeFloorConnectionEditPart<TaskToNextTaskModel> implements
-		TaskToNextTaskFigureContext {
+public class TaskToNextTaskEditPart
+		extends
+		AbstractOfficeFloorConnectionEditPart<TaskToNextTaskModel, TaskToNextTaskEvent>
+		implements TaskToNextTaskFigureContext {
 
 	/*
 	 * =============== AbstractOfficeFloorConnectionEditPart ==============

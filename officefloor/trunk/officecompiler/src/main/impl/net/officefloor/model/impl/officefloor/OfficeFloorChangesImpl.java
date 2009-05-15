@@ -789,4 +789,34 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		};
 	}
 
+	@Override
+	public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> setProcessBoundManagedObjectName(
+			final OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice,
+			final String newProcessBoundManagedObjectName) {
+
+		// TODO test (setProcessBoundManagedObjectName)
+
+		// Obtain the old process bound name
+		final String oldProcessBoundManagedObjectName = officeFloorManagedObjectSourceToDeployedOffice
+				.getProcessBoundManagedObjectName();
+
+		// Returns the change of process bound name
+		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(
+				officeFloorManagedObjectSourceToDeployedOffice,
+				"Rename process bound name to "
+						+ newProcessBoundManagedObjectName) {
+			@Override
+			public void apply() {
+				officeFloorManagedObjectSourceToDeployedOffice
+						.setProcessBoundManagedObjectName(newProcessBoundManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				officeFloorManagedObjectSourceToDeployedOffice
+						.setProcessBoundManagedObjectName(oldProcessBoundManagedObjectName);
+			}
+		};
+	}
+
 }

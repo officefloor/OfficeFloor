@@ -17,22 +17,39 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
- * Context to decorate the
- * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} connection.
+ * Decorated {@link IFigure} for the
+ * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext {
+public interface OfficeFloorManagedObjectSourceToDeployedOfficeFigure {
 
 	/**
-	 * Obtains the {@link ProcessState} bound {@link ManagedObject} name.
+	 * Indicates a change of {@link ProcessState} bound name for the
+	 * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 * 
-	 * @return {@link ProcessState} bound {@link ManagedObject} name.
+	 * @param processBoundManagedObjectName
+	 *            Name to display for the
+	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 */
-	String getProcessBoundManagedObjectName();
+	void setProcessBoundManagedObjectName(String processBoundManagedObjectName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the
+	 * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} name.
+	 * 
+	 * @return {@link IFigure} containing the
+	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} name.
+	 */
+	IFigure getProcessBoundManagedObjectNameFigure();
 
 }

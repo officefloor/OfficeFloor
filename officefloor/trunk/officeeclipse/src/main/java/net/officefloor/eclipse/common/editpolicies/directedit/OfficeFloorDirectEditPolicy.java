@@ -17,7 +17,9 @@
 package net.officefloor.eclipse.common.editpolicies.directedit;
 
 import net.officefloor.eclipse.common.commands.ChangeCommand;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 
@@ -32,6 +34,7 @@ import org.eclipse.gef.editpolicies.DirectEditPolicy;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.gef.tools.CellEditorLocator;
 import org.eclipse.gef.tools.DirectEditManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
@@ -133,6 +136,9 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 				// Obtain the initial value
 				String initialValue = OfficeFloorDirectEditPolicy.this.initialiser
 						.getInitialValue();
+				if (EclipseUtil.isBlank(initialValue)) {
+					initialValue = ""; // ensure not null
+				}
 
 				// Load the initial value
 				CellEditor editor = this.getCellEditor();
@@ -157,15 +163,26 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 			return null;
 		}
 
-		// Obtain the host model
+		// Obtain the host edit part
 		EditPart editPart = this.getHost();
-		AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
 
-		// Obtain the model changes
-		Object changes = officeFloorEditPart.getEditor().getModelChanges();
+		// Obtain the changes
+		Object changes;
+		if (editPart instanceof AbstractOfficeFloorEditPart) {
+			AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
+			changes = officeFloorEditPart.getEditor().getModelChanges();
+		} else if (editPart instanceof AbstractOfficeFloorConnectionEditPart) {
+			AbstractOfficeFloorConnectionEditPart<?, ?> officeFloorConnectionEditPart = (AbstractOfficeFloorConnectionEditPart<?, ?>) editPart;
+			changes = officeFloorConnectionEditPart.getEditor()
+					.getModelChanges();
+		} else {
+			MessageDialog.openError(null, "Error", "Unknown edit part type "
+					+ editPart.getClass().getName());
+			return null; // must obtain changes
+		}
 
 		// Obtain the model
-		Object model = officeFloorEditPart.getCastedModel();
+		Object model = editPart.getModel();
 
 		// Obtain the new value
 		Text text = (Text) request.getCellEditor().getControl();

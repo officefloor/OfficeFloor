@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel.WorkTaskObjectToExternalManagedObjectEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -31,7 +32,7 @@ import org.eclipse.gef.EditPart;
  */
 public class WorkTaskObjectToExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<WorkTaskObjectToExternalManagedObjectModel>
+		AbstractOfficeFloorConnectionEditPart<WorkTaskObjectToExternalManagedObjectModel, WorkTaskObjectToExternalManagedObjectEvent>
 		implements WorkTaskObjectToExternalManagedObjectFigureContext {
 
 	@Override

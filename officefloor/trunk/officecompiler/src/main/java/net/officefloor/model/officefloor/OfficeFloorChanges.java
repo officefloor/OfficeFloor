@@ -23,6 +23,8 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.change.Change;
@@ -249,6 +251,21 @@ public interface OfficeFloorChanges {
 	 */
 	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> removeOfficeFloorManagedObjectSourceToDeployedOffice(
 			OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice);
+
+	/**
+	 * Specifies the {@link ProcessState} bound {@link ManagedObject} name for
+	 * the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 * 
+	 * @param officeFloorManagedObjectSourceToDeployedOffice
+	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 * @param newProcessBoundManagedObjectName
+	 *            New {@link ProcessState} bound {@link ManagedObject} name.
+	 * @return {@link Change} to rename {@link ProcessState} bound
+	 *         {@link ManagedObject} name.
+	 */
+	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> setProcessBoundManagedObjectName(
+			OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice,
+			String newProcessBoundManagedObjectName);
 
 	/**
 	 * Links the {@link OfficeFloorManagedObjectSourceFlowModel} to the

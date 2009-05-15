@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.desk.TaskEscalationToExternalFlowFigureContext;
 import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel.TaskEscalationToExternalFlowEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -31,7 +32,7 @@ import org.eclipse.gef.EditPart;
  */
 public class TaskEscalationToExternalFlowEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<TaskEscalationToExternalFlowModel>
+		AbstractOfficeFloorConnectionEditPart<TaskEscalationToExternalFlowModel, TaskEscalationToExternalFlowEvent>
 		implements TaskEscalationToExternalFlowFigureContext {
 
 	/*
