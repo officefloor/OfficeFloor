@@ -74,6 +74,11 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	private final SelectorFactory selectorFactory;
 
 	/**
+	 * {@link ServerSocketAccepter} that requires binding on starting.
+	 */
+	private ServerSocketAccepter serverSocketAccepter;
+
+	/**
 	 * {@link Server}.
 	 */
 	private Server<F> server;
@@ -157,11 +162,12 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 				this.selectorFactory, this.server, maxConn);
 
 		// Register the accepter of connections
-		ServerSocketAccepter accepter = new ServerSocketAccepter(
+		this.serverSocketAccepter = new ServerSocketAccepter(
 				new InetSocketAddress(port), serverSocketHandler,
 				connectionManager, recommendedSegmentCount, messageSegmentPool);
 		ManagedObjectTaskBuilder<None, ServerSocketAccepter.ServerSocketAccepterFlows> accepterTask = mosContext
-				.addWork("accepter", accepter).addTask("accepter", accepter);
+				.addWork("accepter", this.serverSocketAccepter).addTask(
+						"accepter", this.serverSocketAccepter);
 		accepterTask.setTeam("accepter");
 		accepterTask.linkFlow(
 				ServerSocketAccepter.ServerSocketAccepterFlows.LISTEN,
@@ -184,6 +190,9 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	public void start(ManagedObjectExecuteContext<F> context) throws Exception {
 		// Make the execute context available to the server
 		this.server.setManagedObjectExecuteContext(context);
+
+		// Bind to socket to listen for connections
+		this.serverSocketAccepter.bindToSocket();
 	}
 
 	@Override

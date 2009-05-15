@@ -68,19 +68,14 @@ class ServerSocketAccepter
 	private final MessageSegmentPool messageSegmentPool;
 
 	/**
-	 * {@link ServerSocketChannel} to listen for connections.
-	 */
-	private final ServerSocketChannel channel;
-
-	/**
-	 * {@link Selector} to aid in listening for connections.
-	 */
-	private final Selector selector;
-
-	/**
 	 * {@link ServerSocketHandler}.
 	 */
 	private final ServerSocketHandler<?> serverSocketHandler;
+
+	/**
+	 * {@link InetSocketAddress} to listen for connections.
+	 */
+	private InetSocketAddress serverSocketAddress;
 
 	/**
 	 * Initiate.
@@ -107,11 +102,31 @@ class ServerSocketAccepter
 		this.connectionManager = connectionManager;
 		this.recommendedSegmentCount = recommendedSegmentCount;
 		this.messageSegmentPool = messageSegmentPool;
+		this.serverSocketAddress = serverSocketAddress;
+	}
+
+	/**
+	 * {@link ServerSocketChannel} to listen for connections.
+	 */
+	private ServerSocketChannel channel;
+
+	/**
+	 * {@link Selector} to aid in listening for connections.
+	 */
+	private Selector selector;
+
+	/**
+	 * Opens and binds the {@link ServerSocketChannel}.
+	 * 
+	 * @throws IOException
+	 *             {@link IOException}.
+	 */
+	public void bindToSocket() throws IOException {
 
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
-		this.channel.socket().bind(serverSocketAddress);
+		this.channel.socket().bind(this.serverSocketAddress);
 
 		// Register the channel with the selector
 		this.selector = Selector.open();
