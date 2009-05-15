@@ -1,55 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.officefloor</groupId>
-	<artifactId>officefloor</artifactId>
-	<version>0.0.1</version>
-	<packaging>pom</packaging>
-	<name>Office Floor</name>
-	<description>Parent Office Floor</description>
-	<modules>
-		<module>officeframe</module>
-		<module>officemodel</module>
-		<module>officexml</module>
-		<module>officecompiler</module>
-		<module>officemodelgen</module>
-		<module>officeeclipse</module>
-		<module>officeplugin_hibernate</module>
-		<module>officeplugin_jdbc</module>
-		<module>officeplugin_jms</module>
-		<module>officeplugin_socket</module>
-		<module>officeeclipse_socket</module>
-		<module>officeeclipse_jdbc</module>
-		<module>officework_spring</module>
-		<module>officetool_filingcabinet</module>
-		<module>officeeclipse-jars</module>
-	</modules>
-	<url>http://www.officefloor.net</url>
-	<developers>
-		<developer>
-			<id>sagenschneider</id>
-			<name>Daniel Sagenschneider</name>
-		</developer>
-	</developers>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-		</plugins>
-	</reporting>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.officefloor</groupId>
+    <artifactId>officefloor</artifactId>
+    <version>0.0.1</version>
+    <packaging>pom</packaging>
+    <name>Office Floor</name>
+    <description>Parent Office Floor</description>
+    <modules>
+        <module>officeframe</module>
+        <module>officemodel</module>
+        <module>officexml</module>
+        <module>officecompiler</module>
+        <module>officemodelgen</module>
+        <module>officeeclipse</module>
+        <module>officeplugin_jdbc</module>
+        <module>officeplugin_jms</module>
+        <module>officeplugin_socket</module>
+        <module>officeplugin_spring</module>
+        <module>officeplugin_hibernate</module>
+        <module>officeeclipse_jdbc</module>
+        <module>officeeclipse_socket</module>
+        <module>officetool_filingcabinet</module>
+        <module>officeeclipse-jars</module>
+    </modules>
+    <url>http://www.officefloor.net</url>
+    <developers>
+        <developer>
+            <id>sagenschneider</id>
+            <name>Daniel Sagenschneider</name>
+        </developer>
+    </developers>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <reporting>
+        <plugins>
+        </plugins>
+    </reporting>
 </project>
