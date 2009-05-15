@@ -23,6 +23,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -189,8 +190,23 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public void link(ManagingOffice managingOffice, DeployedOffice office) {
+	public void link(ManagingOffice managingOffice, DeployedOffice office,
+			String processBoundManagedObjectName) {
 		this.linkOffice(managingOffice, office);
+
+		// Provide the process bound managed object name
+		if (!(managingOffice instanceof ManagingOfficeNode)) {
+			this.addIssue("Invalid managing office: "
+					+ managingOffice
+					+ " ["
+					+ (managingOffice == null ? null : managingOffice
+							.getClass().getName()) + "]");
+			return; // can not load process bound name
+		}
+
+		// Load the process bound name
+		((ManagingOfficeNode) managingOffice)
+				.setProcessBoundManagedObjectName(processBoundManagedObjectName);
 	}
 
 	@Override

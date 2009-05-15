@@ -196,14 +196,47 @@ public class CompileOfficeFloorManagedObjectTest extends
 	public void testManagedObjectSourceFlowNotLinked() {
 
 		// Record building the office floor
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
-				"Managed object flow doProcess is not linked to a TaskNode");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		ManagingOfficeBuilder<?> managingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+				"Managed object flow doProcess is not linked to a TaskNode");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensures issue if {@link ManagedObjectFlow} but
+	 * {@link ManagedObjectSource} is not {@link ProcessState} bound the
+	 * {@link ManagingOffice}.
+	 */
+	public void testManagedObjectSourceFlowNotProcessBoundToManagingOffice() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.issues
+				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+						"Must provide process bound name as managed object source has flows");
+		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor
 		this.compile(true);
@@ -229,6 +262,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor
@@ -258,7 +292,9 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
+		ManagingOfficeBuilder<?> managingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
+		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
@@ -280,9 +316,9 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.issues
-		.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
-				"Managed object team MANAGED_OBJECT_SOURCE_TEAM is not linked to a TeamNode");
+				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+						"Managed object team MANAGED_OBJECT_SOURCE_TEAM is not linked to a TeamNode");
 
 		// Compile the office floor
 		this.compile(true);

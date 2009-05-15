@@ -332,7 +332,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 			if (managingOffice != null) {
 				// Have the office manage the managed object
 				deployer.link(managedObjectSource.getManagingOffice(),
-						managingOffice);
+						managingOffice, moToOffice
+								.getProcessBoundManagedObjectName());
 			}
 
 			// Add the office floor managed object source flows

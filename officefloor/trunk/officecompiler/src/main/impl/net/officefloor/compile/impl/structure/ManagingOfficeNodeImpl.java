@@ -22,6 +22,8 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -48,6 +50,12 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	private final NodeContext context;
 
 	/**
+	 * {@link ProcessState} bound {@link ManagedObject} name for the
+	 * {@link ManagedObjectSource}.
+	 */
+	private String processBoundManagedObjectName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectSourceName
@@ -66,6 +74,21 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	}
 
 	/*
+	 * ================== ManagingOfficeNode ===========================
+	 */
+
+	@Override
+	public String getProcessBoundManagedObjectName() {
+		return this.processBoundManagedObjectName;
+	}
+
+	@Override
+	public void setProcessBoundManagedObjectName(
+			String processBoundManagedObjectName) {
+		this.processBoundManagedObjectName = processBoundManagedObjectName;
+	}
+
+	/*
 	 * ================== LinkOfficeNode ===============================
 	 */
 
@@ -79,15 +102,14 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 		// Ensure not already linked
 		if (this.linkedOfficeNode != null) {
-			this.context.getCompilerIssues()
-					.addIssue(
-							LocationType.OFFICE_FLOOR,
-							this.officeFloorLocation,
-							null,
-							null,
-							"Managing office for managed object source "
-									+ this.managedObjectSourceName
-									+ " linked more than once");
+			this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation,
+					null,
+					null,
+					"Managing office for managed object source "
+							+ this.managedObjectSourceName
+							+ " linked more than once");
 			return false; // already linked
 		}
 
