@@ -27,6 +27,8 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -116,8 +118,14 @@ public interface OfficeFloorDeployer {
 	 *            {@link ManagingOffice}.
 	 * @param office
 	 *            {@link DeployedOffice}.
+	 * @param processBoundManagedObjectName
+	 *            {@link ProcessState} bound {@link ManagedObject} name for the
+	 *            {@link ManagedObjectSource} or <code>null</code> if not to be
+	 *            bound to the {@link ProcessState} of the
+	 *            {@link ManagingOffice}.
 	 */
-	void link(ManagingOffice managingOffice, DeployedOffice office);
+	void link(ManagingOffice managingOffice, DeployedOffice office,
+			String processBoundManagedObjectName);
 
 	/**
 	 * Links the {@link OfficeTeam} to be the {@link OfficeFloorTeam}.

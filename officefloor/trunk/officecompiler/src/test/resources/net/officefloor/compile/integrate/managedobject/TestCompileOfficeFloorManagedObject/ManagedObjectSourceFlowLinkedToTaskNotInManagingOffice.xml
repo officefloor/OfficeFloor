@@ -8,7 +8,8 @@
                         <property name="class.name"
                             value="${testcase}$ProcessManagedObject" />
                     </properties>
-                    <managing-office name="MANAGING_OFFICE" />
+                    <managing-office name="MANAGING_OFFICE"
+                        process-bound-name="PROCESS_MO" />
                     <flow name="doProcess">
                         <office-input office="OFFICE_WITH_TASK"
                             section="SECTION" input="INPUT" />

@@ -17,6 +17,9 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagingOffice} node.
@@ -24,4 +27,26 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
  * @author Daniel
  */
 public interface ManagingOfficeNode extends ManagingOffice, LinkOfficeNode {
+
+	/**
+	 * Specifies the {@link ProcessState} bound {@link ManagedObject} name that
+	 * the {@link ManagedObjectSource} is bound to the {@link ManagingOffice}.
+	 * 
+	 * @param processBoundManagedObjectName
+	 *            {@link ProcessState} bound {@link ManagedObject} name that the
+	 *            {@link ManagedObjectSource} is bound to the
+	 *            {@link ManagingOffice}.
+	 */
+	void setProcessBoundManagedObjectName(String processBoundManagedObjectName);
+
+	/**
+	 * Obtains the {@link ProcessState} bound {@link ManagedObject} name that
+	 * the {@link ManagedObjectSource} is bound to the {@link ManagingOffice}.
+	 * 
+	 * @return {@link ProcessState} bound {@link ManagedObject} name that the
+	 *         {@link ManagedObjectSource} is bound to the
+	 *         {@link ManagingOffice}.
+	 */
+	String getProcessBoundManagedObjectName();
+
 }

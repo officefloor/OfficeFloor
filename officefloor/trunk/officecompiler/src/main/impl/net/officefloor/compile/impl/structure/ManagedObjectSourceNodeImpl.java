@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -373,13 +374,25 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Obtain the flow types for the managed object source
 		ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
 
-		// TODO test requiring process bound name.
 		// Provide process bound name if have flows
 		if (flowTypes.length > 0) {
-			// TODO ensure managed object node by same name for office.
-			// (This is necessary as decides on which is the instance)
-			managingOfficeBuilder.setProcessBoundManagedObjectName(this
-					.getManagedObjectSourceName());
+			// Ensure have a process bound managed object name
+			String processBoundManagedObjectName = this.managingOffice
+					.getProcessBoundManagedObjectName();
+			if (CompileUtil.isBlank(processBoundManagedObjectName)) {
+				// Provide issue as should be bound to process state
+				this.context
+						.getCompilerIssues()
+						.addIssue(LocationType.OFFICE_FLOOR,
+								this.officeFloorLocation,
+								AssetType.MANAGED_OBJECT,
+								this.managedObjectSourceName,
+								"Must provide process bound name as managed object source has flows");
+			} else {
+				// Bind the managed object to process state of managing office
+				managingOfficeBuilder
+						.setProcessBoundManagedObjectName(processBoundManagedObjectName);
+			}
 		}
 
 		// Link in the flows for the managed object source

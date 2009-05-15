@@ -34,6 +34,8 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests the {@link OfficeFloorNode}.
@@ -290,14 +292,35 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		ManagingOffice managingOffice = moSource.getManagingOffice();
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
 				null);
-		this.node.link(managingOffice, office);
+		this.node.link(managingOffice, office, null);
 		assertOfficeLink("managing office -> deployed office", managingOffice,
 				office);
 
 		// Ensure only can link once
 		this.node.link(managingOffice, this.addDeployedOffice(this.node,
-				"ANOTHER", null));
+				"ANOTHER", null), null);
 		assertOfficeLink("Can only link once", managingOffice, office);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link ManagingOffice} to the {@link DeployedOffice} with
+	 * a {@link ProcessState} bound {@link ManagedObject} name.
+	 */
+	public void testLinkManagingOfficeToDeployedOfficeWithProcessBoundManagedObjectName() {
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO", null);
+		ManagingOffice managingOffice = moSource.getManagingOffice();
+		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
+				null);
+		this.node.link(managingOffice, office, "MANAGED_OBJECT");
+		assertOfficeLink("managing office -> deployed office", managingOffice,
+				office);
 
 		this.verifyMockObjects();
 	}
