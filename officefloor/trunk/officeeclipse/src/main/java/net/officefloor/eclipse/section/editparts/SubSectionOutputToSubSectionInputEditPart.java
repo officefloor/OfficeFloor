@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.section.SubSectionOutputToSubSectionInputFigureContext;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel.SubSectionOutputToSubSectionInputEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -31,7 +32,7 @@ import org.eclipse.gef.EditPart;
  */
 public class SubSectionOutputToSubSectionInputEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<SubSectionOutputToSubSectionInputModel>
+		AbstractOfficeFloorConnectionEditPart<SubSectionOutputToSubSectionInputModel, SubSectionOutputToSubSectionInputEvent>
 		implements SubSectionOutputToSubSectionInputFigureContext {
 
 	@Override

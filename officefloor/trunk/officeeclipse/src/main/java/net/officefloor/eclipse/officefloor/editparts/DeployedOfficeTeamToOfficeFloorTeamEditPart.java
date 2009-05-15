@@ -22,6 +22,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamToOfficeFloorTeamFigureContext;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel.DeployedOfficeTeamToOfficeFloorTeamEvent;
 
 /**
  * {@link EditPart} for the {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
@@ -30,7 +31,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
  */
 public class DeployedOfficeTeamToOfficeFloorTeamEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<DeployedOfficeTeamToOfficeFloorTeamModel>
+		AbstractOfficeFloorConnectionEditPart<DeployedOfficeTeamToOfficeFloorTeamModel, DeployedOfficeTeamToOfficeFloorTeamEvent>
 		implements DeployedOfficeTeamToOfficeFloorTeamFigureContext {
 
 	/*

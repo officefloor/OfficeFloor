@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectToExternalManagedObjectFigureContext;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel.OfficeSectionObjectToExternalManagedObjectEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -32,7 +33,7 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeSectionObjectToExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<OfficeSectionObjectToExternalManagedObjectModel>
+		AbstractOfficeFloorConnectionEditPart<OfficeSectionObjectToExternalManagedObjectModel, OfficeSectionObjectToExternalManagedObjectEvent>
 		implements OfficeSectionObjectToExternalManagedObjectFigureContext {
 
 	/*

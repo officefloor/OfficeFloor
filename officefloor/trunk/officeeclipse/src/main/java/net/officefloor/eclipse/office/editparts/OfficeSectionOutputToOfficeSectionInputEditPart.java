@@ -23,6 +23,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputToOfficeSectionInputFigureContext;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel.OfficeSectionOutputToOfficeSectionInputEvent;
 
 /**
  * {@link EditPart} for {@link OfficeSectionOutputToOfficeSectionInputModel}.
@@ -31,7 +32,7 @@ import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel
  */
 public class OfficeSectionOutputToOfficeSectionInputEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<OfficeSectionOutputToOfficeSectionInputModel>
+		AbstractOfficeFloorConnectionEditPart<OfficeSectionOutputToOfficeSectionInputModel, OfficeSectionOutputToOfficeSectionInputEvent>
 		implements OfficeSectionOutputToOfficeSectionInputFigureContext {
 
 	/*

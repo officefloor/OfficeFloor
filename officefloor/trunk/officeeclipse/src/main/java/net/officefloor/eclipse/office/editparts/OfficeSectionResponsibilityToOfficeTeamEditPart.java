@@ -20,6 +20,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityToOfficeTeamFigureContext;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel.OfficeSectionResponsibilityToOfficeTeamEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -32,7 +33,7 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeSectionResponsibilityToOfficeTeamEditPart
 		extends
-		AbstractOfficeFloorConnectionEditPart<OfficeSectionResponsibilityToOfficeTeamModel>
+		AbstractOfficeFloorConnectionEditPart<OfficeSectionResponsibilityToOfficeTeamModel, OfficeSectionResponsibilityToOfficeTeamEvent>
 		implements OfficeSectionResponsibilityToOfficeTeamFigureContext {
 
 	/*

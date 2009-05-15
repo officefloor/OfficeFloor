@@ -30,7 +30,7 @@ public class AbstractModel implements Model {
 	/**
 	 * Support in handling property changes.
 	 */
-	private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
+	private final transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
 			this);
 
 	/**
@@ -90,7 +90,8 @@ public class AbstractModel implements Model {
 	 * @param removeEvent
 	 *            Event to fire on item being removed.
 	 */
-	protected <T> void removeItemFromList(T item, List<T> list, Enum<?> removeEvent) {
+	protected <T> void removeItemFromList(T item, List<T> list,
+			Enum<?> removeEvent) {
 		if (list.contains(item)) {
 			list.remove(item);
 
@@ -134,62 +135,36 @@ public class AbstractModel implements Model {
 	}
 
 	/*
-	 * =================================================================================
-	 * Model
-	 * =================================================================================
+	 * =================== Model ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#getX()
-	 */
+	@Override
 	public int getX() {
 		return this.x;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#setX(int)
-	 */
+	@Override
 	public void setX(int x) {
 		this.x = x;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#getY()
-	 */
+	@Override
 	public int getY() {
 		return this.y;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#setY(int)
-	 */
+	@Override
 	public void setY(int y) {
 		this.y = y;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#addPropertyChangeListener(java.beans.PropertyChangeListener)
-	 */
+	@Override
 	public synchronized void addPropertyChangeListener(
 			PropertyChangeListener listener) {
 		this.propertyChangeSupport.addPropertyChangeListener(listener);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.Model#removePropertyChangeListener(java.beans.PropertyChangeListener)
-	 */
+	@Override
 	public synchronized void removePropertyChangeListener(
 			PropertyChangeListener listener) {
 		this.propertyChangeSupport.removePropertyChangeListener(listener);

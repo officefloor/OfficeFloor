@@ -207,8 +207,9 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link IFigure} to decorate.
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceToDeployedOffice}.
+	 * @return {@link OfficeFloorManagedObjectSourceToDeployedOfficeFigure}.
 	 */
-	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+	OfficeFloorManagedObjectSourceToDeployedOfficeFigure decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context);
 

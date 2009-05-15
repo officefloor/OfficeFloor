@@ -22,6 +22,7 @@ import net.officefloor.eclipse.desk.DeskEditor;
 import net.officefloor.eclipse.skin.desk.TaskFlowToTaskFigureContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel.TaskFlowToTaskEvent;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
@@ -31,9 +32,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class TaskFlowToTaskEditPart extends
-		AbstractOfficeFloorConnectionEditPart<TaskFlowToTaskModel> implements
-		TaskFlowToTaskFigureContext {
+public class TaskFlowToTaskEditPart
+		extends
+		AbstractOfficeFloorConnectionEditPart<TaskFlowToTaskModel, TaskFlowToTaskEvent>
+		implements TaskFlowToTaskFigureContext {
 
 	/*
 	 * ============= AbstractOfficeFloorConnectionEditPart ==================
