@@ -16,6 +16,8 @@
  */
 package net.officefloor.frame.spi.administration.source;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
@@ -26,17 +28,30 @@ import net.officefloor.frame.spi.administration.Duty;
 public interface AdministratorDutyMetaData<A extends Enum<A>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link Enum} key identifying this {@link Duty}.
+	 * Obtains a unique name to identify this {@link Duty} for the
+	 * {@link Administrator}.
 	 * 
-	 * @return {@link Enum} key identifying this {@link Duty}.
+	 * @return Name to uniquely identify this {@link Duty}.
+	 */
+	String getDutyName();
+
+	/**
+	 * Obtains the {@link Enum} key identifying this {@link Duty}. If
+	 * <code>null</code> then {@link Duty} will be referenced by this instance's
+	 * index in the array returned from {@link AdministratorSourceMetaData}.
+	 * 
+	 * @return {@link Enum} key identifying the {@link Duty} or
+	 *         <code>null</code> indicating identified by an index.
 	 */
 	A getKey();
 
 	/**
-	 * Obtains the {@link Enum} specifying the flow keys of the {@link Duty}.
+	 * Obtains the list of {@link AdministratorDutyFlowMetaData} instances
+	 * should this {@link Duty} require instigating a {@link Flow}.
 	 * 
-	 * @return {@link Enum} {@link Class} specifying the flow keys.
+	 * @return Meta-data of {@link Flow} instances instigated by this
+	 *         {@link Duty}.
 	 */
-	Class<F> getFlowKeys();
+	AdministratorDutyFlowMetaData<F>[] getFlowMetaData();
 
 }

@@ -42,10 +42,10 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.DutyMetaData#getFlow(int)
+	 * ====================== DutyMetaData ==========================
 	 */
+
+	@Override
 	public FlowMetaData<?> getFlow(int flowIndex) {
 		return this.flows[flowIndex];
 	}

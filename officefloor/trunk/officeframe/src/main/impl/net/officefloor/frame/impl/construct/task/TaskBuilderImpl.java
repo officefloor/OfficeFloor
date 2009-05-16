@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -180,10 +181,24 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	}
 
 	@Override
+	public void linkPreTaskAdministration(String scopeAdministratorName,
+			String dutyName) {
+		this.preTaskDuties.add(new TaskDutyConfigurationImpl<None>(
+				scopeAdministratorName, dutyName));
+	}
+
+	@Override
 	public <A extends Enum<A>> void linkPreTaskAdministration(
 			String scopeAdministratorName, A dutyKey) {
 		this.preTaskDuties.add(new TaskDutyConfigurationImpl<A>(
 				scopeAdministratorName, dutyKey));
+	}
+
+	@Override
+	public void linkPostTaskAdministration(String scopeAdministratorName,
+			String dutyName) {
+		this.postTaskDuties.add(new TaskDutyConfigurationImpl<None>(
+				scopeAdministratorName, dutyName));
 	}
 
 	@Override
@@ -251,8 +266,8 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 				taskName, argumentType);
 
 		// Create the flow configuration
-		TaskFlowConfigurationImpl<F> flow = new TaskFlowConfigurationImpl<F>(flowName,
-				strategy, taskNode, flowIndex, flowKey);
+		TaskFlowConfigurationImpl<F> flow = new TaskFlowConfigurationImpl<F>(
+				flowName, strategy, taskNode, flowIndex, flowKey);
 
 		// Register the flow
 		this.flows.put(new Integer(flowIndex), flow);

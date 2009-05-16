@@ -17,7 +17,6 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -67,23 +66,10 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 	/**
 	 * Adds a {@link Duty} of the {@link Administrator}.
 	 * 
-	 * @param dutyKey
-	 *            Key identifying the {@link Duty}.
-	 * @param flowListingEnum
-	 *            {@link Enum} {@link Class} listing {@link Flow} instances to
-	 *            be instigated by the {@link Duty}.
+	 * @param dutyName
+	 *            Name identifying the {@link Duty}.
 	 * @return {@link DutyBuilder} for the specified {@link Duty}.
 	 */
-	<F extends Enum<F>> DutyBuilder<F> addDuty(A dutyKey,
-			Class<F> flowListingEnum);
-
-	/**
-	 * Adds a {@link Duty} of the {@link Administrator}.
-	 * 
-	 * @param dutyKey
-	 *            Key identifying the {@link Duty}.
-	 * @return {@link DutyBuilder} for the specified {@link Duty}.
-	 */
-	DutyBuilder<Indexed> addDuty(A dutyKey);
+	DutyBuilder addDuty(String dutyName);
 
 }

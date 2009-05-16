@@ -23,6 +23,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -56,19 +58,33 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	RawBoundManagedObjectMetaData<?>[] getAdministeredRawBoundManagedObjects();
 
 	/**
-	 * Obtains the keys identifying the {@link Duty} instances for the
-	 * {@link Administrator}.
-	 * 
-	 * @return Keys identifying the {@link Duty} instances.
-	 */
-	A[] getDutyKeys();
-
-	/**
 	 * Obtains the {@link AdministratorMetaData} for this {@link Administrator}.
 	 * 
 	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
 	 */
 	AdministratorMetaData<I, A> getAdministratorMetaData();
+
+	/**
+	 * Obtains the {@link DutyKey} for the key identifying a {@link Duty}.
+	 * 
+	 * @param key
+	 *            Key identifying a {@link Duty} as per
+	 *            {@link AdministratorDutyMetaData}.
+	 * @return {@link DutyKey} or <code>null</code> if could not find the
+	 *         {@link Duty}.
+	 */
+	DutyKey<A> getDutyKey(Enum<?> key);
+
+	/**
+	 * Obtains the {@link DutyKey} for the name identifying the {@link Duty}.
+	 * 
+	 * @param dutyName
+	 *            Name identifying a {@link Duty} as per
+	 *            {@link AdministratorDutyMetaData}.
+	 * @return {@link DutyKey} or <code>null</code> if could not find the
+	 *         {@link Duty}.
+	 */
+	DutyKey<A> getDutyKey(String dutyName);
 
 	/**
 	 * Links the {@link TaskMetaData} instances to create {@link Flow} of

@@ -14,34 +14,33 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.spi.administration;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.api.build.Indexed;
 
 /**
- * Configuration for a {@link Duty}.
+ * Key identifying a {@link Duty} for the {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface DutyConfiguration<A extends Enum<A>> {
+public interface DutyKey<A> {
 
 	/**
-	 * Obtains name identifying the {@link Duty} of the {@link Administrator}.
+	 * <p>
+	 * Obtains the {@link Enum} identifying the {@link Duty}.
+	 * <p>
+	 * This will be <code>null</code> if {@link Indexed} identification.
 	 * 
-	 * @return Name identifying the {@link Duty} on the {@link Administrator}.
+	 * @return {@link Enum} identifying the {@link Duty} or <code>null</code> if
+	 *         {@link Indexed}.
 	 */
-	String getDutyName();
+	A getKey();
 
 	/**
-	 * Obtains the configuration for the {@link Flow} instances invoked by the
-	 * {@link Duty}.
+	 * Obtains the index identifying the {@link Duty}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
-	 *         the linked {@link Flow}.
+	 * @return Index identifying the {@link Duty}.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	int getIndex();
 
 }

@@ -14,34 +14,61 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.impl.execute.duty;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
 
 /**
- * Configuration for a {@link Duty}.
- * 
  * @author Daniel
+ * 
  */
-public interface DutyConfiguration<A extends Enum<A>> {
+public class DutyKeyImpl<A extends Enum<A>> implements DutyKey<A> {
 
 	/**
-	 * Obtains name identifying the {@link Duty} of the {@link Administrator}.
-	 * 
-	 * @return Name identifying the {@link Duty} on the {@link Administrator}.
+	 * Key identifying the {@link Duty}.
 	 */
-	String getDutyName();
+	private final A key;
 
 	/**
-	 * Obtains the configuration for the {@link Flow} instances invoked by the
-	 * {@link Duty}.
-	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
-	 *         the linked {@link Flow}.
+	 * Index identifying the {@link Duty}.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	private final int index;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param key
+	 *            Key identifying the {@link Duty}.
+	 */
+	public DutyKeyImpl(A key) {
+		this.key = key;
+		this.index = key.ordinal();
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param index
+	 *            Index identifying the {@link Duty}.
+	 */
+	public DutyKeyImpl(int index) {
+		this.key = null;
+		this.index = index;
+	}
+
+	/*
+	 * ====================== DutyKey ================================
+	 */
+
+	@Override
+	public int getIndex() {
+		return this.index;
+	}
+
+	@Override
+	public A getKey() {
+		return this.key;
+	}
 
 }

@@ -22,6 +22,7 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -93,6 +94,19 @@ public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F
 			String scopeAdministratorName, A dutyKey);
 
 	/**
+	 * Links in a {@link Duty} to be executed before the {@link Task}.
+	 * 
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
+	 * @param dutyName
+	 *            Name identifying the {@link Duty} (as per
+	 *            {@link AdministratorDutyMetaData}).
+	 */
+	void linkPreTaskAdministration(String scopeAdministratorName,
+			String dutyName);
+
+	/**
 	 * Links in a {@link Duty} to be executed after the {@link Task}.
 	 * 
 	 * @param scopeAdministratorName
@@ -103,5 +117,18 @@ public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F
 	 */
 	<A extends Enum<A>> void linkPostTaskAdministration(
 			String scopeAdministratorName, A dutyKey);
+
+	/**
+	 * Links in a {@link Duty} to be executed after the {@link Task}.
+	 * 
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
+	 * @param dutyName
+	 *            Name identifying the {@link Duty} (as per
+	 *            {@link AdministratorDutyMetaData}).
+	 */
+	void linkPostTaskAdministration(String scopeAdministratorName,
+			String dutyName);
 
 }

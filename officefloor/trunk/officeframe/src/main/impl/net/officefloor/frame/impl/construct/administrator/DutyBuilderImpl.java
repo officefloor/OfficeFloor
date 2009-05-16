@@ -31,13 +31,13 @@ import net.officefloor.frame.spi.administration.Duty;
  * 
  * @author Daniel
  */
-public class DutyBuilderImpl<A extends Enum<A>, F extends Enum<F>> implements
-		DutyBuilder<F>, DutyConfiguration<A> {
+public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
+		DutyConfiguration<A> {
 
 	/**
-	 * Key identifying the {@link Duty}.
+	 * Name identifying the {@link Duty}.
 	 */
-	private final A dutyKey;
+	private final String dutyName;
 
 	/**
 	 * Registry of {@link Task} instances that may be invoked from the
@@ -48,11 +48,11 @@ public class DutyBuilderImpl<A extends Enum<A>, F extends Enum<F>> implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param dutyKey
-	 *            Key identifying the {@link Duty}.
+	 * @param dutyName
+	 *            Name identifying the {@link Duty}.
 	 */
-	public DutyBuilderImpl(A dutyKey) {
-		this.dutyKey = dutyKey;
+	public DutyBuilderImpl(String dutyName) {
+		this.dutyName = dutyName;
 	}
 
 	/*
@@ -60,8 +60,8 @@ public class DutyBuilderImpl<A extends Enum<A>, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void linkFlow(F key, String workName, String taskName,
-			Class<?> argumentType) {
+	public <F extends Enum<F>> void linkFlow(F key, String workName,
+			String taskName, Class<?> argumentType) {
 		this.linkFlow(key.ordinal(), workName, taskName, argumentType);
 	}
 
@@ -77,8 +77,8 @@ public class DutyBuilderImpl<A extends Enum<A>, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public A getDutyKey() {
-		return this.dutyKey;
+	public String getDutyName() {
+		return this.dutyName;
 	}
 
 	@Override

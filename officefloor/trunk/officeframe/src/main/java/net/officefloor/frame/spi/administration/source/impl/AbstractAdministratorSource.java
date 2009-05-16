@@ -19,9 +19,10 @@ package net.officefloor.frame.spi.administration.source.impl;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyFlowMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -178,25 +179,67 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		void setExtensionInterface(Class<I> extensionInterface);
 
 		/**
-		 * Adds meta-data for a {@link Duty} that required no {@link Flow}
-		 * instances.
+		 * Adds meta-data for a {@link Duty} identifying by the key. The name of
+		 * the duty will be taken from the key.
 		 * 
 		 * @param dutyKey
 		 *            Key identifying the {@link Duty}.
+		 * @return {@link DutyMetaDataContext} to provide meta-data for the
+		 *         {@link Duty}.
 		 */
-		void addDuty(A dutyKey);
+		DutyMetaDataContext addDuty(A dutyKey);
 
 		/**
-		 * Adds meta-data for a {@link Duty} that requires {@link Flow}
-		 * instances.
+		 * Adds meta-data for a {@link Duty} identifying by the index into the
+		 * order the {@link Duty} instances were added.
 		 * 
-		 * @param dutyKey
-		 *            Key identifying the {@link Duty}.
-		 * @param flowKeys
-		 *            {@link Enum} {@link Class} specifying the {@link Duty}
-		 *            flow keys.
+		 * @param dutyName
+		 *            Name identifying the {@link Duty}.
+		 * @return {@link DutyMetaDataContext} to provide meta-data for the
+		 *         {@link Duty}.
 		 */
-		<F extends Enum<F>> void addDuty(A dutyKey, Class<F> flowKeys);
+		DutyMetaDataContext addDuty(String dutyName);
+	}
+
+	/**
+	 * Provides the ability to label the {@link Duty} or {@link Flow}.
+	 */
+	public static interface Labeller {
+
+		/**
+		 * Specifies the label.
+		 * 
+		 * @param label
+		 *            Label.
+		 */
+		void setLabel(String label);
+	}
+
+	/**
+	 * Context for the {@link AdministratorDutyMetaData}.
+	 */
+	public static interface DutyMetaDataContext {
+
+		/**
+		 * Adds a required {@link Flow} identified by the key.
+		 * 
+		 * @param key
+		 *            {@link Enum} to identify the {@link Flow}.
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 */
+		<F extends Enum<F>> Labeller addFlow(F key, Class<?> argumentType);
+
+		/**
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
+		 * 
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 */
+		Labeller addFlow(Class<?> argumentType);
 	}
 
 	/**
@@ -245,13 +288,17 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		}
 
 		@Override
-		public void addDuty(A dutyKey) {
-			this.dutyMetaData.add(new DutyMetaData<None>(dutyKey, None.class));
+		public DutyMetaDataContext addDuty(A dutyKey) {
+			DutyMetaData<Indexed> duty = new DutyMetaData<Indexed>(dutyKey);
+			this.dutyMetaData.add(duty);
+			return duty;
 		}
 
 		@Override
-		public <F extends Enum<F>> void addDuty(A dutyKey, Class<F> flowKeys) {
-			this.dutyMetaData.add(new DutyMetaData<F>(dutyKey, flowKeys));
+		public DutyMetaDataContext addDuty(String dutyName) {
+			DutyMetaData<Indexed> duty = new DutyMetaData<Indexed>(dutyName);
+			this.dutyMetaData.add(duty);
+			return duty;
 		}
 
 		/*
@@ -274,7 +321,12 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	 * {@link AdministratorDutyMetaData} implementation.
 	 */
 	private class DutyMetaData<F extends Enum<F>> implements
-			AdministratorDutyMetaData<A, F> {
+			DutyMetaDataContext, AdministratorDutyMetaData<A, F> {
+
+		/**
+		 * Name of the {@link Duty}.
+		 */
+		private final String dutyName;
 
 		/**
 		 * Key to the {@link Duty}.
@@ -282,21 +334,30 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		private final A dutyKey;
 
 		/**
-		 * Flow keys for the {@link Duty}.
+		 * Listing of {@link AdministratorDutyFlowMetaData} instances.
 		 */
-		private final Class<F> flowKeys;
+		private final List<AdministratorDutyFlowMetaData<?>> flows = new LinkedList<AdministratorDutyFlowMetaData<?>>();
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param dutyName
+		 *            Name for the {@link Duty}.
+		 */
+		public DutyMetaData(String dutyName) {
+			this.dutyName = dutyName;
+			this.dutyKey = null;
+		}
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param dutyKey
 		 *            Key to the {@link Duty}.
-		 * @param flowKeys
-		 *            Flow keys for the {@link Duty}.
 		 */
-		public DutyMetaData(A dutyKey, Class<F> flowKeys) {
+		public DutyMetaData(A dutyKey) {
+			this.dutyName = dutyKey.name();
 			this.dutyKey = dutyKey;
-			this.flowKeys = flowKeys;
 		}
 
 		/*
@@ -304,13 +365,102 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 */
 
 		@Override
+		public String getDutyName() {
+			return this.dutyName;
+		}
+
+		@Override
 		public A getKey() {
 			return this.dutyKey;
 		}
 
 		@Override
-		public Class<F> getFlowKeys() {
-			return this.flowKeys;
+		@SuppressWarnings("unchecked")
+		public AdministratorDutyFlowMetaData<F>[] getFlowMetaData() {
+			return this.flows.toArray(new AdministratorDutyFlowMetaData[0]);
+		}
+
+		/*
+		 * ================ DutyMetaDataContext =========================
+		 */
+
+		@Override
+		public <f extends Enum<f>> Labeller addFlow(f key, Class<?> argumentType) {
+			DutyFlowMetaData<f> flow = new DutyFlowMetaData<f>(key,
+					argumentType);
+			this.flows.add(flow);
+			return flow;
+		}
+
+		@Override
+		public Labeller addFlow(Class<?> argumentType) {
+			DutyFlowMetaData<Indexed> flow = new DutyFlowMetaData<Indexed>(
+					null, argumentType);
+			this.flows.add(flow);
+			return flow;
+		}
+	}
+
+	/**
+	 * {@link AdministratorDutyFlowMetaData} implementation.
+	 */
+	private static class DutyFlowMetaData<F extends Enum<F>> implements
+			Labeller, AdministratorDutyFlowMetaData<F> {
+
+		/**
+		 * Key identifying this {@link Flow}.
+		 */
+		private final F key;
+
+		/**
+		 * Argument type to the {@link Flow}.
+		 */
+		private final Class<?> argumentType;
+
+		/**
+		 * Label for this {@link Flow}.
+		 */
+		private String label;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param key
+		 *            Key identifying this {@link Flow}.
+		 * @param argumentType
+		 *            Argument type to the {@link Flow}.
+		 */
+		public DutyFlowMetaData(F key, Class<?> argumentType) {
+			this.key = key;
+			this.argumentType = argumentType;
+		}
+
+		/*
+		 * ==================== Labeller ===============================
+		 */
+
+		@Override
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
+		/*
+		 * ============= AdministratorDutyFlowMetaData ==================
+		 */
+
+		@Override
+		public F getKey() {
+			return this.key;
+		}
+
+		@Override
+		public Class<?> getArgumentType() {
+			return this.argumentType;
+		}
+
+		@Override
+		public String getLabel() {
+			return this.label;
 		}
 	}
 

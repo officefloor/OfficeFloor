@@ -38,10 +38,19 @@ public interface TaskDutyConfiguration<A extends Enum<A>> {
 	String getScopeAdministratorName();
 
 	/**
+	 * Obtains the name identifying the {@link Duty}.
+	 * 
+	 * @return Name of the {@link Duty} or <code>null</code> if identified by
+	 *         key.
+	 */
+	String getDutyName();
+
+	/**
 	 * Obtains the key identifying the {@link Duty}.
 	 * 
-	 * @return Key identifying the {@link Duty}.
+	 * @return Key identifying the {@link Duty} or <code>null</code> if
+	 *         identified by name.
 	 */
-	A getDuty();
+	A getDutyKey();
 
 }

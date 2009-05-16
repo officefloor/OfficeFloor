@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
+import net.officefloor.frame.spi.administration.DutyKey;
 
 /**
  * Implementation of an {@link AdministratorContainer}.
@@ -103,7 +104,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		}
 
 		// Obtain the key identifying the duty
-		A key = taskDuty.getDutyKey();
+		DutyKey<A> key = taskDuty.getDutyKey();
 
 		// Obtain the duty
 		Duty<I, F> duty = (Duty<I, F>) this.administrator.getDuty(key);
