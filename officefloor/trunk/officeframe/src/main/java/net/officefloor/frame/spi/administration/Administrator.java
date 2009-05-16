@@ -29,10 +29,10 @@ public interface Administrator<I, A extends Enum<A>> {
 	 * {@link Duty} to be undertaken on the {@link ManagedObject} extension
 	 * interfaces.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link Duty}.
+	 * @param dutyKey
+	 *            {@link DutyKey} identifying the {@link Duty}.
 	 * @return {@link Duty}.
 	 */
-	Duty<I, ?> getDuty(A key);
+	Duty<I, ?> getDuty(DutyKey<A> dutyKey);
 
 }

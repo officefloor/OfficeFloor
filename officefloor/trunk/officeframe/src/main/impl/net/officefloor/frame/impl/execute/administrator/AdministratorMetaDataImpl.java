@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
@@ -29,7 +27,7 @@ import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.team.Team;
 
@@ -63,11 +61,11 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 
 	/**
 	 * <p>
-	 * Registry of {@link DutyMetaData} by its {@link Duty} key.
+	 * Listing of {@link DutyMetaData} in order of {@link DutyKey} indexes.
 	 * <p>
 	 * This is treated as <code>final</code>.
 	 */
-	protected Map<A, DutyMetaData> dutyMetaData;
+	protected DutyMetaData[] dutyMetaData;
 
 	/**
 	 * Initiate with meta-data of the {@link Administrator} scope to the
@@ -96,10 +94,10 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 * Loads the remaining state.
 	 * 
 	 * @param dutyMetaData
-	 *            {@link DutyMetaData} for each {@link Duty} of the
-	 *            {@link Administrator}.
+	 *            Listing of {@link DutyMetaData} in order of {@link DutyKey}
+	 *            indexes.
 	 */
-	public void loadRemainingState(Map<A, DutyMetaData> dutyMetaData) {
+	public void loadRemainingState(DutyMetaData[] dutyMetaData) {
 		this.dutyMetaData = dutyMetaData;
 	}
 
@@ -123,8 +121,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	@Override
-	public DutyMetaData getDutyMetaData(A key) {
-		return this.dutyMetaData.get(key);
+	public DutyMetaData getDutyMetaData(DutyKey<A> dutyKey) {
+		return this.dutyMetaData[dutyKey.getIndex()];
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -486,9 +487,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no key for {@link Duty}.
+	 * Ensures issue if no name for {@link Duty}.
 	 */
-	public void testNoDutyKey() {
+	public void testNoDutyName() {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
@@ -500,9 +501,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
-		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), null);
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), null);
 		this.issues.addIssue(this.assetType, this.assetName,
-				"No key provided for duty 0");
+				"No name provided for duty 0");
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -527,7 +528,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
+		this.recordReturn(dutyOne, dutyOne.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
+		this.recordReturn(dutyTwo, dutyTwo.getDutyName(),
+				WrongDutyKeyType.WRONG_DUTY_KEY_TYPE.name());
 		this.recordReturn(dutyTwo, dutyTwo.getKey(),
 				WrongDutyKeyType.WRONG_DUTY_KEY_TYPE);
 		this.issues.addIssue(this.assetType, this.assetName, "Duty key "
@@ -557,6 +561,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Construct the administrators
@@ -577,9 +583,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect bound index", 0, rawAdminMetaData
 				.getAdministratorIndex().getIndexOfAdministratorWithinScope());
 		assertEquals("Incorrect first duty key", DutyKey.ONE, rawAdminMetaData
-				.getDutyKeys()[DutyKey.ONE.ordinal()]);
-		assertEquals("Incorrect second duty key", DutyKey.TWO, rawAdminMetaData
-				.getDutyKeys()[DutyKey.TWO.ordinal()]);
+				.getDutyKey(DutyKey.ONE.name()).getKey());
+		assertNull("Should only have one duty", rawAdminMetaData
+				.getDutyKey(DutyKey.TWO));
 
 		// Verify administrator meta-data
 		assertNotNull("Must have admin source", adminMetaData
@@ -601,10 +607,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Duty} key is provided by the
+	 * Ensure issue if no {@link Duty} name is provided by the
 	 * {@link DutyConfiguration}.
 	 */
-	public void testNoConfiguredDutyKey() {
+	public void testNoConfiguredDutyName() {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
@@ -616,6 +622,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record linking tasks
@@ -623,8 +631,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getDutyConfiguration(),
 				new DutyConfiguration[] { this.dutyOneConfiguration });
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
-				.getDutyKey(), null);
-		this.record_issue("Duty key not provided by duty configuration");
+				.getDutyName(), null);
+		this.record_issue("Duty name not provided by duty configuration");
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
@@ -633,9 +641,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Duty} key configured is of the wrong type.
+	 * Ensure issue if {@link Duty} name does not correspond to a {@link Duty}.
 	 */
-	public void testIncorrectDutyKeyType() {
+	public void testIncorrectDutyName() {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
@@ -647,6 +655,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record linking tasks
@@ -654,9 +664,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getDutyConfiguration(),
 				new DutyConfiguration[] { this.dutyOneConfiguration });
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
-				.getDutyKey(), WrongDutyKeyType.WRONG_DUTY_KEY_TYPE);
-		this.record_issue("Duty key " + WrongDutyKeyType.WRONG_DUTY_KEY_TYPE
-				+ " is not of correct type (" + DutyKey.class.getName() + ")");
+				.getDutyName(), WrongDutyKeyType.WRONG_DUTY_KEY_TYPE.name());
+		this.record_issue("No duty by name "
+				+ WrongDutyKeyType.WRONG_DUTY_KEY_TYPE);
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
@@ -686,6 +696,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record linking tasks
@@ -693,7 +705,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getDutyConfiguration(),
 				new DutyConfiguration[] { this.dutyOneConfiguration });
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
-				.getDutyKey(), DutyKey.ONE);
+				.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
 				.getLinkedProcessConfiguration(), null);
 		this.record_issue("Task references not provided for duty "
@@ -708,6 +720,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link DutyConfiguration} for a {@link Duty}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testNoDutyConfiguration() {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
@@ -720,12 +733,49 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record linking tasks
 		this.recordReturn(this.configuration, this.configuration
 				.getDutyConfiguration(), new DutyConfiguration[0]);
-		this.record_issue("No configuration provided for duty " + DutyKey.ONE);
+		this.record_issue("Must provide configuration for duty [index="
+				+ DutyKey.ONE.ordinal() + ", key=" + DutyKey.ONE.name() + "]");
+
+		// Construct the administrator and link tasks
+		this.replayMockObjects();
+		RawBoundAdministratorMetaData metaData = this
+				.constructRawAdministrator(1, this.configuration)[0];
+		metaData.getDutyKey(DutyKey.ONE); // flags linked to a task
+		metaData.linkTasks(this.taskMetaDataLocator, this.assetManagerFactory,
+				this.issues);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Test only required {@link DutyConfiguration} for a {@link Duty} if linked
+	 * to a {@link Task}.
+	 */
+	public void testNotRequireDutyConfiguration() {
+
+		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		// Record construction of bound administrator meta-data
+		this.record_init();
+		this.record_team();
+		this.record_managedObject();
+		this.recordReturn(this.metaData, this.metaData
+				.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
+		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
+
+		// Record not linked to tasks
+		this.recordReturn(this.configuration, this.configuration
+				.getDutyConfiguration(), new DutyConfiguration[0]);
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
@@ -752,6 +802,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyMetaData });
+		this.recordReturn(dutyMetaData, dutyMetaData.getDutyName(), DutyKey.ONE
+				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record linking tasks
@@ -759,7 +811,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getDutyConfiguration(),
 				new DutyConfiguration[] { this.dutyOneConfiguration });
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
-				.getDutyKey(), DutyKey.ONE);
+				.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
 				.getLinkedProcessConfiguration(),
 				new TaskNodeReference[] { taskReference });
@@ -782,7 +834,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testLinkFlowsToDuty() {
 
-		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
+		final AdministratorDutyMetaData<?, ?> dutyOneMetaData = this
+				.createMock(AdministratorDutyMetaData.class);
+		final AdministratorDutyMetaData<?, ?> dutyTwoMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
 
 		final TaskNodeReference taskReference = this
@@ -796,20 +850,28 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObject();
 		this.recordReturn(this.metaData, this.metaData
 				.getAdministratorDutyMetaData(),
-				new AdministratorDutyMetaData[] { dutyMetaData });
-		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
+				new AdministratorDutyMetaData[] { dutyOneMetaData,
+						dutyTwoMetaData });
+		this.recordReturn(dutyOneMetaData, dutyOneMetaData.getDutyName(),
+				DutyKey.ONE.name());
+		this.recordReturn(dutyOneMetaData, dutyOneMetaData.getKey(),
+				DutyKey.ONE);
+		this.recordReturn(dutyTwoMetaData, dutyTwoMetaData.getDutyName(),
+				DutyKey.TWO.name());
+		this.recordReturn(dutyTwoMetaData, dutyTwoMetaData.getKey(),
+				DutyKey.TWO);
 
 		// Record linking tasks
 		this.recordReturn(this.configuration, this.configuration
 				.getDutyConfiguration(), new DutyConfiguration[] {
 				this.dutyOneConfiguration, this.dutyTwoConfiguration });
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
-				.getDutyKey(), DutyKey.ONE);
+				.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration
 				.getLinkedProcessConfiguration(),
 				new TaskNodeReference[] { taskReference });
 		this.recordReturn(this.dutyTwoConfiguration, this.dutyTwoConfiguration
-				.getDutyKey(), DutyKey.TWO);
+				.getDutyName(), DutyKey.TWO.name());
 		this.recordReturn(this.dutyTwoConfiguration, this.dutyTwoConfiguration
 				.getLinkedProcessConfiguration(), new TaskNodeReference[0]);
 		this.recordReturn(taskReference, taskReference.getWorkName(), "WORK");
@@ -830,10 +892,11 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the duties
-		DutyMetaData dutyOne = adminMetaData.getDutyMetaData(DutyKey.ONE);
+		DutyMetaData dutyOne = adminMetaData
+				.getDutyMetaData(new DutyKeyImpl<DutyKey>(DutyKey.ONE));
 		assertNotNull("Must have first duty", dutyOne);
 		assertNotNull("Must have second duty", adminMetaData
-				.getDutyMetaData(DutyKey.TWO));
+				.getDutyMetaData(new DutyKeyImpl<DutyKey>(DutyKey.TWO)));
 
 		// Verify the flow
 		FlowMetaData<?> flow = dutyOne.getFlow(0);

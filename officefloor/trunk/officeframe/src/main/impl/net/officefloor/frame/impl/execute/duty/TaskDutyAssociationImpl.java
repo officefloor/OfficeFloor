@@ -20,6 +20,7 @@ import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
 
 /**
  * Implementation of {@link TaskDutyAssociation}.
@@ -35,9 +36,10 @@ public class TaskDutyAssociationImpl<A extends Enum<A>> implements
 	private final AdministratorIndex adminIndex;
 
 	/**
-	 * Key identifying the {@link Duty} of the {@link Administrator}.
+	 * {@link DutyKey} identifying the {@link Duty} of the {@link Administrator}
+	 * .
 	 */
-	private final A dutyKey;
+	private final DutyKey<A> dutyKey;
 
 	/**
 	 * Initiate.
@@ -46,9 +48,11 @@ public class TaskDutyAssociationImpl<A extends Enum<A>> implements
 	 *            {@link AdministratorIndex} identifying the
 	 *            {@link Administrator}.
 	 * @param dutyKey
-	 *            Key identifying the {@link Duty} of the {@link Administrator}.
+	 *            {@link DutyKey} identifying the {@link Duty} of the
+	 *            {@link Administrator}.
 	 */
-	public TaskDutyAssociationImpl(AdministratorIndex adminIndex, A dutyKey) {
+	public TaskDutyAssociationImpl(AdministratorIndex adminIndex,
+			DutyKey<A> dutyKey) {
 		this.adminIndex = adminIndex;
 		this.dutyKey = dutyKey;
 	}
@@ -63,7 +67,7 @@ public class TaskDutyAssociationImpl<A extends Enum<A>> implements
 	}
 
 	@Override
-	public A getDutyKey() {
+	public DutyKey<A> getDutyKey() {
 		return this.dutyKey;
 	}
 

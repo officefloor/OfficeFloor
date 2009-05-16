@@ -22,7 +22,6 @@ import java.util.Properties;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DutyBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -105,17 +104,8 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 	}
 
 	@Override
-	public <F extends Enum<F>> DutyBuilder<F> addDuty(A dutyKey,
-			Class<F> flowListingEnum) {
-		DutyBuilderImpl<A, F> dutyBuilder = new DutyBuilderImpl<A, F>(dutyKey);
-		this.duties.add(dutyBuilder);
-		return dutyBuilder;
-	}
-
-	@Override
-	public DutyBuilder<Indexed> addDuty(A dutyKey) {
-		DutyBuilderImpl<A, Indexed> dutyBuilder = new DutyBuilderImpl<A, Indexed>(
-				dutyKey);
+	public DutyBuilder addDuty(String dutyName) {
+		DutyBuilderImpl<A> dutyBuilder = new DutyBuilderImpl<A>(dutyName);
 		this.duties.add(dutyBuilder);
 		return dutyBuilder;
 	}

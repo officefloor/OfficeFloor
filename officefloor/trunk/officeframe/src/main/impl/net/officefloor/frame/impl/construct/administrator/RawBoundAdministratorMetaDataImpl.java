@@ -16,22 +16,23 @@
  */
 package net.officefloor.frame.impl.construct.administrator;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
 import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
+import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
@@ -55,6 +56,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -105,19 +107,25 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	private final RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects;
 
 	/**
-	 * Class specifying the {@link Duty} keys.
-	 */
-	private final Class<A> dutyKeyClass;
-
-	/**
-	 * {@link Duty} keys.
-	 */
-	private final A[] dutyKeys;
-
-	/**
 	 * {@link AdministratorMetaData}.
 	 */
 	private final AdministratorMetaDataImpl<I, A> adminMetaData;
+
+	/**
+	 * Map of {@link DutyKey} instances by name.
+	 */
+	private final Map<String, DutyKey<A>> dutyKeysByName;
+
+	/**
+	 * Map of {@link DutyKey} instances by key.
+	 */
+	private final Map<A, DutyKey<A>> dutyKeysByKey;
+
+	/**
+	 * {@link DutyKey} instances of the {@link Duty} instances linked to a
+	 * {@link Task}.
+	 */
+	private final Set<DutyKey<A>> linkedDutyKeys = new HashSet<DutyKey<A>>();
 
 	/**
 	 * Initiate.
@@ -130,10 +138,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 *            {@link AdministratorSourceConfiguration}.
 	 * @param administeredRawBoundManagedObjects
 	 *            Administered {@link RawBoundManagedObjectMetaData}.
-	 * @param dutyKeyClass
-	 *            Class specifying the {@link Duty} keys.
-	 * @param dutyKeys
-	 *            Keys to the {@link Duty} instances.
+	 * @param dutyKeysByName
+	 *            Map of {@link DutyKey} instances by name.
+	 * @param dutyKeysByKey
+	 *            Map of {@link DutyKey} instances by key.
 	 * @param adminMetaData
 	 *            {@link AdministratorMetaData}.
 	 */
@@ -142,14 +150,15 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			AdministratorIndex administratorIndex,
 			AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration,
 			RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects,
-			Class<A> dutyKeyClass, A[] dutyKeys,
+			Map<String, DutyKey<A>> dutyKeysByName,
+			Map<A, DutyKey<A>> dutyKeysByKey,
 			AdministratorMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
 		this.administratorIndex = administratorIndex;
 		this.administratorSourceConfiguration = administratorSourceConfiguration;
 		this.administeredRawBoundManagedObjects = administeredRawBoundManagedObjects;
-		this.dutyKeyClass = dutyKeyClass;
-		this.dutyKeys = dutyKeys;
+		this.dutyKeysByName = dutyKeysByName;
+		this.dutyKeysByKey = dutyKeysByKey;
 		this.adminMetaData = adminMetaData;
 	}
 
@@ -383,47 +392,83 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		// Ensure all duty keys are of the correct type (report on all duties)
 		boolean isDutyKeyIssue = false;
 		Class<a> dutyKeyClass = null;
+		Map<String, DutyKey<a>> dutyKeysByName = new HashMap<String, DutyKey<a>>();
+		Map<a, DutyKey<a>> dutyKeysByKey = new HashMap<a, DutyKey<a>>();
 		for (int i = 0; i < dutyMetaDatas.length; i++) {
 			AdministratorDutyMetaData<a, ?> dutyMetaData = dutyMetaDatas[i];
 
-			// Ensure have the duty key
-			a dutyKey = dutyMetaData.getKey();
-			if (dutyKey == null) {
+			// Ensure have the duty name
+			String dutyName = dutyMetaData.getDutyName();
+			if (ConstructUtil.isBlank(dutyName)) {
 				issues.addIssue(assetType, assetName,
-						"No key provided for duty " + i);
+						"No name provided for duty " + i);
 				isDutyKeyIssue = true;
 				continue; // can not process this duty
 			}
+			if (dutyKeysByName.containsKey(dutyName)) {
+				issues.addIssue(assetType, assetName, "Duplicate duty by name "
+						+ dutyName);
+				isDutyKeyIssue = true;
+				continue; // can not process duplicate duty
+			}
 
-			// Determine if first duty key which sets the type of duty keys
-			if (dutyKeyClass == null) {
-				// First duty key
-				dutyKeyClass = dutyKey.getDeclaringClass();
+			// Obtain the duty key
+			a dutyKey = dutyMetaData.getKey();
+			if ((dutyKey != null) && (dutyKeysByKey.containsKey(dutyKey))) {
+				issues.addIssue(assetType, assetName, "Duplicate duty by key "
+						+ dutyKey);
+				isDutyKeyIssue = true;
+				continue; // can not process duplicate duty
+			}
 
+			// Determine if should have duty key
+			if (i == 0) {
+				// First duty, so provide duty key class (if available)
+				dutyKeyClass = (dutyKey == null ? null : dutyKey
+						.getDeclaringClass());
 			} else {
-				// Ensure subsequent duty keys of correct type
-				if (!dutyKeyClass.isInstance(dutyKey)) {
-					issues.addIssue(assetType, assetName, "Duty key " + dutyKey
-							+ " is of incorrect type [type="
-							+ dutyKey.getClass().getName() + ", required type="
-							+ dutyKeyClass.getName() + "]");
-					isDutyKeyIssue = true;
+				// Ensure consistency of further duties in having key
+				if (dutyKeyClass == null) {
+					if (dutyKey != null) {
+						issues
+								.addIssue(assetType, assetName,
+										"Duty meta-data provides only keys for some duties");
+						return null; // can not load duties
+					}
+				} else {
+					if (dutyKey == null) {
+						issues
+								.addIssue(assetType, assetName,
+										"Duty meta-data provides only keys for some duties");
+						return null; // can not load duties
+					}
+
+					// Ensure of duty key correct type
+					if (!dutyKeyClass.isInstance(dutyKey)) {
+						issues.addIssue(assetType, assetName, "Duty key "
+								+ dutyKey + " is of incorrect type [type="
+								+ dutyKey.getDeclaringClass().getName()
+								+ ", required type=" + dutyKeyClass.getName()
+								+ "]");
+						isDutyKeyIssue = true;
+						continue; // must be correct duty key type
+					}
 				}
+			}
+
+			// Create the duty key
+			DutyKey<a> key = (dutyKey == null ? new DutyKeyImpl<a>(i)
+					: new DutyKeyImpl<a>(dutyKey));
+
+			// Register the duty
+			dutyKeysByName.put(dutyName, key);
+			if (dutyKey != null) {
+				dutyKeysByKey.put(dutyKey, key);
 			}
 		}
 		if (isDutyKeyIssue) {
 			return null; // should not be issue in obtaining duty keys
 		}
-
-		// Obtain the duty keys ensuring in ordinal order
-		a[] dutyKeys = (dutyKeyClass == null ? null : dutyKeyClass
-				.getEnumConstants());
-		Arrays.sort(dutyKeys, new Comparator<a>() {
-			@Override
-			public int compare(a objA, a objB) {
-				return objA.ordinal() - objB.ordinal();
-			}
-		});
 
 		// TODO allow configuration of escalation procedure for administrator
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
@@ -439,7 +484,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				adminName, administratorIndex, configuration,
 				administeredManagedObjects
 						.toArray(new RawBoundManagedObjectMetaData[0]),
-				dutyKeyClass, dutyKeys, adminMetaData);
+				dutyKeysByName, dutyKeysByKey, adminMetaData);
 
 		// Return the raw bound administrator meta-data
 		return rawBoundAdminMetaData;
@@ -453,56 +498,44 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	public void linkTasks(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
-		// Obtain the duty configurations by duty keys
-		Map<A, TaskNodeReference[]> dutyToTaskReferences = new HashMap<A, TaskNodeReference[]>();
+		// Create the set of required duties to ensure they are configured
+		Set<DutyKey<A>> requiredDuties = new HashSet<DutyKey<A>>(
+				this.linkedDutyKeys);
+
+		// Obtain the duty meta-data by its duty key index
+		Map<Integer, DutyMetaData> dutyMetaData = new HashMap<Integer, DutyMetaData>();
 		for (DutyConfiguration<A> dutyConfiguration : this.administratorSourceConfiguration
 				.getDutyConfiguration()) {
 
+			// Obtain the duty name
+			String dutyName = dutyConfiguration.getDutyName();
+			if (ConstructUtil.isBlank(dutyName)) {
+				issues.addIssue(AssetType.ADMINISTRATOR,
+						this.boundAdministratorName,
+						"Duty name not provided by duty configuration");
+				return; // must have duty name
+			}
+
 			// Obtain the duty key
-			A dutyKey = dutyConfiguration.getDutyKey();
+			DutyKey<?> dutyKey = this.dutyKeysByName.get(dutyName);
 			if (dutyKey == null) {
 				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName,
-						"Duty key not provided by duty configuration");
-				return; // must have duty key
+						this.boundAdministratorName, "No duty by name "
+								+ dutyName);
+				return; // must have duty
 			}
 
-			// Ensure of duty key correct type
-			if (!this.dutyKeyClass.isInstance(dutyKey)) {
-				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName, "Duty key " + dutyKey
-								+ " is not of correct type ("
-								+ this.dutyKeyClass.getName() + ")");
-				return; // must be correct duty key type
-			}
+			// Remove the required duty as have configuration for it
+			requiredDuties.remove(dutyKey);
 
 			// Obtain the task node references
-			TaskNodeReference[] taskNodeReferences = dutyConfiguration
+			TaskNodeReference[] dutyTaskReferences = dutyConfiguration
 					.getLinkedProcessConfiguration();
-			if (taskNodeReferences == null) {
-				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName,
-						"Task references not provided for duty " + dutyKey);
-				return; // must have task references for duty
-			}
-
-			// Register the duty task references
-			dutyToTaskReferences.put(dutyKey, taskNodeReferences);
-		}
-
-		// Create the map for the duties
-		Map<A, DutyMetaData> dutyMetaData = new EnumMap<A, DutyMetaData>(
-				this.dutyKeyClass);
-		for (A dutyKey : this.dutyKeys) {
-
-			// Obtain the task references for the duty
-			TaskNodeReference[] dutyTaskReferences = dutyToTaskReferences
-					.get(dutyKey);
 			if (dutyTaskReferences == null) {
 				issues.addIssue(AssetType.ADMINISTRATOR,
 						this.boundAdministratorName,
-						"No configuration provided for duty " + dutyKey);
-				return; // no configured task references for duty
+						"Task references not provided for duty " + dutyName);
+				return; // must have task references for duty
 			}
 
 			// Obtain the flows for the duty
@@ -514,7 +547,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil
 						.getTaskMetaData(taskReference, taskLocator, issues,
 								AssetType.ADMINISTRATOR,
-								this.boundAdministratorName, "Duty " + dutyKey
+								this.boundAdministratorName, "Duty " + dutyName
 										+ " Flow " + i, true);
 				if (taskMetaData == null) {
 					return; // no task
@@ -530,11 +563,26 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			}
 
 			// Create and register the duty meta-data
-			dutyMetaData.put(dutyKey, new DutyMetaDataImpl(dutyFlows));
+			dutyMetaData.put(new Integer(dutyKey.getIndex()),
+					new DutyMetaDataImpl(dutyFlows));
 		}
 
+		// Must have configuration for each required duty
+		for (DutyKey<A> requiredDuty : requiredDuties) {
+			issues.addIssue(AssetType.ADMINISTRATOR,
+					this.boundAdministratorName,
+					"Must provide configuration for duty [index="
+							+ requiredDuty.getIndex() + ", key="
+							+ requiredDuty.getKey() + "]");
+			return; // must have configuration for each duty
+		}
+
+		// Obtain the listing of duty meta-data
+		DutyMetaData[] metaData = ConstructUtil.toArray(dutyMetaData,
+				new DutyMetaData[0]);
+
 		// Load the duties to the administrator meta-data
-		this.adminMetaData.loadRemainingState(dutyMetaData);
+		this.adminMetaData.loadRemainingState(metaData);
 	}
 
 	@Override
@@ -553,13 +601,26 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	}
 
 	@Override
-	public A[] getDutyKeys() {
-		return this.dutyKeys;
+	public AdministratorMetaData<I, A> getAdministratorMetaData() {
+		return this.adminMetaData;
 	}
 
 	@Override
-	public AdministratorMetaData<I, A> getAdministratorMetaData() {
-		return this.adminMetaData;
+	public DutyKey<A> getDutyKey(Enum<?> key) {
+		DutyKey<A> dutyKey = this.dutyKeysByKey.get(key);
+		if (dutyKey != null) {
+			this.linkedDutyKeys.add(dutyKey);
+		}
+		return dutyKey;
+	}
+
+	@Override
+	public DutyKey<A> getDutyKey(String dutyName) {
+		DutyKey<A> dutyKey = this.dutyKeysByName.get(dutyName);
+		if (dutyKey != null) {
+			this.linkedDutyKeys.add(dutyKey);
+		}
+		return dutyKey;
 	}
 
 }

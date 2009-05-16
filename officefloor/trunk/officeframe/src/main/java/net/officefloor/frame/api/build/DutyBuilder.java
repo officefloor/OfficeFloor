@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.administration.Duty;
  * 
  * @author Daniel
  */
-public interface DutyBuilder<F extends Enum<F>> {
+public interface DutyBuilder {
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -46,7 +46,8 @@ public interface DutyBuilder<F extends Enum<F>> {
 	 *            Type of argument passed to the instigated {@link Flow}. May be
 	 *            <code>null</code> to indicate no argument.
 	 */
-	void linkFlow(F key, String workName, String taskName, Class<?> argumentType);
+	<F extends Enum<F>> void linkFlow(F key, String workName, String taskName,
+			Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the

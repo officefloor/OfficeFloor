@@ -35,9 +35,30 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	private final String scopeAdministratorName;
 
 	/**
+	 * Name identifying the {@link Duty} of the {@link Administrator}.
+	 */
+	private final String dutyName;
+
+	/**
 	 * Key identifying the {@link Duty} of the {@link Administrator}.
 	 */
 	private final A dutyKey;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
+	 * @param dutyKey
+	 *            Name identifying {@link Duty} of the {@link Administrator}.
+	 */
+	public TaskDutyConfigurationImpl(String scopeAdministratorName,
+			String dutyName) {
+		this.scopeAdministratorName = scopeAdministratorName;
+		this.dutyName = dutyName;
+		this.dutyKey = null;
+	}
 
 	/**
 	 * Initiate.
@@ -50,6 +71,7 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	 */
 	public TaskDutyConfigurationImpl(String scopeAdministratorName, A dutyKey) {
 		this.scopeAdministratorName = scopeAdministratorName;
+		this.dutyName = null;
 		this.dutyKey = dutyKey;
 	}
 
@@ -63,7 +85,12 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	}
 
 	@Override
-	public A getDuty() {
+	public String getDutyName() {
+		return this.dutyName;
+	}
+
+	@Override
+	public A getDutyKey() {
 		return this.dutyKey;
 	}
 

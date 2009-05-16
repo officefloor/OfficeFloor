@@ -58,6 +58,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -383,12 +384,36 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			AdministratorIndex adminIndex = scopeAdmin.getAdministratorIndex();
 
 			// Obtain the duty key
-			Enum<?> dutyKey = duty.getDuty();
-			if (dutyKey == null) {
-				issues.addIssue(AssetType.TASK, taskName, "No duty key for "
-						+ (isPreNotPost ? "pre" : "post") + "-task at index "
-						+ taskDuties.size());
-				continue; // no duty
+			DutyKey<?> dutyKey;
+			Enum<?> key = duty.getDutyKey();
+			if (key != null) {
+				dutyKey = scopeAdmin.getDutyKey(key);
+				if (dutyKey == null) {
+					// Must have duty key
+					issues.addIssue(AssetType.TASK, taskName, "No duty for "
+							+ (isPreNotPost ? "pre" : "post")
+							+ "-task at index " + taskDuties.size()
+							+ " (duty key=" + key + ")");
+					continue; // no duty
+				}
+			} else {
+				// Ensure have duty name
+				String dutyName = duty.getDutyName();
+				if (ConstructUtil.isBlank(dutyName)) {
+					issues.addIssue(AssetType.TASK, taskName,
+							"No duty name/key for pre-task at index "
+									+ taskDuties.size());
+					continue; // must have means to identify duty
+				}
+				dutyKey = scopeAdmin.getDutyKey(dutyName);
+				if (dutyKey == null) {
+					// Must have duty key
+					issues.addIssue(AssetType.TASK, taskName, "No duty for "
+							+ (isPreNotPost ? "pre" : "post")
+							+ "-task at index " + taskDuties.size()
+							+ " (duty name=" + dutyName + ")");
+					continue; // no duty
+				}
 			}
 
 			// Load the required managed object indexes for the administrator

@@ -26,6 +26,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
@@ -639,9 +640,9 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Duty} key.
+	 * Ensure issue if no {@link Duty} name.
 	 */
-	public void testNoDutyKey() {
+	public void testNoDutyName() {
 
 		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
@@ -662,8 +663,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
-		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(), null);
-		this.record_taskIssue("No duty key for pre-task at index 0");
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
+				null);
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyName(),
+				null);
+		this.record_taskIssue("No duty name/key for pre-task at index 0");
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
@@ -693,6 +697,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final ManagedObjectIndex moIndex = this
 				.createMock(ManagedObjectIndex.class);
+		final DutyKeyImpl<DutyKey> dutyKey = new DutyKeyImpl<DutyKey>(
+				DutyKey.KEY);
 
 		// Record construct task duty association
 		this.record_taskNameFactoryTeam();
@@ -706,8 +712,9 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
-		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(),
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
 				DutyKey.KEY);
+		this.recordReturn(rawAdmin, rawAdmin.getDutyKey(DutyKey.KEY), dutyKey);
 		this.recordReturn(rawAdmin, rawAdmin
 				.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
@@ -731,7 +738,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getPreAdministrationMetaData()[0];
 		assertEquals("Incorrect administrator index", adminIndex, taskDuty
 				.getAdministratorIndex());
-		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey());
+		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey()
+				.getKey());
 
 		// Ensure have administered managed object included in required
 		assertEquals("Administered managed objects should be required", 1,
@@ -760,6 +768,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final ManagedObjectIndex dependencyIndex = new ManagedObjectIndexImpl(
 				ManagedObjectScope.PROCESS, 0);
+		final DutyKeyImpl<DutyKey> dutyKey = new DutyKeyImpl<DutyKey>(
+				DutyKey.KEY);
 
 		// Record construct task duty association
 		this.record_taskNameFactoryTeam();
@@ -776,8 +786,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
 				adminIndex);
-		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(),
-				DutyKey.KEY);
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(),
+				null);
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyName(),
+				DutyKey.KEY.name());
+		this.recordReturn(rawAdmin, rawAdmin.getDutyKey(DutyKey.KEY.name()),
+				dutyKey);
 		this.recordReturn(rawAdmin, rawAdmin
 				.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
@@ -802,7 +816,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.getPostAdministrationMetaData()[0];
 		assertEquals("Incorrect administrator index", adminIndex, taskDuty
 				.getAdministratorIndex());
-		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey());
+		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey()
+				.getKey());
 
 		// Ensure have administered managed object and dependency in required
 		assertEquals("Administered managed objects should be required", 2,

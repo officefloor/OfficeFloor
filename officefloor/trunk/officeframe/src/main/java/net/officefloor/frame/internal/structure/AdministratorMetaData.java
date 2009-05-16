@@ -18,6 +18,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -55,12 +56,13 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData();
 
 	/**
-	 * Obtains the {@link DutyMetaData} for the input key.
+	 * Obtains the {@link DutyMetaData} for the input {@link DutyKey}.
 	 * 
-	 * @param key
-	 *            Key specifying the {@link Duty}.
-	 * @return {@link DutyMetaData} for the specified {@link Duty}.
+	 * @param dutyKey
+	 *            {@link DutyKey} specifying the {@link Duty}.
+	 * @return {@link DutyMetaData} for {@link Duty} identified by the
+	 *         {@link DutyKey}.
 	 */
-	DutyMetaData getDutyMetaData(A key);
+	DutyMetaData getDutyMetaData(DutyKey<A> dutyKey);
 
 }

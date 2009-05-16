@@ -14,34 +14,47 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.spi.administration.source;
 
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Configuration for a {@link Duty}.
+ * Describes a {@link Flow} required by a {@link Duty} of the
+ * {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface DutyConfiguration<A extends Enum<A>> {
+public interface AdministratorDutyFlowMetaData<F extends Enum<F>> {
 
 	/**
-	 * Obtains name identifying the {@link Duty} of the {@link Administrator}.
+	 * Obtains the {@link Enum} key identifying this {@link Flow}. If
+	 * <code>null</code> then {@link Flow} will be referenced by this instance's
+	 * index in the array returned from {@link AdministratorDutyMetaData}.
 	 * 
-	 * @return Name identifying the {@link Duty} on the {@link Administrator}.
+	 * @return {@link Enum} key identifying the {@link Flow} or
+	 *         <code>null</code> indicating identified by an index.
 	 */
-	String getDutyName();
+	F getKey();
 
 	/**
-	 * Obtains the configuration for the {@link Flow} instances invoked by the
-	 * {@link Duty}.
+	 * <p>
+	 * Obtains the {@link Class} of the argument that is passed to the
+	 * {@link Flow}.
+	 * <p>
+	 * This may be <code>null</code> to indicate no argument is passed.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
-	 *         the linked {@link Flow}.
+	 * @return Type of the argument that is passed to the {@link Flow}.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	Class<?> getArgumentType();
+
+	/**
+	 * Provides a descriptive name for this {@link Flow}. This is useful to
+	 * better describe the {@link Flow}.
+	 * 
+	 * @return Descriptive name for this {@link Flow}.
+	 */
+	String getLabel();
 
 }
