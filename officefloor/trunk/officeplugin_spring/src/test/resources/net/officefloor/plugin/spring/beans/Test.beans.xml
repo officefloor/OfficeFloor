@@ -8,4 +8,10 @@
 
     <bean id="dependency" class="net.officefloor.plugin.spring.beans.DependencyBean" />
 
+    <!-- Makes Office Floor dependencies available within Spring -->
+    <bean id="testFactory"
+        class="net.officefloor.plugin.spring.beanfactory.DependencyFactoryBean">
+        <property name="type" value="java.sql.Connection" />
+    </bean>
+
 </beans>

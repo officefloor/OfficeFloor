@@ -128,6 +128,7 @@ public class BeanManagedObjectSource
 		/*
 		 * =========== CoordinatingManagedObject =========================
 		 */
+		
 		@Override
 		public void loadObjects(ObjectRegistry<BeanDependency> registry)
 				throws Throwable {

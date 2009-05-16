@@ -16,24 +16,37 @@
  */
 package net.officefloor.plugin.spring.beanfactory;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 /**
  * {@link ManagedObjectSource} to obtain the {@link BeanFactory}.
  * 
  * @author Daniel
+ * 
+ * @see DependencyFactoryBean
  */
 public class BeanFactoryManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject {
+		AbstractManagedObjectSource<Indexed, None> {
 
 	/**
 	 * Path to the {@link BeanFactory} configuration.
@@ -62,7 +75,7 @@ public class BeanFactoryManagedObjectSource extends
 	/**
 	 * {@link BeanFactory}.
 	 */
-	private BeanFactory beanFactory;
+	private XmlBeanFactory beanFactory;
 
 	/*
 	 * ================= AbstractManagedObjectSource ======================
@@ -75,7 +88,7 @@ public class BeanFactoryManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
+	protected void loadMetaData(MetaDataContext<Indexed, None> context)
 			throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
@@ -88,22 +101,74 @@ public class BeanFactoryManagedObjectSource extends
 		this.beanFactory = getXmlBeanFactory(configurationPath, mosContext
 				.getClassLoader());
 
+		// Ensure 'Required' properties are configured.
+		// This is not totally necessary but putting in to ensure configured.
+		this.beanFactory
+				.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
+
 		// Indicate the object type
 		context.setObjectClass(BeanFactory.class);
+
+		// Load the dependencies
+		int dependencyIndex = 0;
+		ClassLoader classLoader = mosContext.getClassLoader();
+		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
+			BeanDefinition beanDefinition = this.beanFactory
+					.getBeanDefinition(beanName);
+
+			// Obtain the bean class
+			String beanClassName = beanDefinition.getBeanClassName();
+			Class<?> beanClass = classLoader.loadClass(beanClassName);
+
+			// Ignore non dependency factory beans
+			if (!(DependencyFactoryBean.class.isAssignableFrom(beanClass))) {
+				continue;
+			}
+
+			// Obtain required type for dependency
+			PropertyValue property = beanDefinition.getPropertyValues()
+					.getPropertyValue(
+							DependencyFactoryBean.TYPE_SPRING_PROPERTY);
+			if (property == null) {
+				throw new BeanInitializationException("Property '"
+						+ DependencyFactoryBean.TYPE_SPRING_PROPERTY
+						+ "' is required for bean '" + beanName + "'");
+			}
+			TypedStringValue requiredTypeName = (TypedStringValue) property
+					.getValue();
+			Class<?> requiredType = classLoader.loadClass(requiredTypeName
+					.getValue());
+
+			// Ensure the type is an interface
+			if (!requiredType.isInterface()) {
+				throw new Exception("Required type for "
+						+ DependencyFactoryBean.class.getSimpleName() + " "
+						+ beanName + " must be an interface (type="
+						+ requiredType.getName() + ")");
+			}
+
+			// Create the constructor for the type proxy
+			Constructor<?> proxyConstructor = Proxy.getProxyClass(classLoader,
+					requiredType).getConstructor(InvocationHandler.class);
+
+			// Add the dependency
+			context.addDependency(requiredType).setLabel(beanName);
+
+			// Provide the dependency index and proxy constructor to bean
+			MutablePropertyValues propertyValues = beanDefinition
+					.getPropertyValues();
+			propertyValues.addPropertyValue(
+					DependencyFactoryBean.DEPENDENCY_INDEX_SPRING_PROPERTY,
+					new Integer(dependencyIndex++));
+			propertyValues.addPropertyValue(
+					DependencyFactoryBean.PROXY_CONSTRUCTOR_SPRING_PROPERTY,
+					proxyConstructor);
+		}
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return this;
-	}
-
-	/*
-	 * ================= ManagedObject ===================================
-	 */
-
-	@Override
-	public Object getObject() throws Exception {
-		return this.beanFactory;
+		return new BeanFactoryManagedObject(this.beanFactory);
 	}
 
 }
