@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.change.Change;
 
@@ -30,6 +31,24 @@ import net.officefloor.model.change.Change;
  * @author Daniel
  */
 public interface OfficeChanges {
+
+	/**
+	 * Value for {@link AdministratorScope#PROCESS} on
+	 * {@link AdministratorModel} instances.
+	 */
+	String PROCESS_ADMINISTRATOR_SCOPE = AdministratorScope.PROCESS.name();
+
+	/**
+	 * Value for {@link AdministratorScope#THREAD} on {@link AdministratorModel}
+	 * instances.
+	 */
+	String THREAD_ADMINISTRATOR_SCOPE = AdministratorScope.THREAD.name();
+
+	/**
+	 * Value for {@link AdministratorScope#WORK} on {@link AdministratorModel}
+	 * instances.
+	 */
+	String WORK_ADMINISTRATOR_SCOPE = AdministratorScope.WORK.name();
 
 	/**
 	 * Adds an {@link OfficeSectionModel} to the {@link OfficeModel}.
@@ -144,12 +163,15 @@ public interface OfficeChanges {
 	 *            Class name of the {@link AdministratorSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param administratorScope
+	 *            {@link AdministratorScope} for the {@link AdministratorModel}.
 	 * @param administratorType
 	 *            {@link AdministratorType}.
 	 * @return {@link Change} to add the {@link AdministratorModel}.
 	 */
 	Change<AdministratorModel> addAdministrator(String administratorName,
 			String administratorSourceClassName, PropertyList properties,
+			AdministratorScope administratorScope,
 			AdministratorType<?, ?> administratorType);
 
 	/**

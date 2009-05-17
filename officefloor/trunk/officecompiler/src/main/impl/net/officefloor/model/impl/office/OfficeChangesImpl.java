@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
@@ -319,17 +320,32 @@ public class OfficeChangesImpl implements OfficeChanges {
 	@Override
 	public Change<AdministratorModel> addAdministrator(
 			String administratorName, String administratorSourceClassName,
-			PropertyList properties, AdministratorType<?, ?> administratorType) {
+			PropertyList properties, AdministratorScope administratorScope,
+			AdministratorType<?, ?> administratorType) {
 
 		// TODO test this method (addAdministrator)
 
-		// TODO pass in the administrator scope
-		String administratorScope = "THREAD";
+		// Obtain the administrator scope text
+		String administratorScopeText;
+		switch (administratorScope) {
+		case PROCESS:
+			administratorScopeText = PROCESS_ADMINISTRATOR_SCOPE;
+			break;
+		case THREAD:
+			administratorScopeText = THREAD_ADMINISTRATOR_SCOPE;
+			break;
+		case WORK:
+			administratorScopeText = WORK_ADMINISTRATOR_SCOPE;
+			break;
+		default:
+			throw new IllegalStateException("Unknown administrator scope "
+					+ administratorScope);
+		}
 
 		// Create the administrator
 		final AdministratorModel administrator = new AdministratorModel(
 				administratorName, administratorSourceClassName,
-				administratorScope);
+				administratorScopeText);
 		for (Property property : properties) {
 			administrator.addProperty(new PropertyModel(property.getName(),
 					property.getValue()));

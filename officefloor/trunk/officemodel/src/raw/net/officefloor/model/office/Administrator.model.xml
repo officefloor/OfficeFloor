@@ -6,4 +6,5 @@
     <field type="AdministratorToOfficeTeamModel" name="office team" />
     <list type="PropertyModel" name="property" plural="properties" />
     <list type="DutyModel" name="duty" plural="duties" />
+    <list type="ExternalManagedObjectToAdministratorModel" name="external managed object" />
 </model>

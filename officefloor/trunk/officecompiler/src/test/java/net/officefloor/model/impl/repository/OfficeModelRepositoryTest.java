@@ -27,6 +27,7 @@ import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -92,7 +93,13 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getObjectType", "getX", "getY" }, office
 				.getExternalManagedObjects(), new ExternalManagedObjectModel(
 				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName(), null,
-				10, 11));
+				null, 10, 11));
+		ExternalManagedObjectModel extMo = office.getExternalManagedObjects()
+				.get(0);
+		assertList(new String[] { "getAdministratorName", "getOrder" }, extMo
+				.getAdministrators(),
+				new ExternalManagedObjectToAdministratorModel("ADMINISTRATOR",
+						"1"));
 
 		// ----------------------------------------
 		// Validate the teams
@@ -116,7 +123,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getX", "getY" }, office.getOfficeAdministrators(),
 				new AdministratorModel("ADMINISTRATOR",
 						"net.example.ExampleAdministratorSource", "THREAD",
-						null, null, null, 40, 41));
+						null, null, null, null, 40, 41));
 		AdministratorModel admin = office.getOfficeAdministrators().get(0);
 		assertList(new String[] { "getName", "getValue" }, admin
 				.getProperties(), new PropertyModel("ADMIN_ONE", "VALUE_ONE"),

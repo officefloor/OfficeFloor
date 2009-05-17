@@ -7,6 +7,11 @@
         <value method="setObjectType" node="external-managed-object@object-type" />
         <value method="setX" node="external-managed-object@x" />
         <value method="setY" node="external-managed-object@y" />
+        <object method="addAdministrator" node="administer"
+            class="net.officefloor.model.office.ExternalManagedObjectToAdministratorModel">
+            <value method="setAdministratorName" node="administer@administrator" />
+            <value method="setOrder" node="administer@order" />
+        </object>
     </object>
     <!-- OFFICE TEAMS -->
     <object method="addOfficeTeam" node="team"

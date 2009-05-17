@@ -214,9 +214,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public String getAdministerableManagedObjectName() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DependentManagedObject.getDependentManagedObjectName");
+		return this.objectName;
 	}
 
 	/*

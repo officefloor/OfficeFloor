@@ -24,6 +24,7 @@ import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -146,6 +147,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"ADMINISTRATOR", "DUTY");
 		officeTask.addPostDuty(taskToPostDuty);
 
+		// external managed object -> administrator
+		ExternalManagedObjectToAdministratorModel extMoToAdmin = new ExternalManagedObjectToAdministratorModel(
+				"ADMINISTRATOR", "1");
+		extMo.addAdministrator(extMoToAdmin);
+
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
 				null, this.configurationItem), office, new AbstractMatcher() {
@@ -197,6 +203,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("task <- post duty", officeTask, taskToPostDuty
 				.getOfficeTask());
 		assertEquals("task -> post duty", duty, taskToPostDuty.getDuty());
+
+		// Ensure external managed object administration connected
+		assertEquals("external managed object <- administrator", extMo,
+				extMoToAdmin.getExternalManagedObject());
+		assertEquals("external managed object -> administrator", admin,
+				extMoToAdmin.getAdministrator());
 	}
 
 	/**
@@ -282,6 +294,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		taskToPostDuty.setDuty(duty);
 		taskToPostDuty.connect();
 
+		// external managed object -> administrator
+		ExternalManagedObjectToAdministratorModel extMoToAdmin = new ExternalManagedObjectToAdministratorModel();
+		extMoToAdmin.setExternalManagedObject(extMo);
+		extMoToAdmin.setAdministrator(admin);
+		extMoToAdmin.connect();
+
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -310,5 +328,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				taskToPostDuty.getAdministratorName());
 		assertEquals("task - post duty (duty name)", "DUTY", taskToPostDuty
 				.getDutyName());
+		assertEquals("external managed object - administrator",
+				"ADMINISTRATOR", extMoToAdmin.getAdministratorName());
 	}
 }

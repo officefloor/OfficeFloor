@@ -12,6 +12,18 @@
                 <attribute method="getX" attribute="x" />
                 <attribute method="getY" attribute="y" />
             </attributes>
+            <collection method="getAdministrators">
+                <item
+                    type="net.officefloor.model.office.ExternalManagedObjectToAdministratorModel"
+                    element="administer">
+                    <attributes>
+                        <attribute method="getAdministratorName"
+                            attribute="administrator" />
+                        <attribute method="getOrder"
+                            attribute="order" />
+                    </attributes>
+                </item>
+            </collection>
         </item>
     </collection>
     <!-- OFFICE TEAMS -->
