@@ -1,7 +1,9 @@
 <office>
     <external-managed-objects>
         <external-managed-object name="EXTERNAL_MANAGED_OBJECT"
-            object-type="java.sql.Connection" x="10" y="11" />
+            object-type="java.sql.Connection" x="10" y="11">
+            <administer administrator="ADMINISTRATOR" order="1" />
+        </external-managed-object>
     </external-managed-objects>
     <teams>
         <team name="TEAM" x="20" y="21" />

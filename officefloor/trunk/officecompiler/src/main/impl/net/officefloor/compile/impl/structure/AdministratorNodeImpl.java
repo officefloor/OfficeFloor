@@ -30,7 +30,9 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -216,6 +218,29 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		if (officeTeam != null) {
 			// Build the team responsible for the administrator
 			adminBuilder.setTeam(officeTeam.getOfficeTeamName());
+		}
+
+		// Administer the managed objects
+		for (AdministerableManagedObject administerableManagedObject : this.administeredManagedObjects) {
+
+			// Obtain as link object node
+			LinkObjectNode linkObject = (LinkObjectNode) administerableManagedObject;
+
+			// Obtain the managed object
+			ManagedObjectNode managedObject = LinkUtil.retrieveTarget(
+					linkObject, ManagedObjectNode.class, "Managed Object "
+							+ administerableManagedObject
+									.getAdministerableManagedObjectName(),
+					LocationType.OFFICE, this.officeLocation,
+					AssetType.ADMINISTRATOR, this.administratorName,
+					this.context.getCompilerIssues());
+			if (managedObject == null) {
+				continue; // must have managed object
+			}
+
+			// Build administration of the managed object
+			adminBuilder.administerManagedObject(managedObject
+					.getManagedObjectName());
 		}
 
 		// Build the duties (in deterministic order)

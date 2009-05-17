@@ -26,6 +26,7 @@ import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -168,18 +169,35 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
-		// Create the map of duties
+		// Create the map of administrators and duties
+		Map<String, AdministratorModel> administrators = new HashMap<String, AdministratorModel>();
 		DoubleKeyMap<String, String, DutyModel> duties = new DoubleKeyMap<String, String, DutyModel>();
 		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			String administratorName = admin.getAdministratorName();
+			administrators.put(administratorName, admin);
 			for (DutyModel duty : admin.getDuties()) {
-				duties.put(admin.getAdministratorName(), duty.getDutyName(),
-						duty);
+				duties.put(administratorName, duty.getDutyName(), duty);
 			}
 		}
 
 		// Connect tasks to duties
 		for (OfficeSectionModel section : office.getOfficeSections()) {
 			this.connectTasksToDuties(section.getOfficeSubSection(), duties);
+		}
+
+		// Connect the external managed objects to administrators
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			for (ExternalManagedObjectToAdministratorModel conn : extMo
+					.getAdministrators()) {
+				AdministratorModel admin = administrators.get(conn
+						.getAdministratorName());
+				if (admin != null) {
+					conn.setExternalManagedObject(extMo);
+					conn.setAdministrator(admin);
+					conn.connect();
+				}
+			}
 		}
 
 		// Return the office
@@ -295,6 +313,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					conn.setAdministratorName(admin.getAdministratorName());
 					conn.setDutyName(duty.getDutyName());
 				}
+			}
+		}
+
+		// Specify external managed objects to administrators
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			for (ExternalManagedObjectToAdministratorModel conn : admin
+					.getExternalManagedObjects()) {
+				conn.setAdministratorName(admin.getAdministratorName());
 			}
 		}
 

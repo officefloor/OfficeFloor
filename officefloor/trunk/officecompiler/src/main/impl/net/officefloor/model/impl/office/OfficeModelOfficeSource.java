@@ -18,6 +18,7 @@ package net.officefloor.model.impl.office;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Map;
 import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
@@ -43,11 +45,13 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
@@ -286,18 +290,20 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 		}
 
-		// Add the administrators (keeping registry of duties)
+		// Add the administrators (keeping registry of administrators, duties)
+		Map<String, OfficeAdministrator> administrators = new HashMap<String, OfficeAdministrator>();
 		Map<DutyModel, AdministratorModel> dutyAdmins = new HashMap<DutyModel, AdministratorModel>();
 		DoubleKeyMap<String, String, OfficeDuty> duties = new DoubleKeyMap<String, String, OfficeDuty>();
 		for (AdministratorModel adminModel : office.getOfficeAdministrators()) {
 
-			// Add the administrator
+			// Add the administrator and register it
 			String adminName = adminModel.getAdministratorName();
 			OfficeAdministrator admin = architect.addOfficeAdministrator(
 					adminName, adminModel.getAdministratorSourceClassName());
 			for (PropertyModel property : adminModel.getProperties()) {
 				admin.addProperty(property.getName(), property.getValue());
 			}
+			administrators.put(adminName, admin);
 
 			// Obtain the office team responsible for this administration
 			OfficeTeam officeTeam = null;
@@ -340,6 +346,58 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			this.linkTasksToDuties(null, subSection, subSectionModel,
 					sectionModel, dutyAdmins, duties, architect);
 		}
+
+		// Create the listing of objects to be administered
+		Map<String, List<AdministeredManagedObject>> administration = new HashMap<String, List<AdministeredManagedObject>>();
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+
+			// Obtain the office object
+			OfficeObject officeObject = officeObjects.get(extMo
+					.getExternalManagedObjectName());
+
+			// Add the object for administration
+			for (ExternalManagedObjectToAdministratorModel extMoToAdmin : extMo
+					.getAdministrators()) {
+				AdministratorModel adminModel = extMoToAdmin.getAdministrator();
+				if (adminModel != null) {
+					String administratorName = adminModel
+							.getAdministratorName();
+					List<AdministeredManagedObject> list = administration
+							.get(administratorName);
+					if (list == null) {
+						list = new LinkedList<AdministeredManagedObject>();
+						administration.put(administratorName, list);
+					}
+					list.add(new AdministeredManagedObject(extMoToAdmin
+							.getOrder(), officeObject));
+				}
+			}
+		}
+
+		// Administer the managed objects
+		for (AdministratorModel adminModel : office.getOfficeAdministrators()) {
+
+			// Obtain the administrator
+			String administratorName = adminModel.getAdministratorName();
+			OfficeAdministrator admin = administrators.get(administratorName);
+
+			// Obtain the objects to administer
+			List<AdministeredManagedObject> managedObjects = administration
+					.get(administratorName);
+			if (managedObjects == null) {
+				continue; // no managed objects to administer
+			}
+
+			// Order the managed objects
+			Collections.sort(managedObjects);
+
+			// Add managed objects for administration
+			for (AdministeredManagedObject managedObject : managedObjects) {
+				admin.administerManagedObject(managedObject.managedObject);
+			}
+		}
+
 	}
 
 	/**
@@ -590,6 +648,61 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		public boolean isResponsible(OfficeTask task) {
 			// TODO handle managed object matching for responsibility
 			return true; // TODO for now always responsible
+		}
+	}
+
+	/**
+	 * {@link ManagedObject} to be administered.
+	 */
+	private static class AdministeredManagedObject implements
+			Comparable<AdministeredManagedObject> {
+
+		/**
+		 * Position in the order that the objects are administered.
+		 */
+		public final String order;
+
+		/**
+		 * {@link AdministerableManagedObject}.
+		 */
+		public final AdministerableManagedObject managedObject;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param order
+		 *            Position in the order that the objects are administered.
+		 * @param managedObject
+		 *            {@link AdministerableManagedObject}.
+		 */
+		public AdministeredManagedObject(String order,
+				AdministerableManagedObject managedObject) {
+			this.order = order;
+			this.managedObject = managedObject;
+		}
+
+		/*
+		 * ================== Comparable ==========================
+		 */
+
+		@Override
+		public int compareTo(AdministeredManagedObject that) {
+			return this.getOrder(this.order) - this.getOrder(that.order);
+		}
+
+		/**
+		 * Obtains the order as an {@link Integer}.
+		 * 
+		 * @param order
+		 *            Text order value.
+		 * @return Numeric order value.
+		 */
+		private int getOrder(String order) {
+			try {
+				return Integer.parseInt(order);
+			} catch (NumberFormatException ex) {
+				return Integer.MAX_VALUE; // invalid number so make last
+			}
 		}
 	}
 
