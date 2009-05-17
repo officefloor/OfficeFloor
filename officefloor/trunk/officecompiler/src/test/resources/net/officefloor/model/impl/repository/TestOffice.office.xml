@@ -12,11 +12,13 @@
     </escalations>
     <administrators>
         <administrator name="ADMINISTRATOR"
-            source="net.example.ExampleAdministratorSource" x="40" y="41">
+            source="net.example.ExampleAdministratorSource" scope="THREAD"
+            x="40" y="41">
             <properties>
                 <property name="ADMIN_ONE" value="VALUE_ONE" />
                 <property name="ADMIN_TWO" value="VALUE_TWO" />
             </properties>
+            <team name="TEAM" />
             <duty name="DUTY_ONE" />
             <duty name="DUTY_TWO" />
         </administrator>
@@ -47,10 +49,16 @@
                 <section-managed-object name="SECTION_MANAGED_OBJECT">
                     <team name="MO_TEAM" />
                 </section-managed-object>
-                <task name="TASK" />
+                <task name="TASK">
+                    <pre-administer administrator="ADMINISTRATOR"
+                        duty="DUTY_ONE" />
+                </task>
                 <sub-section name="SUB_SECTION">
                     <section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
-                    <task name="SUB_SECTION_TASK" />
+                    <task name="SUB_SECTION_TASK">
+                        <post-administer administrator="ADMINISTRATOR"
+                            duty="DUTY_TWO" />
+                    </task>
                     <sub-section name="SUB_SUB_SECTION" />
                 </sub-section>
             </sub-section>

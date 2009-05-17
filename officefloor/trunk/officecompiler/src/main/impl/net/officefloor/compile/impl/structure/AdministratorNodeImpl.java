@@ -25,15 +25,24 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -123,7 +132,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		DutyNode duty = this.duties.get(dutyName);
 		if (duty == null) {
 			// Add the duty
-			duty = new DutyNodeImpl(dutyName);
+			duty = new DutyNodeImpl(dutyName, this);
 			this.duties.put(dutyName, duty);
 		}
 		return duty;
@@ -177,6 +186,80 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 		// Return administrator type
 		return this.administratorType;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void buildAdministrator(OfficeBuilder officeBuilder) {
+
+		// Obtain the administrator source class
+		Class<? extends AdministratorSource> administratorSourceClass = this.context
+				.getAdministratorSourceClass(this.administratorSourceClassName,
+						this.officeLocation, this.administratorName);
+		if (administratorSourceClass == null) {
+			return; // must obtain source class
+		}
+
+		// Build the administrator
+		AdministratorBuilder<?> adminBuilder = officeBuilder
+				.addThreadAdministrator(this.administratorName,
+						administratorSourceClass);
+		for (Property property : this.properties) {
+			adminBuilder.addProperty(property.getName(), property.getValue());
+		}
+
+		// Obtain the office team responsible for this administration
+		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this, OfficeTeam.class,
+				"Administrator " + this.administratorName, LocationType.OFFICE,
+				this.officeLocation, AssetType.ADMINISTRATOR,
+				this.administratorName, this.context.getCompilerIssues());
+		if (officeTeam != null) {
+			// Build the team responsible for the administrator
+			adminBuilder.setTeam(officeTeam.getOfficeTeamName());
+		}
+
+		// Build the duties (in deterministic order)
+		DutyNode[] duties = CompileUtil.toSortedArray(this.duties.values(),
+				new DutyNode[0], new StringExtractor<DutyNode>() {
+					@Override
+					public String toString(DutyNode object) {
+						return object.getOfficeDutyName();
+					}
+				});
+		for (DutyNode duty : duties) {
+			adminBuilder.addDuty(duty.getOfficeDutyName());
+		}
+	}
+
+	/*
+	 * ==================== LinkTeamNode ===================================
+	 */
+
+	/**
+	 * Linked {@link LinkTeamNode}.
+	 */
+	private LinkTeamNode linkedTeamNode = null;
+
+	@Override
+	public boolean linkTeamNode(LinkTeamNode node) {
+
+		// Ensure not already linked
+		if (this.linkedTeamNode != null) {
+			// Team already linked
+			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+					this.officeLocation, AssetType.ADMINISTRATOR,
+					this.administratorName, "Team already assigned");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedTeamNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkTeamNode getLinkedTeamNode() {
+		return this.linkedTeamNode;
 	}
 
 }

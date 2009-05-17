@@ -414,6 +414,31 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensures can link {@link OfficeAdministrator} to the {@link OfficeTeam}.
+	 */
+	public void testLinkOfficeAdministratorToOfficeTeam() {
+
+		// Record already being linked
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.ADMINISTRATOR, "ADMIN", "Team already assigned");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeAdministrator admin = this.addAdministrator(this.node, "ADMIN",
+				null);
+		OfficeTeam officeTeam = this.node.addOfficeTeam("OFFICE_TEAM");
+		this.node.link(admin, officeTeam);
+		assertTeamLink("administrator -> office team", admin, officeTeam);
+
+		// Ensure only can link once
+		this.node.link(admin, this.node.addOfficeTeam("ANOTHER"));
+		assertTeamLink("Can only link once", admin, officeTeam);
+
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can specify pre {@link OfficeDuty} for the {@link OfficeTask}.
 	 */
 	public void testLinkPreOfficeDutyForOfficeTask() {

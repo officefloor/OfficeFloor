@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -107,13 +108,13 @@ public class TaskNodeImpl implements TaskNode {
 	 * Listing of {@link OfficeDuty} instances to do before this
 	 * {@link OfficeTask}.
 	 */
-	private final List<OfficeDuty> preTaskDuties = new LinkedList<OfficeDuty>();
+	private final List<DutyNode> preTaskDuties = new LinkedList<DutyNode>();
 
 	/**
 	 * Listing of {@link OfficeDuty} instances to do after this
 	 * {@link OfficeDuty}.
 	 */
-	private final List<OfficeDuty> postTaskDuties = new LinkedList<OfficeDuty>();
+	private final List<DutyNode> postTaskDuties = new LinkedList<DutyNode>();
 
 	/**
 	 * Flag indicating if the context of the {@link Office} for this
@@ -211,7 +212,7 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Obtain the office team for the task
 		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this.teamResponsible,
-				OfficeTeam.class, "Team for task  " + this.taskName,
+				OfficeTeam.class, "Team for task " + this.taskName,
 				LocationType.SECTION, this.sectionLocation, AssetType.TASK,
 				this.taskName, this.context.getCompilerIssues());
 		if (officeTeam == null) {
@@ -413,6 +414,16 @@ public class TaskNodeImpl implements TaskNode {
 				}
 			}
 		}
+
+		// Build the pre task administration
+		for (DutyNode preDuty : this.preTaskDuties) {
+			preDuty.buildPreTaskAdministration(workBuilder, taskBuilder);
+		}
+
+		// Build the post task administration
+		for (DutyNode postDuty : this.postTaskDuties) {
+			postDuty.buildPostTaskAdministration(workBuilder, taskBuilder);
+		}
 	}
 
 	/*
@@ -527,12 +538,32 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public void addPreTaskDuty(OfficeDuty duty) {
-		this.preTaskDuties.add(duty);
+
+		// Ensure duty node
+		if (!(duty instanceof DutyNode)) {
+			this.addIssue("Invalid duty: " + duty + " ["
+					+ (duty == null ? null : duty.getClass().getName()) + "]");
+			return; // can not add duty
+		}
+		DutyNode dutyNode = (DutyNode) duty;
+
+		// Add the pre task duty
+		this.preTaskDuties.add(dutyNode);
 	}
 
 	@Override
 	public void addPostTaskDuty(OfficeDuty duty) {
-		this.postTaskDuties.add(duty);
+
+		// Ensure duty node
+		if (!(duty instanceof DutyNode)) {
+			this.addIssue("Invalid duty: " + duty + " ["
+					+ (duty == null ? null : duty.getClass().getName()) + "]");
+			return; // can not add duty
+		}
+		DutyNode dutyNode = (DutyNode) duty;
+
+		// Add the post task duty
+		this.postTaskDuties.add(dutyNode);
 	}
 
 }

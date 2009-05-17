@@ -20,6 +20,9 @@ import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
+import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -31,6 +34,10 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
@@ -81,6 +88,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
 				"RESPONSIBILITY");
 		section.addOfficeSectionResponsibility(responsibility);
+		AdministratorModel admin = new AdministratorModel("ADMINISTRATOR",
+				"net.example.ExampleAdministratorSource", "THREAD");
+		office.addOfficeAdministrator(admin);
+		DutyModel duty = new DutyModel("DUTY");
+		admin.addDuty(duty);
 
 		// responsibility -> team
 		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel(
@@ -109,6 +121,30 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionObjectToExternalManagedObjectModel objectToExtMo = new OfficeSectionObjectToExternalManagedObjectModel(
 				"EXTERNAL_MANAGED_OBJECT");
 		object.setExternalManagedObject(objectToExtMo);
+
+		// administrator -> team
+		AdministratorToOfficeTeamModel adminToTeam = new AdministratorToOfficeTeamModel(
+				"TEAM");
+		admin.setOfficeTeam(adminToTeam);
+
+		// office task -> duty (setup)
+		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
+		section.setOfficeSubSection(subSection);
+		OfficeSubSectionModel subSubSection = new OfficeSubSectionModel(
+				"SUB_SECTION");
+		subSection.addOfficeSubSection(subSubSection);
+		OfficeTaskModel officeTask = new OfficeTaskModel("TASK");
+		subSubSection.addOfficeTask(officeTask);
+
+		// office task -> pre duty
+		OfficeTaskToPreDutyModel taskToPreDuty = new OfficeTaskToPreDutyModel(
+				"ADMINISTRATOR", "DUTY");
+		officeTask.addPreDuty(taskToPreDuty);
+
+		// office task -> post duty
+		OfficeTaskToPostDutyModel taskToPostDuty = new OfficeTaskToPostDutyModel(
+				"ADMINISTRATOR", "DUTY");
+		officeTask.addPostDuty(taskToPostDuty);
 
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -146,6 +182,21 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeSectionObject());
 		assertEquals("object -> external managed object", extMo, objectToExtMo
 				.getExternalManagedObject());
+
+		// Ensure the administrator teams connected
+		assertEquals("administrator <- team", admin, adminToTeam
+				.getAdministrator());
+		assertEquals("administrator -> team", team, adminToTeam.getOfficeTeam());
+
+		// Ensure the office task pre duties connected
+		assertEquals("task <- pre duty", officeTask, taskToPreDuty
+				.getOfficeTask());
+		assertEquals("task -> pre duty", duty, taskToPreDuty.getDuty());
+
+		// Ensure the office task post duties connected
+		assertEquals("task <- post duty", officeTask, taskToPostDuty
+				.getOfficeTask());
+		assertEquals("task -> post duty", duty, taskToPostDuty.getDuty());
 	}
 
 	/**
@@ -167,6 +218,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
 				"RESPONSIBILITY");
 		section.addOfficeSectionResponsibility(responsibility);
+		AdministratorModel admin = new AdministratorModel("ADMINISTRATOR",
+				"net.example.ExampleAdministratorSource", "THREAD");
+		office.addOfficeAdministrator(admin);
+		DutyModel duty = new DutyModel("DUTY");
+		admin.addDuty(duty);
 
 		// responsibility -> team
 		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
@@ -199,6 +255,33 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		objectToExtMo.setExternalManagedObject(extMo);
 		objectToExtMo.connect();
 
+		// administrator -> team
+		AdministratorToOfficeTeamModel adminToTeam = new AdministratorToOfficeTeamModel();
+		adminToTeam.setAdministrator(admin);
+		adminToTeam.setOfficeTeam(team);
+		adminToTeam.connect();
+
+		// office task -> duty (setup)
+		OfficeSubSectionModel subSection = new OfficeSubSectionModel();
+		section.setOfficeSubSection(subSection);
+		OfficeSubSectionModel subSubSection = new OfficeSubSectionModel(
+				"SUB_SECTION");
+		subSection.addOfficeSubSection(subSubSection);
+		OfficeTaskModel officeTask = new OfficeTaskModel("TASK");
+		subSubSection.addOfficeTask(officeTask);
+
+		// office task -> pre duty
+		OfficeTaskToPreDutyModel taskToPreDuty = new OfficeTaskToPreDutyModel();
+		taskToPreDuty.setOfficeTask(officeTask);
+		taskToPreDuty.setDuty(duty);
+		taskToPreDuty.connect();
+
+		// office task -> post duty
+		OfficeTaskToPostDutyModel taskToPostDuty = new OfficeTaskToPostDutyModel();
+		taskToPostDuty.setOfficeTask(officeTask);
+		taskToPostDuty.setDuty(duty);
+		taskToPostDuty.connect();
+
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -217,5 +300,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("object - external managed object",
 				"EXTERNAL_MANAGED_OBJECT", objectToExtMo
 						.getExternalManagedObjectName());
+		assertEquals("administrator - team", "TEAM", adminToTeam
+				.getOfficeTeamName());
+		assertEquals("task - pre duty (administrator name)", "ADMINISTRATOR",
+				taskToPreDuty.getAdministratorName());
+		assertEquals("task - pre duty (duty name)", "DUTY", taskToPreDuty
+				.getDutyName());
+		assertEquals("task - post duty (administrator name)", "ADMINISTRATOR",
+				taskToPostDuty.getAdministratorName());
+		assertEquals("task - post duty (duty name)", "DUTY", taskToPostDuty
+				.getDutyName());
 	}
 }

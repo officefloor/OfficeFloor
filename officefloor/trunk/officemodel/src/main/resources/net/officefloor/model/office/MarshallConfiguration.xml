@@ -47,6 +47,8 @@
                     attribute="name" />
                 <attribute method="getAdministratorSourceClassName"
                     attribute="source" />
+                <attribute method="getAdministratorScope"
+                    attribute="scope" />
                 <attribute method="getX" attribute="x" />
                 <attribute method="getY" attribute="y" />
             </attributes>
@@ -60,6 +62,12 @@
                     </attributes>
                 </item>
             </collection>
+            <object method="getOfficeTeam" element="team">
+                <attributes>
+                    <attribute method="getOfficeTeamName"
+                        attribute="name" />
+                </attributes>
+            </object>
             <collection method="getDuties">
                 <item type="net.officefloor.model.office.DutyModel"
                     element="duty">
@@ -207,6 +215,30 @@
                             <attribute method="getOfficeTaskName"
                                 attribute="name" />
                         </attributes>
+                        <collection method="getPreDuties">
+                            <item
+                                type="net.officefloor.model.office.OfficeTaskToPreDutyModel"
+                                element="pre-administer">
+                                <attributes>
+                                    <attribute method="getAdministratorName"
+                                        attribute="administrator" />
+                                    <attribute method="getDutyName"
+                                        attribute="duty" />
+                                </attributes>
+                            </item>
+                        </collection>
+                        <collection method="getPostDuties">
+                            <item
+                                type="net.officefloor.model.office.OfficeTaskToPostDutyModel"
+                                element="post-administer">
+                                <attributes>
+                                    <attribute method="getAdministratorName"
+                                        attribute="administrator" />
+                                    <attribute method="getDutyName"
+                                        attribute="duty" />
+                                </attributes>
+                            </item>
+                        </collection>
                     </item>
                 </collection>
                 <collection method="getOfficeSubSections" id="SUB_SECTION">

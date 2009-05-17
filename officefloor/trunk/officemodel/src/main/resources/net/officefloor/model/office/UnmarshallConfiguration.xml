@@ -27,12 +27,17 @@
         class="net.officefloor.model.office.AdministratorModel">
         <value method="setAdministratorName" node="administrator@name" />
         <value method="setAdministratorSourceClassName" node="administrator@source" />
+        <value method="setAdministratorScope" node="administrator@scope" />
         <value method="setX" node="administrator@x" />
         <value method="setY" node="administrator@y" />
         <object method="addProperty" node="property"
             class="net.officefloor.model.office.PropertyModel">
             <value method="setName" node="property@name" />
             <value method="setValue" node="property@value" />
+        </object>
+        <object method="setOfficeTeam" node="team"
+            class="net.officefloor.model.office.AdministratorToOfficeTeamModel">
+            <value method="setOfficeTeamName" node="team@name" />
         </object>
         <object method="addDuty" node="duty"
             class="net.officefloor.model.office.DutyModel">
@@ -110,6 +115,16 @@
             <object method="addOfficeTask" node="task"
                 class="net.officefloor.model.office.OfficeTaskModel">
                 <value method="setOfficeTaskName" node="task@name" />
+                <object method="addPreDuty" node="pre-administer"
+                    class="net.officefloor.model.office.OfficeTaskToPreDutyModel">
+                    <value method="setAdministratorName" node="pre-administer@administrator" />
+                    <value method="setDutyName" node="pre-administer@duty" />
+                </object>
+                <object method="addPostDuty" node="post-administer"
+                    class="net.officefloor.model.office.OfficeTaskToPostDutyModel">
+                    <value method="setAdministratorName" node="post-administer@administrator" />
+                    <value method="setDutyName" node="post-administer@duty" />
+                </object>
             </object>
             <reference id="SUB_SECTION" method="addOfficeSubSection" />
         </object>

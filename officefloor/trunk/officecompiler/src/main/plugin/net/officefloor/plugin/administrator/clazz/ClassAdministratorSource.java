@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.AdministratorSourceService;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -36,7 +37,8 @@ import net.officefloor.frame.spi.administration.source.impl.AbstractAdministrato
  * @author Daniel
  */
 public class ClassAdministratorSource extends
-		AbstractAdministratorSource<Object, Indexed> {
+		AbstractAdministratorSource<Object, Indexed> implements
+		AdministratorSourceService<Object, Indexed, ClassAdministratorSource> {
 
 	/**
 	 * Property name providing the {@link Class} name.
@@ -93,6 +95,20 @@ public class ClassAdministratorSource extends
 					+ extensionInterface.getClass().getName() + ", "
 					+ componentType.getClass().getName() + ")");
 		}
+	}
+
+	/*
+	 * =================== AdministratorSourceService ==========================
+	 */
+
+	@Override
+	public Class<ClassAdministratorSource> getAdministratorSourceClass() {
+		return ClassAdministratorSource.class;
+	}
+
+	@Override
+	public String getAdministratorSourceAlias() {
+		return "CLASS";
 	}
 
 	/*

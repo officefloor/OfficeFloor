@@ -26,6 +26,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -42,7 +43,10 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -234,6 +238,60 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		this.recordReturn(this.officeBuilder, this.officeBuilder
 				.addThreadManagedObject(threadManagedObjectName,
 						officeManagedObjectName), builder);
+		return builder;
+	}
+
+	/**
+	 * Records adding a {@link ThreadState} bound {@link Administrator}.
+	 * 
+	 * @param administratorName
+	 *            Name of the {@link Administrator}.
+	 * @param administratorSourceClass
+	 *            {@link AdministratorSource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
+			String administratorName, Class<S> administratorSourceClass,
+			String... propertyNameValues) {
+		final AdministratorBuilder<A> admin = this
+				.createMock(AdministratorBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder
+				.addThreadAdministrator(administratorName,
+						administratorSourceClass), admin);
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			admin.addProperty(name, value);
+		}
+		return admin;
+	}
+
+	/**
+	 * Convenience method to record adding a {@link ThreadState} bound
+	 * {@link Administrator} and specifying {@link Team} responsible for the
+	 * administration.
+	 * 
+	 * @param administratorName
+	 *            Name of the {@link Administrator}.
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name responsible for
+	 *            administration.
+	 * @param administratorSourceClass
+	 *            {@link AdministratorSource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
+	 */
+	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
+			String administratorName, String officeTeamName,
+			Class<S> administratorSourceClass, String... propertyNameValues) {
+		AdministratorBuilder<A> builder = this
+				.record_officeBuilder_addThreadAdministrator(administratorName,
+						administratorSourceClass, propertyNameValues);
+		builder.setTeam(officeTeamName);
 		return builder;
 	}
 
