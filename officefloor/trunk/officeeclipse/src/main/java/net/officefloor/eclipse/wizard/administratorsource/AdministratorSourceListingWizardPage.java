@@ -17,6 +17,7 @@
 package net.officefloor.eclipse.wizard.administratorsource;
 
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
@@ -61,7 +62,17 @@ public class AdministratorSourceListingWizardPage extends WizardPage {
 	/**
 	 * List containing the {@link AdministratorSource} labels.
 	 */
-	private List list;
+	private List administratorLabels;
+
+	/**
+	 * Listing of {@link AdministratorScope} instances.
+	 */
+	private final AdministratorScope[] scopes = AdministratorScope.values();
+
+	/**
+	 * List containing the {@link AdministratorScope} instances.
+	 */
+	private List administratorScopes;
 
 	/**
 	 * Initiate.
@@ -92,7 +103,7 @@ public class AdministratorSourceListingWizardPage extends WizardPage {
 	 *         if not selected.
 	 */
 	public AdministratorSourceInstance getSelectedAdministratorSourceInstance() {
-		int selectedIndex = this.list.getSelectionIndex();
+		int selectedIndex = this.administratorLabels.getSelectionIndex();
 		if (selectedIndex < 0) {
 			// No selected administrator source instance
 			return null;
@@ -130,12 +141,28 @@ public class AdministratorSourceListingWizardPage extends WizardPage {
 			}
 		});
 
+		// Add listing of scopes
+		String[] scopeNames = new String[this.scopes.length];
+		for (int i = 0; i < scopeNames.length; i++) {
+			scopeNames[i] = this.scopes[i].toString();
+		}
+		this.administratorScopes = new List(page, SWT.SINGLE | SWT.BORDER);
+		this.administratorScopes.setLayoutData(new GridData(SWT.FILL,
+				SWT.BEGINNING, true, false));
+		this.administratorScopes.setItems(scopeNames);
+		this.administratorScopes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				AdministratorSourceListingWizardPage.this.handleChange();
+			}
+		});
+
 		// Add listing of administrator sources
-		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
-		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
-		this.list.setItems(this.administratorSourceLabels);
-		this.list.addSelectionListener(new SelectionAdapter() {
+		this.administratorLabels = new List(page, SWT.SINGLE | SWT.BORDER);
+		this.administratorLabels.setLayoutData(new GridData(SWT.FILL,
+				SWT.BEGINNING, true, false));
+		this.administratorLabels.setItems(this.administratorSourceLabels);
+		this.administratorLabels.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				AdministratorSourceListingWizardPage.this.handleChange();
@@ -167,8 +194,17 @@ public class AdministratorSourceListingWizardPage extends WizardPage {
 			return;
 		}
 
+		// Ensure administrator scope selected
+		int scopeIndex = this.administratorScopes.getSelectionIndex();
+		if (scopeIndex < 0) {
+			this.setErrorMessage("Must select scope");
+			this.setPageComplete(false);
+			return;
+		}
+		AdministratorScope scope = this.scopes[scopeIndex];
+
 		// Determine if administrator source selected
-		int selectionIndex = this.list.getSelectionIndex();
+		int selectionIndex = this.administratorLabels.getSelectionIndex();
 		if (selectionIndex < 0) {
 			this.setErrorMessage("Must select AdministratorSource");
 			this.setPageComplete(false);
@@ -177,7 +213,7 @@ public class AdministratorSourceListingWizardPage extends WizardPage {
 
 		// Specify name for administrator source and is complete
 		this.administratorSourceInstances[selectionIndex]
-				.setAdministratorName(name);
+				.setAdministratorNameAndScope(name, scope);
 		this.setErrorMessage(null);
 		this.setPageComplete(true);
 	}

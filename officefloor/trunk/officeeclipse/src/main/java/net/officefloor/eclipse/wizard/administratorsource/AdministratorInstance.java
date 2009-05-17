@@ -19,6 +19,7 @@ package net.officefloor.eclipse.wizard.administratorsource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
@@ -45,6 +46,11 @@ public class AdministratorInstance {
 	private final PropertyList propertyList;
 
 	/**
+	 * {@link AdministratorScope}.
+	 */
+	private final AdministratorScope administratorScope;
+
+	/**
 	 * {@link AdministratorType}.
 	 */
 	private final AdministratorType<?, ?> administratorType;
@@ -56,12 +62,16 @@ public class AdministratorInstance {
 	 *            Name of the {@link Administrator}.
 	 * @param administratorSourceClassName
 	 *            {@link AdministratorSource} class name.
+	 * @param administratorScope
+	 *            {@link AdministratorScope}.
 	 */
 	public AdministratorInstance(String administratorName,
-			String administratorSourceClassName) {
+			String administratorSourceClassName,
+			AdministratorScope administratorScope) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
+		this.administratorScope = administratorScope;
 		this.administratorType = null;
 	}
 
@@ -74,15 +84,19 @@ public class AdministratorInstance {
 	 *            {@link AdministratorSource} class name.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param administratorScope
+	 *            {@link AdministratorScope}.
 	 * @param administratorType
 	 *            {@link AdministratorType}.
 	 */
 	AdministratorInstance(String administratorName,
 			String administratorSourceClassName, PropertyList propertyList,
+			AdministratorScope administratorScope,
 			AdministratorType<?, ?> administratorType) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
 		this.propertyList = propertyList;
+		this.administratorScope = administratorScope;
 		this.administratorType = administratorType;
 	}
 
@@ -111,6 +125,15 @@ public class AdministratorInstance {
 	 */
 	public PropertyList getPropertylist() {
 		return this.propertyList;
+	}
+
+	/**
+	 * Obtains the {@link AdministratorScope}.
+	 * 
+	 * @return {@link AdministratorScope}.
+	 */
+	public AdministratorScope getAdministratorScope() {
+		return this.administratorScope;
 	}
 
 	/**

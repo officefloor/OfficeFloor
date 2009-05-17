@@ -16,10 +16,10 @@
  */
 package net.officefloor.admin.transaction;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
+import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 
@@ -29,6 +29,7 @@ import net.officefloor.frame.spi.administration.source.impl.AbstractAdministrato
  * 
  * @author Daniel
  */
+// TODO move to officeplugin_transaction (allow use by other plug-ins)
 public class TransactionAdministratorSource extends
 		AbstractAdministratorSource<Transaction, TransactionDutiesEnum>
 		implements Administrator<Transaction, TransactionDutiesEnum> {
@@ -62,8 +63,9 @@ public class TransactionAdministratorSource extends
 	 */
 
 	@Override
-	public Duty<Transaction, ?> getDuty(TransactionDutiesEnum key) {
-		switch (key) {
+	public Duty<Transaction, TransactionDutiesEnum> getDuty(
+			DutyKey<TransactionDutiesEnum> key) {
+		switch (key.getKey()) {
 		case BEGIN:
 			return new BeginDuty();
 		case ROLLBACK:
@@ -78,9 +80,10 @@ public class TransactionAdministratorSource extends
 	/**
 	 * {@link Duty} to begin the transaction.
 	 */
-	private class BeginDuty implements Duty<Transaction, Indexed> {
+	private class BeginDuty implements Duty<Transaction, TransactionDutiesEnum> {
 		@Override
-		public void doDuty(DutyContext<Transaction, Indexed> context)
+		public void doDuty(
+				DutyContext<Transaction, TransactionDutiesEnum> context)
 				throws Exception {
 			// Begin the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
@@ -92,9 +95,11 @@ public class TransactionAdministratorSource extends
 	/**
 	 * {@link Duty} to commit the transaction.
 	 */
-	private class CommitDuty implements Duty<Transaction, Indexed> {
+	private class CommitDuty implements
+			Duty<Transaction, TransactionDutiesEnum> {
 		@Override
-		public void doDuty(DutyContext<Transaction, Indexed> context)
+		public void doDuty(
+				DutyContext<Transaction, TransactionDutiesEnum> context)
 				throws Exception {
 			// Commit the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
@@ -106,9 +111,11 @@ public class TransactionAdministratorSource extends
 	/**
 	 * {@link Duty} to roll back the transaction.
 	 */
-	private class RollbackDuty implements Duty<Transaction, Indexed> {
+	private class RollbackDuty implements
+			Duty<Transaction, TransactionDutiesEnum> {
 		@Override
-		public void doDuty(DutyContext<Transaction, Indexed> context)
+		public void doDuty(
+				DutyContext<Transaction, TransactionDutiesEnum> context)
 				throws Exception {
 			// Roll back the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {

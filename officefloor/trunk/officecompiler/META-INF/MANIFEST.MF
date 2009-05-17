@@ -43,6 +43,7 @@ Export-Package:
  net.officefloor.model.officefloor,
  net.officefloor.model.repository,
  net.officefloor.model.section,
+ net.officefloor.plugin.administrator.clazz,
  net.officefloor.plugin.managedobject.clazz,
  net.officefloor.plugin.team,
  net.officefloor.plugin.work.clazz,

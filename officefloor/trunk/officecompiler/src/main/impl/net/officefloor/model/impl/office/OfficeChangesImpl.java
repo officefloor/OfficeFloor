@@ -353,7 +353,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// Add the duties
 		for (DutyType<?, ?> duty : administratorType.getDutyTypes()) {
-			administrator.addDuty(new DutyModel(duty.getDutyKey().name()));
+			administrator.addDuty(new DutyModel(duty.getDutyName()));
 		}
 
 		// Return change to add the administrator
