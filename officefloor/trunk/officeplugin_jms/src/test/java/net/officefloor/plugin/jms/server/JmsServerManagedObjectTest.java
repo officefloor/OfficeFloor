@@ -80,9 +80,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 				.constructAdministrator("TRANSACTION",
 						TransactionAdministratorSource.class, "JMS_TEAM");
 		adminBuilder.administerManagedObject("JMS_SERVER");
-		adminBuilder.addDuty(TransactionDutiesEnum.COMMIT);
-		adminBuilder.addDuty(TransactionDutiesEnum.BEGIN);
-		adminBuilder.addDuty(TransactionDutiesEnum.ROLLBACK);
+		adminBuilder.addDuty(TransactionDutiesEnum.COMMIT.name());
 
 		// Create the process message task
 		AbstractSingleTask<Work, Indexed, None> processTask = new AbstractSingleTask<Work, Indexed, None>() {

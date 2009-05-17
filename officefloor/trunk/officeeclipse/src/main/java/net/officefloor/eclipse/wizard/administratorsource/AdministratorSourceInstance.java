@@ -29,6 +29,7 @@ import net.officefloor.eclipse.extension.administratorsource.AdministratorSource
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 import org.eclipse.core.resources.IProject;
@@ -100,6 +101,11 @@ public class AdministratorSourceInstance implements
 	private String administratorName;
 
 	/**
+	 * {@link AdministratorScope} for the {@link OfficeAdministrator}.
+	 */
+	private AdministratorScope administratorScope;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param administratorSourceClassName
@@ -133,13 +139,18 @@ public class AdministratorSourceInstance implements
 	}
 
 	/**
-	 * Specifies the location of the {@link OfficeAdministrator}.
+	 * Specifies the name and {@link AdministratorScope} of the
+	 * {@link OfficeAdministrator}.
 	 * 
 	 * @param administratorName
 	 *            Name of the {@link OfficeAdministrator}.
+	 * @param administratorScope
+	 *            {@link AdministratorScope}.
 	 */
-	public void setAdministratorName(String administratorName) {
+	public void setAdministratorNameAndScope(String administratorName,
+			AdministratorScope administratorScope) {
 		this.administratorName = administratorName;
+		this.administratorScope = administratorScope;
 
 		// Notify properties changed as now have location
 		this.notifyPropertiesChanged();
@@ -194,8 +205,7 @@ public class AdministratorSourceInstance implements
 	}
 
 	/**
-	 * Obtains the fully qualified class name of the {@link AdministratorSource}
-	 * .
+	 * Obtains fully qualified class name of the {@link AdministratorSource}.
 	 * 
 	 * @return {@link AdministratorSource} class name.
 	 */
@@ -220,6 +230,16 @@ public class AdministratorSourceInstance implements
 	 */
 	public PropertyList getPropertyList() {
 		return this.properties;
+	}
+
+	/**
+	 * Obtains the {@link AdministratorScope} for the
+	 * {@link OfficeAdministrator}.
+	 * 
+	 * @return {@link AdministratorScope} for the {@link OfficeAdministrator}.
+	 */
+	public AdministratorScope getAdministratorScope() {
+		return this.administratorScope;
 	}
 
 	/**

@@ -4,6 +4,7 @@
    <extension-point id="worksource" name="Work Source" schema="schema/worksource.exsd"/>
    <extension-point id="managedobjectsource" name="Managed Object Source" schema="schema/managedobjectsource.exsd"/>
    <extension-point id="sectionsource" name="Section Source" schema="schema/sectionsource.exsd"/>
+   <extension-point id="administratorsource" name="Administrator Source" schema="schema/administratorsource.exsd"/>
     <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
         <editor
               class="net.officefloor.eclipse.desk.DeskEditor"
@@ -104,6 +105,10 @@
     <extension
           point="net.officefloor.eclipse.managedobjectsource">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.clazz.ClassManagedObjectSourceExtension" />
+    </extension>
+    <extension
+          point="net.officefloor.eclipse.administratorsource">
+          <administratorsource class="net.officefloor.eclipse.extension.administratorsource.clazz.ClassAdministratorSourceExtension" />
     </extension>
     <extension
           point="net.officefloor.eclipse.sectionsource">

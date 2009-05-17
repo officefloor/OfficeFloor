@@ -58,6 +58,7 @@ public class AddAdministratorOperation extends
 				administrator.getAdministratorName(), administrator
 						.getAdministratorSourceClassName(), administrator
 						.getPropertylist(), administrator
+						.getAdministratorScope(), administrator
 						.getAdministratorType());
 
 		// Position the administrator

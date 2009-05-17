@@ -31,6 +31,7 @@ import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
@@ -299,6 +300,8 @@ public class AdministratorSourceWizard extends Wizard implements
 				.getAdministratorSourceClassName();
 		PropertyList propertyList = this.selectedAdministratorSourceInstance
 				.getPropertyList();
+		AdministratorScope administratorScope = this.selectedAdministratorSourceInstance
+				.getAdministratorScope();
 		AdministratorType<?, ?> administratorType = this.selectedAdministratorSourceInstance
 				.getAdministratorType();
 
@@ -308,7 +311,7 @@ public class AdministratorSourceWizard extends Wizard implements
 		// Specify the administrator instance
 		this.administratorInstance = new AdministratorInstance(
 				administratorName, administratorSourceClassName, propertyList,
-				administratorType);
+				administratorScope, administratorType);
 
 		// Finished
 		return true;
