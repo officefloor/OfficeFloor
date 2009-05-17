@@ -28,6 +28,13 @@ import net.officefloor.frame.spi.administration.Duty;
 public interface DutyType<A extends Enum<A>, F extends Enum<F>> {
 
 	/**
+	 * Obtains the name for the {@link Duty}.
+	 * 
+	 * @return Name for the {@link Duty}.
+	 */
+	String getDutyName();
+
+	/**
 	 * Obtains the key for this {@link Duty}.
 	 * 
 	 * @return Key for this {@link Duty}.

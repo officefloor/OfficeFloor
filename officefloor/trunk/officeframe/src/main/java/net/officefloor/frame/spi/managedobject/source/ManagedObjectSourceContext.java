@@ -66,12 +66,15 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> {
 	Properties getProperties();
 
 	/**
+	 * <p>
 	 * Should this {@link ManagedObjectSource} require to obtain various
 	 * resources to initialise it should use the returned {@link ClassLoader} to
-	 * find them on the class path. A possible example of a resource would be an
-	 * XML configuration file specific to the {@link ManagedObjectSource}.
+	 * find them on the class path.
+	 * <p>
+	 * A possible example of a resource would be an XML configuration file
+	 * specific to the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ResourceLocator}.
+	 * @return {@link ClassLoader}.
 	 */
 	ClassLoader getClassLoader();
 

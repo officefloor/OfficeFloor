@@ -16,9 +16,13 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
@@ -236,10 +240,13 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			return null; // failed to instantiate
 		}
 
+		// Obtain the class loader
+		ClassLoader classLoader = this.nodeContext.getClassLoader();
+
 		// Create the administrator source context
 		Properties properties = propertyList.getProperties();
 		AdministratorSourceContext sourceContext = new AdministratorSourceContextImpl(
-				properties);
+				properties, classLoader);
 
 		try {
 			// Initialise the administrator source
@@ -292,6 +299,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 			// Load the duties
 			Class<A> dutyKeyClass = null;
+			Set<String> dutyNames = new HashSet<String>();
 			boolean isDutyIssue = false;
 			for (int i = 0; i < dutyMetaDatas.length; i++) {
 
@@ -303,36 +311,79 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 					continue;
 				}
 
-				// Ensure have duty key
-				A dutyKey = dutyMetaData.getKey();
-				if (dutyKey == null) {
-					this.addIssue("Null key for duty " + i);
+				// Ensure have duty name
+				String dutyName = dutyMetaData.getDutyName();
+				if (CompileUtil.isBlank(dutyName)) {
+					this.addIssue("No name for duty " + i);
 					isDutyIssue = true;
 					continue;
 				}
 
-				// Ensure valid key
-				if (dutyKeyClass == null) {
-					// First duty key
-					dutyKeyClass = dutyKey.getDeclaringClass();
+				// Ensure not duplicate duty name
+				if (dutyNames.contains(dutyName)) {
+					this.addIssue("Duplicate duty name '" + dutyName + "'");
+					isDutyIssue = true;
+					continue;
+				}
+				dutyNames.add(dutyName);
+
+				// Obtain the possible duty key
+				A dutyKey = dutyMetaData.getKey();
+
+				// Determine if first duty
+				if (i == 0) {
+					// First duty, so provide indication if have keys
+					dutyKeyClass = (dutyKey == null ? null : dutyKey
+							.getDeclaringClass());
+
 				} else {
-					// Ensure correct key type
-					if (!dutyKeyClass.isInstance(dutyKey)) {
-						this.addIssue("Key " + dutyKey + " for duty " + i
-								+ " is invalid (type="
-								+ dutyKey.getClass().getName()
-								+ ", required type=" + dutyKeyClass.getName()
-								+ ")");
-						isDutyIssue = true;
-						continue;
+
+					// Subsequent duty, must determine if requires key
+					if (dutyKeyClass == null) {
+						// Ensure that does not have a key
+						if (dutyKey != null) {
+							this.addIssue("Should not have key for duty " + i);
+							isDutyIssue = true;
+							continue;
+						}
+					} else {
+
+						// Ensure that has a key
+						if (dutyKey == null) {
+							this.addIssue("Must have key for duty " + i);
+							isDutyIssue = true;
+							continue;
+						}
+
+						// Ensure correct key type
+						if (!dutyKeyClass.isInstance(dutyKey)) {
+							this.addIssue("Key " + dutyKey + " for duty " + i
+									+ " is invalid (type="
+									+ dutyKey.getClass().getName()
+									+ ", required type="
+									+ dutyKeyClass.getName() + ")");
+							isDutyIssue = true;
+							continue;
+						}
 					}
 				}
 
 				// Create and add the duty meta-data
-				duties.add(new DutyTypeImpl<A>(dutyKey));
+				duties.add(new DutyTypeImpl<A>(dutyName, dutyKey));
 			}
 			if (isDutyIssue) {
 				return null; // must not be issue with duties
+			}
+
+			// If have keys, then ensure sorted by the keys
+			if (dutyKeyClass != null) {
+				Collections.sort(duties, new Comparator<DutyType<A, ?>>() {
+					@Override
+					public int compare(DutyType<A, ?> a, DutyType<A, ?> b) {
+						return a.getDutyKey().ordinal()
+								- b.getDutyKey().ordinal();
+					}
+				});
 			}
 
 		} catch (Throwable ex) {

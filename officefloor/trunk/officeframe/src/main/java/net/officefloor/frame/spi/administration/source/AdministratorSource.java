@@ -73,7 +73,9 @@ public interface AdministratorSource<I, A extends Enum<A>> {
 	 * Creates a new {@link Administrator}.
 	 * 
 	 * @return New {@link Administrator}.
+	 * @throws Throwable
+	 *             If fails to create the {@link Administrator}.
 	 */
-	Administrator<I, A> createAdministrator();
+	Administrator<I, A> createAdministrator() throws Throwable;
 
 }

@@ -32,16 +32,25 @@ public class AdministratorSourceContextImpl implements
 	/**
 	 * {@link Properties}.
 	 */
-	protected final Properties properties;
+	private final Properties properties;
+
+	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param properties
 	 *            {@link Properties}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 */
-	public AdministratorSourceContextImpl(Properties properties) {
+	public AdministratorSourceContextImpl(Properties properties,
+			ClassLoader classLoader) {
 		this.properties = properties;
+		this.classLoader = classLoader;
 	}
 
 	/*
@@ -81,6 +90,11 @@ public class AdministratorSourceContextImpl implements
 	@Override
 	public Properties getProperties() {
 		return this.properties;
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
 	}
 
 }

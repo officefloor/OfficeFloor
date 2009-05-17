@@ -56,6 +56,7 @@ public interface AdministratorLoader {
 	 * @return {@link AdministratorType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
+	// TODO rename to loadAdministratorType
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
 			Class<AS> administratorSourceClass, PropertyList propertyList);
 
