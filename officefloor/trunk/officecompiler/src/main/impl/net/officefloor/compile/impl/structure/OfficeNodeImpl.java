@@ -433,6 +433,19 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			section.buildSection(officeBuilder);
 		}
 
+		// Build the administrators for the office (in deterministic order)
+		AdministratorNode[] admins = CompileUtil.toSortedArray(
+				this.administrators.values(), new AdministratorNode[0],
+				new StringExtractor<AdministratorNode>() {
+					@Override
+					public String toString(AdministratorNode object) {
+						return object.getOfficeAdministratorName();
+					}
+				});
+		for (AdministratorNode admin : admins) {
+			admin.buildAdministrator(officeBuilder);
+		}
+
 		// Return the office builder
 		return officeBuilder;
 	}
@@ -625,6 +638,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void link(ManagedObjectTeam team, OfficeTeam officeTeam) {
 		this.linkTeam(team, officeTeam);
+	}
+
+	@Override
+	public void link(OfficeAdministrator administrator, OfficeTeam officeTeam) {
+		this.linkTeam(administrator, officeTeam);
 	}
 
 	@Override

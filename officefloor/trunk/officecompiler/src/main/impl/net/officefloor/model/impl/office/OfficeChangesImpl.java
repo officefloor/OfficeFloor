@@ -323,9 +323,13 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 		// TODO test this method (addAdministrator)
 
+		// TODO pass in the administrator scope
+		String administratorScope = "THREAD";
+
 		// Create the administrator
 		final AdministratorModel administrator = new AdministratorModel(
-				administratorName, administratorSourceClassName);
+				administratorName, administratorSourceClassName,
+				administratorScope);
 		for (Property property : properties) {
 			administrator.addProperty(new PropertyModel(property.getName(),
 					property.getValue()));

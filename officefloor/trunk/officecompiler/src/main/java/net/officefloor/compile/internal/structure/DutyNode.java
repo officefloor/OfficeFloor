@@ -17,6 +17,9 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
 
 /**
  * {@link OfficeDuty} node.
@@ -24,4 +27,27 @@ import net.officefloor.compile.spi.office.OfficeDuty;
  * @author Daniel
  */
 public interface DutyNode extends OfficeDuty {
+
+	/**
+	 * Builds the pre {@link Task} administration.
+	 * 
+	 * @param workBuilder
+	 *            {@link WorkBuilder}.
+	 * @param taskBuilder
+	 *            {@link TaskBuilder}.
+	 */
+	void buildPreTaskAdministration(WorkBuilder<?> workBuilder,
+			TaskBuilder<?, ?, ?> taskBuilder);
+
+	/**
+	 * Builds the post {@link Task} administration.
+	 * 
+	 * @param workBuilder
+	 *            {@link WorkBuilder}.
+	 * @param taskBuilder
+	 *            {@link TaskBuilder}.
+	 */
+	void buildPostTaskAdministration(WorkBuilder<?> workBuilder,
+			TaskBuilder<?, ?, ?> taskBuilder);
+
 }

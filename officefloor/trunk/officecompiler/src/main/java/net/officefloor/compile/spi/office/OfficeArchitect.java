@@ -191,6 +191,17 @@ public interface OfficeArchitect {
 	void link(ManagedObjectTeam team, OfficeTeam officeTeam);
 
 	/**
+	 * Links the {@link OfficeTeam} to be responsible for the
+	 * {@link OfficeAdministrator}.
+	 * 
+	 * @param administrator
+	 *            {@link OfficeAdministrator}.
+	 * @param officeTeam
+	 *            {@link OfficeTeam}.
+	 */
+	void link(OfficeAdministrator administrator, OfficeTeam officeTeam);
+
+	/**
 	 * <p>
 	 * Allows the {@link OfficeSource} to add an issue in attempting to
 	 * architect the {@link Office}.

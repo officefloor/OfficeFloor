@@ -20,6 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
+import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -31,6 +36,10 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
@@ -92,6 +101,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the administrators to the teams
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			AdministratorToOfficeTeamModel conn = admin.getOfficeTeam();
+			if (conn != null) {
+				OfficeTeamModel team = teams.get(conn.getOfficeTeamName());
+				if (team != null) {
+					conn.setAdministrator(admin);
+					conn.setOfficeTeam(team);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of office section inputs
 		DoubleKeyMap<String, String, OfficeSectionInputModel> inputs = new DoubleKeyMap<String, String, OfficeSectionInputModel>();
 		for (OfficeSectionModel section : office.getOfficeSections()) {
@@ -146,8 +168,72 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Create the map of duties
+		DoubleKeyMap<String, String, DutyModel> duties = new DoubleKeyMap<String, String, DutyModel>();
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			for (DutyModel duty : admin.getDuties()) {
+				duties.put(admin.getAdministratorName(), duty.getDutyName(),
+						duty);
+			}
+		}
+
+		// Connect tasks to duties
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			this.connectTasksToDuties(section.getOfficeSubSection(), duties);
+		}
+
 		// Return the office
 		return office;
+	}
+
+	/**
+	 * Connects the {@link OfficeTaskModel} to {@link DutyModel} instances.
+	 * 
+	 * @param subSection
+	 *            {@link OfficeSubSectionModel}.
+	 * @param duties
+	 *            Map of {@link DutyModel} instances by {@link Administrator}
+	 *            then {@link Duty} name.
+	 */
+	private void connectTasksToDuties(OfficeSubSectionModel subSection,
+			DoubleKeyMap<String, String, DutyModel> duties) {
+
+		// Ensure have the sub section
+		if (subSection == null) {
+			return;
+		}
+
+		// Connect the sub section tasks to pre duties
+		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
+			for (OfficeTaskToPreDutyModel conn : task.getPreDuties()) {
+				DutyModel duty = duties.get(conn.getAdministratorName(), conn
+						.getDutyName());
+				if (duty != null) {
+					conn.setOfficeTask(task);
+					conn.setDuty(duty);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the sub section tasks to post duties
+		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
+			for (OfficeTaskToPostDutyModel conn : task.getPostDuties()) {
+				DutyModel duty = duties.get(conn.getAdministratorName(), conn
+						.getDutyName());
+				if (duty != null) {
+					conn.setOfficeTask(task);
+					conn.setDuty(duty);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect task to duties for further sub sections
+		for (OfficeSubSectionModel subSubSection : subSection
+				.getOfficeSubSections()) {
+			this.connectTasksToDuties(subSubSection, duties);
+		}
 	}
 
 	@Override
@@ -158,6 +244,13 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeTeamModel team : office.getOfficeTeams()) {
 			for (OfficeSectionResponsibilityToOfficeTeamModel conn : team
 					.getOfficeSectionResponsibilities()) {
+				conn.setOfficeTeamName(team.getOfficeTeamName());
+			}
+		}
+
+		// Specify administrators to team
+		for (OfficeTeamModel team : office.getOfficeTeams()) {
+			for (AdministratorToOfficeTeamModel conn : team.getAdministrators()) {
 				conn.setOfficeTeamName(team.getOfficeTeamName());
 			}
 		}
@@ -182,6 +275,26 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					.getOfficeSectionObjects()) {
 				conn.setExternalManagedObjectName(extMo
 						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify pre duties to office tasks
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			for (DutyModel duty : admin.getDuties()) {
+				for (OfficeTaskToPreDutyModel conn : duty.getPreOfficeTasks()) {
+					conn.setAdministratorName(admin.getAdministratorName());
+					conn.setDutyName(duty.getDutyName());
+				}
+			}
+		}
+
+		// Specify post duties to office tasks
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			for (DutyModel duty : admin.getDuties()) {
+				for (OfficeTaskToPostDutyModel conn : duty.getPostOfficeTasks()) {
+					conn.setAdministratorName(admin.getAdministratorName());
+					conn.setDutyName(duty.getDutyName());
+				}
 			}
 		}
 

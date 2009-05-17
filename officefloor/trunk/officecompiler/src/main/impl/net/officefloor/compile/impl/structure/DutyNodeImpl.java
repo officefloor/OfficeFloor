@@ -16,8 +16,11 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
 
 /**
  * {@link DutyNode} implementation.
@@ -30,15 +33,23 @@ public class DutyNodeImpl implements DutyNode {
 	 * Name of this {@link OfficeDuty}.
 	 */
 	private final String dutyName;
-	
+
+	/**
+	 * {@link AdministratorNode} containing this {@link DutyNode}.
+	 */
+	private final AdministratorNode administrator;
+
 	/**
 	 * Initiate.
 	 * 
 	 * @param dutyName
 	 *            Name of this {@link OfficeDuty}.
+	 * @param administrator
+	 *            {@link AdministratorNode} containing this {@link DutyNode}.
 	 */
-	public DutyNodeImpl(String dutyName) {
+	public DutyNodeImpl(String dutyName, AdministratorNode administrator) {
 		this.dutyName = dutyName;
+		this.administrator = administrator;
 	}
 
 	/*
@@ -48,6 +59,28 @@ public class DutyNodeImpl implements DutyNode {
 	@Override
 	public String getOfficeDutyName() {
 		return this.dutyName;
+	}
+
+	/*
+	 * ===================== DutyNode ===================================
+	 */
+
+	@Override
+	public void buildPreTaskAdministration(WorkBuilder<?> workBuilder,
+			TaskBuilder<?, ?, ?> taskBuilder) {
+
+		// Link the pre task duty
+		taskBuilder.linkPreTaskAdministration(this.administrator
+				.getOfficeAdministratorName(), this.dutyName);
+	}
+
+	@Override
+	public void buildPostTaskAdministration(WorkBuilder<?> workBuilder,
+			TaskBuilder<?, ?, ?> taskBuilder) {
+
+		// Link the post task duty
+		taskBuilder.linkPostTaskAdministration(this.administrator
+				.getOfficeAdministratorName(), this.dutyName);
 	}
 
 }

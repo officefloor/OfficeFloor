@@ -24,6 +24,7 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeEscalationModel;
@@ -41,6 +42,8 @@ import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -95,7 +98,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeTeamName", "getX", "getY" }, office
-				.getOfficeTeams(), new OfficeTeamModel("TEAM", null, 20, 21));
+				.getOfficeTeams(), new OfficeTeamModel("TEAM", null, null, 20,
+				21));
 
 		// ----------------------------------------
 		// Validate the escalations
@@ -108,14 +112,17 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the administrators
 		// ----------------------------------------
 		assertList(new String[] { "getAdministratorName",
-				"getAdministratorSourceClassName", "getX", "getY" }, office
-				.getOfficeAdministrators(), new AdministratorModel(
-				"ADMINISTRATOR", "net.example.ExampleAdministratorSource",
-				null, null, 40, 41));
+				"getAdministratorSourceClassName", "getAdministratorScope",
+				"getX", "getY" }, office.getOfficeAdministrators(),
+				new AdministratorModel("ADMINISTRATOR",
+						"net.example.ExampleAdministratorSource", "THREAD",
+						null, null, null, 40, 41));
 		AdministratorModel admin = office.getOfficeAdministrators().get(0);
 		assertList(new String[] { "getName", "getValue" }, admin
 				.getProperties(), new PropertyModel("ADMIN_ONE", "VALUE_ONE"),
 				new PropertyModel("ADMIN_TWO", "VALUE_TWO"));
+		assertProperties(new AdministratorToOfficeTeamModel("TEAM"), admin
+				.getOfficeTeam(), "getOfficeTeamName");
 		assertList(new String[] { "getDutyName" }, admin.getDuties(),
 				new DutyModel("DUTY_ONE"), new DutyModel("DUTY_TWO"));
 
@@ -193,6 +200,10 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				new OfficeSectionManagedObjectTeamModel("MO_TEAM"));
 		assertList(new String[] { "getOfficeTaskName" }, officeSection
 				.getOfficeTasks(), new OfficeTaskModel("TASK"));
+		OfficeTaskModel sectionTask = officeSection.getOfficeTasks().get(0);
+		assertList(new String[] { "getAdministratorName", "getDutyName" },
+				sectionTask.getPreDuties(), new OfficeTaskToPreDutyModel(
+						"ADMINISTRATOR", "DUTY_ONE"));
 		assertList(new String[] { "getOfficeSubSectionName" }, officeSection
 				.getOfficeSubSections(), new OfficeSubSectionModel(
 				"SUB_SECTION"));
@@ -204,6 +215,10 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 						"SUB_SECTION_MANAGED_OBJECT"));
 		assertList(new String[] { "getOfficeTaskName" }, subSection
 				.getOfficeTasks(), new OfficeTaskModel("SUB_SECTION_TASK"));
+		OfficeTaskModel subSectionTask = subSection.getOfficeTasks().get(0);
+		assertList(new String[] { "getAdministratorName", "getDutyName" },
+				subSectionTask.getPostDuties(), new OfficeTaskToPostDutyModel(
+						"ADMINISTRATOR", "DUTY_TWO"));
 		assertList(new String[] { "getOfficeSubSectionName" }, subSection
 				.getOfficeSubSections(), new OfficeSubSectionModel(
 				"SUB_SUB_SECTION"));
