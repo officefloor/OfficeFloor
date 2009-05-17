@@ -249,13 +249,40 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link AdministratorDutyMetaData} key.
+	 * Ensure issue if blank {@link AdministratorDutyMetaData} name.
 	 */
-	public void testNullDutyKey() {
+	public void testBlankDutyName() {
 
 		// Record null duty key
 		this.record_loadAdminType((Enum<?>) null);
-		this.record_issue("Null key for duty 0");
+		this.record_issue("No name for duty 0");
+
+		// Attempt to load
+		this.loadAdministratorType(false, null);
+	}
+
+	/**
+	 * Ensure issue if duplicate {@link AdministratorDutyMetaData} name.
+	 */
+	public void testDuplicateName() {
+
+		// Record null duty key
+		final AdministratorDutyMetaData<?, ?> dutyOne = this
+				.createMock(AdministratorDutyMetaData.class);
+		final AdministratorDutyMetaData<?, ?> dutyTwo = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		final String DUPLICATE_NAME = "duplicate";
+
+		// Record missing type
+		this.record_extensionInterface();
+		this.recordReturn(this.metaData, this.metaData
+				.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
+		this.recordReturn(dutyOne, dutyOne.getDutyName(), DUPLICATE_NAME);
+		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
+		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DUPLICATE_NAME);
+		this.record_issue("Duplicate duty name 'duplicate'");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -279,12 +306,65 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validates the loaded {@link AdministratorType}.
+	 * Ensures issue if first {@link Duty} has a key while a subsequent
+	 * {@link Duty} does not.
 	 */
-	public void testLoadAdministratorType() {
+	public void testMissingKey() {
 
-		// Record loading the administrator type
-		this.record_loadAdminType(DutyKey.ONE, DutyKey.TWO);
+		final AdministratorDutyMetaData<?, ?> dutyOne = this
+				.createMock(AdministratorDutyMetaData.class);
+		final AdministratorDutyMetaData<?, ?> dutyTwo = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		// Record missing type
+		this.record_extensionInterface();
+		this.recordReturn(this.metaData, this.metaData
+				.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
+		this.recordReturn(dutyOne, dutyOne.getDutyName(), DutyKey.ONE.name());
+		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
+		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DutyKey.TWO.name());
+		this.recordReturn(dutyTwo, dutyTwo.getKey(), null);
+		this.record_issue("Must have key for duty " + 1);
+
+		// Attempt to load
+		this.loadAdministratorType(false, null);
+	}
+
+	/**
+	 * Ensures issue if first {@link Duty} does not have a key while a
+	 * subsequent {@link Duty} does.
+	 */
+	public void testUnexpectedKey() {
+
+		final AdministratorDutyMetaData<?, ?> dutyOne = this
+				.createMock(AdministratorDutyMetaData.class);
+		final AdministratorDutyMetaData<?, ?> dutyTwo = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		// Record missing type
+		this.record_extensionInterface();
+		this.recordReturn(this.metaData, this.metaData
+				.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
+		this.recordReturn(dutyOne, dutyOne.getDutyName(), DutyKey.ONE.name());
+		this.recordReturn(dutyOne, dutyOne.getKey(), null);
+		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DutyKey.TWO.name());
+		this.recordReturn(dutyTwo, dutyTwo.getKey(), DutyKey.TWO);
+		this.record_issue("Should not have key for duty " + 1);
+
+		// Attempt to load
+		this.loadAdministratorType(false, null);
+	}
+
+	/**
+	 * Validates the loaded {@link AdministratorType} with keys.
+	 */
+	public void testLoadAdministratorTypeWithKeys() {
+
+		// Record loading the administrator type.
+		// (Should be ordered when returned as a type)
+		this.record_loadAdminType(DutyKey.TWO, DutyKey.ONE);
 
 		// Load the administrator type
 		AdministratorType<?, ?> adminType = this.loadAdministratorType(true,
@@ -295,9 +375,41 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 				adminType.getExtensionInterface());
 		DutyType<?, ?>[] dutyTypes = adminType.getDutyTypes();
 		assertEquals("Incorrect number of duties", 2, dutyTypes.length);
+		assertEquals("Incorrect name for first duty", DutyKey.ONE.name(),
+				dutyTypes[0].getDutyName());
 		assertEquals("Incorrect key for first duty", DutyKey.ONE, dutyTypes[0]
 				.getDutyKey());
+		assertEquals("Incorrect name for second duty", DutyKey.TWO.name(),
+				dutyTypes[1].getDutyName());
 		assertEquals("Incorrect key for second duty", DutyKey.TWO, dutyTypes[1]
+				.getDutyKey());
+	}
+
+	/**
+	 * Validates the loaded {@link AdministratorType} without keys.
+	 */
+	public void testLoadAdministratorTypeWithoutKeys() {
+
+		// Record loading the administrator type
+		// (No keys so take in order as per meta-data)
+		this.record_loadAdminType(false, DutyKey.ONE, DutyKey.TWO);
+
+		// Load the administrator type
+		AdministratorType<?, ?> adminType = this.loadAdministratorType(true,
+				null);
+
+		// Validate the administrator type
+		assertEquals("Incorrect extension interface", XAResource.class,
+				adminType.getExtensionInterface());
+		DutyType<?, ?>[] dutyTypes = adminType.getDutyTypes();
+		assertEquals("Incorrect number of duties", 2, dutyTypes.length);
+		assertEquals("Incorrect name for first duty", DutyKey.ONE.name(),
+				dutyTypes[0].getDutyName());
+		assertNull("Should not have key for first duty", dutyTypes[0]
+				.getDutyKey());
+		assertEquals("Incorrect name for second duty", DutyKey.TWO.name(),
+				dutyTypes[1].getDutyName());
+		assertNull("Should not have key for second duty", dutyTypes[1]
 				.getDutyKey());
 	}
 
@@ -330,6 +442,19 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            Keys of the {@link AdministratorDutyMetaData}.
 	 */
 	private void record_loadAdminType(Enum<?>... keys) {
+		this.record_loadAdminType(true, keys);
+	}
+
+	/**
+	 * Records loading the {@link AdministratorType}.
+	 * 
+	 * @param isIncludeKeys
+	 *            Flag whether names only (<code>false</code> to not include
+	 *            keys).
+	 * @param keys
+	 *            Keys of the {@link AdministratorDutyMetaData}.
+	 */
+	private void record_loadAdminType(boolean isIncludeKeys, Enum<?>... keys) {
 
 		// Create the listing of duty meta-data
 		AdministratorDutyMetaData<?, ?>[] duties = new AdministratorDutyMetaData[keys.length];
@@ -344,7 +469,15 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		for (int i = 0; i < duties.length; i++) {
 			AdministratorDutyMetaData<?, ?> duty = duties[i];
 			Enum<?> key = keys[i];
-			this.recordReturn(duty, duty.getKey(), key);
+			if (key == null) {
+				// Provide blank name
+				this.recordReturn(duty, duty.getDutyName(), null);
+			} else {
+				// Provide details of duty
+				this.recordReturn(duty, duty.getDutyName(), key.name());
+				this.recordReturn(duty, duty.getKey(), (isIncludeKeys ? key
+						: null));
+			}
 		}
 	}
 

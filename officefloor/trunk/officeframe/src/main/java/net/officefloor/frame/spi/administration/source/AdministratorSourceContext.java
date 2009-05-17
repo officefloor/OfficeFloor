@@ -56,4 +56,17 @@ public interface AdministratorSourceContext {
 	 */
 	Properties getProperties();
 
+	/**
+	 * <p>
+	 * Should this {@link AdministratorSource} require to obtain various
+	 * resources to initialise it should use the returned {@link ClassLoader} to
+	 * find them on the class path.
+	 * <p>
+	 * A possible example of a resource would be an XML configuration file
+	 * specific to the {@link AdministratorSource}.
+	 * 
+	 * @return {@link ClassLoader}.
+	 */
+	ClassLoader getClassLoader();
+
 }

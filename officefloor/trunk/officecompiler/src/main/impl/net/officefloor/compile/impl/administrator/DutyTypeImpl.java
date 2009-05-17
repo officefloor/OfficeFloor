@@ -31,6 +31,11 @@ import net.officefloor.frame.spi.administration.Duty;
 public class DutyTypeImpl<A extends Enum<A>> implements DutyType<A, None> {
 
 	/**
+	 * Name of the {@link Duty}.
+	 */
+	private final String dutyName;
+
+	/**
 	 * {@link Duty} key.
 	 */
 	private final A dutyKey;
@@ -38,16 +43,24 @@ public class DutyTypeImpl<A extends Enum<A>> implements DutyType<A, None> {
 	/**
 	 * Initiate.
 	 * 
+	 * @param dutyName
+	 *            Name of the {@link Duty}.
 	 * @param dutyKey
 	 *            {@link Duty} key.
 	 */
-	public DutyTypeImpl(A dutyKey) {
+	public DutyTypeImpl(String dutyName, A dutyKey) {
+		this.dutyName = dutyName;
 		this.dutyKey = dutyKey;
 	}
 
 	/*
 	 * ======================== DutyType ===================================
 	 */
+
+	@Override
+	public String getDutyName() {
+		return this.dutyName;
+	}
 
 	@Override
 	public A getDutyKey() {

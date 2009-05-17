@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
@@ -254,10 +255,13 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			return null; // no instance
 		}
 
+		// Obtain the class loader
+		ClassLoader classLoader = OfficeFrame.class.getClassLoader();
+
 		// Obtain context to initialise the administrator source
 		Properties properties = configuration.getProperties();
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				properties);
+				properties, classLoader);
 
 		try {
 			// Initialise the administrator source
