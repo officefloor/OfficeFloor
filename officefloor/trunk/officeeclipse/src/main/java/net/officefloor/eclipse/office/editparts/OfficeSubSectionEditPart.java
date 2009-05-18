@@ -21,47 +21,51 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
-import net.officefloor.eclipse.office.models.TaskAdministrationJoinPointEvent;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-
-import org.eclipse.gef.EditPart;
+import net.officefloor.eclipse.skin.office.OfficeSubSectionFigureContext;
+import net.officefloor.model.office.OfficeSubSectionModel;
+import net.officefloor.model.office.OfficeSubSectionModel.OfficeSubSectionEvent;
 
 /**
- * {@link EditPart} for {@link AbstractTaskAdministrationJoinPointModel}.
+ * {@link EditPart} for the {@link OfficeSubSectionModel}.
  * 
  * @author Daniel
  */
-public class TaskAdministrationJoinPointEditPart
+public class OfficeSubSectionEditPart
 		extends
-		AbstractOfficeFloorEditPart<AbstractTaskAdministrationJoinPointModel, TaskAdministrationJoinPointEvent, OfficeFloorFigure> {
+		AbstractOfficeFloorEditPart<OfficeSubSectionModel, OfficeSubSectionEvent, OfficeFloorFigure>
+		implements OfficeSubSectionFigureContext {
+
+	/*
+	 * ==================== AbstractOfficeFloorEditPart ===================
+	 */
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createTaskAdministrationJoinPointFigure();
+				.createOfficeSubSectionFigure(this);
 	}
 
 	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		if (this.getCastedModel().isPreRatherThanPost()) {
-			models.addAll(this.getCastedModel().getTask().getPreDuties());
-		} else {
-			models.addAll(this.getCastedModel().getTask().getPostDuties());
-		}
+	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getOfficeTasks());
+		childModels.addAll(this.getCastedModel().getOfficeSubSections());
 	}
 
 	@Override
-	protected Class<TaskAdministrationJoinPointEvent> getPropertyChangeEventType() {
-		return TaskAdministrationJoinPointEvent.class;
+	protected Class<OfficeSubSectionEvent> getPropertyChangeEventType() {
+		return OfficeSubSectionEvent.class;
 	}
 
 	@Override
-	protected void handlePropertyChange(
-			TaskAdministrationJoinPointEvent property, PropertyChangeEvent evt) {
+	protected void handlePropertyChange(OfficeSubSectionEvent property,
+			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_DUTIES:
-			TaskAdministrationJoinPointEditPart.this.refreshSourceConnections();
+		case ADD_OFFICE_TASK:
+		case REMOVE_OFFICE_TASK:
+		case ADD_OFFICE_SUB_SECTION:
+		case REMOVE_OFFICE_SUB_SECTION:
+			this.refreshChildren();
 			break;
 		}
 	}

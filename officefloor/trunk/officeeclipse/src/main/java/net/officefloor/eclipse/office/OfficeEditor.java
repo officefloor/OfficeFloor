@@ -26,8 +26,10 @@ import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphic
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
+import net.officefloor.eclipse.office.editparts.AdministratorToOfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
+import net.officefloor.eclipse.office.editparts.ExternalManagedObjectToAdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEscalationEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
@@ -38,7 +40,10 @@ import net.officefloor.eclipse.office.editparts.OfficeSectionOutputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionOutputToOfficeSectionInputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityToOfficeTeamEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeSubSectionEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTaskToPostDutyEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTaskToPreDutyEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.office.editparts.TaskAdministrationJoinPointEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
@@ -49,13 +54,17 @@ import net.officefloor.eclipse.office.operations.AddOfficeEscalationOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionResponsibilityOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
+import net.officefloor.eclipse.wizard.officetask.OfficeTaskInstance;
+import net.officefloor.eclipse.wizard.officetask.OfficeTaskWizard;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeModel;
@@ -67,7 +76,10 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -118,16 +130,12 @@ public class OfficeEditor extends
 
 		// Entities
 		map.put(OfficeModel.class, OfficeEditPart.class);
+		map.put(AdministratorModel.class, AdministratorEditPart.class);
+		map.put(DutyModel.class, DutyEditPart.class);
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(OfficeEscalationModel.class, OfficeEscalationEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(AdministratorModel.class, AdministratorEditPart.class);
-		map.put(DutyModel.class, DutyEditPart.class);
-		map.put(PreTaskAdministrationJointPointModel.class,
-				TaskAdministrationJoinPointEditPart.class);
-		map.put(PostTaskAdministrationJointPointModel.class,
-				TaskAdministrationJoinPointEditPart.class);
 		map.put(OfficeSectionModel.class, OfficeSectionEditPart.class);
 		map
 				.put(OfficeSectionInputModel.class,
@@ -138,7 +146,12 @@ public class OfficeEditor extends
 				OfficeSectionObjectEditPart.class);
 		map.put(OfficeSectionResponsibilityModel.class,
 				OfficeSectionResponsibilityEditPart.class);
+		map.put(OfficeSubSectionModel.class, OfficeSubSectionEditPart.class);
 		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
+		map.put(PreTaskAdministrationJointPointModel.class,
+				TaskAdministrationJoinPointEditPart.class);
+		map.put(PostTaskAdministrationJointPointModel.class,
+				TaskAdministrationJoinPointEditPart.class);
 
 		// Connections
 		map.put(OfficeSectionObjectToExternalManagedObjectModel.class,
@@ -147,6 +160,14 @@ public class OfficeEditor extends
 				OfficeSectionOutputToOfficeSectionInputEditPart.class);
 		map.put(OfficeSectionResponsibilityToOfficeTeamModel.class,
 				OfficeSectionResponsibilityToOfficeTeamEditPart.class);
+		map.put(AdministratorToOfficeTeamModel.class,
+				AdministratorToOfficeTeamEditPart.class);
+		map.put(ExternalManagedObjectToAdministratorModel.class,
+				ExternalManagedObjectToAdministratorEditPart.class);
+		map.put(OfficeTaskToPreDutyModel.class,
+				OfficeTaskToPreDutyEditPart.class);
+		map.put(OfficeTaskToPostDutyModel.class,
+				OfficeTaskToPostDutyEditPart.class);
 	}
 
 	@Override
@@ -262,6 +283,54 @@ public class OfficeEditor extends
 												target);
 							}
 						});
+
+		// Allow deleting administrator to team
+		policy.addDelete(AdministratorToOfficeTeamModel.class,
+				new DeleteChangeFactory<AdministratorToOfficeTeamModel>() {
+					@Override
+					public Change<AdministratorToOfficeTeamModel> createChange(
+							AdministratorToOfficeTeamModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeAdministratorToOfficeTeam(target);
+					}
+				});
+
+		// Allow deleting external managed object to administrator
+		policy
+				.addDelete(
+						ExternalManagedObjectToAdministratorModel.class,
+						new DeleteChangeFactory<ExternalManagedObjectToAdministratorModel>() {
+							@Override
+							public Change<ExternalManagedObjectToAdministratorModel> createChange(
+									ExternalManagedObjectToAdministratorModel target) {
+								return OfficeEditor.this
+										.getModelChanges()
+										.removeExternalManagedObjectToAdministrator(
+												target);
+							}
+						});
+
+		// Allow deleting task to pre duty
+		policy.addDelete(OfficeTaskToPreDutyModel.class,
+				new DeleteChangeFactory<OfficeTaskToPreDutyModel>() {
+					@Override
+					public Change<OfficeTaskToPreDutyModel> createChange(
+							OfficeTaskToPreDutyModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeTaskToPreDuty(target);
+					}
+				});
+
+		// Allow deleting task to post duty
+		policy.addDelete(OfficeTaskToPostDutyModel.class,
+				new DeleteChangeFactory<OfficeTaskToPostDutyModel>() {
+					@Override
+					public Change<OfficeTaskToPostDutyModel> createChange(
+							OfficeTaskToPostDutyModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeTaskToPostDuty(target);
+					}
+				});
 	}
 
 	@Override
@@ -321,6 +390,73 @@ public class OfficeEditor extends
 												source, target);
 							}
 						});
+
+		// Connect administrator to office team
+		policy
+				.addConnection(
+						AdministratorModel.class,
+						OfficeTeamModel.class,
+						new ConnectionChangeFactory<AdministratorModel, OfficeTeamModel>() {
+							@Override
+							public Change<?> createChange(
+									AdministratorModel source,
+									OfficeTeamModel target,
+									CreateConnectionRequest request) {
+								return OfficeEditor.this.getModelChanges()
+										.linkAdministratorToOfficeTeam(source,
+												target);
+							}
+						});
+
+		// Connect external managed object to administrator
+		policy
+				.addConnection(
+						ExternalManagedObjectModel.class,
+						AdministratorModel.class,
+						new ConnectionChangeFactory<ExternalManagedObjectModel, AdministratorModel>() {
+							@Override
+							public Change<?> createChange(
+									ExternalManagedObjectModel source,
+									AdministratorModel target,
+									CreateConnectionRequest request) {
+								return OfficeEditor.this
+										.getModelChanges()
+										.linkExternalManagedObjectToAdministrator(
+												source, target);
+							}
+						});
+
+		// Connect task to pre/post duty
+		policy.addConnection(DutyModel.class, OfficeSectionModel.class,
+				new ConnectionChangeFactory<DutyModel, OfficeSectionModel>() {
+					@Override
+					public Change<?> createChange(DutyModel source,
+							OfficeSectionModel target,
+							CreateConnectionRequest request) {
+
+						// Obtain the selected task
+						OfficeTaskInstance task = OfficeTaskWizard
+								.getOfficeTask(target, OfficeEditor.this);
+						if (task == null) {
+							return null; // no task, no change
+						}
+
+						// Return change to add pre/post duty to task
+						if (task.isPreRatherThanPostDuty()) {
+							// Return change to add pre duty
+							return OfficeEditor.this.getModelChanges()
+									.linkOfficeTaskToPreDuty(
+											task.getOfficeTask(), source,
+											target, task.getOfficeSection());
+						} else {
+							// Return change to add post duty
+							return OfficeEditor.this.getModelChanges()
+									.linkOfficeTaskToPostDuty(
+											task.getOfficeTask(), source,
+											target, task.getOfficeSection());
+						}
+					}
+				});
 	}
 
 	@Override

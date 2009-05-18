@@ -16,12 +16,15 @@
  */
 package net.officefloor.eclipse.util;
 
-import org.eclipse.core.resources.IProject;
-
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
@@ -31,7 +34,10 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.Model;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+
+import org.eclipse.core.resources.IProject;
 
 /**
  * Utility class for working with the {@link Model} instances.
@@ -133,6 +139,57 @@ public class ModelUtil {
 		ManagedObjectType<?> managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSourceClass, properties);
 		return managedObjectType;
+	}
+
+	/**
+	 * Obtains the {@link OfficeSection} for the {@link OfficeSectionModel}.
+	 * 
+	 * @param officeSection
+	 *            {@link OfficeSectionModel}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 * @return {@link OfficeSection} or <code>null</code> if failed to load.
+	 */
+	public static OfficeSection getOfficeSection(
+			OfficeSectionModel officeSection, OfficeFloorCompiler compiler,
+			CompilerIssues issues, AbstractOfficeFloorEditor<?, ?> editor) {
+		try {
+			// Obtain the class loader
+			ClassLoader classLoader = compiler.getClassLoader();
+
+			// Obtain the section source class
+			Class<? extends SectionSource> sectionSourceClass = obtainClass(
+					officeSection.getSectionSourceClassName(),
+					SectionSource.class, classLoader, editor);
+
+			// Create the property list
+			PropertyList propertyList = compiler.createPropertyList();
+			for (net.officefloor.model.office.PropertyModel property : officeSection
+					.getProperties()) {
+				propertyList.addProperty(property.getName()).setValue(
+						property.getValue());
+			}
+
+			// Obtain the section loader
+			SectionLoader sectionLoader = compiler.getSectionLoader();
+
+			// Load and return the section
+			return sectionLoader.loadOfficeSection(officeSection
+					.getOfficeSectionName(), sectionSourceClass, officeSection
+					.getSectionLocation(), propertyList);
+
+		} catch (Throwable ex) {
+			// Report issue in loading section
+			issues.addIssue(LocationType.SECTION, officeSection
+					.getSectionLocation(), null, null,
+					"Failed to load office section: " + ex.getMessage() + " ["
+							+ ex.getClass().getSimpleName() + "]");
+			return null;
+		}
 	}
 
 	/**

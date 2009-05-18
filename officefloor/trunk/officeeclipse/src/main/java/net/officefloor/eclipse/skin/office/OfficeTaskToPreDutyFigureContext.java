@@ -14,26 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.office.models;
+package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 
 /**
- * Post {@link AbstractTaskAdministrationJoinPointModel}.
+ * Context to decorate the {@link OfficeTaskToPreDutyModel} connection.
  * 
  * @author Daniel
  */
-public class PostTaskAdministrationJointPointModel extends
-		AbstractTaskAdministrationJoinPointModel {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param task
-	 *            {@link OfficeTaskModel}.
-	 */
-	public PostTaskAdministrationJointPointModel(OfficeTaskModel task) {
-		super(task, false);
-	}
-
+public interface OfficeTaskToPreDutyFigureContext {
 }

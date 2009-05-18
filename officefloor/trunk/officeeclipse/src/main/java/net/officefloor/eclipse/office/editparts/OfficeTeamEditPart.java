@@ -52,6 +52,7 @@ public class OfficeTeamEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionResponsibilities());
+		models.addAll(this.getCastedModel().getAdministrators());
 	}
 
 	@Override
@@ -95,12 +96,10 @@ public class OfficeTeamEditPart
 			break;
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+		case ADD_ADMINISTRATOR:
+		case REMOVE_ADMINISTRATOR:
 			this.refreshTargetConnections();
 			break;
-		// case ADD_ADMINISTRATOR:
-		// case REMOVE_ADMINISTRATOR:
-		// ExternalTeamEditPart.this.refreshTargetConnections();
-		// break;
 		}
 	}
 

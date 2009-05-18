@@ -21,6 +21,7 @@ import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTeamModel;
 
@@ -58,6 +59,8 @@ public class StandardOfficeTeamFigure extends AbstractOfficeFloorFigure
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeSectionResponsibilityToOfficeTeamModel.class, anchor);
+		this.registerConnectionAnchor(AdministratorToOfficeTeamModel.class,
+				anchor);
 
 		this.setFigure(figure);
 	}

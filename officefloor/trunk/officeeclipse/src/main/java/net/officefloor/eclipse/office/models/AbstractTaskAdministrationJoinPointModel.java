@@ -16,11 +16,8 @@
  */
 package net.officefloor.eclipse.office.models;
 
-import java.util.List;
-
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.model.AbstractModel;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.OfficeTaskModel;
 
@@ -30,8 +27,8 @@ import net.officefloor.model.office.OfficeTaskModel;
  * 
  * @author Daniel
  */
-public abstract class AbstractTaskAdministrationJoinPointModel<C extends ConnectionModel>
-		extends AbstractModel {
+public abstract class AbstractTaskAdministrationJoinPointModel extends
+		AbstractModel {
 
 	/**
 	 * {@link OfficeTaskModel}.
@@ -39,13 +36,23 @@ public abstract class AbstractTaskAdministrationJoinPointModel<C extends Connect
 	private final OfficeTaskModel task;
 
 	/**
+	 * Flag indicating if pre {@link Duty} rather than post {@link Duty}.
+	 */
+	private final boolean isPreRatherThanPost;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param task
 	 *            {@link OfficeTaskModel}.
+	 * @param isPreRatherThanPost
+	 *            Flag indicating if pre {@link Duty} rather than post
+	 *            {@link Duty}.
 	 */
-	public AbstractTaskAdministrationJoinPointModel(OfficeTaskModel task) {
+	public AbstractTaskAdministrationJoinPointModel(OfficeTaskModel task,
+			boolean isPreRatherThanPost) {
 		this.task = task;
+		this.isPreRatherThanPost = isPreRatherThanPost;
 	}
 
 	/**
@@ -58,32 +65,20 @@ public abstract class AbstractTaskAdministrationJoinPointModel<C extends Connect
 	}
 
 	/**
-	 * Triggers a refresh on the connections.
+	 * Indicates if pre {@link Duty} rather than post {@link Duty}.
+	 * 
+	 * @return <code>true</code> if pre {@link Duty}, otherwise
+	 *         <code>false</code> if post {@link Duty}.
 	 */
-	public void triggerRefreshConnections() {
-		this.changeField("old", "new",
-				TaskAdministrationJoinPointEvent.CHANGE_DUTIES);
+	public boolean isPreRatherThanPost() {
+		return this.isPreRatherThanPost;
 	}
 
 	/**
-	 * Obtains the {@link ConnectionModel} instances to the {@link DutyModel}.
-	 * 
-	 * @return {@link ConnectionModel} instances to the {@link DutyModel}.
+	 * Triggers a {@link TaskAdministrationJoinPointEvent#CHANGE_DUTIES} event.
 	 */
-	public abstract List<C> getDutyConnections();
-
-	/**
-	 * Creates the {@link ConnectionModel} from the {@link TaskModel} to the
-	 * {@link DutyModel}.
-	 * 
-	 * @param task
-	 *            {@link OfficeTaskModel}.
-	 * @param duty
-	 *            {@link DutyModel}.
-	 * @return {@link ConnectionModel} between {@link OfficeTaskModel} to the
-	 *         {@link DutyModel}.
-	 */
-	public abstract ConnectionModel createDutyConnection(
-			OfficeTaskModel task, DutyModel duty);
-
+	public void triggerDutyChangeEvent() {
+		this.firePropertyChange(TaskAdministrationJoinPointEvent.CHANGE_DUTIES
+				.name(), "OLD", "NEW");
+	}
 }

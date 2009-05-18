@@ -44,14 +44,9 @@ public class DutyEditPart extends
 	}
 
 	@Override
-	protected void populateModelChildren(List<Object> childModels) {
-		// childModels.addAll(this.getCastedModel().getFlows());
-	}
-
-	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		// models.addAll(this.getCastedModel().getPreAdminFlowItems());
-		// models.addAll(this.getCastedModel().getPostAdminFlowItems());
+		models.addAll(this.getCastedModel().getPreOfficeTasks());
+		models.addAll(this.getCastedModel().getPostOfficeTasks());
 	}
 
 	@Override
@@ -63,16 +58,12 @@ public class DutyEditPart extends
 	protected void handlePropertyChange(DutyEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		// case ADD_FLOW:
-		// case REMOVE_FLOW:
-		// DutyEditPart.this.refreshChildren();
-		// break;
-		// case ADD_PRE_ADMIN_FLOW_ITEM:
-		// case REMOVE_PRE_ADMIN_FLOW_ITEM:
-		// case ADD_POST_ADMIN_FLOW_ITEM:
-		// case REMOVE_POST_ADMIN_FLOW_ITEM:
-		// DutyEditPart.this.refreshTargetConnections();
-		// break;
+		case ADD_PRE_OFFICE_TASK:
+		case REMOVE_PRE_OFFICE_TASK:
+		case ADD_POST_OFFICE_TASK:
+		case REMOVE_POST_OFFICE_TASK:
+			this.refreshTargetConnections();
+			break;
 		}
 	}
 

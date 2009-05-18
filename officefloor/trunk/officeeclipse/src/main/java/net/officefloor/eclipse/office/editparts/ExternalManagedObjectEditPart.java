@@ -50,6 +50,11 @@ public class ExternalManagedObjectEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getAdministrators());
+	}
+
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionObjects());
 	}
@@ -96,15 +101,14 @@ public class ExternalManagedObjectEditPart
 			this.getOfficeFloorFigure().setExternalManagedObjectName(
 					this.getCastedModel().getExternalManagedObjectName());
 			break;
+		case ADD_ADMINISTRATOR:
+		case REMOVE_ADMINISTRATOR:
+			this.refreshSourceConnections();
+			break;
 		case ADD_OFFICE_SECTION_OBJECT:
 		case REMOVE_OFFICE_SECTION_OBJECT:
 			this.refreshTargetConnections();
 			break;
-		// case ADD_ADMINISTRATOR:
-		// case REMOVE_ADMINISTRATOR:
-		// ExternalManagedObjectEditPart.this
-		// .refreshTargetConnections();
-		// break;
 		}
 	}
 
