@@ -31,6 +31,7 @@ import javax.jms.Session;
 import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -63,6 +64,11 @@ public class JmsServerManagedObjectSource
 	 * instances.
 	 */
 	public static final String JMS_MAX_SERVER_SESSIONS = "jms.max.sessions";
+
+	/**
+	 * {@link JmsAdminObjectFactory}.
+	 */
+	private JmsAdminObjectFactory jmsAdminObjectFactory;
 
 	/**
 	 * Connection Factory for the JMS connection.
@@ -156,7 +162,7 @@ public class JmsServerManagedObjectSource
 		context.setObjectClass(Void.class); // may not use
 
 		// Obtain the JMS admin object factory
-		JmsAdminObjectFactory jmsAdminObjectFactory = JmsUtil
+		this.jmsAdminObjectFactory = JmsUtil
 				.getJmsAdminObjectFactory(mosContext);
 
 		// Obtain the property values
@@ -164,11 +170,6 @@ public class JmsServerManagedObjectSource
 				.getProperty(JMS_MAX_SERVER_SESSIONS));
 		this.messageSelector = mosContext.getProperty(JMS_MESSAGE_SELECTOR,
 				null);
-
-		// Obtain the connection factory and destination
-		this.connectionFactory = jmsAdminObjectFactory
-				.createConnectionFactory();
-		this.destination = jmsAdminObjectFactory.createDestination();
 
 		// Link the on message task
 		context
@@ -183,6 +184,8 @@ public class JmsServerManagedObjectSource
 		taskBuilder.linkParameter(
 				OnMessageDependencies.JMS_SERVER_MANAGED_OBJECT,
 				JmsServerManagedObject.class);
+		taskBuilder.linkFlow(OnMessageFlows.ON_MESSAGE, null,
+				FlowInstigationStrategyEnum.SEQUENTIAL, Message.class);
 		taskBuilder.setTeam("team");
 
 		// Register the recycle task
@@ -208,7 +211,12 @@ public class JmsServerManagedObjectSource
 		// Maintain reference to context
 		this.executeContext = context;
 
-		// TODO move the below into a startup task
+		// TODO consider moving the below into a startup task
+
+		// Obtain the connection factory and destination
+		this.connectionFactory = jmsAdminObjectFactory
+				.createConnectionFactory();
+		this.destination = jmsAdminObjectFactory.createDestination();
 
 		// Create the connection
 		this.connection = this.connectionFactory.createConnection();
