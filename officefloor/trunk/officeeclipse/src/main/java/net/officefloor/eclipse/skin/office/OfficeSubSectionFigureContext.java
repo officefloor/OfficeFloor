@@ -14,26 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.office.models;
-
-import net.officefloor.model.office.OfficeTaskModel;
+package net.officefloor.eclipse.skin.office;
 
 /**
- * Post {@link AbstractTaskAdministrationJoinPointModel}.
+ * Context for the {@link OfficeSubSectionFigure}.
  * 
  * @author Daniel
  */
-public class PostTaskAdministrationJointPointModel extends
-		AbstractTaskAdministrationJoinPointModel {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param task
-	 *            {@link OfficeTaskModel}.
-	 */
-	public PostTaskAdministrationJointPointModel(OfficeTaskModel task) {
-		super(task, false);
-	}
+public interface OfficeSubSectionFigureContext {
 
 }

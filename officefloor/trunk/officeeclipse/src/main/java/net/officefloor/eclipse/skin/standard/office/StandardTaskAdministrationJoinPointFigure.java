@@ -17,11 +17,14 @@
 package net.officefloor.eclipse.skin.standard.office;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 
 /**
  * Standard {@link TaskAdministrationJoinPointFigure}.
@@ -29,8 +32,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
  * @author Daniel
  */
 public class StandardTaskAdministrationJoinPointFigure extends
-		AbstractOfficeFloorFigure implements
-		TaskAdministrationJoinPointFigure {
+		AbstractOfficeFloorFigure implements TaskAdministrationJoinPointFigure {
 
 	/**
 	 * Initiate.
@@ -38,6 +40,13 @@ public class StandardTaskAdministrationJoinPointFigure extends
 	public StandardTaskAdministrationJoinPointFigure() {
 		ConnectorFigure figure = new ConnectorFigure(ConnectorDirection.EAST,
 				ColorConstants.black);
+
+		// Register the anchor to pre/post duty
+		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		this.registerConnectionAnchor(OfficeTaskToPreDutyModel.class, anchor);
+		this.registerConnectionAnchor(OfficeTaskToPostDutyModel.class, anchor);
+
 		this.setFigure(figure);
 	}
+
 }

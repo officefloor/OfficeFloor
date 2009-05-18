@@ -19,7 +19,7 @@ package net.officefloor.eclipse.common.editpolicies.connection;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.common.commands.ChangeCommand;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
@@ -89,7 +89,7 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Command getConnectionCompleteCommand(
-			CreateConnectionRequest request) {
+			final CreateConnectionRequest request) {
 
 		// Obtain create command
 		Command startCommand = request.getStartCommand();
@@ -99,11 +99,11 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 		ConnectionCreateCommand createCommand = (ConnectionCreateCommand) startCommand;
 
 		// Obtain the source type
-		Object source = createCommand.getSource();
+		final Object source = createCommand.getSource();
 		Class<?> sourceType = source.getClass();
 
 		// Obtain the target type
-		Object target = this.getHost().getModel();
+		final Object target = this.getHost().getModel();
 		Class<?> targetType = target.getClass();
 
 		// Obtain link to connect source to target
@@ -120,15 +120,42 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 			return null; // no link to connect source to target
 		}
 
-		// Create the change to connect source to target
-		Change<?> change = connectLink.factory.createChange(source, target,
-				request);
-		if (change == null) {
-			return null; // must have change
-		}
+		// Wrap creating change in command to only occur on connection creation
+		final ConnectionChangeFactory factory = connectLink.factory;
+		return new OfficeFloorCommand() {
 
-		// Return command to change
-		return new ChangeCommand(change);
+			/**
+			 * Flag indicated if attempted to create {@link Change}.
+			 */
+			private boolean isChangeCreated = false;
+
+			/**
+			 * {@link Change}.
+			 */
+			private Change<?> change = null;
+
+			@Override
+			protected void doCommand() {
+				// Lazy load the change
+				if (!this.isChangeCreated) {
+					this.isChangeCreated = true;
+					this.change = factory.createChange(source, target, request);
+				}
+
+				// Apply change if have change
+				if (this.change != null) {
+					this.change.apply();
+				}
+			}
+
+			@Override
+			protected void undoCommand() {
+				// Revert if have change
+				if (this.change != null) {
+					this.change.revert();
+				}
+			}
+		};
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
@@ -56,11 +57,12 @@ public class AdministratorEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// models.addAll(this.getCastedModel().getManagedObjects());
-		// AdministratorToTeamModel team = this.getCastedModel().getTeam();
-		// if (team != null) {
-		// models.add(team);
-		// }
+		EclipseUtil.addToList(models, this.getCastedModel().getOfficeTeam());
+	}
+
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getExternalManagedObjects());
 	}
 
 	@Override
@@ -107,13 +109,13 @@ public class AdministratorEditPart
 		case REMOVE_DUTY:
 			this.refreshChildren();
 			break;
-		// case ADD_MANAGED_OBJECT:
-		// case REMOVE_MANAGED_OBJECT:
-		// AdministratorEditPart.this.refreshSourceConnections();
-		// break;
-		// case CHANGE_TEAM:
-		// AdministratorEditPart.this.refreshSourceConnections();
-		// break;
+		case CHANGE_OFFICE_TEAM:
+			this.refreshSourceConnections();
+			break;
+		case ADD_EXTERNAL_MANAGED_OBJECT:
+		case REMOVE_EXTERNAL_MANAGED_OBJECT:
+			this.refreshTargetConnections();
+			break;
 		}
 	}
 

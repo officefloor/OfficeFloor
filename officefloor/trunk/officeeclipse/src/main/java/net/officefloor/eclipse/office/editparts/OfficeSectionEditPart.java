@@ -25,6 +25,7 @@ import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeSectionModel;
@@ -56,6 +57,8 @@ public class OfficeSectionEditPart
 		childModels.addAll(this.getCastedModel().getOfficeSectionObjects());
 		childModels.addAll(this.getCastedModel()
 				.getOfficeSectionResponsibilities());
+		EclipseUtil.addToList(childModels, this.getCastedModel()
+				.getOfficeSubSection());
 	}
 
 	@Override
@@ -106,6 +109,7 @@ public class OfficeSectionEditPart
 		case REMOVE_OFFICE_SECTION_OBJECT:
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+		case CHANGE_OFFICE_SUB_SECTION:
 			this.refreshChildren();
 			break;
 		}

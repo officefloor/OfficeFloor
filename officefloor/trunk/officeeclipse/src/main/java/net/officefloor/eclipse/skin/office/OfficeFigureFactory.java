@@ -19,8 +19,10 @@ package net.officefloor.eclipse.skin.office;
 import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -31,7 +33,10 @@ import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTaskToPostDutyModel;
+import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 
 import org.eclipse.draw2d.IFigure;
@@ -76,6 +81,17 @@ public interface OfficeFigureFactory {
 			ExternalManagedObjectFigureContext context);
 
 	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeEscalationModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeEscalationFigureContext}.
+	 * @return {@link OfficeEscalationFigure}.
+	 */
+	OfficeEscalationFigure createOfficeEscalationFigure(
+			OfficeEscalationFigureContext context);
+
+	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTeamModel}.
 	 * 
 	 * @param context
@@ -83,23 +99,6 @@ public interface OfficeFigureFactory {
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	OfficeTeamFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
-	 * 
-	 * @param context
-	 *            {@link OfficeTaskFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link AbstractTaskAdministrationJoinPointModel}.
-	 * 
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure();
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
@@ -146,17 +145,6 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link OfficeEscalationModel}.
-	 * 
-	 * @param context
-	 *            {@link OfficeEscalationFigureContext}.
-	 * @return {@link OfficeEscalationFigure}.
-	 */
-	OfficeEscalationFigure createOfficeEscalationFigure(
-			OfficeEscalationFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSectionResponsibilityModel}.
 	 * 
 	 * @param context
@@ -165,6 +153,34 @@ public interface OfficeFigureFactory {
 	 */
 	OfficeSectionResponsibilityFigure createOfficeSectionResponsibilityFigure(
 			OfficeSectionResponsibilityFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeSubSectionModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSubSectionFigureContext}.
+	 * @return {@link OfficeSubSectionFigure}.
+	 */
+	OfficeSubSectionFigure createOfficeSubSectionFigure(
+			OfficeSubSectionFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeTaskFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link AbstractTaskAdministrationJoinPointModel}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure();
 
 	/**
 	 * Decorates the {@link OfficeSectionObjectToExternalManagedObjectModel}
@@ -204,5 +220,50 @@ public interface OfficeFigureFactory {
 	void decorateOfficeSectionResponsibilityToOfficeTeam(
 			PolylineConnection figure,
 			OfficeSectionResponsibilityToOfficeTeamFigureContext context);
+
+	/**
+	 * Decorates the {@link AdministratorToOfficeTeamModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link AdministratorToOfficeTeamFigureContext}.
+	 */
+	void decorateAdministratorToOfficeTeamFigure(PolylineConnection figure,
+			AdministratorToOfficeTeamFigureContext context);
+
+	/**
+	 * Decorates the {@link ExternalManagedObjectToAdministratorModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link ExternalManagedObjectToAdministratorFigureContext}.
+	 */
+	void decorateExternalManagedObjectToAdministratorFigure(
+			PolylineConnection figure,
+			ExternalManagedObjectToAdministratorFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeTaskToPreDutyModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeTaskToPreDutyFigureContext}.
+	 */
+	void decorateOfficeTaskToPreDutyFigure(PolylineConnection figure,
+			OfficeTaskToPreDutyFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeTaskToPostDutyModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeTaskToPostDutyFigureContext}.
+	 */
+	void decorateOfficeTaskToPostDutyFigure(PolylineConnection figure,
+			OfficeTaskToPostDutyFigureContext context);
 
 }

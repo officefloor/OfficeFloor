@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.wizard;
 
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -44,11 +45,24 @@ public class WizardUtil {
 	 */
 	public static boolean runWizard(IWizard wizard,
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+		return runWizard(wizard, editPart.getEditor());
+	}
 
+	/**
+	 * Runs the {@link IWizard}.
+	 * 
+	 * @param wizard
+	 *            {@link IWizard}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 * @return <code>true</code> if successful.
+	 */
+	public static boolean runWizard(IWizard wizard,
+			AbstractOfficeFloorEditor<?, ?> editor) {
 		try {
 
 			// Obtain the editor size
-			IEditorSite editorSite = editPart.getEditor().getEditorSite();
+			IEditorSite editorSite = editor.getEditorSite();
 
 			// Initiate the wizard
 			if (wizard instanceof IWorkbenchWizard) {
@@ -82,7 +96,7 @@ public class WizardUtil {
 			return isSuccessful;
 
 		} catch (Throwable ex) {
-			editPart.messageError(ex);
+			editor.messageError(ex);
 			return false;
 		}
 	}

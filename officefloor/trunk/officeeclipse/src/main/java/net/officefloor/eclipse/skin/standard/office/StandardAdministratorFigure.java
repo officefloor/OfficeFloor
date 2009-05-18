@@ -24,6 +24,8 @@ import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.AdministratorToOfficeTeamModel;
+import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -62,31 +64,36 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		NoSpacingGridLayout layout = new NoSpacingGridLayout(3);
 		figure.setLayoutManager(layout);
 
+		// Managed Object connector
+		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.WEST,
+				ColorConstants.black);
+		mo.setBorder(new MarginBorder(10, 0, 0, 0));
+		figure.add(mo);
+		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
+
+		// Register the anchor to external managed objects
+		this.registerConnectionAnchor(
+				ExternalManagedObjectToAdministratorModel.class, mo
+						.getConnectionAnchor());
+
+		// Create the administrator container
+		RoundedContainerFigure administrator = new RoundedContainerFigure(
+				context.getAdministratorName(), administratorColour, 20, false);
+		figure.add(administrator);
+		this.administratorName = administrator.getContainerName();
+
 		// Team connector
-		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.WEST,
+		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.EAST,
 				ColorConstants.black);
 		team.setBorder(new MarginBorder(10, 0, 0, 0));
-		// this.registerConnectionAnchor(AdministratorToTeamModel.class, team
-		// .getConnectionAnchor());
 		figure.add(team);
 		layout
 				.setConstraint(team, new GridData(0, SWT.BEGINNING, false,
 						false));
 
-		// Create the administrator container
-		RoundedContainerFigure administrator = new RoundedContainerFigure(context
-				.getAdministratorName(), administratorColour, 20, false);
-		figure.add(administrator);
-		this.administratorName = administrator.getContainerName();
-
-		// Managed Object connector
-		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.EAST,
-				ColorConstants.black);
-		mo.setBorder(new MarginBorder(10, 0, 0, 0));
-		// this.registerConnectionAnchor(AdministratorToManagedObjectModel.class,
-		// mo.getConnectionAnchor());
-		figure.add(mo);
-		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
+		// Register the anchor to team
+		this.registerConnectionAnchor(AdministratorToOfficeTeamModel.class,
+				team.getConnectionAnchor());
 
 		// Specify the figures
 		this.setFigure(figure);

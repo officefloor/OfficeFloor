@@ -16,47 +16,40 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
-import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSubSectionFigure;
+import net.officefloor.eclipse.skin.office.OfficeSubSectionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MarginBorder;
 
 /**
- * Standard {@link OfficeTaskFigure}.
+ * {@link OfficeSubSectionFigure} implementation.
  * 
  * @author Daniel
  */
-public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
-		implements OfficeTaskFigure {
+public class StandardOfficeSubSectionFigure extends AbstractOfficeFloorFigure
+		implements OfficeSubSectionFigure {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link OfficeTaskFigureContext}.
+	 *            {@link OfficeSubSectionFigureContext}.
 	 */
-	public StandardOfficeTaskFigure(OfficeTaskFigureContext context) {
+	public StandardOfficeSubSectionFigure(OfficeSubSectionFigureContext context) {
 
-		// Create the figure
 		Figure figure = new Figure();
-		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(2);
-		figure.setLayoutManager(figureLayout);
+		figure.setLayoutManager(new NoSpacingToolbarLayout(true));
 
-		// Create the task name
-		Label task = new Label(context.getOfficeTaskName());
-		figure.add(task);
-
-		// Create the container for child connectors
+		// Content pane
 		Figure contentPane = new Figure();
-		NoSpacingGridLayout contentPaneLayout = new NoSpacingGridLayout(1);
-		contentPaneLayout.verticalSpacing = 2;
-		contentPane.setLayoutManager(contentPaneLayout);
+		contentPane.setLayoutManager(new NoSpacingToolbarLayout(false));
+		contentPane.setBorder(new MarginBorder(2, 4, 2, 2));
 		figure.add(contentPane);
 
-		// Specify the figure
+		// Specify the figure and content pane
 		this.setFigure(figure);
 		this.setContentPane(contentPane);
 	}

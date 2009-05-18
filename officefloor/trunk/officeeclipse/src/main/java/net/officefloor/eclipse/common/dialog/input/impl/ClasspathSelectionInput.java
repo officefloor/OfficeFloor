@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -42,7 +43,7 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
- * Abstract {@link Input} to obtain an item from the class path.
+ * {@link Input} to obtain an item from the class path.
  * 
  * @author Daniel
  */
@@ -126,20 +127,15 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
-	 * officefloor.eclipse.common.dialog.input.InputContext)
+	 * ================= Input ===================================
 	 */
+
 	@Override
 	public Tree buildControl(final InputContext context) {
 
 		// Create the tree
 		final Tree tree = new Tree(context.getParent(), SWT.NONE);
-		GridData gridData = new GridData(GridData.FILL_BOTH);
-		gridData.heightHint = 150; // hint on height
-		gridData.widthHint = 200; // hint on width
-		tree.setLayoutData(gridData);
+		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Obtain the root of the tree
 		Object treeInput = this.getTreeRootItem();
@@ -164,14 +160,6 @@ public class ClasspathSelectionInput implements Input<Tree> {
 		return tree;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
-	 * .swt.widgets.Control,
-	 * net.officefloor.eclipse.common.dialog.input.InputContext)
-	 */
 	@Override
 	public Object getValue(Tree control, InputContext context) {
 
@@ -203,18 +191,15 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	}
 
 	/**
-	 * Classpath {@link WorkbenchContentProvider}.
+	 * Class path {@link WorkbenchContentProvider}.
 	 */
 	private class ClasspathWorkbenchContentProvider extends
 			WorkbenchContentProvider {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.ui.model.BaseWorkbenchContentProvider#getChildren(java
-		 * .lang.Object)
+		 * ================ BaseWorkbenchContentProvider ===================
 		 */
+
 		@Override
 		public Object[] getChildren(Object o) {
 			try {
@@ -231,10 +216,10 @@ public class ClasspathSelectionInput implements Input<Tree> {
 
 			} catch (Exception ex) {
 
-				// TODO remove
-				System.err.println("Failed to get children ["
-						+ this.getClass().getName() + "]");
-				ex.printStackTrace();
+				// Indicate error
+				MessageDialog.openError(null, "Error",
+						"Failed to get children: " + ex.getMessage() + " ["
+								+ this.getClass().getSimpleName() + "]");
 
 				// Failed to get children
 				return new Object[0];

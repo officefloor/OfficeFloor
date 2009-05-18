@@ -19,9 +19,11 @@ package net.officefloor.model.office;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.change.Change;
 
@@ -335,5 +337,114 @@ public interface OfficeChanges {
 	 */
 	Change<OfficeSectionResponsibilityToOfficeTeamModel> removeOfficeSectionResponsibilityToOfficeTeam(
 			OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam);
+
+	/**
+	 * Links the {@link AdministratorModel} to the {@link OfficeTeamModel}.
+	 * 
+	 * @param administrator
+	 *            {@link AdministratorModel}.
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel}.
+	 * @return {@link Change} to add the {@link AdministratorToOfficeTeamModel}.
+	 */
+	Change<AdministratorToOfficeTeamModel> linkAdministratorToOfficeTeam(
+			AdministratorModel administrator, OfficeTeamModel officeTeam);
+
+	/**
+	 * Removes the {@link AdministratorToOfficeTeamModel}.
+	 * 
+	 * @param administratorToOfficeTeam
+	 *            {@link AdministratorToOfficeTeamModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link AdministratorToOfficeTeamModel}.
+	 */
+	Change<AdministratorToOfficeTeamModel> removeAdministratorToOfficeTeam(
+			AdministratorToOfficeTeamModel administratorToOfficeTeam);
+
+	/**
+	 * Links the {@link ExternalManagedObjectModel} to the
+	 * {@link AdministratorModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @param administrator
+	 *            {@link AdministratorModel}.
+	 * @return {@link Change} to add the
+	 *         {@link ExternalManagedObjectToAdministratorModel}.
+	 */
+	Change<ExternalManagedObjectToAdministratorModel> linkExternalManagedObjectToAdministrator(
+			ExternalManagedObjectModel externalManagedObject,
+			AdministratorModel administrator);
+
+	/**
+	 * Removes the {@link ExternalManagedObjectToAdministratorModel}.
+	 * 
+	 * @param externalManagedObjectToAdministrator
+	 *            {@link ExternalManagedObjectToAdministratorModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link ExternalManagedObjectToAdministratorModel}.
+	 */
+	Change<ExternalManagedObjectToAdministratorModel> removeExternalManagedObjectToAdministrator(
+			ExternalManagedObjectToAdministratorModel externalManagedObjectToAdministrator);
+
+	/**
+	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
+	 * pre-administration.
+	 * 
+	 * @param officeTask
+	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
+	 *            {@link OfficeTaskModel} exists for it.
+	 * @param duty
+	 *            {@link DutyModel}.
+	 * @param officeSectionModel
+	 *            {@link OfficeSectionModel} to ensure {@link OfficeTaskModel}
+	 *            exists on.
+	 * @param officeSection
+	 *            {@link OfficeSection} for the {@link OfficeSectionModel}.
+	 * @return {@link Change} to add the {@link OfficeTaskToPreDutyModel}.
+	 */
+	Change<OfficeTaskToPreDutyModel> linkOfficeTaskToPreDuty(
+			OfficeTask officeTask, DutyModel duty,
+			OfficeSectionModel officeSectionModel, OfficeSection officeSection);
+
+	/**
+	 * Removes the {@link OfficeTaskToPreDutyModel}.
+	 * 
+	 * @param officeTaskToPreDuty
+	 *            {@link OfficeTaskToPreDutyModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeTaskToPreDutyModel}.
+	 */
+	Change<OfficeTaskToPreDutyModel> removeOfficeTaskToPreDuty(
+			OfficeTaskToPreDutyModel officeTaskToPreDuty);
+
+	/**
+	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
+	 * post-administration.
+	 * 
+	 * @param officeTask
+	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
+	 *            {@link OfficeTaskModel} exists for it.
+	 * @param duty
+	 *            {@link DutyModel}.
+	 * @param officeSectionModel
+	 *            {@link OfficeSectionModel} to ensure {@link OfficeTaskModel}
+	 *            exists on.
+	 * @param officeSection
+	 *            {@link OfficeSection} for the {@link OfficeSectionModel}.
+	 * @return {@link Change} to add the {@link OfficeTaskToPostDutyModel}.
+	 */
+	Change<OfficeTaskToPostDutyModel> linkOfficeTaskToPostDuty(
+			OfficeTask officeTask, DutyModel duty,
+			OfficeSectionModel officeSectionModel, OfficeSection officeSection);
+
+	/**
+	 * Removes the {@link OfficeTaskToPostDutyModel}.
+	 * 
+	 * @param officeTaskToPostDuty
+	 *            {@link OfficeTaskToPostDutyModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeTaskToPostDutyModel}.
+	 */
+	Change<OfficeTaskToPostDutyModel> removeOfficeTaskToPostDuty(
+			OfficeTaskToPostDutyModel officeTaskToPostDuty);
 
 }

@@ -43,19 +43,19 @@ public class OfficeTaskEditPart
 	/**
 	 * {@link PreTaskAdministrationJointPointModel}.
 	 */
-	private PreTaskAdministrationJointPointModel preFlowItemAdministrationJoinPoint;
+	private PreTaskAdministrationJointPointModel preTaskAdministrationJoinPoint;
 
 	/**
 	 * {@link PostTaskAdministrationJointPointModel}.
 	 */
-	private PostTaskAdministrationJointPointModel postFlowItemAdministrationJoinPoint;
+	private PostTaskAdministrationJointPointModel postTaskAdministrationJoinPoint;
 
 	@Override
 	protected void init() {
-		// Create the flow item administration join points
-		this.preFlowItemAdministrationJoinPoint = new PreTaskAdministrationJointPointModel(
+		// Create the task administration join points
+		this.preTaskAdministrationJoinPoint = new PreTaskAdministrationJointPointModel(
 				this.getCastedModel());
-		this.postFlowItemAdministrationJoinPoint = new PostTaskAdministrationJointPointModel(
+		this.postTaskAdministrationJoinPoint = new PostTaskAdministrationJointPointModel(
 				this.getCastedModel());
 	}
 
@@ -67,22 +67,9 @@ public class OfficeTaskEditPart
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		// Add flow item administration join points
-		childModels.add(this.preFlowItemAdministrationJoinPoint);
-		childModels.add(this.postFlowItemAdministrationJoinPoint);
-	}
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// FlowItemToTeamModel team = this.getCastedModel().getTeam();
-		// if (team != null) {
-		// models.add(team);
-		// }
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// models.addAll(this.getCastedModel().getDutyFlows());
+		// Add task administration join points
+		childModels.add(this.preTaskAdministrationJoinPoint);
+		childModels.add(this.postTaskAdministrationJoinPoint);
 	}
 
 	@Override
@@ -94,23 +81,14 @@ public class OfficeTaskEditPart
 	protected void handlePropertyChange(OfficeTaskEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		// case ADD_PRE_ADMIN_DUTY:
-		// case REMOVE_PRE_ADMIN_DUTY:
-		// FlowItemEditPart.this.preFlowItemAdministrationJoinPoint
-		// .triggerRefreshConnections();
-		// break;
-		// case ADD_POST_ADMIN_DUTY:
-		// case REMOVE_POST_ADMIN_DUTY:
-		// FlowItemEditPart.this.postFlowItemAdministrationJoinPoint
-		// .triggerRefreshConnections();
-		// break;
-		// case CHANGE_TEAM:
-		// FlowItemEditPart.this.refreshSourceConnections();
-		// break;
-		// case ADD_DUTY_FLOW:
-		// case REMOVE_DUTY_FLOW:
-		// FlowItemEditPart.this.refreshTargetConnections();
-		// break;
+		case ADD_PRE_DUTY:
+		case REMOVE_PRE_DUTY:
+			this.preTaskAdministrationJoinPoint.triggerDutyChangeEvent();
+			break;
+		case ADD_POST_DUTY:
+		case REMOVE_POST_DUTY:
+			this.postTaskAdministrationJoinPoint.triggerDutyChangeEvent();
+			break;
 		}
 	}
 

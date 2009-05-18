@@ -16,10 +16,6 @@
  */
 package net.officefloor.eclipse.office.models;
 
-import java.util.List;
-
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.OfficeTaskModel;
 
 /**
@@ -27,9 +23,8 @@ import net.officefloor.model.office.OfficeTaskModel;
  * 
  * @author Daniel
  */
-public class PreTaskAdministrationJointPointModel
-		extends
-		AbstractTaskAdministrationJoinPointModel<ConnectionModel> {
+public class PreTaskAdministrationJointPointModel extends
+		AbstractTaskAdministrationJoinPointModel {
 
 	/**
 	 * Initiate.
@@ -38,23 +33,7 @@ public class PreTaskAdministrationJointPointModel
 	 *            {@link OfficeTaskModel}.
 	 */
 	public PreTaskAdministrationJointPointModel(OfficeTaskModel task) {
-		super(task);
-	}
-
-	@Override
-	public ConnectionModel createDutyConnection(OfficeTaskModel task,
-			DutyModel duty) {
-//		FlowItemToPreAdministratorDutyModel connection = new FlowItemToPreAdministratorDutyModel();
-//		connection.setFlowItem(flowItem);
-//		connection.setDuty(duty);
-//		return connection;
-		return null;
-	}
-
-	@Override
-	public List<ConnectionModel> getDutyConnections() {
-//		return this.getFlowItem().getPreAdminDutys();
-		return null;
+		super(task, true);
 	}
 
 }
