@@ -48,13 +48,18 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -346,7 +351,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			OfficeNode managingOffice, OfficeBuilder officeBuilder) {
 
 		// Obtain the name to add this managed object source
-		String managedObjectSourceName = this.getManagedObjectSourceName();
+		final String managedObjectSourceName = this
+				.getManagedObjectSourceName();
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = this.getManagedObjectType();
@@ -396,7 +402,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the flows for the managed object source
-		for (ManagedObjectFlowType<?> flowType : flowTypes) {
+		for (final ManagedObjectFlowType<?> flowType : flowTypes) {
 
 			// Obtain the flow type details
 			String flowName = flowType.getFlowName();
@@ -432,14 +438,54 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				continue; // task must be within managing office
 			}
 
-			// Link the flow to the task
-			String workName = workNode.getQualifiedWorkName();
-			String taskName = taskNode.getOfficeTaskName();
-			if (flowKey != null) {
-				managingOfficeBuilder.linkProcess(flowKey, workName, taskName);
+			// Obtain the details of task to link flow
+			final String workName = workNode.getQualifiedWorkName();
+			final String taskName = taskNode.getOfficeTaskName();
+
+			// Determine if flow from task
+			String flowTaskName = flowType.getTaskName();
+			if (CompileUtil.isBlank(flowTaskName)) {
+				// Link the flow directly from managed object source to the task
+				if (flowKey != null) {
+					managingOfficeBuilder.linkProcess(flowKey, workName,
+							taskName);
+				} else {
+					managingOfficeBuilder.linkProcess(flowIndex, workName,
+							taskName);
+				}
+
 			} else {
-				managingOfficeBuilder
-						.linkProcess(flowIndex, workName, taskName);
+
+				// TODO test office enhancing for managed object source
+
+				// Link flow from task to its task
+				officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
+					@Override
+					public void enhanceOffice(OfficeEnhancerContext context) {
+
+						// Obtain the flow builder for the task
+						String flowWorkName = OfficeBuilderImpl
+								.getNamespacedName(managedObjectSourceName,
+										flowType.getWorkName());
+						String flowTaskName = flowType.getTaskName();
+						FlowNodeBuilder flowBuilder = context
+								.getFlowNodeBuilder(flowWorkName, flowTaskName);
+
+						// Link in the flow
+						Enum<?> flowKey = flowType.getKey();
+						Class<?> argumentType = flowType.getArgumentType();
+						if (flowKey != null) {
+							flowBuilder.linkFlow(flowKey, workName, taskName,
+									FlowInstigationStrategyEnum.SEQUENTIAL,
+									argumentType);
+						} else {
+							int flowIndex = flowType.getIndex();
+							flowBuilder.linkFlow(flowIndex, workName, taskName,
+									FlowInstigationStrategyEnum.SEQUENTIAL,
+									argumentType);
+						}
+					}
+				});
 			}
 		}
 

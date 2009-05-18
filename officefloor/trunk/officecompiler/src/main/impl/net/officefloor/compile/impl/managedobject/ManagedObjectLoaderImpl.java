@@ -565,9 +565,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							return null; // no task name then no work name
 						}
 
+						// Obtain the flow key and index
+						Enum<?> flowKey = flow.getKey();
+						int flowIndex = (flowKey == null ? i : flowKey
+								.ordinal());
+
 						// Create and add the required flow
 						taskFlows.add(new ManagedObjectFlowTypeImpl(workName,
-								taskName, i, argumentType, null, flowName));
+								taskName, flowIndex, argumentType, flowKey,
+								flowName));
 
 					} else {
 						// Linking to a task and determine if same work
