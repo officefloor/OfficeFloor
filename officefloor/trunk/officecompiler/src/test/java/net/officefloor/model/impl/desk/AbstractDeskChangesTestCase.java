@@ -88,10 +88,10 @@ public abstract class AbstractDeskChangesTestCase extends
 	 *            {@link WorkTypeConstructor} to construct the {@link WorkType}.
 	 * @return {@link WorkType}.
 	 */
-	protected WorkType<?> constructWorkType(WorkTypeConstructor constructor) {
+	protected WorkType<Work> constructWorkType(WorkTypeConstructor constructor) {
 
 		// Create the work type builder
-		WorkTypeImpl<?> workTypeBuilder = new WorkTypeImpl<Work>();
+		WorkTypeImpl<Work> workTypeBuilder = new WorkTypeImpl<Work>();
 
 		// Build the work type via the constructor
 		WorkTypeContext context = new WorkTypeContextImpl(workTypeBuilder);

@@ -1,0 +1,28 @@
+<desk>
+    <external-flows>
+        <external-flow name="FLOW" />
+    </external-flows>
+    <works>
+        <work name="WORK" source="net.example.ExampleWorkSource">
+            <work-task name="WORK_TASK" />
+        </work>
+    </works>
+    <tasks>
+        <task name="TASK" work="TASK" task="WORK_TASK" return-type="java.lang.Long">
+            <task-flow name="CHANGE_DETAILS" key="KEY_TWO"
+                argument-type="java.lang.Byte">
+                <external-flow name="FLOW" />
+            </task-flow>
+            <task-flow name="ADDED" argument-type="java.lang.String" />
+            <task-flow name="RENAME_NEW" argument-type="java.lang.Integer">
+                <external-flow name="FLOW" />
+            </task-flow>
+            <task-flow name="REORDER_B" argument-type="java.lang.Double">
+                <external-flow name="FLOW" />
+            </task-flow>
+            <task-flow name="REORDER_A" argument-type="java.lang.Float">
+                <task name="TASK" />
+            </task-flow>
+        </task>
+    </tasks>
+</desk>
