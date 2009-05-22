@@ -16,8 +16,13 @@
  */
 package net.officefloor.model.desk;
 
+import java.util.Map;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
@@ -25,13 +30,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
  * Changes that can be made to a {@link DeskModel}.
@@ -99,9 +97,48 @@ public interface DeskChanges {
 	 */
 	Change<WorkModel> renameWork(WorkModel workModel, String newWorkName);
 
-	// TODO determine how conformWork is to be implemented
-	<W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
-			WorkType<W> workType);
+	/**
+	 * Refactors the {@link WorkModel}.
+	 * 
+	 * @param workModel
+	 *            {@link WorkModel} to refactor.
+	 * @param workName
+	 *            New name for the {@link WorkModel}.
+	 * @param workSourceClassName
+	 *            New {@link WorkSource} class name for the {@link WorkModel}.
+	 * @param properties
+	 *            New {@link PropertyList} for the {@link WorkModel}.
+	 * @param workType
+	 *            {@link WorkType} that the {@link WorkModel} is being
+	 *            refactored to.
+	 * @param workTaskNameMapping
+	 *            Mapping of the {@link TaskType} name to the
+	 *            {@link WorkTaskModel} name.
+	 * @param workTaskToObjectNameMapping
+	 *            Mapping of the {@link WorkTaskModel} name to the
+	 *            {@link TaskObjectType} name to the {@link WorkTaskObjectModel}
+	 *            name.
+	 * @param taskToFlowNameMapping
+	 *            Mapping of the {@link TaskModel} name to the
+	 *            {@link TaskFlowType} name to the {@link TaskFlowModel} name.
+	 * @param taskToEscalationTypeMapping
+	 *            Mapping of the {@link TaskModel} name to the
+	 *            {@link TaskEscalationType} type to the
+	 *            {@link TaskEscalationModel} type.
+	 * @param taskNames
+	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
+	 *            list results in loading all {@link WorkTaskModel} instances
+	 *            for the {@link WorkType}.
+	 * @return {@link Change} to refactor the {@link WorkModel}.
+	 */
+	<W extends Work> Change<WorkModel> refactorWork(WorkModel workModel,
+			String workName, String workSourceClassName,
+			PropertyList properties, WorkType<W> workType,
+			Map<String, String> workTaskNameMapping,
+			Map<String, Map<String, String>> workTaskToObjectNameMapping,
+			Map<String, Map<String, String>> taskToFlowNameMapping,
+			Map<String, Map<String, String>> taskToEscalationTypeMapping,
+			String... taskNames);
 
 	/**
 	 * Adds the {@link TaskType} as a {@link WorkTaskModel} to the
@@ -192,10 +229,6 @@ public interface DeskChanges {
 	 * @return {@link Change} to set the {@link TaskModel} public/private.
 	 */
 	Change<TaskModel> setTaskAsPublic(boolean isPublic, TaskModel taskModel);
-
-	// TODO determine how conformTask is to be implemented
-	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> conformTask(
-			WorkTaskModel taskModel, TaskType<W, D, F> taskType);
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.

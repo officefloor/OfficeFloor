@@ -5,6 +5,7 @@ Bundle-SymbolicName: net.officefloor.model;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
 Export-Package: net.officefloor.model,
+ net.officefloor.model.conform,
  net.officefloor.model.desk,
  net.officefloor.model.office,
  net.officefloor.model.officefloor,

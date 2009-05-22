@@ -17,11 +17,14 @@
 package net.officefloor.model.impl.desk;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.properties.Property;
@@ -35,8 +38,8 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -574,11 +577,256 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
-	public <W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
-			WorkType<W> workType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.conformWork");
+	public <W extends Work> Change<WorkModel> refactorWork(
+			final WorkModel workModel, final String workName,
+			final String workSourceClassName, PropertyList properties,
+			WorkType<W> workType, Map<String, String> workTaskNameMapping,
+			Map<String, Map<String, String>> workTaskToObjectNameMapping,
+			Map<String, Map<String, String>> taskToFlowNameMapping,
+			Map<String, Map<String, String>> taskToEscalationTypeMapping,
+			String... taskNames) {
+
+		// TODO test this method (refactorWork)
+
+		// Create the list to contain all refactor changes
+		final List<Change<?>> refactor = new LinkedList<Change<?>>();
+
+		// Add change to rename the work
+		final String existingWorkName = workModel.getWorkName();
+		refactor.add(new AbstractChange<WorkModel>(workModel, "Rename work") {
+			@Override
+			public void apply() {
+				workModel.setWorkName(workName);
+			}
+
+			@Override
+			public void revert() {
+				workModel.setWorkName(existingWorkName);
+			}
+		});
+
+		// Add change for work class source name
+		final String existingWorkSourceClassName = workModel
+				.getWorkSourceClassName();
+		refactor.add(new AbstractChange<WorkModel>(workModel,
+				"Change WorkSource class") {
+			@Override
+			public void apply() {
+				workModel.setWorkSourceClassName(workSourceClassName);
+			}
+
+			@Override
+			public void revert() {
+				workModel.setWorkSourceClassName(existingWorkSourceClassName);
+			}
+		});
+
+		// Add change to the properties
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				workModel.getProperties());
+		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
+		for (Property property : properties) {
+			newProperties.add(new PropertyModel(property.getName(), property
+					.getValue()));
+		}
+		refactor.add(new AbstractChange<WorkModel>(workModel,
+				"Change work properties") {
+			@Override
+			public void apply() {
+				for (PropertyModel property : existingProperties) {
+					workModel.removeProperty(property);
+				}
+				for (PropertyModel property : newProperties) {
+					workModel.addProperty(property);
+				}
+			}
+
+			@Override
+			public void revert() {
+				for (PropertyModel property : newProperties) {
+					workModel.removeProperty(property);
+				}
+				for (PropertyModel property : existingProperties) {
+					workModel.addProperty(property);
+				}
+			}
+		});
+
+		// Create the map of existing work tasks to their names
+		Map<String, WorkTaskModel> existingWorkTasks = new HashMap<String, WorkTaskModel>();
+		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
+			existingWorkTasks.put(workTask.getWorkTaskName(), workTask);
+		}
+
+		// Refactor tasks
+		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
+
+			// Obtain the name of the task
+			String taskName = taskType.getTaskName();
+
+			// Obtain the existing work task for task type
+			final WorkTaskModel workTask = this.getExistingItem(taskName,
+					workTaskNameMapping, existingWorkTasks);
+
+			// Work task to be refactored, so object name mappings
+			Map<String, String> objectTargetToExisting = workTaskToObjectNameMapping
+					.get(taskName);
+			if (objectTargetToExisting == null) {
+				// Provide default empty map
+				objectTargetToExisting = new HashMap<String, String>(0);
+			}
+
+			// Create the map of existing work task objects to their names
+			Map<String, WorkTaskObjectModel> existingWorkTaskObjects = new HashMap<String, WorkTaskObjectModel>();
+			if (workTask != null) {
+				for (WorkTaskObjectModel workTaskObject : workTask
+						.getTaskObjects()) {
+					existingWorkTaskObjects.put(workTaskObject.getObjectName(),
+							workTaskObject);
+				}
+			}
+
+			// Obtain the objects in order as per type
+			TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
+			final WorkTaskObjectModel[] targetObjectOrder = new WorkTaskObjectModel[objectTypes.length];
+			for (int i = 0; i < objectTypes.length; i++) {
+				TaskObjectType<?> objectType = objectTypes[i];
+
+				// Obtain the details of the object type
+				String objectName = objectType.getObjectName();
+				Enum<?> objectKey = objectType.getKey();
+				final String objectKeyName = (objectKey == null ? null
+						: objectKey.name());
+				Class<?> objectClass = objectType.getObjectType();
+				final String objectTypeName = (objectClass == null ? null
+						: objectClass.getName());
+
+				// Obtain the existing object for object type
+				final WorkTaskObjectModel workTaskObject = this
+						.getExistingItem(objectName, objectTargetToExisting,
+								existingWorkTaskObjects);
+
+				// Determine if existing task object
+				if (workTaskObject == null) {
+					// No existing object, so create one
+					targetObjectOrder[i] = new WorkTaskObjectModel(objectName,
+							objectKeyName, objectTypeName, false);
+
+				} else {
+					// Existing object, so add to order
+					targetObjectOrder[i] = workTaskObject;
+
+					// Match on name, but must refactor other object details
+					final String existingKeyName = workTaskObject.getKey();
+					final String existingTypeName = workTaskObject
+							.getObjectType();
+					refactor.add(new AbstractChange<WorkTaskObjectModel>(
+							workTaskObject, "Refactor work task object") {
+						@Override
+						public void apply() {
+							workTaskObject.setKey(objectKeyName);
+							workTaskObject.setObjectType(objectTypeName);
+						}
+
+						@Override
+						public void revert() {
+							workTaskObject.setKey(existingKeyName);
+							workTaskObject.setObjectType(existingTypeName);
+						}
+					});
+				}
+			}
+
+			// Obtain the existing object order
+			final WorkTaskObjectModel[] existingObjectOrder = (workTask == null ? new WorkTaskObjectModel[0]
+					: workTask.getTaskObjects().toArray(
+							new WorkTaskObjectModel[0]));
+
+			// Add changes to disconnect existing objects to be removed
+			Set<WorkTaskObjectModel> targetObjects = new HashSet<WorkTaskObjectModel>(
+					Arrays.asList(targetObjectOrder));
+			for (WorkTaskObjectModel existingObject : existingObjectOrder) {
+				if (!(targetObjects.contains(existingObject))) {
+					// Add change to disconnect object
+
+				}
+			}
+
+			// Add change to order the new objects
+			refactor.add(new AbstractChange<WorkTaskModel>(workTask,
+					"Refactor objects of work task") {
+				@Override
+				public void apply() {
+					// Remove the existing objects
+					for (WorkTaskObjectModel object : existingObjectOrder) {
+						workTask.removeTaskObject(object);
+					}
+
+					// Add the target objects
+					for (WorkTaskObjectModel object : targetObjectOrder) {
+						workTask.addTaskObject(object);
+					}
+				}
+
+				@Override
+				public void revert() {
+					// Remove the target objects
+					for (WorkTaskObjectModel object : targetObjectOrder) {
+						workTask.removeTaskObject(object);
+					}
+
+					// Add back the existing objects
+					for (WorkTaskObjectModel object : existingObjectOrder) {
+						workTask.addTaskObject(object);
+					}
+				}
+			});
+
+		}
+
+		// Return change to do all the refactoring
+		return new AbstractChange<WorkModel>(workModel, "Refactor work") {
+			@Override
+			public void apply() {
+				for (Change<?> change : refactor) {
+					change.apply();
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Revert changes in reverse order as applied
+				for (int i = (refactor.size() - 1); i >= 0; i--) {
+					Change<?> change = refactor.get(i);
+					change.revert();
+				}
+			}
+		};
+	}
+
+	/**
+	 * Obtains the existing item for the target name.
+	 * 
+	 * @param targetItemName
+	 *            Target item name.
+	 * @param targetToExistingName
+	 *            Mapping of target item name to existing item name.
+	 * @param existingNameToItem
+	 *            Mapping of existing item name to the existing item.
+	 */
+	private <T> T getExistingItem(String targetItemName,
+			Map<String, String> targetToExistingName,
+			Map<String, T> existingNameToItem) {
+
+		// Obtain the existing item name
+		String existingItemName = targetToExistingName.get(targetItemName);
+		if (existingItemName != null) {
+			// Have existing name, so return existing item by name
+			return existingNameToItem.get(existingItemName);
+		} else {
+			// No existing name, so no existing item
+			return null;
+		}
 	}
 
 	@Override
@@ -982,14 +1230,6 @@ public class DeskChangesImpl implements DeskChanges {
 				task.setIsPublic(!isPublic);
 			}
 		};
-	}
-
-	@Override
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> conformTask(
-			WorkTaskModel taskModel, TaskType<W, D, F> taskType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.conformTask");
 	}
 
 	@Override
