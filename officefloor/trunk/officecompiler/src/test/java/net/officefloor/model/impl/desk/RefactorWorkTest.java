@@ -65,6 +65,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	 * Tests removing a {@link WorkTaskModel}.
 	 */
 	public void testRemoveWorkTask() {
+		this.refactor_mapTask("TASK_B", "TASK_B");
 		this.refactor_includeTasks("TASK_B");
 		this.doRefactor(new WorkTypeConstructor() {
 			@Override
@@ -78,7 +79,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	 * Tests removing a {@link WorkTaskModel} with connections.
 	 */
 	public void testRemoveWorkTaskWithConnections() {
-		this.refactor_mapTask("TASK", "TASK");
+		this.refactor_mapTask("TASK_B", "TASK_B");
 		this.refactor_includeTasks("TASK_B");
 		this.doRefactor(new WorkTypeConstructor() {
 			@Override
@@ -137,7 +138,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	 * Tests refactoring the {@link TaskFlowModel} instances.
 	 */
 	public void testRefactorTaskFlows() {
-		this.refactor_mapTask("TASK", "TASK");
+		this.refactor_mapTask("WORK_TASK", "WORK_TASK");
 		this.refactor_mapFlow("TASK", "CHANGE_DETAILS", "CHANGE_DETAILS");
 		this.refactor_mapFlow("TASK", "RENAME_NEW", "RENAME_OLD");
 		this.refactor_mapFlow("TASK", "REORDER_A", "REORDER_A");
@@ -145,7 +146,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 		this.doRefactor(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
-				TaskTypeConstructor task = context.addTask("TASK");
+				TaskTypeConstructor task = context.addTask("WORK_TASK");
 				task.getBuilder().setReturnType(Long.class);
 				task.addFlow(Byte.class, Key.KEY_TWO)
 						.setLabel("CHANGE_DETAILS");
@@ -161,9 +162,9 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	 * Tests refactoring the {@link TaskEscalationModel} instances.
 	 */
 	public void testRefactorTaskEscalations() {
-		this.refactor_mapTask("TASK", "TASK");
-		this.refactor_mapEscalation("TASK", NullPointerException.class
-				.getName(), RuntimeException.class.getName());
+		this.refactor_mapTask("WORK_TASK", "WORK_TASK");
+		this.refactor_mapEscalation("TASK", RuntimeException.class
+				.getName(), NullPointerException.class.getName());
 		this.refactor_mapEscalation("TASK", Exception.class.getName(),
 				Exception.class.getName());
 		this.refactor_mapEscalation("TASK", Error.class.getName(), Error.class
@@ -171,7 +172,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 		this.doRefactor(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
-				TaskTypeConstructor task = context.addTask("TASK");
+				TaskTypeConstructor task = context.addTask("WORK_TASK");
 				task.addEscalation(RuntimeException.class);
 				task.addEscalation(SQLException.class);
 				task.addEscalation(Error.class);
