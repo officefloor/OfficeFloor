@@ -1,6 +1,8 @@
 <desk>
     <external-flows>
-        <external-flow name="FLOW" />
+        <external-flow name="FLOW_REMOVE" />
+        <external-flow name="FLOW_RUNTIME" />
+        <external-flow name="FLOW_REORDER" />
     </external-flows>
     <works>
         <work name="WORK" source="net.example.ExampleWorkSource">
@@ -8,16 +10,16 @@
         </work>
     </works>
     <tasks>
-        <task name="TASK" work="TASK" task="WORK_TASK">
-            <task-escalation type="java.lang.RuntimeException">
-                <external-flow name="FLOW" />
+        <task name="TASK" work="WORK" task="WORK_TASK">
+            <task-escalation escalation-type="java.lang.RuntimeException">
+                <external-flow name="FLOW_RUNTIME" />
             </task-escalation>
-            <task-escalation type="java.sql.SQLException" />
-            <task-escalation type="java.lang.Error">
+            <task-escalation escalation-type="java.sql.SQLException" />
+            <task-escalation escalation-type="java.lang.Error">
                 <task name="TASK" />
             </task-escalation>
-            <task-escalation type="java.lang.Exception">
-                <external-flow name="FLOW" />
+            <task-escalation escalation-type="java.lang.Exception">
+                <external-flow name="FLOW_REORDER" />
             </task-escalation>
         </task>
     </tasks>

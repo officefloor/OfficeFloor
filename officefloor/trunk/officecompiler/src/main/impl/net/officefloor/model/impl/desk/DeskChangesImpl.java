@@ -311,16 +311,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 		// Remove flow connections
 		for (TaskFlowModel flow : task.getTaskFlows()) {
-			TaskFlowToTaskModel connTask = flow.getTask();
-			if (connTask != null) {
-				connTask.remove();
-				connectionList.add(connTask);
-			}
-			TaskFlowToExternalFlowModel connExtFlow = flow.getExternalFlow();
-			if (connExtFlow != null) {
-				connExtFlow.remove();
-				connectionList.add(connExtFlow);
-			}
+			this.removeTaskFlowConnections(flow, connectionList);
 		}
 
 		// Remove next connections
@@ -338,17 +329,61 @@ public class DeskChangesImpl implements DeskChanges {
 
 		// Remove escalation connections
 		for (TaskEscalationModel escalation : task.getTaskEscalations()) {
-			TaskEscalationToTaskModel connTask = escalation.getTask();
-			if (connTask != null) {
-				connTask.remove();
-				connectionList.add(connTask);
-			}
-			TaskEscalationToExternalFlowModel connExtFlow = escalation
-					.getExternalFlow();
-			if (connExtFlow != null) {
-				connExtFlow.remove();
-				connectionList.add(connExtFlow);
-			}
+			this.removeTaskEscalationConnections(escalation, connectionList);
+		}
+	}
+
+	/**
+	 * Removes the connections to the {@link TaskFlowModel}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlowModel}.
+	 * @param connectionList
+	 *            Listing to add the removed {@link ConnectionModel} instances.
+	 */
+	private void removeTaskFlowConnections(TaskFlowModel taskFlow,
+			List<ConnectionModel> connectionList) {
+
+		// Remove connection to task
+		TaskFlowToTaskModel connTask = taskFlow.getTask();
+		if (connTask != null) {
+			connTask.remove();
+			connectionList.add(connTask);
+		}
+
+		// Remove connection to external flow
+		TaskFlowToExternalFlowModel connExtFlow = taskFlow.getExternalFlow();
+		if (connExtFlow != null) {
+			connExtFlow.remove();
+			connectionList.add(connExtFlow);
+		}
+	}
+
+	/**
+	 * Removes the connections to the {@link TaskEscalationModel}.
+	 * 
+	 * @param taskEscalation
+	 *            {@link TaskEscalationModel}.
+	 * @param connectionList
+	 *            Listing to add the removed {@link ConnectionModel} instances.
+	 */
+	private void removeTaskEscalationConnections(
+			TaskEscalationModel taskEscalation,
+			List<ConnectionModel> connectionList) {
+
+		// Remove connection to task
+		TaskEscalationToTaskModel connTask = taskEscalation.getTask();
+		if (connTask != null) {
+			connTask.remove();
+			connectionList.add(connTask);
+		}
+
+		// Remove connection to external flow
+		TaskEscalationToExternalFlowModel connExtFlow = taskEscalation
+				.getExternalFlow();
+		if (connExtFlow != null) {
+			connExtFlow.remove();
+			connectionList.add(connExtFlow);
 		}
 	}
 
@@ -366,12 +401,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 		// Remove object connections
 		for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
-			WorkTaskObjectToExternalManagedObjectModel conn = taskObject
-					.getExternalManagedObject();
-			if (conn != null) {
-				conn.remove();
-				connectionList.add(conn);
-			}
+			this.removeWorkTaskObjectConnections(taskObject, connectionList);
 		}
 
 		// Remove task connections (copy to stop concurrent)
@@ -379,6 +409,27 @@ public class DeskChangesImpl implements DeskChanges {
 				workTask.getTasks())) {
 			TaskModel task = taskConn.getTask();
 			this.removeTaskConnections(task, connectionList);
+		}
+	}
+
+	/**
+	 * Removes the connections to the {@link WorkTaskObjectModel}.
+	 * 
+	 * @param workTaskObject
+	 *            {@link WorkTaskObjectModel}.
+	 * @param connectionList
+	 *            Listing to add the removed {@link ConnectionModel} instances.
+	 */
+	private void removeWorkTaskObjectConnections(
+			WorkTaskObjectModel workTaskObject,
+			List<ConnectionModel> connectionList) {
+
+		// Remove connection to external managed object
+		WorkTaskObjectToExternalManagedObjectModel conn = workTaskObject
+				.getExternalManagedObject();
+		if (conn != null) {
+			conn.remove();
+			connectionList.add(conn);
 		}
 	}
 
@@ -586,10 +637,10 @@ public class DeskChangesImpl implements DeskChanges {
 			Map<String, Map<String, String>> taskToEscalationTypeMapping,
 			String... taskNames) {
 
-		// TODO test this method (refactorWork)
-
 		// Create the list to contain all refactor changes
 		final List<Change<?>> refactor = new LinkedList<Change<?>>();
+
+		// ------------------- Details of WorkModel --------------------
 
 		// Add change to rename the work
 		final String existingWorkName = workModel.getWorkName();
@@ -652,6 +703,8 @@ public class DeskChangesImpl implements DeskChanges {
 			}
 		});
 
+		// ---------------- WorkTaskModel / TaskModel --------------------
+
 		// Create the map of existing work tasks to their names
 		Map<String, WorkTaskModel> existingWorkTasks = new HashMap<String, WorkTaskModel>();
 		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
@@ -659,18 +712,65 @@ public class DeskChangesImpl implements DeskChanges {
 		}
 
 		// Refactor tasks
-		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
+		TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
+		final WorkTaskModel[] targetTaskOrder = new WorkTaskModel[taskTypes.length];
+		for (int t = 0; t < taskTypes.length; t++) {
+			TaskType<?, ?, ?> taskType = taskTypes[t];
 
-			// Obtain the name of the task
-			String taskName = taskType.getTaskName();
+			// Obtain the details of the task type
+			final String workTaskName = taskType.getTaskName();
+			Class<?> returnClass = taskType.getReturnType();
+			final String returnTypeName = (returnClass == null ? null
+					: returnClass.getName());
 
-			// Obtain the existing work task for task type
-			final WorkTaskModel workTask = this.getExistingItem(taskName,
+			// Obtain the work task for task type (may need to create)
+			WorkTaskModel findWorkTask = this.getExistingItem(workTaskName,
 					workTaskNameMapping, existingWorkTasks);
+			final WorkTaskModel workTask = ((findWorkTask == null) ? new WorkTaskModel(
+					workTaskName)
+					: findWorkTask);
+			targetTaskOrder[t] = workTask;
 
-			// Work task to be refactored, so object name mappings
+			// Refactor details of work task (and tasks)
+			final String existingWorkTaskName = workTask.getWorkTaskName();
+			refactor.add(new AbstractChange<WorkTaskModel>(workTask,
+					"Refactor work task") {
+
+				/**
+				 * Existing return types for the {@link TaskModel} instances.
+				 */
+				private Map<TaskModel, String> existingReturnTypes = new HashMap<TaskModel, String>();
+
+				@Override
+				public void apply() {
+					// Specify new task name
+					workTask.setWorkTaskName(workTaskName);
+					for (WorkTaskToTaskModel conn : workTask.getTasks()) {
+						TaskModel task = conn.getTask();
+						task.setWorkTaskName(workTaskName);
+						this.existingReturnTypes
+								.put(task, task.getReturnType());
+						task.setReturnType(returnTypeName);
+					}
+				}
+
+				@Override
+				public void revert() {
+					// Revert to existing task name
+					workTask.setWorkTaskName(existingWorkTaskName);
+					for (WorkTaskToTaskModel conn : workTask.getTasks()) {
+						TaskModel task = conn.getTask();
+						task.setWorkTaskName(existingWorkTaskName);
+						task.setReturnType(this.existingReturnTypes.get(task));
+					}
+				}
+			});
+
+			// ------------------- WorkTaskObjectModel --------------------
+
+			// Work task to be refactored, so obtain object name mappings
 			Map<String, String> objectTargetToExisting = workTaskToObjectNameMapping
-					.get(taskName);
+					.get(workTaskName);
 			if (objectTargetToExisting == null) {
 				// Provide default empty map
 				objectTargetToExisting = new HashMap<String, String>(0);
@@ -678,22 +778,19 @@ public class DeskChangesImpl implements DeskChanges {
 
 			// Create the map of existing work task objects to their names
 			Map<String, WorkTaskObjectModel> existingWorkTaskObjects = new HashMap<String, WorkTaskObjectModel>();
-			if (workTask != null) {
-				for (WorkTaskObjectModel workTaskObject : workTask
-						.getTaskObjects()) {
-					existingWorkTaskObjects.put(workTaskObject.getObjectName(),
-							workTaskObject);
-				}
+			for (WorkTaskObjectModel workTaskObject : workTask.getTaskObjects()) {
+				existingWorkTaskObjects.put(workTaskObject.getObjectName(),
+						workTaskObject);
 			}
 
 			// Obtain the objects in order as per type
 			TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
 			final WorkTaskObjectModel[] targetObjectOrder = new WorkTaskObjectModel[objectTypes.length];
-			for (int i = 0; i < objectTypes.length; i++) {
-				TaskObjectType<?> objectType = objectTypes[i];
+			for (int o = 0; o < objectTypes.length; o++) {
+				TaskObjectType<?> objectType = objectTypes[o];
 
 				// Obtain the details of the object type
-				String objectName = objectType.getObjectName();
+				final String objectName = objectType.getObjectName();
 				Enum<?> objectKey = objectType.getKey();
 				final String objectKeyName = (objectKey == null ? null
 						: objectKey.name());
@@ -701,46 +798,41 @@ public class DeskChangesImpl implements DeskChanges {
 				final String objectTypeName = (objectClass == null ? null
 						: objectClass.getName());
 
-				// Obtain the existing object for object type
-				final WorkTaskObjectModel workTaskObject = this
-						.getExistingItem(objectName, objectTargetToExisting,
-								existingWorkTaskObjects);
+				// Obtain the object for object type (may need to create)
+				WorkTaskObjectModel findWorkTaskObject = this.getExistingItem(
+						objectName, objectTargetToExisting,
+						existingWorkTaskObjects);
+				final WorkTaskObjectModel workTaskObject = ((findWorkTaskObject == null) ? new WorkTaskObjectModel(
+						objectName, objectKeyName, objectTypeName, false)
+						: findWorkTaskObject);
+				targetObjectOrder[o] = workTaskObject;
 
-				// Determine if existing task object
-				if (workTaskObject == null) {
-					// No existing object, so create one
-					targetObjectOrder[i] = new WorkTaskObjectModel(objectName,
-							objectKeyName, objectTypeName, false);
+				// Refactor details of object
+				final String existingObjectName = workTaskObject
+						.getObjectName();
+				final String existingKeyName = workTaskObject.getKey();
+				final String existingTypeName = workTaskObject.getObjectType();
+				refactor.add(new AbstractChange<WorkTaskObjectModel>(
+						workTaskObject, "Refactor work task object") {
+					@Override
+					public void apply() {
+						workTaskObject.setObjectName(objectName);
+						workTaskObject.setKey(objectKeyName);
+						workTaskObject.setObjectType(objectTypeName);
+					}
 
-				} else {
-					// Existing object, so add to order
-					targetObjectOrder[i] = workTaskObject;
-
-					// Match on name, but must refactor other object details
-					final String existingKeyName = workTaskObject.getKey();
-					final String existingTypeName = workTaskObject
-							.getObjectType();
-					refactor.add(new AbstractChange<WorkTaskObjectModel>(
-							workTaskObject, "Refactor work task object") {
-						@Override
-						public void apply() {
-							workTaskObject.setKey(objectKeyName);
-							workTaskObject.setObjectType(objectTypeName);
-						}
-
-						@Override
-						public void revert() {
-							workTaskObject.setKey(existingKeyName);
-							workTaskObject.setObjectType(existingTypeName);
-						}
-					});
-				}
+					@Override
+					public void revert() {
+						workTaskObject.setObjectName(existingObjectName);
+						workTaskObject.setKey(existingKeyName);
+						workTaskObject.setObjectType(existingTypeName);
+					}
+				});
 			}
 
 			// Obtain the existing object order
-			final WorkTaskObjectModel[] existingObjectOrder = (workTask == null ? new WorkTaskObjectModel[0]
-					: workTask.getTaskObjects().toArray(
-							new WorkTaskObjectModel[0]));
+			final WorkTaskObjectModel[] existingObjectOrder = workTask
+					.getTaskObjects().toArray(new WorkTaskObjectModel[0]);
 
 			// Add changes to disconnect existing objects to be removed
 			Set<WorkTaskObjectModel> targetObjects = new HashSet<WorkTaskObjectModel>(
@@ -748,21 +840,29 @@ public class DeskChangesImpl implements DeskChanges {
 			for (WorkTaskObjectModel existingObject : existingObjectOrder) {
 				if (!(targetObjects.contains(existingObject))) {
 					// Add change to disconnect object
-
+					final WorkTaskObjectModel taskObject = existingObject;
+					refactor.add(new DisconnectChange<WorkTaskObjectModel>(
+							existingObject) {
+						@Override
+						protected void populateRemovedConnections(
+								List<ConnectionModel> connList) {
+							DeskChangesImpl.this
+									.removeWorkTaskObjectConnections(
+											taskObject, connList);
+						}
+					});
 				}
 			}
 
-			// Add change to order the new objects
+			// Add change to order the refactored objects
 			refactor.add(new AbstractChange<WorkTaskModel>(workTask,
 					"Refactor objects of work task") {
 				@Override
 				public void apply() {
-					// Remove the existing objects
+					// Remove existing objects, add target objects
 					for (WorkTaskObjectModel object : existingObjectOrder) {
 						workTask.removeTaskObject(object);
 					}
-
-					// Add the target objects
 					for (WorkTaskObjectModel object : targetObjectOrder) {
 						workTask.addTaskObject(object);
 					}
@@ -770,19 +870,327 @@ public class DeskChangesImpl implements DeskChanges {
 
 				@Override
 				public void revert() {
-					// Remove the target objects
+					// Remove the target objects, add back existing
 					for (WorkTaskObjectModel object : targetObjectOrder) {
 						workTask.removeTaskObject(object);
 					}
-
-					// Add back the existing objects
 					for (WorkTaskObjectModel object : existingObjectOrder) {
 						workTask.addTaskObject(object);
 					}
 				}
 			});
 
+			// ---------------------- TaskModel ------------------------
+
+			// Refactor the tasks of the work task
+			for (WorkTaskToTaskModel workTaskToTask : workTask.getTasks()) {
+
+				// Ensure have task for connection
+				final TaskModel task = workTaskToTask.getTask();
+				if (task == null) {
+					continue; // must have task
+				}
+
+				// Obtain details of task
+				String taskName = task.getTaskName();
+
+				// --------------- TaskFlowModel ------------------------
+
+				// Task to be refactored, so obtain flow name mappings
+				Map<String, String> flowTargetToExisting = taskToFlowNameMapping
+						.get(taskName);
+				if (flowTargetToExisting == null) {
+					// Provide default empty map
+					flowTargetToExisting = new HashMap<String, String>(0);
+				}
+
+				// Create the map of existing task flows to their names
+				Map<String, TaskFlowModel> existingTaskFlows = new HashMap<String, TaskFlowModel>();
+				for (TaskFlowModel taskFlow : task.getTaskFlows()) {
+					existingTaskFlows.put(taskFlow.getFlowName(), taskFlow);
+				}
+
+				// Obtain the flows in order of type
+				TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();
+				final TaskFlowModel[] targetFlowOrder = new TaskFlowModel[flowTypes.length];
+				for (int f = 0; f < targetFlowOrder.length; f++) {
+					TaskFlowType<?> flowType = flowTypes[f];
+
+					// Obtain the details of the flow type
+					final String flowName = flowType.getFlowName();
+					Enum<?> flowKey = flowType.getKey();
+					final String flowKeyName = (flowKey == null ? null
+							: flowKey.name());
+					Class<?> argumentType = flowType.getArgumentType();
+					final String argumentTypeName = (argumentType == null ? null
+							: argumentType.getName());
+
+					// Obtain the flow for flow type (may need to create)
+					TaskFlowModel findTaskFlow = this.getExistingItem(flowName,
+							flowTargetToExisting, existingTaskFlows);
+					final TaskFlowModel taskFlow = ((findTaskFlow == null) ? new TaskFlowModel(
+							flowName, flowKeyName, argumentTypeName)
+							: findTaskFlow);
+					targetFlowOrder[f] = taskFlow;
+
+					// Refactor details of flow
+					final String existingFlowName = taskFlow.getFlowName();
+					final String existingFlowKeyName = taskFlow.getKey();
+					final String existingArgumentTypeName = taskFlow
+							.getArgumentType();
+					refactor.add(new AbstractChange<TaskFlowModel>(taskFlow,
+							"Refactor task flow") {
+						@Override
+						public void apply() {
+							taskFlow.setFlowName(flowName);
+							taskFlow.setKey(flowKeyName);
+							taskFlow.setArgumentType(argumentTypeName);
+						}
+
+						@Override
+						public void revert() {
+							taskFlow.setFlowName(existingFlowName);
+							taskFlow.setKey(existingFlowKeyName);
+							taskFlow.setArgumentType(existingArgumentTypeName);
+						}
+					});
+				}
+
+				// Obtain the existing flow order
+				final TaskFlowModel[] existingFlowOrder = task.getTaskFlows()
+						.toArray(new TaskFlowModel[0]);
+
+				// Add changes to disconnect existing flows to be removed
+				Set<TaskFlowModel> targetFlows = new HashSet<TaskFlowModel>(
+						Arrays.asList(targetFlowOrder));
+				for (TaskFlowModel existingTaskFlow : existingFlowOrder) {
+					if (!(targetFlows.contains(existingTaskFlow))) {
+						// Add change to disconnect flow
+						final TaskFlowModel taskFlow = existingTaskFlow;
+						refactor.add(new DisconnectChange<TaskFlowModel>(
+								taskFlow) {
+							@Override
+							protected void populateRemovedConnections(
+									List<ConnectionModel> connList) {
+								DeskChangesImpl.this.removeTaskFlowConnections(
+										taskFlow, connList);
+							}
+						});
+					}
+				}
+
+				// Add change to order the refactored flows
+				refactor.add(new AbstractChange<TaskModel>(task,
+						"Refactor task flows") {
+					@Override
+					public void apply() {
+						// Remove existing flows, add target flows
+						for (TaskFlowModel flow : existingFlowOrder) {
+							task.removeTaskFlow(flow);
+						}
+						for (TaskFlowModel flow : targetFlowOrder) {
+							task.addTaskFlow(flow);
+						}
+					}
+
+					@Override
+					public void revert() {
+						// Remove target flows, add back existing flows
+						for (TaskFlowModel flow : targetFlowOrder) {
+							task.removeTaskFlow(flow);
+						}
+						for (TaskFlowModel flow : existingFlowOrder) {
+							task.addTaskFlow(flow);
+						}
+					}
+				});
+
+				// --------------- TaskEscalationModel ------------------
+
+				// Task to be refactored, so obtain escalation name mappings
+				Map<String, String> escalationTargetToExisting = taskToEscalationTypeMapping
+						.get(taskName);
+				if (escalationTargetToExisting == null) {
+					// Provide default empty map
+					escalationTargetToExisting = new HashMap<String, String>(0);
+				}
+
+				// Create the map of existing task escalations to their names
+				Map<String, TaskEscalationModel> existingTaskEscalations = new HashMap<String, TaskEscalationModel>();
+				for (TaskEscalationModel taskEscalation : task
+						.getTaskEscalations()) {
+					existingTaskEscalations.put(taskEscalation
+							.getEscalationType(), taskEscalation);
+				}
+
+				// Obtain the escalations in order of type
+				TaskEscalationType[] escalationTypes = taskType
+						.getEscalationTypes();
+				final TaskEscalationModel[] targetEscalationOrder = new TaskEscalationModel[escalationTypes.length];
+				for (int e = 0; e < targetEscalationOrder.length; e++) {
+					TaskEscalationType escalationType = escalationTypes[e];
+
+					// Obtain details of the escalation type
+					final String escalationTypeName = escalationType
+							.getEscalationType().getName();
+
+					// Obtain the escalation for escalation type (may create)
+					TaskEscalationModel findTaskEscalation = this
+							.getExistingItem(escalationTypeName,
+									escalationTargetToExisting,
+									existingTaskEscalations);
+					final TaskEscalationModel taskEscalation = ((findTaskEscalation == null) ? new TaskEscalationModel(
+							escalationTypeName)
+							: findTaskEscalation);
+					targetEscalationOrder[e] = taskEscalation;
+
+					// Refactor details of escalation
+					final String existingEscalationTypeName = taskEscalation
+							.getEscalationType();
+					refactor.add(new AbstractChange<TaskEscalationModel>(
+							taskEscalation, "Refactor task escalation") {
+						@Override
+						public void apply() {
+							taskEscalation
+									.setEscalationType(escalationTypeName);
+						}
+
+						@Override
+						public void revert() {
+							taskEscalation
+									.setEscalationType(existingEscalationTypeName);
+						}
+					});
+				}
+
+				// Obtain the existing escalation order
+				final TaskEscalationModel[] existingEscalationOrder = task
+						.getTaskEscalations().toArray(
+								new TaskEscalationModel[0]);
+
+				// Add changes to disconnect existing escalations to be removed
+				Set<TaskEscalationModel> targetEscalations = new HashSet<TaskEscalationModel>(
+						Arrays.asList(targetEscalationOrder));
+				for (TaskEscalationModel existingEscalation : existingEscalationOrder) {
+					if (!(targetEscalations.contains(existingEscalation))) {
+						// Add change to disconnect escalation
+						final TaskEscalationModel taskEscalation = existingEscalation;
+						refactor.add(new DisconnectChange<TaskEscalationModel>(
+								taskEscalation) {
+							@Override
+							protected void populateRemovedConnections(
+									List<ConnectionModel> connList) {
+								DeskChangesImpl.this
+										.removeTaskEscalationConnections(
+												taskEscalation, connList);
+							}
+						});
+					}
+				}
+
+				// Add change to order the refactored escalations
+				refactor.add(new AbstractChange<TaskModel>(task,
+						"Refactor task escalations") {
+					@Override
+					public void apply() {
+						// Remove existing escalations, add target escalations
+						for (TaskEscalationModel escalation : existingEscalationOrder) {
+							task.removeTaskEscalation(escalation);
+						}
+						for (TaskEscalationModel escalation : targetEscalationOrder) {
+							task.addTaskEscalation(escalation);
+						}
+					}
+
+					@Override
+					public void revert() {
+						// Remove target escalations, add back existing
+						for (TaskEscalationModel escalation : targetEscalationOrder) {
+							task.removeTaskEscalation(escalation);
+						}
+						for (TaskEscalationModel escalation : existingEscalationOrder) {
+							task.addTaskEscalation(escalation);
+						}
+					}
+				});
+			}
 		}
+
+		// ------------ WorkTaskModel / TaskModel (continued) ----------------
+
+		// Obtain existing work task order
+		final WorkTaskModel[] existingTaskOrder = workModel.getWorkTasks()
+				.toArray(new WorkTaskModel[0]);
+
+		// Add changes to disconnect existing tasks to be removed
+		Set<WorkTaskModel> targetTasks = new HashSet<WorkTaskModel>(Arrays
+				.asList(targetTaskOrder));
+		for (WorkTaskModel existingTask : existingTaskOrder) {
+			if (!(targetTasks.contains(existingTask))) {
+				final WorkTaskModel workTask = existingTask;
+
+				// Add change to disconnect work task (and its tasks)
+				refactor.add(new DisconnectChange<WorkTaskModel>(workTask) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						DeskChangesImpl.this.removeWorkTaskConnections(
+								workTask, connList);
+					}
+				});
+
+				// Add change to remove tasks of work task
+				refactor.add(new AbstractChange<WorkTaskModel>(workTask,
+						"Remove tasks of work task") {
+
+					/**
+					 * Removed {@link TaskModel} instances.
+					 */
+					private List<TaskModel> tasks;
+
+					@Override
+					public void apply() {
+						this.tasks = new LinkedList<TaskModel>();
+						DeskChangesImpl.this.removeWorkTask(workTask,
+								this.tasks);
+					}
+
+					@Override
+					public void revert() {
+						// Add back the task models
+						for (TaskModel task : this.tasks) {
+							DeskChangesImpl.this.desk.addTask(task);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to order the new tasks
+		refactor.add(new AbstractChange<WorkModel>(workModel,
+				"Refactor tasks of work") {
+			@Override
+			public void apply() {
+				// Remove existing tasks, add target tasks
+				for (WorkTaskModel task : existingTaskOrder) {
+					workModel.removeWorkTask(task);
+				}
+				for (WorkTaskModel task : targetTaskOrder) {
+					workModel.addWorkTask(task);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target tasks, add back existing
+				for (WorkTaskModel task : targetTaskOrder) {
+					workModel.removeWorkTask(task);
+				}
+				for (WorkTaskModel task : existingTaskOrder) {
+					workModel.addWorkTask(task);
+				}
+			}
+		});
 
 		// Return change to do all the refactoring
 		return new AbstractChange<WorkModel>(workModel, "Refactor work") {
@@ -1845,6 +2253,58 @@ public class DeskChangesImpl implements DeskChanges {
 				workToInitialTask.connect();
 			}
 		};
+	}
+
+	/**
+	 * {@link Change} to simplify removing {@link ConnectionModel} instances.
+	 */
+	private abstract static class DisconnectChange<T> extends AbstractChange<T> {
+
+		/**
+		 * {@link ConnectionModel} instances removed.
+		 */
+		private ConnectionModel[] connections;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param target
+		 *            Target to remove {@link ConnectionModel} instances.
+		 */
+		public DisconnectChange(T target) {
+			super(target, "Remove connections for "
+					+ target.getClass().getSimpleName());
+		}
+
+		/*
+		 * ======================== Change =================================
+		 */
+
+		@Override
+		public void apply() {
+			// Populate the removed connections
+			List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
+			this.populateRemovedConnections(connList);
+			this.connections = connList.toArray(new ConnectionModel[0]);
+		}
+
+		/**
+		 * Populates the removed {@link ConnectionModel}.
+		 * 
+		 * @param connList
+		 *            List to populate with the removed {@link ConnectionModel}
+		 *            instances.
+		 */
+		protected abstract void populateRemovedConnections(
+				List<ConnectionModel> connList);
+
+		@Override
+		public void revert() {
+			// Re-connect connections in reverse order
+			for (int i = (this.connections.length - 1); i >= 0; i--) {
+				this.connections[i].connect();
+			}
+		}
 	}
 
 }

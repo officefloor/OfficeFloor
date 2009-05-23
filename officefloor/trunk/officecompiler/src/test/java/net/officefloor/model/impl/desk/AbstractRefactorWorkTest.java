@@ -45,7 +45,8 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
  * 
  * @author Daniel
  */
-public class AbstractRefactorWorkTest extends AbstractDeskChangesTestCase {
+public abstract class AbstractRefactorWorkTest extends
+		AbstractDeskChangesTestCase {
 
 	/**
 	 * {@link WorkModel} to refactor.
