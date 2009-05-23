@@ -17,8 +17,6 @@
 package net.officefloor.eclipse.extension.administratorsource.clazz;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
@@ -27,7 +25,6 @@ import net.officefloor.eclipse.extension.administratorsource.AdministratorSource
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -70,19 +67,14 @@ public class ClassAdministratorSourceExtension implements
 		final Property classNameProperty = property;
 
 		// Provide listing of class names
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addJavaClassFilter();
 		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject(), filter), new InputListener() {
+				.getProject()), new InputListener() {
 
 			@Override
 			public void notifyValueChanged(Object value) {
 
-				// Must be java element (due to filter)
-				IJavaElement javaElement = (IJavaElement) value;
-
 				// Obtain the class name
-				String className = ClasspathUtil.getClassName(javaElement);
+				String className = (value == null ? null : value.toString());
 
 				// Inform of change of class name
 				classNameProperty.setValue(className);

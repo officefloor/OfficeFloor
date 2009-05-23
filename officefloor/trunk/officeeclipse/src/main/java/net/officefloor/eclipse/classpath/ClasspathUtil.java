@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -51,7 +52,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryResource;
-import org.eclipse.jdt.internal.core.NonJavaResource;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 /**
@@ -411,13 +411,9 @@ public class ClasspathUtil {
 			IJavaElement javaElement = (IJavaElement) parent;
 			return getChildren(javaElement);
 
-		} else if (parent instanceof JarEntryResource) {
-			JarEntryResource jarEntryResource = (JarEntryResource) parent;
+		} else if (parent instanceof IJarEntryResource) {
+			IJarEntryResource jarEntryResource = (IJarEntryResource) parent;
 			return getChildren(jarEntryResource);
-
-		} else if (parent instanceof NonJavaResource) {
-			// No children for non-java resource
-			return new Object[0];
 
 		} else {
 			// Unhandled type
@@ -533,7 +529,7 @@ public class ClasspathUtil {
 				IPackageFragment fragment = (IPackageFragment) javaElement;
 
 				// Add the fragment children
-				children.addAll(Arrays.asList(fragment.getChildren()));
+				children.addAll(Arrays.asList(fragment.getClassFiles()));
 				children.addAll(Arrays.asList(fragment.getNonJavaResources()));
 
 			} else if (javaElement instanceof ITypeRoot) {
@@ -557,13 +553,13 @@ public class ClasspathUtil {
 	}
 
 	/**
-	 * Obtains the children of the {@link JarEntryResource}.
+	 * Obtains the children of the {@link IJarEntryResource}.
 	 * 
 	 * @param jarEntryResource
 	 *            {@link JarEntryResource}.
 	 * @return Children.
 	 */
-	public static Object[] getChildren(JarEntryResource jarEntryResource) {
+	public static Object[] getChildren(IJarEntryResource jarEntryResource) {
 		return jarEntryResource.getChildren();
 	}
 

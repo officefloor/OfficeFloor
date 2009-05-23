@@ -17,7 +17,6 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.model.change.Change;
@@ -57,10 +56,8 @@ public class AddExternalFlowOperation extends
 		final ExternalFlowModel flow = new ExternalFlowModel();
 		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
 				"Y");
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addJavaClassFilter();
 		dialog.registerPropertyInput("Argument Type",
-				new ClasspathSelectionInput(editPart.getEditor(), filter));
+				new ClasspathSelectionInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;

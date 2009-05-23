@@ -18,9 +18,6 @@ package net.officefloor.eclipse.extension.managedobjectsource.xml;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.InputFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
@@ -29,7 +26,6 @@ import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSource
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerManagedObjectSource;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -78,25 +74,15 @@ public class TreeXmlMarshallerManagedObjectSourceExtension
 		final Property configurationProperty = property;
 
 		// Provide listing of class names
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addResourceFilter(new InputFilter<IResource>() {
-			@Override
-			public boolean isFilter(IResource item) {
-				return false;
-			}
-		});
 		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject(), filter), new InputListener() {
+				.getProject()), new InputListener() {
 
 			@Override
 			public void notifyValueChanged(Object value) {
 
-				// Must be resource (due to filter)
-				IResource resource = (IResource) value;
-
 				// Obtain the resource location on class path
-				String resourceLocation = ClasspathUtil
-						.getClassPathLocation(resource.getFullPath());
+				String resourceLocation = (value == null ? null : value
+						.toString());
 
 				// Inform of change of resource
 				configurationProperty.setValue(resourceLocation);

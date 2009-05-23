@@ -18,7 +18,6 @@ package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.model.change.Change;
@@ -56,10 +55,8 @@ public class AddOfficeEscalationOperation extends
 		// Create the populated Office Escalation
 		final OfficeEscalationModel escalation = new OfficeEscalationModel();
 		BeanDialog dialog = editPart.createBeanDialog(escalation, "X", "Y");
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addJavaClassFilter();
 		dialog.registerPropertyInput("Escalation Type",
-				new ClasspathSelectionInput(editPart.getEditor(), filter));
+				new ClasspathSelectionInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;

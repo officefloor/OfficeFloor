@@ -20,10 +20,10 @@ import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
-import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;
+import net.officefloor.eclipse.common.dialog.input.filter.ClassNameInputFilter;
+import net.officefloor.eclipse.common.dialog.input.filter.FileNameInputFilter;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,7 +34,13 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IEditorInput;
@@ -47,7 +53,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  * 
  * @author Daniel
  */
-public class ClasspathSelectionInput implements Input<Tree> {
+public class ClasspathSelectionInput implements Input<Composite> {
 
 	/**
 	 * {@link IProject} as root of {@link Tree}. If <code>null</code> includes
@@ -61,20 +67,21 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	private final ClasspathFilter filter;
 
 	/**
-	 * Initiate with {@link IWorkspaceRoot} as root.
+	 * Flag indicating to output the name of the object selected rather than the
+	 * object itself.
 	 */
-	public ClasspathSelectionInput() {
-		this(null);
-	}
+	private final boolean isOutputName;
 
 	/**
-	 * Initiate with {@link IWorkspaceRoot} as root.
-	 * 
-	 * @param filter
-	 *            {@link ClasspathFilter}. May be <code>null</code>.
+	 * {@link Tree}.
 	 */
-	public ClasspathSelectionInput(ClasspathFilter filter) {
-		this((IProject) null, filter);
+	private Tree tree;
+
+	/**
+	 * Initiate to use {@link IWorkspaceRoot}.
+	 */
+	public ClasspathSelectionInput() {
+		this((IProject) null);
 	}
 
 	/**
@@ -82,27 +89,43 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	 * 
 	 * @param project
 	 *            {@link IProject} to be root.
-	 * @param filter
-	 *            {@link ClasspathFilter}. May be <code>null</code>.
 	 */
-	public ClasspathSelectionInput(IProject project, ClasspathFilter filter) {
-		this.project = project;
-		this.filter = (filter == null ? new ClasspathFilter(IFile.class,
-				new AlwaysIncludeInputFilter()) : filter);
+	public ClasspathSelectionInput(IProject project) {
+		this(project, true);
 	}
 
 	/**
-	 * Initiate with the {@link IProject} of the {@link IEditorInput} of the
-	 * input {@link IEditorPart}.
+	 * Initiate with {@link IProject} as root.
+	 * 
+	 * @param project
+	 *            {@link IProject} to be root.
+	 * @param isOutputName
+	 *            Indicates whether to return the name or the {@link IResource}/
+	 *            {@link IJavaElement}.
+	 */
+	public ClasspathSelectionInput(IProject project, boolean isOutputName) {
+		this.project = project;
+		this.filter = new ClasspathFilter();
+		this.isOutputName = isOutputName;
+	}
+
+	/**
+	 * Initiate with the {@link IProject} of the {@link IEditorInput}.
 	 * 
 	 * @param editor
-	 *            {@link IEditorPart}.
-	 * @param filter
-	 *            {@link ClasspathFilter}. May be <code>null</code>.
+	 *            {@link IEditorInput}.
 	 */
-	public ClasspathSelectionInput(IEditorPart editor, ClasspathFilter filter) {
-		this(ProjectConfigurationContext.getProject(editor.getEditorInput()),
-				filter);
+	public ClasspathSelectionInput(IEditorPart editor) {
+		this(ProjectConfigurationContext.getProject(editor.getEditorInput()));
+	}
+
+	/**
+	 * Obtains the {@link ClasspathFilter}.
+	 * 
+	 * @return {@link ClasspathFilter}.
+	 */
+	public ClasspathFilter getClasspathFilter() {
+		return this.filter;
 	}
 
 	/**
@@ -131,18 +154,37 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	 */
 
 	@Override
-	public Tree buildControl(final InputContext context) {
+	public Composite buildControl(final InputContext context) {
+
+		// Create composite to contain file expression and selection tree
+		final Composite container = new Composite(context.getParent(), SWT.NONE);
+		container.setLayout(new GridLayout(1, false));
+
+		// Add filters for file and class names
+		final FileNameInputFilter fileNameFilter = new FileNameInputFilter();
+		this.filter.addFileFilter(fileNameFilter);
+		final ClassNameInputFilter classNameFilter = new ClassNameInputFilter();
+		this.filter.addClassFileFilter(classNameFilter);
+
+		// Create the text box to provide filtering regular expression
+		Composite filterContainer = new Composite(container, SWT.NONE);
+		filterContainer.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
+				true, false));
+		filterContainer.setLayout(new GridLayout(2, false));
+		new Label(filterContainer, SWT.NONE).setText("Filter");
+		final Text text = new Text(filterContainer, SWT.BORDER);
+		text.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Create the tree
-		final Tree tree = new Tree(context.getParent(), SWT.NONE);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.tree = new Tree(container, SWT.NONE);
+		this.tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Obtain the root of the tree
-		Object treeInput = this.getTreeRootItem();
+		final Object treeInput = this.getTreeRootItem();
 
 		// Create the Tree selection
-		TreeViewer treeViewer = new TreeViewer(tree);
-		treeViewer.setAutoExpandLevel(2);
+		final TreeViewer treeViewer = new TreeViewer(this.tree);
+		treeViewer.setAutoExpandLevel(1);
 		treeViewer.setContentProvider(new ClasspathWorkbenchContentProvider());
 		treeViewer.setLabelProvider(WorkbenchLabelProvider
 				.getDecoratingWorkbenchLabelProvider());
@@ -152,19 +194,33 @@ public class ClasspathSelectionInput implements Input<Tree> {
 			public void selectionChanged(SelectionChangedEvent event) {
 				// Notify of change
 				context.notifyValueChanged(ClasspathSelectionInput.this
-						.getValue(tree, context));
+						.getValue(container, context));
+			}
+		});
+
+		// Add text listener that filters on changed details
+		text.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				// Change filter as per text
+				String includeText = text.getText();
+				fileNameFilter.setFileNameRegularExpression(includeText);
+				classNameFilter.setClassNameRegularExpression(includeText);
+
+				// Reset tree input to take into account filtering
+				treeViewer.refresh(false);
 			}
 		});
 
 		// Return the tree
-		return tree;
+		return this.tree;
 	}
 
 	@Override
-	public Object getValue(Tree control, InputContext context) {
+	public Object getValue(Composite control, InputContext context) {
 
 		// Obtain the selection from the tree
-		TreeItem[] treeItems = control.getSelection();
+		TreeItem[] treeItems = this.tree.getSelection();
 
 		// Ensure only one tree item selected
 		if (treeItems.length != 1) {
@@ -178,11 +234,20 @@ public class ClasspathSelectionInput implements Input<Tree> {
 		// Return based on specific type
 		if (data instanceof IResource) {
 			IResource resource = (IResource) data;
-			return resource;
+			if (this.isOutputName) {
+				return ClasspathUtil.getClassPathLocation(resource
+						.getFullPath());
+			} else {
+				return resource;
+			}
 
 		} else if (data instanceof IJavaElement) {
 			IJavaElement javaElement = (IJavaElement) data;
-			return javaElement;
+			if (this.isOutputName) {
+				return ClasspathUtil.getClassName(javaElement);
+			} else {
+				return javaElement;
+			}
 
 		} else {
 			// Unknown type

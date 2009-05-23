@@ -52,10 +52,8 @@ public class AddExternalManagedObjectOperation extends
 		// Create the populated External Managed Object
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
 		BeanDialog dialog = editPart.createBeanDialog(mo, "X", "Y");
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addJavaClassFilter();
 		dialog.registerPropertyInput("Object Type",
-				new ClasspathSelectionInput(editPart.getEditor(), filter));
+				new ClasspathSelectionInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;
