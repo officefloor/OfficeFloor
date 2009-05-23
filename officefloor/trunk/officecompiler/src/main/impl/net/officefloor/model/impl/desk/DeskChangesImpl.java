@@ -711,9 +711,13 @@ public class DeskChangesImpl implements DeskChanges {
 			existingWorkTasks.put(workTask.getWorkTaskName(), workTask);
 		}
 
+		// Create the set of tasks to include
+		Set<String> includeTaskNames = new HashSet<String>(Arrays
+				.asList(taskNames));
+
 		// Refactor tasks
 		TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
-		final WorkTaskModel[] targetTaskOrder = new WorkTaskModel[taskTypes.length];
+		List<WorkTaskModel> targetTaskList = new LinkedList<WorkTaskModel>();
 		for (int t = 0; t < taskTypes.length; t++) {
 			TaskType<?, ?, ?> taskType = taskTypes[t];
 
@@ -723,13 +727,19 @@ public class DeskChangesImpl implements DeskChanges {
 			final String returnTypeName = (returnClass == null ? null
 					: returnClass.getName());
 
+			// Determine if include the task
+			if ((includeTaskNames.size() > 0)
+					&& (!(includeTaskNames.contains(workTaskName)))) {
+				continue; // task filtered from being included
+			}
+
 			// Obtain the work task for task type (may need to create)
 			WorkTaskModel findWorkTask = this.getExistingItem(workTaskName,
 					workTaskNameMapping, existingWorkTasks);
 			final WorkTaskModel workTask = ((findWorkTask == null) ? new WorkTaskModel(
 					workTaskName)
 					: findWorkTask);
-			targetTaskOrder[t] = workTask;
+			targetTaskList.add(workTask);
 
 			// Refactor details of work task (and tasks)
 			final String existingWorkTaskName = workTask.getWorkTaskName();
@@ -1117,6 +1127,10 @@ public class DeskChangesImpl implements DeskChanges {
 		}
 
 		// ------------ WorkTaskModel / TaskModel (continued) ----------------
+
+		// Obtain the target work task order
+		final WorkTaskModel[] targetTaskOrder = targetTaskList
+				.toArray(new WorkTaskModel[0]);
 
 		// Obtain existing work task order
 		final WorkTaskModel[] existingTaskOrder = workModel.getWorkTasks()

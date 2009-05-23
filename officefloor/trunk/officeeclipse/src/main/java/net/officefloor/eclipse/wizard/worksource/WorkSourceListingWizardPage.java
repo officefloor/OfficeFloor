@@ -17,6 +17,7 @@
 package net.officefloor.eclipse.wizard.worksource;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -40,6 +41,11 @@ public class WorkSourceListingWizardPage extends WizardPage {
 	private final WorkSourceInstance[] workSourceInstances;
 
 	/**
+	 * {@link WorkInstance} being refactored or <code>null</code> if creating.
+	 */
+	private final WorkInstance workInstance;
+
+	/**
 	 * Listing of {@link WorkSource} labels in order of
 	 * {@link WorkSourceInstance} listing.
 	 */
@@ -55,10 +61,15 @@ public class WorkSourceListingWizardPage extends WizardPage {
 	 * 
 	 * @param workSourceInstances
 	 *            Listing of {@link WorkSourceInstance}.
+	 * @param workInstance
+	 *            {@link WorkInstance} of {@link Work} being refactored.
+	 *            <code>null</code> if creating new {@link WorkInstance}.
 	 */
-	WorkSourceListingWizardPage(WorkSourceInstance[] workSourceInstances) {
+	WorkSourceListingWizardPage(WorkSourceInstance[] workSourceInstances,
+			WorkInstance workInstance) {
 		super("WorkSource listing");
 		this.workSourceInstances = workSourceInstances;
+		this.workInstance = workInstance;
 
 		// Create the listing of labels
 		this.workSourceLabels = new String[this.workSourceInstances.length];
@@ -114,8 +125,19 @@ public class WorkSourceListingWizardPage extends WizardPage {
 			}
 		});
 
-		// Initially page not complete (as must select work loader)
-		this.setPageComplete(false);
+		// Flag selected work instance (if refactoring work)
+		if (this.workInstance != null) {
+			for (int i = 0; i < this.workSourceInstances.length; i++) {
+				if (this.workSourceInstances[i].getWorkSourceClassName()
+						.equals(this.workInstance.getWorkSourceClassName())) {
+					// Work source for the selected instance
+					this.list.select(i);
+				}
+			}
+		}
+
+		// Page complete if selected a work source
+		this.setPageComplete(this.getSelectedWorkSourceInstance() != null);
 
 		// Provide error if no work loaders available
 		if (this.workSourceInstances.length == 0) {

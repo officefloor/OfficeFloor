@@ -49,7 +49,6 @@ import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.Tool;
-import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
@@ -73,7 +72,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 
 /**
  * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
@@ -138,17 +136,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 				// Notify change in dirty state
 				AbstractOfficeFloorEditor.this.firePropertyChange(PROP_DIRTY);
 			}
-		});
-	}
-
-	/**
-	 * <p>
-	 * Flags this {@link IEditorPart} as dirty requiring a save.
-	 * <p>
-	 * Note this is mainly used for testing.
-	 */
-	public void flagDirty() {
-		this.getCommandStack().execute(new Command() {
 		});
 	}
 
@@ -332,7 +319,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		viewer.setKeyHandler(new CommonGraphicalViewerKeyHandler(viewer));
 
 		// Load the edit part factory and initialise contents
-		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
+		this.loadEditPartTypes();
 		viewer.setEditPartFactory(this);
 		viewer.setContents(this.getCastedModel());
 
@@ -484,6 +471,14 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 		// Return the edit part
 		return editPart;
+	}
+
+	/**
+	 * Allows sub classes to trigger the population of the {@link EditPart}
+	 * types.
+	 */
+	protected void loadEditPartTypes() {
+		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
 	}
 
 	/**

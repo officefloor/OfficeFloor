@@ -182,57 +182,29 @@ public class InputHandler<T> implements InputContext {
 	}
 
 	/*
-	 * ===========================================================
-	 * PropertyInputContext
-	 * ===========================================================
+	 * ================ InputContext =================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#getParent()
-	 */
 	@Override
 	public Composite getParent() {
 		return this.parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#getInitialValue()
-	 */
 	@Override
 	public Object getInitialValue() {
 		return this.initialValue;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#getAttribute(java.lang.String)
-	 */
 	@Override
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#setAttribute(java.lang.String,
-	 *      java.lang.Object)
-	 */
 	@Override
 	public void setAttribute(String name, Object value) {
 		this.setAttribute(name, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#notifyValueChanged(java.lang.Object)
-	 */
 	@Override
 	public void notifyValueChanged(Object value) {
 		try {
@@ -257,11 +229,6 @@ public class InputHandler<T> implements InputContext {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.InputContext#notifyValueInvalid(java.lang.String)
-	 */
 	@Override
 	public void notifyValueInvalid(String message) {
 		// Notify listener
