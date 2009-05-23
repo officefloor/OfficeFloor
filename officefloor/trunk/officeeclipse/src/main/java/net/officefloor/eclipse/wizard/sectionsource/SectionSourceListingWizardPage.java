@@ -19,8 +19,6 @@ package net.officefloor.eclipse.wizard.sectionsource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.InputFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
@@ -164,15 +162,8 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		});
 
 		// Provide means to specify section location
-		ClasspathFilter filter = new ClasspathFilter();
-		filter.addFileFilter(new InputFilter<IFile>() {
-			@Override
-			public boolean isFilter(IFile item) {
-				return false; // include all files
-			}
-		});
 		new InputHandler<String>(page, new ClasspathSelectionInput(
-				this.project, filter), new InputListener() {
+				this.project, false), new InputListener() {
 			@Override
 			public void notifyValueChanged(Object value) {
 

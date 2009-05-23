@@ -23,7 +23,6 @@ import java.util.Map;
 import net.officefloor.eclipse.bootstrap.Bootstrap;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.plugin.filingcabinet.FilingCabinetGenerator;
@@ -44,7 +43,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
- * {@link IWorkbenchWindowActionDelegate} for the {@link FilingCabinetGenerator}.
+ * {@link IWorkbenchWindowActionDelegate} for the {@link FilingCabinetGenerator}
+ * .
  * 
  * @author Daniel
  */
@@ -71,10 +71,10 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 			// Populate the bean to generate the file
 			FilingCabinetBean bean = new FilingCabinetBean();
 			BeanDialog dialog = new BeanDialog(this.window.getShell(), bean);
-			dialog.registerPropertyInput("Location",
-					new ClasspathSelectionInput(new ClasspathFilter(
-							IPackageFragment.class,
-							new AlwaysIncludeInputFilter())));
+			ClasspathSelectionInput selectionInput = new ClasspathSelectionInput();
+			selectionInput.getClasspathFilter().addPackageFragmentFilter(
+					new AlwaysIncludeInputFilter());
+			dialog.registerPropertyInput("Location", selectionInput);
 			if (!dialog.populate()) {
 				// Cancelled
 				return;

@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -286,8 +287,19 @@ public class ClasspathFilter {
 	 * @param filter
 	 *            Filter.
 	 */
-	public void addClassFileFilter(InputFilter<? super IClassFile> filter) {
-		this.addFilter(IClassFile.class, filter);
+	public void addClassFileFilter(InputFilter<? super ITypeRoot> filter) {
+		this.addFilter(ITypeRoot.class, filter);
+	}
+
+	/**
+	 * Adds a {@link IJarEntryResource} filter.
+	 * 
+	 * @param filter
+	 *            Filter.
+	 */
+	public void addJarEntryResourceFilter(
+			InputFilter<? super IJarEntryResource> filter) {
+		this.addFilter(IJarEntryResource.class, filter);
 	}
 
 	/**
