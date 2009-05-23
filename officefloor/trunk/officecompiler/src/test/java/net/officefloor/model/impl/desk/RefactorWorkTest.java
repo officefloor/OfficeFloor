@@ -16,6 +16,7 @@
  */
 package net.officefloor.model.impl.desk;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import net.officefloor.compile.properties.PropertyList;
@@ -84,6 +85,30 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 		this.doRefactor(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
+				context.addTask("TASK_B");
+			}
+		});
+	}
+
+	/**
+	 * Tests not including the {@link WorkTaskModel}.
+	 */
+	public void testNotIncludeWorkTask() {
+		this.refactor_mapTask("TASK_A", "TASK_A");
+		this.refactor_mapTask("TASK_B", "TASK_B");
+		this.refactor_includeTasks("TASK_B"); // not include TASK_A
+		this.doRefactor(new WorkTypeConstructor() {
+			@Override
+			public void construct(WorkTypeContext context) {
+				// Task A
+				TaskTypeConstructor taskA = context.addTask("TASK_A");
+				taskA.addFlow(Object.class, null).setLabel("FLOW_A");
+				taskA.addFlow(Object.class, null).setLabel("FLOW_B");
+				taskA.addEscalation(SQLException.class);
+				taskA.addEscalation(IOException.class);
+				taskA.addObject(Object.class, null).setLabel("OBJECT");
+
+				// Task B
 				context.addTask("TASK_B");
 			}
 		});
@@ -163,8 +188,8 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	 */
 	public void testRefactorTaskEscalations() {
 		this.refactor_mapTask("WORK_TASK", "WORK_TASK");
-		this.refactor_mapEscalation("TASK", RuntimeException.class
-				.getName(), NullPointerException.class.getName());
+		this.refactor_mapEscalation("TASK", RuntimeException.class.getName(),
+				NullPointerException.class.getName());
 		this.refactor_mapEscalation("TASK", Exception.class.getName(),
 				Exception.class.getName());
 		this.refactor_mapEscalation("TASK", Error.class.getName(), Error.class

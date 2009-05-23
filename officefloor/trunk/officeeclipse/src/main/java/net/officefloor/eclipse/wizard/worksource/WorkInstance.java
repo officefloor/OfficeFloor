@@ -16,12 +16,26 @@
  */
 package net.officefloor.eclipse.wizard.worksource;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
  * Instance of a {@link Work}.
@@ -46,6 +60,11 @@ public class WorkInstance {
 	private final PropertyList propertyList;
 
 	/**
+	 * {@link WorkModel}.
+	 */
+	private final WorkModel workModel;
+
+	/**
 	 * {@link WorkType}.
 	 */
 	private final WorkType<?> workType;
@@ -61,25 +80,56 @@ public class WorkInstance {
 	private final String[] taskTypeNames;
 
 	/**
+	 * Mapping of {@link TaskType} name to {@link WorkTaskModel} name.
+	 */
+	private final Map<String, String> workTaskNameMapping;
+
+	/**
+	 * Mapping of {@link TaskObjectType} name to {@link WorkTaskObjectModel}
+	 * name for a particular {@link WorkTaskModel} name.
+	 */
+	private final Map<String, Map<String, String>> taskObjectNameMappingForWorkTask;
+
+	/**
+	 * Mapping of {@link TaskFlowType} name to {@link TaskFlowModel} name for a
+	 * particular {@link TaskModel} name.
+	 */
+	private final Map<String, Map<String, String>> taskFlowNameMappingForTask;
+
+	/**
+	 * Mapping of {@link TaskEscalationType} name to {@link TaskEscalationModel}
+	 * name for a particular {@link TaskModel} name.
+	 */
+	private final Map<String, Map<String, String>> taskEscalationTypeMappingForTask;
+
+	/**
 	 * Initiate for public use.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param workSourceClassName
-	 *            {@link WorkSource} class name.
-	 * @param taskTypeNames
-	 *            Names of the {@link TaskType} instances being used on the
-	 *            {@link WorkType}.
+	 * @param workModel
+	 *            {@link WorkModel}.
 	 */
-	public WorkInstance(String workName, String workSourceClassName,
-			String... taskTypeNames) {
-		this.workName = workName;
-		this.workSourceClassName = workSourceClassName;
+	public WorkInstance(WorkModel workModel) {
+		this.workModel = workModel;
+		this.workName = this.workModel.getWorkName();
+		this.workSourceClassName = this.workModel.getWorkSourceClassName();
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
+		for (PropertyModel property : this.workModel.getProperties()) {
+			this.propertyList.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
 		this.workType = null;
 		this.taskTypes = null;
-		this.taskTypeNames = (taskTypeNames == null ? new String[0]
-				: taskTypeNames);
+		this.workTaskNameMapping = null;
+		this.taskObjectNameMappingForWorkTask = null;
+		this.taskFlowNameMappingForTask = null;
+		this.taskEscalationTypeMappingForTask = null;
+
+		// Create the list of task type names
+		List<String> workTaskNames = new LinkedList<String>();
+		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
+			workTaskNames.add(workTask.getWorkTaskName());
+		}
+		this.taskTypeNames = workTaskNames.toArray(new String[0]);
 	}
 
 	/**
@@ -95,15 +145,38 @@ public class WorkInstance {
 	 *            {@link WorkType}.
 	 * @param taskTypes
 	 *            {@link TaskType} selected.
+	 * @param workTaskNameMapping
+	 *            Mapping of {@link TaskType} name to {@link WorkTaskModel}
+	 *            name.
+	 * @param taskObjectNameMappingForWorkTask
+	 *            Mapping of {@link TaskObjectType} name to
+	 *            {@link WorkTaskObjectModel} name for a particular
+	 *            {@link WorkTaskModel} name.
+	 * @param taskFlowNameMappingForTask
+	 *            Mapping of {@link TaskFlowType} name to {@link TaskFlowModel}
+	 *            name for a particular {@link TaskModel} name.
+	 * @param taskEscalationTypeMappingForTask
+	 *            Mapping of {@link TaskEscalationType} name to
+	 *            {@link TaskEscalationModel} name for a particular
+	 *            {@link TaskModel} name.
 	 */
 	WorkInstance(String workName, String workSourceClassName,
 			PropertyList propertyList, WorkType<?> workType,
-			TaskType<?, ?, ?>[] taskTypes) {
+			TaskType<?, ?, ?>[] taskTypes,
+			Map<String, String> workTaskNameMapping,
+			Map<String, Map<String, String>> taskObjectNameMappingForWorkTask,
+			Map<String, Map<String, String>> taskFlowNameMappingForTask,
+			Map<String, Map<String, String>> taskEscalationTypeMappingForTask) {
 		this.workName = workName;
 		this.workSourceClassName = workSourceClassName;
 		this.propertyList = propertyList;
+		this.workModel = null;
 		this.workType = workType;
 		this.taskTypes = taskTypes;
+		this.workTaskNameMapping = workTaskNameMapping;
+		this.taskObjectNameMappingForWorkTask = taskObjectNameMappingForWorkTask;
+		this.taskFlowNameMappingForTask = taskFlowNameMappingForTask;
+		this.taskEscalationTypeMappingForTask = taskEscalationTypeMappingForTask;
 
 		// Create the listing of task type names
 		this.taskTypeNames = new String[this.taskTypes.length];
@@ -140,6 +213,17 @@ public class WorkInstance {
 	}
 
 	/**
+	 * Obtains the {@link WorkModel}.
+	 * 
+	 * @return {@link WorkModel} if instantiated by <code>public</code>
+	 *         constructor or <code>null</code> if from
+	 *         {@link WorkSourceInstance}.
+	 */
+	WorkModel getWorkModel() {
+		return this.workModel;
+	}
+
+	/**
 	 * Obtains the {@link WorkType}.
 	 * 
 	 * @return {@link WorkType} if obtained from {@link WorkSourceInstance} or
@@ -171,4 +255,51 @@ public class WorkInstance {
 	public String[] getTaskTypeNames() {
 		return this.taskTypeNames;
 	}
+
+	/**
+	 * Obtains the mapping of {@link TaskType} name to {@link WorkTaskModel}
+	 * name.
+	 * 
+	 * @return Mapping of {@link TaskType} name to {@link WorkTaskModel} name.
+	 */
+	public Map<String, String> getWorkTaskNameMapping() {
+		return this.workTaskNameMapping;
+	}
+
+	/**
+	 * Obtains the mapping of {@link TaskObjectType} name to
+	 * {@link WorkTaskObjectModel} name for a particular {@link WorkTaskModel}
+	 * name.
+	 * 
+	 * @return Mapping of {@link TaskObjectType} name to
+	 *         {@link WorkTaskObjectModel} name for a particular
+	 *         {@link WorkTaskModel} name.
+	 */
+	public Map<String, Map<String, String>> getTaskObjectNameMappingForWorkTask() {
+		return this.taskObjectNameMappingForWorkTask;
+	}
+
+	/**
+	 * Obtains the mapping of {@link TaskFlowType} name to {@link TaskFlowModel}
+	 * name for a particular {@link TaskModel} name.
+	 * 
+	 * @return Mapping of {@link TaskFlowType} name to {@link TaskFlowModel}
+	 *         name for a particular {@link TaskModel} name.
+	 */
+	public Map<String, Map<String, String>> getTaskFlowNameMappingForTask() {
+		return this.taskFlowNameMappingForTask;
+	}
+
+	/**
+	 * Obtains the mapping of {@link TaskEscalationType} name to
+	 * {@link TaskEscalationModel} name for a particular {@link TaskModel} name.
+	 * 
+	 * @return Mapping of {@link TaskEscalationType} name to
+	 *         {@link TaskEscalationModel} name for a particular
+	 *         {@link TaskModel} name.
+	 */
+	public Map<String, Map<String, String>> getTaskEscalationTypeMappingForTask() {
+		return this.taskEscalationTypeMappingForTask;
+	}
+
 }

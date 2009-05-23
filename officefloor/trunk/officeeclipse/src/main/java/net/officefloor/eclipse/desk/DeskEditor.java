@@ -51,6 +51,7 @@ import net.officefloor.eclipse.desk.operations.DeleteExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.DeleteExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.DeleteTaskOperation;
 import net.officefloor.eclipse.desk.operations.DeleteWorkOperation;
+import net.officefloor.eclipse.desk.operations.RefactorWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -440,6 +441,9 @@ public class DeskEditor extends
 		list.add(new DeleteTaskOperation(deskChanges));
 		list.add(new DeleteExternalFlowOperation(deskChanges));
 		list.add(new DeleteExternalManagedObjectOperation(deskChanges));
+
+		// Work actions
+		list.add(new RefactorWorkOperation(deskChanges));
 
 		// Task actions
 		list.add(new ToggleTaskPublicOperation(deskChanges));

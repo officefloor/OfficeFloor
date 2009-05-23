@@ -65,7 +65,7 @@ public class WorkSourceWizard extends Wizard implements
 			WorkInstance workInstance) {
 
 		// Create and run the wizard
-		WorkSourceWizard wizard = new WorkSourceWizard(editPart);
+		WorkSourceWizard wizard = new WorkSourceWizard(editPart, workInstance);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the work instance
 			return wizard.getWorkInstance();
@@ -167,6 +167,21 @@ public class WorkSourceWizard extends Wizard implements
 	private WorkSourcePropertiesWizardPage currentPropertiesPage = null;
 
 	/**
+	 * {@link WorkSourceAlignTasksWizardPage}.
+	 */
+	private final WorkSourceAlignTasksWizardPage alignTasksPage;
+
+	/**
+	 * {@link WorkSourceAlignObjectsWizardPage}.
+	 */
+	private final WorkSourceAlignObjectsWizardPage alignObjectsPage;
+
+	/**
+	 * {@link WorkSourceAlignFlowsEscalationsWizardPage}.
+	 */
+	private final WorkSourceAlignFlowsEscalationsWizardPage alignFlowsEscalationsPage;
+
+	/**
 	 * {@link WorkInstance}.
 	 */
 	private WorkInstance workInstance = null;
@@ -220,7 +235,7 @@ public class WorkSourceWizard extends Wizard implements
 
 		// Create the pages
 		this.listingPage = new WorkSourceListingWizardPage(
-				workSourceInstanceListing);
+				workSourceInstanceListing, workInstance);
 		for (WorkSourceInstance workSourceInstance : workSourceInstanceListing) {
 			this.propertiesPages
 					.put(workSourceInstance,
@@ -228,6 +243,23 @@ public class WorkSourceWizard extends Wizard implements
 									workSourceInstance));
 		}
 		this.tasksPage = new WorkSourceTasksWizardPage();
+
+		// Add pages to refactor work
+		if (workInstance != null) {
+			// Refactoring work
+			this.alignTasksPage = new WorkSourceAlignTasksWizardPage(
+					workInstance);
+			this.alignObjectsPage = new WorkSourceAlignObjectsWizardPage(
+					workInstance);
+			this.alignFlowsEscalationsPage = new WorkSourceAlignFlowsEscalationsWizardPage(
+					workInstance);
+
+		} else {
+			// Create new work (no refactoring required)
+			this.alignTasksPage = null;
+			this.alignObjectsPage = null;
+			this.alignFlowsEscalationsPage = null;
+		}
 	}
 
 	/**
@@ -252,10 +284,17 @@ public class WorkSourceWizard extends Wizard implements
 					new IWizardPage[0])[0]);
 		}
 		this.addPage(this.tasksPage);
+		if (this.alignTasksPage != null) {
+			// Add refactoring pages
+			this.addPage(this.alignTasksPage);
+			this.addPage(this.alignObjectsPage);
+			this.addPage(this.alignFlowsEscalationsPage);
+		}
 	}
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
+
 		// Handle based on current page
 		if (page == this.listingPage) {
 			// Listing page, so obtain properties page based on selection
@@ -273,10 +312,33 @@ public class WorkSourceWizard extends Wizard implements
 					.loadWorkSourceInstance(this.selectedWorkSourceInstance);
 			return this.tasksPage;
 
-		} else {
-			// Tasks selected, nothing further
-			return null;
+		} else if (page == this.tasksPage) {
+			// Return align tasks (or null if new work)
+			if (this.alignTasksPage != null) {
+				this.alignTasksPage
+						.loadWorkSourceInstance(this.selectedWorkSourceInstance);
+			}
+			return this.alignTasksPage;
+
+		} else if (page == this.alignTasksPage) {
+			// Return align objects
+			this.alignObjectsPage.loadWorkTaskMappingAndWorkSourceInstance(
+					this.alignTasksPage.getWorkTaskNameMapping(),
+					this.selectedWorkSourceInstance);
+			return this.alignObjectsPage;
+
+		} else if (page == this.alignObjectsPage) {
+			// Return align flows/escalations
+			this.alignFlowsEscalationsPage
+					.loadWorkTaskMappingAndWorkSourceInstance(
+							this.alignTasksPage.getWorkTaskNameMapping(),
+							this.selectedWorkSourceInstance);
+			return this.alignFlowsEscalationsPage;
+
 		}
+
+		// If here, then should be nothing further
+		return null;
 	}
 
 	@Override
@@ -317,12 +379,26 @@ public class WorkSourceWizard extends Wizard implements
 		TaskType<?, ?, ?>[] taskTypes = this.tasksPage.getSelectedTaskTypes()
 				.toArray(new TaskType[0]);
 
+		// Obtain the refactor alignments
+		Map<String, String> workTaskNameMapping = (this.alignTasksPage == null ? null
+				: this.alignTasksPage.getWorkTaskNameMapping());
+		Map<String, Map<String, String>> taskObjectNameMappingForWorkTask = (this.alignObjectsPage == null ? null
+				: this.alignObjectsPage.getTaskObjectNameMappingForWorkTask());
+		Map<String, Map<String, String>> taskFlowNameMappingForTask = (this.alignFlowsEscalationsPage == null ? null
+				: this.alignFlowsEscalationsPage
+						.getTaskFlowNameMappingForTask());
+		Map<String, Map<String, String>> taskEscalationTypeMappingForTask = (this.alignFlowsEscalationsPage == null ? null
+				: this.alignFlowsEscalationsPage
+						.getTaskEscalationTypeMappingForTask());
+
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the work instance
 		this.workInstance = new WorkInstance(workName, workSourceClassName,
-				propertyList, workType, taskTypes);
+				propertyList, workType, taskTypes, workTaskNameMapping,
+				taskObjectNameMappingForWorkTask, taskFlowNameMappingForTask,
+				taskEscalationTypeMappingForTask);
 
 		// Include extension on project class path
 		this.selectedWorkSourceInstance

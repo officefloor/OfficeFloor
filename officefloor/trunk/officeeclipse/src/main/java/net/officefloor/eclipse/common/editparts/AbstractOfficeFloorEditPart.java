@@ -196,8 +196,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 		ConfigurationContext context = new FileConfigurationItem(this.editor
 				.getEditorInput()).getContext();
 
-		// Create a new Class Loader to ensure load the latest version of
-		// classes
+		// Create a new Class Loader to ensure latest version of classes
 		ClassLoader classLoader = ProjectClassLoader.create(context);
 
 		// Obtain the Shell for the dialog
