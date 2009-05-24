@@ -35,12 +35,9 @@ public class OfficeFloorClasspathContainerInitialiser extends
 		ClasspathContainerInitializer {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jdt.core.ClasspathContainerInitializer#initialize(org.eclipse
-	 * .core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
+	 * ============= ClasspathContainerInitializer ==================
 	 */
+	
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project)
 			throws CoreException {

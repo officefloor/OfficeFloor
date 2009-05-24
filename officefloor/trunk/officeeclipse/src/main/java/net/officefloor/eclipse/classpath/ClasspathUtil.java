@@ -28,6 +28,7 @@ import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
+import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -164,7 +165,7 @@ public class ClasspathUtil {
 	 * @return {@link IClasspathEntry} or <code>null</code> if fails.
 	 */
 	public static IClasspathEntry createClasspathEntry(
-			ClasspathProvision provision) throws Exception {
+			ClasspathProvision provision) {
 
 		// Handle based on type of provision
 		if (provision instanceof TypeClasspathProvision) {
@@ -194,12 +195,11 @@ public class ClasspathUtil {
 	 *            Name of variable.
 	 * @param path
 	 *            Path from variable.
-	 * @return {@link IClasspathEntry} for the variable.
-	 * @throws Exception
-	 *             If fails to obtain the {@link IClasspathEntry}.
+	 * @return {@link IClasspathEntry} for the variable or <code>null</code> if
+	 *         fails to create.
 	 */
 	public static IClasspathEntry createClasspathEntry(String variable,
-			String path) throws Exception {
+			String path) {
 
 		// Create the path
 		IPath variablePath = new Path(variable).append(path);
@@ -215,30 +215,51 @@ public class ClasspathUtil {
 	 * @param clazz
 	 *            {@link Class}.
 	 * @return {@link IClasspathEntry} of the class path containing the
-	 *         {@link Class}.
-	 * @throws Exception
-	 *             If fails to obtain the {@link IClasspathEntry}.
+	 *         {@link Class} or <code>null</code> if issue obtaining.
 	 */
-	public static IClasspathEntry createClasspathEntry(Class<?> clazz)
-			throws Exception {
+	public static IClasspathEntry createClasspathEntry(Class<?> clazz) {
 
-		// Obtain the class resource name
-		String classResourceName = clazz.getName().replace('.', '/') + ".class";
+		try {
+			// Obtain the class resource name
+			String classResourceName = clazz.getName().replace('.', '/')
+					+ ".class";
 
-		// Obtain the URL to the class resource
-		URL classUrl = clazz.getClassLoader().getResource(classResourceName);
-		URL resolvedUrl = FileLocator.resolve(classUrl);
+			// Obtain the URL to the class resource
+			URL classUrl = clazz.getClassLoader()
+					.getResource(classResourceName);
+			URL resolvedUrl = FileLocator.resolve(classUrl);
+			String resolvedPath = resolvedUrl.getPath();
 
-		// Create the path to class path
-		String resolvedPath = new File(resolvedUrl.toURI()).getAbsolutePath();
-		String classpath = resolvedPath.substring(0,
-				(resolvedPath.length() - classResourceName.length()));
+			// Determine the class path
+			String classpath;
+			if (resolvedPath.startsWith("file:")) {
+				// Class contained in file, strip path to obtain file
+				resolvedPath = resolvedPath.substring("file:".length());
+				int endOfFilePath = resolvedPath.indexOf('!');
+				classpath = resolvedPath.substring(0, endOfFilePath);
 
-		// Obtain the path for the class path
-		IPath classpathPath = new Path(classpath);
+			} else {
+				// Plain directory, obtain path to start of class directory
+				String path = new File(resolvedUrl.toURI()).getAbsolutePath();
+				classpath = path.substring(0,
+						(path.length() - classResourceName.length()));
+			}
 
-		// Return the class path entry
-		return JavaCore.newLibraryEntry(classpathPath, null, null);
+			// Obtain the path for the class path
+			IPath classpathPath = new Path(classpath);
+
+			// Return the class path entry
+			return JavaCore.newLibraryEntry(classpathPath, null, null);
+
+		} catch (Throwable ex) {
+
+			// Log failure to obtain class path for class
+			LogUtil.logError("Failed to obtain class path for class "
+					+ (clazz == null ? null : clazz.getName()), ex);
+
+			// No class path as failed to obtain
+			return null;
+		}
 	}
 
 	/**
