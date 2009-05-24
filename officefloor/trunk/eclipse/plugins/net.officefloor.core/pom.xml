@@ -57,6 +57,7 @@ This may require coping and renaming from the plug-in.
                 </executions>
                 <configuration>
                     <pde>true</pde>
+                    <downloadSources>true</downloadSources>
                 </configuration>
             </plugin>
             <plugin>

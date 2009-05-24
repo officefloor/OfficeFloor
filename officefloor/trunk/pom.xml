@@ -24,6 +24,7 @@
         <module>officeeclipse_socket</module>
         <module>officetool_filingcabinet</module>
         <module>officeeclipse-jars</module>
+        <module>eclipse/plugins/net.officefloor.core</module>
     </modules>
     <url>http://www.officefloor.net</url>
     <developers>
@@ -39,12 +40,6 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
                 </configuration>
             </plugin>
         </plugins>
