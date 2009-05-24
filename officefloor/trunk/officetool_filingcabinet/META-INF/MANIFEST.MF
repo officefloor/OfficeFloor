@@ -5,6 +5,5 @@ Bundle-SymbolicName: net.officefloor.tool.filingcabinet;singleton:=true
 Bundle-Version: 1.0.0
 Export-Package: net.officefloor.plugin.filingcabinet
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: net.officefloor.compiler;bundle-version="1.0.0",
- net.officefloor.frame;bundle-version="1.0.0",
- net.officefloor.eclipse.jars;bundle-version="1.0.0"
+Require-Bundle: net.officefloor.eclipse.jars;bundle-version="1.0.0",
+ net.officefloor.core;bundle-version="0.0.1"

@@ -190,8 +190,16 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 
 		// Ensure the framework class paths available
 		for (Class<?> frameworkClass : frameworkClasses) {
-			this.classPaths.add(ClasspathUtil
-					.createClasspathEntry(frameworkClass));
+
+			// Obtain the class path
+			IClasspathEntry classpath = ClasspathUtil
+					.createClasspathEntry(frameworkClass);
+			if (classpath == null) {
+				continue; // ignore as issue in obtaining
+			}
+
+			// Have path so add the class path
+			this.classPaths.add(classpath);
 		}
 
 		// Add the extension class paths (skipping container id)
@@ -239,6 +247,9 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 					// Obtain the class path entry
 					IClasspathEntry classpathEntry = ClasspathUtil
 							.createClasspathEntry(provision);
+					if (classpathEntry == null) {
+						continue; // issue in obtaining class path
+					}
 
 					// Add the class path entry
 					this.addClasspathEntry(classpathEntry);
