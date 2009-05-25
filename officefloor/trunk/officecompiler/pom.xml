@@ -10,9 +10,6 @@
 	<artifactId>officecompiler</artifactId>
 	<name>Office Floor Compiler</name>
 	<description>Compiler for the Office Floor</description>
-	<properties>
-		<office_version>0.0.1</office_version>
-	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -39,19 +36,19 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officeframe</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officexml</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officemodel</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -62,6 +59,7 @@
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>1.1</version>
+            <scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

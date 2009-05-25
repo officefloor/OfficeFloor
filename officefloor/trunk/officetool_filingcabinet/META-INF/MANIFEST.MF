@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Tool for the filing cabinet
-Bundle-SymbolicName: net.officefloor.tool.filingcabinet;singleton:=true
-Bundle-Version: 1.0.0
-Export-Package: net.officefloor.plugin.filingcabinet
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: net.officefloor.eclipse.jars;bundle-version="1.0.0",
- net.officefloor.core;bundle-version="0.0.1"

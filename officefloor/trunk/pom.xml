@@ -9,22 +9,35 @@
     <name>Office Floor</name>
     <description>Parent Office Floor</description>
     <modules>
+    
+        <!-- Core functionality -->
         <module>officeframe</module>
         <module>officemodel</module>
         <module>officexml</module>
         <module>officecompiler</module>
         <module>officemodelgen</module>
-        <module>officeeclipse</module>
+
+        <!-- Plug-in functionality -->
         <module>officeplugin_jdbc</module>
         <module>officeplugin_jms</module>
         <module>officeplugin_socket</module>
         <module>officeplugin_spring</module>
         <module>officeplugin_hibernate</module>
-        <module>officeeclipse_jdbc</module>
-        <module>officeeclipse_socket</module>
+
+        <!-- Tool functionality -->
         <module>officetool_filingcabinet</module>
-        <module>officeeclipse-jars</module>
+
+        <!-- Core eclipse functionality -->
         <module>eclipse/plugins/net.officefloor.core</module>
+        <module>eclipse/plugins/net.officefloor.ui</module>
+        <module>eclipse/features/net.officefloor.feature</module>
+
+        <!-- Plug-in eclipse functionality -->
+        <module>eclipse/plugins/net.officefloor.filingcabinet</module>
+        <module>eclipse/plugins/net.officefloor.jdbc</module>
+        <module>eclipse/plugins/net.officefloor.socket</module>
+        <module>eclipse/features/net.officefloor.plugins.feature</module>
+
     </modules>
     <url>http://www.officefloor.net</url>
     <developers>
@@ -40,6 +53,12 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
                 </configuration>
             </plugin>
         </plugins>
