@@ -92,17 +92,9 @@ This may require coping and renaming from the plug-in.
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
-            <artifactId>net.officefloor.filingcabinet</artifactId>
-            <version>${pom.version}</version>
-            <type>zip</type>
-        </dependency>
-<!--  
-        <dependency>
-            <groupId>${pom.groupId}</groupId>
             <artifactId>net.officefloor.ui</artifactId>
             <version>${pom.version}</version>
             <type>zip</type>
         </dependency>
--->
     </dependencies>
 </project>

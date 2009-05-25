@@ -101,6 +101,10 @@ This may require coping and renaming from the plug-in.
                 <extensions>true</extensions>
                 <configuration>
                     <eclipseInstall>${eclipse.install.dir}</eclipseInstall>
+                    <buildProperties>
+                        <javacSource>1.6</javacSource>
+                        <javacTarget>1.6</javacTarget>
+                    </buildProperties>
                 </configuration>
                 <executions>
                     <execution>
