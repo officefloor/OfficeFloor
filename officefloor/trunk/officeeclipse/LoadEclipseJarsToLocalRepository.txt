@@ -1,2 +1,0 @@
-# TO load the eclipse JARs to the Maven local repository
-mvn eclipse:make-artifacts -DeclipseDir="C:\tools\eclipse\eclipse-3.3\eclipse"
