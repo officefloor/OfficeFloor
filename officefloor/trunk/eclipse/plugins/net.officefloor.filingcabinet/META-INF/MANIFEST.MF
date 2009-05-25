@@ -6,16 +6,6 @@ Bundle-Version: 0.0.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: net.officefloor.core;bundle-version="0.0.1",
  net.officefloor.ui;bundle-version="0.0.1"
-Bundle-ClassPath: .,
- easymock-1.1.jar,
- hsqldb-1.8.0.7.jar,
- junit-3.8.1.jar,
- mysql-connector-java-5.0.4.jar,
- officecompiler-0.0.1.jar,
- officeframe-0.0.1.jar,
- officemodel-0.0.1.jar,
- officetool_filingcabinet-0.0.1.jar,
- officexml-0.0.1.jar
 Import-Package: org.eclipse.core.resources,
  org.eclipse.core.runtime;version="3.4.0",
  org.eclipse.core.runtime.jobs,
@@ -25,3 +15,14 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.jface.viewers,
  org.eclipse.swt.widgets,
  org.eclipse.ui
+Bundle-ClassPath: .,
+ easymock-1.1.jar,
+ hsqldb-1.8.0.7.jar,
+ junit-3.8.1.jar,
+ mysql-connector-java-5.0.4.jar,
+ net.officefloor.core-0.0.1.zip,
+ officecompiler-0.0.1.jar,
+ officeframe-0.0.1.jar,
+ officemodel-0.0.1.jar,
+ officetool_filingcabinet-0.0.1.jar,
+ officexml-0.0.1.jar
