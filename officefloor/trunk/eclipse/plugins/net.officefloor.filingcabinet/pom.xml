@@ -125,5 +125,11 @@ This may require coping and renaming from the plug-in.
             <artifactId>officetool_filingcabinet</artifactId>
             <version>${pom.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>net.officefloor.core</artifactId>
+            <version>${pom.version}</version>
+            <type>zip</type>
+        </dependency>
     </dependencies>
 </project>
