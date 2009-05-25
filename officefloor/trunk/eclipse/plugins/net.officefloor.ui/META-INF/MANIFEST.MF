@@ -53,13 +53,15 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.views.navigator,
  org.osgi.framework;version="1.4.0"
 Require-Bundle: net.officefloor.core;bundle-version="0.0.1"
-Bundle-ClassPath: .,
- junit-3.8.1.jar,
- net.officefloor.core-0.0.1.zip,
- net.officefloor.filingcabinet-0.0.1.zip
 Export-Package: net.officefloor.eclipse.bootstrap,
  net.officefloor.eclipse.classpath,
  net.officefloor.eclipse.common.dialog,
  net.officefloor.eclipse.common.dialog.input,
  net.officefloor.eclipse.common.dialog.input.filter,
- net.officefloor.eclipse.common.dialog.input.impl
+ net.officefloor.eclipse.common.dialog.input.impl,
+ net.officefloor.eclipse.extension.classpath,
+ net.officefloor.eclipse.extension.managedobjectsource,
+ net.officefloor.eclipse.extension.worksource
+Bundle-ClassPath: .,
+ junit-3.8.1.jar,
+ net.officefloor.core-0.0.1.zip

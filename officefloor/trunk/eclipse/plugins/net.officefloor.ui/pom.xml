@@ -87,6 +87,8 @@ This may require coping and renaming from the plug-in.
                             <directory>${basedir}</directory>
                             <includes>
                                 <include>*.jar</include>
+                                <include>*.zip</include>
+                                <include>javaCompiler...args</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
@@ -121,18 +123,19 @@ This may require coping and renaming from the plug-in.
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Skipping tests as to be run by Eclipse PDE builder -->
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>net.officefloor.core</artifactId>
-            <version>${pom.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>${pom.groupId}</groupId>
-            <artifactId>net.officefloor.filingcabinet</artifactId>
             <version>${pom.version}</version>
             <type>zip</type>
         </dependency>

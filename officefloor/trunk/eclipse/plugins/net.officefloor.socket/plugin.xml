@@ -2,17 +2,17 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
-         point="net.officefloor.eclipse.worksource">
+         point="net.officefloor.ui.worksource">
       <worksource
             class="net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension" />
    </extension>
    <extension
-         point="net.officefloor.eclipse.worksource">
+         point="net.officefloor.ui.worksource">
       <worksource
             class="net.officefloor.eclipse.socket.HttpFileWorkSourceExtension" />
    </extension>
    <extension
-         point="net.officefloor.eclipse.managedobjectsource">
+         point="net.officefloor.ui.managedobjectsource">
       <managedobjectsource
             class="net.officefloor.eclipse.socket.HttpManagedObjectSourceExtension" />
    </extension>
