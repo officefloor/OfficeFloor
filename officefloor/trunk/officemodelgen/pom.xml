@@ -12,24 +12,21 @@
 	<description>
 		Generates the Office Floor model for configuring via an IDE.  This is a code generator internal to Office Floor to save effort in writing the peristent classes.
 	</description>
-	<properties>
-		<office_version>0.0.1</office_version>
-	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officeframe</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officecompiler</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officexml</artifactId>
-			<version>${office_version}</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -39,4 +36,3 @@
 		</dependency>
 	</dependencies>
 </project>
-
