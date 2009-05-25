@@ -82,37 +82,37 @@
         </shortcut>
     </extension>
     <extension
-          point="net.officefloor.eclipse.worksource">
+          point="net.officefloor.ui.worksource">
        <worksource
              class="net.officefloor.eclipse.extension.worksource.clazz.ClassWorkSourceExtension">
        </worksource>
     </extension>
     <extension
-          point="net.officefloor.eclipse.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsource">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.clazz.ClassManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsource">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.TreeXmlMarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsource">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.TreeXmlUnmarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsource">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.FlatXmlUnmarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.administratorsource">
+          point="net.officefloor.ui.administratorsource">
           <administratorsource class="net.officefloor.eclipse.extension.administratorsource.clazz.ClassAdministratorSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.sectionsource">
+          point="net.officefloor.ui.sectionsource">
           <sectionsource class="net.officefloor.eclipse.extension.sectionsource.desk.DeskModelSectionSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.eclipse.sectionsource">
+          point="net.officefloor.ui.sectionsource">
           <sectionsource class="net.officefloor.eclipse.extension.sectionsource.section.SectionModelSectionSourceExtension" />
     </extension>
     <extension

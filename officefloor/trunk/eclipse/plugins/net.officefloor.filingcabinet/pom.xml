@@ -87,6 +87,8 @@ This may require coping and renaming from the plug-in.
                             <directory>${basedir}</directory>
                             <includes>
                                 <include>*.jar</include>
+                                <include>*.zip</include>
+                                <include>javaCompiler...args</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>

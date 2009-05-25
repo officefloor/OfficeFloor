@@ -6,7 +6,7 @@
 		<groupId>net.officefloor</groupId>
 		<version>0.0.1</version>
 	</parent>
-	<artifactId>officeeclipse_socket</artifactId>
+	<artifactId>net.officefloor.socket</artifactId>
 	<name>Office Floor Eclipse Socket Extension</name>
 	<description>Provides extensions for socket configuration.</description>
     <packaging>zip</packaging>

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Eclipse Socket Extension
-Bundle-SymbolicName: officeeclipse_socket;singleton:=true
+Bundle-SymbolicName: net.officefloor.socket;singleton:=true
 Bundle-Version: 0.0.1
 Bundle-Vendor: Daniel Sagenschneider
 Require-Bundle: net.officefloor.core;bundle-version="0.0.1",
