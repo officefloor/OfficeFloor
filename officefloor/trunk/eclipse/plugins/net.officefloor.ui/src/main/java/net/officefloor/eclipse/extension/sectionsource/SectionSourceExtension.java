@@ -38,7 +38,7 @@ public interface SectionSourceExtension<S extends SectionSource> {
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("sectionsource");
+			.getExtensionId("sectionsources");
 
 	/**
 	 * Obtains the class of the {@link SectionSource} being enriched in its

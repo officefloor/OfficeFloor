@@ -3,10 +3,10 @@
 <schema targetNamespace="net.officefloor.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="net.officefloor.ui" id="worksource" name="Work Source"/>
+         <meta.schema plugin="net.officefloor.ui" id="worksources" name="Work Source"/>
       </appInfo>
       <documentation>
-         Extension to obtain plug-in WorkSource instances.
+         Allows providing custom functionality to create a particular WorkSource.
       </documentation>
    </annotation>
 

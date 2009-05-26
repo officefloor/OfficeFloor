@@ -39,7 +39,7 @@ public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("worksource");
+			.getExtensionId("worksources");
 
 	/**
 	 * Obtains the class of the {@link WorkSource} being enriched in its usage.
