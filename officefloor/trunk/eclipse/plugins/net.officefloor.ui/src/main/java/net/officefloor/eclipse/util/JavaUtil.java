@@ -85,7 +85,7 @@ public class JavaUtil {
 		}
 
 		// Obtain the list of implementations
-		ITypeHierarchy hierarchy = javaType.newTypeHierarchy(null);
+		ITypeHierarchy hierarchy = javaType.newTypeHierarchy(javaProject, null);
 		IType[] allTypes = hierarchy.getAllClasses();
 
 		// Trim the list to non-abstract implementations

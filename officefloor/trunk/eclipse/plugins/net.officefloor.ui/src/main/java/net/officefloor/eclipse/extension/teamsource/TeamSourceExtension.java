@@ -38,7 +38,7 @@ public interface TeamSourceExtension<S extends TeamSource> {
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("teamsource");
+			.getExtensionId("teamsources");
 
 	/**
 	 * Obtains the class of the {@link TeamSource} being enriched in its usage.

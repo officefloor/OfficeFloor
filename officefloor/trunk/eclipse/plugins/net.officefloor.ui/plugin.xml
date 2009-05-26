@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-   <extension-point id="worksource" name="Work Source" schema="schema/worksource.exsd"/>
-   <extension-point id="managedobjectsource" name="Managed Object Source" schema="schema/managedobjectsource.exsd"/>
-   <extension-point id="sectionsource" name="Section Source" schema="schema/sectionsource.exsd"/>
-   <extension-point id="administratorsource" name="Administrator Source" schema="schema/administratorsource.exsd"/>
-    <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
+   <extension-point id="worksources" name="Work Source" schema="schema/worksource.exsd"/>
+   <extension-point id="managedobjectsources" name="Managed Object Source" schema="schema/managedobjectsource.exsd"/>
+   <extension-point id="sectionsources" name="Section Source" schema="schema/sectionsource.exsd"/>
+   <extension-point id="administratorsources" name="Administrator Source" schema="schema/administratorsource.exsd"/>
+   <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
         <editor
               class="net.officefloor.eclipse.desk.DeskEditor"
               contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
@@ -82,37 +82,37 @@
         </shortcut>
     </extension>
     <extension
-          point="net.officefloor.ui.worksource">
+          point="net.officefloor.ui.worksources">
        <worksource
              class="net.officefloor.eclipse.extension.worksource.clazz.ClassWorkSourceExtension">
        </worksource>
     </extension>
     <extension
-          point="net.officefloor.ui.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsources">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.clazz.ClassManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsources">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.TreeXmlMarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsources">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.TreeXmlUnmarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.managedobjectsource">
+          point="net.officefloor.ui.managedobjectsources">
           <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.xml.FlatXmlUnmarshallerManagedObjectSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.administratorsource">
+          point="net.officefloor.ui.administratorsources">
           <administratorsource class="net.officefloor.eclipse.extension.administratorsource.clazz.ClassAdministratorSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.sectionsource">
+          point="net.officefloor.ui.sectionsources">
           <sectionsource class="net.officefloor.eclipse.extension.sectionsource.desk.DeskModelSectionSourceExtension" />
     </extension>
     <extension
-          point="net.officefloor.ui.sectionsource">
+          point="net.officefloor.ui.sectionsources">
           <sectionsource class="net.officefloor.eclipse.extension.sectionsource.section.SectionModelSectionSourceExtension" />
     </extension>
     <extension

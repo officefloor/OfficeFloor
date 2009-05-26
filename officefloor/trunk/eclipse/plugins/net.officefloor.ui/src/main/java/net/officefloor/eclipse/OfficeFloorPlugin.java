@@ -14,14 +14,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
- * The main plugin class to be used in the desktop.
+ * The plug-in class.
  */
 public class OfficeFloorPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Plug-in Id for the {@link OfficeFloorPlugin}.
 	 */
-	public static final String PLUGIN_ID = "net.officefloor.eclipse";
+	public static final String PLUGIN_ID = "net.officefloor.ui";
 
 	/**
 	 * Shared instance.
@@ -88,7 +88,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	public static OfficeFloorSkin getSkin() {
 		return skin;
 	}
-	
+
 	/**
 	 * Creates a new {@link OfficeFloorCompiler} for the input
 	 * {@link AbstractOfficeFloorEditPart}.

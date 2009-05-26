@@ -3,10 +3,10 @@
 <schema targetNamespace="net.officefloor.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="net.officefloor.ui" id="sectionsource" name="Section Source"/>
+         <meta.schema plugin="net.officefloor.ui" id="sectionsources" name="Section Source"/>
       </appInfo>
       <documentation>
-         [Enter description of this extension point.]
+         Allows providing custom functionality to create a particular SectionSource.
       </documentation>
    </annotation>
 
@@ -17,6 +17,9 @@
          </appInfo>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="sectionsource"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -64,7 +67,7 @@
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         3.4
       </documentation>
    </annotation>
 

@@ -62,6 +62,7 @@ Export-Package: net.officefloor.eclipse.bootstrap,
  net.officefloor.eclipse.extension.classpath,
  net.officefloor.eclipse.extension.managedobjectsource,
  net.officefloor.eclipse.extension.worksource
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
 Bundle-ClassPath: .,
- junit-3.8.1.jar,
- net.officefloor.core-0.0.1.zip
+ junit-3.8.1.jar

@@ -39,7 +39,7 @@ public interface AdministratorSourceExtension<I, A extends Enum<A>, S extends Ad
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("administratorsource");
+			.getExtensionId("administratorsources");
 
 	/**
 	 * Obtains the class of the {@link AdministratorSource} being enriched in

@@ -38,7 +38,7 @@ public interface ManagedObjectSourceExtension<D extends Enum<D>, F extends Enum<
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("managedobjectsource");
+			.getExtensionId("managedobjectsources");
 
 	/**
 	 * Obtains the class of the {@link ManagedObjectSource} being enriched in
