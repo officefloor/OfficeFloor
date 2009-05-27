@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>officefloor</artifactId>
 		<groupId>net.officefloor</groupId>
 		<version>0.0.1</version>
 	</parent>
-	<modelVersion>4.0.0</modelVersion>
 	<artifactId>officetool_filingcabinet</artifactId>
 	<name>Office Floor Filing Cabinet Tool</name>
 	<description>Office Floor tool for filing cabinet</description>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officeframe</artifactId>
-			<version>0.0.1</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor</groupId>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>officecompiler</artifactId>
-			<version>0.0.1</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>easymock</groupId>
@@ -43,4 +43,3 @@
 		</dependency>
 	</dependencies>
 </project>
-
