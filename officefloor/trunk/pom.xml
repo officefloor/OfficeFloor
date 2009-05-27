@@ -27,9 +27,12 @@
         <!-- Tool functionality -->
         <module>officetool_filingcabinet</module>
 
+        <!-- Ensure eclipse plug-ins are built before features -->
+        <module>eclipse/plugins/eclipse.plugins</module>
+
         <!-- Core eclipse functionality -->
         <module>eclipse/plugins/net.officefloor.core</module>
-        <module>eclipse/plugins/net.officefloor.ui</module>
+        <module>eclipse/plugins/net.officefloor.ui</module>  
         <module>eclipse/features/net.officefloor.feature</module>
 
         <!-- Plug-in eclipse functionality -->
@@ -44,6 +47,8 @@
         <developer>
             <id>sagenschneider</id>
             <name>Daniel Sagenschneider</name>
+            <roles>
+            </roles>
         </developer>
     </developers>
     <build>
