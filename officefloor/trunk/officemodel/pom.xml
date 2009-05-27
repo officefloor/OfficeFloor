@@ -59,6 +59,8 @@
 											location="${repo}/net/officefloor/officecompiler/${ver}/officecompiler-${ver}.jar" />
 										<pathelement
 											location="${repo}/net/officefloor/officexml/${ver}/officexml-${ver}.jar" />
+										<!-- For initial building bring in the IDE built classes of officecompiler -->
+                                        <pathelement path="${modelprojectdir}/../officecompiler/target/classes" />
 									</classpath>
 								</java>
 								<!-- Compiling the model classes -->
