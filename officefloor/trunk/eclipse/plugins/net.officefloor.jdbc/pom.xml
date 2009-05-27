@@ -42,17 +42,9 @@ This may require coping and renaming from the plug-in.
             </plugin>
             <plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>synchronise-eclipse</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>eclipse</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <pde>true</pde>
+                    <useProjectReferences>false</useProjectReferences>
                     <downloadSources>true</downloadSources>
                 </configuration>
             </plugin>
@@ -108,13 +100,6 @@ This may require coping and renaming from the plug-in.
                         <phase>compile</phase>
                         <goals>
                             <goal>attach</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>clean-pde</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
                         </goals>
                     </execution>
                 </executions>

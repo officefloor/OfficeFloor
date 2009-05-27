@@ -37,8 +37,15 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- Skip tests as to be done by PDE builder -->
+                    <!-- Skip tests compilation as requires PDE environment -->
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Skip possibles tests (built via IDE) as requires PDE environment -->
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>
@@ -71,15 +78,6 @@ This may require coping and renaming from the plug-in.
             </plugin>
             <plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>synchronise-eclipse</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>eclipse</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <pde>true</pde>
                     <downloadSources>true</downloadSources>
@@ -136,13 +134,6 @@ This may require coping and renaming from the plug-in.
                         <phase>compile</phase>
                         <goals>
                             <goal>attach</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>clean-pde</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
                         </goals>
                     </execution>
                 </executions>

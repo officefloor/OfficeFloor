@@ -46,15 +46,6 @@ This may require coping and renaming from the plug-in.
             </plugin>
             <plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>synchronise-eclipse</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>eclipse</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <pde>true</pde>
                     <downloadSources>true</downloadSources>
@@ -107,6 +98,12 @@ This may require coping and renaming from the plug-in.
             <artifactId>net.officefloor.feature</artifactId>
             <version>${pom.version}</version>
             <type>zip</type>
+        </dependency>
+        <!-- Ensure in muli-module building that all plug-ins are built first -->
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>net.officefloor.eclipse.plugins</artifactId>
+            <version>${pom.version}</version>
         </dependency>
     </dependencies>
 </project>
