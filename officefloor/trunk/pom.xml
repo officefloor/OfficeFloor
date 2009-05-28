@@ -9,7 +9,7 @@
     <name>Office Floor</name>
     <description>Parent Office Floor</description>
     <modules>
-    
+
         <!-- Core functionality -->
         <module>officeframe</module>
         <module>officemodel</module>
@@ -32,7 +32,7 @@
 
         <!-- Core eclipse functionality -->
         <module>eclipse/plugins/net.officefloor.core</module>
-        <module>eclipse/plugins/net.officefloor.ui</module>  
+        <module>eclipse/plugins/net.officefloor.ui</module>
         <module>eclipse/features/net.officefloor.feature</module>
 
         <!-- Plug-in eclipse functionality -->
@@ -40,6 +40,9 @@
         <module>eclipse/plugins/net.officefloor.jdbc</module>
         <module>eclipse/plugins/net.officefloor.socket</module>
         <module>eclipse/features/net.officefloor.plugins.feature</module>
+
+        <!-- Eclipse update site -->
+        <module>eclipse/update.site</module>
 
     </modules>
     <url>http://www.officefloor.net</url>
