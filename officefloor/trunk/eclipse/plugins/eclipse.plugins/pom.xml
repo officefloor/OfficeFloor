@@ -10,16 +10,6 @@
     <artifactId>net.officefloor.eclipse.plugins</artifactId>
     <name>Office Floor Eclipse Plug-ins</name>
     <description>Provides a dependency for features to ensure all plug-ins are built before features are built.</description>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <projectnatures />
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>

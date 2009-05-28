@@ -30,12 +30,12 @@
                                     <property>eclipse.install.dir</property>
                                     <message>
                                         Missing property: &apos;eclipse.install.dir&apos;
-                                    
-Please ensure property &apos;eclipse.install.dir&apos; is specified in an external active profile. 
+
+Please ensure property &apos;eclipse.install.dir&apos; is specified in an external active profile.
 Its value should contain the directory path to where Eclipse is installed (eg C:\install).
 
-Also ensure the &apos;startup.jar&apos; is available in the installed directory.  
-This may require coping and renaming from the plug-in. 
+Also ensure the &apos;startup.jar&apos; is available in the installed directory.
+This may require coping and renaming from the plug-in.
                                     </message>
                                 </requireProperty>
                             </rules>
@@ -93,15 +93,6 @@ This may require coping and renaming from the plug-in.
                 <configuration>
                     <eclipseInstall>${eclipse.install.dir}</eclipseInstall>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>build-pde</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>attach</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
