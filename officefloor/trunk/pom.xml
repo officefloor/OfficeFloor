@@ -1,78 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>net.officefloor</groupId>
-    <artifactId>officefloor</artifactId>
-    <version>0.0.1</version>
-    <packaging>pom</packaging>
-    <name>Office Floor</name>
-    <description>Parent Office Floor</description>
-    <modules>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.officefloor</groupId>
+	<artifactId>officefloor</artifactId>
+	<version>0.0.1</version>
+	<packaging>pom</packaging>
+	<name>Office Floor</name>
+	<description>Parent Office Floor</description>
+	<modules>
 
-        <!-- Core functionality -->
-        <module>officeframe</module>
-        <module>officemodel</module>
-        <module>officexml</module>
-        <module>officecompiler</module>
-        <module>officemodelgen</module>
+		<!-- Core functionality -->
+		<module>officeframe</module>
+		<module>officemodel</module>
+		<module>officexml</module>
+		<module>officecompiler</module>
+		<module>officemodelgen</module>
 
-        <!-- Plug-in functionality -->
-        <module>officeplugin_jdbc</module>
-        <module>officeplugin_jms</module>
-        <module>officeplugin_socket</module>
-        <module>officeplugin_spring</module>
-        <module>officeplugin_hibernate</module>
+		<!-- Plug-in functionality -->
+		<module>officeplugin_jdbc</module>
+		<module>officeplugin_jms</module>
+		<module>officeplugin_socket</module>
+		<module>officeplugin_spring</module>
+		<module>officeplugin_hibernate</module>
 
-        <!-- Tool functionality -->
-        <module>officetool_filingcabinet</module>
+		<!-- Tool functionality -->
+		<module>officetool_filingcabinet</module>
 
-        <!-- Ensure eclipse plug-ins are built before features -->
-        <module>eclipse/plugins/eclipse.plugins</module>
+		<!-- Ensure eclipse plug-ins are built before features -->
+		<module>eclipse/plugins/eclipse.plugins
+		</module>
 
-        <!-- Core eclipse functionality -->
-        <module>eclipse/plugins/net.officefloor.core</module>
-        <module>eclipse/plugins/net.officefloor.ui</module>
-        <module>eclipse/features/net.officefloor.feature</module>
+		<!-- Core eclipse functionality -->
+		<module>eclipse/plugins/net.officefloor.core
+		</module>
+		<module>eclipse/plugins/net.officefloor.ui
+		</module>
+		<module>eclipse/features/net.officefloor.feature
+		</module>
 
-        <!-- Plug-in eclipse functionality -->
-        <module>eclipse/plugins/net.officefloor.filingcabinet</module>
-        <module>eclipse/plugins/net.officefloor.jdbc</module>
-        <module>eclipse/plugins/net.officefloor.socket</module>
-        <module>eclipse/features/net.officefloor.plugins.feature</module>
+		<!-- Plug-in eclipse functionality -->
+		<module>eclipse/plugins/net.officefloor.filingcabinet
+		</module>
+		<module>eclipse/plugins/net.officefloor.jdbc
+		</module>
+		<module>eclipse/plugins/net.officefloor.socket
+		</module>
+		<module>eclipse/features/net.officefloor.plugins.feature
+		</module>
 
-        <!-- Eclipse update site -->
-        <module>eclipse/update.site</module>
+		<!-- Eclipse update site -->
+		<module>eclipse/update.site</module>
 
-    </modules>
-    <url>http://www.officefloor.net</url>
-    <developers>
-        <developer>
-            <id>sagenschneider</id>
-            <name>Daniel Sagenschneider</name>
-            <roles>
-            </roles>
-        </developer>
-    </developers>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    <reporting>
-        <plugins>
-        </plugins>
-    </reporting>
+	</modules>
+	<url>http://www.officefloor.net</url>
+	<inceptionYear>2005</inceptionYear>
+	<issueManagement>
+		<system>Sourceforge Tracker</system>
+		<url>https://sourceforge.net/tracker/?group_id=156349</url>
+	</issueManagement>
+	<developers>
+		<developer>
+			<id>sagenschneider</id>
+			<name>Daniel Sagenschneider</name>
+			<email>sagenschneider@users.sourceforge.net</email>
+			<roles>
+				<role>Administrator</role>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
+		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/</url>
+	</scm>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-license-plugin
+				</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<version>1.4.0</version>
+				<configuration>
+					<header>src/license/license-header.txt
+					</header>
+					<aggregate>true</aggregate>
+					<excludes>
+						<exclude>**/META-INF/services/**</exclude>
+						<exclude>**/src/test/resources/**
+						</exclude>
+						<exclude>**/src/auto/**</exclude>
+						<exclude>**/*.xml</exclude>
+						<exclude>**/*.xsd</exclude>
+						<exclude>**/*.exsd</exclude>
+						<exclude>**/*.txt</exclude>
+						<exclude>**/*.ofp</exclude>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.apt</exclude>
+					</excludes>
+					<properties>
+						<currentYear>2009</currentYear>
+					</properties>
+					<headerDefinitions>
+						<headerDefinition>src/license/java-header-style.xml
+						</headerDefinition>
+					</headerDefinitions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+		</plugins>
+	</reporting>
 </project>
