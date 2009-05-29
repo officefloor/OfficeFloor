@@ -38,7 +38,7 @@
 			<attribute name="Bundle-ClassPath" value=".,${net.officefloor.core.classpath}" />
 		</manifest>
 		<!-- Generate plugin for update site -->
-		<zip basedir="${plugins.dir}/net.officefloor.core_${version}" destfile="${update.site.dir}/net.officefloor.core_${version}.zip" />
+		<jar basedir="${plugins.dir}/net.officefloor.core_${version}" manifest="${net.officefloor.core.dir}/META-INF/MANIFEST.MF" destfile="${update.site.dir}/net.officefloor.core_${version}.jar" />
 	</target>
 
 	<target name="net.officefloor.ui" depends="validate" description="Generates update site content for plugin net.officefloor.ui">
