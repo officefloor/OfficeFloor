@@ -7,6 +7,8 @@ Bundle-Vendor: Daniel Sagenschneider
 Require-Bundle: net.officefloor.ui;bundle-version="0.0.1",
  net.officefloor.core;bundle-version="0.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-RegisterBuddy: net.officefloor.core,
+ net.officefloor.ui
 Import-Package: org.eclipse.core.resources,
  org.eclipse.jface.dialogs,
  org.eclipse.swt,
@@ -25,3 +27,6 @@ Bundle-ClassPath: .,
  net.officefloor.ui-0.0.1.zip,
  officeframe-0.0.1.jar,
  officeplugin_jdbc-0.0.1.jar
+Export-Package: net.officefloor.eclipse.jdbc,
+ net.officefloor.plugin.jdbc,
+ net.officefloor.plugin.jdbc.util
