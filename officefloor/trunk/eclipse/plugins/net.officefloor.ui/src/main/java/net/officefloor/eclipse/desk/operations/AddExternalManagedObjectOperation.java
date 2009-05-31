@@ -18,7 +18,7 @@ package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
@@ -52,7 +52,7 @@ public class AddExternalManagedObjectOperation extends
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
 		BeanDialog dialog = editPart.createBeanDialog(mo, "X", "Y");
 		dialog.registerPropertyInput("Object Type",
-				new ClasspathSelectionInput(editPart.getEditor()));
+				new ClasspathClassInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;

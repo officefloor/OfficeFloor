@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.section.operations;
 
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -57,7 +57,7 @@ public class AddExternalFlowOperation extends
 		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
 				"Y");
 		dialog.registerPropertyInput("Argument Type",
-				new ClasspathSelectionInput(editPart.getEditor()));
+				new ClasspathClassInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;

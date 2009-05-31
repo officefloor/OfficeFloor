@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
@@ -26,7 +26,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
 
 /**
  * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AddExternalFlowOperation extends
@@ -34,7 +34,7 @@ public class AddExternalFlowOperation extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param deskChanges
 	 *            {@link DeskChanges}.
 	 */
@@ -56,8 +56,8 @@ public class AddExternalFlowOperation extends
 		final ExternalFlowModel flow = new ExternalFlowModel();
 		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
 				"Y");
-		dialog.registerPropertyInput("Argument Type",
-				new ClasspathSelectionInput(editPart.getEditor()));
+		dialog.registerPropertyInput("Argument Type", new ClasspathClassInput(
+				editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created
 			return null;

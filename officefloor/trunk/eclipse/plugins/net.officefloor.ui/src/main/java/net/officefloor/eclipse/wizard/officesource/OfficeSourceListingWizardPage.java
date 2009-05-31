@@ -17,16 +17,13 @@
 package net.officefloor.eclipse.wizard.officesource;
 
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.manage.Office;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -43,7 +40,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link IWizardPage} providing the listing of {@link OfficeSourceInstance}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeSourceListingWizardPage extends WizardPage {
@@ -81,7 +78,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeSourceInstances
 	 *            Listing of {@link OfficeSourceInstance}.
 	 * @param project
@@ -106,7 +103,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Obtains the selected {@link OfficeSourceInstance}.
-	 * 
+	 *
 	 * @return Selected {@link OfficeSourceInstance} or <code>null</code> if not
 	 *         selected.
 	 */
@@ -162,57 +159,57 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		});
 
 		// Provide means to specify office location
-		new InputHandler<String>(page, new ClasspathSelectionInput(
-				this.project, false), new InputListener() {
-			@Override
-			public void notifyValueChanged(Object value) {
+		Composite locationComposite = new Composite(page, SWT.NONE);
+		locationComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
+				true, false));
+		locationComposite.setLayout(new GridLayout(2, false));
+		Label locationLabel = new Label(locationComposite, SWT.NONE);
+		locationLabel.setText("Location: ");
+		InputHandler<String> location = new InputHandler<String>(
+				locationComposite, new ClasspathFileInput(this.project, page
+						.getShell()), new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
 
-				// Handle if java element
-				if (value instanceof IJavaElement) {
-					value = ((IJavaElement) value).getResource();
-				}
+						// Obtain the location
+						String location = (value == null ? "" : value
+								.toString());
 
-				// Obtain the location
-				String location;
-				if (value instanceof IFile) {
-					IFile file = (IFile) value;
-					location = ClasspathUtil.getClassPathLocation(file
-							.getFullPath());
-				} else {
-					// No file selected
-					location = null;
-				}
+						// Determine if default office name
+						String name = OfficeSourceListingWizardPage.this.officeName
+								.getText();
+						if ((!EclipseUtil.isBlank(location))
+								&& ((EclipseUtil.isBlank(name)) || (location
+										.startsWith(name)))) {
+							// Use simple name of location
+							name = location;
+							int index = name.lastIndexOf('/');
+							if (index >= 0) {
+								name = name.substring(index + "/".length());
+							}
+							index = name.indexOf('.');
+							if (index >= 0) {
+								name = name.substring(0, index);
+							}
+							OfficeSourceListingWizardPage.this.officeName
+									.setText(name);
+						}
 
-				// Determine if default office name
-				String name = OfficeSourceListingWizardPage.this.officeName
-						.getText();
-				if ((!EclipseUtil.isBlank(location))
-						&& (EclipseUtil.isBlank(name))) {
-					// Use simple name of location
-					name = location;
-					int index = name.lastIndexOf('/');
-					if (index >= 0) {
-						name = name.substring(index + "/".length());
+						// Specify the location
+						OfficeSourceListingWizardPage.this.officeLocation = location;
+
+						// Flag the location changed
+						OfficeSourceListingWizardPage.this.handleChange();
 					}
-					index = name.indexOf('.');
-					if (index >= 0) {
-						name = name.substring(0, index);
+
+					@Override
+					public void notifyValueInvalid(String message) {
+						OfficeSourceListingWizardPage.this
+								.setErrorMessage(message);
 					}
-					OfficeSourceListingWizardPage.this.officeName.setText(name);
-				}
-
-				// Specify the location
-				OfficeSourceListingWizardPage.this.officeLocation = location;
-
-				// Flag the location changed
-				OfficeSourceListingWizardPage.this.handleChange();
-			}
-
-			@Override
-			public void notifyValueInvalid(String message) {
-				OfficeSourceListingWizardPage.this.setErrorMessage(message);
-			}
-		});
+				});
+		location.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Initially page not complete (as must select office source)
 		this.setPageComplete(false);

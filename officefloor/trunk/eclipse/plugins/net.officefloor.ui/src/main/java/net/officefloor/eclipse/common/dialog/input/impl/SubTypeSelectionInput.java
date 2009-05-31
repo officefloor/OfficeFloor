@@ -16,10 +16,10 @@
  */
 package net.officefloor.eclipse.common.dialog.input.impl;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.List;
 
 /**
  * {@link List} to hold sub types.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SubTypeSelectionInput implements Input<List> {
@@ -38,37 +38,40 @@ public class SubTypeSelectionInput implements Input<List> {
 	/**
 	 * Listing sub {@link IType} instances.
 	 */
-	private final IType[] subTypes;
+	private IType[] subTypes;
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @param superClassName
 	 *            Super class name.
 	 */
-	public SubTypeSelectionInput(IProject project, String superClassName)
-			throws OfficeFloorPluginFailure {
+	public SubTypeSelectionInput(IProject project, String superClassName) {
 		try {
+			// Obtain the sub types
 			this.subTypes = JavaUtil.getSubTypes(project, superClassName);
-		} catch (Exception ex) {
-			throw new OfficeFloorPluginFailure(ex);
+
+		} catch (Throwable ex) {
+			// Indicate failed to obtain sub types
+			LogUtil.logError(
+					"Failed to obtain sub types for " + superClassName, ex);
+			this.subTypes = new IType[0];
 		}
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
-	 * officefloor.eclipse.common.dialog.input.InputContext)
+	 * ==================== Input =======================================
 	 */
+
 	@Override
 	public List buildControl(final InputContext context) {
+
 		// Create the list of the sub types
 		final List subTypeList = new List(context.getParent(), SWT.SINGLE
 				| SWT.BORDER);
-		for (IType type : subTypes) {
+		for (IType type : this.subTypes) {
 			subTypeList.add(type.getFullyQualifiedName());
 		}
 
@@ -89,14 +92,6 @@ public class SubTypeSelectionInput implements Input<List> {
 		return subTypeList;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
-	 * .swt.widgets.Control,
-	 * net.officefloor.eclipse.common.dialog.input.InputContext)
-	 */
 	@Override
 	public String getValue(List control, InputContext context) {
 		// Obtain the name of the sub type selected

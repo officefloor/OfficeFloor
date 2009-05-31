@@ -23,8 +23,7 @@ import java.util.Map;
 import net.officefloor.eclipse.bootstrap.Bootstrap;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.plugin.filingcabinet.FilingCabinetGenerator;
 
 import org.eclipse.core.resources.IProject;
@@ -39,13 +38,13 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
- * {@link IWorkbenchWindowActionDelegate} for the {@link FilingCabinetGenerator}
- * .
- * 
+ * {@link IWorkbenchWindowActionDelegate} for {@link FilingCabinetGenerator}.
+ *
  * @author Daniel Sagenschneider
  */
 public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
@@ -70,11 +69,14 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 		try {
 			// Populate the bean to generate the file
 			FilingCabinetBean bean = new FilingCabinetBean();
-			BeanDialog dialog = new BeanDialog(this.window.getShell(), bean);
-			ClasspathSelectionInput selectionInput = new ClasspathSelectionInput();
-			selectionInput.getClasspathFilter().addPackageFragmentFilter(
-					new AlwaysIncludeInputFilter());
+			Shell shell = this.window.getShell();
+			BeanDialog dialog = new BeanDialog(shell, bean);
+
+			// TODO provide input on container rather than file
+			ClasspathFileInput selectionInput = new ClasspathFileInput(
+					ResourcesPlugin.getWorkspace().getRoot(), shell);
 			dialog.registerPropertyInput("Location", selectionInput);
+
 			if (!dialog.populate()) {
 				// Cancelled
 				return;
@@ -162,7 +164,7 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 
 	/**
 	 * Handles changing of selection.
-	 * 
+	 *
 	 * @param action
 	 *            {@link IAction}.
 	 * @param packageFragment

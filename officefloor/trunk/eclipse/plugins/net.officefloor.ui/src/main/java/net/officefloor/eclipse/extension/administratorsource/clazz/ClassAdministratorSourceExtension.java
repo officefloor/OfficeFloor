@@ -19,7 +19,7 @@ package net.officefloor.eclipse.extension.administratorsource.clazz;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtensionContext;
 import net.officefloor.frame.api.build.Indexed;
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link AdministratorSourceExtension} for {@link ClassAdministratorSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassAdministratorSourceExtension implements
@@ -67,8 +67,8 @@ public class ClassAdministratorSourceExtension implements
 		final Property classNameProperty = property;
 
 		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject()), new InputListener() {
+		new InputHandler<String>(page, new ClasspathClassInput(context
+				.getProject(), page.getShell()), new InputListener() {
 
 			@Override
 			public void notifyValueChanged(Object value) {
