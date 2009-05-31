@@ -52,19 +52,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JarEntryResource;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 /**
  * Utility methods for working with class path.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClasspathUtil {
 
 	/**
 	 * Loads the {@link Class} from the {@link IProject} class path.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @param className
@@ -91,7 +90,7 @@ public class ClasspathUtil {
 	 * <p>
 	 * No exception is thrown if unable to update the class path and the class
 	 * path is subsequently not updated.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param monitor
@@ -119,7 +118,7 @@ public class ClasspathUtil {
 	 * Convenience method to ensure {@link OfficeFloorClasspathContainer} is
 	 * available on the {@link IProject} and that the class paths for the input
 	 * extensions are available.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @param monitor
@@ -140,7 +139,7 @@ public class ClasspathUtil {
 	 * Ensures the {@link OfficeFloorClasspathContainer} is available on the
 	 * {@link IJavaProject} and that the class paths for the input extensions
 	 * are available.
-	 * 
+	 *
 	 * @param javaProject
 	 *            {@link IJavaProject}.
 	 * @param monitor
@@ -159,7 +158,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Creates the {@link IClasspathEntry} from a {@link ClasspathProvision}.
-	 * 
+	 *
 	 * @param provision
 	 *            {@link ClasspathProvision}.
 	 * @return {@link IClasspathEntry} or <code>null</code> if fails.
@@ -190,7 +189,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the {@link IClasspathEntry} of the input variable and path.
-	 * 
+	 *
 	 * @param variable
 	 *            Name of variable.
 	 * @param path
@@ -211,7 +210,7 @@ public class ClasspathUtil {
 	/**
 	 * Obtains the {@link IClasspathEntry} of the class path containing the
 	 * {@link Class}.
-	 * 
+	 *
 	 * @param clazz
 	 *            {@link Class}.
 	 * @return {@link IClasspathEntry} of the class path containing the
@@ -264,7 +263,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the class name of the input {@link IJavaElement}.
-	 * 
+	 *
 	 * @param classFile
 	 *            {@link IClassFile}.
 	 * @return Class name or <code>null</code> if {@link IJavaElement} not a
@@ -302,7 +301,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the location on the class path for the input full path.
-	 * 
+	 *
 	 * @param fullPath
 	 *            Full path.
 	 * @return Location on the class path for the input full path.
@@ -313,7 +312,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the location on the class path for the input {@link IPath}.
-	 * 
+	 *
 	 * @param path
 	 *            {@link IPath}.
 	 * @return Location on the class path for the input {@link IPath}.
@@ -378,11 +377,13 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the descendants of the input item.
-	 * 
+	 *
 	 * @param item
 	 *            Item.
 	 * @return Descendants of the item.
 	 */
+	// TODO remove as use StandardJavaElementContentProvider
+	@Deprecated
 	public static Object[] getDescendants(Object item) {
 		List<Object> descendants = new LinkedList<Object>();
 		loadDescendants(item, descendants);
@@ -391,7 +392,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Loads the descendants of the input item.
-	 * 
+	 *
 	 * @param item
 	 *            Item.
 	 * @param descendants
@@ -411,11 +412,12 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the children of the input parent.
-	 * 
+	 *
 	 * @param parent
 	 *            Parent.
 	 * @return Children.
 	 */
+	// TODO remove as use StandardJavaElementContentProvider
 	public static Object[] getChildren(Object parent) {
 
 		// No children for null
@@ -446,7 +448,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the children of the {@link IResource}.
-	 * 
+	 *
 	 * @param resource
 	 *            {@link IResource}.
 	 * @return Children.
@@ -511,7 +513,7 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the children of the {@link IJavaElement}.
-	 * 
+	 *
 	 * @param javaElement
 	 *            {@link IJavaElement}.
 	 * @return Children.
@@ -551,6 +553,7 @@ public class ClasspathUtil {
 
 				// Add the fragment children
 				children.addAll(Arrays.asList(fragment.getClassFiles()));
+				children.addAll(Arrays.asList(fragment.getCompilationUnits()));
 				children.addAll(Arrays.asList(fragment.getNonJavaResources()));
 
 			} else if (javaElement instanceof ITypeRoot) {
@@ -575,9 +578,9 @@ public class ClasspathUtil {
 
 	/**
 	 * Obtains the children of the {@link IJarEntryResource}.
-	 * 
+	 *
 	 * @param jarEntryResource
-	 *            {@link JarEntryResource}.
+	 *            {@link IJarEntryResource}.
 	 * @return Children.
 	 */
 	public static Object[] getChildren(IJarEntryResource jarEntryResource) {
@@ -587,7 +590,7 @@ public class ClasspathUtil {
 	/**
 	 * Obtains the specific project, being either {@link IJavaProject} of the
 	 * input {@link IProject} or the input {@link IProject}.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @return Specific project.

@@ -28,6 +28,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -42,7 +44,7 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 /**
  * Page to create a new {@link OfficeFloor} item.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeItemNewWizardPage extends WizardPage {
@@ -74,7 +76,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param selection
 	 *            {@link IStructuredSelection}.
 	 * @param pageName
@@ -115,7 +117,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Obtains the {@link IContainer} name.
-	 * 
+	 *
 	 * @return {@link IContainer} name.
 	 */
 	public String getItemContainerName() {
@@ -124,7 +126,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Obtain the full item name including the extension.
-	 * 
+	 *
 	 * @return Full item name.
 	 */
 	public String getItemFullName() {
@@ -137,7 +139,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Obtains the item name.
-	 * 
+	 *
 	 * @return Item name.
 	 */
 	public String getItemName() {
@@ -145,12 +147,9 @@ public class OfficeItemNewWizardPage extends WizardPage {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
-	 * .Composite)
+	 * ====================== IDialogPage ====================================
 	 */
+
 	@Override
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NULL);
@@ -159,8 +158,8 @@ public class OfficeItemNewWizardPage extends WizardPage {
 		// Container
 		new Label(container, SWT.NULL).setText("Container:");
 		this.containerText = new Text(container, SWT.BORDER | SWT.SINGLE);
-		this.containerText
-				.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		this.containerText.setLayoutData(new GridData(GridData.FILL,
+				GridData.BEGINNING, true, false));
 		this.containerText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent arg0) {
@@ -185,17 +184,30 @@ public class OfficeItemNewWizardPage extends WizardPage {
 		// Item name
 		new Label(container, SWT.NULL).setText("Name:");
 		this.itemText = new Text(container, SWT.BORDER | SWT.SINGLE);
-		this.itemText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		this.itemText.setLayoutData(new GridData(GridData.FILL,
+				GridData.BEGINNING, true, false));
 		this.itemText.addModifyListener(new ModifyListener() {
 			@Override
-			public void modifyText(ModifyEvent arg0) {
+			public void modifyText(ModifyEvent event) {
 				OfficeItemNewWizardPage.this.handleDialogChanged();
 			}
 		});
 		this.itemText.addVerifyListener(new VerifyListener() {
 			@Override
-			public void verifyText(VerifyEvent arg0) {
+			public void verifyText(VerifyEvent event) {
 				OfficeItemNewWizardPage.this.handleDialogChanged();
+			}
+		});
+		this.itemText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				OfficeItemNewWizardPage.this.itemText.selectAll();
+			}
+		});
+		this.itemText.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent event) {
+				OfficeItemNewWizardPage.this.itemText.selectAll();
 			}
 		});
 
@@ -307,7 +319,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Updates the status of this dialog.
-	 * 
+	 *
 	 * @param message
 	 *            Message indicating status. <code>null</code> means complete.
 	 */

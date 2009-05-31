@@ -18,8 +18,7 @@ package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.ExternalManagedObjectModel;
@@ -27,7 +26,7 @@ import net.officefloor.model.office.OfficeChanges;
 
 /**
  * {@link Operation} to add the {@link ExternalManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AddExternalManagedObjectOperation extends
@@ -35,7 +34,7 @@ public class AddExternalManagedObjectOperation extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeChanges
 	 *            {@link OfficeChanges}.
 	 */
@@ -53,7 +52,7 @@ public class AddExternalManagedObjectOperation extends
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
 		BeanDialog dialog = editPart.createBeanDialog(mo, "X", "Y");
 		dialog.registerPropertyInput("Object Type",
-				new ClasspathSelectionInput(editPart.getEditor()));
+				new ClasspathClassInput(editPart.getEditor()));
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;

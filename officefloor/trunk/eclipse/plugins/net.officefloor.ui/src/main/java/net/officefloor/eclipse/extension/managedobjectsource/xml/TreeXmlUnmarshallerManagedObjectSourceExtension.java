@@ -20,19 +20,22 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerManagedObjectSource;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link ManagedObjectSourceExtension} for
  * {@link TreeXmlUnmarshallerManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TreeXmlUnmarshallerManagedObjectSourceExtension
@@ -58,7 +61,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceExtension
 			final ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
-		page.setLayout(new GridLayout(1, false));
+		page.setLayout(new GridLayout(2, false));
 
 		// Obtain the configuration property
 		Property property = context
@@ -74,26 +77,30 @@ public class TreeXmlUnmarshallerManagedObjectSourceExtension
 		final Property configurationProperty = property;
 
 		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject()), new InputListener() {
+		new Label(page, SWT.NONE).setText("Configuration: ");
+		InputHandler<String> fileName = new InputHandler<String>(page,
+				new ClasspathFileInput(context.getProject(), page.getShell()),
+				new InputListener() {
 
-			@Override
-			public void notifyValueChanged(Object value) {
+					@Override
+					public void notifyValueChanged(Object value) {
 
-				// Obtain the resource location on class path
-				String resourceLocation = (value == null ? null : value
-						.toString());
+						// Obtain the resource location on class path
+						String resourceLocation = (value == null ? null : value
+								.toString());
 
-				// Inform of change of resource
-				configurationProperty.setValue(resourceLocation);
-				context.notifyPropertiesChanged();
-			}
+						// Inform of change of resource
+						configurationProperty.setValue(resourceLocation);
+						context.notifyPropertiesChanged();
+					}
 
-			@Override
-			public void notifyValueInvalid(String message) {
-				context.setErrorMessage(message);
-			}
-		});
+					@Override
+					public void notifyValueInvalid(String message) {
+						context.setErrorMessage(message);
+					}
+				});
+		fileName.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 	}
 
 	@Override

@@ -20,7 +20,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for {@link ClassManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceExtension
@@ -70,8 +70,8 @@ public class ClassManagedObjectSourceExtension
 		final Property classNameProperty = property;
 
 		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject()), new InputListener() {
+		new InputHandler<String>(page, new ClasspathClassInput(context
+				.getProject(), page.getShell()), new InputListener() {
 
 			@Override
 			public void notifyValueChanged(Object value) {

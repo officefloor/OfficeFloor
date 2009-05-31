@@ -20,7 +20,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
@@ -29,12 +29,14 @@ import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for the {@link ClassWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSourceExtension implements
@@ -72,25 +74,27 @@ public class ClassWorkSourceExtension implements
 		final Property classNameProperty = property;
 
 		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject()), new InputListener() {
+		InputHandler<String> inputHandler = new InputHandler<String>(page,
+				new ClasspathClassInput(context.getProject(), page
+						.getShell()), new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Obtain the class name
+						String className = (value == null ? null : value
+								.toString());
 
-			@Override
-			public void notifyValueChanged(Object value) {
+						// Inform of change of class name
+						classNameProperty.setValue(className);
+						context.notifyPropertiesChanged();
+					}
 
-				// Obtain the class name
-				String className = (value == null ? null : value.toString());
-
-				// Inform of change of class name
-				classNameProperty.setValue(className);
-				context.notifyPropertiesChanged();
-			}
-
-			@Override
-			public void notifyValueInvalid(String message) {
-				context.setErrorMessage(message);
-			}
-		});
+					@Override
+					public void notifyValueInvalid(String message) {
+						context.setErrorMessage(message);
+					}
+				});
+		inputHandler.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 	}
 
 	@Override

@@ -20,20 +20,23 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.xml.unmarshall.flat.FlatXmlUnmarshallerManagedObjectSource;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link ManagedObjectSourceExtension} for
  * {@link FlatXmlUnmarshallerManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class FlatXmlUnmarshallerManagedObjectSourceExtension
@@ -59,7 +62,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceExtension
 			final ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
-		page.setLayout(new GridLayout(1, false));
+		page.setLayout(new GridLayout(2, false));
 
 		// Obtain the class name property
 		Property property = context.getPropertyList().getProperty(
@@ -70,26 +73,31 @@ public class FlatXmlUnmarshallerManagedObjectSourceExtension
 		}
 		final Property classNameProperty = property;
 
-		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathSelectionInput(context
-				.getProject()), new InputListener() {
+		// Provide selection of class name
+		new Label(page, SWT.NONE).setText("Class: ");
+		InputHandler<String> className = new InputHandler<String>(page,
+				new ClasspathClassInput(context.getProject(), page.getShell()),
+				new InputListener() {
 
-			@Override
-			public void notifyValueChanged(Object value) {
+					@Override
+					public void notifyValueChanged(Object value) {
 
-				// Obtain the class name
-				String className = (value == null ? null : value.toString());
+						// Obtain the class name
+						String className = (value == null ? null : value
+								.toString());
 
-				// Inform of change of class name
-				classNameProperty.setValue(className);
-				context.notifyPropertiesChanged();
-			}
+						// Inform of change of class name
+						classNameProperty.setValue(className);
+						context.notifyPropertiesChanged();
+					}
 
-			@Override
-			public void notifyValueInvalid(String message) {
-				context.setErrorMessage(message);
-			}
-		});
+					@Override
+					public void notifyValueInvalid(String message) {
+						context.setErrorMessage(message);
+					}
+				});
+		className.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 	}
 
 	@Override
