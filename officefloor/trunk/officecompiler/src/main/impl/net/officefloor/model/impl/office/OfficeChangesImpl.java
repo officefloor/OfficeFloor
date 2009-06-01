@@ -62,7 +62,7 @@ import net.officefloor.model.office.PropertyModel;
 
 /**
  * {@link OfficeChanges} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeChangesImpl implements OfficeChanges {
@@ -74,7 +74,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param office
 	 *            {@link OfficeModel} to change.
 	 */
@@ -86,7 +86,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Loads the hierarchy of {@link OfficeSubSection} instances from the top
 	 * {@link OfficeSubSection} down to the {@link OfficeSubSection} containing
 	 * the {@link OfficeTask}.
-	 * 
+	 *
 	 * @param hierarchy
 	 *            Hierarchy to be loaded with the {@link OfficeSubSection}
 	 *            instances containing the {@link OfficeTask}.
@@ -140,7 +140,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Adds the {@link OfficeSubSection} hierarchy to the
 	 * {@link OfficeSectionModel}.
-	 * 
+	 *
 	 * @param hierarchy
 	 *            {@link OfficeSubSection} hierarchy.
 	 * @param section
@@ -175,7 +175,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	/**
 	 * Adds the hierarchy to the {@link OfficeSubSectionModel}.
-	 * 
+	 *
 	 * @param hierarchy
 	 *            Hierarchy of {@link OfficeSubSection} instances to add to the
 	 *            {@link OfficeSubSectionModel}.
@@ -231,7 +231,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Adds (or retrieves if already added) the {@link OfficeTask} to the
 	 * {@link OfficeSubSectionModel}.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to add the {@link OfficeTask}.
 	 * @param officeTask
@@ -274,7 +274,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Cleans leaf {@link OfficeSubSectionModel} instances that do not contain
 	 * connections.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to clean.
 	 * @param changes
@@ -353,7 +353,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeTaskModel}.
-	 * 
+	 *
 	 * @param task
 	 *            {@link OfficeTaskModel}.
 	 * @return {@link OfficeSectionModel} containing the {@link OfficeTaskModel}
@@ -378,7 +378,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Determines if the {@link OfficeSubSectionModel} contains the
 	 * {@link OfficeTaskModel} on itself or any of its
 	 * {@link OfficeSubSectionModel} instances.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel} to check if contains
 	 *            {@link OfficeTaskModel}.

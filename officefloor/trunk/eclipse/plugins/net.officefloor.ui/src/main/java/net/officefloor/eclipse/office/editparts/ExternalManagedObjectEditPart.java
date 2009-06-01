@@ -35,7 +35,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalManagedObjectEditPart
@@ -119,54 +119,6 @@ public class ExternalManagedObjectEditPart
 	@Override
 	public String getExternalManagedObjectName() {
 		return this.getCastedModel().getExternalManagedObjectName();
-	}
-
-	@Override
-	public String getNextScope(String currentScope) {
-		// // Find the index of the current scope
-		// int currentScopeIndex = -1;
-		// for (int i = 0; i < WorkEntry.MANAGED_OBJECT_SCOPES.length; i++) {
-		// if (WorkEntry.MANAGED_OBJECT_SCOPES[i].equals(currentScope)) {
-		// currentScopeIndex = i;
-		// }
-		// }
-		//
-		// // Move to the next scope (and cycle back to first if necessary)
-		// int nextScopeIndex = (currentScopeIndex + 1)
-		// % WorkEntry.MANAGED_OBJECT_SCOPES.length;
-		//
-		// // Return the next scope
-		// return WorkEntry.MANAGED_OBJECT_SCOPES[nextScopeIndex];
-		return null;
-	}
-
-	@Override
-	public String getScope() {
-		// return this.getCastedModel().getScope();
-		return null;
-	}
-
-	@Override
-	public void setScope(final String scope) {
-
-		// // Maintain current scope
-		// final String currentScope = this.getCastedModel().getScope();
-		//
-		// // Change the scope
-		// this.executeCommand(new OfficeFloorCommand() {
-		//
-		// @Override
-		// protected void doCommand() {
-		// ExternalManagedObjectEditPart.this.getCastedModel().setScope(
-		// scope);
-		// }
-		//
-		// @Override
-		// protected void undoCommand() {
-		// ExternalManagedObjectEditPart.this.getCastedModel().setScope(
-		// currentScope);
-		// }
-		// });
 	}
 
 }

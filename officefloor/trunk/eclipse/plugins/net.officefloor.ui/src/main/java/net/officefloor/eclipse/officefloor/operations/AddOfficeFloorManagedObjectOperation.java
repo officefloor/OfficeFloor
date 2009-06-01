@@ -28,7 +28,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 /**
  * {@link Operation} to add an {@link OfficeFloorManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AddOfficeFloorManagedObjectOperation
@@ -37,7 +37,7 @@ public class AddOfficeFloorManagedObjectOperation
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeFloorChanges
 	 *            {@link OfficeFloorChanges}.
 	 */
@@ -67,10 +67,10 @@ public class AddOfficeFloorManagedObjectOperation
 			return null; // must have managed object type
 		}
 
-		// Obtain the details for the managed object
+		// Obtain the details for the managed object (default scope)
 		String managedObjectName = managedObjectSource
 				.getOfficeFloorManagedObjectSourceName();
-		ManagedObjectScope managedObjectScope = ManagedObjectScope.THREAD;
+		ManagedObjectScope managedObjectScope = ManagedObjectScope.PROCESS;
 
 		// Create the change to add the managed object
 		Change<OfficeFloorManagedObjectModel> change = changes

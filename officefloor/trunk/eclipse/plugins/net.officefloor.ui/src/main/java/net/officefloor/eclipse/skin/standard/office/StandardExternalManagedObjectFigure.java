@@ -16,17 +16,16 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
-
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.model.office.ExternalManagedObjectModel;
+
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 
 /**
  * Standard {@link ExternalManagedObjectFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardExternalManagedObjectFigure extends
@@ -44,7 +43,7 @@ public class StandardExternalManagedObjectFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 */
@@ -52,21 +51,8 @@ public class StandardExternalManagedObjectFigure extends
 			ExternalManagedObjectFigureContext context) {
 		this.context = context;
 		this.figure = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-				this.getManagedObjectText(context.getScope()));
+				this.context.getExternalManagedObjectName());
 		this.setFigure(this.figure);
-	}
-
-	/**
-	 * Obtains the {@link ExternalManagedObjectModel} text.
-	 * 
-	 * @param name
-	 *            Name of the {@link ExternalManagedObjectModel}.
-	 * @param scope
-	 *            Scope of the {@link ExternalManagedObjectModel}.
-	 * @return {@link ExternalManagedObjectModel} text.
-	 */
-	private String getManagedObjectText(String scope) {
-		return this.context.getExternalManagedObjectName() + " (" + scope + ")";
 	}
 
 	/*
@@ -76,11 +62,6 @@ public class StandardExternalManagedObjectFigure extends
 	@Override
 	public void setExternalManagedObjectName(String externalManagedObjectName) {
 		this.figure.getLabel().setText(externalManagedObjectName);
-	}
-
-	@Override
-	public void setScope(String scope) {
-		this.figure.setManagedObjectName(this.getManagedObjectText(scope));
 	}
 
 	@Override

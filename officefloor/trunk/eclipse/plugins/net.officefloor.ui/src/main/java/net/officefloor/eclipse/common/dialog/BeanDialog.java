@@ -35,7 +35,6 @@ import net.officefloor.eclipse.common.dialog.input.ValueTranslatorRegistry;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
@@ -48,7 +47,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * Popuates the input bean by user entered information via a dialog window.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanDialog extends Dialog {
@@ -90,7 +89,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param parentShell
 	 *            Parent shell.
 	 * @param bean
@@ -111,7 +110,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Initiate without the ability to load {@link Class} instances.
-	 * 
+	 *
 	 * @param parentShell
 	 *            Parent shell.
 	 * @param bean
@@ -126,7 +125,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Populates the bean.
-	 * 
+	 *
 	 * @return <code>true<code> if bean is populated.
 	 */
 	public boolean populate() {
@@ -140,7 +139,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Registers a specialised {@link Input} for the property name.
-	 * 
+	 *
 	 * @param propertyName
 	 *            Name of property.
 	 * @param builder
@@ -148,6 +147,13 @@ public class BeanDialog extends Dialog {
 	 */
 	public void registerPropertyInput(String propertyName, Input<?> input) {
 		this.specialisedInputs.put(propertyName, input);
+
+		// Determine if also a value translator for itself
+		if (input instanceof ValueTranslator) {
+			// Register as value translator
+			this.registerPropertyValueTranslator(propertyName,
+					(ValueTranslator) input);
+		}
 	}
 
 	/**
@@ -156,7 +162,7 @@ public class BeanDialog extends Dialog {
 	 * <p>
 	 * Named {@link ValueTranslator} instances override typed
 	 * {@link ValueTranslator} instances.
-	 * 
+	 *
 	 * @param propertyName
 	 *            Name of property.
 	 * @param translator
@@ -169,7 +175,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Obtains the {@link Control} of the dialog area.
-	 * 
+	 *
 	 * @return Dialog area.
 	 */
 	protected Control getDialogArea() {
@@ -177,10 +183,10 @@ public class BeanDialog extends Dialog {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * ======================== Dialog ============================
 	 */
+
+	@Override
 	protected Control createDialogArea(Composite parent) {
 
 		// Create the set of properties (public mutators)
@@ -217,10 +223,7 @@ public class BeanDialog extends Dialog {
 			// Label the property
 			Label label = new Label(composite, SWT.WRAP);
 			label.setText(propertyName);
-			GridData data = new GridData(GridData.GRAB_HORIZONTAL
-					| GridData.GRAB_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL
-					| GridData.VERTICAL_ALIGN_CENTER);
-			data.widthHint = convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
+			GridData data = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			label.setLayoutData(data);
 			label.setFont(parent.getFont());
 
@@ -238,15 +241,14 @@ public class BeanDialog extends Dialog {
 			// Format the control for the property (if not done)
 			if (inputHandler.getControl().getLayoutData() == null) {
 				inputHandler.getControl().setLayoutData(
-						new GridData(GridData.GRAB_HORIZONTAL
-								| GridData.HORIZONTAL_ALIGN_FILL));
+						new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			}
 
 			// Position for invalid property notification
 			Label errorText = new Label(composite, SWT.WRAP);
 			errorText.setText("");
-			errorText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-					| GridData.HORIZONTAL_ALIGN_FILL));
+			errorText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+					false));
 			errorText.setBackground(errorText.getDisplay().getSystemColor(
 					SWT.COLOR_WIDGET_BACKGROUND));
 			errorText.setForeground(ColorConstants.red);
@@ -261,11 +263,7 @@ public class BeanDialog extends Dialog {
 		return composite;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
-	 */
+	@Override
 	protected void okPressed() {
 
 		// Ensure all properties are populated
@@ -292,7 +290,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Obtains the property name from the input accessor/mutator method name.
-	 * 
+	 *
 	 * @param methodName
 	 *            Accessor/mutator method name.
 	 * @return Property name for the method name.
@@ -341,7 +339,7 @@ public class BeanDialog extends Dialog {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param inputHandler
 		 *            {@link PropertyInputHandler} for this property.
 		 * @param errorText
@@ -356,27 +354,15 @@ public class BeanDialog extends Dialog {
 		}
 
 		/*
-		 * ==========================================================
-		 * InputListener
-		 * ==========================================================
+		 * =================== InputListener ========================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.input.InputListener#notifyValueChanged(java.lang.Object)
-		 */
 		@Override
 		public void notifyValueChanged(Object value) {
 			// Value valid
 			this.errorText.setText("");
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.input.InputListener#notifyValueInvalid(java.lang.String)
-		 */
 		@Override
 		public void notifyValueInvalid(String message) {
 			// Indicate error
@@ -390,10 +376,9 @@ public class BeanDialog extends Dialog {
 	private class DefaultPropertyInput implements Input<Text> {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInput#buildControl(net.officefloor.eclipse.common.dialog.PropertyInputContext)
+		 * ====================== Input ============================
 		 */
+
 		@Override
 		public Text buildControl(final InputContext context) {
 
@@ -433,12 +418,6 @@ public class BeanDialog extends Dialog {
 			return text;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInput#getValue(org.eclipse.swt.widgets.Control,
-		 *      net.officefloor.eclipse.common.dialog.PropertyInputContext)
-		 */
 		@Override
 		public String getValue(Text control, InputContext context) {
 			// Return the value

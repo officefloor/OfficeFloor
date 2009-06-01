@@ -53,7 +53,7 @@ import net.officefloor.model.officefloor.PropertyModel;
 
 /**
  * {@link OfficeFloorChanges} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorChangesImpl implements OfficeFloorChanges {
@@ -65,7 +65,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeFloor
 	 *            {@link OfficeFloorModel}.
 	 */
@@ -75,7 +75,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	/**
 	 * Obtains the text name identifying the {@link ManagedObjectScope}.
-	 * 
+	 *
 	 * @param scope
 	 *            {@link ManagedObjectScope}.
 	 * @return Text name for the {@link ManagedObjectScope}.
@@ -307,6 +307,34 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			public void revert() {
 				managedObject
 						.setOfficeFloorManagedObjectName(oldManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectModel> rescopeOfficeFloorManagedObject(
+			final OfficeFloorManagedObjectModel managedObject,
+			ManagedObjectScope newManagedObjectScope) {
+
+		// TODO test this method (scopeOfficeFloorManagedObject)
+
+		// Obtain the new scope text
+		final String newScope = getManagedObjectScope(newManagedObjectScope);
+
+		// OBtain the old managed object scope
+		final String oldScope = managedObject.getManagedObjectScope();
+
+		// Return change to re-scope the managed object
+		return new AbstractChange<OfficeFloorManagedObjectModel>(managedObject,
+				"Rescope managed object to " + newScope) {
+			@Override
+			public void apply() {
+				managedObject.setManagedObjectScope(newScope);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setManagedObjectScope(oldScope);
 			}
 		};
 	}

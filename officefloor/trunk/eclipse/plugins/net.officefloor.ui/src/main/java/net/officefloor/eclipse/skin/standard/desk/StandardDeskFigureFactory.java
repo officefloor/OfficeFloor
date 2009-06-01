@@ -53,7 +53,7 @@ import org.eclipse.draw2d.PolylineDecoration;
 
 /**
  * Standard {@link DeskFigureFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDeskFigureFactory implements DeskFigureFactory {
@@ -61,7 +61,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	/**
 	 * Decorates the {@link Figure} based on the
 	 * {@link FlowInstigationStrategyEnum}.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param instigationStrategy
@@ -182,26 +182,19 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public void decorateTaskToNextTaskFigure(PolylineConnection figure,
 			TaskToNextTaskFigureContext context) {
-		PolylineDecoration arrow = new PolylineDecoration();
-		arrow.setLineWidth(2);
-		figure.setTargetDecoration(arrow);
-		figure.setLineWidth(2);
+		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 	@Override
 	public void decorateTaskToNextExternalFlowFigure(PolylineConnection figure,
 			TaskToNextExternalFlowFigureContext context) {
-		PolylineDecoration arrow = new PolylineDecoration();
-		arrow.setLineWidth(2);
-		figure.setTargetDecoration(arrow);
-		figure.setLineWidth(2);
+		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 	@Override
 	public void decorateTaskEscalationToTaskFigure(PolylineConnection figure,
 			TaskEscalationToTaskFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
-		figure.setForegroundColor(ColorConstants.red);
 	}
 
 	@Override
@@ -209,7 +202,6 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 			PolylineConnection figure,
 			TaskEscalationToExternalFlowFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
-		figure.setForegroundColor(ColorConstants.red);
 	}
 
 	@Override

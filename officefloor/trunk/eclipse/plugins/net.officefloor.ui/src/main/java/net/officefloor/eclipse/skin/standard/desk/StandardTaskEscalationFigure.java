@@ -28,7 +28,7 @@ import org.eclipse.draw2d.ColorConstants;
 
 /**
  * Standard {@link TaskEscalationFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardTaskEscalationFigure extends AbstractOfficeFloorFigure
@@ -36,7 +36,7 @@ public class StandardTaskEscalationFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link TaskEscalationFigureContext}.
 	 */
@@ -51,7 +51,7 @@ public class StandardTaskEscalationFigure extends AbstractOfficeFloorFigure
 		}
 
 		LabelConnectorFigure figure = new LabelConnectorFigure(simpleType,
-				ConnectorDirection.EAST, ColorConstants.red);
+				ConnectorDirection.EAST, ColorConstants.black);
 		this.registerConnectionAnchor(TaskEscalationToTaskModel.class,
 				figure.getConnectionAnchor());
 		this.registerConnectionAnchor(

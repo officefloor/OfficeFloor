@@ -17,24 +17,35 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorManagedObjectFigure extends OfficeFloorFigure {
 
 	/**
 	 * Indicates a change in name for the {@link OfficeFloorManagedObjectModel}.
-	 * 
+	 *
 	 * @param officeFloorManagedObjectName
 	 *            Name to display for the {@link OfficeFloorManagedObjectModel}.
 	 */
 	void setOfficeFloorManagedObjectName(String officeFloorManagedObjectName);
+
+	/**
+	 * Indicates a change in {@link ManagedObjectScope} for the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 *
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} to display for the
+	 *            {@link OfficeFloorManagedObjectModel}.
+	 */
+	void setManagedObjectScope(ManagedObjectScope managedObjectScope);
 
 	/**
 	 * <p>
@@ -43,9 +54,10 @@ public interface OfficeFloorManagedObjectFigure extends OfficeFloorFigure {
 	 * <p>
 	 * This is to allow placement of the editor in changing the
 	 * {@link OfficeFloorManagedObjectModel} name.
-	 * 
+	 *
 	 * @return {@link IFigure} containing the
 	 *         {@link OfficeFloorManagedObjectModel} name.
 	 */
 	IFigure getOfficeFloorManagedObjectNameFigure();
+
 }

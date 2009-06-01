@@ -16,20 +16,30 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 
 /**
  * Context for the {@link OfficeFloorManagedObjectFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorManagedObjectFigureContext {
 
 	/**
 	 * Obtains the {@link OfficeFloorManagedObjectModel} name.
-	 * 
+	 *
 	 * @return {@link OfficeFloorManagedObjectModel} name.
 	 */
 	String getOfficeFloorManagedObjectName();
+
+	/**
+	 * Obtains the {@link ManagedObjectScope} for the
+	 * {@link OfficeFloorManagedObjectModel}.
+	 *
+	 * @return {@link ManagedObjectScope} for the
+	 *         {@link OfficeFloorManagedObjectModel}.
+	 */
+	ManagedObjectScope getManagedObjectScope();
 
 }

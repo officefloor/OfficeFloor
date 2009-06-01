@@ -32,7 +32,7 @@ import net.officefloor.compile.properties.PropertyList;
 
 /**
  * Implementation of the {@link PropertyList}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class PropertyListImpl implements PropertyList {
@@ -44,7 +44,7 @@ public class PropertyListImpl implements PropertyList {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param nameValuePairs
 	 *            {@link Property} name/values to initially populate this list.
 	 */
@@ -109,6 +109,20 @@ public class PropertyListImpl implements PropertyList {
 
 		// No matching property if at this point
 		return null;
+	}
+
+	@Override
+	public Property getOrAddProperty(String name) {
+
+		// Attempt to get the property
+		Property property = this.getProperty(name);
+		if (property == null) {
+			// Not property found, so add
+			property = this.addProperty(name);
+		}
+
+		// Return the property
+		return property;
 	}
 
 	@Override

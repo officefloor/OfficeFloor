@@ -26,6 +26,7 @@ import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectE
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -36,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorManagedObjectEditPart
@@ -116,6 +117,10 @@ public class OfficeFloorManagedObjectEditPart
 			this.getOfficeFloorFigure().setOfficeFloorManagedObjectName(
 					this.getCastedModel().getOfficeFloorManagedObjectName());
 			break;
+		case CHANGE_MANAGED_OBJECT_SCOPE:
+			this.getOfficeFloorFigure().setManagedObjectScope(
+					this.getManagedObjectScope());
+			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_DEPENDENCY:
 			this.refreshChildren();
@@ -139,6 +144,24 @@ public class OfficeFloorManagedObjectEditPart
 	@Override
 	public String getOfficeFloorManagedObjectName() {
 		return this.getCastedModel().getOfficeFloorManagedObjectName();
+	}
+
+	@Override
+	public ManagedObjectScope getManagedObjectScope() {
+		// Return the scope
+		String scopeName = this.getCastedModel().getManagedObjectScope();
+		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(scopeName)) {
+			return ManagedObjectScope.PROCESS;
+		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE
+				.equals(scopeName)) {
+			return ManagedObjectScope.THREAD;
+		} else if (OfficeFloorChanges.WORK_MANAGED_OBJECT_SCOPE
+				.equals(scopeName)) {
+			return ManagedObjectScope.WORK;
+		} else {
+			// Unknown scope
+			return null;
+		}
 	}
 
 }

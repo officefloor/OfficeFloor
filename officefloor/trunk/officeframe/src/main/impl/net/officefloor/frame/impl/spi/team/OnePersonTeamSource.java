@@ -23,10 +23,15 @@ import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
  * {@link TeamSource} for the {@link OnePersonTeam}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeamSource extends AbstractTeamSource {
+
+	/**
+	 * Property name of the max wait time in milliseconds.
+	 */
+	public static final String MAX_WAIT_TIME_PROPERTY_NAME = "wait";
 
 	/*
 	 * ==================== AbstractTeamSource ==============================
@@ -34,14 +39,15 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty("wait");
+		context.addProperty(MAX_WAIT_TIME_PROPERTY_NAME, "Wait time (ms)");
 	}
 
 	@Override
 	protected Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the wait time
-		long waitTime = Long.parseLong(context.getProperty("wait", "100"));
+		long waitTime = Long.parseLong(context.getProperty(
+				MAX_WAIT_TIME_PROPERTY_NAME, "100"));
 
 		// Return the one person team
 		return new OnePersonTeam(waitTime);

@@ -48,7 +48,6 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
-import org.eclipse.gef.Tool;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
@@ -70,13 +69,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 
 /**
  * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
  * edit.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
@@ -118,7 +120,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	public AbstractOfficeFloorEditor() {
 		// Specify the Edit Domain
 		DefaultEditDomain editDomain = new DefaultEditDomain(this);
-		editDomain.setDefaultTool(new OfficeFloorSelectionTool());
+		editDomain.setDefaultTool(new SelectionTool());
 		editDomain.loadDefaultTool();
 		this.setEditDomain(editDomain);
 
@@ -141,7 +143,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Specifies the Model.
-	 * 
+	 *
 	 * @param model
 	 *            Model.
 	 */
@@ -151,7 +153,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link Model}.
-	 * 
+	 *
 	 * @return {@link Model}.
 	 */
 	public M getCastedModel() {
@@ -160,7 +162,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link RootEditPart}.
-	 * 
+	 *
 	 * @return {@link RootEditPart}.
 	 */
 	public RootEditPart getRootEditPart() {
@@ -169,7 +171,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Obtains the {@link Model} change functionality.
-	 * 
+	 *
 	 * @return {@link Model} change functionality.
 	 */
 	public C getModelChanges() {
@@ -179,7 +181,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	/**
 	 * Displays the {@link Throwable} error details as an error
 	 * {@link MessageDialog}.
-	 * 
+	 *
 	 * @param error
 	 *            Error.
 	 */
@@ -206,7 +208,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message as an error {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Error message.
 	 */
@@ -217,7 +219,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message and its cause as an error {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Error message.
 	 * @param cause
@@ -230,7 +232,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the message as a warning {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Warning message
 	 */
@@ -241,7 +243,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays the {@link IStatus} error.
-	 * 
+	 *
 	 * @param status
 	 *            {@link IStatus} error.
 	 */
@@ -251,7 +253,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Displays a {@link Dialog} for the {@link IStatus}.
-	 * 
+	 *
 	 * @param status
 	 *            {@link IStatus}.
 	 * @param title
@@ -264,7 +266,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link LayoutEditPolicy} to be installed.
-	 * 
+	 *
 	 * @return {@link LayoutEditPolicy} to be installed.
 	 */
 	public LayoutEditPolicy createLayoutEditPolicy() {
@@ -275,7 +277,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link OfficeFloorLayoutEditPolicy}.
-	 * 
+	 *
 	 * @param policy
 	 *            {@link OfficeFloorLayoutEditPolicy}.
 	 */
@@ -284,7 +286,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link GraphicalEditPolicy} to be installed.
-	 * 
+	 *
 	 * @return {@link GraphicalEditPolicy} to be installed.
 	 */
 	public GraphicalNodeEditPolicy createGraphicalEditPolicy() {
@@ -295,7 +297,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link OfficeFloorGraphicalNodeEditPolicy}.
-	 * 
+	 *
 	 * @param policy
 	 *            {@link OfficeFloorGraphicalNodeEditPolicy}.
 	 */
@@ -335,6 +337,38 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	}
 
 	/**
+	 * {@link MouseListener} that listens to last location the mouse down event
+	 * was fired so that context menu may obtain the location.
+	 */
+	private class MouseLocation extends MouseAdapter {
+
+		/**
+		 * Last X location.
+		 */
+		private int lastX = -1;
+
+		/**
+		 * Last Y location
+		 */
+		private int lastY = -1;
+
+		@Override
+		public void mouseDown(MouseEvent e) {
+			this.lastX = e.x;
+			this.lastY = e.y;
+		}
+
+		/**
+		 * Obtains the location of the mouse for the down event.
+		 *
+		 * @return Location of the mouse for the down event.
+		 */
+		public Point getLocation() {
+			return new Point(this.lastX, this.lastY);
+		}
+	}
+
+	/**
 	 * Initialises the context menu.
 	 */
 	protected void initialiseContextMenu() {
@@ -350,6 +384,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 			return;
 		}
 
+		// Add mouse listener for the location to give operations
+		final MouseLocation mouseLocation = new MouseLocation();
+		this.getGraphicalControl().addMouseListener(mouseLocation);
+
 		// Create the context menu
 		ContextMenuProvider menuProvider = new ContextMenuProvider(this
 				.getGraphicalViewer()) {
@@ -357,17 +395,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 			public void buildContextMenu(IMenuManager menuManager) {
 
 				// Obtain the location
-				Tool tool = AbstractOfficeFloorEditor.this.getEditDomain()
-						.getActiveTool();
-				Point location;
-				if (tool instanceof OfficeFloorSelectionTool) {
-					// Obtain location of right-click
-					OfficeFloorSelectionTool selectionTool = (OfficeFloorSelectionTool) tool;
-					location = selectionTool.getLocation();
-				} else {
-					// Provide no location
-					location = new Point(-1, -1);
-				}
+				Point location = mouseLocation.getLocation();
 
 				// Obtain the selected edit parts
 				List<EditPart> selectedEditPartList = new LinkedList<EditPart>();
@@ -419,7 +447,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the listing of {@link Operation} instances.
-	 * 
+	 *
 	 * @param list
 	 *            Listing to add {@link Operation} instances.
 	 */
@@ -483,7 +511,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Populates the {@link EditPart} types for their respective model.
-	 * 
+	 *
 	 * @param mapping
 	 *            Registry to load the mappings.
 	 */
@@ -492,7 +520,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Indicates if able to be a drop target listener.
-	 * 
+	 *
 	 * @return <code>true</code> if this Editor is able to be a drop target.
 	 */
 	protected abstract boolean isDragTarget();
@@ -526,7 +554,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Creates the {@link Model} change functionality.
-	 * 
+	 *
 	 * @param model
 	 *            Root {@link Model}.
 	 * @return {@link Model} change functionality.
@@ -535,7 +563,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Retrieves the Model.
-	 * 
+	 *
 	 * @param configuration
 	 *            Configuration of the Model.
 	 * @return Model to be edited.
@@ -569,7 +597,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Stores the Model.
-	 * 
+	 *
 	 * @param model
 	 *            Model to be stored.
 	 * @param configuration
@@ -634,22 +662,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 	/**
 	 * Override to initialise the {@link PaletteRoot}.
-	 * 
+	 *
 	 * @see #getPaletteRoot()
 	 */
 	protected void initialisePaletteRoot() {
 		// Do nothing
-	}
-
-	/**
-	 * {@link SelectionTool} to allow obtaining the location of selection.
-	 */
-	private static class OfficeFloorSelectionTool extends SelectionTool {
-
-		@Override
-		public Point getLocation() {
-			return super.getLocation();
-		}
 	}
 
 }

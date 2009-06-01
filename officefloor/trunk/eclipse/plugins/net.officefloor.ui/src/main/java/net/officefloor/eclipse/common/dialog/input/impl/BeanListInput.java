@@ -22,9 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 /**
  * {@link Table} to create and populate a list of beans.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanListInput<B> implements Input<Table> {
@@ -97,7 +97,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param beanType
 	 *            Type of the bean.
 	 */
@@ -113,7 +113,7 @@ public class BeanListInput<B> implements Input<Table> {
 	 * Adds property to be populated on the bean.
 	 * <p>
 	 * This may NOT be called after {@link #buildControl(InputContext)}.
-	 * 
+	 *
 	 * @param propertyName
 	 *            Name of the property on the bean.
 	 * @param weight
@@ -123,8 +123,10 @@ public class BeanListInput<B> implements Input<Table> {
 
 		// Ensure properties are not added after building control
 		if (this.tableViewer != null) {
-			throw new OfficeFloorPluginFailure(
-					"Can not add properties after building table");
+			LogUtil
+					.logError("Can not add properties after building table (property: "
+							+ propertyName + ")");
+			return;
 		}
 
 		// Add the property
@@ -135,7 +137,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Adds a bean.
-	 * 
+	 *
 	 * @param bean
 	 *            Bean.
 	 */
@@ -151,7 +153,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Removes a bean.
-	 * 
+	 *
 	 * @param bean
 	 *            Bean.
 	 */
@@ -166,11 +168,9 @@ public class BeanListInput<B> implements Input<Table> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
-	 * officefloor.eclipse.common.dialog.input.InputContext)
+	 * ==================== Input ==========================================
 	 */
+
 	@Override
 	public Table buildControl(final InputContext context) {
 
@@ -244,7 +244,6 @@ public class BeanListInput<B> implements Input<Table> {
 		addButton.setLayoutData(new GridData(
 				GridData.HORIZONTAL_ALIGN_BEGINNING));
 		addButton.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
@@ -258,7 +257,7 @@ public class BeanListInput<B> implements Input<Table> {
 					context.notifyValueChanged(BeanListInput.this.beans);
 
 				} catch (Exception ex) {
-					throw new OfficeFloorPluginFailure(ex);
+					LogUtil.logError("Failed to add bean", ex);
 				}
 			}
 		});
@@ -295,14 +294,6 @@ public class BeanListInput<B> implements Input<Table> {
 		return this.table;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
-	 * .swt.widgets.Control,
-	 * net.officefloor.eclipse.common.dialog.input.InputContext)
-	 */
 	@Override
 	public List<B> getValue(Table control, InputContext context) {
 		return this.beans;
@@ -335,14 +326,13 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param name
 		 *            Property Name.
 		 * @param weight
 		 *            Weight of the column width for this property.
 		 */
-		public BeanProperty(String name, int weight)
-				throws OfficeFloorPluginFailure {
+		public BeanProperty(String name, int weight) {
 			this.name = name;
 			this.weight = weight;
 
@@ -352,15 +342,16 @@ public class BeanListInput<B> implements Input<Table> {
 					+ methodName.substring(1);
 
 			// Attempt to obtain the accessor (must have)
+			Method accessMethod = null;
 			try {
-				this.accessor = BeanListInput.this.beanType.getMethod("get"
+				accessMethod = BeanListInput.this.beanType.getMethod("get"
 						+ methodName);
 			} catch (Exception ex) {
 				// Must have accessor
-				throw new OfficeFloorPluginFailure("Must have accessor for '"
-						+ methodName + "' on bean "
-						+ BeanListInput.this.beanType.getName());
+				LogUtil.logError("Must have accessor for '" + methodName
+						+ "' on bean " + BeanListInput.this.beanType.getName());
 			}
+			this.accessor = accessMethod;
 
 			// Attempt to obtain the mutator (not necessary)
 			Method method = null;
@@ -375,7 +366,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Obtains the weight of the column width for this property.
-		 * 
+		 *
 		 * @return Weight of the column width for this property.
 		 */
 		public int getWeight() {
@@ -384,12 +375,12 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Obtains the property value from the bean.
-		 * 
+		 *
 		 * @param bean
 		 *            Bean to obtain the property value.
 		 * @return Value of the bean's property.
 		 */
-		public String getValue(B bean) throws OfficeFloorPluginFailure {
+		public String getValue(B bean) {
 			try {
 				// Obtain the return of the bean's accessor
 				Object value = this.accessor.invoke(bean);
@@ -398,13 +389,15 @@ public class BeanListInput<B> implements Input<Table> {
 				return (value == null ? "" : value.toString());
 
 			} catch (Exception ex) {
-				throw new OfficeFloorPluginFailure(ex);
+				LogUtil.logError("Failed to get value for property "
+						+ this.name, ex);
+				return "";
 			}
 		}
 
 		/**
 		 * Indicates if can modify this property.
-		 * 
+		 *
 		 * @return <code>true</code> if can modify this property.
 		 */
 		public boolean canModify() {
@@ -413,14 +406,13 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Specifies the property value on the bean.
-		 * 
+		 *
 		 * @param bean
 		 *            Bean to have its property specified.
 		 * @param value
 		 *            Value to set on the property of the bean.
 		 */
-		public void setValue(B bean, String value)
-				throws OfficeFloorPluginFailure {
+		public void setValue(B bean, String value) {
 
 			// Only set value if have mutator
 			if (this.mutator == null) {
@@ -431,7 +423,8 @@ public class BeanListInput<B> implements Input<Table> {
 				// Set the property value on the bean
 				this.mutator.invoke(bean, value);
 			} catch (Exception ex) {
-				throw new OfficeFloorPluginFailure(ex);
+				LogUtil.logError("Failed to set value for property "
+						+ this.name, ex);
 			}
 		}
 	}
@@ -448,7 +441,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param inputContext
 		 *            {@link InputContext}.
 		 */
@@ -458,7 +451,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
 		 * java.lang.String)
@@ -481,7 +474,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
 		 * java.lang.String)
@@ -504,7 +497,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
 		 * java.lang.String, java.lang.Object)
 		 */
@@ -542,7 +535,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java
 		 * .lang.Object, int)
@@ -554,7 +547,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.
 		 * lang.Object, int)
@@ -592,7 +585,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.IStructuredContentProvider#getElements(
 		 * java.lang.Object)
@@ -605,7 +598,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		@Override
@@ -615,7 +608,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse
 		 * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)

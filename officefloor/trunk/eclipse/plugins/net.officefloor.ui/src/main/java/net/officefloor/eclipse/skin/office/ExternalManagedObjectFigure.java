@@ -23,26 +23,18 @@ import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link OfficeFloorFigure} for the {@link ExternalManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExternalManagedObjectFigure extends OfficeFloorFigure {
 
 	/**
 	 * Indicates a change in the name of the {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param externalManagedObjectName
 	 *            Name to display for the {@link ExternalManagedObjectModel}.
 	 */
 	void setExternalManagedObjectName(String externalManagedObjectName);
-
-	/**
-	 * Specifies scope on the display.
-	 * 
-	 * @param scope
-	 *            Scope.
-	 */
-	void setScope(String scope);
 
 	/**
 	 * <p>
@@ -51,7 +43,7 @@ public interface ExternalManagedObjectFigure extends OfficeFloorFigure {
 	 * <p>
 	 * This is to allow placement of the editor in changing the
 	 * {@link ExternalManagedObjectModel} name.
-	 * 
+	 *
 	 * @return {@link IFigure} containing the {@link ExternalManagedObjectModel}
 	 *         name.
 	 */

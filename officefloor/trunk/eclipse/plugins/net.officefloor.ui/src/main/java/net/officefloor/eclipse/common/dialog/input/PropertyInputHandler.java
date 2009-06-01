@@ -22,14 +22,14 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 /**
  * Handler for the {@link Input} that populates a property on a bean.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class PropertyInputHandler {
@@ -51,7 +51,7 @@ public class PropertyInputHandler {
 
 	/**
 	 * Initialise.
-	 * 
+	 *
 	 * @param parent
 	 *            Parent {@link Composite}.
 	 * @param input
@@ -63,8 +63,8 @@ public class PropertyInputHandler {
 	 * @param valueTranslatorRegistry
 	 *            {@link ValueTranslatorRegistry}.
 	 * @param translator
-	 *            {@link ValueTranslator} to use or <code>null</code> to
-	 *            source from {@link ValueTranslatorRegistry}.
+	 *            {@link ValueTranslator} to use or <code>null</code> to source
+	 *            from {@link ValueTranslatorRegistry}.
 	 */
 	public PropertyInputHandler(Composite parent,
 			Input<? extends Control> input, String propertyName, Object bean,
@@ -127,9 +127,9 @@ public class PropertyInputHandler {
 		// Obtain the set method details
 		Method setMethod = null;
 		if (setMethods.size() == 0) {
-			throw new OfficeFloorPluginFailure("No mutator for property '"
-					+ propertyName + "' on bean "
-					+ this.bean.getClass().getName());
+			// Indicate must have mutator for property
+			LogUtil.logError("No mutator for property '" + propertyName
+					+ "' on bean " + this.bean.getClass().getName());
 		} else if (setMethods.size() == 1) {
 			// Only mutator so use
 			setMethod = setMethods.get(0);
@@ -161,9 +161,9 @@ public class PropertyInputHandler {
 			}
 		} else {
 			// Must have mutator
-			throw new OfficeFloorPluginFailure(
-					"Can not determine mutator for propety '" + propertyName
-							+ "' from bean " + this.bean.getClass().getName());
+			LogUtil.logError("Can not determine mutator for property '"
+					+ propertyName + "' from bean "
+					+ this.bean.getClass().getName());
 		}
 		this.mutator = setMethod;
 
@@ -174,7 +174,7 @@ public class PropertyInputHandler {
 		}
 		if (translator == null) {
 			// Must have translator
-			throw new OfficeFloorPluginFailure("Can not obtain "
+			LogUtil.logError("Can not obtain "
 					+ ValueTranslator.class.getSimpleName() + " for property '"
 					+ propertyName + "' of type " + propertyType.getName()
 					+ " for bean " + this.bean.getClass().getName());
@@ -187,7 +187,7 @@ public class PropertyInputHandler {
 
 	/**
 	 * Obtains the {@link Control}.
-	 * 
+	 *
 	 * @return {@link Control}.
 	 */
 	public Control getControl() {
@@ -196,7 +196,7 @@ public class PropertyInputHandler {
 
 	/**
 	 * Specifies the {@link InputListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            {@link InputListener}.
 	 */
@@ -206,7 +206,7 @@ public class PropertyInputHandler {
 
 	/**
 	 * Populates the value on the property of the bean.
-	 * 
+	 *
 	 * @return <code>true</code> if non-null value populated (or if
 	 *         {@link String} that is not empty).
 	 * @throws InvalidValueException

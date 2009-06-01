@@ -35,7 +35,7 @@ import net.officefloor.plugin.work.http.HttpException;
 
 /**
  * {@link Work} and {@link Task} for serving {@link File} content as response.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpFileTask
@@ -47,6 +47,31 @@ public class HttpFileTask
 	 */
 	public static enum HttpFileTaskDependencies {
 		SERVER_HTTP_CONNECTION
+	}
+
+	/**
+	 * Package to prefix to paths to find the file.
+	 */
+	private final String packagePrefix;
+
+	/**
+	 * Default index file name. Typically <code>index.html</code>.
+	 */
+	private final String defaultIndexFileName;
+
+	/**
+	 * Initialise.
+	 *
+	 * @param packagePrefix
+	 *            Package to prefix to paths to find the file.
+	 * @param defaultIndexFileName
+	 *            Default index file name. Typically <code>index.html</code>.
+	 */
+	public HttpFileTask(String packagePrefix, String defaultIndexFileName) {
+		// Ensure package prefix ends with '/'
+		this.packagePrefix = (packagePrefix.endsWith("/") ? packagePrefix
+				: packagePrefix + "/");
+		this.defaultIndexFileName = defaultIndexFileName;
 	}
 
 	/*
@@ -71,18 +96,40 @@ public class HttpFileTask
 			path = path.substring(0, parameterStart);
 		}
 
+		// Keep track of original request path (for possible file not found)
+		String requestPath = path;
+
+		// Determine if file (file expected to have extension)
+		boolean isFile = (path.indexOf('.') > 0);
+
+		// Prefix the package onto the path
+		path = this.packagePrefix + path;
+
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+
+		// Obtain the content based on whether directory or file
+		InputStream content;
+		if (isFile) {
+			// Obtain the file
+			content = classLoader.getResourceAsStream(path);
+		} else {
+			// Obtain default index file from the directory
+			String directoryPath = (path.endsWith("/") ? path : path + "/")
+					+ this.defaultIndexFileName;
+			content = classLoader.getResourceAsStream(directoryPath);
+		}
+
 		// Obtain the response
 		HttpResponse response = connection.getHttpResponse();
-
-		// Obtain the file content from class path
-		InputStream content = context.getClass().getResourceAsStream(path);
 
 		// Handle if not find file
 		if (content == null) {
 			// Item not found
 			response.setStatus(HttpStatus._404); // not found
 			new OutputStreamWriter(response.getBody()).append(
-					"Can not find resource " + path).flush();
+					"Can not find resource " + requestPath).flush();
 		} else {
 			// Return the file content as response
 			OutputStream responseBody = response.getBody();
@@ -98,5 +145,4 @@ public class HttpFileTask
 		// Should expect no further processing
 		return null;
 	}
-
 }

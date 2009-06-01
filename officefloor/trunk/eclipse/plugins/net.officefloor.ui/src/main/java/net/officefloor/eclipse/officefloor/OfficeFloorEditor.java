@@ -47,6 +47,7 @@ import net.officefloor.eclipse.officefloor.operations.AddDeployedOfficeOperation
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectSourceOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorTeamOperation;
+import net.officefloor.eclipse.officefloor.operations.RescopeOfficeFloorManagedObjectOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
 import net.officefloor.model.impl.officefloor.OfficeFloorRepositoryImpl;
@@ -78,7 +79,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link OfficeFloorModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorEditor extends
@@ -429,6 +430,10 @@ public class OfficeFloorEditor extends
 
 		// Add managed object from managed object source
 		list.add(new AddOfficeFloorManagedObjectOperation(officeFloorChanges));
+
+		// Add managed object changes
+		list.add(new RescopeOfficeFloorManagedObjectOperation(
+				officeFloorChanges));
 	}
 
 }
