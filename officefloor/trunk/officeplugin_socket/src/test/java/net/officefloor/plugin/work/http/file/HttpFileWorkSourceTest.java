@@ -30,7 +30,7 @@ import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependenci
 
 /**
  * Tests the {@link HttpFileWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
@@ -40,7 +40,11 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		// Should be no properties
-		WorkLoaderUtil.validateSpecification(HttpFileWorkSource.class);
+		WorkLoaderUtil.validateSpecification(HttpFileWorkSource.class,
+				HttpFileWorkSource.PACKAGE_PREFIX_PROPERTY_NAME,
+				"Package prefix",
+				HttpFileWorkSource.DEFAULT_INDEX_FILE_PROPETY_NAME,
+				"Default index file");
 	}
 
 	/**
@@ -49,7 +53,7 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	public void testLoad() throws Exception {
 
 		// Build the expected work type
-		HttpFileTask workTaskFactory = new HttpFileTask();
+		HttpFileTask workTaskFactory = new HttpFileTask("html", "index.html");
 		WorkTypeBuilder<HttpFileTask> work = WorkLoaderUtil
 				.createWorkTypeBuilder(workTaskFactory);
 		TaskTypeBuilder<HttpFileTaskDependencies, None> task = work
@@ -61,7 +65,10 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 		task.addEscalation(IOException.class);
 
 		// Verify work type
-		WorkLoaderUtil.validateWorkType(work, HttpFileWorkSource.class);
+		WorkLoaderUtil.validateWorkType(work, HttpFileWorkSource.class,
+				HttpFileWorkSource.PACKAGE_PREFIX_PROPERTY_NAME, "html",
+				HttpFileWorkSource.DEFAULT_INDEX_FILE_PROPETY_NAME,
+				"index.html");
 	}
 
 }

@@ -31,7 +31,7 @@ import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependenci
 
 /**
  * Tests the {@link HttpFileTask}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpFileTaskTest extends OfficeFrameTestCase {
@@ -86,8 +86,15 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Validates able load default index page.
+	 */
+	public void testDefaultIndexPage() throws Throwable {
+		this.doTest("", "index.html", true);
+	}
+
+	/**
 	 * Do the test.
-	 * 
+	 *
 	 * @param fileName
 	 *            Name of the file.
 	 * @param isFileAvailable
@@ -96,15 +103,14 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 	private void doTest(String path, String fileName, boolean isFileAvailable)
 			throws Throwable {
 
-		// Prefix package to both path and file
+		// Obtain the package prefix and default index file name
 		String packagePrefix = this.getClass().getPackage().getName().replace(
-				'.', '/')
-				+ "/";
-		path = packagePrefix + path;
-		fileName = packagePrefix + fileName;
+				'.', '/');
+		String defaultIndexFileName = "index.html";
 
 		// Create the HTTP file task
-		HttpFileTask task = new HttpFileTask();
+		HttpFileTask task = new HttpFileTask(packagePrefix,
+				defaultIndexFileName);
 
 		// Record actions on mocks
 		this.recordReturn(this.taskContext, this.taskContext

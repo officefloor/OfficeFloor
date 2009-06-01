@@ -21,14 +21,14 @@ import java.util.Properties;
 
 /**
  * Listing of {@link Property} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface PropertyList extends Iterable<Property> {
 
 	/**
 	 * Appends a {@link Property} to this {@link PropertyList}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link Property}.
 	 * @param label
@@ -40,7 +40,7 @@ public interface PropertyList extends Iterable<Property> {
 
 	/**
 	 * Appends a {@link Property} to this {@link PropertyList}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link Property} which is also used as the label.
 	 * @return {@link Property} added.
@@ -50,14 +50,14 @@ public interface PropertyList extends Iterable<Property> {
 	/**
 	 * Obtains the names of the {@link Property} instances in the order they
 	 * were added.
-	 * 
+	 *
 	 * @return Names of the {@link Property} instances.
 	 */
 	String[] getPropertyNames();
 
 	/**
 	 * Obtains the first {@link Property} by the input name.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link Property} to return.
 	 * @return First {@link Property} by the input name, or <code>null</code> if
@@ -66,9 +66,20 @@ public interface PropertyList extends Iterable<Property> {
 	Property getProperty(String name);
 
 	/**
+	 * Convenience method that attempts to get the {@link Property} and if not
+	 * found adds the {@link Property}.
+	 *
+	 * @param name
+	 *            Name of the {@link Property} to return.
+	 * @return First {@link Property} by the input name or a newly added
+	 *         {@link Property} if no {@link Property} found by the name.
+	 */
+	Property getOrAddProperty(String name);
+
+	/**
 	 * Obtains the {@link Properties} populated with the {@link Property}
 	 * values.
-	 * 
+	 *
 	 * @return Populated {@link Properties}.
 	 */
 	Properties getProperties();
@@ -81,7 +92,7 @@ public interface PropertyList extends Iterable<Property> {
 	/**
 	 * Enable sorting the {@link Property} instances within this
 	 * {@link PropertyList}.
-	 * 
+	 *
 	 * @param comparator
 	 *            {@link Comparator} to provide comparisons for sorting.
 	 */

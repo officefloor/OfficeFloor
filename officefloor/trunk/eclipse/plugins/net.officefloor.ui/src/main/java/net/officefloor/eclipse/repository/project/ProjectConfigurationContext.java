@@ -19,25 +19,23 @@ package net.officefloor.eclipse.repository.project;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.IEditorInput;
 
 /**
  * Implementation of {@link ConfigurationContext} for a {@link IProject}
  * providing context for a {@link IFile}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ProjectConfigurationContext implements ConfigurationContext {
@@ -59,7 +57,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 	/**
 	 * Obtains the {@link IProject} from the input {@link IEditorInput}.
-	 * 
+	 *
 	 * @param editorInput
 	 *            {@link IEditorInput}.
 	 * @return {@link IProject} for the input {@link IEditorInput}.
@@ -70,66 +68,57 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 	/**
 	 * Initiate with the {@link IProject} providing context.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject} providing context.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to initialise.
 	 */
-	public ProjectConfigurationContext(IProject project)
-			throws OfficeFloorPluginFailure {
+	public ProjectConfigurationContext(IProject project) {
 		this(project, null);
 	}
 
 	/**
 	 * Convenience constructor.
-	 * 
+	 *
 	 * @param editorInput
 	 *            {@link IEditorInput}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to construct.
 	 */
-	public ProjectConfigurationContext(IEditorInput editorInput)
-			throws OfficeFloorPluginFailure {
+	public ProjectConfigurationContext(IEditorInput editorInput) {
 		this(getProject(editorInput), null);
 	}
 
 	/**
 	 * Initiate with the {@link IProject} providing context.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject} providing context.
 	 * @param monitor
 	 *            {@link IProgressMonitor}. If only retrieving may specify
 	 *            <code>null</code>.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to initialise.
 	 */
 	public ProjectConfigurationContext(IProject project,
-			IProgressMonitor monitor) throws OfficeFloorPluginFailure {
+			IProgressMonitor monitor) {
 		this.project = project;
 		this.monitor = monitor;
 
+		String[] computedClassPath;
 		try {
 			// Create the Java Project
 			IJavaProject javaProject = JavaCore.create(project);
 
 			// Obtain the class path
-			this.classpath = JavaRuntime
+			computedClassPath = JavaRuntime
 					.computeDefaultRuntimeClassPath(javaProject);
 
-		} catch (JavaModelException ex) {
-			// Propagate
-			throw new OfficeFloorPluginFailure(ex);
-		} catch (CoreException ex) {
-			// Propagate
-			throw new OfficeFloorPluginFailure(ex);
+		} catch (Throwable ex) {
+			LogUtil.logError("Failed to compute class path for project", ex);
+			computedClassPath = new String[0]; // provide empty class path
 		}
+		this.classpath = computedClassPath;
 	}
 
 	/**
 	 * Obtain the {@link IProject}.
-	 * 
+	 *
 	 * @return {@link IProject}.
 	 */
 	public IProject getProject() {

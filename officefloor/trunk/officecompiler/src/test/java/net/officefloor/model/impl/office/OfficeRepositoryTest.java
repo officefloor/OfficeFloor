@@ -47,7 +47,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link OfficeRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeRepositoryTest extends OfficeFrameTestCase {

@@ -31,10 +31,20 @@ import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependenci
 
 /**
  * {@link WorkSource} to provide {@link File} content HTTP responses.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpFileWorkSource extends AbstractWorkSource<HttpFileTask> {
+
+	/**
+	 * Property name for the package prefix.
+	 */
+	public static final String PACKAGE_PREFIX_PROPERTY_NAME = "package.prefix";
+
+	/**
+	 * Property name for the default index file name.
+	 */
+	public static final String DEFAULT_INDEX_FILE_PROPETY_NAME = "default.index.file.name";
 
 	/*
 	 * ===================== AbstractWorkSource =============================
@@ -42,15 +52,24 @@ public class HttpFileWorkSource extends AbstractWorkSource<HttpFileTask> {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO consider providing directory to restrict file accesses
+		context.addProperty(PACKAGE_PREFIX_PROPERTY_NAME, "Package prefix");
+		context.addProperty(DEFAULT_INDEX_FILE_PROPETY_NAME,
+				"Default index file");
 	}
 
 	@Override
 	public void sourceWork(WorkTypeBuilder<HttpFileTask> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
+		// Obtain the properties
+		String packagePrefix = context
+				.getProperty(PACKAGE_PREFIX_PROPERTY_NAME);
+		String defaultIndexFileName = context
+				.getProperty(DEFAULT_INDEX_FILE_PROPETY_NAME);
+
 		// Create the task to return a file
-		HttpFileTask task = new HttpFileTask();
+		HttpFileTask task = new HttpFileTask(packagePrefix,
+				defaultIndexFileName);
 
 		// Define the work
 		workTypeBuilder.setWorkFactory(task);

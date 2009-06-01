@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -40,7 +41,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link OfficeFloorManagedObjectFigure} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectFigure extends
@@ -52,13 +53,19 @@ public class StandardOfficeFloorManagedObjectFigure extends
 	private final Label officeFloorManagedObjectName;
 
 	/**
+	 * {@link OfficeFloorManagedObjectFigureContext}.
+	 */
+	private final OfficeFloorManagedObjectFigureContext context;
+
+	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectFigureContext}.
 	 */
 	public StandardOfficeFloorManagedObjectFigure(
 			OfficeFloorManagedObjectFigureContext context) {
+		this.context = context;
 
 		Color moColor = ColorConstants.lightBlue;
 
@@ -92,8 +99,8 @@ public class StandardOfficeFloorManagedObjectFigure extends
 						dependencyAnchor);
 
 		// Create the managed object source
-		RoundedContainerFigure mo = new RoundedContainerFigure(context
-				.getOfficeFloorManagedObjectName(), moColor, 20, false);
+		RoundedContainerFigure mo = new RoundedContainerFigure(this
+				.getOfficeFloorManagedObjectLabel(), moColor, 20, false);
 		this.officeFloorManagedObjectName = mo.getContainerName();
 		objectAndMo.add(mo);
 
@@ -115,6 +122,40 @@ public class StandardOfficeFloorManagedObjectFigure extends
 		this.setContentPane(mo.getContentPane());
 	}
 
+	/**
+	 * Obtains the label text for the {@link OfficeFloorManagedObjectFigure}.
+	 *
+	 * @return Label text for the {@link OfficeFloorManagedObjectFigure}.
+	 */
+	private String getOfficeFloorManagedObjectLabel() {
+
+		// Determine the scope name
+		String scopeName;
+		ManagedObjectScope scope = this.context.getManagedObjectScope();
+		if (scope == null) {
+			scopeName = "Undefined";
+		} else {
+			switch (scope) {
+			case PROCESS:
+				scopeName = "process";
+				break;
+			case THREAD:
+				scopeName = "thread";
+				break;
+			case WORK:
+				scopeName = "work";
+				break;
+			default:
+				scopeName = "Unknown";
+				break;
+			}
+		}
+
+		// Return the label text
+		return this.context.getOfficeFloorManagedObjectName() + " ["
+				+ scopeName + "]";
+	}
+
 	/*
 	 * ================ OfficeFloorManagedObjectFigure =====================
 	 */
@@ -122,7 +163,14 @@ public class StandardOfficeFloorManagedObjectFigure extends
 	@Override
 	public void setOfficeFloorManagedObjectName(
 			String officeFloorManagedObjectName) {
-		this.officeFloorManagedObjectName.setText(officeFloorManagedObjectName);
+		this.officeFloorManagedObjectName.setText(this
+				.getOfficeFloorManagedObjectLabel());
+	}
+
+	@Override
+	public void setManagedObjectScope(ManagedObjectScope managedObjectScope) {
+		this.officeFloorManagedObjectName.setText(this
+				.getOfficeFloorManagedObjectLabel());
 	}
 
 	@Override

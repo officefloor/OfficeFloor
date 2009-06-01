@@ -22,38 +22,16 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 
 /**
  * Context for the {@link ExternalManagedObjectModel} {@link IFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExternalManagedObjectFigureContext {
 
 	/**
 	 * Obtains the {@link ExternalManagedObjectModel} name.
-	 * 
+	 *
 	 * @return {@link ExternalManagedObjectModel} name.
 	 */
 	String getExternalManagedObjectName();
-
-	/**
-	 * Obtains the next scope.
-	 * 
-	 * @return Next scope.
-	 */
-	String getNextScope(String currentScope);
-
-	/**
-	 * Obtains the scope.
-	 * 
-	 * @return Scope.
-	 */
-	String getScope();
-
-	/**
-	 * Specifies the scope.
-	 * 
-	 * @param scope
-	 *            Scope.
-	 */
-	void setScope(String scope);
 
 }

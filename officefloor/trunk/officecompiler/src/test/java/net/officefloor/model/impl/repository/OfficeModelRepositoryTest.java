@@ -53,7 +53,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshaling/unmarshaling of the {@link OfficeModel} via the
  * {@link ModelRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
@@ -65,7 +65,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override

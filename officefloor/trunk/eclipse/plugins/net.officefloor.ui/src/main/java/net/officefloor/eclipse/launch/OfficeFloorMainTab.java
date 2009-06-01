@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.launch;
 
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.model.office.OfficeModel;
@@ -23,7 +24,6 @@ import net.officefloor.model.office.OfficeModel;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.swt.SWT;
@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link ILaunchConfigurationTab} for running {@link OfficeFloor}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
@@ -58,20 +58,14 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	private Text workName;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
+	 * =================== ILaunchConfigurationTab ==========================
 	 */
+
 	@Override
 	public String getName() {
 		return "Main";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 
@@ -113,11 +107,6 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 		this.setControl(composite);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
@@ -129,15 +118,11 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 			this.workName.setText(configuration.getAttribute(
 					OfficeFloorLauncher.ATTR_WORK_NAME, ""));
 		} catch (CoreException ex) {
-			DebugUIPlugin.log(ex.getStatus());
+			LogUtil.logError("Failed to initialise from configuration", ex);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
+
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
@@ -148,11 +133,6 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 				this.workName.getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		// No defaults

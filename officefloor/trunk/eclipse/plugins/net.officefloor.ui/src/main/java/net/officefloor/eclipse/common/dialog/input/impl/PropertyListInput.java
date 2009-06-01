@@ -46,7 +46,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 /**
  * {@link PropertyList} {@link Input}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class PropertyListInput implements Input<Table> {
@@ -88,7 +88,7 @@ public class PropertyListInput implements Input<Table> {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 */
@@ -98,7 +98,7 @@ public class PropertyListInput implements Input<Table> {
 
 	/**
 	 * Hides the {@link Property} from being displayed.
-	 * 
+	 *
 	 * @param propertyName
 	 *            Name of {@link Property} to no display.
 	 */
@@ -193,7 +193,7 @@ public class PropertyListInput implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param inputContext
 		 *            {@link InputContext}.
 		 */
@@ -222,7 +222,8 @@ public class PropertyListInput implements Input<Table> {
 				return label;
 
 			} else if (VALUE_COLUMN.equals(property)) {
-				return propertyEntry.getValue();
+				String value = propertyEntry.getValue();
+				return (value == null ? "" : value);
 			}
 
 			// Unknown column
@@ -290,7 +291,8 @@ public class PropertyListInput implements Input<Table> {
 				return label;
 
 			case 1:
-				return property.getValue();
+				String value = property.getValue();
+				return (value == null ? "" : value);
 
 			default:
 				return "Unknown column index " + columnIndex;

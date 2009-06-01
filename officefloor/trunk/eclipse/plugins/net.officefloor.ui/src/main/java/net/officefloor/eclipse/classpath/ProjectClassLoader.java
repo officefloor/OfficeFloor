@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
+import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -35,7 +35,7 @@ import org.eclipse.ui.IEditorPart;
 /**
  * {@link java.lang.ClassLoader} to load classes from a
  * {@link org.eclipse.core.resources.IProject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ProjectClassLoader extends URLClassLoader {
@@ -54,7 +54,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Convenience method to find a {@link ConfigurationItem} on the class path
 	 * of the project of the input {@link IEditorPart}.
-	 * 
+	 *
 	 * @param editorPart
 	 *            {@link IEditorPart}.
 	 * @param path
@@ -74,15 +74,12 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Convenience method to create the {@link ProjectClassLoader} from the
 	 * input {@link IEditorPart}.
-	 * 
+	 *
 	 * @param editorPart
 	 *            {@link IEditorPart}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(IEditorPart editorPart)
-			throws OfficeFloorPluginFailure {
+	public static ProjectClassLoader create(IEditorPart editorPart) {
 
 		// Obtain the configuration context
 		ConfigurationContext context = new ProjectConfigurationContext(
@@ -95,31 +92,26 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Convenience method to create the {@link ProjectClassLoader} from an
 	 * {@link IProject}.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(IProject project)
-			throws OfficeFloorPluginFailure {
+	public static ProjectClassLoader create(IProject project) {
 		return create(project, null);
 	}
 
 	/**
 	 * Initiates from the {@link IProject} with the parent {@link ClassLoader}.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @param parentClassLoader
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
 	public static ProjectClassLoader create(IProject project,
-			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
+			ClassLoader parentClassLoader) {
 
 		// Obtain the configuration context
 		ConfigurationContext context = new ProjectConfigurationContext(project);
@@ -130,32 +122,27 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Initiates from the {@link ConfigurationContext}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(ConfigurationContext context)
-			throws OfficeFloorPluginFailure {
+	public static ProjectClassLoader create(ConfigurationContext context) {
 		return create(context, null);
 	}
 
 	/**
 	 * Initiates from the {@link ConfigurationContext} using the parent
 	 * {@link ClassLoader}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 * @param parentClassLoader
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
 	public static ProjectClassLoader create(ConfigurationContext context,
-			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
+			ClassLoader parentClassLoader) {
 
 		// Default parent class loader from office floor plugin
 		if (parentClassLoader == null) {
@@ -169,7 +156,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Initiates from the specified class path.
-	 * 
+	 *
 	 * @param id
 	 *            Id of the {@link ProjectClassLoader}.
 	 * @param classpath
@@ -177,16 +164,22 @@ public class ProjectClassLoader extends URLClassLoader {
 	 * @param parentClassLoader
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create {@link ProjectClassLoader}.
 	 */
 	public static ProjectClassLoader create(String id, String[] classpath,
-			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
+			ClassLoader parentClassLoader) {
 
 		// Create the list of URLs
 		List<URL> urls = new ArrayList<URL>();
 		for (String path : classpath) {
-			urls.add(createUrl(path));
+
+			// Obain the URL
+			URL url = createUrl(path);
+			if (url == null) {
+				continue; // must create URL
+			}
+
+			// Add the URL
+			urls.add(url);
 		}
 
 		// Return the created class loader
@@ -197,7 +190,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Ensure creates via static
 	 * {@link #create(ConfigurationContext, ClassLoader)} method.
-	 * 
+	 *
 	 * @param urls
 	 *            URLs.
 	 * @param parent
@@ -213,7 +206,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Obtains the {@link ConfigurationContext}.
-	 * 
+	 *
 	 * @return {@link ConfigurationContext}.
 	 */
 	public ConfigurationContext getConfigurationContext() {
@@ -222,7 +215,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Finds the {@link ConfigurationItem}.
-	 * 
+	 *
 	 * @param path
 	 *            Path of the {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
@@ -234,7 +227,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Finds the {@link ConfigurationItem} and uses the input
 	 * {@link ConfigurationContext}.
-	 * 
+	 *
 	 * @param path
 	 *            Path of the {@link ConfigurationItem}.
 	 * @param context
@@ -258,14 +251,13 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Creates the {@link URL} from the path.
-	 * 
+	 *
 	 * @param path
 	 *            Path to create as a {@link URL}.
-	 * @return {@link URL} of the path.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create the {@link URL}.
+	 * @return {@link URL} of the path or <code>null</code> if fails to create
+	 *         the {@link URL}.
 	 */
-	protected static URL createUrl(String path) throws OfficeFloorPluginFailure {
+	protected static URL createUrl(String path) {
 		try {
 			if (path.endsWith(".jar") || (path.endsWith(".zip"))) {
 				return new URL("file", null, path);
@@ -273,10 +265,10 @@ public class ProjectClassLoader extends URLClassLoader {
 				return new URL("file", null, path + "/");
 			}
 		} catch (MalformedURLException ex) {
-			// Propagate
-			throw new OfficeFloorPluginFailure(
-					"Failed to create URL from path '" + path + "' as "
-							+ ex.getMessage(), ex);
+			// Indicate error in adding URL
+			LogUtil.logError("Failed to create URL from path '" + path
+					+ "' as " + ex.getMessage(), ex);
+			return null;
 		}
 	}
 
@@ -303,7 +295,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param path
 		 *            Path to the resource.
 		 * @param context
@@ -363,7 +355,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param location
 		 *            Location of this {@link ConfigurationContext}.
 		 * @param classLoader

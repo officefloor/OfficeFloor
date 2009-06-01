@@ -16,7 +16,6 @@
  */
 package net.officefloor.eclipse.launch;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.eclipse.core.resources.IResource;
@@ -33,23 +32,23 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
 /**
  * {@link ILaunchShortcut} for the {@link OfficeFloor}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.jface.viewers.ISelection,
-	 *      java.lang.String)
+	 * ================== ILaunchShortcut ================================
 	 */
+
 	@Override
 	public void launch(ISelection selection, String mode) {
 		try {
@@ -136,20 +135,15 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			DebugUITools.launch(launchConfig, mode);
 
 		} catch (CoreException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+			// Display error in launching
+			ErrorDialog.openError(null, "Error launching", "Failed to launch",
+					ex.getStatus());
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.ui.IEditorPart,
-	 *      java.lang.String)
-	 */
 	@Override
 	public void launch(IEditorPart editor, String mode) {
-		// Should not launch from editor part
-		throw new OfficeFloorPluginFailure("Should not shortcut launch from "
-				+ IEditorPart.class.getSimpleName());
+		MessageDialog.openError(editor.getEditorSite().getShell(), "Error",
+				"Should not run from editor");
 	}
 }
