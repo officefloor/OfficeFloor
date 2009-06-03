@@ -19,12 +19,12 @@ package net.officefloor.model.impl.section;
 import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionChanges;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * Abstract functionality for testing the {@link SectionChanges}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractSectionChangesTestCase extends
@@ -38,7 +38,7 @@ public abstract class AbstractSectionChangesTestCase extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param isSpecificSetupFilePerTest
 	 *            Flag if specific setup file to be used.
 	 */

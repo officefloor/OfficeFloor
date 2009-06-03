@@ -16,7 +16,12 @@
  */
 package net.officefloor.model.officefloor;
 
+import java.util.Map;
+
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -133,6 +138,42 @@ public interface OfficeFloorChanges {
 	 */
 	Change<DeployedOfficeModel> renameDeployedOffice(
 			DeployedOfficeModel deployedOffice, String newDeployedOfficeName);
+
+	/**
+	 * Refactors the {@link DeployedOfficeModel}.
+	 *
+	 * @param deployedOffice
+	 *            {@link DeployedOfficeModel} to refactor.
+	 * @param officeName
+	 *            Name for the {@link DeployedOfficeModel}.
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name for the
+	 *            {@link DeployedOfficeModel}.
+	 * @param officeLocation
+	 *            Location of the {@link DeployedOfficeModel}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param officeType
+	 *            {@link OfficeType} to refactor the {@link DeployedOfficeModel}
+	 *            to.
+	 * @param objectNameMapping
+	 *            Mapping of {@link OfficeManagedObjectType} name to
+	 *            {@link DeployedOfficeObjectModel} name.
+	 * @param inputNameMapping
+	 *            Mapping of {@link OfficeInputType} name to
+	 *            {@link DeployedOfficeInputModel} name.
+	 * @param teamNameMapping
+	 *            Mapping of {@link OfficeTeamType} name to
+	 *            {@link DeployedOfficeTeamModel} name.
+	 * @return {@link Change} to refactor the {@link DeployedOfficeModel}.
+	 */
+	Change<DeployedOfficeModel> refactorDeployedOffice(
+			DeployedOfficeModel deployedOffice, String officeName,
+			String officeSourceClassName, String officeLocation,
+			PropertyList properties, OfficeType officeType,
+			Map<String, String> objectNameMapping,
+			Map<String, String> inputNameMapping,
+			Map<String, String> teamNameMapping);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSourceModel} to the

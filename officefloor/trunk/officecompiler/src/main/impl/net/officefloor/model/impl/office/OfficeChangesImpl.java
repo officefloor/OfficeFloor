@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
@@ -517,6 +518,19 @@ public class OfficeChangesImpl implements OfficeChanges {
 				officeSection.setOfficeSectionName(oldOfficeSectionName);
 			}
 		};
+	}
+
+	@Override
+	public Change<OfficeSectionModel> refactorOfficeSection(
+			OfficeSectionModel sectionModel, String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties, OfficeSection officeSection,
+			Map<String, String> inputNameMapping,
+			Map<String, String> outputNameMapping,
+			Map<String, String> objectNameMapping) {
+		// TODO Implement OfficeChanges.refactorOfficeSection
+		throw new UnsupportedOperationException(
+				"OfficeChanges.refactorOfficeSection");
 	}
 
 	@Override
