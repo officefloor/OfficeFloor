@@ -22,13 +22,17 @@ import java.util.Map;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 
 /**
@@ -121,10 +125,99 @@ public abstract class AbstractRefactorDeployedOfficeTest extends
 	}
 
 	/**
+	 * Sets up refactoring of the {@link OfficeSource}.
+	 *
+	 * @param officeSourceClassName
+	 *            New {@link OfficeSource} class name.
+	 */
+	protected void refactor_officeSourceClassName(String officeSourceClassName) {
+		this.officeSourceClassName = officeSourceClassName;
+	}
+
+	/**
+	 * Sets up refactoring of the {@link DeployedOfficeModel} location.
+	 *
+	 * @param officeLocation
+	 *            {@link DeployedOfficeModel} location.
+	 */
+	protected void refactor_officeLocation(String officeLocation) {
+		this.officeLocation = officeLocation;
+	}
+
+	/**
+	 * Sets up refactoring a change in {@link PropertyList}.
+	 *
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	protected void refactor_addProperty(String name, String value) {
+
+		// Obtain the property list
+		if (this.properties == null) {
+			this.properties = new PropertyListImpl();
+		}
+
+		// Add the property
+		this.properties.addProperty(name).setValue(value);
+	}
+
+	/**
+	 * Maps {@link OfficeManagedObjectType} name to
+	 * {@link DeployedOfficeObjectModel} name.
+	 *
+	 * @param objectTypeName
+	 *            {@link OfficeManagedObjectType} name.
+	 * @param objectModelName
+	 *            {@link DeployedOfficeObjectModel} name.
+	 */
+	protected void refactor_mapObject(String objectTypeName,
+			String objectModelName) {
+		this.objectNameMapping.put(objectTypeName, objectModelName);
+	}
+
+	/**
+	 * Maps {@link OfficeInputType} name to {@link DeployedOfficeInputModel}
+	 * name.
+	 *
+	 * @param inputTypeName
+	 *            {@link OfficeInputType} name.
+	 * @param inputModelName
+	 *            {@link DeployedOfficeInputModel} name.
+	 */
+	protected void refactor_mapInput(String inputTypeName, String inputModelName) {
+		this.inputNameMapping.put(inputTypeName, inputModelName);
+	}
+
+	/**
+	 * Maps {@link OfficeTeamType} name to {@link DeployedOfficeTeamModel} name.
+	 *
+	 * @param teamTypeName
+	 *            {@link OfficeTeamType} name.
+	 * @param teamModelName
+	 *            {@link DeployedOfficeTeamModel} name.
+	 */
+	protected void refactor_mapTeam(String teamTypeName, String teamModelName) {
+		this.teamNameMapping.put(teamTypeName, teamModelName);
+	}
+
+	/**
 	 * Does refactoring test with a simple {@link OfficeType}.
 	 */
 	protected void doRefactor() {
 		this.doRefactor((OfficeType) null);
+	}
+
+	/**
+	 * Convenience method to do refactoring.
+	 *
+	 * @param constructor
+	 *            {@link OfficeTypeConstructor}.
+	 */
+	protected void doRefactor(OfficeTypeConstructor constructor) {
+		OfficeType officeType = this.constructOfficeType(constructor);
+		this.doRefactor(officeType);
 	}
 
 	/**
