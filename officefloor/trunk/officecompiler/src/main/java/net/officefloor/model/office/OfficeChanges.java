@@ -16,9 +16,14 @@
  */
 package net.officefloor.model.office;
 
+import java.util.Map;
+
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -90,6 +95,42 @@ public interface OfficeChanges {
 	 */
 	Change<OfficeSectionModel> renameOfficeSection(
 			OfficeSectionModel officeSection, String newOfficeSectionName);
+
+	/**
+	 * Refactors the {@link OfficeSectionModel}.
+	 *
+	 * @param sectionModel
+	 *            {@link OfficeSectionModel} to refactor.
+	 * @param sectionName
+	 *            Name for the {@link OfficeSectionModel}.
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} class name for the
+	 *            {@link OfficeSectionModel}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param officeSection
+	 *            {@link OfficeSection} that the {@link OfficeSectionModel} is
+	 *            being refactored to.
+	 * @param inputNameMapping
+	 *            Mapping of the {@link OfficeSectionInput} name to the
+	 *            {@link OfficeSectionInputModel} name.
+	 * @param outputNameMapping
+	 *            Mapping of the {@link OfficeSectionOutput} name to the
+	 *            {@link OfficeSectionOutputModel} name.
+	 * @param objectNameMapping
+	 *            Mapping of the {@link OfficeSectionObject} name to the
+	 *            {@link OfficeSectionObjectModel} name.
+	 * @return {@link Change} to refactor the {@link OfficeSectionModel}.
+	 */
+	Change<OfficeSectionModel> refactorOfficeSection(
+			OfficeSectionModel sectionModel, String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties, OfficeSection officeSection,
+			Map<String, String> inputNameMapping,
+			Map<String, String> outputNameMapping,
+			Map<String, String> objectNameMapping);
 
 	/**
 	 * Adds an {@link OfficeTeamModel} to the {@link OfficeModel}.

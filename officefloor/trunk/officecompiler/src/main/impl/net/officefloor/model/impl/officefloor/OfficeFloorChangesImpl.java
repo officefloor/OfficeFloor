@@ -16,6 +16,8 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.util.Map;
+
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -203,6 +205,19 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 				deployedOffice.setDeployedOfficeName(oldDeployedOfficeName);
 			}
 		};
+	}
+
+	@Override
+	public Change<DeployedOfficeModel> refactorDeployedOffice(
+			DeployedOfficeModel deployedOffice, String officeName,
+			String officeSourceClassName, String officeLocation,
+			PropertyList properties, OfficeType officeType,
+			Map<String, String> objectNameMapping,
+			Map<String, String> inputNameMapping,
+			Map<String, String> teamNameMapping) {
+		// TODO Implement OfficeFloorChanges.refactorDeployedOffice
+		throw new UnsupportedOperationException(
+				"OfficeFloorChanges.refactorDeployedOffice");
 	}
 
 	@Override
