@@ -112,6 +112,38 @@ public abstract class AbstractOfficeChangesTestCase extends
 	 */
 	protected interface OfficeSectionContext {
 
+		/**
+		 * Adds an {@link OfficeSectionInput}.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param parameterType
+		 *            Parameter type.
+		 */
+		void addOfficeSectionInput(String name, Class<?> parameterType);
+
+		/**
+		 * Adds an {@link OfficeSectionOutput}.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param argumentType
+		 *            Argument type.
+		 * @param isEscalationOnly
+		 *            Flag indicating if escalation only.
+		 */
+		void addOfficeSectionOutput(String name, Class<?> argumentType,
+				boolean isEscalationOnly);
+
+		/**
+		 * Adds an {@link OfficeSectionObject}.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param objectType
+		 *            Object type.
+		 */
+		void addOfficeSectionObject(String name, Class<?> objectType);
 	}
 
 	/**
@@ -139,6 +171,28 @@ public abstract class AbstractOfficeChangesTestCase extends
 		 * {@link OfficeSectionObject} instances.
 		 */
 		private List<OfficeSectionObject> objects = new LinkedList<OfficeSectionObject>();
+
+		/*
+		 * ===================== OfficeSectionContext =====================
+		 */
+
+		@Override
+		public void addOfficeSectionInput(String name, Class<?> parameterType) {
+			this.inputs
+					.add(new OfficeSectionItem(name, parameterType.getName()));
+		}
+
+		@Override
+		public void addOfficeSectionOutput(String name, Class<?> argumentType,
+				boolean isEscalationOnly) {
+			this.outputs
+					.add(new OfficeSectionItem(name, argumentType.getName()));
+		}
+
+		@Override
+		public void addOfficeSectionObject(String name, Class<?> objectType) {
+			this.objects.add(new OfficeSectionItem(name, objectType.getName()));
+		}
 
 		/*
 		 * ===================== OfficeSection ===========================
@@ -180,6 +234,104 @@ public abstract class AbstractOfficeChangesTestCase extends
 		public OfficeTask[] getOfficeTasks() {
 			fail("Currently not testing sub sections");
 			return null;
+		}
+
+	}
+
+	/**
+	 * Item from {@link OfficeSection}.
+	 */
+	private class OfficeSectionItem implements OfficeSectionInput,
+			OfficeSectionOutput, OfficeSectionObject {
+
+		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
+		 * Type.
+		 */
+		private final String type;
+
+		/**
+		 * Flag indicating if escalation only.
+		 */
+		private final boolean isEscalation;
+
+		/**
+		 * Initialise.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param type
+		 *            Type.
+		 * @param isEscalation
+		 *            Flag indicating if escalation only.
+		 */
+		public OfficeSectionItem(String name, String type, boolean isEscalation) {
+			this.name = name;
+			this.type = type;
+			this.isEscalation = isEscalation;
+		}
+
+		/**
+		 * Initialise.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param type
+		 *            Type.
+		 */
+		public OfficeSectionItem(String name, String type) {
+			this(name, type, false);
+		}
+
+		/*
+		 * ================ OfficeSectionInput ======================
+		 */
+
+		@Override
+		public String getOfficeSectionInputName() {
+			return this.name;
+		}
+
+		@Override
+		public String getParameterType() {
+			return this.type;
+		}
+
+		/*
+		 * ================ OfficeSectionOutput ======================
+		 */
+
+		@Override
+		public String getOfficeSectionOutputName() {
+			return this.name;
+		}
+
+		@Override
+		public String getArgumentType() {
+			return this.type;
+		}
+
+		@Override
+		public boolean isEscalationOnly() {
+			return this.isEscalation;
+		}
+
+		/*
+		 * ================ OfficeSectionObject ======================
+		 */
+
+		@Override
+		public String getOfficeSectionObjectName() {
+			return this.name;
+		}
+
+		@Override
+		public String getObjectType() {
+			return this.type;
 		}
 	}
 

@@ -16,7 +16,14 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import javax.transaction.xa.XAResource;
+
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 
 /**
  * Tests refactoring the {@link DeployedOfficeModel}.
@@ -32,6 +39,74 @@ public class RefactorDeployedOfficeTest extends
 	public void testRenameDeployedOffice() {
 		this.refactor_deployedOfficeName("NEW_NAME");
 		this.doRefactor();
+	}
+
+	/**
+	 * Ensure can change {@link OfficeSource} class name.
+	 */
+	public void testChangeOfficeSource() {
+		this.refactor_officeSourceClassName("net.another.AnotherOfficeSource");
+		this.doRefactor();
+	}
+
+	/**
+	 * Ensure can change {@link DeployedOfficeModel} location.
+	 */
+	public void testChangeOfficeLocation() {
+		this.refactor_officeLocation("ANOTHER_LOCATION");
+		this.doRefactor();
+	}
+
+	/**
+	 * Ensure can change {@link PropertyList}.
+	 */
+	public void testChangeProperties() {
+		this.refactor_addProperty("ANOTHER_NAME", "ANOTHER_VALUE");
+		this.doRefactor();
+	}
+
+	/**
+	 * Ensure can refactor the {@link DeployedOfficeInputModel} instances.
+	 */
+	public void testRefactorInputs() {
+		this.refactor_mapInput("CHANGE:DETAILS", "CHANGE:DETAILS");
+		this.refactor_mapInput("RENAME:NEW", "RENAME:OLD");
+		this.doRefactor(new OfficeTypeConstructor() {
+			@Override
+			public void construct(OfficeTypeContext context) {
+				context.addOfficeInput("CHANGE", "DETAILS", Integer.class);
+				context.addOfficeInput("RENAME", "NEW", Object.class);
+			}
+		});
+	}
+
+	/**
+	 * Ensure can refactor the {@link DeployedOfficeObjectModel} instances.
+	 */
+	public void testRefactorObjects() {
+		this.refactor_mapObject("CHANGE_DETAILS", "CHANGE_DETAILS");
+		this.refactor_mapObject("RENAME_NEW", "RENAME_OLD");
+		this.doRefactor(new OfficeTypeConstructor() {
+			@Override
+			public void construct(OfficeTypeContext context) {
+				context.addOfficeManagedObject("CHANGE_DETAILS", Integer.class,
+						XAResource.class);
+				context.addOfficeManagedObject("RENAME_NEW", Object.class);
+			}
+		});
+	}
+
+	/**
+	 * Ensure can refactor the {@link DeployedOfficeTeamModel} instances.
+	 */
+	public void testRefactorTeams() {
+		this.refactor_mapTeam("RENAME_NEW", "RENAME_OLD");
+		this.doRefactor(new OfficeTypeConstructor() {
+			@Override
+			public void construct(OfficeTypeContext context) {
+				context.addOfficeTeam("RENAME_NEW");
+			}
+		});
 	}
 
 }

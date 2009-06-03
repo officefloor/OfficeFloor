@@ -1,0 +1,9 @@
+<office-floor>
+	<offices>
+		<office name="NAME" source="net.example.ExampleOfficeSource"
+			location="LOCATION" />
+		<properties>
+			<property name="ANOTHER_NAME" value="ANOTHER_VALUE" />
+		</properties>
+	</offices>
+</office-floor>

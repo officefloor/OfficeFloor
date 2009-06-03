@@ -16,10 +16,15 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
@@ -103,6 +108,39 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	 */
 	protected interface OfficeTypeContext {
 
+		/**
+		 * Add {@link OfficeInputType}.
+		 *
+		 * @param name
+		 *            Name of {@link OfficeSection}.
+		 * @param inputName
+		 *            Name of {@link OfficeSectionInput}.
+		 * @param parameterType
+		 *            Parameter type.
+		 */
+		void addOfficeInput(String name, String inputName,
+				Class<?> parameterType);
+
+		/**
+		 * Add {@link OfficeManagedObjectType}.
+		 *
+		 * @param name
+		 *            Name of {@link OfficeManagedObjectType}.
+		 * @param objectType
+		 *            Object type.
+		 * @param extensionInterfaces
+		 *            Extension interfaces.
+		 */
+		void addOfficeManagedObject(String name, Class<?> objectType,
+				Class<?>... extensionInterfaces);
+
+		/**
+		 * Add {@link OfficeTeamType}.
+		 *
+		 * @param name
+		 *            Name of {@link OfficeTeamType}.
+		 */
+		void addOfficeTeam(String name);
 	}
 
 	/**
@@ -111,29 +149,187 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	private class OfficeTypeContextImpl implements OfficeTypeContext,
 			OfficeType {
 
+		/**
+		 * {@link OfficeInputType} instances.
+		 */
+		private final List<OfficeInputType> inputs = new LinkedList<OfficeInputType>();
+
+		/**
+		 * {@link OfficeManagedObjectType} instances.
+		 */
+		private final List<OfficeManagedObjectType> objects = new LinkedList<OfficeManagedObjectType>();
+
+		/**
+		 * {@link OfficeTeamType} instances.
+		 */
+		private final List<OfficeTeamType> teams = new LinkedList<OfficeTeamType>();
+
+		/*
+		 * ===================== OfficeTypeContext ============================
+		 */
+
+		@Override
+		public void addOfficeInput(String name, String inputName,
+				Class<?> parameterType) {
+			this.inputs.add(new OfficeTypeItem(name, inputName, parameterType
+					.getName()));
+		}
+
+		@Override
+		public void addOfficeManagedObject(String name, Class<?> objectType,
+				Class<?>... extensionInterfaces) {
+			this.objects.add(new OfficeTypeItem(name, objectType.getName(),
+					extensionInterfaces));
+		}
+
+		@Override
+		public void addOfficeTeam(String name) {
+			this.teams.add(new OfficeTypeItem(name));
+		}
+
 		/*
 		 * ===================== OfficeType ================================
 		 */
 
 		@Override
 		public OfficeInputType[] getOfficeInputTypes() {
-			// TODO Implement OfficeType.getOfficeInputTypes
-			throw new UnsupportedOperationException(
-					"OfficeType.getOfficeInputTypes");
+			return this.inputs.toArray(new OfficeInputType[0]);
 		}
 
 		@Override
 		public OfficeManagedObjectType[] getOfficeManagedObjectTypes() {
-			// TODO Implement OfficeType.getOfficeManagedObjectTypes
-			throw new UnsupportedOperationException(
-					"OfficeType.getOfficeManagedObjectTypes");
+			return this.objects.toArray(new OfficeManagedObjectType[0]);
 		}
 
 		@Override
 		public OfficeTeamType[] getOfficeTeamTypes() {
-			// TODO Implement OfficeType.getOfficeTeamTypes
-			throw new UnsupportedOperationException(
-					"OfficeType.getOfficeTeamTypes");
+			return this.teams.toArray(new OfficeTeamType[0]);
+		}
+	}
+
+	/**
+	 * {@link OfficeType} item.
+	 */
+	private class OfficeTypeItem implements OfficeInputType,
+			OfficeManagedObjectType, OfficeTeamType {
+
+		/**
+		 * Name.
+		 */
+		private final String name;
+
+		/**
+		 * Type.
+		 */
+		private final String type;
+
+		/**
+		 * Input name.
+		 */
+		private final String inputName;
+
+		/**
+		 * Extension interfaces.
+		 */
+		private final String[] extensionInterfaces;
+
+		/**
+		 * Initialise for {@link OfficeInputType}.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param inputName
+		 *            Input name.
+		 * @param parameterType
+		 *            Parameter type.
+		 */
+		public OfficeTypeItem(String name, String inputName,
+				String parameterType) {
+			this.name = name;
+			this.inputName = inputName;
+			this.type = parameterType;
+			this.extensionInterfaces = null;
+		}
+
+		/**
+		 * Initialise for {@link OfficeManagedObjectType}.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param objectType
+		 *            Object type.
+		 * @param extensionInterfaces
+		 *            Extension interfaces.
+		 */
+		public OfficeTypeItem(String name, String objectType,
+				Class<?>[] extensionInterfaces) {
+			this.name = name;
+			this.inputName = null;
+			this.type = objectType;
+			this.extensionInterfaces = new String[extensionInterfaces.length];
+			for (int i = 0; i < this.extensionInterfaces.length; i++) {
+				this.extensionInterfaces[i] = extensionInterfaces[i].getName();
+			}
+		}
+
+		/**
+		 * Initialise for {@link OfficeTeamType}.
+		 *
+		 * @param name
+		 *            Name.
+		 */
+		public OfficeTypeItem(String name) {
+			this.name = name;
+			this.inputName = null;
+			this.type = null;
+			this.extensionInterfaces = null;
+		}
+
+		/*
+		 * ================== OfficeInputType =========================
+		 */
+
+		@Override
+		public String getOfficeSectionName() {
+			return this.name;
+		}
+
+		@Override
+		public String getOfficeSectionInputName() {
+			return this.inputName;
+		}
+
+		@Override
+		public String getParameterType() {
+			return this.type;
+		}
+
+		/*
+		 * ================== OfficeManagedObjectType ======================
+		 */
+
+		@Override
+		public String getOfficeManagedObjectName() {
+			return this.name;
+		}
+
+		@Override
+		public String getObjectType() {
+			return this.type;
+		}
+
+		@Override
+		public String[] getExtensionInterfaces() {
+			return this.extensionInterfaces;
+		}
+
+		/*
+		 * ================== OfficeTeamType =================================
+		 */
+
+		@Override
+		public String getOfficeTeamName() {
+			return this.name;
 		}
 	}
 

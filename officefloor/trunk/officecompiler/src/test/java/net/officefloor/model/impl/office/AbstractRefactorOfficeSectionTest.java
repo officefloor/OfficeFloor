@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -123,10 +124,102 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 	}
 
 	/**
+	 * Refactors the {@link SectionSource} class name.
+	 *
+	 * @param sectionSourceClassName
+	 *            New {@link SectionSource} class name.
+	 */
+	protected void refactor_sectionSourceClassName(String sectionSourceClassName) {
+		this.sectionSourceClassName = sectionSourceClassName;
+	}
+
+	/**
+	 * Refactors the location of the {@link OfficeSectionModel}.
+	 *
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSectionModel}.
+	 */
+	protected void refactor_sectionLocation(String sectionLocation) {
+		this.sectionLocation = sectionLocation;
+	}
+
+	/**
+	 * Refactors by adding a {@link Property}.
+	 *
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	protected void refactor_addProperty(String name, String value) {
+
+		// Obtain the properties
+		if (this.properties == null) {
+			this.properties = new PropertyListImpl();
+		}
+
+		// Add the property
+		this.properties.addProperty(name).setValue(value);
+	}
+
+	/**
+	 * Maps {@link OfficeSectionInput} name to {@link OfficeSectionObjectModel}
+	 * name.
+	 *
+	 * @param inputTypeName
+	 *            {@link OfficeSectionInput} name.
+	 * @param inputModelName
+	 *            {@link OfficeSectionObjectModel} name.
+	 */
+	protected void refactor_mapInput(String inputTypeName, String inputModelName) {
+		this.inputNameMapping.put(inputModelName, inputModelName);
+	}
+
+	/**
+	 * Maps {@link OfficeSectionOutput} name to {@link OfficeSectionOutputModel}
+	 * name.
+	 *
+	 * @param outputTypeName
+	 *            {@link OfficeSectionOutput} name.
+	 * @param outputModelName
+	 *            {@link OfficeSectionOutputModel} name.
+	 */
+	protected void refactor_mapOutput(String outputTypeName,
+			String outputModelName) {
+		this.outputNameMapping.put(outputTypeName, outputModelName);
+	}
+
+	/**
+	 * Maps {@link OfficeSectionObject} name to {@link OfficeSectionObjectModel}
+	 * name.
+	 *
+	 * @param objectTypeName
+	 *            {@link OfficeSectionObject} name.
+	 * @param objectModelName
+	 *            {@link OfficeSectionObjectModel} name.
+	 */
+	protected void refactor_mapObject(String objectTypeName,
+			String objectModelName) {
+		this.objectNameMapping.put(objectTypeName, objectModelName);
+	}
+
+	/**
 	 * Convenience method to do refactoring with a simple {@link OfficeSection}.
 	 */
 	protected void doRefactor() {
 		this.doRefactor((OfficeSection) null);
+	}
+
+	/**
+	 * Convenience method to do refactoring from {@link OfficeSection} from the
+	 * {@link OfficeSectionConstructor}.
+	 *
+	 * @param constructor
+	 *            {@link OfficeSectionConstructor}.
+	 */
+	protected void doRefactor(OfficeSectionConstructor constructor) {
+		OfficeSection section = this.constructOfficeSection(constructor);
+		this.doRefactor(section);
 	}
 
 	/**
