@@ -42,6 +42,11 @@ import net.officefloor.model.change.Change;
 public interface OfficeFloorChanges {
 
 	/**
+	 * Seperator between Section name and Input Name.
+	 */
+	char SECTION_INPUT_SEPARATOR = ':';
+
+	/**
 	 * Value for {@link ManagedObjectScope#PROCESS} on
 	 * {@link OfficeFloorManagedObjectModel} instances.
 	 */
