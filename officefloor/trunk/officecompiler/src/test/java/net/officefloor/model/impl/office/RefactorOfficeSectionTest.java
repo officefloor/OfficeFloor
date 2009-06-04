@@ -71,7 +71,7 @@ public class RefactorOfficeSectionTest extends
 		this.doRefactor(new OfficeSectionConstructor() {
 			@Override
 			public void construct(OfficeSectionContext context) {
-				context.addOfficeSectionInput("CHANGE_DETAIL", Integer.class);
+				context.addOfficeSectionInput("CHANGE_DETAILS", Integer.class);
 				context.addOfficeSectionInput("RENAME_NEW", Object.class);
 			}
 		});
@@ -108,6 +108,13 @@ public class RefactorOfficeSectionTest extends
 				context.addOfficeSectionObject("RENAME_NEW", Object.class);
 			}
 		});
+	}
+
+	/**
+	 * Ensures removes necessary connections in refactoring.
+	 */
+	public void testRemoveConnections() {
+		this.doRefactor();
 	}
 
 }

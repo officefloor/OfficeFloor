@@ -59,18 +59,19 @@ import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
 
 /**
  * {@link DeskChanges} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Obtains the link type name for the {@link FlowInstigationStrategyEnum}.
-	 * 
+	 *
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @return Link type name for the {@link FlowInstigationStrategyEnum}.
@@ -102,7 +103,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * Sorts the {@link WorkModel} instances.
 	 * <p>
 	 * This enable easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param workModels
 	 *            {@link WorkTaskModel} instances.
 	 */
@@ -120,7 +121,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * Sorts the {@link WorkTaskModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param workTaskModels
 	 *            {@link WorkTaskModel} instances.
 	 */
@@ -135,7 +136,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Sorts the {@link WorkTaskToTaskModel} connections.
-	 * 
+	 *
 	 * @param workTaskToTaskConnections
 	 *            {@link WorkTaskToTaskModel} instances.
 	 */
@@ -157,7 +158,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * Sorts the {@link TaskModel} instances.
 	 * <p>
 	 * This enable easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param taskModels
 	 *            {@link TaskModel} instances.
 	 */
@@ -175,7 +176,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * Sorts the {@link ExternalFlowModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param externalFlows
 	 *            {@link ExternalFlowModel} instances.
 	 */
@@ -194,7 +195,7 @@ public class DeskChangesImpl implements DeskChanges {
 	 * Sorts the {@link ExternalManagedObjectModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param externalManagedObjects
 	 *            {@link ExternalManagedObjectModel} instances.
 	 */
@@ -218,7 +219,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param desk
 	 *            {@link DeskModel}.
 	 */
@@ -256,7 +257,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Creates a {@link WorkTaskModel} for a {@link TaskType}.
-	 * 
+	 *
 	 * @param taskType
 	 *            {@link TaskType}.
 	 * @return {@link WorkTaskModel} for the {@link TaskType}.
@@ -283,7 +284,7 @@ public class DeskChangesImpl implements DeskChanges {
 	/**
 	 * Removes the connections to the {@link TaskModel} (except to its
 	 * {@link WorkTaskModel}).
-	 * 
+	 *
 	 * @param task
 	 *            {@link TaskModel}.
 	 * @param connectionList
@@ -335,7 +336,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Removes the connections to the {@link TaskFlowModel}.
-	 * 
+	 *
 	 * @param taskFlow
 	 *            {@link TaskFlowModel}.
 	 * @param connectionList
@@ -361,7 +362,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Removes the connections to the {@link TaskEscalationModel}.
-	 * 
+	 *
 	 * @param taskEscalation
 	 *            {@link TaskEscalationModel}.
 	 * @param connectionList
@@ -390,7 +391,7 @@ public class DeskChangesImpl implements DeskChanges {
 	/**
 	 * Removes the connections to the {@link WorkTaskModel} and its associated
 	 * {@link TaskModel} instances.
-	 * 
+	 *
 	 * @param workTask
 	 *            {@link WorkTaskModel}.
 	 * @param connectionList
@@ -414,7 +415,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Removes the connections to the {@link WorkTaskObjectModel}.
-	 * 
+	 *
 	 * @param workTaskObject
 	 *            {@link WorkTaskObjectModel}.
 	 * @param connectionList
@@ -436,7 +437,7 @@ public class DeskChangesImpl implements DeskChanges {
 	/**
 	 * Removes the {@link TaskModel} instances associated to the
 	 * {@link WorkTaskModel}.
-	 * 
+	 *
 	 * @param workTask
 	 *            {@link WorkTaskModel}.
 	 * @param taskList
@@ -1228,7 +1229,7 @@ public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * Obtains the existing item for the target name.
-	 * 
+	 *
 	 * @param targetItemName
 	 *            Target item name.
 	 * @param targetToExistingName
@@ -2267,58 +2268,6 @@ public class DeskChangesImpl implements DeskChanges {
 				workToInitialTask.connect();
 			}
 		};
-	}
-
-	/**
-	 * {@link Change} to simplify removing {@link ConnectionModel} instances.
-	 */
-	private abstract static class DisconnectChange<T> extends AbstractChange<T> {
-
-		/**
-		 * {@link ConnectionModel} instances removed.
-		 */
-		private ConnectionModel[] connections;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param target
-		 *            Target to remove {@link ConnectionModel} instances.
-		 */
-		public DisconnectChange(T target) {
-			super(target, "Remove connections for "
-					+ target.getClass().getSimpleName());
-		}
-
-		/*
-		 * ======================== Change =================================
-		 */
-
-		@Override
-		public void apply() {
-			// Populate the removed connections
-			List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-			this.populateRemovedConnections(connList);
-			this.connections = connList.toArray(new ConnectionModel[0]);
-		}
-
-		/**
-		 * Populates the removed {@link ConnectionModel}.
-		 * 
-		 * @param connList
-		 *            List to populate with the removed {@link ConnectionModel}
-		 *            instances.
-		 */
-		protected abstract void populateRemovedConnections(
-				List<ConnectionModel> connList);
-
-		@Override
-		public void revert() {
-			// Re-connect connections in reverse order
-			for (int i = (this.connections.length - 1); i >= 0; i--) {
-				this.connections[i].connect();
-			}
-		}
 	}
 
 }

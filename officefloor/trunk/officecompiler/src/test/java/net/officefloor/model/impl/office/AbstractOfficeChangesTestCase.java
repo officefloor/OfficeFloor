@@ -185,8 +185,8 @@ public abstract class AbstractOfficeChangesTestCase extends
 		@Override
 		public void addOfficeSectionOutput(String name, Class<?> argumentType,
 				boolean isEscalationOnly) {
-			this.outputs
-					.add(new OfficeSectionItem(name, argumentType.getName()));
+			this.outputs.add(new OfficeSectionItem(name,
+					argumentType.getName(), isEscalationOnly));
 		}
 
 		@Override

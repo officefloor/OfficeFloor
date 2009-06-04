@@ -16,7 +16,15 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -30,8 +38,10 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -209,15 +219,451 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 
 	@Override
 	public Change<DeployedOfficeModel> refactorDeployedOffice(
-			DeployedOfficeModel deployedOffice, String officeName,
-			String officeSourceClassName, String officeLocation,
+			final DeployedOfficeModel office, final String officeName,
+			final String officeSourceClassName, final String officeLocation,
 			PropertyList properties, OfficeType officeType,
 			Map<String, String> objectNameMapping,
 			Map<String, String> inputNameMapping,
 			Map<String, String> teamNameMapping) {
-		// TODO Implement OfficeFloorChanges.refactorDeployedOffice
-		throw new UnsupportedOperationException(
-				"OfficeFloorChanges.refactorDeployedOffice");
+
+		// Create the list to contain all refactor changes
+		final List<Change<?>> refactor = new LinkedList<Change<?>>();
+
+		// ------------ Details of DeployedOfficeModel -----------------
+
+		// Add change for office details
+		final String existingOfficeName = office.getDeployedOfficeName();
+		final String existingOfficeSourceClassName = office
+				.getOfficeSourceClassName();
+		final String existingOfficeLocation = office.getOfficeLocation();
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
+				"Change office details") {
+			@Override
+			public void apply() {
+				office.setDeployedOfficeName(officeName);
+				office.setOfficeSourceClassName(officeSourceClassName);
+				office.setOfficeLocation(officeLocation);
+			}
+
+			@Override
+			public void revert() {
+				office.setDeployedOfficeName(existingOfficeName);
+				office.setOfficeSourceClassName(existingOfficeSourceClassName);
+				office.setOfficeLocation(existingOfficeLocation);
+			}
+		});
+
+		// Add change to the properties
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				office.getProperties());
+		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
+		for (Property property : properties) {
+			newProperties.add(new PropertyModel(property.getName(), property
+					.getValue()));
+		}
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
+				"Change office properties") {
+			@Override
+			public void apply() {
+				for (PropertyModel property : existingProperties) {
+					office.removeProperty(property);
+				}
+				for (PropertyModel property : newProperties) {
+					office.addProperty(property);
+				}
+			}
+
+			@Override
+			public void revert() {
+				for (PropertyModel property : newProperties) {
+					office.removeProperty(property);
+				}
+				for (PropertyModel property : existingProperties) {
+					office.addProperty(property);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionObjects ---------------------------
+
+		// Create the map of existing objects to their names
+		Map<String, DeployedOfficeObjectModel> existingObjectMapping = new HashMap<String, DeployedOfficeObjectModel>();
+		for (DeployedOfficeObjectModel object : office
+				.getDeployedOfficeObjects()) {
+			existingObjectMapping.put(object.getDeployedOfficeObjectName(),
+					object);
+		}
+
+		// Create the listing of target objects
+		OfficeManagedObjectType[] objectTypes = officeType
+				.getOfficeManagedObjectTypes();
+		final DeployedOfficeObjectModel[] targetObjects = new DeployedOfficeObjectModel[objectTypes.length];
+		for (int o = 0; o < targetObjects.length; o++) {
+			OfficeManagedObjectType objectType = objectTypes[o];
+
+			// Obtain the details of the object
+			final String objectName = objectType.getOfficeManagedObjectName();
+			final String objectTypeName = objectType.getObjectType();
+			// TODO refactor extension interfaces
+
+			// Obtain the object for object type (may need to create)
+			DeployedOfficeObjectModel findObject = this.getExistingItem(
+					objectName, objectNameMapping, existingObjectMapping);
+			final DeployedOfficeObjectModel object = (findObject != null ? findObject
+					: new DeployedOfficeObjectModel(objectName, objectTypeName));
+			targetObjects[o] = object;
+
+			// Refactor details of object
+			final String existingObjectName = object
+					.getDeployedOfficeObjectName();
+			final String existingObjectTypeName = object.getObjectType();
+			refactor.add(new AbstractChange<DeployedOfficeObjectModel>(object,
+					"Refactor office object") {
+				@Override
+				public void apply() {
+					object.setDeployedOfficeObjectName(objectName);
+					object.setObjectType(objectTypeName);
+				}
+
+				@Override
+				public void revert() {
+					object.setDeployedOfficeObjectName(existingObjectName);
+					object.setObjectType(existingObjectTypeName);
+				}
+			});
+		}
+
+		// Ensure target objects sorted by name
+		Arrays.sort(targetObjects, new Comparator<DeployedOfficeObjectModel>() {
+			@Override
+			public int compare(DeployedOfficeObjectModel a,
+					DeployedOfficeObjectModel b) {
+				return a.getDeployedOfficeObjectName().compareTo(
+						b.getDeployedOfficeObjectName());
+			}
+		});
+
+		// Obtain the existing objects
+		final DeployedOfficeObjectModel[] existingObjects = office
+				.getDeployedOfficeObjects().toArray(
+						new DeployedOfficeObjectModel[0]);
+
+		// Add changes to disconnect existing objects to be removed
+		Set<DeployedOfficeObjectModel> targetObjectSet = new HashSet<DeployedOfficeObjectModel>(
+				Arrays.asList(targetObjects));
+		for (DeployedOfficeObjectModel existingObject : existingObjects) {
+			if (!(targetObjectSet.contains(existingObject))) {
+				// Add change to disconnect object
+				final DeployedOfficeObjectModel object = existingObject;
+				refactor.add(new DisconnectChange<DeployedOfficeObjectModel>(
+						existingObject) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = object
+								.getOfficeFloorManagedObject();
+						if (conn != null) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor objects
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
+				"Refactor objects of office") {
+			@Override
+			public void apply() {
+				// Remove existing objects, add target objects
+				for (DeployedOfficeObjectModel object : existingObjects) {
+					office.removeDeployedOfficeObject(object);
+				}
+				for (DeployedOfficeObjectModel object : targetObjects) {
+					office.addDeployedOfficeObject(object);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target objects, add back existing
+				for (DeployedOfficeObjectModel object : targetObjects) {
+					office.removeDeployedOfficeObject(object);
+				}
+				for (DeployedOfficeObjectModel object : existingObjects) {
+					office.addDeployedOfficeObject(object);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionInputs ---------------------------
+
+		// Create the map of existing inputs to their names
+		Map<String, DeployedOfficeInputModel> existingInputMapping = new HashMap<String, DeployedOfficeInputModel>();
+		for (DeployedOfficeInputModel input : office.getDeployedOfficeInputs()) {
+			String sectionInputName = input.getSectionName()
+					+ SECTION_INPUT_SEPARATOR + input.getSectionInputName();
+			existingInputMapping.put(sectionInputName, input);
+		}
+
+		// Create the listing of target inputs
+		OfficeInputType[] inputTypes = officeType.getOfficeInputTypes();
+		final DeployedOfficeInputModel[] targetInputs = new DeployedOfficeInputModel[inputTypes.length];
+		for (int i = 0; i < targetInputs.length; i++) {
+			OfficeInputType inputType = inputTypes[i];
+
+			// Obtain the details of the input
+			final String sectionName = inputType.getOfficeSectionName();
+			final String inputName = inputType.getOfficeSectionInputName();
+			final String sectionInputName = sectionName
+					+ SECTION_INPUT_SEPARATOR + inputName;
+			final String parameterTypeName = inputType.getParameterType();
+
+			// Obtain the input for input type (may need to create)
+			DeployedOfficeInputModel findInput = this.getExistingItem(
+					sectionInputName, inputNameMapping, existingInputMapping);
+			final DeployedOfficeInputModel input = (findInput != null ? findInput
+					: new DeployedOfficeInputModel(sectionName, inputName,
+							parameterTypeName));
+			targetInputs[i] = input;
+
+			// Refactor details of input
+			final String existingSectionName = input.getSectionName();
+			final String existingInputName = input.getSectionInputName();
+			final String existingParmeterTypeName = input.getParameterType();
+			refactor.add(new AbstractChange<DeployedOfficeInputModel>(input,
+					"Refactor office input") {
+				@Override
+				public void apply() {
+					input.setSectionName(sectionName);
+					input.setSectionInputName(inputName);
+					input.setParameterType(parameterTypeName);
+				}
+
+				@Override
+				public void revert() {
+					input.setSectionName(existingSectionName);
+					input.setSectionInputName(existingInputName);
+					input.setParameterType(existingParmeterTypeName);
+				}
+			});
+		}
+
+		// Ensure target inputs sorted by name
+		Arrays.sort(targetInputs, new Comparator<DeployedOfficeInputModel>() {
+			@Override
+			public int compare(DeployedOfficeInputModel a,
+					DeployedOfficeInputModel b) {
+				return (a.getSectionName() + SECTION_INPUT_SEPARATOR + a
+						.getSectionInputName()).compareTo(b.getSectionName()
+						+ SECTION_INPUT_SEPARATOR + b.getSectionInputName());
+			}
+		});
+
+		// Obtain the existing inputs
+		final DeployedOfficeInputModel[] existingInputs = office
+				.getDeployedOfficeInputs().toArray(
+						new DeployedOfficeInputModel[0]);
+
+		// Add changes to disconnect existing inputs to be removed
+		Set<DeployedOfficeInputModel> targetInputSet = new HashSet<DeployedOfficeInputModel>(
+				Arrays.asList(targetInputs));
+		for (DeployedOfficeInputModel existingInput : existingInputs) {
+			if (!(targetInputSet.contains(existingInput))) {
+				// Add change to disconnect input
+				final DeployedOfficeInputModel input = existingInput;
+				refactor.add(new DisconnectChange<DeployedOfficeInputModel>(
+						existingInput) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						for (OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn : new ArrayList<OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel>(
+								input.getOfficeFloorManagedObjectSourceFlows())) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor inputs
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
+				"Refactor inputs of office") {
+			@Override
+			public void apply() {
+				// Remove existing inputs, add target inputs
+				for (DeployedOfficeInputModel input : existingInputs) {
+					office.removeDeployedOfficeInput(input);
+				}
+				for (DeployedOfficeInputModel input : targetInputs) {
+					office.addDeployedOfficeInput(input);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target inputs, add back existing
+				for (DeployedOfficeInputModel input : targetInputs) {
+					office.removeDeployedOfficeInput(input);
+				}
+				for (DeployedOfficeInputModel input : existingInputs) {
+					office.addDeployedOfficeInput(input);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionTeams ---------------------------
+
+		// Create the map of existing teams to their names
+		Map<String, DeployedOfficeTeamModel> existingTeamMapping = new HashMap<String, DeployedOfficeTeamModel>();
+		for (DeployedOfficeTeamModel team : office.getDeployedOfficeTeams()) {
+			existingTeamMapping.put(team.getDeployedOfficeTeamName(), team);
+		}
+
+		// Create the listing of target teams
+		OfficeTeamType[] teamTypes = officeType.getOfficeTeamTypes();
+		final DeployedOfficeTeamModel[] targetTeams = new DeployedOfficeTeamModel[teamTypes.length];
+		for (int i = 0; i < targetTeams.length; i++) {
+			OfficeTeamType teamType = teamTypes[i];
+
+			// Obtain the details of the team
+			final String teamName = teamType.getOfficeTeamName();
+
+			// Obtain the team for team type (may need to create)
+			DeployedOfficeTeamModel findTeam = this.getExistingItem(teamName,
+					teamNameMapping, existingTeamMapping);
+			final DeployedOfficeTeamModel team = (findTeam != null ? findTeam
+					: new DeployedOfficeTeamModel(teamName));
+			targetTeams[i] = team;
+
+			// Refactor details of team
+			final String existingTeamName = team.getDeployedOfficeTeamName();
+			refactor.add(new AbstractChange<DeployedOfficeTeamModel>(team,
+					"Refactor office team") {
+				@Override
+				public void apply() {
+					team.setDeployedOfficeTeamName(teamName);
+				}
+
+				@Override
+				public void revert() {
+					team.setDeployedOfficeTeamName(existingTeamName);
+				}
+			});
+		}
+
+		// Ensure target teams sorted by name
+		Arrays.sort(targetTeams, new Comparator<DeployedOfficeTeamModel>() {
+			@Override
+			public int compare(DeployedOfficeTeamModel a,
+					DeployedOfficeTeamModel b) {
+				return a.getDeployedOfficeTeamName().compareTo(
+						b.getDeployedOfficeTeamName());
+			}
+		});
+
+		// Obtain the existing teams
+		final DeployedOfficeTeamModel[] existingTeams = office
+				.getDeployedOfficeTeams().toArray(
+						new DeployedOfficeTeamModel[0]);
+
+		// Add changes to disconnect existing teams to be removed
+		Set<DeployedOfficeTeamModel> targetTeamSet = new HashSet<DeployedOfficeTeamModel>(
+				Arrays.asList(targetTeams));
+		for (DeployedOfficeTeamModel existingTeam : existingTeams) {
+			if (!(targetTeamSet.contains(existingTeam))) {
+				// Add change to disconnect team
+				final DeployedOfficeTeamModel team = existingTeam;
+				refactor.add(new DisconnectChange<DeployedOfficeTeamModel>(
+						existingTeam) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						DeployedOfficeTeamToOfficeFloorTeamModel conn = team
+								.getOfficeFloorTeam();
+						if (conn != null) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor teams
+		refactor.add(new AbstractChange<DeployedOfficeModel>(office,
+				"Refactor teams of office") {
+			@Override
+			public void apply() {
+				// Remove existing teams, add target teams
+				for (DeployedOfficeTeamModel team : existingTeams) {
+					office.removeDeployedOfficeTeam(team);
+				}
+				for (DeployedOfficeTeamModel team : targetTeams) {
+					office.addDeployedOfficeTeam(team);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target teams, add back existing
+				for (DeployedOfficeTeamModel team : targetTeams) {
+					office.removeDeployedOfficeTeam(team);
+				}
+				for (DeployedOfficeTeamModel team : existingTeams) {
+					office.addDeployedOfficeTeam(team);
+				}
+			}
+		});
+
+		// ----------------- Refactoring -------------------------------
+
+		// Return change to do all the refactoring
+		return new AbstractChange<DeployedOfficeModel>(office,
+				"Refactor deployed office") {
+			@Override
+			public void apply() {
+				for (Change<?> change : refactor) {
+					change.apply();
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Revert changes in reverse order as applied
+				for (int i = (refactor.size() - 1); i >= 0; i--) {
+					Change<?> change = refactor.get(i);
+					change.revert();
+				}
+			}
+		};
+	}
+
+	/**
+	 * Obtains the existing item for the target name.
+	 *
+	 * @param targetItemName
+	 *            Target item name.
+	 * @param targetToExistingName
+	 *            Mapping of target item name to existing item name.
+	 * @param existingNameToItem
+	 *            Mapping of existing item name to the existing item.
+	 */
+	private <T> T getExistingItem(String targetItemName,
+			Map<String, String> targetToExistingName,
+			Map<String, T> existingNameToItem) {
+
+		// Obtain the existing item name
+		String existingItemName = targetToExistingName.get(targetItemName);
+		if (existingItemName != null) {
+			// Have existing name, so return existing item by name
+			return existingNameToItem.get(existingItemName);
+		} else {
+			// No existing name, so no existing item
+			return null;
+		}
 	}
 
 	@Override

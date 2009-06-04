@@ -109,4 +109,11 @@ public class RefactorDeployedOfficeTest extends
 		});
 	}
 
+	/**
+	 * Ensure removes necessary connections on refactoring.
+	 */
+	public void testRemoveConnections() {
+		this.doRefactor();
+	}
+
 }

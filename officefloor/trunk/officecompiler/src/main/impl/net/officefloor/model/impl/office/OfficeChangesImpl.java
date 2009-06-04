@@ -17,12 +17,16 @@
 package net.officefloor.model.impl.office;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
@@ -35,8 +39,10 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
@@ -522,15 +528,460 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeSectionModel> refactorOfficeSection(
-			OfficeSectionModel sectionModel, String sectionName,
-			String sectionSourceClassName, String sectionLocation,
+			final OfficeSectionModel sectionModel, final String sectionName,
+			final String sectionSourceClassName, final String sectionLocation,
 			PropertyList properties, OfficeSection officeSection,
 			Map<String, String> inputNameMapping,
 			Map<String, String> outputNameMapping,
 			Map<String, String> objectNameMapping) {
-		// TODO Implement OfficeChanges.refactorOfficeSection
-		throw new UnsupportedOperationException(
-				"OfficeChanges.refactorOfficeSection");
+
+		// Create the list to contain all refactor changes
+		final List<Change<?>> refactor = new LinkedList<Change<?>>();
+
+		// ------------ Details of OfficeSectionModel -----------------
+
+		// Add change to details of office section
+		final String existingSectionName = sectionModel.getOfficeSectionName();
+		final String existingSectionSourceClassName = sectionModel
+				.getSectionSourceClassName();
+		final String existingSectionLocation = sectionModel
+				.getSectionLocation();
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Change office section details") {
+			@Override
+			public void apply() {
+				sectionModel.setOfficeSectionName(sectionName);
+				sectionModel.setSectionSourceClassName(sectionSourceClassName);
+				sectionModel.setSectionLocation(sectionLocation);
+			}
+
+			@Override
+			public void revert() {
+				sectionModel.setOfficeSectionName(existingSectionName);
+				sectionModel
+						.setSectionSourceClassName(existingSectionSourceClassName);
+				sectionModel.setSectionLocation(existingSectionLocation);
+			}
+		});
+
+		// Add change to the properties
+		final List<PropertyModel> existingProperties = new ArrayList<PropertyModel>(
+				sectionModel.getProperties());
+		final List<PropertyModel> newProperties = new LinkedList<PropertyModel>();
+		for (Property property : properties) {
+			newProperties.add(new PropertyModel(property.getName(), property
+					.getValue()));
+		}
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Change section properties") {
+			@Override
+			public void apply() {
+				for (PropertyModel property : existingProperties) {
+					sectionModel.removeProperty(property);
+				}
+				for (PropertyModel property : newProperties) {
+					sectionModel.addProperty(property);
+				}
+			}
+
+			@Override
+			public void revert() {
+				for (PropertyModel property : newProperties) {
+					sectionModel.removeProperty(property);
+				}
+				for (PropertyModel property : existingProperties) {
+					sectionModel.addProperty(property);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionObjects ---------------------------
+
+		// Create the map of existing objects to their names
+		Map<String, OfficeSectionObjectModel> existingObjectMapping = new HashMap<String, OfficeSectionObjectModel>();
+		for (OfficeSectionObjectModel object : sectionModel
+				.getOfficeSectionObjects()) {
+			existingObjectMapping.put(object.getOfficeSectionObjectName(),
+					object);
+		}
+
+		// Create the listing of target objects
+		OfficeSectionObject[] objectTypes = officeSection
+				.getOfficeSectionObjects();
+		final OfficeSectionObjectModel[] targetObjects = new OfficeSectionObjectModel[objectTypes.length];
+		for (int o = 0; o < targetObjects.length; o++) {
+			OfficeSectionObject objectType = objectTypes[o];
+
+			// Obtain the details of the object
+			final String objectName = objectType.getOfficeSectionObjectName();
+			final String objectTypeName = objectType.getObjectType();
+
+			// Obtain the object for object type (may need to create)
+			OfficeSectionObjectModel findObject = this.getExistingItem(
+					objectName, objectNameMapping, existingObjectMapping);
+			final OfficeSectionObjectModel object = (findObject != null ? findObject
+					: new OfficeSectionObjectModel(objectName, objectTypeName));
+			targetObjects[o] = object;
+
+			// Refactor details of object
+			final String existingObjectName = object
+					.getOfficeSectionObjectName();
+			final String existingObjectTypeName = object.getObjectType();
+			refactor.add(new AbstractChange<OfficeSectionObjectModel>(object,
+					"Refactor office section object") {
+				@Override
+				public void apply() {
+					object.setOfficeSectionObjectName(objectName);
+					object.setObjectType(objectTypeName);
+				}
+
+				@Override
+				public void revert() {
+					object.setOfficeSectionObjectName(existingObjectName);
+					object.setObjectType(existingObjectTypeName);
+				}
+			});
+		}
+
+		// Ensure target objects sorted by name
+		Arrays.sort(targetObjects, new Comparator<OfficeSectionObjectModel>() {
+			@Override
+			public int compare(OfficeSectionObjectModel a,
+					OfficeSectionObjectModel b) {
+				return a.getOfficeSectionObjectName().compareTo(
+						b.getOfficeSectionObjectName());
+			}
+		});
+
+		// Obtain the existing objects
+		final OfficeSectionObjectModel[] existingObjects = sectionModel
+				.getOfficeSectionObjects().toArray(
+						new OfficeSectionObjectModel[0]);
+
+		// Add changes to disconnect existing objects to be removed
+		Set<OfficeSectionObjectModel> targetObjectSet = new HashSet<OfficeSectionObjectModel>(
+				Arrays.asList(targetObjects));
+		for (OfficeSectionObjectModel existingObject : existingObjects) {
+			if (!(targetObjectSet.contains(existingObject))) {
+				// Add change to disconnect object
+				final OfficeSectionObjectModel object = existingObject;
+				refactor.add(new DisconnectChange<OfficeSectionObjectModel>(
+						existingObject) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						OfficeSectionObjectToExternalManagedObjectModel conn = object
+								.getExternalManagedObject();
+						if (conn != null) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor objects
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Refactor objects of office section") {
+			@Override
+			public void apply() {
+				// Remove existing objects, add target objects
+				for (OfficeSectionObjectModel object : existingObjects) {
+					sectionModel.removeOfficeSectionObject(object);
+				}
+				for (OfficeSectionObjectModel object : targetObjects) {
+					sectionModel.addOfficeSectionObject(object);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target objects, add back existing
+				for (OfficeSectionObjectModel object : targetObjects) {
+					sectionModel.removeOfficeSectionObject(object);
+				}
+				for (OfficeSectionObjectModel object : existingObjects) {
+					sectionModel.addOfficeSectionObject(object);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionInputs ---------------------------
+
+		// Create the map of existing inputs to their names
+		Map<String, OfficeSectionInputModel> existingInputMapping = new HashMap<String, OfficeSectionInputModel>();
+		for (OfficeSectionInputModel object : sectionModel
+				.getOfficeSectionInputs()) {
+			existingInputMapping
+					.put(object.getOfficeSectionInputName(), object);
+		}
+
+		// Create the listing of target inputs
+		OfficeSectionInput[] inputTypes = officeSection
+				.getOfficeSectionInputs();
+		final OfficeSectionInputModel[] targetInputs = new OfficeSectionInputModel[inputTypes.length];
+		for (int i = 0; i < targetInputs.length; i++) {
+			OfficeSectionInput inputType = inputTypes[i];
+
+			// Obtain the details of the input
+			final String inputName = inputType.getOfficeSectionInputName();
+			final String parameterTypeName = inputType.getParameterType();
+
+			// Obtain the input for input type (may need to create)
+			OfficeSectionInputModel findInput = this.getExistingItem(inputName,
+					inputNameMapping, existingInputMapping);
+			final OfficeSectionInputModel input = (findInput != null ? findInput
+					: new OfficeSectionInputModel(inputName, parameterTypeName));
+			targetInputs[i] = input;
+
+			// Refactor details of input
+			final String existingInputName = input.getOfficeSectionInputName();
+			final String existingInputParameterTypeName = input
+					.getParameterType();
+			refactor.add(new AbstractChange<OfficeSectionInputModel>(input,
+					"Refactor office section input") {
+				@Override
+				public void apply() {
+					input.setOfficeSectionInputName(inputName);
+					input.setParameterType(parameterTypeName);
+				}
+
+				@Override
+				public void revert() {
+					input.setOfficeSectionInputName(existingInputName);
+					input.setParameterType(existingInputParameterTypeName);
+				}
+			});
+		}
+
+		// Ensure target inputs sorted by name
+		Arrays.sort(targetInputs, new Comparator<OfficeSectionInputModel>() {
+			@Override
+			public int compare(OfficeSectionInputModel a,
+					OfficeSectionInputModel b) {
+				return a.getOfficeSectionInputName().compareTo(
+						b.getOfficeSectionInputName());
+			}
+		});
+
+		// Obtain the existing inputs
+		final OfficeSectionInputModel[] existingInputs = sectionModel
+				.getOfficeSectionInputs().toArray(
+						new OfficeSectionInputModel[0]);
+
+		// Add changes to disconnect existing inputs to be removed
+		Set<OfficeSectionInputModel> targetInputSet = new HashSet<OfficeSectionInputModel>(
+				Arrays.asList(targetInputs));
+		for (OfficeSectionInputModel existingInput : existingInputs) {
+			if (!(targetInputSet.contains(existingInput))) {
+				// Add change to disconnect input
+				final OfficeSectionInputModel input = existingInput;
+				refactor.add(new DisconnectChange<OfficeSectionInputModel>(
+						existingInput) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						for (OfficeSectionOutputToOfficeSectionInputModel conn : new ArrayList<OfficeSectionOutputToOfficeSectionInputModel>(
+								input.getOfficeSectionOutputs())) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor inputs
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Refactor inputs of office section") {
+			@Override
+			public void apply() {
+				// Remove existing inputs, add target inputs
+				for (OfficeSectionInputModel input : existingInputs) {
+					sectionModel.removeOfficeSectionInput(input);
+				}
+				for (OfficeSectionInputModel input : targetInputs) {
+					sectionModel.addOfficeSectionInput(input);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target inputs, add back existing
+				for (OfficeSectionInputModel input : targetInputs) {
+					sectionModel.removeOfficeSectionInput(input);
+				}
+				for (OfficeSectionInputModel input : existingInputs) {
+					sectionModel.addOfficeSectionInput(input);
+				}
+			}
+		});
+
+		// ------------------- OfficeSectionOutputs ---------------------------
+
+		// Create the map of existing outputs to their names
+		Map<String, OfficeSectionOutputModel> existingOutputMapping = new HashMap<String, OfficeSectionOutputModel>();
+		for (OfficeSectionOutputModel object : sectionModel
+				.getOfficeSectionOutputs()) {
+			existingOutputMapping.put(object.getOfficeSectionOutputName(),
+					object);
+		}
+
+		// Create the listing of target outputs
+		OfficeSectionOutput[] outputTypes = officeSection
+				.getOfficeSectionOutputs();
+		final OfficeSectionOutputModel[] targetOutputs = new OfficeSectionOutputModel[outputTypes.length];
+		for (int o = 0; o < targetOutputs.length; o++) {
+			OfficeSectionOutput outputType = outputTypes[o];
+
+			// Obtain the details of the output
+			final String outputName = outputType.getOfficeSectionOutputName();
+			final String argumentTypeName = outputType.getArgumentType();
+			final boolean isEscalationOnly = outputType.isEscalationOnly();
+
+			// Obtain the output for output type (may need to create)
+			OfficeSectionOutputModel findOutput = this.getExistingItem(
+					outputName, outputNameMapping, existingOutputMapping);
+			final OfficeSectionOutputModel output = (findOutput != null ? findOutput
+					: new OfficeSectionOutputModel(outputName,
+							argumentTypeName, isEscalationOnly));
+			targetOutputs[o] = output;
+
+			// Refactor details of output
+			final String existingOutputName = output
+					.getOfficeSectionOutputName();
+			final String existingOutputArgumentTypeName = output
+					.getArgumentType();
+			final boolean existingIsEscalationOnly = output.getEscalationOnly();
+			refactor.add(new AbstractChange<OfficeSectionOutputModel>(output,
+					"Refactor office section output") {
+				@Override
+				public void apply() {
+					output.setOfficeSectionOutputName(outputName);
+					output.setArgumentType(argumentTypeName);
+					output.setEscalationOnly(isEscalationOnly);
+				}
+
+				@Override
+				public void revert() {
+					output.setOfficeSectionOutputName(existingOutputName);
+					output.setArgumentType(existingOutputArgumentTypeName);
+					output.setEscalationOnly(existingIsEscalationOnly);
+				}
+			});
+		}
+
+		// Ensure target outputs sorted by name
+		Arrays.sort(targetOutputs, new Comparator<OfficeSectionOutputModel>() {
+			@Override
+			public int compare(OfficeSectionOutputModel a,
+					OfficeSectionOutputModel b) {
+				return a.getOfficeSectionOutputName().compareTo(
+						b.getOfficeSectionOutputName());
+			}
+		});
+
+		// Obtain the existing outputs
+		final OfficeSectionOutputModel[] existingOutputs = sectionModel
+				.getOfficeSectionOutputs().toArray(
+						new OfficeSectionOutputModel[0]);
+
+		// Add changes to disconnect existing outputs to be removed
+		Set<OfficeSectionOutputModel> targetOutputSet = new HashSet<OfficeSectionOutputModel>(
+				Arrays.asList(targetOutputs));
+		for (OfficeSectionOutputModel existingOutput : existingOutputs) {
+			if (!(targetOutputSet.contains(existingOutput))) {
+				// Add change to disconnect output
+				final OfficeSectionOutputModel output = existingOutput;
+				refactor.add(new DisconnectChange<OfficeSectionOutputModel>(
+						existingOutput) {
+					@Override
+					protected void populateRemovedConnections(
+							List<ConnectionModel> connList) {
+						OfficeSectionOutputToOfficeSectionInputModel conn = output
+								.getOfficeSectionInput();
+						if (conn != null) {
+							conn.remove();
+							connList.add(conn);
+						}
+					}
+				});
+			}
+		}
+
+		// Add change to refactor outputs
+		refactor.add(new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Refactor outputs of office section") {
+			@Override
+			public void apply() {
+				// Remove existing outputs, add target outputs
+				for (OfficeSectionOutputModel output : existingOutputs) {
+					sectionModel.removeOfficeSectionOutput(output);
+				}
+				for (OfficeSectionOutputModel output : targetOutputs) {
+					sectionModel.addOfficeSectionOutput(output);
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Remove the target outputs, add back existing
+				for (OfficeSectionOutputModel output : targetOutputs) {
+					sectionModel.removeOfficeSectionOutput(output);
+				}
+				for (OfficeSectionOutputModel output : existingOutputs) {
+					sectionModel.addOfficeSectionOutput(output);
+				}
+			}
+		});
+
+		// ----------------- Refactoring -------------------------------
+
+		// Return change to do all the refactoring
+		return new AbstractChange<OfficeSectionModel>(sectionModel,
+				"Refactor office section") {
+			@Override
+			public void apply() {
+				for (Change<?> change : refactor) {
+					change.apply();
+				}
+			}
+
+			@Override
+			public void revert() {
+				// Revert changes in reverse order as applied
+				for (int i = (refactor.size() - 1); i >= 0; i--) {
+					Change<?> change = refactor.get(i);
+					change.revert();
+				}
+			}
+		};
+	}
+
+	/**
+	 * Obtains the existing item for the target name.
+	 *
+	 * @param targetItemName
+	 *            Target item name.
+	 * @param targetToExistingName
+	 *            Mapping of target item name to existing item name.
+	 * @param existingNameToItem
+	 *            Mapping of existing item name to the existing item.
+	 */
+	private <T> T getExistingItem(String targetItemName,
+			Map<String, String> targetToExistingName,
+			Map<String, T> existingNameToItem) {
+
+		// Obtain the existing item name
+		String existingItemName = targetToExistingName.get(targetItemName);
+		if (existingItemName != null) {
+			// Have existing name, so return existing item by name
+			return existingNameToItem.get(existingItemName);
+		} else {
+			// No existing name, so no existing item
+			return null;
+		}
 	}
 
 	@Override
