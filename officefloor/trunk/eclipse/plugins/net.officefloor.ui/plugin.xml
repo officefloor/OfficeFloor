@@ -16,39 +16,39 @@
 		point="org.eclipse.ui.editors">
 		<editor class="net.officefloor.eclipse.desk.DeskEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="desk" icon="icons/desk.gif" id="net.officefloor.editors.desk"
+			default="true" extensions="desk" icon="icons/Desk.png" id="net.officefloor.editors.desk"
 			name="Desk Editor" />
 		<editor class="net.officefloor.eclipse.section.SectionEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="section" icon="icons/section.gif"
+			default="true" extensions="section" icon="icons/Section.png"
 			id="net.officefloor.editors.section" name="Section Editor" />
 		<editor class="net.officefloor.eclipse.office.OfficeEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="office" icon="icons/office.gif"
+			default="true" extensions="office" icon="icons/Office.png"
 			id="net.officefloor.editors.office" name="Office Editor" />
 		<editor class="net.officefloor.eclipse.officefloor.OfficeFloorEditor"
 			contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
-			default="true" extensions="officefloor" icon="icons/officefloor.gif"
+			default="true" extensions="officefloor" icon="icons/OfficeFloor.png"
 			id="net.officefloor.editors.officefloor" name="OfficeFloor Editor" />
 	</extension>
 	<extension point="org.eclipse.ui.newWizards">
 		<category id="net.officefloor.eclipse" name="Office Floor">
 		</category>
 		<wizard category="net.officefloor.eclipse"
-			class="net.officefloor.eclipse.wizard.file.DeskNewWizard" icon="icons/desk.gif"
+			class="net.officefloor.eclipse.wizard.file.DeskNewWizard" icon="icons/Desk.png"
 			id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
 		</wizard>
 		<wizard category="net.officefloor.eclipse"
-			class="net.officefloor.eclipse.wizard.file.SectionNewWizard" icon="icons/section.gif"
+			class="net.officefloor.eclipse.wizard.file.SectionNewWizard" icon="icons/Section.png"
 			id="net.officefloor.eclipse.wizards.SectionNewWizard" name="Section">
 		</wizard>
 		<wizard category="net.officefloor.eclipse"
-			class="net.officefloor.eclipse.wizard.file.OfficeNewWizard" icon="icons/office.gif"
+			class="net.officefloor.eclipse.wizard.file.OfficeNewWizard" icon="icons/Office.png"
 			id="net.officefloor.eclipse.wizards.OfficeNewWizard" name="Office">
 		</wizard>
 		<wizard category="net.officefloor.eclipse"
 			class="net.officefloor.eclipse.wizard.file.OfficeFloorNewWizard"
-			icon="icons/officefloor.gif" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
+			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
 			name="Office Floor">
 		</wizard>
 	</extension>
@@ -62,7 +62,7 @@
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
 		<launchConfigurationTypeImage
 			configTypeID="net.officefloor.eclipse.launch.configurationtype.officeFloor"
-			icon="icons/officefloor.gif" id="net.officefloor.eclipse.launch.icon.officeFloor">
+			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.launch.icon.officeFloor">
 		</launchConfigurationTypeImage>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
@@ -73,7 +73,7 @@
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchShortcuts">
 		<shortcut class="net.officefloor.eclipse.launch.OfficeFloorLaunchShortcut"
-			icon="icons/officefloor.gif" id="net.officefloor.eclipse.launch.shortcut.officeFloor"
+			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.launch.shortcut.officeFloor"
 			label="Office Floor" modes="run,debug">
 			<configurationType
 				id="net.officefloor.eclipse.launch.configurationtype.officeFloor">
