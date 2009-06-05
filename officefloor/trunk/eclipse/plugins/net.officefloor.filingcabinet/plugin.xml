@@ -8,7 +8,7 @@
          </menu>
          <action
                label="Filing Cabinet"
-               icon="icons/officefloor.gif"
+               icon="icons/FilingCabinet.png"
                class="net.officefloor.eclipse.tool.filingcabinet.FilingCabinetAction"
                menubarPath="officefloorMenu/officefloorGroup"
                toolbarPath="officefloorGroup"
