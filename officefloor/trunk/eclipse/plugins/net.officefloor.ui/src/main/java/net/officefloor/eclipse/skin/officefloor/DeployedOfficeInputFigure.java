@@ -16,13 +16,25 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link DeployedOfficeInputModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface DeployedOfficeInputFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change in name of the {@link DeployedOfficeInputModel}.
+	 *
+	 * @param sectionName
+	 *            {@link OfficeSection} name.
+	 * @param sectionInputName
+	 *            {@link OfficeSectionInput} name.
+	 */
+	void setSectionInput(String sectionName, String sectionInputName);
 }

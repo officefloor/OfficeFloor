@@ -56,6 +56,11 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 	private final IProject project;
 
 	/**
+	 * {@link OfficeInstance}.
+	 */
+	private final OfficeInstance officeInstance;
+
+	/**
 	 * Listing of {@link OfficeSource} labels in order of
 	 * {@link OfficeSourceInstance} listing.
 	 */
@@ -83,12 +88,16 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 	 *            Listing of {@link OfficeSourceInstance}.
 	 * @param project
 	 *            {@link IProject}.
+	 * @param officeInstance
+	 *            {@link OfficeInstance} to be refactored or <code>null</code>
+	 *            if creating new.
 	 */
 	OfficeSourceListingWizardPage(OfficeSourceInstance[] officeSourceInstances,
-			IProject project) {
+			IProject project, OfficeInstance officeInstance) {
 		super("OfficeSource listing");
 		this.officeSourceInstances = officeSourceInstances;
 		this.project = project;
+		this.officeInstance = officeInstance;
 
 		// Create the listing of labels
 		this.officeSourceLabels = new String[this.officeSourceInstances.length];
@@ -128,6 +137,24 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new GridLayout(1, true));
 
+		// Obtain the initial values
+		String initialOfficeName = "";
+		int initialOfficeSourceIndex = -1;
+		String initialOfficeLocation = "";
+		if (this.officeInstance != null) {
+			// Obtain default values from office instance
+			initialOfficeName = this.officeInstance.getOfficeName();
+			initialOfficeLocation = this.officeInstance.getOfficeLocation();
+			String officeSourceClassName = this.officeInstance
+					.getOfficeSourceClassName();
+			for (int i = 0; i < this.officeSourceInstances.length; i++) {
+				if (officeSourceClassName.equals(this.officeSourceInstances[i]
+						.getOfficeSourceClassName())) {
+					initialOfficeSourceIndex = i;
+				}
+			}
+		}
+
 		// Add means to specify office name
 		Composite nameComposite = new Composite(page, SWT.NONE);
 		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
@@ -138,6 +165,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		this.officeName = new Text(nameComposite, SWT.BORDER);
 		this.officeName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
 				true, false));
+		this.officeName.setText(initialOfficeName);
 		this.officeName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -151,6 +179,7 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
 				false));
 		this.list.setItems(this.officeSourceLabels);
+		this.list.setSelection(initialOfficeSourceIndex);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -165,9 +194,11 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		locationComposite.setLayout(new GridLayout(2, false));
 		Label locationLabel = new Label(locationComposite, SWT.NONE);
 		locationLabel.setText("Location: ");
+		this.officeLocation = initialOfficeLocation;
 		InputHandler<String> location = new InputHandler<String>(
-				locationComposite, new ClasspathFileInput(this.project, page
-						.getShell()), new InputListener() {
+				locationComposite, new ClasspathFileInput(this.project,
+						initialOfficeLocation, page.getShell()),
+				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 
@@ -211,8 +242,8 @@ public class OfficeSourceListingWizardPage extends WizardPage {
 		location.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Initially page not complete (as must select office source)
-		this.setPageComplete(false);
+		// Indicate initial state
+		this.handleChange();
 
 		// Provide error if no office loaders available
 		if (this.officeSourceInstances.length == 0) {

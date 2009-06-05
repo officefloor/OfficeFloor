@@ -42,7 +42,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * {@link IWizard} to add and manage {@link Office} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeSourceWizard extends Wizard implements
@@ -50,14 +50,14 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link OfficeInstance}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link OfficeSourceWizard}.
 	 * @param officeInstance
 	 *            {@link OfficeInstance} to based decisions. <code>null</code>
 	 *            if creating new {@link OfficeInstance}.
-	 * @return {@link OfficeInstance} or <code>null</code> if cancelled.
+	 * @return {@link OfficeInstance} or <code>null</code> if canceled.
 	 */
 	public static OfficeInstance getOfficeInstance(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
@@ -82,7 +82,7 @@ public class OfficeSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link OfficeSource} class name to its
 	 * {@link OfficeSourceInstance}.
-	 * 
+	 *
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -151,6 +151,11 @@ public class OfficeSourceWizard extends Wizard implements
 	private final Map<OfficeSourceInstance, OfficeSourcePropertiesWizardPage> propertiesPages = new HashMap<OfficeSourceInstance, OfficeSourcePropertiesWizardPage>();
 
 	/**
+	 * {@link OfficeSourceAlignDeployedOfficeWizardPage}.
+	 */
+	private final OfficeSourceAlignDeployedOfficeWizardPage officeAlignPage;
+
+	/**
 	 * Selected {@link OfficeSourceInstance}.
 	 */
 	private OfficeSourceInstance selectedOfficeSourceInstance = null;
@@ -167,7 +172,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link OfficeInstance}.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 */
@@ -177,7 +182,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param project
 	 *            {@link IProject}.
 	 * @param officeInstance
@@ -208,17 +213,27 @@ public class OfficeSourceWizard extends Wizard implements
 
 		// Create the pages
 		this.listingPage = new OfficeSourceListingWizardPage(
-				officeSourceInstanceListing, project);
+				officeSourceInstanceListing, project, officeInstance);
 		for (OfficeSourceInstance officeSourceInstance : officeSourceInstanceListing) {
 			this.propertiesPages.put(officeSourceInstance,
 					new OfficeSourcePropertiesWizardPage(this,
 							officeSourceInstance));
 		}
+
+		// Determine if require creating refactor pages
+		if (officeInstance != null) {
+			// Refactoring office
+			this.officeAlignPage = new OfficeSourceAlignDeployedOfficeWizardPage(
+					officeInstance);
+		} else {
+			// Create new office
+			this.officeAlignPage = null;
+		}
 	}
 
 	/**
 	 * Obtains the {@link OfficeInstance}.
-	 * 
+	 *
 	 * @return {@link OfficeInstance}.
 	 */
 	public OfficeInstance getOfficeInstance() {
@@ -237,6 +252,11 @@ public class OfficeSourceWizard extends Wizard implements
 			this.addPage(this.propertiesPages.values().toArray(
 					new IWizardPage[0])[0]);
 		}
+
+		// Add the refactor pages
+		if (this.officeAlignPage != null) {
+			this.addPage(this.officeAlignPage);
+		}
 	}
 
 	@Override
@@ -254,6 +274,18 @@ public class OfficeSourceWizard extends Wizard implements
 
 			// Load office type to set state and return as next page
 			return this.currentPropertiesPage;
+
+		} else if (page == this.currentPropertiesPage) {
+			// Determine if require refactoring
+			if (this.officeAlignPage != null) {
+				// Refactoring office
+				this.officeAlignPage
+						.loadOfficeSourceInstance(this.selectedOfficeSourceInstance);
+				return this.officeAlignPage;
+			}
+
+			// Not refactoring, nothing further
+			return null;
 
 		} else {
 			// Tasks selected, nothing further
@@ -295,12 +327,25 @@ public class OfficeSourceWizard extends Wizard implements
 		OfficeType officeType = this.selectedOfficeSourceInstance
 				.getOfficeType();
 
+		// Obtain the mappings
+		Map<String, String> objectNameMapping = null;
+		Map<String, String> inputNameMapping = null;
+		Map<String, String> teamNameMapping = null;
+		if (this.officeAlignPage != null) {
+			// Obtain mappings for office
+			objectNameMapping = this.officeAlignPage.getObjectNameMapping();
+			inputNameMapping = this.officeAlignPage.getInputNameMapping();
+			teamNameMapping = this.officeAlignPage.getTeamNameMapping();
+		}
+
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the office instance
 		this.officeInstance = new OfficeInstance(officeName,
-				officeSourceClassName, officeLocation, propertyList, officeType);
+				officeSourceClassName, officeLocation, propertyList,
+				officeType, objectNameMapping, inputNameMapping,
+				teamNameMapping);
 
 		// Finished
 		return true;

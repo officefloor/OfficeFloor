@@ -21,7 +21,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel.DeployedOfficeInputEvent;
@@ -30,16 +30,16 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link DeployedOfficeInputModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeployedOfficeInputEditPart
 		extends
-		AbstractOfficeFloorEditPart<DeployedOfficeInputModel, DeployedOfficeInputEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeInputModel, DeployedOfficeInputEvent, DeployedOfficeInputFigure>
 		implements DeployedOfficeInputFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeployedOfficeInputFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createDeployedOfficeInputFigure(this);
 	}
@@ -59,6 +59,12 @@ public class DeployedOfficeInputEditPart
 	protected void handlePropertyChange(DeployedOfficeInputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_SECTION_NAME:
+		case CHANGE_SECTION_INPUT_NAME:
+			this.getOfficeFloorFigure().setSectionInput(
+					this.getCastedModel().getSectionName(),
+					this.getCastedModel().getSectionInputName());
+			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
