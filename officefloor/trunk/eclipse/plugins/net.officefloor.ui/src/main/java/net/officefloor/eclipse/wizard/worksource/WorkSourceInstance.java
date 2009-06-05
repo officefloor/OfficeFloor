@@ -18,6 +18,7 @@ package net.officefloor.eclipse.wizard.worksource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
@@ -44,7 +45,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link WorkSource} instance.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkSourceInstance implements WorkSourceExtensionContext,
@@ -82,6 +83,11 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	private final WorkSourceInstanceContext context;
 
 	/**
+	 * {@link WorkInstance}.
+	 */
+	private WorkInstance workInstance;
+
+	/**
 	 * {@link WorkSource} class.
 	 */
 	@SuppressWarnings("unchecked")
@@ -99,7 +105,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param workSourceClassName
 	 *            Fully qualified class name of the {@link WorkSource}.
 	 * @param workSourceExtension
@@ -130,6 +136,17 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	}
 
 	/**
+	 * Loads the particular {@link WorkInstance} for this
+	 * {@link WorkSourceInstance} to configure properties from.
+	 *
+	 * @param workInstance
+	 *            {@link WorkInstance}.
+	 */
+	public void loadWorkInstance(WorkInstance workInstance) {
+		this.workInstance = workInstance;
+	}
+
+	/**
 	 * Attempts to load the {@link WorkType}.
 	 */
 	public void loadWorkType() {
@@ -141,7 +158,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * Includes the {@link WorkSourceExtension} on the {@link IProject} class
 	 * path.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link EditPart} adding the {@link Work}.
 	 */
@@ -160,7 +177,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Obtains the label for the {@link WorkSource}.
-	 * 
+	 *
 	 * @return Label for the {@link WorkSource}.
 	 */
 	public String getWorkSourceLabel() {
@@ -180,7 +197,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Obtains the fully qualified class name of the {@link WorkSource}.
-	 * 
+	 *
 	 * @return {@link WorkSource} class name.
 	 */
 	public String getWorkSourceClassName() {
@@ -190,7 +207,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * Obtains the {@link PropertyList} to source the {@link Work} from the
 	 * {@link WorkSource}.
-	 * 
+	 *
 	 * @return Populated {@link PropertyList}.
 	 */
 	public PropertyList getPropertyList() {
@@ -199,7 +216,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Obtains the loaded {@link WorkType}.
-	 * 
+	 *
 	 * @return Loaded {@link WorkType} or <code>null</code> if issue loading.
 	 */
 	public WorkType<?> getWorkType() {
@@ -208,7 +225,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Obtains the suggested name for the {@link Work}.
-	 * 
+	 *
 	 * @return Suggested name for the {@link Work}.
 	 */
 	public String getSuggestedWorkName() {
@@ -225,7 +242,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * Creates the {@link Control} instances to populate the
 	 * {@link WorkLoaderProperty} instances.
-	 * 
+	 *
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
 	 * @param context
@@ -265,6 +282,14 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		// Obtain specification properties for work source
 		this.properties = this.workLoader
 				.loadSpecification(this.workSourceClass);
+
+		// Load work instance properties if available
+		if (this.workInstance != null) {
+			for (Property property : this.workInstance.getPropertyList()) {
+				this.properties.getOrAddProperty(property.getName()).setValue(
+						property.getValue());
+			}
+		}
 
 		// Determine if have extension
 		if (this.workSourceExtension != null) {

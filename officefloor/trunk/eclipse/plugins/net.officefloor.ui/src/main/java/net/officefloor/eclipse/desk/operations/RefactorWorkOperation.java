@@ -75,7 +75,7 @@ public class RefactorWorkOperation extends
 		// Return change for refactoring the work
 		return changes.refactorWork(work, workInstance.getWorkName(),
 				workInstance.getWorkSourceClassName(), workInstance
-						.getPropertylist(), workInstance.getWorkType(),
+						.getPropertyList(), workInstance.getWorkType(),
 				workTaskNameMapping, workTaskToObjectNameMapping,
 				taskToFlowNameMapping, taskToEscalationTypeMapping,
 				workInstance.getTaskTypeNames());

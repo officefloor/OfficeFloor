@@ -18,11 +18,12 @@ package net.officefloor.eclipse.socket;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.plugin.work.http.route.HttpRouteWorkSource;
 
 /**
  * Entry in routing.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RoutingEntry {
@@ -38,8 +39,27 @@ public class RoutingEntry {
 	private String pattern;
 
 	/**
+	 * Default construction for use in {@link BeanDialog}.
+	 */
+	public RoutingEntry() {
+	}
+
+	/**
+	 * Initialise.
+	 *
+	 * @param name
+	 *            Name.
+	 * @param pattern
+	 *            Pattern.
+	 */
+	public RoutingEntry(String name, String pattern) {
+		this.name = (name == null ? "" : name);
+		this.pattern = (pattern == null ? "" : pattern);
+	}
+
+	/**
 	 * Obtains the name identifying this {@link RoutingEntry}.
-	 * 
+	 *
 	 * @return Name.
 	 */
 	public String getName() {
@@ -48,7 +68,7 @@ public class RoutingEntry {
 
 	/**
 	 * Specifies the name.
-	 * 
+	 *
 	 * @param name
 	 *            Name.
 	 */
@@ -58,7 +78,7 @@ public class RoutingEntry {
 
 	/**
 	 * Obtains the pattern.
-	 * 
+	 *
 	 * @return Pattern.
 	 */
 	public String getPattern() {
@@ -67,7 +87,7 @@ public class RoutingEntry {
 
 	/**
 	 * Specifies the pattern.
-	 * 
+	 *
 	 * @param pattern
 	 *            Pattern.
 	 */
@@ -78,7 +98,7 @@ public class RoutingEntry {
 	/**
 	 * Loads the {@link Property} for this {@link RoutingEntry} to the
 	 * {@link PropertyList}.
-	 * 
+	 *
 	 * @param {@link PropertyList}.
 	 */
 	public void loadProperty(PropertyList propertyList) {
@@ -88,10 +108,7 @@ public class RoutingEntry {
 				: (HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX + this.name);
 
 		// Load the property
-		Property property = propertyList.getProperty(propertyName);
-		if (property == null) {
-			property = propertyList.addProperty(propertyName);
-		}
+		Property property = propertyList.addProperty(propertyName);
 		property.setValue(this.pattern);
 	}
 

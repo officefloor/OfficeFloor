@@ -43,7 +43,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * {@link IWizard} to add and manage {@link Work} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkSourceWizard extends Wizard implements
@@ -51,7 +51,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link WorkInstance}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link WorkSourceWizard}.
@@ -78,7 +78,7 @@ public class WorkSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link WorkSource} class name to its
 	 * {@link WorkSourceInstance}.
-	 * 
+	 *
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -188,7 +188,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link WorkInstance}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
@@ -198,7 +198,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param workInstance
@@ -254,6 +254,15 @@ public class WorkSourceWizard extends Wizard implements
 			this.alignFlowsEscalationsPage = new WorkSourceAlignFlowsEscalationsWizardPage(
 					workInstance);
 
+			// Load work instance against matching work source instance
+			String workSourceClassName = workInstance.getWorkSourceClassName();
+			for (WorkSourceInstance workSourceInstance : workSourceInstanceListing) {
+				if (workSourceClassName.equals(workSourceInstance
+						.getWorkSourceClassName())) {
+					workSourceInstance.loadWorkInstance(workInstance);
+				}
+			}
+
 		} else {
 			// Create new work (no refactoring required)
 			this.alignTasksPage = null;
@@ -264,7 +273,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Obtains the {@link WorkInstance}.
-	 * 
+	 *
 	 * @return {@link WorkInstance}.
 	 */
 	public WorkInstance getWorkInstance() {

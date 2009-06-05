@@ -18,6 +18,7 @@ package net.officefloor.eclipse.socket;
 
 import java.util.List;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
@@ -35,7 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for the {@link HttpRouteWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRouteWorkSourceExtension implements
@@ -68,6 +69,23 @@ public class HttpRouteWorkSourceExtension implements
 				RoutingEntry.class);
 		input.addProperty("name", 1);
 		input.addProperty("pattern", 2);
+
+		// Add the initial routing entries
+		for (Property property : context.getPropertyList()) {
+			String name = property.getName();
+			if ((name == null)
+					|| (!name
+							.startsWith(HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX))) {
+				continue; // not a routing property
+			}
+			name = name.substring(HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX
+					.length());
+
+			// Add the initial routing entry
+			input.addBean(new RoutingEntry(name, property.getValue()));
+		}
+
+		// Add control to alter properties
 		new InputHandler<List<RoutingEntry>>(page, input, new InputListener() {
 
 			@Override

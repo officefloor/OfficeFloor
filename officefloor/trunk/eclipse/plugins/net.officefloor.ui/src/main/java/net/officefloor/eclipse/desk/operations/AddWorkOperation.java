@@ -57,7 +57,7 @@ public class AddWorkOperation extends AbstractDeskChangeOperation<DeskEditPart> 
 
 		// Obtain the add work change
 		Change<WorkModel> change = changes.addWork(work.getWorkName(), work
-				.getWorkSourceClassName(), work.getPropertylist(), work
+				.getWorkSourceClassName(), work.getPropertyList(), work
 				.getWorkType(), work.getTaskTypeNames());
 
 		// Position the work

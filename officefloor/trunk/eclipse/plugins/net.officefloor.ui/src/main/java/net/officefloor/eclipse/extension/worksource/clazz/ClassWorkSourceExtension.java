@@ -65,18 +65,13 @@ public class ClassWorkSourceExtension implements
 		page.setLayout(new GridLayout(1, false));
 
 		// Obtain the class name property
-		Property property = context.getPropertyList().getProperty(
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
-		if (property == null) {
-			property = context.getPropertyList().addProperty(
-					ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
-		}
-		final Property classNameProperty = property;
+		final Property classNameProperty = context.getPropertyList()
+				.getOrAddProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
 
 		// Provide listing of class names
 		InputHandler<String> inputHandler = new InputHandler<String>(page,
-				new ClasspathClassInput(context.getProject(), page
-						.getShell()), new InputListener() {
+				new ClasspathClassInput(context.getProject(), classNameProperty
+						.getValue(), page.getShell()), new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Obtain the class name
