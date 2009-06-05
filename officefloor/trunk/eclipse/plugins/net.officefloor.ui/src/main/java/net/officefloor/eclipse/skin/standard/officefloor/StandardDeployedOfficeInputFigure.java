@@ -21,6 +21,7 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -28,15 +29,20 @@ import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link DeployedOfficeInputFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeInputFigure extends
 		AbstractOfficeFloorFigure implements DeployedOfficeInputFigure {
 
 	/**
+	 * {@link OfficeItemFigure}.
+	 */
+	private final OfficeItemFigure figure;
+
+	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeInputFigureContext}.
 	 */
@@ -44,20 +50,32 @@ public class StandardDeployedOfficeInputFigure extends
 			DeployedOfficeInputFigureContext context) {
 
 		// Obtain the name of the input
-		String inputName = context.getOfficeSectionName() + ":"
+		String inputName = context.getOfficeSectionName()
+				+ OfficeFloorChanges.SECTION_INPUT_SEPARATOR
 				+ context.getOfficeSectionInputName();
 
-		OfficeItemFigure figure = new OfficeItemFigure(inputName,
-				ConnectorDirection.EAST, ColorConstants.black);
+		this.figure = new OfficeItemFigure(inputName, ConnectorDirection.EAST,
+				ColorConstants.black);
 
 		// Register connections
-		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this
 				.registerConnectionAnchor(
 						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
 						anchor);
 
-		this.setFigure(figure);
+		this.setFigure(this.figure);
+	}
+
+	/*
+	 * =================== DeployedOfficeInputFigure ===========================
+	 */
+
+	@Override
+	public void setSectionInput(String sectionName, String sectionInputName) {
+		String inputName = sectionName
+				+ OfficeFloorChanges.SECTION_INPUT_SEPARATOR + sectionInputName;
+		this.figure.setItemName(inputName);
 	}
 
 }

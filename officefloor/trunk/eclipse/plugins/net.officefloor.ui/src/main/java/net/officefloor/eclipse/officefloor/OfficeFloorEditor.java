@@ -47,6 +47,7 @@ import net.officefloor.eclipse.officefloor.operations.AddDeployedOfficeOperation
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectSourceOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorTeamOperation;
+import net.officefloor.eclipse.officefloor.operations.RefactorDeployedOfficeFloorChangeOperation;
 import net.officefloor.eclipse.officefloor.operations.RescopeOfficeFloorManagedObjectOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
@@ -427,6 +428,9 @@ public class OfficeFloorEditor extends
 		list.add(new AddOfficeFloorTeamOperation(officeFloorChanges));
 		list.add(new AddOfficeFloorManagedObjectSourceOperation(
 				officeFloorChanges));
+
+		// Add office operations
+		list.add(new RefactorDeployedOfficeFloorChangeOperation(officeFloorChanges));
 
 		// Add managed object from managed object source
 		list.add(new AddOfficeFloorManagedObjectOperation(officeFloorChanges));
