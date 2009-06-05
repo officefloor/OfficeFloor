@@ -54,6 +54,7 @@ import net.officefloor.eclipse.office.operations.AddOfficeEscalationOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionResponsibilityOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
+import net.officefloor.eclipse.office.operations.RefactorOfficeSectionChangeOperation;
 import net.officefloor.eclipse.wizard.officetask.OfficeTaskInstance;
 import net.officefloor.eclipse.wizard.officetask.OfficeTaskWizard;
 import net.officefloor.model.change.Change;
@@ -89,7 +90,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link OfficeModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeEditor extends
@@ -472,7 +473,8 @@ public class OfficeEditor extends
 		list.add(new AddAdministratorOperation(officeChanges));
 		list.add(new AddOfficeEscalationOperation(officeChanges));
 
-		// Office section add model operations
+		// Office section operations
+		list.add(new RefactorOfficeSectionChangeOperation(officeChanges));
 		list.add(new AddOfficeSectionResponsibilityOperation(officeChanges));
 	}
 

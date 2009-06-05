@@ -62,6 +62,12 @@ public class SectionSourceListingWizardPage extends WizardPage {
 	private final String[] sectionSourceLabels;
 
 	/**
+	 * {@link SectionInstance} to refactor or <code>null</code> if creating new
+	 * {@link SectionInstance}.
+	 */
+	private final SectionInstance sectionInstance;
+
+	/**
 	 * {@link Text} of the {@link OfficeSection} name.
 	 */
 	private Text sectionName;
@@ -83,12 +89,17 @@ public class SectionSourceListingWizardPage extends WizardPage {
 	 *            Listing of {@link SectionSourceInstance}.
 	 * @param project
 	 *            {@link IProject}.
+	 * @param sectionInstance
+	 *            {@link SectionInstance} to refactor or <code>null</code> if
+	 *            creating new.
 	 */
 	SectionSourceListingWizardPage(
-			SectionSourceInstance[] sectionSourceInstances, IProject project) {
+			SectionSourceInstance[] sectionSourceInstances, IProject project,
+			SectionInstance sectionInstance) {
 		super("SectionSource listing");
 		this.sectionSourceInstances = sectionSourceInstances;
 		this.project = project;
+		this.sectionInstance = sectionInstance;
 
 		// Create the listing of labels
 		this.sectionSourceLabels = new String[this.sectionSourceInstances.length];
@@ -128,6 +139,25 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new GridLayout(1, true));
 
+		// Obtain the initial values
+		String initialSectionName = "";
+		int initialSectionSourceIndex = -1;
+		String initialSectionLocation = "";
+		if (this.sectionInstance != null) {
+			// Have section instance, so provide initial name, source, location
+			initialSectionName = this.sectionInstance.getSectionName();
+			initialSectionLocation = this.sectionInstance.getSectionLocation();
+			String sectionSourceClassName = this.sectionInstance
+					.getSectionSourceClassName();
+			for (int i = 0; i < this.sectionSourceInstances.length; i++) {
+				if (sectionSourceClassName
+						.equals(this.sectionSourceInstances[i]
+								.getSectionSourceClassName())) {
+					initialSectionSourceIndex = i;
+				}
+			}
+		}
+
 		// Add means to specify section name
 		Composite nameComposite = new Composite(page, SWT.NONE);
 		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
@@ -138,6 +168,7 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		this.sectionName = new Text(nameComposite, SWT.BORDER);
 		this.sectionName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
 				true, false));
+		this.sectionName.setText(initialSectionName);
 		this.sectionName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -151,6 +182,7 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
 				false));
 		this.list.setItems(this.sectionSourceLabels);
+		this.list.setSelection(initialSectionSourceIndex);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -165,9 +197,11 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		locationComposite.setLayout(new GridLayout(2, false));
 		Label locationLabel = new Label(locationComposite, SWT.NONE);
 		locationLabel.setText("Location: ");
+		this.sectionLocation = initialSectionLocation;
 		InputHandler<String> location = new InputHandler<String>(
-				locationComposite, new ClasspathFileInput(this.project, page
-						.getShell()), new InputListener() {
+				locationComposite, new ClasspathFileInput(this.project,
+						initialSectionLocation, page.getShell()),
+				new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 
@@ -211,8 +245,8 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		location.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Initially page not complete (as must select section source)
-		this.setPageComplete(false);
+		// Indicate initial state
+		this.handleChange();
 
 		// Provide error if no section loaders available
 		if (this.sectionSourceInstances.length == 0) {

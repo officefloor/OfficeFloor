@@ -42,7 +42,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * {@link IWizard} to add and manage {@link OfficeSection} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionSourceWizard extends Wizard implements
@@ -51,7 +51,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Facade method to obtain the {@link SectionInstance} containing the loaded
 	 * {@link SectionType}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -69,7 +69,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Facade method to obtain the {@link SectionInstance} containing the loaded
 	 * {@link OfficeSection}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -86,7 +86,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link SectionInstance}.
-	 * 
+	 *
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -118,7 +118,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link SectionSource} class name to its
 	 * {@link SectionSourceInstance}.
-	 * 
+	 *
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -194,6 +194,11 @@ public class SectionSourceWizard extends Wizard implements
 	private final Map<SectionSourceInstance, SectionSourcePropertiesWizardPage> propertiesPages = new HashMap<SectionSourceInstance, SectionSourcePropertiesWizardPage>();
 
 	/**
+	 * {@link SectionSourceAlignOfficeSectionWizardPage}.
+	 */
+	private final SectionSourceAlignOfficeSectionWizardPage officeSectionAlignPage;
+
+	/**
 	 * Selected {@link SectionSourceInstance}.
 	 */
 	private SectionSourceInstance selectedSectionSourceInstance = null;
@@ -210,7 +215,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link SectionInstance}.
-	 * 
+	 *
 	 * @param isLoadType
 	 *            Flag indicating to load {@link SectionType} rather than
 	 *            {@link OfficeSection}.
@@ -223,7 +228,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param isLoadType
 	 *            Flag indicating to load {@link SectionType} rather than
 	 *            {@link OfficeSection}.
@@ -259,17 +264,27 @@ public class SectionSourceWizard extends Wizard implements
 
 		// Create the pages
 		this.listingPage = new SectionSourceListingWizardPage(
-				sectionSourceInstanceListing, project);
+				sectionSourceInstanceListing, project, sectionInstance);
 		for (SectionSourceInstance sectionSourceInstance : sectionSourceInstanceListing) {
 			this.propertiesPages.put(sectionSourceInstance,
 					new SectionSourcePropertiesWizardPage(this,
 							sectionSourceInstance));
 		}
+
+		// Determine if require creating refactor pages
+		if (sectionInstance != null) {
+			// Refactoring section
+			this.officeSectionAlignPage = new SectionSourceAlignOfficeSectionWizardPage(
+					sectionInstance);
+		} else {
+			// Creating new section
+			this.officeSectionAlignPage = null;
+		}
 	}
 
 	/**
 	 * Obtains the {@link SectionInstance}.
-	 * 
+	 *
 	 * @return {@link SectionInstance}.
 	 */
 	public SectionInstance getSectionInstance() {
@@ -288,6 +303,11 @@ public class SectionSourceWizard extends Wizard implements
 			this.addPage(this.propertiesPages.values().toArray(
 					new IWizardPage[0])[0]);
 		}
+
+		// Add refactor pages
+		if (this.officeSectionAlignPage != null) {
+			this.addPage(this.officeSectionAlignPage);
+		}
 	}
 
 	@Override
@@ -305,6 +325,18 @@ public class SectionSourceWizard extends Wizard implements
 
 			// Load section type to set state and return as next page
 			return this.currentPropertiesPage;
+
+		} else if (page == this.currentPropertiesPage) {
+			// Determine if refactoring
+			if (this.officeSectionAlignPage != null) {
+				// Refactoring office section
+				this.officeSectionAlignPage
+						.loadSectionSourceInstance(this.selectedSectionSourceInstance);
+				return this.officeSectionAlignPage;
+			}
+
+			// Not refactoring, nothing further
+			return null;
 
 		} else {
 			// Tasks selected, nothing further
@@ -349,13 +381,28 @@ public class SectionSourceWizard extends Wizard implements
 		OfficeSection officeSection = this.selectedSectionSourceInstance
 				.getOfficeSection();
 
+		// Obtain the mappings
+		Map<String, String> inputNameMapping = null;
+		Map<String, String> outputNameMapping = null;
+		Map<String, String> objectNameMapping = null;
+		if (this.officeSectionAlignPage != null) {
+			// Obtain mappings for office section
+			inputNameMapping = this.officeSectionAlignPage
+					.getInputNameMapping();
+			outputNameMapping = this.officeSectionAlignPage
+					.getOutputNameMapping();
+			objectNameMapping = this.officeSectionAlignPage
+					.getObjectNameMapping();
+		}
+
 		// Normalise the properties
 		propertyList.normalise();
 
 		// Specify the section instance
 		this.sectionInstance = new SectionInstance(sectionName,
 				sectionSourceClassName, sectionLocation, propertyList,
-				sectionType, officeSection);
+				sectionType, officeSection, inputNameMapping,
+				outputNameMapping, objectNameMapping);
 
 		// Finished
 		return true;

@@ -23,7 +23,6 @@ import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.bindings.keys.KeyStroke;
@@ -62,6 +61,11 @@ public class ClasspathFileInput implements Input<Composite> {
 	private final Shell shell;
 
 	/**
+	 * Initial path to the file.
+	 */
+	private final String initialPath;
+
+	/**
 	 * {@link Text} containing the file name.
 	 */
 	private Text fileName;
@@ -69,14 +73,30 @@ public class ClasspathFileInput implements Input<Composite> {
 	/**
 	 * Initiate.
 	 *
-	 * @param project
-	 *            {@link IProject} to be root.
+	 * @param container
+	 *            {@link IContainer} to find the file within.
+	 * @param initialPath
+	 *            Initial path to the file.
+	 * @param shell
+	 *            {@link Shell}.
+	 */
+	public ClasspathFileInput(IContainer container, String initialPath,
+			Shell shell) {
+		this.container = container;
+		this.initialPath = (initialPath == null ? "" : initialPath);
+		this.shell = shell;
+	}
+
+	/**
+	 * Initiate.
+	 *
+	 * @param container
+	 *            {@link IContainer} to find the file within.
 	 * @param shell
 	 *            {@link Shell}.
 	 */
 	public ClasspathFileInput(IContainer container, Shell shell) {
-		this.container = container;
-		this.shell = shell;
+		this(container, null, shell);
 	}
 
 	/*
@@ -94,6 +114,7 @@ public class ClasspathFileInput implements Input<Composite> {
 		this.fileName = new Text(container, SWT.BORDER);
 		this.fileName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
 				false));
+		this.fileName.setText(this.initialPath);
 		this.fileName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {

@@ -79,19 +79,11 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		// Decorate based on flow instigation strategy
 		switch (instigationStrategy) {
 		case SEQUENTIAL:
-			PolylineDecoration sequentialArrow = new PolylineDecoration();
-			sequentialArrow.setLineWidth(2);
-			figure.setTargetDecoration(sequentialArrow);
-			figure.setLineWidth(2);
+			figure.setTargetDecoration(new PolylineDecoration());
 			break;
 		case PARALLEL:
-			PolylineDecoration parallelSourceArrow = new PolylineDecoration();
-			parallelSourceArrow.setLineWidth(2);
-			figure.setSourceDecoration(parallelSourceArrow);
-			PolylineDecoration parallelTargetArrow = new PolylineDecoration();
-			parallelTargetArrow.setLineWidth(2);
-			figure.setTargetDecoration(parallelTargetArrow);
-			figure.setLineWidth(2);
+			figure.setSourceDecoration(new PolylineDecoration());
+			figure.setTargetDecoration(new PolylineDecoration());
 			break;
 		case ASYNCHRONOUS:
 			figure.setTargetDecoration(new PolylineDecoration());
