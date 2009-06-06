@@ -20,7 +20,7 @@ import java.io.InputStream;
 
 /**
  * Context of the {@link ConfigurationItem} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ConfigurationContext {
@@ -31,22 +31,21 @@ public interface ConfigurationContext {
 	 * <p>
 	 * This value is used in the equality of {@link ConfigurationContext}
 	 * instances.
-	 * 
+	 *
 	 * @return Location for this {@link ConfigurationContext}.
 	 */
 	String getLocation();
 
 	/**
 	 * Obtains the class path for the context.
-	 * 
+	 *
 	 * @return Class path for the context.
 	 */
-	@Deprecated
 	String[] getClasspath();
 
 	/**
 	 * Obtains the {@link ConfigurationItem} at the relative location.
-	 * 
+	 *
 	 * @param relativeLocation
 	 *            Relative location of the {@link ConfigurationItem} to obtain.
 	 * @return {@link ConfigurationItem}.
@@ -59,7 +58,7 @@ public interface ConfigurationContext {
 
 	/**
 	 * Creates a new {@link ConfigurationItem} at the relative location.
-	 * 
+	 *
 	 * @param relativeLocation
 	 *            Relative location of the {@link ConfigurationItem} to create.
 	 * @param configuration
