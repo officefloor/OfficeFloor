@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="OfficeFloor Frame">
+    <bannerLeft>
+        <src>/images/OfficeFloorBannerImage.png
+        </src>
+        <href>http://www.officefloor.net/</href>
+    </bannerLeft>
+	<body>
+		<menu name="Frame">
+			<item name="Introduction" href="index.html"/>
+		</menu>
+	</body>
+</project>

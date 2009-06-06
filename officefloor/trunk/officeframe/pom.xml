@@ -8,8 +8,8 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officeframe</artifactId>
-	<name>Office Floor Framework</name>
-	<description>Core framework for the Office Floor</description>
+	<name>Frame</name>
+	<description>Frame in which the OfficeFloor operates</description>
 	<build>
 		<plugins>
 			<plugin>

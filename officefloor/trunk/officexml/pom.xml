@@ -8,9 +8,9 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officexml</artifactId>
-    <name>Office Floor XML Plug-in</name>
+    <name>XML plug-in</name>
     <description>
-		OXM (Object to XML Mapping) for the Office Floor
+		OXM (Object to XML Mapping) for OfficeFloor
 	</description>
     <dependencies>
         <dependency>

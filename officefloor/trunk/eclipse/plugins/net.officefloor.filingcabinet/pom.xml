@@ -12,7 +12,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>net.officefloor.filingcabinet</artifactId>
-    <name>Office Floor Filing Cabinet</name>
+    <name>Eclipse Filing Cabinet</name>
+    <description>Eclipse plug-in for Filing Cabinet</description>
     <packaging>zip</packaging>
     <build>
         <plugins>

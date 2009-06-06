@@ -12,7 +12,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>net.officefloor.ui</artifactId>
-    <name>Office Floor User Interface</name>
+    <name>Eclipse UI</name>
+    <description>OfficeFloor user interface Eclipse plug-in</description>
     <packaging>zip</packaging>
     <build>
         <plugins>

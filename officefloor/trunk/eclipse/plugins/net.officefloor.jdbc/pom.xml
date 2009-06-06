@@ -1,31 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>officefloor</artifactId>
-        <groupId>net.officefloor</groupId>
-        <version>0.0.1</version>
-    </parent>
-    <artifactId>net.officefloor.jdbc</artifactId>
-    <name>Office Floor Eclipse JDBC Extension</name>
-    <description>Provides extensions for JDBC configuration.</description>
-    <packaging>zip</packaging>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-property</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireProperty>
-                                    <property>eclipse.install.dir</property>
-                                    <message>
-                                        Missing property: &apos;eclipse.install.dir&apos;
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>officefloor</artifactId>
+		<groupId>net.officefloor</groupId>
+		<version>0.0.1</version>
+	</parent>
+	<artifactId>net.officefloor.jdbc</artifactId>
+	<name>Eclipse JDBC</name>
+	<description>Provides Eclipse extensions for JDBC configuration.</description>
+	<packaging>zip</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-property</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireProperty>
+									<property>eclipse.install.dir</property>
+									<message>
+										Missing property: &apos;eclipse.install.dir&apos;
 
 Please ensure property &apos;eclipse.install.dir&apos; is specified in an external active profile.
 Its value should contain the directory path to where Eclipse is installed (eg C:\install).
