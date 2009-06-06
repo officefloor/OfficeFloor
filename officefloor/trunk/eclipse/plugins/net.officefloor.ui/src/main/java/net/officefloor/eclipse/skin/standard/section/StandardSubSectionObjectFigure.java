@@ -19,16 +19,16 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigure;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.SubSectionItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link SubSectionObjectFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardSubSectionObjectFigure extends
@@ -36,7 +36,7 @@ public class StandardSubSectionObjectFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionObjectFigureContext}.
 	 */
@@ -44,7 +44,7 @@ public class StandardSubSectionObjectFigure extends
 			SubSectionObjectFigureContext context) {
 		SubSectionItemFigure figure = new SubSectionItemFigure(context.getSubSectionObjectName(),
 				false, ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SubSectionObjectToExternalManagedObjectModel.class, anchor);

@@ -19,6 +19,7 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.WorkFigure;
 import net.officefloor.eclipse.skin.desk.WorkFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
@@ -28,7 +29,6 @@ import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.AbstractBorder;
 import org.eclipse.draw2d.Border;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.GridData;
@@ -43,7 +43,7 @@ import org.eclipse.swt.SWT;
 
 /**
  * Standard {@link WorkFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
@@ -56,7 +56,7 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkFigureContext}.
 	 */
@@ -93,9 +93,10 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		workLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL,
 				SWT.BEGINNING, true, false));
 
-		// Link to initial flow
+		// Link to initial task
 		ConnectorFigure initialFlowConnector = new ConnectorFigure(
-				ConnectorDirection.EAST, ColorConstants.lightBlue);
+				ConnectorDirection.EAST, StandardOfficeFloorColours
+						.INITIAL_TASK_LINE());
 		figure.add(initialFlowConnector);
 		this.registerConnectionAnchor(WorkToInitialTaskModel.class,
 				initialFlowConnector.getConnectionAnchor());

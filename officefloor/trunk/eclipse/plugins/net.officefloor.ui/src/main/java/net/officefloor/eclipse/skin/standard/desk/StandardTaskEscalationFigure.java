@@ -19,12 +19,11 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.TaskEscalationFigure;
 import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
-
-import org.eclipse.draw2d.ColorConstants;
 
 /**
  * Standard {@link TaskEscalationFigure}.
@@ -51,7 +50,7 @@ public class StandardTaskEscalationFigure extends AbstractOfficeFloorFigure
 		}
 
 		LabelConnectorFigure figure = new LabelConnectorFigure(simpleType,
-				ConnectorDirection.EAST, ColorConstants.black);
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 		this.registerConnectionAnchor(TaskEscalationToTaskModel.class,
 				figure.getConnectionAnchor());
 		this.registerConnectionAnchor(

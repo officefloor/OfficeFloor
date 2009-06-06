@@ -19,17 +19,17 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link TaskFlowFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
@@ -37,14 +37,14 @@ public class StandardTaskFlowFigure extends AbstractOfficeFloorFigure implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link TaskFlowFigureContext}.
 	 */
 	public StandardTaskFlowFigure(TaskFlowFigureContext context) {
 		LabelConnectorFigure connector = new LabelConnectorFigure(context
 				.getTaskFlowName(), ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();

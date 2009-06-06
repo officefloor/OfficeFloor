@@ -19,9 +19,10 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
@@ -29,7 +30,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
@@ -37,7 +37,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link OfficeFloorManagedObjectFigure} implementation.
@@ -67,8 +66,6 @@ public class StandardOfficeFloorManagedObjectFigure extends
 			OfficeFloorManagedObjectFigureContext context) {
 		this.context = context;
 
-		Color moColor = ColorConstants.lightBlue;
-
 		// Create the figure
 		Figure figure = new Figure();
 		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(1);
@@ -82,7 +79,7 @@ public class StandardOfficeFloorManagedObjectFigure extends
 
 		// Add the office object and managed object dependency connector
 		ConnectorFigure dependency = new ConnectorFigure(
-				ConnectorDirection.WEST, ColorConstants.black);
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		dependency.setBorder(new MarginBorder(10, 0, 0, 0));
 		objectAndMoLayout.setConstraint(dependency, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, false, false));
@@ -100,13 +97,14 @@ public class StandardOfficeFloorManagedObjectFigure extends
 
 		// Create the managed object source
 		RoundedContainerFigure mo = new RoundedContainerFigure(this
-				.getOfficeFloorManagedObjectLabel(), moColor, 20, false);
+				.getOfficeFloorManagedObjectLabel(), StandardOfficeFloorColours
+				.MANAGED_OBJECT(), 20, false);
 		this.officeFloorManagedObjectName = mo.getContainerName();
 		objectAndMo.add(mo);
 
 		// Add the managed object source connector
 		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.SOUTH,
-				ColorConstants.lightBlue);
+				StandardOfficeFloorColours.BLACK());
 		figureLayout.setConstraint(mos, new GridData(SWT.CENTER, SWT.BEGINNING,
 				true, false));
 		figure.add(mos);

@@ -19,6 +19,7 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -26,14 +27,13 @@ import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link ExternalFlowFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
@@ -46,7 +46,7 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalFlowFigureContext}.
 	 */
@@ -54,7 +54,7 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getExternalFlowName(), ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		this.externalFlowName = figure.getLabel();
 
 		// Register anchors

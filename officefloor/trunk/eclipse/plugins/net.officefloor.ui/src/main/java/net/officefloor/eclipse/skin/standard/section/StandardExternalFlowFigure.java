@@ -19,18 +19,18 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link ExternalFlowFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
@@ -43,14 +43,14 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalFlowFigureContext}.
 	 */
 	public StandardExternalFlowFigure(ExternalFlowFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getExternalFlowName(), ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		this.externalFlowName = figure.getLabel();
 
 		this.registerConnectionAnchor(

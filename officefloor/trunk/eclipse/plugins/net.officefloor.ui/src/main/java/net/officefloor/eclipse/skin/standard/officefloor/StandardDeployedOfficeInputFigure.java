@@ -19,12 +19,12 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
@@ -55,7 +55,7 @@ public class StandardDeployedOfficeInputFigure extends
 				+ context.getOfficeSectionInputName();
 
 		this.figure = new OfficeItemFigure(inputName, ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 
 		// Register connections
 		ConnectionAnchor anchor = this.figure.getConnectionAnchor();

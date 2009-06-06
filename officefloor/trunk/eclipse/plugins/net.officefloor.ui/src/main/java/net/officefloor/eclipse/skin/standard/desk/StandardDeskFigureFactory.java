@@ -42,9 +42,9 @@ import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskToTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkToInitialTaskFigureContext;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -72,7 +72,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 
 		// Ensure have flow instigation strategy
 		if (instigationStrategy == null) {
-			figure.setForegroundColor(ColorConstants.red);
+			figure.setForegroundColor(StandardOfficeFloorColours.ERROR());
 			return;
 		}
 
@@ -147,7 +147,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public void decorateWorkTaskToTaskFigure(PolylineConnection figure,
 			WorkTaskToTaskFigureContext context) {
-		figure.setForegroundColor(ColorConstants.lightGray);
+		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
 	}
 
 	@Override
@@ -199,7 +199,8 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public void decorateWorkToInitialTaskFigure(PolylineConnection figure,
 			WorkToInitialTaskFigureContext context) {
-		figure.setForegroundColor(ColorConstants.lightBlue);
+		figure.setForegroundColor(StandardOfficeFloorColours
+				.INITIAL_TASK_LINE());
 	}
 
 }

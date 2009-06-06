@@ -19,17 +19,17 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.SubSectionItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link SubSectionOutputFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardSubSectionOutputFigure extends AbstractOfficeFloorFigure
@@ -37,19 +37,19 @@ public class StandardSubSectionOutputFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionOutputFigureContext}.
 	 */
-	public StandardSubSectionOutputFigure(
-			SubSectionOutputFigureContext context) {
+	public StandardSubSectionOutputFigure(SubSectionOutputFigureContext context) {
 		SubSectionItemFigure figure = new SubSectionItemFigure(context
 				.getSubSectionOutputName(), false, ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(SubSectionOutputToExternalFlowModel.class,
-				anchor);
-		this.registerConnectionAnchor(SubSectionOutputToSubSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(
+				SubSectionOutputToExternalFlowModel.class, anchor);
+		this.registerConnectionAnchor(
+				SubSectionOutputToSubSectionInputModel.class, anchor);
 		this.setFigure(figure);
 	}
 }

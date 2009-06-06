@@ -16,8 +16,9 @@
  */
 package net.officefloor.eclipse.skin.standard.figure;
 
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+
 import org.eclipse.draw2d.ChopboxAnchor;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
@@ -28,7 +29,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link IFigure} providing a connector.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ConnectorFigure extends Figure {
@@ -46,16 +47,16 @@ public class ConnectorFigure extends Figure {
 	private final ConnectionAnchor connectionAnchor;
 
 	/**
-	 * Initiate with defaults of {@link ColorConstants#black} and
+	 * Initiate with defaults of {@link StandardOfficeFloorColours#BLACK()} and
 	 * {@link ConnectorDirection#EAST}.
 	 */
 	public ConnectorFigure() {
-		this(ConnectorDirection.EAST, ColorConstants.black);
+		this(ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 	}
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param direction
 	 *            {@link ConnectorDirection}.
 	 * @param colour
@@ -140,7 +141,7 @@ public class ConnectorFigure extends Figure {
 
 	/**
 	 * Obtains the {@link ConnectionAnchor}.
-	 * 
+	 *
 	 * @return {@link ConnectionAnchor}.
 	 */
 	public ConnectionAnchor getConnectionAnchor() {

@@ -19,16 +19,16 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 
 /**
  * {@link WorkTaskObjectFigure} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
@@ -41,7 +41,7 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkTaskObjectFigureContext}.
 	 */
@@ -53,7 +53,7 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 		// Create the figure
 		this.parameterFigure = new LabelConnectorFigure(shortObjectTypeName,
-				ConnectorDirection.WEST, ColorConstants.black);
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		this.registerConnectionAnchor(
 				WorkTaskObjectToExternalManagedObjectModel.class,
 				this.parameterFigure.getConnectionAnchor());
@@ -67,7 +67,7 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure#setIsParameter
 	 * (boolean)
@@ -79,7 +79,7 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Obtains the short type name from the input type.
-	 * 
+	 *
 	 * @param typeName
 	 *            Type name.
 	 * @return Short type name.

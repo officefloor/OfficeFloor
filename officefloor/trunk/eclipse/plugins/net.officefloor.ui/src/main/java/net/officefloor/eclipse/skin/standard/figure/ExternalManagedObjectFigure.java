@@ -16,18 +16,18 @@
  */
 package net.officefloor.eclipse.skin.standard.figure;
 
-import org.eclipse.draw2d.ColorConstants;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-
 /**
  * {@link ManagedObject} {@link Figure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalManagedObjectFigure extends Ellipse {
@@ -39,17 +39,16 @@ public class ExternalManagedObjectFigure extends Ellipse {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of {@link ManagedObject}.
 	 */
 	public ExternalManagedObjectFigure(String managedObjectName) {
 
 		// Ellipse
-		this.setBackgroundColor(ColorConstants.lightBlue);
+		this.setBackgroundColor(StandardOfficeFloorColours.EXTERNAL_OBJECT());
 		this.setOpaque(true);
 		this.setLayoutManager(new FlowLayout());
-		this.setOutline(false);
 
 		// Name of managed object
 		this.name = new Label(managedObjectName);
@@ -60,7 +59,7 @@ public class ExternalManagedObjectFigure extends Ellipse {
 
 	/**
 	 * Obtains the {@link Label} containing the {@link ManagedObject} name.
-	 * 
+	 *
 	 * @return {@link Label} containing the {@link ManagedObject} name.
 	 */
 	public Label getLabel() {
@@ -69,7 +68,7 @@ public class ExternalManagedObjectFigure extends Ellipse {
 
 	/**
 	 * Specifies the {@link ManagedObject} name.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            {@link ManagedObject} name.
 	 */

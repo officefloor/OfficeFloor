@@ -19,26 +19,25 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link AdministratorFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
@@ -51,13 +50,11 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link AdministratorFigureContext}.
 	 */
 	public StandardAdministratorFigure(AdministratorFigureContext context) {
-
-		Color administratorColour = new Color(null, 100, 255, 200);
 
 		// Figure
 		Figure figure = new Figure();
@@ -66,7 +63,7 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 
 		// Managed Object connector
 		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		mo.setBorder(new MarginBorder(10, 0, 0, 0));
 		figure.add(mo);
 		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
@@ -78,13 +75,14 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 
 		// Create the administrator container
 		RoundedContainerFigure administrator = new RoundedContainerFigure(
-				context.getAdministratorName(), administratorColour, 20, false);
+				context.getAdministratorName(), StandardOfficeFloorColours
+						.ADMINISTRATOR(), 20, false);
 		figure.add(administrator);
 		this.administratorName = administrator.getContainerName();
 
 		// Team connector
 		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		team.setBorder(new MarginBorder(10, 0, 0, 0));
 		figure.add(team);
 		layout

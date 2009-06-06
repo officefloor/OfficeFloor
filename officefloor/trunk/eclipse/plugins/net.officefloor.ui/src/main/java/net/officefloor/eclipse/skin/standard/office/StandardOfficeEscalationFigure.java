@@ -19,14 +19,13 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 
-import org.eclipse.draw2d.ColorConstants;
-
 /**
  * {@link OfficeEscalationFigure} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeEscalationFigure extends AbstractOfficeFloorFigure
@@ -34,14 +33,14 @@ public class StandardOfficeEscalationFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeEscalationFigureContext}.
 	 */
 	public StandardOfficeEscalationFigure(OfficeEscalationFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getOfficeEscalationTypeName(), ConnectorDirection.WEST,
-				ColorConstants.red);
+				StandardOfficeFloorColours.BLACK());
 
 		this.setFigure(figure);
 	}

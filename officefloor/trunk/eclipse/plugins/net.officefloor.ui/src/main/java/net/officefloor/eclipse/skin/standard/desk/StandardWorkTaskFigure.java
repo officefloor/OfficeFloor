@@ -19,19 +19,19 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.geometry.Insets;
 
 /**
  * Standard {@link WorkTaskFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
@@ -39,7 +39,7 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkTaskFigureContext}.
 	 */
@@ -51,7 +51,8 @@ public class StandardWorkTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Task name
 		LabelConnectorFigure nameFigure = new LabelConnectorFigure(context
-				.getWorkTaskName(), ConnectorDirection.EAST, ColorConstants.black);
+				.getWorkTaskName(), ConnectorDirection.EAST,
+				StandardOfficeFloorColours.BLACK());
 		this.registerConnectionAnchor(WorkTaskToTaskModel.class, nameFigure
 				.getConnectionAnchor());
 		figure.add(nameFigure);
