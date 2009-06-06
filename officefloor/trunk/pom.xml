@@ -6,7 +6,7 @@
 	<artifactId>officefloor</artifactId>
 	<version>0.0.1</version>
 	<packaging>pom</packaging>
-	<name>Office Floor</name>
+	<name>OfficeFloor</name>
 	<description>Parent Office Floor</description>
 	<modules>
 
@@ -52,27 +52,43 @@
 		<!-- Eclipse update site -->
 		<module>eclipse/update.site</module>
 
+		<!-- Skin for Maven Site Generation -->
+		<module>maven/maven-officefloor-skin
+		</module>
+
 	</modules>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
 	<issueManagement>
 		<system>Trac</system>
-		<url>http://apps.sourceforge.net/trac/officefloor</url>
+		<url>http://apps.sourceforge.net/trac/officefloor
+		</url>
 	</issueManagement>
 	<developers>
 		<developer>
 			<id>sagenschneider</id>
 			<name>Daniel Sagenschneider</name>
-			<email>sagenschneider@users.sourceforge.net</email>
+			<email>sagenschneider@users.sourceforge.net
+			</email>
 			<roles>
 				<role>Administrator</role>
 				<role>Developer</role>
 			</roles>
 		</developer>
+		<developer>
+			<id>melanies</id>
+			<name>Melanie Sagenschneider</name>
+			<email>melanies@users.sourceforge.net
+			</email>
+		</developer>
 	</developers>
 	<scm>
-		<connection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
-		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/</url>
+		<connection>
+			scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk
+		</connection>
+		<url>
+			http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk
+		</url>
 	</scm>
 	<build>
 		<plugins>

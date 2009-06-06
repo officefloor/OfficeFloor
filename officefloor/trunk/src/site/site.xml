@@ -3,7 +3,7 @@
 	<bannerLeft>
 		<src>/images/OfficeFloorBannerImage.png
 		</src>
-		<href>http://www.officefloor.net</href>
+		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
 		<logo name="SourceForge" href="http://sourceforge.net/"
@@ -11,6 +11,8 @@
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
 	</poweredBy>
+	<publishDate position="right" />
+	<version position="right" />
 	<skin>
 		<groupId>net.officefloor</groupId>
 		<artifactId>maven-officefloor-skin</artifactId>
@@ -45,12 +47,7 @@
 		<menu name="OfficeFloor">
 			<item name="Introduction" href="index.html"/>
 			<item name="Download" href="download.html"/>
-			<item name="Release Notes" href="release-notes.html"/>
-			<item name="General Information" href="about.html"/>
 		</menu>
-<!-- TODO tidy up and re-include
 		<menu ref="modules"/>
-		<menu ref="reports"/>
--->
 	</body>
 </project>
