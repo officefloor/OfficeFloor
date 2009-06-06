@@ -56,8 +56,8 @@
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
 	<issueManagement>
-		<system>Sourceforge Tracker</system>
-		<url>https://sourceforge.net/tracker/?group_id=156349</url>
+		<system>Trac</system>
+		<url>http://apps.sourceforge.net/trac/officefloor</url>
 	</issueManagement>
 	<developers>
 		<developer>
