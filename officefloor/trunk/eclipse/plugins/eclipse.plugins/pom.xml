@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>net.officefloor.eclipse.plugins</artifactId>
-    <name>Office Floor Eclipse Plug-ins</name>
+    <name>Eclipse Plug-ins</name>
     <description>Provides a dependency for features to ensure all plug-ins are built before features are built.</description>
     <dependencies>
         <dependency>

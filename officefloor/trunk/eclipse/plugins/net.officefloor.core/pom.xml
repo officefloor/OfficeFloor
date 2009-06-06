@@ -12,7 +12,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>net.officefloor.core</artifactId>
-    <name>Office Floor Core</name>
+    <name>Eclipse Core</name>
+    <description>OfficeFloor core Eclipse plug-in</description>
     <packaging>zip</packaging>
     <build>
         <plugins>

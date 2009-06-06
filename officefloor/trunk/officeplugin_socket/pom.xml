@@ -7,8 +7,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_socket</artifactId>
-    <name>Office Floor Socket Plug-in</name>
-    <description>Office Floor plug-in for Sockets</description>
+    <name>Socket plug-in</name>
+    <description>OfficeFloor plug-in for Sockets</description>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>

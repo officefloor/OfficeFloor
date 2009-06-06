@@ -8,8 +8,8 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>
-	<name>Office Floor Filing Cabinet Tool</name>
-	<description>Office Floor tool for filing cabinet</description>
+	<name>Filing Cabinet Tool</name>
+	<description>OfficeFloor tool for filing cabinet</description>
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>

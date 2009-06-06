@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>net.officefloor.update.site
 	</artifactId>
-	<name>Office Floor Eclipse Update Site</name>
+	<name>Eclipse Update Site</name>
 	<description>
 		Generates update site content for Office Floor Eclipse.
 	</description>

@@ -8,8 +8,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_jdbc</artifactId>
-    <name>Office Floor JDBC Plug-in</name>
-    <description>Office Floor plug-in for JDBC</description>
+    <name>JDBC plug-in</name>
+    <description>OfficeFloor plug-in for JDBC</description>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>

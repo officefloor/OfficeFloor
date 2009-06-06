@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>officefloor</artifactId>
 		<groupId>net.officefloor</groupId>
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officemodel</artifactId>
-	<name>Office Floor Persistent Model</name>
+	<name>Model</name>
 	<description>
-		Office Floor model to be configured by the IDE.
+		OfficeFloor core model to be configured by the IDE and compiled.
 	</description>
 	<build>
 		<plugins>
@@ -59,8 +59,12 @@
 											location="${repo}/net/officefloor/officecompiler/${ver}/officecompiler-${ver}.jar" />
 										<pathelement
 											location="${repo}/net/officefloor/officexml/${ver}/officexml-${ver}.jar" />
-										<!-- For initial building bring in the IDE built classes of officecompiler -->
-                                        <pathelement path="${modelprojectdir}/../officecompiler/target/classes" />
+										<!--
+											For initial building bring in the IDE built classes of
+											officecompiler
+										-->
+										<pathelement
+											path="${modelprojectdir}/../officecompiler/target/classes" />
 									</classpath>
 								</java>
 								<!-- Compiling the model classes -->

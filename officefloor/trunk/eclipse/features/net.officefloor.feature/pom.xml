@@ -10,7 +10,8 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>net.officefloor.feature</artifactId>
-	<name>Office Floor Feature</name>
+	<name>Eclipse Feature</name>
+	<description>Feature for the core plug-ins for Eclipse</description>
 	<packaging>zip</packaging>
 	<build>
 		<plugins>

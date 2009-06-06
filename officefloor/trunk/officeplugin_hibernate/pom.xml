@@ -8,8 +8,8 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_hibernate</artifactId>
-    <name>Office Floor Hibernate Plug-in</name>
-    <description>Office Floor plug-in for Hibernate</description>
+    <name>Hibernate plug-in</name>
+    <description>OfficeFloor plug-in for Hibernate</description>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
