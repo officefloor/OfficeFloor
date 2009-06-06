@@ -19,6 +19,7 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.RectangleContainerFigure;
@@ -27,18 +28,16 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link OfficeFloorManagedObjectSourceFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectSourceFigure extends
@@ -53,14 +52,12 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFigureContext}.
 	 */
 	public StandardOfficeFloorManagedObjectSourceFigure(
 			OfficeFloorManagedObjectSourceFigureContext context) {
-
-		Color moColor = ColorConstants.lightGray;
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -69,7 +66,8 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 
 		// Add the managed object connector
 		ConnectorFigure managedObject = new ConnectorFigure(
-				ConnectorDirection.NORTH, ColorConstants.lightBlue);
+				ConnectorDirection.NORTH, StandardOfficeFloorColours
+						.LINK_LINE());
 		figureLayout.setConstraint(managedObject, new GridData(SWT.CENTER,
 				SWT.BEGINNING, true, false));
 		figure.add(managedObject);
@@ -88,7 +86,7 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 
 		// Add the office connector
 		ConnectorFigure office = new ConnectorFigure(ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		office.setBorder(new MarginBorder(10, 0, 0, 0));
 		officeAndMos.add(office);
 		officeAndMosLayout.setConstraint(office, new GridData(SWT.BEGINNING,
@@ -101,7 +99,8 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 
 		// Create the managed object source
 		RectangleContainerFigure mos = new RectangleContainerFigure(context
-				.getOfficeFloorManagedObjectSourceName(), moColor, 20, false);
+				.getOfficeFloorManagedObjectSourceName(),
+				StandardOfficeFloorColours.MANAGED_OBJECT_SOURCE(), 20, false);
 		this.officeFloorManagedObjectSourceName = mos.getContainerName();
 		officeAndMos.add(mos);
 

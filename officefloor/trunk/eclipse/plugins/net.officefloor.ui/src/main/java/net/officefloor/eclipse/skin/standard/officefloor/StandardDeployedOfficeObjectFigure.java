@@ -19,16 +19,16 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link DeployedOfficeObjectFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeObjectFigure extends
@@ -36,7 +36,7 @@ public class StandardDeployedOfficeObjectFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeObjectFigureContext}.
 	 */
@@ -44,7 +44,7 @@ public class StandardDeployedOfficeObjectFigure extends
 			DeployedOfficeObjectFigureContext context) {
 		OfficeItemFigure figure = new OfficeItemFigure(context
 				.getDeployedOfficeObjectName(), ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,

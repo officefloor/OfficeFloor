@@ -19,6 +19,7 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
@@ -26,13 +27,12 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
 /**
  * Standard {@link DutyFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
@@ -40,7 +40,7 @@ public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DutyFigureContext}.
 	 */
@@ -52,7 +52,8 @@ public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 
 		// Create the duty figure
 		LabelConnectorFigure duty = new LabelConnectorFigure(context
-				.getDutyName(), ConnectorDirection.WEST, ColorConstants.black);
+				.getDutyName(), ConnectorDirection.WEST,
+				StandardOfficeFloorColours.BLACK());
 		figure.add(duty);
 
 		// Register anchor to office tasks

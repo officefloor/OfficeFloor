@@ -19,16 +19,16 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link DeployedOfficeTeamFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeTeamFigure extends AbstractOfficeFloorFigure
@@ -36,14 +36,14 @@ public class StandardDeployedOfficeTeamFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeTeamFigureContext}.
 	 */
 	public StandardDeployedOfficeTeamFigure(DeployedOfficeTeamFigureContext context) {
 		OfficeItemFigure figure = new OfficeItemFigure(context
 				.getDeployedOfficeTeamName(), ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				DeployedOfficeTeamToOfficeFloorTeamModel.class, anchor);

@@ -16,9 +16,10 @@
  */
 package net.officefloor.eclipse.skin.standard.figure;
 
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+
 import org.eclipse.draw2d.AbstractBorder;
 import org.eclipse.draw2d.Border;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -35,7 +36,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link RoundedRectangle} that has a header section and content pane.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RoundedContainerFigure extends Figure {
@@ -57,7 +58,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param containerName
 	 *            Name of the container.
 	 * @param backgroundColour
@@ -94,7 +95,7 @@ public class RoundedContainerFigure extends Figure {
 		} else {
 			this.isPublicFigure = new Ellipse();
 			this.isPublicFigure.setSize(6, 6);
-			this.isPublicFigure.setBackgroundColor(ColorConstants.black);
+			this.isPublicFigure.setBackgroundColor(StandardOfficeFloorColours.BLACK());
 			header.add(this.isPublicFigure);
 		}
 
@@ -120,7 +121,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Obtains the content pane.
-	 * 
+	 *
 	 * @return Content pane.
 	 */
 	public Figure getContentPane() {
@@ -129,7 +130,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Obtains the {@link Label} for the container name.
-	 * 
+	 *
 	 * @return {@link Label} for the container name.
 	 */
 	public Label getContainerName() {
@@ -138,7 +139,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Specifies if public.
-	 * 
+	 *
 	 * @param isPublic
 	 *            <code>true</code> if public.
 	 */

@@ -44,14 +44,14 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTo
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.PolylineDecoration;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorFigureFactory implements
@@ -121,7 +121,7 @@ public class StandardOfficeFloorFigureFactory implements
 	public void decorateOfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext context) {
-		figure.setForegroundColor(ColorConstants.lightBlue);
+		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
 	}
 
 	@Override
@@ -164,7 +164,8 @@ public class StandardOfficeFloorFigureFactory implements
 	public OfficeFloorManagedObjectSourceToDeployedOfficeFigure decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context) {
-		return new StandardOfficeFloorManagedObjectSourceToDeployedOfficeFigure(figure, context);
+		return new StandardOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+				figure, context);
 	}
 
 }

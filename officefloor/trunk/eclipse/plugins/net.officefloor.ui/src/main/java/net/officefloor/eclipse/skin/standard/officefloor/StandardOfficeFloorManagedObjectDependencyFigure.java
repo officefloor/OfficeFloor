@@ -16,19 +16,19 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
+
 /**
  * Standard {@link OfficeFloorManagedObjectDependencyFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectDependencyFigure extends
@@ -37,7 +37,7 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
 	 */
@@ -45,7 +45,7 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 			OfficeFloorManagedObjectDependencyFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getOfficeFloorManagedObjectDependencyName(),
-				ConnectorDirection.EAST, ColorConstants.black);
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 
 		// Register connections
 		ConnectionAnchor anchor = figure.getConnectionAnchor();

@@ -19,25 +19,24 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link DeployedOfficeFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure
@@ -50,13 +49,11 @@ public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeFigureContext}.
 	 */
 	public StandardDeployedOfficeFigure(DeployedOfficeFigureContext context) {
-
-		Color officeColour = new Color(null, 130, 255, 150);
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -65,13 +62,13 @@ public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure
 
 		// Create the office
 		RoundedContainerFigure office = new RoundedContainerFigure(context
-				.getDeployedOfficeName(), officeColour, 20, false);
+				.getDeployedOfficeName(), StandardOfficeFloorColours.OFFICE(), 20, false);
 		this.deployedOfficeName = office.getContainerName();
 		figure.add(office);
 
 		// Create the managing object connection
 		ConnectorFigure managingObject = new ConnectorFigure(
-				ConnectorDirection.EAST, ColorConstants.black);
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
 		managingObject.setBorder(new MarginBorder(10, 0, 0, 0));
 		this.registerConnectionAnchor(
 				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,

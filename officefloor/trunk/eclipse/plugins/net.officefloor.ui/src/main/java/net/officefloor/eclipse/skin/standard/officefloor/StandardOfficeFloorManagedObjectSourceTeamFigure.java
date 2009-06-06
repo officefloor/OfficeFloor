@@ -19,31 +19,33 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link OfficeFloorManagedObjectSourceTeamFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public class StandardOfficeFloorManagedObjectSourceTeamFigure extends AbstractOfficeFloorFigure
-		implements OfficeFloorManagedObjectSourceTeamFigure {
+public class StandardOfficeFloorManagedObjectSourceTeamFigure extends
+		AbstractOfficeFloorFigure implements
+		OfficeFloorManagedObjectSourceTeamFigure {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceTeamFigure}.
 	 */
 	public StandardOfficeFloorManagedObjectSourceTeamFigure(
 			OfficeFloorManagedObjectSourceTeamFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeFloorManagedObjectSourceTeamName(), ConnectorDirection.WEST, ColorConstants.black);
+				.getOfficeFloorManagedObjectSourceTeamName(),
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,

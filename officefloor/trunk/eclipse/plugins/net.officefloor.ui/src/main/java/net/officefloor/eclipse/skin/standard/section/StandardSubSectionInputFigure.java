@@ -19,17 +19,17 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.SubSectionItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
 /**
  * Standard {@link SubSectionInputFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
@@ -42,14 +42,14 @@ public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionInputFigureContext}.
 	 */
 	public StandardSubSectionInputFigure(SubSectionInputFigureContext context) {
 		this.figure = new SubSectionItemFigure(context.getSubSectionInputName(),
 				context.isPublic(), ConnectorDirection.WEST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SubSectionOutputToSubSectionInputModel.class, anchor);

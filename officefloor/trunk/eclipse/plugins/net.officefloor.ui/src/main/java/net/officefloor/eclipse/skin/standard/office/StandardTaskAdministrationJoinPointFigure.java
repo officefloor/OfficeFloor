@@ -16,19 +16,19 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
+
 /**
  * Standard {@link TaskAdministrationJoinPointFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardTaskAdministrationJoinPointFigure extends
@@ -39,7 +39,7 @@ public class StandardTaskAdministrationJoinPointFigure extends
 	 */
 	public StandardTaskAdministrationJoinPointFigure() {
 		ConnectorFigure figure = new ConnectorFigure(ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 
 		// Register the anchor to pre/post duty
 		ConnectionAnchor anchor = figure.getConnectionAnchor();

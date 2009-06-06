@@ -19,24 +19,24 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Label;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link OfficeFloorManagedObjectSourceFlowFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
-		AbstractOfficeFloorFigure implements OfficeFloorManagedObjectSourceFlowFigure {
+		AbstractOfficeFloorFigure implements
+		OfficeFloorManagedObjectSourceFlowFigure {
 
 	/**
 	 * {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
@@ -55,15 +55,13 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
 	 */
 	public StandardOfficeFloorManagedObjectSourceFlowFigure(
 			OfficeFloorManagedObjectSourceFlowFigureContext context) {
 		this.context = context;
-
-		Color taskFlowColour = ColorConstants.black;
 
 		// Create the figure
 		Figure figure = new Figure();
@@ -73,7 +71,7 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 
 		// Create the connector
 		this.connector = new ConnectorFigure(ConnectorDirection.WEST,
-				taskFlowColour);
+				StandardOfficeFloorColours.BLACK());
 		this
 				.registerConnectionAnchor(
 						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
@@ -83,7 +81,7 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 		// Create the flow name
 		this.flowName = new Label();
 		this.flowName.setLayoutManager(new NoSpacingToolbarLayout(true));
-		this.flowName.setForegroundColor(taskFlowColour);
+		this.flowName.setForegroundColor(StandardOfficeFloorColours.BLACK());
 		figure.add(this.flowName);
 
 		// Initiate connection state
@@ -99,7 +97,8 @@ public class StandardOfficeFloorManagedObjectSourceFlowFigure extends
 	public void connectionChanged() {
 
 		// Obtain the flow name
-		String flowName = this.context.getOfficeFloorManagedObjectSourceFlowName();
+		String flowName = this.context
+				.getOfficeFloorManagedObjectSourceFlowName();
 
 		// Obtains the task name
 		String taskName = context.getInitialTaskName();

@@ -23,7 +23,6 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.ConnectionModel;
 
 import org.eclipse.draw2d.ChopboxAnchor;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
@@ -32,7 +31,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * Abstract {@link OfficeFloorFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
@@ -67,7 +66,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to represent the {@link EditPart}.
 	 * @param contentPane
@@ -80,7 +79,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Initiate to add children to top level {@link IFigure}.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to represent the {@link EditPart} and also
 	 *            potentially have children added.
@@ -95,7 +94,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 	 * <p>
 	 * Using this constructor you must ensure {@link #setFigure(IFigure)} is
 	 * called with the {@link IFigure}.
-	 * 
+	 *
 	 * @see #setFigure(IFigure)
 	 * @see #setContentPane(IFigure)
 	 */
@@ -104,7 +103,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Specifies the {@link IFigure}.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure}.
 	 */
@@ -114,7 +113,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Specifies the content pane.
-	 * 
+	 *
 	 * @param contentPane
 	 *            Content pane {@link IFigure}.
 	 */
@@ -124,7 +123,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Registers a {@link ConnectionAnchor}.
-	 * 
+	 *
 	 * @param connectionModelType
 	 *            {@link ConnectionModel} type for the connection.
 	 * @param connectionAnchor
@@ -138,7 +137,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Registers a source {@link ConnectionAnchor}.
-	 * 
+	 *
 	 * @param connectionModelType
 	 *            {@link ConnectionModel} type for the connection.
 	 * @param connectionAnchor
@@ -152,7 +151,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Registers a target {@link ConnectionAnchor}.
-	 * 
+	 *
 	 * @param connectionModelType
 	 *            {@link ConnectionModel} type for the connection.
 	 * @param connectionAnchor
@@ -175,7 +174,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 		if (this.figure == null) {
 			// Provide no figure (if one not configured)
 			Label noFigure = new Label("ERROR: no figure provided");
-			noFigure.setBackgroundColor(ColorConstants.red);
+			noFigure.setBackgroundColor(StandardOfficeFloorColours.ERROR());
 			noFigure.setOpaque(true);
 			noFigure.setLayoutManager(new FlowLayout());
 			this.figure = noFigure;
@@ -207,7 +206,7 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 
 	/**
 	 * Obtains the {@link ConnectionAnchor}.
-	 * 
+	 *
 	 * @param specificConnectionAnchors
 	 *            Specific {@link ConnectionAnchor} map.
 	 * @param connectionModelType

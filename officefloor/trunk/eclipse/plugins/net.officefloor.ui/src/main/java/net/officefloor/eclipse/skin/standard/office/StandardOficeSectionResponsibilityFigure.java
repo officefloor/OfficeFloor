@@ -19,19 +19,19 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
 /**
  * {@link OfficeSectionResponsibilityFigure} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOficeSectionResponsibilityFigure extends
@@ -45,7 +45,7 @@ public class StandardOficeSectionResponsibilityFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionResponsibilityFigureContext}.
 	 */
@@ -53,7 +53,7 @@ public class StandardOficeSectionResponsibilityFigure extends
 			OfficeSectionResponsibilityFigureContext context) {
 		LabelConnectorFigure connector = new LabelConnectorFigure(context
 				.getOfficeSectionResponsibilityName(), ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		this.officeSectionResponsibilityName = connector.getLabel();
 
 		// Register the anchors

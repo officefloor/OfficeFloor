@@ -28,10 +28,26 @@ import net.officefloor.eclipse.skin.standard.section.StandardSectionFigureFactor
 
 /**
  * The standard {@link OfficeFloorSkin}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFloorSkin implements OfficeFloorSkin {
+
+	/**
+	 * {@link StandardOfficeFloorColours}.
+	 */
+	private static final StandardOfficeFloorColours colours = new StandardOfficeFloorColours();
+
+	/**
+	 * Obtains the {@link StandardOfficeFloorColours}.
+	 *
+	 * TODO provide means to configure these colours in properties.
+	 *
+	 * @return {@link StandardOfficeFloorColours}.
+	 */
+	public static StandardOfficeFloorColours getColours() {
+		return colours;
+	}
 
 	/**
 	 * {@link DeskFigureFactory}.
@@ -54,43 +70,24 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	private final SectionFigureFactory roomFigureFactory = new StandardSectionFigureFactory();
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.skin.OfficeFloorSkin#getDeskFigureFactory()
+	 * ==================== OfficeFloorSkin ================================
 	 */
+
 	@Override
 	public DeskFigureFactory getDeskFigureFactory() {
 		return this.deskFigureFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.OfficeFloorSkin#getOfficeFigureFactory()
-	 */
 	@Override
 	public OfficeFigureFactory getOfficeFigureFactory() {
 		return this.officeFigureFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.OfficeFloorSkin#getOfficeFloorFigureFactory
-	 * ()
-	 */
 	@Override
 	public OfficeFloorFigureFactory getOfficeFloorFigureFactory() {
 		return this.officeFloorFigureFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.skin.OfficeFloorSkin#getRoomFigureFactory()
-	 */
 	@Override
 	public SectionFigureFactory getSectionFigureFactory() {
 		return this.roomFigureFactory;

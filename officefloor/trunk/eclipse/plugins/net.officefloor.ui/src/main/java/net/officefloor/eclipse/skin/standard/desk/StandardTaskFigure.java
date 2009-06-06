@@ -19,9 +19,10 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
@@ -30,18 +31,16 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link StandardTaskFigure} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
@@ -57,8 +56,6 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	 */
 	public StandardTaskFigure(final TaskFigureContext context) {
 
-		Color flowColour = new Color(null, 130, 255, 150);
-
 		// Create the figure
 		Figure figure = new Figure();
 		NoSpacingGridLayout layout = new NoSpacingGridLayout(3);
@@ -66,7 +63,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Create the connector
 		ConnectorFigure inputConnector = new ConnectorFigure(
-				ConnectorDirection.WEST, ColorConstants.black);
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		inputConnector.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor inputAnchor = inputConnector.getConnectionAnchor();
 		this.registerConnectionAnchor(TaskFlowToTaskModel.class, inputAnchor);
@@ -89,8 +86,8 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
-		this.flowItem = new RoundedContainerFigure(context.getTaskName(), flowColour,
-				20, true);
+		this.flowItem = new RoundedContainerFigure(context.getTaskName(),
+				StandardOfficeFloorColours.TASK(), 20, true);
 		flowItemAndTaskLink.add(this.flowItem);
 
 		// Initiate state of is public
@@ -98,7 +95,8 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Add the connector for task
 		ConnectorFigure taskConnector = new ConnectorFigure(
-				ConnectorDirection.SOUTH, ColorConstants.lightGray);
+				ConnectorDirection.SOUTH, StandardOfficeFloorColours
+						.LINK_LINE());
 		taskConnector.setBorder(new MarginBorder(0, 20, 0, 0));
 		this.registerConnectionAnchor(WorkTaskToTaskModel.class, taskConnector
 				.getConnectionAnchor());
@@ -106,7 +104,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Add next flow connector
 		ConnectorFigure nextFlow = new ConnectorFigure(ConnectorDirection.EAST,
-				ColorConstants.black);
+				StandardOfficeFloorColours.BLACK());
 		nextFlow.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor nextFlowAnchor = nextFlow.getConnectionAnchor();
 		this.registerSourceConnectionAnchor(TaskToNextTaskModel.class,
