@@ -1,0 +1,22 @@
+                                        -----------------
+					  Principles
+					-----------------
+				       Daniel Sagenschneider
+				        -----------------
+					
+Office Floor Principles
+
+  The principals behind Office Floor are:
+
+   * Graphical configuration.  Developers write code and graphically configure it together into an executable Office Floor.  {{{./PromoteGoodDesign.apt}Promote good design vs policing a good design}}.
+
+   * Code is not dependent on Office Floor.  Office Floor is capable of running POJOs that are graphical configured together.
+
+   * Developers need not know 'everything' to make code changes.  Graphical configuration provides a WYSIWYG approach to configuring your code and does not have 'implied' patterns in the architecture that must be understood.
+
+   * Performance in system execution, RAD, developer learning curves.
+
+   * Extensibility to enable coverage 
+   
+   * Make use of only what you require.
+
