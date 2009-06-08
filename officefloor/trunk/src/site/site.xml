@@ -42,11 +42,20 @@
             <object><noscript><p><img src="http://apps.sourceforge.net/piwik/officefloor/piwik.php?idsite=1" alt="piwik"/></p></noscript></object>
 	    </head>
 		<links>
-			<item name="OfficeFloor" href="http://www.officefloor.net/"/>
+			<item name="OfficeFloor" href="http://www.officefloor.net/" />
 		</links>
 		<menu name="OfficeFloor">
-			<item name="Introduction" href="index.html"/>
-			<item name="Download" href="download.html"/>
+			<item name="Welcome" href="index.html" />
+		</menu>
+		<menu name="Get">
+			<item name="Download" href="download.html" />
+			<item name="Eclipse" href="eclipse.html" />
+	    </menu>
+	    <menu name="Business">
+	        <item name="Benefits" href="business.html" />
+	    </menu>
+	    <menu name="Technical">
+			<item name="Architecture" href="architecture.html" />
 		</menu>
 		<menu ref="modules"/>
 	</body>
