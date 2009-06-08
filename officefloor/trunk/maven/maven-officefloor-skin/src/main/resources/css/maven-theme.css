@@ -1,9 +1,12 @@
 body {
   padding: 0px 0px 10px 0px;
 }
-body, td, select, input, li{
+body, td, select, input, li {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
+}
+li {
+  list-style: square;
 }
 code{
   font-family: Courier, monospace;
@@ -20,6 +23,11 @@ a:visited  {
 }
 a:active, a:hover {
   color:#69c;
+}
+hr {
+  border: 0;
+  background-color: #c0c0c0;
+  height: 1px;
 }
 #legend li.externalLink {
   background: url(../images/external.png) left top no-repeat;
@@ -39,57 +47,52 @@ a.newWindow, a.newWindow:link, a.newWindow:visited, a.newWindow:active, a.newWin
 }
 h2 {
   padding: 4px 4px 4px 6px;
-  border: 1px solid #999;
-  color: #900;
-  background-color: #ddd;
-  font-weight:900;
-  font-size: x-large;
+  border: 1px solid #c0c0c0;
+  color: #008bff;
+  background-color: #bbe0ff;
+  font-weight: lighter;
+  font-size: large;
 }
 h3 {
   padding: 4px 4px 4px 6px;
-  border: 1px solid #aaa;
-  color: #900;
-  background-color: #eee;
-  font-weight: normal;
+  color: #008bff;
+  font-weight: lighter;
   font-size: large;
 }
 h4 {
   padding: 4px 4px 4px 6px;
-  border: 1px solid #bbb;
-  color: #900;
-  background-color: #fff;
-  font-weight: normal;
-  font-size: large;
+  color: #008bff;
+  font-size: lighter;
 }
 h5 {
   padding: 4px 4px 4px 6px;
-  color: #900;
-  font-size: medium;
+  color: #008bff;
+  font-size: lighter;
 }
 p {
   line-height: 1.3em;
   font-size: small;
 }
 #breadcrumbs {
-  border-top: 1px solid #aaa;
-  border-bottom: 1px solid #aaa;
-  background-color: #ccc;
+  border-top: 1px solid #c0c0c0;
+  border-bottom: 1px solid #c0c0c0;
+  background-color: #e5e5e5;
 }
 #leftColumn {
   margin: 10px 0 0 5px;
-  border: 1px solid #999;
-  background-color: #eee;
+  border: 1px solid #c0c0c0;
+  background-color: #e5e5e5;
 }
 #navcolumn h5 {
   font-size: smaller;
-  border-bottom: 1px solid #aaaaaa;
+  border-bottom: 1px solid #c0c0c0;
   padding-top: 2px;
-  color: #000;
+  color: #000000;
 }
 
 table.bodyTable th {
   color: white;
-  background-color: #bbb;
+  background-color: #c0c0c0;
   text-align: left;
   font-weight: bold;
 }
@@ -99,30 +102,31 @@ table.bodyTable th, table.bodyTable td {
 }
 
 table.bodyTable tr.a {
-  background-color: #ddd;
+  background-color: #e5e5e5;
 }
 
 table.bodyTable tr.b {
-  background-color: #eee;
+  background-color: #e5e5e5;
 }
 
 .source {
-  border: 1px solid #999;
+  font-family: Courier, monospace;
+  border: 1px solid #c0c0c0;
 }
 dl {
   padding: 4px 4px 4px 6px;
-  border: 1px solid #aaa;
-  background-color: #ffc;
+  border: 1px solid #c0c0c0;
+  background-color: #e5e5e5;
 }
 dt {
-  color: #900;
+  color: #000000;
+  font-style: italic;
 }
 #organizationLogo img, #projectLogo img, #projectLogo span{
   margin: 8px;
 }
 #banner {
-  border-bottom: 1px solid #fff;
-  background-color:#bbe0ff;
+  background-color: #bbe0ff;
 }
 .errormark, .warningmark, .donemark, .infomark {
   background: url(../images/icon_error_sml.gif) no-repeat;
