@@ -1,0 +1,33 @@
+                                       ------------------
+				         Architecture
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  The architecture stack has three distinct layers:
+
+     [[1]] <IDE> (Eclipse Plug-in) which populates the models that configure the <Sources> (building blocks of OfficeFloor).
+
+     [[1]] <Compiler> which compiles the <Sources> into the <Frame>
+
+     [[1]] <Frame> which is the runtime to execute the functionality of the <Sources>
+
+     []
+
+  Each stack layer provides core functionality which is extended by plug-ins.
+
+[images/Architecture.png] OfficeFloor Architecture
+
+IDE (Eclipse Plug-in)
+
+  IDE providing the graphical functionality (via GEF) to configure the <Sources> that are the building blocks of OfficeFloor.  It utilises the <Compiler> to obtain the <Types> from <Sources> so that it can configure these together via the models populated graphically.
+
+Compiler
+
+  The <Compiler> loads the <Sources> into the <Frame>.  It takes care of validating <Type> compatibility between the <Sources> so that executed functionality is <type safe>.  This provides <fail quickly> validation in loading the functionality into the <Frame>.
+
+Frame
+
+  The <Frame> is the core of the job based architecture that gives OfficeFloor its performance.
+
+  It enables simplifying functionality of an application down into jobs, where each type of job is executed by a particular team (name used by OfficeFloor for a thread pool).  This enables, for example, blocking jobs and non-blocking jobs to be handled by different teams providing performance tuning the application at deployment time.
