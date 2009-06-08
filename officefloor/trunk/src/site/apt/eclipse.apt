@@ -4,10 +4,6 @@
 	               Daniel Sagenschneider
 			-----------------
 
-Eclipse
-
   To install OfficeFloor for Eclipse, use the update site:  http://www.officefloor.net/update
 
-Server
-
-  Please download the zip containing the jars from the download site.
+  Details of how to use an Eclipse update site can be found at {{{http://help.eclipse.org/help32/topic/org.eclipse.platform.doc.user/tasks/tasks-34.htm}Installing new features with the update manager}}
