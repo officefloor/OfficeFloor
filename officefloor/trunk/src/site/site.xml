@@ -46,13 +46,15 @@
 		</links>
 		<menu name="OfficeFloor">
 			<item name="Welcome" href="index.html" />
+			<item name="Demonstration" href="demonstration.html" />
+			<item name="Principles" href="principles.html" />
 		</menu>
 		<menu name="Get">
 			<item name="Download" href="download.html" />
 			<item name="Eclipse" href="eclipse.html" />
 	    </menu>
 	    <menu name="Business">
-	        <item name="Benefits" href="business.html" />
+	        <item name="Benefits" href="benefits.html" />
 	    </menu>
 	    <menu name="Technical">
 			<item name="Architecture" href="architecture.html" />

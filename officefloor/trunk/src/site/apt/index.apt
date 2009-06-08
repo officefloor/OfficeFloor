@@ -6,5 +6,10 @@
 
   <<Welcome to OfficeFloor>>
 
-  OfficeFloor simplifies the development of high performance systems by utilising a job based architecture and managing application functionality via graphical configuration.
+  OfficeFloor simplifies the development of high performance systems.  It uses a {{{architecture.html}job based architecture}} and manages application functionality with {{{net.officefloor.core/index.html}graphical configuration}}, so that:
+
+   * developers can get back to the enjoyment of writing code rather than configuration
+
+   * the business can get transparency into their applications to ensure correctness - which leads to reduced costs
+
 
