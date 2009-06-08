@@ -1,0 +1,152 @@
+                                           ------------------------
+					    Job Based Architecture
+                                           ------------------------
+					    Daniel Sagenschneider
+                                           ------------------------
+
+  The {{{Job}Job Based Architecture}} focuses on defining the application as a list of jobs where each job type is assigned to a team to execute.  The architecture follows the natural blocks of code in structured programming and enhances this by allowing the various blocks of code (jobs) to be executed by the most appropriate thread (team).
+
+
+
+Real world design pattern
+
+  You need not look beyond the office (you are possibly sitting in right now) to see this design pattern in use.  Within an office there are various teams responsible for different jobs - eg sales for selling, billing for invoicing, IT to support systems.  Each team is specifically set up to handle their responsible jobs.
+
+  The teams operate efficiently with each other to accomplish the work.  An example of this efficiency is interaction via email.  Should sales need a customer to be invoiced they can send off an email to billing requesting this and then get on with the other jobs at hand.  At some point later sales will receive email confirmation that the customer was invoiced.  The focal point of this interaction is that sales were able to accomplish other jobs while billing did the invoicing.  Sales did not spend their time hitting the refresh on their mail intently waiting for the invoice confirmation email.
+
+  Sales hitting refresh waiting for the invoice confirmation email is typically what happens when design patterns such as <Thread per Request> are utilised.  As blocking operations (such as database and web service calls) tie up the thread, the thread sits idle waiting for a response and can not be used for other operations.  This causes necessity to increase the overall number of threads to cope with increasing load rather than follow the office design pattern and have various teams responsible for certain jobs and scaling only the teams doing more jobs or bigger jobs.
+
+  In essense, having to have a sales person doing billing means they are tied up from attending to customers and customers not being attended to is sales being lost.
+
+
+
+Issues addressed by the job based architecture
+
+  Issues addressed by the job based architecture are:
+
+   * Limitations of single servicing thread architecture
+
+   * Inversion of control, not just dependency injection
+
+   * Appropriately handling exceptions from aspects
+
+
+* Limitations of {single} servicing thread architecture
+
+  To illustrate the limitations of the single servicing thread architecture, take for example the below sequential processing steps to service a web request:
+
++------------------------------------------------+
+    try {
+
+      // Code to parse the request
+
+      // Code to handle request via retrieving content from a database
+
+      // Code to generate response
+
+      // Code to send response
+
+    catch (Exception ex) {
+      // Code to handle exception
+    }
++------------------------------------------------+
+
+  Following the single service thread architecture (typical of the <Thread per Request/Connection design pattern>), each step would be executed sequentially by a single thread responsible for servicing the request.  This works well and is the basis for most application servers. It however has the limitation that it ties up a thread to service the request and can become problematic with blocking operations (such as database calls).
+
+  To illustrate the blocking operation issue with the single servicing thread architecture, let there for example be a large number of requests coming into the server (larger than the number of threads in the thread pool servicing requests).  In this situation, each thread is processing a single request and all remaining requests are queued waiting for a thread to become available.  Each queued request must wait until every request in front of it is has been passed to a thread before it itself gets serviced.  Should the queue of requests be significantly larger than the number of threads, the request may end up waiting for many requests in front of it to be completely serviced before it has even started to be processed.  The issue with the single servicing thread architecture is that it loses its efficiency as the majority of time the thread spends servicing a request is sleeping waiting for the network blocking calls to the database to return.  Requests are waiting for <sleepy workers> to get the job done.
+
+  The queuing of requests in single servicing thread architecture becomes even more of a problem when requests are not all alike.  Take for example the following processing steps for servicing requests for a website's static home page and static images:
+
++------------------------------------------------+
+    try {
+
+      // Code to parse the request
+
+      // Code to retrieve page/image from cache
+
+      // Code to send response
+
+    catch (Exception ex) {
+      // Code to handle exception
+    }
++------------------------------------------------+
+
+  The above code to use a cached response will be significantly faster than the database network call response code.  Yet if the above described large number of requests are coming into the server, these smaller requests must also wait for the larger database requests in front of it in the queue to be finished before it is serviced.  This becomes a significant problem if the time to process these requests becomes time consuming to the point the user is not willing to wait for the home page and goes elsewhere - <the sales person busy with other work not attending to the customer problem>.
+
+
+* Inversion of control, not just dependency injection
+
+  Dependency injection relies on a <Factory> to construct the inital object that requires all dependencies injected into it.  Typically this may be taken further by dependency injection solutions to provide frameworks that reduce the need for direct access to the <factories>.  It however does not address the need requiring <all> dependencies to be injected before the object can be used.
+
+  To illustrate this take for example the following object (non-important code commented out):
+
++------------------------------------------------+
+    public class InjectedObject {
+
+        @resource
+        private java.sql.Connection connection;
+	
+	@resource
+	private Cache cache;
+	
+        public String getContent(String key) {
+	    try {
+	        // Attempt to obtain from cache
+	        String content = this.cache.getContent(key);
+	        if (content != null) {
+	            return content;  // return content from cache
+                }
+		// Obtain content from database
+		String content = this.getContentFromDatabase(key, this.connection);
+		this.cache.storeContent(key, content);
+		return content;
+	    catch (Exception ex) {
+	        // code to handle exception
+	    }
+	}
+	
+	private getContentFromDatabase(String key, java.sql.Connection connection) {
+	    // code to retrieve database content
+	}
+    }
++------------------------------------------------+
+
+  Before the above object can be used, it must be injected with both a <<<java.sql.Connection>>> and <<<Cache>>> dependency.  Should most content be available in the <<<Cache>>> the injection of a <<<java.sql.Connection>>> becomes unneeded processing, especially if the <<<java.sql.Connection>>> is retrieved from a connection pool causing both blocking to wait for an available <<<java.sql.Connection>>> and contention on the connection pool locks.
+
+  It would be better to break the object into two so that retrieving content from <<<Cache>>> is not dependant on a <<<java.sql.Connection>>> also being made available.  Doing this would necessitate creating separate objects and subsequently <breaking> the interface of the client code.  Should separate threads be used for cache retrieval and database calls (as described by the issue of {{{single}single servicing thread architecture}}) the client becomes involved with the internal behaviour further breaking <encapsulation>.
+
+  Note it is possible to inject a <<<javax.sql.DataSource>>> rather than <<<java.sql.Connection>>> to alleviate this problem, however doing so:
+
+   * requires additional plumbing code to ensure the <<<java.sql.Connection>>> is closed (and possibly passed around to other functionality involved in the transaction on the <<<java.sql.Connection>>>)
+
+   * still suffers blocking waiting for the <<<java.sql.Connection>>> when one is required
+
+  To summarise, just using dependency injection has limitations and the following enhancements are necessary to improve its efficiency:
+
+   * Only the necessary dependencies are injected for each block of code
+
+   * Ability to select the thread responsible for executing each block of code
+
+
+* Appropriately handling exceptions from aspects
+
+  Beyond the following issues of aspects:
+
+   * attempting to trace code with weaved in aspects (especially novice developers who are only grasping its concepts)
+
+   * managing naming conventions or annotations in the code so that aspects are woven in correctly and do not appear in unexpected locations
+
+   * trusting the aspects are actually doing what you require them to do - typically requiring large system tests to validate this
+
+  the inability to appropriately handle exceptions from aspects is of greatest concern.
+
+  To illustrate this, take the following snippet of code:
+
++------------------------------------------------+
+    TODO provide code
++------------------------------------------------+
+
+
+
+{Job} based architecture
+

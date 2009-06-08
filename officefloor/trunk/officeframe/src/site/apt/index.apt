@@ -1,24 +1,11 @@
-Office Frame
+                                               -----------------------
+                                                    OfficeFrame
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
 
-  Office Frame is the core of the Office Floor.
-As the name suggests it is the frame in which defines the various office components.
+  Office Frame derives its name from being the <frame> in a building to contain a floor.  And much like a building frame it focuses on providing the space for the floors without impeding too much on floor design.
 
-  The core components are:
+[images/frame.png] OfficeFrame
   
-  * Task
-  
-  * Work
-  
-  * Team
-  
-  * Managed Object
-  
-  * Administrator
-  
-  * Framework which binds these components together
-  
-  The relationship between these components is as follows:
-  
-  * Teams execute Tasks
-  
-  * Work is broken down into Tasks
+  Its focus is to act more as a <virtual machine> than as a <framework>.  Please see the {{{architecture.html}architecture}} for more details.
