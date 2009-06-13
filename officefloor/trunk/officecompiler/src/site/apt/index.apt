@@ -1,0 +1,11 @@
+                                         --------------------
+                                            OfficeCompiler
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  As the name suggests, OfficeCompiler compiles the configurations ready for execution by the OfficeFrame.
+
+[images/OfficeCompiler.png] Office Compiler
+
+  OfficeCompiler compilation units are <XxxSources> that are the building blocks to OfficeFloor.  Each type of <XxxSource> has its purpose and they are compiled together into the OfficeFrame to provide the application functionality.
