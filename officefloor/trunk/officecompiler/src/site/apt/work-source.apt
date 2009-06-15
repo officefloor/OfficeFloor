@@ -49,5 +49,7 @@ Writing your own WorkSource implementation
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
 | net.officefloor.compile.WorkSourceService                       | Allows using the ServiceLoader functionality to provide additional meta-data about your <<<WorkSource>>>.  Providing this is optional. |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
+| net.officefloor.plugin.work.clazz.ClassWorkSource               | Provides the <plumbing> to use POJOs for <<<Work>>> and <<<Tasks>>>.  You may want to consider using this rather than writing a <full> implementation. |
+*-----------------------------------------------------------------+------------------------------------------------------------------------+
 
   Also see the IDE for details on how you can also provide customised graphical configuration of your <<<WorkSource>>>.
