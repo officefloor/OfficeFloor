@@ -45,7 +45,7 @@ Responsibilities
   
   Two examples of <<<ManagedObjectSources>>> being used as <active> objects is sockets and JMS.  When a request/message arrives, the <<<ManagedObjectSource>>> can invoke a <<<Task>>> that an application can then link into to provide servicing of the request/message.  See these sources for more details.
 
-  The ability to make <<<ManagedObjectSources>>> <active> objects means that 'special' containers are not required by OfficeFloor for each type of service.  Should an application require a certain type of service, it can plug-in the appropriate <<<ManagedObjectSource>>> providing the service.  This follows OfficeFloor's principle of only use what you require.
+  The ability to make <<<ManagedObjectSources>>> <active> objects means that 'special' containers are not required by OfficeFloor for each type of service.  Should an application require a certain type of service, it can plug-in the appropriate <<<ManagedObjectSource>>> providing the service.  Furthermore, additional threads are not required for each type of service as the <jobs> from each service can be assigned to the same thread pools (teams).  This follows OfficeFloor's principle of only use what you require.
 
 
 * ManagedObjectPoolSource

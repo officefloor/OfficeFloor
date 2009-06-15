@@ -4,4 +4,27 @@
                                          Daniel Sagenschneider
                                          --------------------
 
-  <<TODO>> provide documentation
+  <<<TeamSource>>> provides the <<<Teams>>> that execute the <jobs> within OfficeFloor.  Much like <teams> in offices are responsible for completing certain <jobs>, so are the <<<Teams>>> provided by the <<<TeamSources>>>.
+
+  The name <<<Team>>> comes from the idea that <teams> within an office are the <active> individuals ensuring the work is completed, much like a <thread pool> are <active> threads processing the functionality of an application.  Also, much like <teams> within an office, <<<Teams>>> (thread pools) can be varying in nature: single thread (one person responsible), multi-threaded (group of people), thread per job (contract out work), etc.
+
+  The ability of OfficeFloor (due to its job based architecture) to allow <jobs> to be assigned to <teams> and the <teams> to be structured for the <jobs> they are assigned, gives architects significant flexibility to tune the efficiency of applications.  Furthermore, the greatest flexibility for the architect is that the assigning of jobs to teams and the selection of teams can be left until assembly and deployment of the application.  This means that rather than significant effort be used up front to decide the correct <threading> model and possibly incur 'expensive' changes later if incorrect, the developers can first code up the functionality which results in identifying the <finer> details of the application and once this is understood, a <threading> model can then be appropriately choosen and used.
+
+
+Writing your own TeamSource implementation
+
+  Before writing your own implementation, please do have a quick check as there may be an implementation already existing that suits your requirements.
+
+  If however you have found nothing that meets your requirements, you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*---------------------------------------------------------------+-------------------------------------------------------------------------+
+|| Class                                                        || Description                                                            |
+*---------------------------------------------------------------+-------------------------------------------------------------------------+
+| net.officefloor.frame.spi.team.source.TeamSource              | This is the interface that all <<<TeamSource>>> implementations must implement |
+*---------------------------------------------------------------+-------------------------------------------------------------------------+
+| net.officefloor.frame.spi.team.source.impl.AbstractTeamSource | Provides abstract functionality to simplify implementing a <<<TeamSource>>> |
+*---------------------------------------------------------------+-------------------------------------------------------------------------+
+| net.officefloor.compile.TeamSourceService                     | Allows using the ServiceLoader functionality to provide additional meta-data about your <<<TeamSource>>>. Providing this is optional. |
+*---------------------------------------------------------------+-------------------------------------------------------------------------+
+
+  Also see the IDE for details on how you can also provide customised graphical configuration of your TeamSource.
