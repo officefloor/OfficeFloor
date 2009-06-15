@@ -4,4 +4,34 @@
                                          Daniel Sagenschneider
                                          --------------------
 
-  <<TODO>> provide documentation
+  The <<<OfficeFloorSource>>> provides the deployment configurations of offices (<applications>).  The <<<OfficeFloorSource>>> has the following focuses:
+
+   * Specifying which <<<Offices>>> are to be deployed (to the <<<OfficeFloor>>>)
+
+   * <<<ManagedObjectSource>>> required by the <<<Offices>>> to configure the <<<Offices>>> to the environment in which they are to be deployed
+
+   * <<<TeamSources>>> that tune the applications to the hardware they are to be deployed on
+
+  Typically this is configured by the technical lead, architect or plant engineer.  Configuring the <<<OfficeFloorSource>>> requires understanding of both the offices (<applications>) being deployed and the hardware they will be running on.  An example may be that a four thread <<<TeamSource>>> is used for CPU intensive <<<Tasks>>> on a server that has two dual core CPUs (thread per CPU instance).  On the other hand they may elect to only provide a <<<TeamSource>>> with three threads to allow a CPU to be free for other <<<Tasks>>> of the application.
+
+  Enabling the tuning to be done at deployment time means that code changes (and possibly quite 'expensive' code changes) are not required when the application is finally deployed to the hardware.  Having the hardware available to performance test and tune applications for production can sometimes be difficult, especially if budgets are tight or systems take a while to develop and hardware is only bought late in the system development lifecycle.  Furthermore, applications can be moved to different hardware long after the development team has stopped development of the applications.  Applications need an ability to be tuned during deployment and OfficeFloor provides this ability via the <<<OfficeFloorSource>>>.
+
+
+
+Writing your own OfficeFloorSource implementation
+
+  Before writing your own implementation, please do have a quick check as there may be an implementation already existing that suits your requirements. This is especially the case as along with your <<<OfficeFloorSource>>> implementation, you will likely be asked to provide a graphical editor to follow the principle of not having the developer waste time writing configuration by hand.
+
+  If however you have found nothing that meets your requirements, you can write your own implementation. The following table provides starting points for writing your own implementation.
+
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+|| Class                                                                        || Description                                            |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| net.officefloor.compile.spi.officefloor.source.OfficeFloorSource              | This is the interface that all <<<OfficeFloorSource>>> implementations must implement |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource | Provides abstract functionality to simplify implementing a <<<OfficeFloorSource>>> |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+| net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource      | Implementation of the <<<OfficeFloorSource>>>. See the IDE for mote details |
+*-------------------------------------------------------------------------------+---------------------------------------------------------+
+
+  Please note that in writing you own implementation, it will also likely expected of you to provide a graphical editor to configure your implementation.
