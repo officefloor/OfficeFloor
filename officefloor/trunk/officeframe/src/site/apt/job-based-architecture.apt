@@ -51,7 +51,7 @@ Issues addressed by the job based architecture
 
   Following the single service thread architecture (typical of the <Thread per Request/Connection design pattern>), each step would be executed sequentially by a single thread responsible for servicing the request.  This works well and is the basis for most application servers. It however has the limitation that it ties up a thread to service the request and can become problematic with blocking operations (such as database calls).
 
-  To illustrate the blocking operation issue with the single servicing thread architecture, let there for example be a large number of requests coming into the server (larger than the number of threads in the thread pool servicing requests).  In this situation, each thread is processing a single request and all remaining requests are queued waiting for a thread to become available.  Each queued request must wait until every request in front of it is has been passed to a thread before it itself gets serviced.  Should the queue of requests be significantly larger than the number of threads, the request may end up waiting for many requests in front of it to be completely serviced before it has even started to be processed.  The issue with the single servicing thread architecture is that it loses its efficiency as the majority of time the thread spends servicing a request is sleeping waiting for the network blocking calls to the database to return.  Requests are waiting for <sleepy workers> to get the job done.
+  To illustrate the blocking operation issue with the single servicing thread architecture, let there for example be a large number of requests coming into the server (larger than the number of threads in the thread pool servicing requests).  In this situation, each thread is processing a single request and all remaining requests are queued waiting for a thread to become available.  Each queued request must wait until every request in front of it is passed to a thread before it itself gets serviced by a thread.  Should the queue of requests be significantly larger than the number of threads, the request may end up waiting for many requests in front of it to be completely serviced before it has even started to be processed.  The issue with the single servicing thread architecture is that it loses its efficiency as the majority of time the thread spends servicing a request is sleeping waiting for the network blocking calls to the database to return.  In other words, requests are waiting for <sleepy workers> to get the job done.
 
   The queuing of requests in single servicing thread architecture becomes even more of a problem when requests are not all alike.  Take for example the following processing steps for servicing requests for a website's static home page and static images:
 
@@ -265,7 +265,7 @@ Issues addressed by the job based architecture
   The resulting <<<useContent>>> method then may have, for example, the following method signature:
 
 +------------------------------------------------+
-    public OutputForNextJob useContent(String content, Writer writer) throws IOException
+    public void useContent(String content, Writer writer) throws IOException
 +------------------------------------------------+
 
   where the <<<useContent>>> will possibly write the content to a <<<Writer>>> that results in sending the content to the HTTP client.
@@ -278,12 +278,12 @@ Issues addressed by the job based architecture
   An example catch block of code for the <<<getDatabaseContent>>> may be as follows:
 
 +------------------------------------------------+
-    public void handleException(SQLException escalation, Writer writer) {
+    public void handleException(SQLException escalation, Writer writer) throws IOException {
         writer.write(escalation.getMessage());
     }
 +------------------------------------------------+
 
-  This simple example would write the message of the exception to a <<<Writer>>> which may send this back to the HTTP client.
+  This simple example would write the message of the exception to a <<<Writer>>> which may send this back to the HTTP client.  Note that the <<<IOException>>> can also be handled by another <catch> block, much like adding a nested <try> block within a <catch> block.
 
   More complex handing of exceptions (escalations), could for example:
 
@@ -334,9 +334,9 @@ Issues addressed by the job based architecture
 
 Using a Job Based Architecture
 
-  Simplify the application into blocks of code (jobs) means that these blocks of code must be connected together to create the execution flows of an application.  Manually connecting them together by the developer, either through additional plumbing code or hand written configuration, is error prone and likely very time consuming for the developer.  Therefore having a job based architecture, though improviing the efficiency of applications, needs additional tools to aid in the efficiency of rapid application development and developer learning curves.
+  Simplifying the application into blocks of code (jobs) means that these blocks of code must be connected together to create the execution flows of an application.  Manually connecting them together by the developer, either through additional plumbing code or hand written configuration, is error prone and likely very time consuming for the developer.  Therefore having a job based architecture, though improviing the efficiency of applications, needs additional tools to aid in the efficiency of rapid application development and developer learning curves.
 
-  Graphical configuration of connecting the blocks of code together into a flow is necessary to improve efficiency of development.  As the blocks of code provide meta-data about their inputs and outputs, graphical tools are used to connect them together removing the need for developers to write out the configuration by hand.  As the flows in the application are represented graphically, it is also much easier for developers to review these to get an understanding of the system.  The graphical reprsentation even enables non-technical individuals to review aspects of the system.
+  Graphical configuration of connecting the blocks of code together into a flow is necessary to improve efficiency of development.  As the blocks of code provide meta-data about their inputs and outputs, graphical tools are used to connect them together removing the need for developers to write out the configuration by hand.  As the flows in the application are represented graphically, it is also much easier for developers to review these to get an understanding of the system.  The graphical representation even enables non-technical individuals to review aspects of the system.
 
   OfficeFloor provides both the job based architecture and graphical tools.
 
