@@ -6,15 +6,23 @@
 
   The principals behind OfficeFloor are:
 
-   * Code is not dependent on OfficeFloor.  OfficeFloor is capable of running POJOs without addititional <plumbing>.
-
-   * Developers need not know <everything> to make code changes.  Graphical configuration provides a WYSIWYG approach to configuring your code and does not have <implied> patterns in the architecture that must be understood. See {{{promote-good-design.html}Promote good design vs policing a good design}}.
+   * OfficeFloor is light weight - capable of running POJOs without addititional <plumbing>.
 
    * Writing configuration files by hand is a <waste> of developer's time.  Developer's should be doing what they enjoy and do best, writing code.
 
-   * Systems should be transparent for the business and not incur additional costs to be made transparent.  In other words, the artifacts that the developers use (specifically Sections) should be <easily> understandable and reviewable by non-techincal individuals.
+   * Configuration should be managed similar to code - managable encapsulated modules that can be stored in SCM.
+
+   * Developers need not know <everything> to make code changes.  Graphical configuration provides a what you see is what you get (WYSIWYG) approach to configuring your code and does not have <implied> patterns in the architecture that must be understood. See {{{promote-good-design.html}Promote good design vs policing a good design}}.
+
+   * Applications should be transparent for the business and not incur additional costs to be made transparent.  In other words, artifacts used by the developers (eg Sections) should be <easily> understandable and reviewable by non-techincal individuals.
 
    * All three areas of performance are important: system execution, rapid application development (RAD), developer learning curves.
 
-   * Make use of only what you require and be extensible to cover what is required.
+   * Make use of only what you require and be extensible to do what is required.
+
+   * The software development lifecycle (SDLC) is <<not>> an after thought.  OfficeFloor is to encourage <good> software development practices by promoting:
+
+       * flexibility to make decisions at the <appropriate> times in the SDLC
+
+       * clear communication between the business and development team
 
