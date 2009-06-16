@@ -5,6 +5,9 @@ body, td, select, input, li {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
 }
+li {
+  margin-bottom: 0.5em;
+}
 ul {
   list-style: square;
 }
