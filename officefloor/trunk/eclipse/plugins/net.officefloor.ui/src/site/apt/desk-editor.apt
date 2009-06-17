@@ -4,4 +4,48 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<TODO>> provide content
+  The Desk Editor gets its name from the idea that all <work> within an office is accomplished at a <desk>.  In reality work may be carried out away from one's desk, however the term <desk> can mean the physical desk one sits at or the more logical concept of say a <sales desk>.  In either case, the notion is that <<<Work>>> and its <<<Tasks>>> are specific to particular desks where <diligent> workers execute all tasks on the desk.
+
+  The configuration elements that can be added to a desk are:
+
+   * Work
+
+   * Tasks from work
+
+   * External flows
+
+   * External objects
+
+   * <future enhancement will see the Desk Editor also capable of adding ManagedObjects>
+
+  The resulting model configured by the Desk Editor is for the <<<DeskModelSectionSource>>>, which is a <<<SectionSource>>> and subsequently may be added to other <<<SectionSources>>> and an <<<OfficeSource>>>.  The desk may not have sections added to it as its focus is to create atomic configuration units that can be joined together by other configurations (such as the <<<SectionModelSectionSource>>>). 
+
+
+
+Using a Desk Editor
+
+  As the Desk Editor is graphical in nature, recorded demonstrations will be used to provide details on how to use the editor.  This follows OfficeFloor's principle of performance in developer learning curves as watching <short> visual demonstrations is more effective and faster than <long> textual descriptions in gaining the necessary information to start using the editor.
+
+  <<TODO>> provide the following demonstrations:
+
+   [[1]] Create a new desk
+
+   [[1]] Add work to desk
+
+   [[1]] Create a task from work
+
+   [[1]] Flag object as parameter
+
+   [[1]] Link task to next task
+
+   [[1]] Link task output to another task
+
+   [[1]] Add external flow and link as next task for a task
+
+   [[1]] Add external flow and link task output
+
+   [[1]] Add external object and link task object
+
+   [[1]] Flag task as public
+
+   [[1]] Refactor work
