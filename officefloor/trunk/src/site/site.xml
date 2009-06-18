@@ -49,12 +49,9 @@
 			<item name="Demonstration" href="demonstration.html" />
 			<item name="Principles" href="principles.html" />
 		</menu>
-		<menu name="Get">
+		<menu name="Start using">
 			<item name="Download" href="download.html" />
 			<item name="Eclipse" href="eclipse.html" />
-	    </menu>
-	    <menu name="Business">
-	        <item name="Benefits" href="benefits.html" />
 	    </menu>
 	    <menu name="Technical">
 			<item name="Architecture" href="architecture.html" />
