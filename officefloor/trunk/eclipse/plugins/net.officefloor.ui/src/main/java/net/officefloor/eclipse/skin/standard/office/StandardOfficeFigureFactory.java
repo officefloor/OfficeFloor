@@ -116,7 +116,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	@Override
 	public OfficeSectionResponsibilityFigure createOfficeSectionResponsibilityFigure(
 			OfficeSectionResponsibilityFigureContext context) {
-		return new StandardOficeSectionResponsibilityFigure(context);
+		return new StandardOfficeSectionResponsibilityFigure(context);
 	}
 
 	@Override

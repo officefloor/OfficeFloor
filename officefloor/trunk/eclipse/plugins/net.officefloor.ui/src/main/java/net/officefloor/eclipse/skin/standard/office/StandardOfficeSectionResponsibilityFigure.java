@@ -20,12 +20,15 @@ import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
@@ -34,7 +37,7 @@ import org.eclipse.draw2d.Label;
  *
  * @author Daniel Sagenschneider
  */
-public class StandardOficeSectionResponsibilityFigure extends
+public class StandardOfficeSectionResponsibilityFigure extends
 		AbstractOfficeFloorFigure implements OfficeSectionResponsibilityFigure {
 
 	/**
@@ -49,19 +52,30 @@ public class StandardOficeSectionResponsibilityFigure extends
 	 * @param context
 	 *            {@link OfficeSectionResponsibilityFigureContext}.
 	 */
-	public StandardOficeSectionResponsibilityFigure(
+	public StandardOfficeSectionResponsibilityFigure(
 			OfficeSectionResponsibilityFigureContext context) {
-		LabelConnectorFigure connector = new LabelConnectorFigure(context
+
+		Figure container = new Figure();
+		container.setLayoutManager(new GridLayout(2, false));
+
+		// Create connector for managed objects
+		ConnectorFigure moConnector = new ConnectorFigure(
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		container.add(moConnector);
+
+		// Create label and connector for teams
+		LabelConnectorFigure teamConnector = new LabelConnectorFigure(context
 				.getOfficeSectionResponsibilityName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
-		this.officeSectionResponsibilityName = connector.getLabel();
+		container.add(teamConnector);
+		this.officeSectionResponsibilityName = teamConnector.getLabel();
 
 		// Register the anchors
-		ConnectionAnchor anchor = connector.getConnectionAnchor();
+		ConnectionAnchor teamAnchor = teamConnector.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				OfficeSectionResponsibilityToOfficeTeamModel.class, anchor);
+				OfficeSectionResponsibilityToOfficeTeamModel.class, teamAnchor);
 
-		this.setFigure(connector);
+		this.setFigure(container);
 	}
 
 	/*
