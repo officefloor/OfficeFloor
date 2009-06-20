@@ -4,20 +4,9 @@
 					Daniel Sagenschneider
                                         ---------------------
 
-  Please find the below demonstrations of OfficeFloor.  It is recommended to watch the demonstrations in the order outlined below as each demonstration builds off the previous.
+  The below 5 minute demo shows the graphical configuration of OfficeFloor and how POJO methods can be connected together.  This is a simple demo and more functional <<<Tasks>>> for working with HTTP and HTML content can be found in the Socket Plugin.
 
-  <<TODO provide links to the demonstrations>>
 
-   [[1]] 'Hello World' web server (also the <quick> introduction to OfficeFloor).
+%{swf|src=file:///L:/officefloor-demo/HelloWorldConfigurationDemo/HelloWorldConfigurationDemo.swf|width=1020|height=614|quality=high}
 
-   [[1]] Dynamic web server.
 
-   [[1]] Web server backed by database.
-
-   [[1]] Transactional web server.
-
-  Other demonstrations for particular features of OfficeFloor.
-
-   * Embedding OfficeFloor into existing applications.
-
-   * JMS Server.

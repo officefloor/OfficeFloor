@@ -20,11 +20,13 @@
 	</skin>
 	<body>
 		<head>
+		    <!-- shortcut icon -->
+		    <link rel="shortcut icon" href="/favicon.ico" />
 			<!-- Search Engine details -->
 			<meta name="keywords"
-				content="java,XML,SEDA,application,framework,server,inversion,control,dependency,injection" />
+				content="job,based,architecture,graphical,configuration,application,framework,server,inversion,control,dependency,injection,java,XML,SEDA" />
 			<meta name="description"
-				content="OfficeFloor providing graphical configuration and scalable systems" />
+				content="OfficeFloor simplifies the development of high performance systems" />
 			<!-- Piwik -->
 			<script type="text/javascript">
 				var pkBaseURL = (("https:" ==
@@ -41,17 +43,19 @@
             </script>
             <object><noscript><p><img src="http://apps.sourceforge.net/piwik/officefloor/piwik.php?idsite=1" alt="piwik"/></p></noscript></object>
 	    </head>
-		<links>
-			<item name="OfficeFloor" href="http://www.officefloor.net/" />
-		</links>
+        <breadcrumbs>
+            <item name="OfficeFloor" href="http://www.officefloor.net/" />
+        </breadcrumbs>
 		<menu name="OfficeFloor">
 			<item name="Welcome" href="index.html" />
-			<item name="Demonstration" href="demonstration.html" />
+			<item name="Demos" href="demonstration.html" />
 			<item name="Principles" href="principles.html" />
+			<item name="Job Based Architecture" href="officeframe/job-based-architecture.html" />
+			<item name="Graphical Configuration" href="net.officefloor.ui/graphical-configuration.html" />
 		</menu>
 		<menu name="Start using">
-			<item name="Download" href="download.html" />
 			<item name="Eclipse" href="eclipse.html" />
+            <item name="Download" href="download.html" />
 	    </menu>
 	    <menu name="Technical">
 			<item name="Architecture" href="architecture.html" />
