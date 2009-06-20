@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+        <breadcrumbs>
+            <item name="Eclipse Core" href="index.html" />
+        </breadcrumbs>
 		<menu name="Eclipse Core">
 			<item name="Overview" href="index.html" />
 		</menu>

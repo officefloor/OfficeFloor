@@ -4,17 +4,21 @@
       label="Office Floor Feature"
       version="0.0.1">
 
-   <description url="http://www.officefloor.net/description">
-      [Enter Feature Description here.]
+   <description url="http://www.officefloor.net/">
+      OfficeFloor simplifies the development of high performance systems.
    </description>
 
-   <copyright url="http://www.officefloor.net/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (C) 2005-2009 Daniel Sagenschneider
    </copyright>
 
-   <license url="http://www.officefloor.net/license">
-      [Enter License Description here.]
+   <license url="http://www.gnu.org/licenses/gpl.html">
+      OfficeFloor is licensed under GPL (http://www.gnu.org/licenses/gpl.html)
    </license>
+
+   <url>
+      <update label="OfficeFloor" url="http://www.officefloor.net/update"/>
+   </url>
 
    <requires>
       <import plugin="org.eclipse.core.commands"/>
@@ -37,11 +41,14 @@
 
    <plugin
          id="net.officefloor.core"
-         version="0.0.1"
-         unpack="true"/>
+         download-size="0"
+         install-size="0"
+         version="0.0.1"/>
 
    <plugin
          id="net.officefloor.ui"
+         download-size="0"
+         install-size="0"
          version="0.0.1"
          unpack="false"/>
 
