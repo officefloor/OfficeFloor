@@ -52,8 +52,12 @@
 	</target>
 
 	<target name="net.officefloor.feature" depends="validate" description="Generates update site content for feature net.officefloor.feature">
+		<!-- Obtain the feature jar location -->
+		<available property="feature.dependency.path" value="${dependency.dir}/net.officefloor.feature-${version}.zip" file="${dependency.dir}/net.officefloor.feature-${version}.zip" type="file" />
+        <available property="feature.dependency.path" value="${dependency.dir}/net.officefloor.feature_${version}.bin.dist.zip" file="${dependency.dir}/net.officefloor.feature_${version}.bin.dist.zip" type="file" />
+		<fail unless="feature.dependency.path" message="Can not find dependency: net.officefloor.feature (version ${version})" />
 		<!-- Unzip the feature contents to extract directory -->
-		<unzip src="${dependency.dir}/net.officefloor.feature-${version}.zip" dest="${extract.dir}" />
+		<unzip src="${feature.dependency.path}" dest="${extract.dir}" />
 		<!-- Generate plugin content -->
 		<antcall target="net.officefloor.core" />
 		<antcall target="net.officefloor.ui" />
@@ -116,8 +120,12 @@
 	</target>
 
 	<target name="net.officefloor.plugins.feature" depends="validate" description="Generates update site content for feature net.officefloor.plugins.feature">
+        <!-- Obtain the feature plugins jar location -->
+        <available property="plugins.feature.dependency.path" value="${dependency.dir}/net.officefloor.plugins.feature-${version}.zip" file="${dependency.dir}/net.officefloor.plugins.feature-${version}.zip" type="file" />
+        <available property="plugins.feature.dependency.path" value="${dependency.dir}/net.officefloor.plugins.feature_${version}.bin.dist.zip" file="${dependency.dir}/net.officefloor.plugins.feature_${version}.bin.dist.zip" type="file" />
+        <fail unless="plugins.feature.dependency.path" message="Can not find dependency: net.officefloor.feature (version ${version})" />
 		<!-- Unzip the feature contents to extract directory -->
-		<unzip src="${dependency.dir}/net.officefloor.plugins.feature-${version}.zip" dest="${extract.dir}" />
+		<unzip src="${plugins.feature.dependency.path}" dest="${extract.dir}" />
 		<!-- Generate plugin content -->
 		<antcall target="net.officefloor.filingcabinet" />
 		<antcall target="net.officefloor.jdbc" />
@@ -126,12 +134,6 @@
 		<jar basedir="${features.dir}/net.officefloor.plugins.feature_${version}" destfile="${update.site.dir}/net.officefloor.plugins.feature_${version}.jar" />
 	</target>
 
-	<target name="UpdateSite" depends="validate" description="Copies in update site files and zips up for installing as maven artifact">
-		<!-- Copy in the update site files -->
-		<copy file="${basedir}/site.xml" tofile="${update.site.dir}/site.xml" />
-		<copy file="${basedir}/mirrors.xml" tofile="${update.site.dir}/mirrors.xml" />
-	</target>
-
-	<target name="generate" depends="validate,prepare,net.officefloor.feature,net.officefloor.plugins.feature,UpdateSite" description="Runs all tasks necessary to generate the update site content" />
+	<target name="generate" depends="validate,prepare,net.officefloor.feature,net.officefloor.plugins.feature" description="Runs all tasks necessary to generate the update site content" />
 
 </project>
