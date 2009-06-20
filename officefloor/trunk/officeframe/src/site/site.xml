@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+		<breadcrumbs>
+			<item name="Frame" href="index.html" />
+		</breadcrumbs>
 		<menu name="Frame">
 			<item name="Overview" href="index.html" />
 			<item name="Job Based Architecture" href="job-based-architecture.html" />
@@ -13,6 +16,6 @@
 		<menu name="Technical">
 			<item name="Architecture" href="architecture.html" />
 		</menu>
-        <menu ref="parent" />
+		<menu ref="parent" />
 	</body>
 </project>
