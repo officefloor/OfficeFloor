@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+        <breadcrumbs>
+            <item name="Model Generator" href="index.html" />
+        </breadcrumbs>
 		<menu name="Model Generator">
 			<item name="Overview" href="index.html" />
 		</menu>

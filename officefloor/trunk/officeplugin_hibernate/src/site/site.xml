@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+        <breadcrumbs>
+            <item name="Hibernate Plugin" href="index.html" />
+        </breadcrumbs>
 		<menu name="Hibernate">
 			<item name="Overview" href="index.html" />
 		</menu>
