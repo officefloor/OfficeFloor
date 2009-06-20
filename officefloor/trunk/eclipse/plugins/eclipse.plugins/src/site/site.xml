@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+        <breadcrumbs>
+            <item name="Eclipse Plug-ins" href="index.html" />
+        </breadcrumbs>
 		<menu name="Eclipse Plug-ins">
 			<item name="Overview" href="index.html" />
 		</menu>
