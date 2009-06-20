@@ -6,6 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
+        <breadcrumbs>
+            <item name="Maven Site Skin" href="index.html" />
+        </breadcrumbs>
 		<menu name="Maven Site Skin">
 			<item name="Overview" href="index.html" />
 		</menu>
