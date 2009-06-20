@@ -6,7 +6,10 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="Filing Cabinet tool">
+        <breadcrumbs>
+            <item name="Filing Cabinet Tool" href="index.html" />
+        </breadcrumbs>
+		<menu name="Filing Cabinet">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />
