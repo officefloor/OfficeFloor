@@ -7,7 +7,7 @@
   OfficeCompiler provides a main class to run OfficeFloor from the command line.  To run from command line, use:
 
 +----------------------------------------------------------------------------------------------------------+
-       java -cp ... net.officefloor.main.OfficeFloorMain <office floor configuration file>
+       java -cp ... net.officefloor.main.OfficeFloorMain <officefloor configuration file>
 +----------------------------------------------------------------------------------------------------------+
 
   [...] represents the class path.  The class path should contain the following:
@@ -24,4 +24,4 @@
 
      * your application jar
 
-  [\<office floor configuration file\>] Specifies the location on the class path of the OfficeFloorSource configuration.
+  [\<officefloor configuration file\>] Specifies the location on the class path of the OfficeFloorSource configuration.

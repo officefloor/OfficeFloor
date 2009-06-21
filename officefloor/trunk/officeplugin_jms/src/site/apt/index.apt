@@ -1,10 +1,10 @@
                                        ---------------------------
-                                               JMS plug-in
+                                               JMS Plug-in
                                        ---------------------------
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module provides <<<ManagedObjectSources>>> to support JMS.  The module supports both consuming messages and publishing messages.
+  This module provides ManagedObjectSources to support JMS.  The module supports both consuming messages and publishing messages.
 
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
 || ManagedObjectSource                                           || Interface of object                                      || Extension interfaces |

@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_jdbc</artifactId>
-    <name>JDBC plug-in</name>
+    <name>JDBC Plug-in</name>
     <description>OfficeFloor plug-in for JDBC</description>
     <dependencies>
         <dependency>

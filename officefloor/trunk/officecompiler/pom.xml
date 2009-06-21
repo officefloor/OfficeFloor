@@ -8,8 +8,8 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officecompiler</artifactId>
-	<name>Compiler</name>
-	<description>Compiler for the OfficeFloor</description>
+	<name>OfficeCompiler</name>
+	<description>Compiler for OfficeFloor</description>
 	<build>
 		<plugins>
 			<plugin>

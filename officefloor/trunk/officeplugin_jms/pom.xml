@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_jms</artifactId>
-    <name>JMS plug-in</name>
+    <name>JMS Plug-in</name>
     <description>OfficeFloor plug-in for JMS</description>
     <dependencies>
         <dependency>

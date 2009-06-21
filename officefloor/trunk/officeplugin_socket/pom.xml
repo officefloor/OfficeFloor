@@ -7,7 +7,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_socket</artifactId>
-    <name>Socket plug-in</name>
+    <name>Socket Plug-in</name>
     <description>OfficeFloor plug-in for Sockets</description>
     <dependencies>
         <dependency>

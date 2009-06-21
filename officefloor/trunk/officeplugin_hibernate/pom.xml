@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_hibernate</artifactId>
-    <name>Hibernate plug-in</name>
+    <name>Hibernate Plug-in</name>
     <description>OfficeFloor plug-in for Hibernate</description>
     <dependencies>
         <dependency>

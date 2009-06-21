@@ -8,9 +8,9 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officemodel</artifactId>
-	<name>Model</name>
+	<name>OfficeModel</name>
 	<description>
-		OfficeFloor core model to be configured by the IDE and compiled.
+		OfficeFloor core model to be configured by the graphical editors and compiled.
 	</description>
 	<build>
 		<plugins>

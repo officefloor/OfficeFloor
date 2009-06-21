@@ -16,7 +16,7 @@
     officeFloor.openOfficeFloor();
 +------------------------------------------------------------------------------+
 
-  The following snippet then illustrates how to invoke functionality within the OfficeFloor.
+  The next snippet then illustrates how to invoke functionality within the OfficeFloor.
 
 +------------------------------------------------------------------------------+
     String officeName = ...; // name of Office as per configuration
