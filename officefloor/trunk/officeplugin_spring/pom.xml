@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officeplugin_spring</artifactId>
-    <name>Spring plug-in</name>
+    <name>Spring Plug-in</name>
     <description>Integration with Spring to allow use of its BeanFactory (specifically XmlBeanFactory).</description>
     <dependencies>
         <dependency>

@@ -7,9 +7,9 @@
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="XML Plug-in" href="index.html" />
+            <item name="OfficeXml" href="index.html" />
         </breadcrumbs>
-		<menu name="XML">
+		<menu name="OfficeXml">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

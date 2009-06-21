@@ -8,7 +8,7 @@
         <version>0.0.1</version>
     </parent>
     <artifactId>officexml</artifactId>
-    <name>XML plug-in</name>
+    <name>OfficeXml</name>
     <description>
 		OXM (Object to XML Mapping) for OfficeFloor
 	</description>

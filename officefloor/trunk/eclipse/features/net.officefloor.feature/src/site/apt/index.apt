@@ -6,6 +6,6 @@
 
   This module packages up the core Eclipse plugins to create the core Eclipse feature for OfficeFloor.  The Eclipse plugins included are:
 
-   * Eclipse core
+   * Eclipse Core
 
    * Eclipse UI

@@ -4,8 +4,10 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  Office Frame derives its name from being the <frame> in a building to contain a floor.  And much like a building frame it focuses on providing the space for the floors without impeding too much on floor design.
+  OfficeFrame is the execution environment for the Jobs within the {{{job-based-architecture.html}Job Based Architecture}} of OfficeFloor.
+
+  OfficeFrame derives its name from being the 'frame' in a building to contain a floor.  Furthermore, much like a building frame it focuses on providing the space for the floors without impeding too much on floor design.
 
 [images/frame.png] OfficeFrame
-  
-  Its focus is to act more as a <virtual machine> than as a <framework>.  Please see the {{{architecture.html}architecture}} for more details.
+
+  OfficeFrame's focus is to act more as a 'virtual machine' than as a framework.  Please see OfficeFrame's {{{architecture.html}Design}} for more further information.

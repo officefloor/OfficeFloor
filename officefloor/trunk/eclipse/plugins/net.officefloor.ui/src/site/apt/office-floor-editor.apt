@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  The OfficeFloor editor provides configuration to deploy offices (applications).
+  The OfficeFloor Editor provides configuration to deploy Offices (applications).
 
   The configuration elements that can be added to an OfficeFloor are:
 
@@ -14,15 +14,15 @@
 
    * Teams
 
-  The resulting model configured by the OfficeFloor Editor is for the <<<OfficeFloorModelOfficeFloorSource>>>, which provides the deployment configuration and as such is not added to any other configurations - it is the top level configuration that specifies how applications are to be run on the hardware.
+  The resulting model configured by the OfficeFloor Editor is for the OfficeFloorModelOfficeFloorSource, which provides the deployment configuration and as such is not added to any other configurations.  It is the top level configuration that specifies how applications are to be run on the hardware.
 
 
 
 Using the OfficeFloor Editor
 
-  As the OfficeFloor Editor is graphical in nature, recorded demonstrations will be used to provide details on how to use the editor. This follows OfficeFloor's principle of performance in developer learning curves as watching <short> visual demonstrations is more effective and faster than <long> textual descriptions in gaining the necessary information to start using the editor.
+  As the OfficeFloor Editor is graphical in nature recorded demonstrations will be used to provide details on how to use the editor. This follows OfficeFloor's principle of performance in developer learning curves as watching short visual demonstrations is more effective and faster than long textual descriptions in gaining the necessary information to start using the editor.
 
-  <<TODO>> provide the following demonstrations:
+  <Future documentation to provide the following demonstrations:>
 
    [[1]] Create a new officefloor
 

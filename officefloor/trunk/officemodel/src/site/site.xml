@@ -7,9 +7,9 @@
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="Model" href="index.html" />
+            <item name="OfficeModel" href="index.html" />
         </breadcrumbs>
-		<menu name="Model">
+		<menu name="OfficeModel">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />
