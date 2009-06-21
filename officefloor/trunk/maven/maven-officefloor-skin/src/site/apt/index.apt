@@ -1,7 +1,7 @@
                                        ---------------------------
-                                            Maven Site Skin
+                                       OfficeFloor Maven Site Skin
                                        ---------------------------
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module provides the <skin> for Maven to generate the OfficeFloor web site.
+  This module provides the skin for Maven to generate the OfficeFloor web site.
