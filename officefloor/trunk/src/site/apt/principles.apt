@@ -6,23 +6,17 @@
 
   The principals behind OfficeFloor are:
 
-   * OfficeFloor is light weight - capable of running POJOs without addititional <plumbing>.
+   * Use {{{eclipse/plugins/net.officefloor.ui/graphical-configuration.html}Graphical Configuration}} to allow developers to be more productive by focusing on code instead of writing time consuming and error prone configuration by hand.
 
-   * Writing configuration files by hand is a <waste> of developer's time.  Developer's should be doing what they enjoy and do best, writing code.
+   * Organise information around the decisions made in building software applications to avoid information overload.  See {{{promote-good-design.html}Promote good design vs policing a good design}} for further information.
 
-   * Configuration should be managed similar to code - managable encapsulated modules that can be stored in SCM.
+   * Display the application in a manner that allows non-technical individuals to understand the internals of the application.  This also allows for greater transparency of applications for businesses.
 
-   * Developers need not know <everything> to make code changes.  Graphical configuration provides a what you see is what you get (WYSIWYG) approach to configuring your code and does not have <implied> patterns in the architecture that must be understood. See {{{promote-good-design.html}Promote good design vs policing a good design}}.
+   * Flexible to select only the components that suit the application by using a {{{officeframe/job-based-architecture.html}Job Based Architecture}}.
 
-   * Applications should be transparent for the business and not incur additional costs to be made transparent.  In other words, artifacts used by the developers (eg Sections) should be <easily> understandable and reviewable by non-techincal individuals.
+   * Focus on business logic of applications by using non-intrusive code execution.  For example, OfficeFloor can use POJOs without addititional 'plumbing'.
 
-   * All three areas of performance are important: system execution, rapid application development (RAD), developer learning curves.
+   * Performance is imperative and includes both application execution and rapid application development (RAD).
 
-   * Make use of only what you require and be extensible to do what is required.
-
-   * The software development lifecycle (SDLC) is <<not>> an after thought.  OfficeFloor is to encourage <good> software development practices by promoting:
-
-       * flexibility to make decisions at the <appropriate> times in the SDLC
-
-       * clear communication between the business and development team
+   * Encourage good software development practices by promoting clear communication between the business and development team.
 
