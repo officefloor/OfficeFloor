@@ -10,6 +10,7 @@
 			img="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
+		<logo name="Eclipse" href="http://www.eclipse.org/" img="http://www.officefloor.net/images/EclipseReady.jpg" />
 	</poweredBy>
 	<publishDate position="right" />
 	<version position="right" />
@@ -20,8 +21,8 @@
 	</skin>
 	<body>
 		<head>
-		    <!-- shortcut icon -->
-		    <link rel="shortcut icon" href="/favicon.ico" />
+			<!-- shortcut icon -->
+			<link rel="shortcut icon" href="/favicon.ico" />
 			<!-- Search Engine details -->
 			<meta name="keywords"
 				content="job,based,architecture,graphical,configuration,application,framework,server,inversion,control,dependency,injection,java,XML,SEDA" />
@@ -44,14 +45,14 @@
             <object><noscript><p><img src="http://apps.sourceforge.net/piwik/officefloor/piwik.php?idsite=1" alt="piwik"/></p></noscript></object>
 	    </head>
         <breadcrumbs>
-            <item name="OfficeFloor" href="http://www.officefloor.net/" />
+            <item name="OfficeFloor" href="http://www.officefloor.net" />
         </breadcrumbs>
 		<menu name="OfficeFloor">
 			<item name="Welcome" href="index.html" />
-			<item name="Demos" href="demonstration.html" />
+			<item name="Demo" href="demo.html" />
 			<item name="Principles" href="principles.html" />
 			<item name="Job Based Architecture" href="officeframe/job-based-architecture.html" />
-			<item name="Graphical Configuration" href="net.officefloor.ui/graphical-configuration.html" />
+			<item name="Graphical Configuration" href="eclipse/plugins/net.officefloor.ui/graphical-configuration.html" />
 		</menu>
 		<menu name="Start using">
 			<item name="Eclipse" href="eclipse.html" />

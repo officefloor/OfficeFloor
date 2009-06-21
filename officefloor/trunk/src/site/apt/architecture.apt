@@ -4,52 +4,57 @@
 				      Daniel Sagenschneider
 				       ------------------
 
-  The architecture stack has three distinct layers:
+  The architecture stack for OfficeFloor has three distinct layers:
 
      [[1]] {{IDE}} (Eclipse Plug-in) which populates the models that configure the {{Sources}} (building blocks of OfficeFloor).
 
-     [[1]] {{Compiler}} which compiles the {{Sources}} into the {{Frame}}
+     [[1]] {{Compiler}} which compiles the {{Sources}} into the {{Frame}}.
 
-     [[1]] {{Frame}} which is the runtime to execute the functionality of the {{Sources}}
+     [[1]] {{Frame}} which is the runtime to execute the functionality of the {{Sources}}.
 
      []
 
 [images/Architecture.png] OfficeFloor Architecture
 
-  [{Sources}] A <<<Source>>> is like a <<<javax.sql.DataSource>>> to a <<<java.sql.Connection>>>.  It is a source of a particular item used by OfficeFloor. The items are as follows:
+
+
+{Sources}
+
+  A Source is like a <<<javax.sql.DataSource>>> to a <<<java.sql.Connection>>>.  It is a Source of a particular item used by OfficeFloor. The items are as follows:
 
   [TeamSource] Provides thread pools for execution of jobs.  A thread pool is known as a Team within OfficeFloor.
 
   [WorkSource] Provides tasks grouped under work that contains the application functionality.  There may be many work types within OfficeFloor and each task is a job.  A typical example would be: work = object, tasks = methods on the object.
 
-  [ManagedObjectSource] Provides objects which are made available to tasks.  Typically the objects are such things as <<<java.sql.Connection>>>, <<<javax.jms.Message>>>, <<<java.nio.channels.SocketChannel>>> - objects you would likely dependency inject.
+  [ManagedObjectSource] Provides objects which are made available to tasks.  Typically the objects are such things as <<<java.sql.Connection>>>, <<<javax.jms.Message>>>, <<<java.nio.channels.SocketChannel>>> (objects you would likely dependency inject).
 
-  [AdministratorSource] Provides duties which can be weaved between tasks.  This allows for Aspect style functionality to handle such things as transactions, logging.  Each duty is a job.
+  [AdministratorSource] Provides duties which can be weaved between tasks.  This allows for Aspect style functionality to handle such things as transactions and logging.  Each duty is a job.
 
-  [SectionSource] Configuration of how the Work and Managed Objects are connected together.  Sections may also contain other sections to break down configuration into managable encapsulated detail.  Typically this is represented graphically so that developers and the business can work together around the diagrams to ensure the correctness of the system.
+  [SectionSource] Configuration of how the Work and Managed Objects are connected together.  Sections may also contain other sections to break down configuration into managable encapsulated detail.  Typically this is represented graphically so that developers and the business can work together on these diagrams to ensure the business requirements for the application are being met.
 
-  [OfficeSource] Configuration of an application.  An application is known as an Office within OfficeFloor.  An office provides the details of how the Sections are connected together along with specifying Administration of any tasks and assigning logical teams responsible to execute the jobs.  The reason for administration and assigning logical teams only within the Office is to abstract this away from Sections so that the developer and the business can focus on application functionality in the Sections rather than being caught up with these technical aspects.
+  [OfficeSource] Configuration of an application.  An application is known as an Office within OfficeFloor.  An Office provides the details of how the Sections are connected together along with specifying the Administration of any tasks and assigning logical Teams responsible to execute the jobs.  The reason for Administration and assigning logical Teams only within the Office is to abstract this away from Sections so that the developer and the business can focus on application functionality in the Sections rather than being caught up with these technical aspects.
 
-  [OfficeFloorSource] Configuration of deploying applications.  It is also, as you may guess, where this project got its name.  An OfficeFloor may host many Offices where each Office is made up of many Sections.  The OfficeFloor allows tuning the Offices to the hardware/network it is running on by specifying the physical teams and managed object sources of the Offices.  For example, non-blocking jobs could be assigned to a team that will have one thread per CPU allowing effective use of the hardware without causing thread contention.
+  [OfficeFloorSource] Configuration of deploying applications.  It is also where this project got its name.  An OfficeFloor may host many Offices where each Office is made up of many Sections.  The OfficeFloor allows tuning the Offices to the hardware/network it is running on by specifying the physical Teams and Managed Object Sources of the Offices.  For example, non-blocking jobs could be assigned to a Team that will have one thread per CPU allowing effective use of the hardware without causing thread contention.
 
 {IDE} (Eclipse Plug-in)
 
-  IDE providing the graphical functionality (via Eclipse's GEF) to configure the {{Sources}}.  It utilises the {{Compiler}} to obtain the <Types> from {{Sources}} so that it can graphically configure these together into the models that make up the {{Sources}} configuration.
+  The IDE provides the graphical functionality (via Eclipse's GEF) to configure the {{Sources}}.  It utilises the {{Compiler}} to obtain the 'Types' from {{Sources}} so that it can graphically configure these together into the models that make up the {{Sources}} configuration.
 
-  More information can be found {{{net.officefloor.core/index.html}here}}.
+  Further information can be found in the {{{net.officefloor.ui/index.html}Eclipse UI}} module.
 
-  OfficeFloor has been architected to support other IDE's (please get involved if you would like this to happen).  Focus, however, has been on Eclipse due to its wide adoption, GEF plug-in, and most importantly - free.
+  Eclipse has been choosen due to its wide adoption, GEF plug-in, and most importantly it's <free>.
 
 {Compiler}
 
-  The {{Compiler}} loads the {{Sources}} into the {{Frame}}.  It takes care of validating <Type> compatibility between the {{Sources}} so that the constructed application is <type safe>.  This provides <fail quickly> validation in loading the functionality into the {{Frame}}.
+  The {{Compiler}} loads the {{Sources}} into the {{Frame}}.  It takes care of validating 'Type' compatibility between the {{Sources}} so that the constructed application is type safe.  This provides fail quickly validation in loading the functionality into the {{Frame}}.
 
-  More information can be found {{{officecompiler/index.html}here}}.
+  Further information can be found in the {{{officecompiler/index.html}Compiler}} module.
 
 {Frame}
 
-  The {{Frame}} is the core of the job based architecture that gives OfficeFloor its performance.
+  The {{Frame}} is the core of the {{{job-based-architecture.html}Job Based Architecture}} that gives OfficeFloor its performance.
 
-  It enables simplifying functionality of an application down into jobs, where each type of job is executed by a particular team (name used by OfficeFloor for a thread pool).
-  
-  More information can be found {{{officeframe/index.html}here}}.
+  It simplifies the functionality of an application into Jobs where each type of Job is executed by a particular Team.
+
+  Further information can be found in the {{{officeframe/index.html}Frame}} module.
+
