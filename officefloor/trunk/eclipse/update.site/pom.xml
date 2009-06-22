@@ -11,7 +11,7 @@
 	</artifactId>
 	<name>Eclipse Update Site</name>
 	<description>
-		Generates update site content for Office Floor Eclipse.
+		Generates update site content for OfficeFloor in Eclipse.
 	</description>
 	<packaging>pom</packaging>
 	<build>

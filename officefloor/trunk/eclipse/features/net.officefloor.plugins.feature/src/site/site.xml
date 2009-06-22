@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Eclipse Plug-ins Feature">
+<project name="Plug-ins Eclipse Feature">
 	<bannerLeft>
-		<src>/images/OfficeFloorBannerImage.png
+		<src>images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="Eclipse Plug-ins Feature" href="index.html" />
+            <item name="Plug-ins Eclipse Feature" href="index.html" />
         </breadcrumbs>
-		<menu name="Eclipse Plug-ins Feature">
+		<menu name="Plug-ins Eclipse Feature">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

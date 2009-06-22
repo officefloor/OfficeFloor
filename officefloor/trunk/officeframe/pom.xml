@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>officeframe</artifactId>
 	<name>OfficeFrame</name>
-	<description>Frame which executes the applications</description>
+	<description>Frame that executes the applications</description>
 	<build>
 		<plugins>
 			<plugin>
