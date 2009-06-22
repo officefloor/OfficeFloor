@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="JDBC plug-in">
+<project name="JDBC Plug-in">
 	<bannerLeft>
-		<src>/images/OfficeFloorBannerImage.png
+		<src>images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="JDBC Plugin" href="index.html" />
+            <item name="JDBC Plug-in" href="index.html" />
         </breadcrumbs>
-		<menu name="JDBC">
+		<menu name="JDBC Plug-in">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

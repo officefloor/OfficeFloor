@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Filing Cabinet tool">
+<project name="Filing Cabinet Tool">
 	<bannerLeft>
-		<src>/images/OfficeFloorBannerImage.png
+		<src>images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
@@ -9,7 +9,7 @@
         <breadcrumbs>
             <item name="Filing Cabinet Tool" href="index.html" />
         </breadcrumbs>
-		<menu name="Filing Cabinet">
+		<menu name="Filing Cabinet Tool">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

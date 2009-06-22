@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="JMS plug-in">
+<project name="JMS Plug-in">
 	<bannerLeft>
-		<src>/images/OfficeFloorBannerImage.png
+		<src>images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="JMS Plugin" href="index.html" />
+            <item name="JMS Plug-in" href="index.html" />
         </breadcrumbs>
-		<menu name="JMS">
+		<menu name="JMS Plug-in">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

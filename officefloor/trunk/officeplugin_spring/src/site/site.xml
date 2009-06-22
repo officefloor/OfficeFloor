@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Spring plug-in">
+<project name="Spring Plug-in">
 	<bannerLeft>
-		<src>/images/OfficeFloorBannerImage.png
+		<src>images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
         <breadcrumbs>
-            <item name="Spring Plugin" href="index.html" />
+            <item name="Spring Plug-in" href="index.html" />
         </breadcrumbs>
-		<menu name="Spring">
+		<menu name="Spring Plug-in">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />

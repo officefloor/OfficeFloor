@@ -11,8 +11,8 @@
 	</parent>
 	<artifactId>net.officefloor.plugins.feature
 	</artifactId>
-	<name>Eclipse Plugins Feature</name>
-	<description>Feature for the additional plug-ins for Eclipse</description>
+	<name>Plug-ins Eclipse Feature</name>
+	<description>Eclipse Feature for the additional OfficeFloor Plug-ins</description>
 	<packaging>zip</packaging>
 	<build>
 		<plugins>
