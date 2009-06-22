@@ -6,11 +6,11 @@
 
   The architecture stack for OfficeFloor has three distinct layers:
 
-     [[1]] {{IDE}} (Eclipse Plug-in) which populates the models that configure the {{Sources}} (building blocks of OfficeFloor).
+     [[1]] {{{Graphical}Graphical Editors}} as plugins to the Eclipse IDE that populate the models that configure the {{Sources}} (building blocks of OfficeFloor).
 
-     [[1]] {{Compiler}} which compiles the {{Sources}} into the {{Frame}}.
+     [[1]] {{OfficeCompiler}} which compiles the {{Sources}} into the {{OfficeFrame}}.
 
-     [[1]] {{Frame}} which is the runtime to execute the functionality of the {{Sources}}.
+     [[1]] {{OfficeFrame}} which is the runtime to execute the functionality of the {{Sources}}.
 
      []
 
@@ -36,25 +36,25 @@
 
   [OfficeFloorSource] Configuration of deploying applications.  It is also where this project got its name.  An OfficeFloor may host many Offices where each Office is made up of many Sections.  The OfficeFloor allows tuning the Offices to the hardware/network it is running on by specifying the physical Teams and Managed Object Sources of the Offices.  For example, non-blocking jobs could be assigned to a Team that will have one thread per CPU allowing effective use of the hardware without causing thread contention.
 
-{IDE} (Eclipse Plug-in)
+{Graphical} Editors
 
-  The IDE provides the graphical functionality (via Eclipse's GEF) to configure the {{Sources}}.  It utilises the {{Compiler}} to obtain the 'Types' from {{Sources}} so that it can graphically configure these together into the models that make up the {{Sources}} configuration.
+  The OfficeFloor graphical editors are plugins to the Eclipse IDE and provide the graphical functionality (via Eclipse's GEF) to configure the {{Sources}}.  The graphical editors utilise the {{OfficeCompiler}} to compile the {{Sources}} into 'types' and then graphically configures these 'types' together into the models that make up the OfficeFloor configuration.
 
-  Further information can be found in the {{{net.officefloor.ui/index.html}Eclipse UI}} module.
+  Further information can be found in the {{{eclipse/plugins/net.officefloor.ui/index.html}Eclipse UI}} module.
 
-  Eclipse has been choosen due to its wide adoption, GEF plug-in, and most importantly it's <free>.
+  Eclipse has been selected due to its wide adoption, GEF plug-in, and most importantly it's <free>.
 
-{Compiler}
+{OfficeCompiler}
 
-  The {{Compiler}} loads the {{Sources}} into the {{Frame}}.  It takes care of validating 'Type' compatibility between the {{Sources}} so that the constructed application is type safe.  This provides fail quickly validation in loading the functionality into the {{Frame}}.
+  The {{OfficeCompiler}} loads the {{Sources}} into the {{OfficeFrame}}.  It takes care of validating 'type' compatibility between the {{Sources}} so that the constructed application is type safe.  This provides fail quickly validation in loading the functionality into the {{OfficeFrame}}.
 
-  Further information can be found in the {{{officecompiler/index.html}Compiler}} module.
+  Further information can be found in the {{{officecompiler/index.html}OfficeCompiler}} module.
 
-{Frame}
+{OfficeFrame}
 
-  The {{Frame}} is the core of the {{{job-based-architecture.html}Job Based Architecture}} that gives OfficeFloor its performance.
+  The {{OfficeFrame}} is the core of the {{{job-based-architecture.html}Job Based Architecture}} that gives OfficeFloor its performance.
 
   It simplifies the functionality of an application into Jobs where each type of Job is executed by a particular Team.
 
-  Further information can be found in the {{{officeframe/index.html}Frame}} module.
+  Further information can be found in the {{{officeframe/index.html}OfficeFrame}} module.
 
