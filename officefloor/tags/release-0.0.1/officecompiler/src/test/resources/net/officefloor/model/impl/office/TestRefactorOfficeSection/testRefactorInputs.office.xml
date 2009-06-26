@@ -1,0 +1,9 @@
+<office>
+	<sections>
+		<section name="NAME" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<input name="CHANGE_DETAILS" parameter-type="java.lang.Integer" />
+			<input name="RENAME_NEW" parameter-type="java.lang.Object" />
+		</section>
+	</sections>
+</office>
