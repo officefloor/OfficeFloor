@@ -25,9 +25,9 @@
 			<link rel="shortcut icon" href="/favicon.ico" />
 			<!-- Search Engine details -->
 			<meta name="keywords"
-				content="job,based,architecture,graphical,configuration,application,framework,server,inversion,control,dependency,injection,java,XML,SEDA" />
+				content="job,based,architecture,graphical,configuration,framework,server,inversion,control,dependency,injection,java,XML,SEDA" />
 			<meta name="description"
-				content="OfficeFloor simplifies the development of high performance systems" />
+				content="OfficeFloor simplifies the development of high performance applications" />
 			<!-- Piwik -->
 			<script type="text/javascript">
 				var pkBaseURL = (("https:" ==
