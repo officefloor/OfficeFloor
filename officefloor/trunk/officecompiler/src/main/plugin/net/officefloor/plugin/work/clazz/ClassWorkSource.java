@@ -19,6 +19,8 @@ package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ import net.officefloor.frame.api.execute.Work;
 /**
  * {@link WorkSource} for a {@link Class} having the {@link Object} as the
  * {@link Work} and {@link Method} instances as the {@link Task} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
@@ -148,8 +150,16 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 										+ FlowInterface.class.getName());
 					}
 
-					// Create a flow for each method of the interface
+					// Obtain the methods sorted (deterministic order)
 					Method[] flowMethods = paramType.getMethods();
+					Arrays.sort(flowMethods, new Comparator<Method>() {
+						@Override
+						public int compare(Method a, Method b) {
+							return a.getName().compareTo(b.getName());
+						}
+					});
+
+					// Create a flow for each method of the interface
 					Map<String, FlowMethodMetaData> flowMethodMetaDatas = new HashMap<String, FlowMethodMetaData>(
 							flowMethods.length);
 					for (int m = 0; m < flowMethods.length; m++) {

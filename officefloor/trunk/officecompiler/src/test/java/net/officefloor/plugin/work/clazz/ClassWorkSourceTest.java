@@ -34,7 +34,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Test the {@link ClassWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSourceTest extends OfficeFrameTestCase {
@@ -47,7 +47,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -79,19 +79,18 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		instanceMethod.setReturnType(String.class);
 		instanceMethod.addObject(String.class).setLabel(
 				String.class.getSimpleName());
-		instanceMethod.addFlow().setLabel("sequential");
-		TaskFlowTypeBuilder<?> parallel = instanceMethod.addFlow();
-		parallel.setLabel("parallel");
-		parallel.setArgumentType(Integer.class);
 		TaskFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
 		asynchronous.setLabel("asynchronous");
 		asynchronous.setArgumentType(String.class);
+		TaskFlowTypeBuilder<?> parallel = instanceMethod.addFlow();
+		parallel.setLabel("parallel");
+		parallel.setArgumentType(Integer.class);
+		instanceMethod.addFlow().setLabel("sequential");
 		instanceMethod.addEscalation(IOException.class);
 
 		// taskFailMethod
-		TaskTypeBuilder<?, ?> failMethod = work.addTaskType(
-				"taskFailMethod", new ClassTaskFactory(null, false, null),
-				null, null);
+		TaskTypeBuilder<?, ?> failMethod = work.addTaskType("taskFailMethod",
+				new ClassTaskFactory(null, false, null), null, null);
 		failMethod.addEscalation(SQLException.class);
 
 		// taskStaticMethod
@@ -117,6 +116,11 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		final String PARAMETER_VALUE = "PARAMETER";
 		final String RETURN_VALUE = "INSTANCE RETURN VALUE";
 
+		// Index order of flows due to sorting by method name
+		final int SEQUENTIAL_FLOW_INDEX = 2;
+		final int PARALLEL_FLOW_INDEX = 1;
+		final int ASYNCHRONOUS_FLOW_INDEX = 0;
+
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
@@ -134,12 +138,12 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.taskContext, this.taskContext.getWork(), work);
 		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
 				PARAMETER_VALUE);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(0, null),
-				ignoreFlowFuture);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(1,
-				new Integer(1)), ignoreFlowFuture);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(2,
-				PARAMETER_VALUE), flowFuture);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(
+				SEQUENTIAL_FLOW_INDEX, null), ignoreFlowFuture);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(
+				PARALLEL_FLOW_INDEX, new Integer(1)), ignoreFlowFuture);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(
+				ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE), flowFuture);
 		this.taskContext.join(flowFuture, 1000, "TOKEN");
 
 		// Replay the mock objects
@@ -250,7 +254,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Resets for the next test.
-		 * 
+		 *
 		 * @param expectedContext
 		 *            Expected {@link TaskContext}.
 		 */
@@ -320,7 +324,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Parallel invocation.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter.
 		 */
@@ -328,7 +332,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Asynchronous invocation.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter.
 		 * @return {@link FlowFuture}.
