@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Office Floor Eclipse Socket Extension
+Bundle-Name: Eclipse Socket
 Bundle-SymbolicName: net.officefloor.socket;singleton:=true
 Bundle-Version: 0.0.1
 Bundle-Vendor: Daniel Sagenschneider
@@ -13,6 +13,15 @@ Import-Package: org.eclipse.swt,
  org.eclipse.swt.events,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets
+Export-Package: net.officefloor.eclipse.socket,
+ net.officefloor.plugin.impl.socket.server,
+ net.officefloor.plugin.impl.socket.server.messagesegment,
+ net.officefloor.plugin.socket.server.http,
+ net.officefloor.plugin.socket.server.http.api,
+ net.officefloor.plugin.socket.server.http.parse,
+ net.officefloor.plugin.socket.server.spi,
+ net.officefloor.plugin.socket.server.tcp,
+ net.officefloor.plugin.socket.server.tcp.api
 Bundle-ClassPath: .,
  commons-codec-1.2.jar,
  commons-httpclient-3.1.jar,
@@ -26,12 +35,3 @@ Bundle-ClassPath: .,
  officemodel-0.0.1.jar,
  officeplugin_socket-0.0.1.jar,
  officexml-0.0.1.jar
-Export-Package: net.officefloor.eclipse.socket,
- net.officefloor.plugin.impl.socket.server,
- net.officefloor.plugin.impl.socket.server.messagesegment,
- net.officefloor.plugin.socket.server.http,
- net.officefloor.plugin.socket.server.http.api,
- net.officefloor.plugin.socket.server.http.parse,
- net.officefloor.plugin.socket.server.spi,
- net.officefloor.plugin.socket.server.tcp,
- net.officefloor.plugin.socket.server.tcp.api
