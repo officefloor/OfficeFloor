@@ -72,7 +72,7 @@ import org.eclipse.ui.ide.IDE;
  * This provides the implementation of a {@link NodeEditPart} but does not
  * implement the interface. Subclasses may therefore choose to implement the
  * interface if it requires this functionality.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enum<E>, F extends OfficeFloorFigure>
@@ -97,7 +97,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	/**
 	 * Specifies the {@link AbstractOfficeFloorEditor} that contains this
 	 * {@link EditPart}.
-	 * 
+	 *
 	 * @param editor
 	 *            Editor containing this.
 	 */
@@ -107,7 +107,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Obtains the Editor for this.
-	 * 
+	 *
 	 * @return Editor for this.
 	 */
 	public AbstractOfficeFloorEditor<?, ?> getEditor() {
@@ -119,7 +119,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * Specifies the location for the figure.
 	 * <p>
 	 * This is utilised by {@link MovePositionalModelCommand}.
-	 * 
+	 *
 	 * @param location
 	 *            Location for the figure.
 	 */
@@ -136,7 +136,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	/**
 	 * Opens the {@link IFile} that corresponds to the input class path location
 	 * of the {@link IProject} containing this {@link IEditorInput}.
-	 * 
+	 *
 	 * @param classpathFilePath
 	 *            Path of the file on the class path to open.
 	 * @param editorId
@@ -184,7 +184,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Creates the {@link BeanDialog} for the input bean.
-	 * 
+	 *
 	 * @param bean
 	 *            Bean.
 	 * @param ignoreProperties
@@ -209,7 +209,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Displays the message as an error {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Error message.
 	 */
@@ -220,7 +220,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	/**
 	 * Displays the {@link Throwable} error details as an error
 	 * {@link MessageDialog}.
-	 * 
+	 *
 	 * @param error
 	 *            Error.
 	 */
@@ -230,7 +230,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Displays the message and its cause as an error {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Error message.
 	 * @param cause
@@ -242,7 +242,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Displays the {@link IStatus} error.
-	 * 
+	 *
 	 * @param status
 	 *            {@link IStatus} error.
 	 */
@@ -252,7 +252,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Displays the message as a warning {@link MessageDialog}.
-	 * 
+	 *
 	 * @param message
 	 *            Warning message
 	 */
@@ -287,14 +287,14 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Obtains the {@link Enum} type for the property change events.
-	 * 
+	 *
 	 * @return {@link Enum} type for the property change events.
 	 */
 	protected abstract Class<E> getPropertyChangeEventType();
 
 	/**
 	 * Handles the {@link PropertyChangeEvent}.
-	 * 
+	 *
 	 * @param property
 	 *            {@link Enum} property change event.
 	 * @param evt
@@ -342,7 +342,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Sub classes may override to populate the {@link OfficeFloorEditPolicy}.
-	 * 
+	 *
 	 * @param policy
 	 *            {@link OfficeFloorEditPolicy} to populate.
 	 */
@@ -353,7 +353,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	/**
 	 * Sub classes may override to populate the
 	 * {@link OfficeFloorDirectEditPolicy}.
-	 * 
+	 *
 	 * @param policy
 	 *            {@link OfficeFloorDirectEditPolicy} to populate.
 	 */
@@ -400,7 +400,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * Obtains the {@link OfficeFloorFigure} for this {@link EditPart}.
 	 * <p>
 	 * This will lazy create the {@link OfficeFloorFigure}.
-	 * 
+	 *
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	public F getOfficeFloorFigure() {
@@ -418,7 +418,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * By default this will return <code>true</code> only if the parent
 	 * {@link EditPart} is a {@link AbstractOfficeFloorDiagramEditPart}.
 	 * Typically this default behaviour will cover most scenarios.
-	 * 
+	 *
 	 * @return <code>true</code> if {@link IFigure} needs a
 	 *         {@link FreeformWrapperFigure}.
 	 */
@@ -426,13 +426,13 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 		// Obtain the parent edit part
 		EditPart parent = this.getParent();
-		boolean isFreeForm = (parent instanceof AbstractOfficeFloorDiagramEditPart);
+		boolean isFreeForm = (parent instanceof AbstractOfficeFloorDiagramEditPart<?>);
 		return isFreeForm;
 	}
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for this {@link EditPart}.
-	 * 
+	 *
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	protected abstract F createOfficeFloorFigure();
@@ -461,7 +461,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Override to populate the children of this model.
-	 * 
+	 *
 	 * @param childModels
 	 *            List to be populated with the children models.
 	 */
@@ -483,7 +483,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Populates the Models that are sources of connections.
-	 * 
+	 *
 	 * @param models
 	 *            List to be populated with Models that are the sources of
 	 *            connections.
@@ -506,7 +506,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Populates the Models that are targets of connections.
-	 * 
+	 *
 	 * @param models
 	 *            List to be populated with Models that are the targets of
 	 *            connections.
@@ -534,7 +534,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Obtains the model casted to its specific type.
-	 * 
+	 *
 	 * @return Model casted to its specific type.
 	 */
 	@SuppressWarnings( { "unchecked" })
@@ -544,7 +544,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	/**
 	 * Executes the input {@link Command}.
-	 * 
+	 *
 	 * @param command
 	 *            {@link Command}.
 	 */

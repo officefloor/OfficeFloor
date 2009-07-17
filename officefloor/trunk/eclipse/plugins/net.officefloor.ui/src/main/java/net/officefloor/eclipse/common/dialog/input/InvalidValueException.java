@@ -19,14 +19,16 @@ package net.officefloor.eclipse.common.dialog.input;
 
 /**
  * Indicates the property value is invalid.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class InvalidValueException extends Exception {
 
+
+
 	/**
 	 * Only allow message that is displayed back to the user.
-	 * 
+	 *
 	 * @param message
 	 *            Message that is to be displayed back to the user.
 	 */

@@ -92,7 +92,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	 * {@link WorkSource} class.
 	 */
 	@SuppressWarnings("unchecked")
-	private Class<? extends WorkSource> workSourceClass;
+	private Class workSourceClass;
 
 	/**
 	 * {@link PropertyList}.
@@ -150,6 +150,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * Attempts to load the {@link WorkType}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void loadWorkType() {
 		// Attempt to load the work type
 		this.workType = this.workLoader.loadWorkType(this.workSourceClass,
