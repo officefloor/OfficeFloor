@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Office Floor Filing Cabinet
+Bundle-Name: Eclipse Filing Cabinet
 Bundle-SymbolicName: net.officefloor.filingcabinet;singleton:=true
 Bundle-Version: 0.0.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
