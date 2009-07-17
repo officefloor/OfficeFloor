@@ -42,14 +42,14 @@ import org.eclipse.core.resources.IProject;
 
 /**
  * Utility class for working with the {@link Model} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ModelUtil {
 
 	/**
 	 * Obtains the {@link WorkType} for the {@link WorkModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel}.
 	 * @param editor
@@ -95,7 +95,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link OfficeFloorManagedObjectSourceModel}.
-	 * 
+	 *
 	 * @param managedObjectSource
 	 *            {@link OfficeFloorManagedObjectSourceModel}.
 	 * @param editor
@@ -121,7 +121,7 @@ public class ModelUtil {
 		ClassLoader classLoader = compiler.getClassLoader();
 
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource> managedObjectSourceClass = obtainClass(
+		Class managedObjectSourceClass = obtainClass(
 				managedObjectSource.getManagedObjectSourceClassName(),
 				ManagedObjectSource.class, classLoader, editor);
 		if (managedObjectSourceClass == null) {
@@ -144,7 +144,7 @@ public class ModelUtil {
 
 	/**
 	 * Obtains the {@link OfficeSection} for the {@link OfficeSectionModel}.
-	 * 
+	 *
 	 * @param officeSection
 	 *            {@link OfficeSectionModel}.
 	 * @param compiler
@@ -195,7 +195,7 @@ public class ModelUtil {
 
 	/**
 	 * Obtains the {@link Class} by its name.
-	 * 
+	 *
 	 * @param className
 	 *            Fully qualified name of the class.
 	 * @param superType

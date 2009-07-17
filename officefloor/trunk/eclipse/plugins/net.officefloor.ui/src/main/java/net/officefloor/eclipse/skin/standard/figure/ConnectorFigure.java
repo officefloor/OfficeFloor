@@ -66,7 +66,7 @@ public class ConnectorFigure extends Figure {
 	public ConnectorFigure(ConnectorDirection direction, Color colour) {
 
 		final int SIZE = 4;
-		final int ALIGNMENT = (SIZE % 2 == 0 ? -1 : 0);
+		final int ALIGNMENT = (((SIZE % 2) == 0) ? -1 : 0);
 
 		// Specify layout
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
