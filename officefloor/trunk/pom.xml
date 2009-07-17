@@ -126,13 +126,13 @@
 						<exclude>**/*.ofp</exclude>
 						<exclude>**/*.properties</exclude>
 						<exclude>**/*.apt</exclude>
-                        <exclude>**/*.xcf</exclude>
-                        <exclude>**/*.odg</exclude>
-                        <exclude>**/*.zip</exclude>
-                        <exclude>**/*.jar</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/*.log</exclude>
-                        <exclude>**/*.args</exclude>
+						<exclude>**/*.xcf</exclude>
+						<exclude>**/*.odg</exclude>
+						<exclude>**/*.zip</exclude>
+						<exclude>**/*.jar</exclude>
+						<exclude>**/*.css</exclude>
+						<exclude>**/*.log</exclude>
+						<exclude>**/*.args</exclude>
 					</excludes>
 					<properties>
 						<currentYear>2009</currentYear>
@@ -149,12 +149,12 @@
 		<plugins>
 		</plugins>
 	</reporting>
-    <distributionManagement>
-        <site>
-            <id>officefloor.sf.net</id>
-            <url>
-                scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
-            </url>
-        </site>
-    </distributionManagement>
+	<distributionManagement>
+		<site>
+			<id>officefloor.sf.net</id>
+			<url>
+				scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
+			</url>
+		</site>
+	</distributionManagement>
 </project>
