@@ -34,7 +34,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 /**
  * Stress tests asynchronous operations by {@link AsynchronousManagedObject}
  * instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AsynchronousOperationStressTest extends
@@ -57,12 +57,12 @@ public class AsynchronousOperationStressTest extends
 	@StressTest
 	public void test_StressAsynchronousOperation_LeaderFollowerTeam()
 			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", 2, 100));
 	}
 
 	/**
 	 * Does the asynchronous operation stress test.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -145,7 +145,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * {@link Task}.
-		 * 
+		 *
 		 * @param taskOne
 		 *            {@link Task} one.
 		 * @param taskTwo
@@ -213,7 +213,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param otherTaskManagedObject
 		 *            {@link MockManagedObject} for the other {@link Task}.
 		 * @param maxRepeats
@@ -233,7 +233,7 @@ public class AsynchronousOperationStressTest extends
 
 		/**
 		 * {@link Task}.
-		 * 
+		 *
 		 * @param ownManagedObject
 		 *            {@link MockManagedObject} instance for this {@link Task}.
 		 * @param taskContext
@@ -245,7 +245,7 @@ public class AsynchronousOperationStressTest extends
 			// Output progress
 			if (this.isPrintOutput) {
 				if ((this.repeatCount > 0)
-						& ((this.repeatCount % 1000000) == 0)) {
+						& ((this.repeatCount % 100000) == 0)) {
 					AsynchronousOperationStressTest.this
 							.printMessage("Asynchronous operation "
 									+ this.repeatCount);

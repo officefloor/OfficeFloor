@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Mock implementation of the {@link Job} for testing.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 class MockTaskContainer implements Job {
@@ -32,13 +32,18 @@ class MockTaskContainer implements Job {
 	/**
 	 * Lock.
 	 */
-	protected final Object lock = new Object();
+	private final Object lock = new Object();
 
 	/**
 	 * {@link Team}.
 	 */
-	protected Team team;
-	
+	private Team team;
+
+	/**
+	 * Flag indicating if this {@link Job} has been started.
+	 */
+	private boolean isStarted = false;
+
 	/**
 	 * Flag indicating to stop processing.
 	 */
@@ -51,7 +56,7 @@ class MockTaskContainer implements Job {
 
 	/**
 	 * Obtains the lock for conditional waits.
-	 * 
+	 *
 	 * @return Lock for conditional waits.
 	 */
 	public Object getLock() {
@@ -60,7 +65,7 @@ class MockTaskContainer implements Job {
 
 	/**
 	 * Assigns this {@link MockTaskContainer} to a {@link Team}.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to assign this.
 	 * @param waitTime
@@ -68,7 +73,7 @@ class MockTaskContainer implements Job {
 	 *            {@link #isTaskReady(JobContext)} is not called.
 	 */
 	public void assignJobToTeam(Team team, int waitTime) {
-		synchronized (this.getLock()) {
+		synchronized (this.lock) {
 			// Store team
 			this.team = team;
 
@@ -77,22 +82,26 @@ class MockTaskContainer implements Job {
 
 			// Wait on processing to start
 			try {
-				this.getLock().wait(waitTime * 1000);
+				this.lock.wait(waitTime * 1000);
 			} catch (InterruptedException ex) {
 				Assert.fail("Interrupted: " + ex.getMessage());
 			}
+
+			// Ensure this job is started
+			Assert.assertTrue("Job must be started", this.isStarted);
 		}
 	}
 
 	/*
 	 * ========================== Job ======================================
 	 */
-	
+
 	@Override
 	public boolean doJob(JobContext executionContext) {
 
 		// Notify processing so assignJobToTeam may return
 		synchronized (this.lock) {
+			this.isStarted = true;
 			this.lock.notify();
 		}
 
@@ -114,8 +123,7 @@ class MockTaskContainer implements Job {
 	/**
 	 * Next {@link Job}.
 	 */
-	protected Job nextJob = null;
-
+	private Job nextJob = null;
 
 	@Override
 	public void setNextJob(Job job) {
