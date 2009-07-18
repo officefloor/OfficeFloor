@@ -22,7 +22,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link LeaderFollowerTeam}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
@@ -61,8 +61,15 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * High load test.
+	 */
+	public void testHighLoad() {
+		this.leaderFollowerTest(100, 100);
+	}
+
+	/**
 	 * Runs the test on the {@link LeaderFollowerTeam}.
-	 * 
+	 *
 	 * @param teamMemberCount
 	 *            Count of workers in the team.
 	 */
@@ -71,12 +78,21 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		// Create the team and start it working
 		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
 		this.team.startWorking();
+		System.out.println("Team started");
+
+		// Wait some time before assigning tasks
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException ex) {
+			fail("Failed to wait before assigning tasks");
+		}
 
 		// Assign tasks and wait on them to be started for execution
 		MockTaskContainer[] tasks = new MockTaskContainer[taskCount];
 		for (int i = 0; i < taskCount; i++) {
 			tasks[i] = new MockTaskContainer();
 			tasks[i].assignJobToTeam(this.team, 10);
+			System.out.println("Task " + i + " running");
 		}
 
 		// Obtain the team members
@@ -92,6 +108,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 
 		// Stop processing (should have all teams finished)
 		this.team.stopWorking();
+		System.out.println("Team stopped");
 
 		// Ensure each team member has stopped working
 		for (int i = 0; i < teamMembers.length; i++) {
