@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Appends data to the {@link BufferStream}.
@@ -32,18 +33,42 @@ public interface OutputBufferStream {
 	 * Obtains an {@link OutputStream} that writes content to the
 	 * {@link BufferStream}.
 	 * <p>
-	 * This allows using existing stream implementations.
+	 * This allows use of existing stream implementations.
 	 *
 	 * @return {@link OutputStream}.
 	 */
 	OutputStream getOutputStream();
 
 	/**
-	 * Writes a single byte to the {@link BufferStream}.
+	 * <p>
+	 * Writes the bytes to the {@link BufferStream}.
+	 * <p>
+	 * The bytes are copied into the {@link BufferStream} so that the input
+	 * array is no longer required.
 	 *
-	 * @param b
-	 *            Byte to be written to the {@link BufferStream}.
+	 * @param bytes
+	 *            Bytes to be written to the {@link BufferStream}.
+	 * @throws IOException
+	 *             If fails to write the bytes.
 	 */
-	void write(byte b) throws IOException;
+	void write(byte[] bytes) throws IOException;
+
+	/**
+	 * <p>
+	 * Appends the {@link ByteBuffer} to the {@link BufferStream}.
+	 * <p>
+	 * The input {@link ByteBuffer} is used directly by the {@link BufferStream}
+	 * and must not be changed until the {@link BufferStream} is no longer being
+	 * used.
+	 *
+	 * @param buffer
+	 *            {@link ByteBuffer} ready to be read from.
+	 */
+	void append(ByteBuffer buffer) throws IOException;
+
+	/**
+	 * Closes the stream releasing resources.
+	 */
+	void close();
 
 }

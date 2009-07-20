@@ -17,10 +17,14 @@
  */
 package net.officefloor.plugin.stream.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import net.officefloor.plugin.stream.BufferProcessException;
+import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * {@link InputBufferStream} implementation.
@@ -59,8 +63,24 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	}
 
 	@Override
-	public int read(byte[] readBuffer) {
+	public int read(byte[] readBuffer) throws IOException {
 		return this.bufferStream.read(readBuffer);
+	}
+
+	@Override
+	public int read(BufferProcessor processor) throws IOException,
+			BufferProcessException {
+		return this.bufferStream.read(processor);
+	}
+
+	@Override
+	public int read(OutputBufferStream outputBufferStream) throws IOException {
+		return this.bufferStream.read(outputBufferStream);
+	}
+
+	@Override
+	public void close() {
+		this.bufferStream.closeInput();
 	}
 
 }

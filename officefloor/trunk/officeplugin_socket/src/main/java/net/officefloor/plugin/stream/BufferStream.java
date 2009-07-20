@@ -18,6 +18,7 @@
 package net.officefloor.plugin.stream;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Stream of buffers.
@@ -25,6 +26,11 @@ import java.io.IOException;
  * @author Daniel Sagenschneider
  */
 public interface BufferStream {
+
+	/**
+	 * Value returned from read operations to indicate end of stream.
+	 */
+	static int END_OF_STREAM = -1;
 
 	/*
 	 * ================= Write Functionality ===========================
@@ -38,14 +44,32 @@ public interface BufferStream {
 	OutputBufferStream getOutputBufferStream();
 
 	/**
-	 * Writes the byte to the {@link BufferStream}.
+	 * Writes the bytes to the {@link BufferStream}.
 	 *
-	 * @param b
-	 *            Byte.
+	 * @param bytes
+	 *            Bytes to be written to the {@link BufferStream}.
 	 * @throws IOException
-	 *             If fails to write byte.
+	 *             If fails to write the bytes.
 	 */
-	void write(byte b) throws IOException;
+	void write(byte[] bytes) throws IOException;
+
+	/**
+	 * Appends the {@link ByteBuffer} to the {@link BufferStream}.
+	 *
+	 * @param buffer
+	 *            {@link ByteBuffer} to append.
+	 * @throws IOException
+	 *             If fails to append {@link ByteBuffer}.
+	 */
+	void append(ByteBuffer buffer) throws IOException;
+
+	/**
+	 * <p>
+	 * Closes the output to the {@link BufferStream} and releases the resources.
+	 * <p>
+	 * Further output will result in an {@link IOException}.
+	 */
+	void closeOutput();
 
 	/*
 	 * ================= Read Functionality ===========================
@@ -65,8 +89,56 @@ public interface BufferStream {
 	 * @param readBuffer
 	 *            Buffer to be loaded with the {@link BufferStream} content.
 	 * @return Number of bytes loaded into the input buffer from the
-	 *         {@link BufferStream}.
+	 *         {@link BufferStream}. Return of {@link #END_OF_STREAM} indicates
+	 *         end of stream with no bytes loaded to buffer.
+	 * @throws IOException
+	 *             If failure to read input. Typically this will be because the
+	 *             input is closed.
 	 */
-	int read(byte[] readBuffer);
+	int read(byte[] readBuffer) throws IOException;
+
+	/**
+	 * Reads and processes the contents of a {@link ByteBuffer} from the
+	 * {@link BufferStream}.
+	 *
+	 * @param processor
+	 *            {@link BufferProcessor} to process the data of the
+	 *            {@link ByteBuffer}.
+	 * @return Number of bytes in the {@link ByteBuffer} provided to the
+	 *         {@link BufferProcessor} to process. Return of
+	 *         {@link #END_OF_STREAM} indicates end of stream with the
+	 *         {@link BufferProcessor} not invoked.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 * @throws BufferProcessException
+	 *             Wraps the {@link Exception} thrown by the
+	 *             {@link BufferProcessor} in processing the {@link ByteBuffer}.
+	 */
+	int read(BufferProcessor processor) throws IOException,
+			BufferProcessException;
+
+	/**
+	 * Reads data from this {@link BufferStream} to the
+	 * {@link OutputBufferStream}.
+	 *
+	 * @param outputBufferStream
+	 *            {@link OutputBufferStream} to receive the data.
+	 * @return Number of bytes transferred to the {@link OutputBufferStream}.
+	 *         Return of {@link BufferStream#END_OF_STREAM} indicates end of
+	 *         stream.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 */
+	int read(OutputBufferStream outputBufferStream) throws IOException;
+
+	/**
+	 * <p>
+	 * Closes the input to the {@link BufferStream} and releases the resources.
+	 * <p>
+	 * Further output will be ignored.
+	 */
+	void closeInput();
 
 }
