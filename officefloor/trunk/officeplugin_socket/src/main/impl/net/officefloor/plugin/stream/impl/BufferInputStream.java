@@ -59,14 +59,25 @@ public class BufferInputStream extends InputStream {
 
 		// Attempt to read from the buffer stream
 		int size = this.input.read(this.readBuffer);
-		if (size == 0) {
+		switch (size) {
+		case -1:
+			// End of stream
+			return size;
+
+		case 0:
 			// Must have content as will not block waiting for content
 			throw new NoBufferStreamContentException();
-		}
 
-		// Return the byte read
-		int b = this.readBuffer[0];
-		return b;
+		default:
+			// Return the byte read
+			int b = this.readBuffer[0];
+			return b;
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.input.close();
 	}
 
 }

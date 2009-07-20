@@ -35,6 +35,11 @@ public class BufferOutputStream extends OutputStream {
 	private final OutputBufferStream output;
 
 	/**
+	 * Write buffer to allow writing a byte at a time.
+	 */
+	private final byte[] writeBuffer = new byte[1];
+
+	/**
 	 * Initiate.
 	 *
 	 * @param output
@@ -50,7 +55,18 @@ public class BufferOutputStream extends OutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
-		this.output.write((byte) b);
+		this.writeBuffer[0] = (byte) b;
+		this.output.write(this.writeBuffer);
+	}
+
+	@Override
+	public void write(byte[] b) throws IOException {
+		this.output.write(b);
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.output.close();
 	}
 
 }

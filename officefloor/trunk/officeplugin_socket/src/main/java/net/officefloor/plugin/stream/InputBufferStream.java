@@ -19,6 +19,7 @@ package net.officefloor.plugin.stream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Retreives input from the {@link BufferStream}.
@@ -46,8 +47,54 @@ public interface InputBufferStream {
 	 * @param readBuffer
 	 *            Buffer to load {@link BufferStream} content.
 	 * @return Number of bytes loaded into the buffer from the
-	 *         {@link BufferStream}.
+	 *         {@link BufferStream}. Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream with
+	 *         no bytes loaded to buffer.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
 	 */
-	int read(byte[] readBuffer);
+	int read(byte[] readBuffer) throws IOException;
+
+	/**
+	 * Reads and processes the contents of a {@link ByteBuffer} from the
+	 * {@link BufferStream}.
+	 *
+	 * @param processor
+	 *            {@link BufferProcessor} to process the data of the
+	 *            {@link ByteBuffer}.
+	 * @return Number of bytes in the {@link ByteBuffer} provided to the
+	 *         {@link BufferProcessor} to process. Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream with
+	 *         the {@link BufferProcessor} not invoked.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 * @throws BufferProcessException
+	 *             Wraps the {@link Exception} thrown by the
+	 *             {@link BufferProcessor} in processing the {@link ByteBuffer}.
+	 */
+	int read(BufferProcessor processor) throws IOException,
+			BufferProcessException;
+
+	/**
+	 * Reads data from this {@link BufferStream} to the
+	 * {@link OutputBufferStream}.
+	 *
+	 * @param outputBufferStream
+	 *            {@link OutputBufferStream} to receive the data.
+	 * @return Number of bytes transferred to the {@link OutputBufferStream}.
+	 *         Return of {@link BufferStream#END_OF_STREAM} indicates end of
+	 *         stream.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 */
+	int read(OutputBufferStream outputBufferStream) throws IOException;
+
+	/**
+	 * Closes the stream releasing resources.
+	 */
+	void close();
 
 }
