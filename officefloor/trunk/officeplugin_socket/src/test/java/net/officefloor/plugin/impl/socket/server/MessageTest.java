@@ -21,7 +21,7 @@ import net.officefloor.plugin.socket.server.spi.Message;
 
 /**
  * Tests the {@link Message} implementations.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class MessageTest extends AbstractWriteRead {

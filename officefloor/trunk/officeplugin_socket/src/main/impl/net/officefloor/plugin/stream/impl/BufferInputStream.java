@@ -20,6 +20,7 @@ package net.officefloor.plugin.stream.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.NoBufferStreamContentException;
 
@@ -57,12 +58,12 @@ public class BufferInputStream extends InputStream {
 	@Override
 	public int read() throws IOException {
 
-		// Attempt to read from the buffer stream
+		// Read from the buffer stream
 		int size = this.input.read(this.readBuffer);
 		switch (size) {
-		case -1:
+		case BufferStream.END_OF_STREAM:
 			// End of stream
-			return size;
+			return BufferStream.END_OF_STREAM;
 
 		case 0:
 			// Must have content as will not block waiting for content
@@ -73,6 +74,33 @@ public class BufferInputStream extends InputStream {
 			int b = this.readBuffer[0];
 			return b;
 		}
+	}
+
+	@Override
+	public int read(byte[] b) throws IOException {
+
+		// Read from the buffer stream
+		int size = this.input.read(b);
+		switch (size) {
+		case BufferStream.END_OF_STREAM:
+			// End of stream
+			return BufferStream.END_OF_STREAM;
+
+		case 0:
+			// Must have content as will not block waiting for content
+			throw new NoBufferStreamContentException();
+
+		default:
+			// Return the size read
+			return size;
+		}
+	}
+
+	@Override
+	public int available() throws IOException {
+		long availableLength = this.input.available();
+		return ((availableLength > Integer.MAX_VALUE) ? Integer.MAX_VALUE
+				: (int) availableLength);
 	}
 
 	@Override

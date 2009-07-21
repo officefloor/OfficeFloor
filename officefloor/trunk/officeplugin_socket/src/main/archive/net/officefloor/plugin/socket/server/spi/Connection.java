@@ -34,7 +34,7 @@ public interface Connection {
 	/**
 	 * Obtains the lock that must be <code>synchronized</code> on before
 	 * making any changes to the {@link Connection} or any of its
-	 * {@link Message} instances.
+	 * {@link Request} instances.
 	 * 
 	 * @return Lock for this {@link Connection}.
 	 */

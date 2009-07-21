@@ -17,28 +17,24 @@
  */
 package net.officefloor.plugin.stream;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * <p>
- * Wraps the {@link Exception} of the {@link BufferProcessor} in failing to
- * process the {@link ByteBuffer}.
- * <p>
- * The {@link BufferProcessor} {@link Exception} can be obtained from
- * {@link #getCause()}.
+ * Populates the {@link ByteBuffer} on an {@link OutputBufferStream} write.
  *
  * @author Daniel Sagenschneider
  */
-public class BufferProcessException extends Exception {
+public interface BufferPopulator {
 
 	/**
-	 * Initiate.
+	 * Populates the {@link ByteBuffer}.
 	 *
-	 * @param cause
-	 *            {@link BufferProcessor} {@link Exception}.
+	 * @param buffer
+	 *            {@link ByteBuffer} to be populated.
+	 * @throws IOException
+	 *             Failure to populate the {@link ByteBuffer}.
 	 */
-	public BufferProcessException(Throwable cause) {
-		super(cause);
-	}
+	void populate(ByteBuffer buffer) throws IOException;
 
 }

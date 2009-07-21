@@ -20,14 +20,14 @@ package net.officefloor.plugin.socket.server.spi;
 import java.nio.ByteBuffer;
 
 /**
- * {@link Message} to write to the client.
+ * {@link Request} to write to the client.
  * 
  * @author Daniel Sagenschneider
  */
 public interface WriteMessage extends Message {
 
 	/**
-	 * Appends the whole input data to this {@link Message}.
+	 * Appends the whole input data to this {@link Request}.
 	 * 
 	 * @param data
 	 *            Data.
@@ -35,7 +35,7 @@ public interface WriteMessage extends Message {
 	void append(byte[] data);
 
 	/**
-	 * Appends the specified input data to this {@link Message}.
+	 * Appends the specified input data to this {@link Request}.
 	 * 
 	 * @param data
 	 *            Data.
@@ -47,7 +47,7 @@ public interface WriteMessage extends Message {
 	void append(byte[] data, int offset, int length);
 
 	/**
-	 * Appends a single {@link MessageSegment} to this {@link Message}.
+	 * Appends a single {@link MessageSegment} to this {@link Request}.
 	 * 
 	 * @return Appended {@link MessageSegment}.
 	 */
@@ -61,14 +61,14 @@ public interface WriteMessage extends Message {
 	 * bytes between {@link ByteBuffer} instances.
 	 * 
 	 * @param byteBuffer
-	 *            {@link ByteBuffer} to append to this {@link Message}.
+	 *            {@link ByteBuffer} to append to this {@link Request}.
 	 * @return {@link MessageSegment} for the input {@link ByteBuffer}.
 	 */
 	MessageSegment appendSegment(ByteBuffer byteBuffer);
 
 	/**
 	 * <p>
-	 * Flags that this {@link Message} is complete and can be written in full to
+	 * Flags that this {@link Request} is complete and can be written in full to
 	 * the client.
 	 * <p>
 	 * Once invoked, no further data can be added to this {@link WriteMessage}.
@@ -76,10 +76,10 @@ public interface WriteMessage extends Message {
 	void write();
 
 	/**
-	 * Flags whether this {@link Message} has been completely written to the
+	 * Flags whether this {@link Request} has been completely written to the
 	 * client.
 	 * 
-	 * @return <code>true</code> if this {@link Message} has been completely
+	 * @return <code>true</code> if this {@link Request} has been completely
 	 *         written to the client.
 	 */
 	boolean isWritten();

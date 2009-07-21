@@ -86,10 +86,18 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testStream_OutputInputByte() throws IOException {
 		final char VALUE = 'a';
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.outputStream.write(VALUE);
+		assertEquals("Incorrect available bytes", 1, this.inputStream
+				.available());
 		int value = this.inputStream.read();
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect result", VALUE, value);
 		this.inputStream.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -122,14 +130,26 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	 */
 	public void testStream_OutputInputOutputInputByte() throws IOException {
 		final char FIRST = 'a';
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.outputStream.write(FIRST);
+		assertEquals("Incorrect available bytes", 1, this.inputStream
+				.available());
 		int first = this.inputStream.read();
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect result", FIRST, first);
 		final char SECOND = 'b';
 		this.outputStream.write(SECOND);
+		assertEquals("Incorrect available bytes", 1, this.inputStream
+				.available());
 		int second = this.inputStream.read();
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect result", SECOND, second);
 		this.inputStream.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -141,19 +161,27 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		final byte[] content = this.createContent(this.getBufferSize() * 100);
 
 		// Write the content
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the content
 		byte[] result = new byte[content.length];
 		for (int i = 0; i < result.length; i++) {
 			result[i] = (byte) this.inputStream.read();
 		}
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Ensure correct result
 		assertEquals(content, result);
 
 		// Ensure closed
 		this.inputStream.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -166,11 +194,17 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		final byte[] content = this.createContent(this.getBufferSize() * 100);
 
 		// Write the content
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the content in one read
 		byte[] result = new byte[content.length];
 		int readSize = this.inputStream.read(result);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
 
 		// Ensure correct result
@@ -178,6 +212,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 
 		// Ensure closed
 		this.inputStream.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -189,11 +225,17 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		final byte[] content = this.createContent(this.getBufferSize() * 2);
 
 		// Write the content
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the content
 		byte[] result = new byte[content.length];
 		int readSize = this.inputStream.read(result);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect bytes read", content.length, readSize);
 
 		// Ensure correct result
@@ -201,6 +243,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 
 		// Ensure closed
 		this.inputStream.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -214,14 +258,20 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		this.outputStream.close();
 
 		// Read first byte and then should always indicate closed
+		assertEquals("Incorrect available bytes", 1, this.inputStream
+				.available());
 		assertEquals("Incorrect read byte", 'a', this.inputStream.read());
 		assertEquals("Should now be end of stream", BufferStream.END_OF_STREAM,
 				this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 
 		// Verify that from now on indicates that closed
 		for (int i = 0; i < 1000; i++) {
 			assertEquals("Should always be end of stream",
 					BufferStream.END_OF_STREAM, this.inputStream.read());
+			assertEquals("Incorrect available bytes",
+					BufferStream.END_OF_STREAM, this.inputStream.available());
 		}
 	}
 
@@ -244,8 +294,12 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 
 		// Ensure can read content before close
 		assertEquals("Incorrect read byte", 'a', this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 		assertEquals("Should now be end of stream", BufferStream.END_OF_STREAM,
 				this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -284,11 +338,17 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		byte[] content = this.createContent(this.getBufferSize());
 
 		// Write the bytes
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.output.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the bytes
 		byte[] result = new byte[content.length];
 		int readSize = this.input.read(result);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
 
 		// Ensure read results are correct
@@ -296,6 +356,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 
 		// Close the stream
 		this.input.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/**
@@ -307,18 +369,26 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		byte[] content = this.createContent(this.getBufferSize() * 100);
 
 		// Write the bytes
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.output.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the bytes
 		byte[] result = new byte[content.length];
 		int readSize = this.input.read(result);
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Ensure read results are correct
 		assertEquals(content, result);
 
 		// Close the stream
 		this.input.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 	}
 
 	/*
@@ -335,12 +405,18 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		ByteBuffer contentBuffer = ByteBuffer.wrap(content);
 
 		// Append the byte buffer
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 		this.output.append(contentBuffer);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the bytes
 		byte[] result = new byte[content.length];
 		int readSize = this.input.read(result);
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Ensure read results are correct
 		assertEquals(content, result);
@@ -356,16 +432,24 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		// Write content to the buffer
 		byte[] content = this.createContent(this.getBufferSize());
 		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the byte buffer
 		CompareBufferProcessor.assertRead(this.input, content);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Ensure data read and no further data available
 		CompareBufferProcessor.assertRead(this.input, null);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Ensure verify end of stream
 		this.output.close();
 		CompareBufferProcessor.assertEndOfStream(this.input);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 
 		// All squirts should be closed
 	}
@@ -380,16 +464,25 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		byte[] contentB = this.createContent(this.getBufferSize() / 3);
 		this.outputStream.write(contentA);
 		this.outputStream.write(contentB);
+		assertEquals("Incorrect available bytes",
+				(contentA.length + contentB.length), this.inputStream
+						.available());
 
 		// Read the buffer contents in partial chunks
 		CompareBufferProcessor.assertRead(this.input, contentA);
+		assertEquals("Incorrect available bytes", contentB.length,
+				this.inputStream.available());
 
 		// Ensure on output close that can continue reading remaining
 		this.output.close();
 		CompareBufferProcessor.assertRead(this.input, contentB);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 
 		// Ensure now end of stream
 		CompareBufferProcessor.assertEndOfStream(this.input);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 
 		// All squirts should be closed
 	}
@@ -397,8 +490,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure that appended {@link ByteBuffer} is same read {@link ByteBuffer}.
 	 */
-	public void testBuffer_SameBuffer() throws IOException,
-			BufferProcessException {
+	public void testBuffer_SameBuffer() throws IOException {
 
 		// Create buffer to append
 		byte[] content = this.createContent(10);
@@ -406,20 +498,230 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 
 		// Append the buffer
 		this.output.append(contentBuffer);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Read the buffer
 		final ByteBuffer[] processBuffer = new ByteBuffer[1];
 		this.input.read(new BufferProcessor() {
 			@Override
-			public void process(ByteBuffer buffer) throws Exception {
+			public void process(ByteBuffer buffer) {
 				processBuffer[0] = buffer;
 			}
 		});
+		assertEquals("Incorrect available bytes", 10, this.inputStream
+				.available());
 
 		// Validate buffer (not same buffer as duplicate)
 		byte[] result = new byte[content.length];
 		processBuffer[0].get(result);
 		assertEquals(content, result);
+	}
+
+	/**
+	 * Ensure can populate {@link ByteBuffer}.
+	 */
+	public void testBuffer_PopulateBuffer() throws IOException {
+
+		// Populate the content
+		byte[] content = this.createContent(this.getBufferSize());
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+		this.output.write(new LoadBufferPopulator(content));
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
+
+		// Read the content
+		this.assertInputStreamRead(content);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Close stream
+		this.input.close();
+	}
+
+	/**
+	 * Ensure can partially populate the {@link ByteBuffer}.
+	 */
+	public void testBuffer_PartialPopulateBuffer() throws IOException {
+
+		// Create the partial content
+		byte[] contentA = this.createContent(this.getBufferSize() / 3);
+		byte[] contentB = this.createContent(this.getBufferSize() / 4);
+
+		// Partially populate the content
+		this.output.write(new LoadBufferPopulator(contentA));
+		assertEquals("Incorrect available bytes", contentA.length,
+				this.inputStream.available());
+		this.output.write(new LoadBufferPopulator(contentB));
+		assertEquals("Incorrect available bytes",
+				(contentA.length + contentB.length), this.inputStream
+						.available());
+
+		// Close the output
+		this.output.close();
+
+		// Read the content
+		this.assertInputStreamRead(contentA);
+		assertEquals("Incorrect available bytes", contentB.length,
+				this.inputStream.available());
+		this.assertInputStreamRead(contentB);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+
+		// Close stream
+		this.input.close();
+	}
+
+	/*
+	 * ==================== Browse tests ================================
+	 */
+
+	/**
+	 * Ensure end of stream if no data on browse.
+	 */
+	public void testBrowse_EmptyStream() throws IOException {
+		InputStream browseStream = this.input.getBrowseStream();
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				browseStream.read());
+	}
+
+	/**
+	 * Ensure able to browse a single byte.
+	 */
+	public void testBrowse_SingleByte() throws IOException {
+
+		// Add a byte
+		this.outputStream.write('a');
+
+		// Ensure can browse the single byte
+		InputStream browseStream = this.input.getBrowseStream();
+		assertEquals("Incorrect browsed byte", 'a', browseStream.read());
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				browseStream.read());
+
+		// Ensure content still available to read
+		this.assertInputStreamRead(new byte[] { 'a' });
+
+		// Close stream
+		this.input.close();
+	}
+
+	/**
+	 * Ensure able to browse content should {@link BufferStream} have multiple
+	 * underlying {@link BufferSquirt} instances.
+	 */
+	public void testBrowse_MultipleBuffers() throws IOException {
+
+		// Write content
+		byte[] content = this.createContent(this.getBufferSize() * 3);
+		this.output.write(content);
+
+		// Browse the content
+		InputStream browseStream = this.input.getBrowseStream();
+		byte[] result = new byte[content.length];
+		int readSize = browseStream.read(result);
+		assertEquals("Incorrect read size", content.length, readSize);
+		assertEquals(content, result);
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				browseStream.read());
+
+		// Ensure content still available to read
+		this.assertInputStreamRead(content);
+
+		// Close stream
+		this.input.close();
+	}
+
+	/**
+	 * Ensure skip of empty stream works as likely override default skip
+	 * routine.
+	 */
+	public void testBrowse_SkipEmptyStream() throws IOException {
+		InputStream browseStream = this.input.getBrowseStream();
+		assertEquals("Should not skip if negative", 0, browseStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, browseStream.skip(0));
+		assertEquals("Should not skip if empty", 0, browseStream.skip(10));
+	}
+
+	/**
+	 * Ensure able to skip single byte as likely override default skip routine.
+	 */
+	public void testBrowse_SkipSingleByte() throws IOException {
+		// Add a byte
+		this.outputStream.write('a');
+
+		// Ensure can skip
+		InputStream browseStream = this.input.getBrowseStream();
+		assertEquals("Should not skip if negative", 0, browseStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, browseStream.skip(0));
+		assertEquals("Should only skip available", 1, browseStream.skip(10));
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				browseStream.read());
+
+		// Ensure content still available to read
+		this.assertInputStreamRead(new byte[] { 'a' });
+
+		// Close stream
+		this.input.close();
+	}
+
+	/**
+	 * Ensure able to skip over multiple buffers as likely override default skip
+	 * routine.
+	 */
+	public void testBrowse_SkipOverMultipleBuffers() throws IOException {
+
+		// Write content
+		byte[] content = this.createContent(this.getBufferSize() * 3);
+		this.output.write(content);
+
+		// Browse the content
+		InputStream browseStream = this.input.getBrowseStream();
+		assertEquals("Should not skip if negative", 0, browseStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, browseStream.skip(0));
+
+		// Skip into first buffer and validate position
+		int position = this.getBufferSize() / 3;
+		assertEquals("Should skip the bytes", position, browseStream
+				.skip(position));
+		byte expectedByte = content[position];
+		byte actualByte = (byte) browseStream.read();
+		assertEquals("Incorrect byte after skip", expectedByte, actualByte);
+		position++; // at next position after read
+
+		// Skip into second buffer and validate position
+		position += this.getBufferSize();
+		assertEquals("Should skip to next buffer", this.getBufferSize(),
+				browseStream.skip(this.getBufferSize()));
+		expectedByte = content[position];
+		actualByte = (byte) browseStream.read();
+		assertEquals("Incorrect byte after skip to next buffer", expectedByte,
+				actualByte);
+		position++; // at next position after read
+
+		// Verify not skipping while in middle of available data
+		assertEquals("Should not skip if negative", 0, browseStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, browseStream.skip(0));
+		expectedByte = content[position];
+		actualByte = (byte) browseStream.read();
+		assertEquals("Incorrect byte after no effect operations", expectedByte,
+				actualByte);
+		position++; // at next position after read
+
+		// Skip past end and ensure end of stream
+		int remainingPositions = content.length - position;
+		assertEquals("Should only skip remaining positions",
+				remainingPositions, browseStream.skip(content.length * 10));
+		assertEquals("Further skips should not move", 0, browseStream.skip(1));
+		assertEquals("Should be end of browse stream",
+				BufferStream.END_OF_STREAM, browseStream.read());
+
+		// Ensure content still available to read
+		this.assertInputStreamRead(content);
+
+		// Close stream
+		this.input.close();
 	}
 
 	/*
@@ -435,6 +737,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		// Populate the buffer stream
 		byte[] content = this.createContent(this.getBufferSize());
 		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
 
 		// Create another buffer stream
 		BufferStream joinStream = this.createBufferStream();
@@ -444,21 +748,30 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		int readSize = this.input.read(joinOutput);
 		assertEquals("Incorrect transfer size of bytes", content.length,
 				readSize);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
 
 		// Validate no further data in original buffer stream
 		this.outputStream.close();
 		assertEquals("No further data for original",
 				BufferStream.END_OF_STREAM, this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
 
 		// Validate data transferred to other buffer stream
 		InputBufferStream joinInput = joinStream.getInputBufferStream();
+		assertEquals("Incorrect available bytes", content.length, joinInput
+				.available());
 		byte[] result = new byte[content.length];
 		readSize = joinInput.read(result);
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
+		assertEquals("Incorrect available bytes", 0, joinInput.available());
 		assertEquals(content, result);
 
 		// Close stream
 		joinInput.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				joinInput.available());
 	}
 
 	/*
@@ -747,7 +1060,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public void process(ByteBuffer buffer) throws Exception {
+		public void process(ByteBuffer buffer) {
 
 			// Flag invoked
 			this.isProcessInvoked = true;
@@ -760,6 +1073,36 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 			byte[] actual = new byte[expected.length];
 			buffer.get(actual);
 			AbstractBufferStreamTest.assertEquals(this.expected, actual);
+		}
+	}
+
+	/**
+	 * {@link BufferPopulator} to load bytes.
+	 */
+	private static class LoadBufferPopulator implements BufferPopulator {
+
+		/**
+		 * Content to load to the {@link ByteBuffer}.
+		 */
+		private final byte[] content;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param content
+		 *            Content to load to the {@link ByteBuffer}.
+		 */
+		public LoadBufferPopulator(byte[] content) {
+			this.content = content;
+		}
+
+		/*
+		 * =================== BufferPopulator ===============================
+		 */
+
+		@Override
+		public void populate(ByteBuffer buffer) throws IOException {
+			buffer.put(this.content);
 		}
 	}
 

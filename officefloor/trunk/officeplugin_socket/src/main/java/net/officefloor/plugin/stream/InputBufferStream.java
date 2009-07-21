@@ -35,10 +35,26 @@ public interface InputBufferStream {
 	 * <p>
 	 * As the {@link BufferStream} is non-blocking any attempt to read data when
 	 * none is available will result in an {@link IOException}.
+	 * {@link InputStream#available()} is implemented to provide an accurate
+	 * size of available bytes.
 	 *
-	 * @return {@link InputStream}.
+	 * @return {@link InputStream} to read from the {@link BufferStream}.
 	 */
 	InputStream getInputStream();
+
+	/**
+	 * <p>
+	 * Obtains an {@link InputStream} that allows browsing the contents of the
+	 * {@link BufferStream} without changing the {@link BufferStream} markers.
+	 * <p>
+	 * Once the available data has been browsed, further reads will return
+	 * {@link BufferStream#END_OF_STREAM} indicating end of stream of available
+	 * data. It is therefore optional for {@link InputStream#available()} to
+	 * provide the available bytes (unlike {@link #getInputStream()}.
+	 *
+	 * @return {@link InputStream} to browse the {@link BufferStream}.
+	 */
+	InputStream getBrowseStream();
 
 	/**
 	 * Reads the content from the {@link BufferStream} into the input buffer
@@ -57,25 +73,24 @@ public interface InputBufferStream {
 	int read(byte[] readBuffer) throws IOException;
 
 	/**
+	 * <p>
 	 * Reads and processes the contents of a {@link ByteBuffer} from the
 	 * {@link BufferStream}.
+	 * <p>
+	 * If there is no data in the {@link BufferStream} then the
+	 * {@link BufferProcessor} will not be invoked.
 	 *
 	 * @param processor
 	 *            {@link BufferProcessor} to process the data of the
 	 *            {@link ByteBuffer}.
 	 * @return Number of bytes in the {@link ByteBuffer} provided to the
-	 *         {@link BufferProcessor} to process. Return of
-	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream with
-	 *         the {@link BufferProcessor} not invoked.
+	 *         {@link BufferProcessor} that were processed (read). Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream.
 	 * @throws IOException
 	 *             If fails to read input. Typically this will be because the
 	 *             input is closed.
-	 * @throws BufferProcessException
-	 *             Wraps the {@link Exception} thrown by the
-	 *             {@link BufferProcessor} in processing the {@link ByteBuffer}.
 	 */
-	int read(BufferProcessor processor) throws IOException,
-			BufferProcessException;
+	int read(BufferProcessor processor) throws IOException;
 
 	/**
 	 * Reads data from this {@link BufferStream} to the
@@ -91,6 +106,15 @@ public interface InputBufferStream {
 	 *             input is closed.
 	 */
 	int read(OutputBufferStream outputBufferStream) throws IOException;
+
+	/**
+	 * Provides an accurate number of bytes available in the
+	 * {@link BufferStream}.
+	 *
+	 * @return Number of bytes available in the {@link BufferStream}. Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream.
+	 */
+	long available();
 
 	/**
 	 * Closes the stream releasing resources.

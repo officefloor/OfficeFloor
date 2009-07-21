@@ -21,7 +21,7 @@ package net.officefloor.plugin.socket.server.spi;
  * <p>
  * Represents a message to be communicated.
  * <p>
- * <b>All changes to a {@link Message} or a {@link MessageSegment} must be done
+ * <b>All changes to a {@link Request} or a {@link MessageSegment} must be done
  * within a <code>synchronized</code> block on lock
  * {@link Connection#getLock()}.</b>
  * <p>
@@ -32,32 +32,32 @@ package net.officefloor.plugin.socket.server.spi;
 public interface Message {
 
 	/**
-	 * Obtains the {@link Connection} this {@link Message} is in.
+	 * Obtains the {@link Connection} this {@link Request} is in.
 	 * 
-	 * @return {@link Connection} this {@link Message} is in.
+	 * @return {@link Connection} this {@link Request} is in.
 	 */
 	Connection getConnection();
 
 	/**
 	 * Obtains the number of {@link MessageSegment} instances on this
-	 * {@link Message}.
+	 * {@link Request}.
 	 * 
 	 * @return Number of {@link MessageSegment} instances on this
-	 *         {@link Message}.
+	 *         {@link Request}.
 	 */
 	int getSegmentCount();
 
 	/**
-	 * Obtains the first {@link MessageSegment} of this {@link Message}.
+	 * Obtains the first {@link MessageSegment} of this {@link Request}.
 	 * 
-	 * @return First {@link MessageSegment} of this {@link Message}.
+	 * @return First {@link MessageSegment} of this {@link Request}.
 	 */
 	MessageSegment getFirstSegment();
 
 	/**
-	 * Obtains the last {@link MessageSegment} of this {@link Message}.
+	 * Obtains the last {@link MessageSegment} of this {@link Request}.
 	 * 
-	 * @return last {@link MessageSegment} of this {@link Message}.
+	 * @return last {@link MessageSegment} of this {@link Request}.
 	 */
 	MessageSegment getLastSegment();
 

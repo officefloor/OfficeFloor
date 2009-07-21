@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.impl.socket.server;
+package net.officefloor.plugin.server.socket.impl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -31,17 +31,15 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
-import net.officefloor.plugin.socket.server.spi.Message;
-import net.officefloor.plugin.socket.server.spi.MessageSegment;
-import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Accepts connections.
  *
  * @author Daniel Sagenschneider
  */
-class ServerSocketAccepter
+public class ServerSocketAccepter
 		extends
 		AbstractSingleTask<ServerSocketAccepter, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
 
@@ -58,15 +56,9 @@ class ServerSocketAccepter
 	private final ConnectionManager connectionManager;
 
 	/**
-	 * Recommended number of {@link MessageSegment} instances per
-	 * {@link Message}.
+	 * {@link BufferSquirtFactory}.
 	 */
-	private final int recommendedSegmentCount;
-
-	/**
-	 * {@link MessageSegmentPool}.
-	 */
-	private final MessageSegmentPool messageSegmentPool;
+	private final BufferSquirtFactory bufferSquirtFactory;
 
 	/**
 	 * {@link ServerSocketHandler}.
@@ -87,22 +79,18 @@ class ServerSocketAccepter
 	 *            {@link ServerSocketHandler}.
 	 * @param connectionManager
 	 *            {@link ConnectionManager}.
-	 * @param recommendedSegmentCount
-	 *            Recommended number of {@link MessageSegment} instances per
-	 *            {@link Message}.
-	 * @param messageSegmentPool
-	 *            {@link DirectBufferMessageSegmentPool}.
+	 * @param bufferSquirtFactory
+	 *            {@link BufferSquirtFactory}.
 	 * @throws IOException
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
-	ServerSocketAccepter(InetSocketAddress serverSocketAddress,
+	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
 			ServerSocketHandler<?> serverSocketHandler,
-			ConnectionManager connectionManager, int recommendedSegmentCount,
-			MessageSegmentPool messageSegmentPool) throws IOException {
+			ConnectionManager connectionManager,
+			BufferSquirtFactory bufferSquirtFactory) throws IOException {
 		this.serverSocketHandler = serverSocketHandler;
 		this.connectionManager = connectionManager;
-		this.recommendedSegmentCount = recommendedSegmentCount;
-		this.messageSegmentPool = messageSegmentPool;
+		this.bufferSquirtFactory = bufferSquirtFactory;
 		this.serverSocketAddress = serverSocketAddress;
 	}
 
@@ -176,8 +164,7 @@ class ServerSocketAccepter
 									new NonblockingSocketChannelImpl(
 											socketChannel),
 									this.serverSocketHandler,
-									this.recommendedSegmentCount,
-									this.messageSegmentPool);
+									this.bufferSquirtFactory);
 
 							// Register the connection for management
 							this.connectionManager.registerConnection(
