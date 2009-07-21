@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
@@ -63,6 +64,11 @@ public class OutputBufferStreamImpl implements OutputBufferStream {
 	@Override
 	public void write(byte[] bytes) throws IOException {
 		this.bufferStream.write(bytes);
+	}
+
+	@Override
+	public void write(BufferPopulator populator) throws IOException {
+		this.bufferStream.write(populator);
 	}
 
 	@Override

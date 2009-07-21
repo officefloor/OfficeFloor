@@ -54,6 +54,17 @@ public interface OutputBufferStream {
 	void write(byte[] bytes) throws IOException;
 
 	/**
+	 * Writes content to a {@link ByteBuffer} of the {@link BufferStream}.
+	 *
+	 * @param populator
+	 *            {@link BufferPopulator} to write data to the
+	 *            {@link ByteBuffer}.
+	 * @throws IOException
+	 *             If fails to write data to {@link ByteBuffer}.
+	 */
+	void write(BufferPopulator populator) throws IOException;
+
+	/**
 	 * <p>
 	 * Appends the {@link ByteBuffer} to the {@link BufferStream}.
 	 * <p>

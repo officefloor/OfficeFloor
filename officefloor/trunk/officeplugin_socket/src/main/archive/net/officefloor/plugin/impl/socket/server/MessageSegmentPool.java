@@ -24,14 +24,14 @@ import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
  * Pool of {@link PooledMessageSegment} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface MessageSegmentPool {
 
 	/**
 	 * Obtains the {@link ByteBuffer} size of each {@link MessageSegment}.
-	 * 
+	 *
 	 * @return {@link ByteBuffer} size of each {@link MessageSegment}.
 	 */
 	int getMessageSegmentBufferSize();
@@ -43,7 +43,7 @@ public interface MessageSegmentPool {
 	 * Should the {@link MessageSegment} have next {@link MessageSegment}
 	 * instances, they are also returned to this {@link MessageSegmentPool}.
 	 * This aids returning {@link Message} instances in bulk.
-	 * 
+	 *
 	 * @param segment
 	 *            Start {@link MessageSegment} listing to be returned to this
 	 *            {@link MessageSegmentPool}.
@@ -52,14 +52,14 @@ public interface MessageSegmentPool {
 
 	/**
 	 * Obtains a {@link PooledMessageSegment}.
-	 * 
+	 *
 	 * @return {@link PooledMessageSegment}.
 	 */
 	PooledMessageSegment getMessageSegment();
 
 	/**
 	 * Obtains a {@link PooledMessageSegment} for the input {@link ByteBuffer}.
-	 * 
+	 *
 	 * @param buffer
 	 *            {@link ByteBuffer}.
 	 * @return {@link PooledMessageSegment}.

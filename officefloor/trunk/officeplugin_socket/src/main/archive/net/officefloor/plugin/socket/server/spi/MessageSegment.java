@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
- * Segment of a {@link Message}.
+ * Segment of a {@link Request}.
  * <p>
  * Provided by the Server Socket plug-in.
  * 
@@ -38,19 +38,19 @@ public interface MessageSegment {
 
 	/**
 	 * Obtains the next {@link MessageSegment} {@link MessageSegment} in the
-	 * listing of {@link MessageSegment} instances for the {@link Message}.
+	 * listing of {@link MessageSegment} instances for the {@link Request}.
 	 * 
 	 * @return Next {@link MessageSegment} or <code>null</code> if no further
-	 *         {@link MessageSegment} instances for the {@link Message}.
+	 *         {@link MessageSegment} instances for the {@link Request}.
 	 */
 	MessageSegment getNextSegment();
 
 	/**
 	 * Obtains the previous {@link MessageSegment} in the listing of
-	 * {@link MessageSegment} instances for the {@link Message}.
+	 * {@link MessageSegment} instances for the {@link Request}.
 	 * 
 	 * @return Previous {@link MessageSegment} or <code>null</code> if no
-	 *         further {@link MessageSegment} instances for the {@link Message}.
+	 *         further {@link MessageSegment} instances for the {@link Request}.
 	 */
 	MessageSegment getPrevSegment();
 }

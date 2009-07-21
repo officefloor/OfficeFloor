@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
 
 /**
  * Stream of {@link Message} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class Stream<T extends AbstractMessage<T>> {
@@ -54,7 +54,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param messageFactory
@@ -68,7 +68,7 @@ public class Stream<T extends AbstractMessage<T>> {
 	/**
 	 * Creates a {@link AbstractMessage} and appends to listing of
 	 * {@link AbstractMessage} instances of this {@link Stream}.
-	 * 
+	 *
 	 * @param listener
 	 *            {@link WriteMessageListener}.
 	 * @return Newly created {@link AbstractMessage}.
@@ -100,7 +100,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Obtains the first {@link AbstractMessage}.
-	 * 
+	 *
 	 * @return First {@link AbstractMessage} or <code>null</code> if no
 	 *         {@link AbstractMessage} instances for this {@link Stream}.
 	 */
@@ -110,7 +110,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Obtains the last {@link AbstractMessage}.
-	 * 
+	 *
 	 * @return Last {@link AbstractMessage} or <code>null</code> if no
 	 *         {@link AbstractMessage} instances for this {@link Stream}.
 	 */
@@ -121,7 +121,7 @@ public class Stream<T extends AbstractMessage<T>> {
 	/**
 	 * Removes the input {@link AbstractMessage} and all {@link AbstractMessage}
 	 * instances before it from the {@link Connection}.
-	 * 
+	 *
 	 * @param message
 	 *            {@link AbstractMessage} to remove from this {@link Connection}.
 	 */
@@ -155,7 +155,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Writes the data to this {@link Stream}.
-	 * 
+	 *
 	 * @param data
 	 *            Data to be written to this {@link Stream}.
 	 * @param offset
@@ -231,7 +231,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Writes the {@link ByteBuffer} data to this {@link Stream}.
-	 * 
+	 *
 	 * @param data
 	 *            {@link ByteBuffer} of data.
 	 * @throws IOException
@@ -281,7 +281,7 @@ public class Stream<T extends AbstractMessage<T>> {
 
 	/**
 	 * Reads the data from this {@link Stream}.
-	 * 
+	 *
 	 * @param buffer
 	 *            Buffer to read data into.
 	 * @param offset

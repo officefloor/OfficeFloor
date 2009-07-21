@@ -18,6 +18,7 @@
 package net.officefloor.plugin.stream;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -54,6 +55,17 @@ public interface BufferStream {
 	void write(byte[] bytes) throws IOException;
 
 	/**
+	 * Writes content to a {@link ByteBuffer} of the {@link BufferStream}.
+	 *
+	 * @param populator
+	 *            {@link BufferPopulator} to write data to the
+	 *            {@link ByteBuffer}.
+	 * @throws IOException
+	 *             If fails to write data to {@link ByteBuffer}.
+	 */
+	void write(BufferPopulator populator) throws IOException;
+
+	/**
 	 * Appends the {@link ByteBuffer} to the {@link BufferStream}.
 	 *
 	 * @param buffer
@@ -81,6 +93,19 @@ public interface BufferStream {
 	 * @return {@link InputBufferStream}.
 	 */
 	InputBufferStream getInputBufferStream();
+
+	/**
+	 * <p>
+	 * Obtains an {@link InputStream} that allows browsing the contents of the
+	 * {@link BufferStream} without changing the {@link BufferStream} markers.
+	 * <p>
+	 * Once the available data has been browsed, further reads will return
+	 * {@link BufferStream#END_OF_STREAM} indicating end of stream of available
+	 * data.
+	 *
+	 * @return {@link InputStream} to browse the {@link BufferStream}.
+	 */
+	InputStream getBrowseStream();
 
 	/**
 	 * Reads the content from the {@link BufferStream} into the input buffer
@@ -111,12 +136,8 @@ public interface BufferStream {
 	 * @throws IOException
 	 *             If fails to read input. Typically this will be because the
 	 *             input is closed.
-	 * @throws BufferProcessException
-	 *             Wraps the {@link Exception} thrown by the
-	 *             {@link BufferProcessor} in processing the {@link ByteBuffer}.
 	 */
-	int read(BufferProcessor processor) throws IOException,
-			BufferProcessException;
+	int read(BufferProcessor processor) throws IOException;
 
 	/**
 	 * Reads data from this {@link BufferStream} to the
@@ -132,6 +153,15 @@ public interface BufferStream {
 	 *             input is closed.
 	 */
 	int read(OutputBufferStream outputBufferStream) throws IOException;
+
+	/**
+	 * Provides an accurate number of bytes available in the
+	 * {@link BufferStream}.
+	 *
+	 * @return Number of bytes available in the {@link BufferStream}. Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream.
+	 */
+	long available();
 
 	/**
 	 * <p>

@@ -18,7 +18,7 @@
 package net.officefloor.plugin.socket.server.spi;
 
 /**
- * {@link Message} for reading from the client.
+ * {@link Request} for reading from the client.
  * 
  * @author Daniel Sagenschneider
  */

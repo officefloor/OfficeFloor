@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.stream;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -31,9 +32,9 @@ public interface BufferProcessor {
 	 *
 	 * @param buffer
 	 *            {@link ByteBuffer} from the {@link InputBufferStream}.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to process the {@link ByteBuffer}.
 	 */
-	void process(ByteBuffer buffer) throws Exception;
+	void process(ByteBuffer buffer) throws IOException;
 
 }
