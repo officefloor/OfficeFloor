@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp;
+package net.officefloor.plugin.socket.server.tcp.source;
 
 import java.io.OutputStream;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
  * Provides for processing a {@link Messages} response.

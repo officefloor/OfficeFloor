@@ -30,13 +30,13 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.http.HttpServerStartup;
 import net.officefloor.plugin.socket.server.http.request.config.CommunicationConfig;
 import net.officefloor.plugin.socket.server.http.request.config.HeaderConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ProcessConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RequestConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ResponseConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RunConfig;
+import net.officefloor.plugin.socket.server.http.source.HttpServerStartup;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 

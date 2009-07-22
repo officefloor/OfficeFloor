@@ -18,7 +18,7 @@
 package net.officefloor.plugin.socket.server.http.parse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpStatus;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 
 /**
  * Tests the {@link HttpRequestParser}.
@@ -172,23 +172,23 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidPartialMethod() {
 		this.doInvalidMethodTest("INVALID", HttpStatus._400,
-				"Unknown method: INVALID...");
+				"Unknown method: INV...");
 	}
 
 	/**
 	 * Validates invalid method on request.
 	 */
 	public void testInvalidMethod() {
-		this.doInvalidMethodTest("INVALID /path HTTP/1.0\n\n", HttpStatus._400,
-				"Unknown method: INVALID");
+		this.doInvalidMethodTest("IV /path HTTP/1.0\n\n", HttpStatus._400,
+				"Unknown method: IV");
 	}
 
 	/**
 	 * Validates invalid partial version on request.
 	 */
 	public void testInvalidPartialVersion() {
-		this.doInvalidMethodTest("GET /path INVALID", HttpStatus._400,
-				"Unknown version: INVALID...");
+		this.doInvalidMethodTest("GET /path InvalidHttpVersion",
+				HttpStatus._400, "Unknown version: InvalidH...");
 	}
 
 	/**

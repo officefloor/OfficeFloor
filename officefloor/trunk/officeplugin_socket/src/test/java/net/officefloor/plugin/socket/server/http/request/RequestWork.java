@@ -24,9 +24,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.request.config.CommunicationConfig;
 import net.officefloor.plugin.socket.server.http.request.config.HeaderConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ProcessConfig;

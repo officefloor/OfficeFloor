@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http;
+package net.officefloor.plugin.socket.server.http.source;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -24,9 +24,13 @@ import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.socket.server.http.source.HttpConnectionHandler;
+import net.officefloor.plugin.socket.server.http.source.HttpResponseImpl;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
