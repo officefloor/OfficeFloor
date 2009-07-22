@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp;
+package net.officefloor.plugin.socket.server.tcp.source;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -24,8 +24,8 @@ import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
-import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerTcpConnection}.

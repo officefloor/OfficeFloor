@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.socket.server.http.HttpStatus;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 
 /**
  * Parser for a HTTP request.
@@ -64,13 +64,18 @@ public class HttpRequestParser {
 	private static final byte atoA = (byte) (A - a);
 
 	/**
+	 * Bytes contents for the GET method.
+	 */
+	private static final byte[] METHOD_GET = UsAscii("GET");
+
+	/**
 	 * <p>
 	 * Valid HTTP methods.
 	 * <p>
 	 * Note: order is done on most likely to occur to improve valid content
 	 * performance.
 	 */
-	private static final byte[][] HTTP_METHODS = new byte[][] { UsAscii("GET"),
+	private static final byte[][] HTTP_METHODS = new byte[][] { METHOD_GET,
 			UsAscii("POST"), UsAscii("HEAD"), UsAscii("PUT"),
 			UsAscii("DELETE"), UsAscii("OPTIONS"), UsAscii("TRACE"),
 			UsAscii("CONNECT") };
@@ -621,10 +626,13 @@ public class HttpRequestParser {
 		case START:
 			// Ensure method is valid
 			if (this.parseState == ParseState.METHOD) {
-				// Ensure content of method is valid so far
-				if (!isPartialContentValid(this.method, HTTP_METHODS)) {
-					throw new ParseException(HttpStatus._400,
-							"Unknown method: " + this.method.toString() + "...");
+				// Ensure content of method is valid (once have reasonable size)
+				if (this.method.getCharacterCount() >= METHOD_GET.length) {
+					if (!isPartialContentValid(this.method, HTTP_METHODS)) {
+						throw new ParseException(HttpStatus._400,
+								"Unknown method: " + this.method.toString()
+										+ "...");
+					}
 				}
 
 			} else if (this.parseState.ordinal() > ParseState.METHOD.ordinal()) {
@@ -642,11 +650,13 @@ public class HttpRequestParser {
 		case METHOD:
 			// Ensure version is valid
 			if (this.parseState == ParseState.VERSION) {
-				// Ensure content of version is valid so far
-				if (!isPartialContentValid(this.version, HTTP_VERSIONS)) {
-					throw new ParseException(HttpStatus._400,
-							"Unknown version: " + this.version.toString()
-									+ "...");
+				// Ensure version content valid (once have reasonable size)
+				if (this.version.getCharacterCount() >= HTTP_1_0.length()) {
+					if (!isPartialContentValid(this.version, HTTP_VERSIONS)) {
+						throw new ParseException(HttpStatus._400,
+								"Unknown version: " + this.version.toString()
+										+ "...");
+					}
 				}
 
 			} else if (this.parseState.ordinal() > ParseState.VERSION.ordinal()) {

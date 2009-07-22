@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.parse;
 
-import net.officefloor.plugin.socket.server.http.HttpStatus;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 
 /**
  * Indicates that failed to parse.
