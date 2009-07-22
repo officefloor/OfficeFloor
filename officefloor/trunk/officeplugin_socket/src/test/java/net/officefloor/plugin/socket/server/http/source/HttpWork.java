@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http;
+package net.officefloor.plugin.socket.server.http.source;
 
 import java.io.OutputStreamWriter;
 
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * Provides for processing a {@link HttpRequest}.

@@ -15,38 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp;
+package net.officefloor.plugin.socket.server.http;
+
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Provides translations of messages.
+ * HTTP connection to be handled by the {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class Messages {
+public interface ServerHttpConnection {
 
 	/**
-	 * Listing of messages.
-	 */
-	private static final String[] messages = new String[] { "Hello World",
-			"Test", "OfficeFloor" };
-
-	/**
-	 * Obtains the number of messages.
+	 * Obtains the {@link HttpRequest} for this {@link ServerHttpConnection}.
 	 * 
-	 * @return Number of messages.
+	 * @return {@link HttpRequest} for this {@link ServerHttpConnection}.
 	 */
-	public static int getSize() {
-		return messages.length;
-	}
+	HttpRequest getHttpRequest();
 
 	/**
-	 * Obtains the particular message.
+	 * Obtains the {@link HttpResponse} for this {@link ServerHttpConnection}.
 	 * 
-	 * @param index
-	 *            Index for the message.
-	 * @return Message.
+	 * @return {@link HttpResponse} for this {@link ServerHttpConnection}.
 	 */
-	public static String getMessage(int index) {
-		return messages[index];
-	}
+	HttpResponse getHttpResponse();
+
 }

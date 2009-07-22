@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http;
+package net.officefloor.plugin.socket.server.http.source;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;

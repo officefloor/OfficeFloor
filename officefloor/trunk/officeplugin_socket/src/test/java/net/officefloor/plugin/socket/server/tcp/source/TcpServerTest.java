@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp;
+package net.officefloor.plugin.socket.server.tcp.source;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -34,7 +34,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
