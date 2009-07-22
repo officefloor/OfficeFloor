@@ -17,23 +17,23 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.match.StubMatcher;
+import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.socket.server.IdleContext;
+import net.officefloor.plugin.socket.server.ReadContext;
+import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.spi.Connection;
-import net.officefloor.plugin.socket.server.spi.IdleContext;
-import net.officefloor.plugin.socket.server.spi.ReadContext;
-import net.officefloor.plugin.socket.server.spi.ReadMessage;
-import net.officefloor.plugin.socket.server.spi.WriteContext;
-import net.officefloor.plugin.socket.server.spi.WriteMessage;
+import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
@@ -59,16 +59,6 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	private ReadContext readContext = this.createMock(ReadContext.class);
 
 	/**
-	 * Mock {@link ReadMessage}.
-	 */
-	private ReadMessage readMessage = this.createMock(ReadMessage.class);
-
-	/**
-	 * Mock {@link WriteMessage}.
-	 */
-	private WriteMessage writeMessage = this.createMock(WriteMessage.class);
-
-	/**
 	 * Mock {@link WriteContext}.
 	 */
 	private WriteContext writeContext = this.createMock(WriteContext.class);
@@ -80,7 +70,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -100,26 +90,17 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 */
 	public void testSuccessfulRead() throws Exception {
 
-		// Obtain the request
+		// Obtain the request and input stream to its contents
 		String requestText = "GET /path HTTP/1.1\nhost: localhost\n\n";
 		final byte[] request = UsAsciiUtil.convertToHttp(requestText);
+		InputStream requestInputStream = new ByteArrayInputStream(request);
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
 				.currentTimeMillis());
-		this.recordReturn(this.readContext, this.readContext.getReadMessage(),
-				this.readMessage);
-		this.recordReturn(this.readMessage, this.readMessage.read(null),
-				request.length, new StubMatcher() {
-					@Override
-					protected void stub(Object[] arguments) {
-						byte[] buffer = (byte[]) arguments[0];
-						for (int i = 0; i < request.length; i++) {
-							buffer[i] = request[i];
-						}
-					}
-				});
-		this.readContext.setReadComplete(true);
+		this.recordReturn(this.readContext, this.readContext.getInputStream(),
+				requestInputStream);
+		this.readContext.requestReceived(request.length, null);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -144,15 +125,22 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 */
 	public void testInvalidRead() throws Exception {
 
+		// Create mocks
+		OutputBufferStream outputBufferStream = this
+				.createMock(OutputBufferStream.class);
+
+		// Create invalid request
 		String invalidRequestText = "Invalid Request";
 		final byte[] request = UsAsciiUtil.convertToHttp(invalidRequestText);
+		InputStream requestInputStream = new ByteArrayInputStream(request);
 
 		// Generate details of invalid response message
 		byte[] badRequestResponseHeader = null;
 		byte[] badRequestResponseDetail = null;
 		try {
-			new HttpRequestParser(1024, 1024).parseMoreContent(request, 0,
-					request.length);
+			for (int i = 0; i < request.length; i++) {
+				new HttpRequestParser(1024, 1024).parseMoreContent(request[i]);
+			}
 			fail("Test invalid as should not be able to parse request");
 		} catch (ParseException ex) {
 			// Obtain detail of bad request
@@ -170,29 +158,18 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
 				.currentTimeMillis());
-		this.recordReturn(this.readContext, this.readContext.getReadMessage(),
-				this.readMessage);
-		this.recordReturn(this.readMessage, this.readMessage.read(null),
-				request.length, new StubMatcher() {
-					@Override
-					protected void stub(Object[] arguments) {
-						byte[] buffer = (byte[]) arguments[0];
-						for (int i = 0; i < request.length; i++) {
-							buffer[i] = request[i];
-						}
-					}
-				});
+		this.recordReturn(this.readContext, this.readContext.getInputStream(),
+				requestInputStream);
 		this.recordReturn(this.connection, this.connection
-				.createWriteMessage(null), this.writeMessage);
-		this.writeMessage.append(badRequestResponseHeader, 0,
+				.getOutputBufferStream(), outputBufferStream);
+		outputBufferStream.write(badRequestResponseHeader, 0,
 				badRequestResponseHeader.length);
-		this.control(this.writeMessage).setMatcher(
+		this.control(outputBufferStream).setMatcher(
 				UsAsciiUtil.createUsAsciiMatcher());
-		this.recordReturn(this.writeMessage, this.writeMessage
-				.appendSegment(ByteBuffer.wrap(badRequestResponseDetail)),
-				null, UsAsciiUtil.createUsAsciiMatcher());
-		this.writeMessage.write();
-		this.readContext.setReadComplete(true);
+		outputBufferStream.append(ByteBuffer.wrap(badRequestResponseDetail));
+		this.control(outputBufferStream).setMatcher(
+				UsAsciiUtil.createUsAsciiMatcher());
+		this.readContext.requestReceived(0, null);
 
 		// Replay mocks
 		this.replayMockObjects();

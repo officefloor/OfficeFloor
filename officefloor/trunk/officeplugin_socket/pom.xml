@@ -25,24 +25,34 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
+								<!-- TODO add back in -->
+								<!--
 								<source>src/main/work</source>
-								<!-- TODO remove src/main/archive -->
+								-->
+								<!-- TODO remove -->
+								<!--
 								<source>src/main/archive</source>
+								-->
 							</sources>
 						</configuration>
 					</execution>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
+					<!-- TODO include back -->
+					<!--
+						<execution> <id>add-test-source</id>
+						<phase>generate-sources</phase> <goals>
+						<goal>add-test-source</goal> </goals> <configuration> <sources>
+					-->
+					<!--  TODO add back in -->
+					<!--
 								<source>src/test/work</source>
-							</sources>
-						</configuration>
-					</execution>
+								-->
+					<!-- TODO remove -->
+					<!--
+								<source>src/test/archive</source>
+								-->
+					<!--
+						</sources> </configuration> </execution>
+					-->
 				</executions>
 			</plugin>
 		</plugins>

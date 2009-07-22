@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferProcessor;
@@ -112,6 +113,20 @@ public class BufferStreamImpl implements BufferStream {
 	}
 
 	/**
+	 * Creates a new {@link BufferSquirt} from the {@link BufferSquirtFactory}
+	 * wrapping it in a new {@link ManagedBufferSquirt}.
+	 *
+	 * @return New {@link ManagedBufferSquirt}.
+	 */
+	private ManagedBufferSquirt newBufferSquirt() {
+		BufferSquirt squirt = this.squirtFactory.createBufferSquirt();
+		BufferSquirtUsage usage = new BufferSquirtUsage(squirt);
+		ManagedBufferSquirt managedSquirt = new ManagedBufferSquirt(usage,
+				squirt.getBuffer());
+		return managedSquirt;
+	}
+
+	/**
 	 * Obtains the write {@link ByteBuffer} to write further content to this
 	 * {@link BufferStream}.
 	 *
@@ -123,8 +138,7 @@ public class BufferStreamImpl implements BufferStream {
 		BufferSquirtElement element;
 		if (this.head == null) {
 			// Create first element in stream
-			element = new BufferSquirtElement(this.squirtFactory
-					.createBufferSquirt());
+			element = new BufferSquirtElement(this.newBufferSquirt());
 			this.head = element;
 			this.tail = element;
 		} else {
@@ -136,8 +150,7 @@ public class BufferStreamImpl implements BufferStream {
 		ByteBuffer buffer = element.squirt.getBuffer();
 		if (buffer.remaining() == 0) {
 			// Append new buffer and flip current last for reading
-			element = new BufferSquirtElement(this.squirtFactory
-					.createBufferSquirt());
+			element = new BufferSquirtElement(this.newBufferSquirt());
 			buffer = element.squirt.getBuffer();
 			this.tail.next = element;
 			this.tail.squirt.getBuffer().flip();
@@ -204,20 +217,20 @@ public class BufferStreamImpl implements BufferStream {
 	 */
 	private BufferSquirtElement sliceWriteBufferForReading() {
 
-		// Obtain the write buffer
+		// Obtain the write buffer squirt usage and buffer
+		BufferSquirtUsage usage = this.tail.squirt.usage;
 		ByteBuffer buffer = this.tail.squirt.getBuffer();
 
 		// Add remaining buffer content as squirt
 		ByteBuffer appendBuffer = buffer.slice();
 		BufferSquirtElement writeElement = new BufferSquirtElement(
-				new BufferSquirtSlice(appendBuffer, this.tail.squirt));
+				new ManagedBufferSquirt(usage, appendBuffer));
 		BufferSquirtElement readElement = this.tail;
 		this.tail.next = writeElement;
 		this.tail = writeElement;
 
 		// Setup content for reading
 		buffer.flip();
-		readElement.isSliced = true;
 
 		// Return the read element
 		return readElement;
@@ -234,13 +247,18 @@ public class BufferStreamImpl implements BufferStream {
 
 	@Override
 	public void write(byte[] bytes) throws IOException {
+		this.write(bytes, 0, bytes.length);
+	}
+
+	@Override
+	public void write(byte[] bytes, int offset, int length) throws IOException {
 
 		// Ensure the output is open
 		this.ensureOutputOpen();
 
 		// Obtain the content markers
-		int contentPosition = 0;
-		int contentRemaining = bytes.length;
+		int contentPosition = offset;
+		int contentRemaining = length;
 
 		// Write content to stream until no further content
 		while (contentRemaining > 0) {
@@ -298,24 +316,36 @@ public class BufferStreamImpl implements BufferStream {
 	@Override
 	public void append(ByteBuffer buffer) throws IOException {
 
-		// Ensure the output is open
-		this.ensureOutputOpen();
-
 		// Use duplicate to not change original buffer markers.
 		// Also means not subject to external changes in buffer markers.
 		// Note: Will still be subject to data changes.
 		buffer = buffer.duplicate();
 
-		// Create the squirt element for the buffer
+		// Add the appended buffer
+		this.append(new AppendedBufferSquirt(buffer));
+	}
+
+	@Override
+	public void append(BufferSquirt squirt) throws IOException {
+
+		// Ensure the output is open
+		this.ensureOutputOpen();
+
+		// Obtain the buffer of the squirt
+		ByteBuffer buffer = squirt.getBuffer();
+
+		// Create the element and management for the squirt
 		BufferSquirtElement element = new BufferSquirtElement(
-				new AppendedBufferSquirt(buffer));
+				new ManagedBufferSquirt(new BufferSquirtUsage(squirt), buffer));
 
 		// Determine if first buffer
 		if (this.head == null) {
 			// First buffer so append an empty write buffer.
 			// Empty write squirt to save on memory if only appending buffers.
+			EmptyBufferSquirt emptyBufferSquirt = new EmptyBufferSquirt();
 			BufferSquirtElement writeElement = new BufferSquirtElement(
-					new EmptyBufferSquirt());
+					new ManagedBufferSquirt(new BufferSquirtUsage(
+							emptyBufferSquirt), emptyBufferSquirt.getBuffer()));
 			this.head = element;
 			this.head.next = writeElement;
 			this.tail = writeElement;
@@ -352,6 +382,12 @@ public class BufferStreamImpl implements BufferStream {
 
 	@Override
 	public int read(byte[] readBuffer) throws IOException {
+		return this.read(readBuffer, 0, readBuffer.length);
+	}
+
+	@Override
+	public int read(byte[] readBuffer, int offset, int length)
+			throws IOException {
 
 		// Ensure the input is open
 		this.ensureInputOpen();
@@ -363,8 +399,8 @@ public class BufferStreamImpl implements BufferStream {
 		}
 
 		// Obtain the read markers
-		int readPosition = 0;
-		int readRemaining = readBuffer.length;
+		int readPosition = offset;
+		int readRemaining = length;
 		int readSize = 0; // return value
 
 		// Read content until no data or read buffer full
@@ -373,9 +409,12 @@ public class BufferStreamImpl implements BufferStream {
 			// Prepare for the read
 			switch (this.prepareForRead()) {
 			case BufferStream.END_OF_STREAM:
-				return BufferStream.END_OF_STREAM;
+				// Previous loop may have read data
+				return (readSize > 0 ? readSize : BufferStream.END_OF_STREAM);
 			case 0:
-				return 0;
+				// No further data available
+				return readSize;
+
 				// Otherwise data available to read
 			}
 
@@ -399,9 +438,7 @@ public class BufferStreamImpl implements BufferStream {
 				// Buffer read so remove
 				BufferSquirtElement removedElement = this.head;
 				this.head = removedElement.next;
-				if (!removedElement.isSliced) {
-					removedElement.squirt.close();
-				}
+				removedElement.squirt.close();
 			}
 		}
 
@@ -438,10 +475,8 @@ public class BufferStreamImpl implements BufferStream {
 			if (bufferRemaining == 0) {
 				// Buffer processed, therefore release squirt
 				BufferSquirtElement element = this.head;
-				if (!element.isSliced) {
-					element.squirt.close();
-				}
 				this.head = element.next;
+				element.squirt.close();
 
 			} else {
 				// Further data remaining in buffer, so adjust read size
@@ -463,40 +498,86 @@ public class BufferStreamImpl implements BufferStream {
 	}
 
 	@Override
-	public int read(OutputBufferStream outputBufferStream) throws IOException {
+	public int read(int numberOfBytes, OutputBufferStream outputBufferStream)
+			throws IOException {
 
 		// Ensure the input is open
 		this.ensureInputOpen();
 
-		// Prepare for the read
-		switch (this.prepareForRead()) {
-		case BufferStream.END_OF_STREAM:
-			return BufferStream.END_OF_STREAM;
-		case 0:
-			return 0;
-			// Otherwise data available to read
+		// Determine if content for reading
+		if (this.head == null) {
+			// No content, read size based on whether stream closed
+			return (this.isOutputClosed ? BufferStream.END_OF_STREAM : 0);
 		}
 
-		// Obtain the buffer to process
-		ByteBuffer processBuffer = this.head.squirt.getBuffer();
+		// Obtain the read markers
+		int readRemaining = numberOfBytes;
+		int readSize = 0; // return value
 
-		// TODO transfer squirt rather than copy data
-		byte[] transfer = new byte[processBuffer.remaining()];
-		processBuffer.get(transfer);
-		outputBufferStream.write(transfer);
+		// Read content until no data or read buffer full
+		while (readRemaining > 0) {
 
-		// Bytes read so adjust available
-		this.availableSize -= transfer.length;
+			// Prepare for the read
+			switch (this.prepareForRead()) {
+			case BufferStream.END_OF_STREAM:
+				// Previous loop may have read data
+				return (readSize > 0 ? readSize : BufferStream.END_OF_STREAM);
+			case 0:
+				// No further data available
+				return readSize;
 
-		// Buffer read so remove
-		BufferSquirtElement removedElement = this.head;
-		this.head = removedElement.next;
-		if (!removedElement.isSliced) {
-			removedElement.squirt.close();
+				// Otherwise data available to read
+			}
+
+			// Determine content remaining in buffer to read
+			BufferSquirtElement element = this.head;
+			ByteBuffer buffer = element.squirt.getBuffer();
+			int bufferRemaining = buffer.remaining();
+
+			// Obtain the usage for the buffer squirt
+			BufferSquirtUsage usage = element.squirt.usage;
+
+			// Transfer the buffer
+			int readLength;
+			if (bufferRemaining > readRemaining) {
+				// Only partial of buffer to transfer
+				ByteBuffer transferBuffer = buffer.slice();
+				transferBuffer.limit(readRemaining);
+				outputBufferStream.append(new ManagedBufferSquirt(usage,
+						transferBuffer));
+
+				// Move position to after transferred content
+				buffer.position(buffer.position() + readRemaining);
+				readLength = readRemaining;
+
+			} else if (buffer.position() == 0) {
+				// Transfer the entire buffer
+				this.head = element.next;
+				outputBufferStream.append(element.squirt);
+				readLength = bufferRemaining;
+
+			} else {
+				// Transfer the remaining of the buffer
+				ByteBuffer transferBuffer = buffer.slice();
+				outputBufferStream.append(new ManagedBufferSquirt(usage,
+						transferBuffer));
+
+				// Remove the buffer
+				this.head = element.next;
+				element.squirt.close();
+				readLength = bufferRemaining;
+			}
+
+			// Indicate bytes read and no longer available
+			this.availableSize -= readLength;
+
+			// Update read markers
+			readRemaining -= readLength;
+			readSize += readLength;
 		}
 
-		// Return the bytes transferred
-		return transfer.length;
+		// Return the bytes read
+		return readSize;
 	}
 
 	@Override
@@ -519,13 +600,7 @@ public class BufferStreamImpl implements BufferStream {
 		// Close all the buffer squirts
 		BufferSquirtElement element = this.head;
 		while (element != null) {
-
-			// Close the squirt if not a slice
-			if (!element.isSliced) {
-				element.squirt.close();
-			}
-
-			// Move to next element
+			element.squirt.close();
 			element = element.next;
 		}
 
@@ -543,9 +618,9 @@ public class BufferStreamImpl implements BufferStream {
 	private static class BufferSquirtElement {
 
 		/**
-		 * {@link BufferSquirt}.
+		 * {@link ManagedBufferSquirt}.
 		 */
-		public final BufferSquirt squirt;
+		public final ManagedBufferSquirt squirt;
 
 		/**
 		 * Next {@link BufferSquirtElement}.
@@ -553,19 +628,96 @@ public class BufferStreamImpl implements BufferStream {
 		public BufferSquirtElement next = null;
 
 		/**
-		 * Flags indicating if the {@link ByteBuffer} of the
-		 * {@link BufferSquirt} was sliced.
+		 * Initiate.
+		 *
+		 * @param squirt
+		 *            {@link ManagedBufferSquirt}.
 		 */
-		public boolean isSliced = false;
+		public BufferSquirtElement(ManagedBufferSquirt squirt) {
+			this.squirt = squirt;
+		}
+	}
+
+	/**
+	 * Provides usage of a {@link BufferSquirt}. This allows to track usage and
+	 * close the {@link BufferSquirt} when no longer used.
+	 */
+	private static class BufferSquirtUsage {
+
+		/**
+		 * Count of uses of the {@link BufferSquirt}.
+		 */
+		public final AtomicInteger count = new AtomicInteger(0);
+
+		/**
+		 * {@link BufferSquirt} being used.
+		 */
+		public final BufferSquirt underlyingBufferSquirt;
 
 		/**
 		 * Initiate.
 		 *
-		 * @param squirt
-		 *            {@link BufferSquirt}.
+		 * @param bufferSquirt
+		 *            {@link BufferSquirt} being used.
 		 */
-		public BufferSquirtElement(BufferSquirt squirt) {
-			this.squirt = squirt;
+		public BufferSquirtUsage(BufferSquirt bufferSquirt) {
+			this.underlyingBufferSquirt = bufferSquirt;
+		}
+	}
+
+	/**
+	 * {@link BufferSquirt} wrapper that provides management of the
+	 * {@link BufferSquirt} to be closed when no longer being used.
+	 */
+	private static class ManagedBufferSquirt implements BufferSquirt {
+
+		/**
+		 * {@link BufferSquirtUsage}.
+		 */
+		private final BufferSquirtUsage usage;
+
+		/**
+		 * {@link ByteBuffer} over the {@link BufferSquirt} instances
+		 * {@link ByteBuffer}.
+		 */
+		private final ByteBuffer buffer;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param usage
+		 *            {@link BufferSquirtUsage}.
+		 * @param buffer
+		 *            {@link ByteBuffer} over the {@link BufferSquirt} instances
+		 *            {@link ByteBuffer}.
+		 */
+		public ManagedBufferSquirt(BufferSquirtUsage usage, ByteBuffer buffer) {
+			this.usage = usage;
+			this.buffer = buffer;
+
+			// Increate usage for this managed buffer squirt instance
+			this.usage.count.incrementAndGet();
+		}
+
+		/*
+		 * ================ ManagedBufferSquirt ===========================
+		 */
+
+		@Override
+		public ByteBuffer getBuffer() {
+			return this.buffer;
+		}
+
+		@Override
+		public void close() {
+
+			// This instance no longer used, so remove from count
+			int count = this.usage.count.decrementAndGet();
+
+			// If no longer used, close the underlying buffer squirt
+			if (count == 0) {
+				this.usage.underlyingBufferSquirt.close();
+			}
 		}
 	}
 
@@ -626,49 +778,6 @@ public class BufferStreamImpl implements BufferStream {
 		@Override
 		public void close() {
 			// Do nothing
-		}
-	}
-
-	/**
-	 * Slice of a {@link BufferSquirt}.
-	 */
-	private static class BufferSquirtSlice implements BufferSquirt {
-
-		/**
-		 * {@link ByteBuffer} slice.
-		 */
-		private final ByteBuffer slice;
-
-		/**
-		 * Delegate {@link BufferSquirt} being wrapped.
-		 */
-		private final BufferSquirt delegate;
-
-		/**
-		 * Initiate.
-		 *
-		 * @param slice
-		 *            {@link ByteBuffer} slice.
-		 * @param delegate
-		 *            Delegate {@link BufferSquirt} being wrapped.
-		 */
-		public BufferSquirtSlice(ByteBuffer slice, BufferSquirt delegate) {
-			this.slice = slice;
-			this.delegate = delegate;
-		}
-
-		/*
-		 * ================= BufferSquirt ===========================
-		 */
-
-		@Override
-		public ByteBuffer getBuffer() {
-			return this.slice;
-		}
-
-		@Override
-		public void close() {
-			this.delegate.close();
 		}
 	}
 

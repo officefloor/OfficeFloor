@@ -65,6 +65,11 @@ public class BufferOutputStream extends OutputStream {
 	}
 
 	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		this.output.write(b, off, len);
+	}
+
+	@Override
 	public void close() throws IOException {
 		this.output.close();
 	}

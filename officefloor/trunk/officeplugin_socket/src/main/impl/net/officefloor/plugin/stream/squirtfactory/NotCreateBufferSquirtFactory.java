@@ -15,31 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
+package net.officefloor.plugin.stream.squirtfactory;
 
-import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.BufferSquirt;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
- * Message identified by the {@link ConnectionHandler}.
+ * {@link BufferSquirtFactory} that does not create {@link BufferSquirt}
+ * instances.
  *
  * @author Daniel Sagenschneider
  */
-public interface Request {
+public class NotCreateBufferSquirtFactory implements BufferSquirtFactory {
 
-	/**
-	 * Obtains the attachment provided by the {@link ConnectionHandler}.
-	 *
-	 * @return Attachment provided by the {@link ConnectionHandler}. May be
-	 *         <code>null</code>.
-	 */
-	Object getAttachment();
-
-	/**
-	 * Obtains the {@link InputBufferStream} to obtain data from the client for
-	 * this {@link Request}.
-	 *
-	 * @return {@link InputBufferStream}.
-	 */
-	InputBufferStream getInputBufferStream();
+	@Override
+	public BufferSquirt createBufferSquirt() {
+		throw new IllegalStateException("Should not create a "
+				+ BufferSquirt.class.getSimpleName());
+	}
 
 }

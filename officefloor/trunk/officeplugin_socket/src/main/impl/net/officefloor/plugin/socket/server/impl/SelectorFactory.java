@@ -15,45 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
+package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.Selector;
 
 /**
  * <p>
- * Handler for a {@link Connection}.
+ * Factory for the creation of the {@link Selector}.
  * <p>
- * Required to be implemented by the handler provider.
+ * This wraps {@link Selector#open()}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ConnectionHandler {
+public class SelectorFactory {
 
 	/**
-	 * Handles a read from the {@link SocketChannel}.
+	 * Creates the {@link Selector}.
 	 *
-	 * @param context
-	 *            {@link ReadContext}.
+	 * @return New {@link Selector}.
 	 * @throws IOException
-	 *             If fails to obtain data from the {@link ReadContext}.
+	 *             If fails to create the {@link Selector}.
 	 */
-	void handleRead(ReadContext context) throws IOException;
-
-	/**
-	 * Handles a potential write to the {@link SocketChannel}.
-	 *
-	 * @param context
-	 *            {@link WriteContext}.
-	 */
-	void handleWrite(WriteContext context);
-
-	/**
-	 * Handles a {@link Connection} being idled.
-	 *
-	 * @param context
-	 *            {@link IdleContext}.
-	 */
-	void handleIdleConnection(IdleContext context);
+	public Selector createSelector() throws IOException {
+		return Selector.open();
+	}
 
 }

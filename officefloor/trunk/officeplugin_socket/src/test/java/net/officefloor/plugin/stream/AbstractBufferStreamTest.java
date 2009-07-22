@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -248,6 +249,49 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to write and read buffer with offsets.
+	 */
+	public void testStream_OffsetBuffer() throws IOException {
+
+		// Create the content to write
+		final byte[] content = this.createContent(this.getBufferSize() * 3);
+
+		// Obtain offset and length
+		final int offset = content.length / 4;
+		final int length = this.getBufferSize() * 2;
+
+		// Write the content
+		this.outputStream.write(content, offset, length);
+		assertEquals("Incorrect available bytes", length, this.inputStream
+				.available());
+
+		// Read the result (via offset)
+		final byte[] result = new byte[content.length];
+		int readSize = this.inputStream.read(result, offset, length);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+		assertEquals("Incorrect bytes read", length, readSize);
+
+		// Ensure no data before offset and after length
+		for (int i = 0; i < offset; i++) {
+			assertEquals("Read byte " + i + " should be blank", 0, result[i]);
+		}
+		for (int i = (offset + length); i < content.length; i++) {
+			assertEquals("Read byte " + i + " should be blank", 0, result[i]);
+		}
+
+		// Ensure correct result
+		byte[] contentCompare = Arrays.copyOfRange(content, offset,
+				(offset + length));
+		byte[] resultCompare = Arrays.copyOfRange(result, offset,
+				(offset + length));
+		assertEquals(contentCompare, resultCompare);
+
+		// Close stream
+		this.inputStream.close();
+	}
+
+	/**
 	 * Ensure indicates if end of stream (read all data after output stream
 	 * closed).
 	 */
@@ -389,6 +433,48 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		this.input.close();
 		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
 				this.inputStream.available());
+	}
+
+	/**
+	 * Ensure able to write and read buffer with offsets.
+	 */
+	public void testBytes_OffsetBytes() throws IOException {
+
+		// Create the content to write
+		final byte[] content = this.createContent(this.getBufferSize() * 3);
+
+		// Obtain offset and length
+		final int offset = content.length / 4;
+		final int length = this.getBufferSize() * 2;
+
+		// Write the content
+		this.output.write(content, offset, length);
+		assertEquals("Incorrect available bytes", length, this.input
+				.available());
+
+		// Read the result (via offset)
+		final byte[] result = new byte[content.length];
+		int readSize = this.input.read(result, offset, length);
+		assertEquals("Incorrect available bytes", 0, this.input.available());
+		assertEquals("Incorrect bytes read", length, readSize);
+
+		// Ensure no data before offset and after length
+		for (int i = 0; i < offset; i++) {
+			assertEquals("Read byte " + i + " should be blank", 0, result[i]);
+		}
+		for (int i = (offset + length); i < content.length; i++) {
+			assertEquals("Read byte " + i + " should be blank", 0, result[i]);
+		}
+
+		// Ensure correct result
+		byte[] contentCompare = Arrays.copyOfRange(content, offset,
+				(offset + length));
+		byte[] resultCompare = Arrays.copyOfRange(result, offset,
+				(offset + length));
+		assertEquals(contentCompare, resultCompare);
+
+		// Close stream
+		this.input.close();
 	}
 
 	/*
@@ -725,14 +811,14 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	}
 
 	/*
-	 * ==================== Join Stream tests ================================
+	 * ==================== Transfer Stream tests ==============================
 	 */
 
 	/**
 	 * Ensure able to stream content from one {@link BufferStream} to another
 	 * {@link BufferStream}.
 	 */
-	public void testJoin() throws IOException {
+	public void testTransfer_FullBuffer() throws IOException {
 
 		// Populate the buffer stream
 		byte[] content = this.createContent(this.getBufferSize());
@@ -745,7 +831,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		OutputBufferStream joinOutput = joinStream.getOutputBufferStream();
 
 		// Read contents from buffer stream into other buffer stream
-		int readSize = this.input.read(joinOutput);
+		int readSize = this.input.read(content.length, joinOutput);
 		assertEquals("Incorrect transfer size of bytes", content.length,
 				readSize);
 		assertEquals("Incorrect available bytes", 0, this.inputStream
@@ -767,6 +853,169 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of bytes read", content.length, readSize);
 		assertEquals("Incorrect available bytes", 0, joinInput.available());
 		assertEquals(content, result);
+
+		// Close stream
+		joinInput.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				joinInput.available());
+	}
+
+	/**
+	 * Ensure able to transfer partial content of a buffer.
+	 */
+	public void testTransfer_PartialBuffer() throws IOException {
+
+		// Populate the buffer stream
+		byte[] content = this.createContent(this.getBufferSize());
+		this.outputStream.write(content);
+		this.outputStream.close();
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
+
+		// Create another buffer stream
+		BufferStream joinStream = this.createBufferStream();
+		OutputBufferStream joinOutput = joinStream.getOutputBufferStream();
+
+		// Obtain the bytes to transfer
+		int transferSize = this.getBufferSize() / 3;
+		int remainingSize = this.getBufferSize() - transferSize;
+
+		// Read contents from buffer stream into other buffer stream
+		int readSize = this.input.read(transferSize, joinOutput);
+		assertEquals("Incorrect transfer size of bytes", transferSize, readSize);
+		assertEquals("Incorrect remaining available bytes", remainingSize,
+				this.inputStream.available());
+
+		// Validate the remaining data in original stream
+		byte[] originalResult = new byte[remainingSize];
+		readSize = this.input.read(originalResult);
+		byte[] originalContent = Arrays.copyOfRange(content, transferSize,
+				content.length);
+		assertEquals(originalContent, originalResult);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+		assertEquals("No further data for original",
+				BufferStream.END_OF_STREAM, this.inputStream.read());
+
+		// Validate data transferred to other buffer stream
+		InputBufferStream joinInput = joinStream.getInputBufferStream();
+		assertEquals("Incorrect available bytes", transferSize, joinInput
+				.available());
+		byte[] transferredResult = new byte[transferSize];
+		readSize = joinInput.read(transferredResult);
+		assertEquals("Incorrect number of bytes read", transferSize, readSize);
+		assertEquals("Incorrect available bytes", 0, joinInput.available());
+		byte[] transferredContent = Arrays
+				.copyOfRange(content, 0, transferSize);
+		assertEquals(transferredContent, transferredResult);
+
+		// Close stream
+		joinInput.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				joinInput.available());
+	}
+
+	/**
+	 * Enusre able to transfer multiple buffers.
+	 */
+	public void testTransfer_MultipleBuffers() throws IOException {
+
+		// Populate the buffer stream
+		byte[] content = this.createContent(this.getBufferSize() * 3);
+		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
+
+		// Create another buffer stream
+		BufferStream joinStream = this.createBufferStream();
+		OutputBufferStream joinOutput = joinStream.getOutputBufferStream();
+
+		// Read contents from buffer stream into other buffer stream
+		int readSize = this.input.read(content.length, joinOutput);
+		assertEquals("Incorrect transfer size of bytes", content.length,
+				readSize);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Validate no further data in original buffer stream
+		this.outputStream.close();
+		assertEquals("No further data for original",
+				BufferStream.END_OF_STREAM, this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+
+		// Validate data transferred to other buffer stream
+		InputBufferStream joinInput = joinStream.getInputBufferStream();
+		assertEquals("Incorrect available bytes", content.length, joinInput
+				.available());
+		byte[] result = new byte[content.length];
+		readSize = joinInput.read(result);
+		assertEquals("Incorrect number of bytes read", content.length, readSize);
+		assertEquals("Incorrect available bytes", 0, joinInput.available());
+		assertEquals(content, result);
+
+		// Close stream
+		joinInput.close();
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				joinInput.available());
+	}
+
+	/**
+	 * Ensure able to transfer content when positioned not at a start of a
+	 * buffer.
+	 */
+	public void testTransfer_OffsetIntoBuffer() throws IOException {
+
+		// Populate the buffer stream
+		byte[] content = this.createContent(this.getBufferSize());
+		this.outputStream.write(content);
+		assertEquals("Incorrect available bytes", content.length,
+				this.inputStream.available());
+
+		// Read byte from stream
+		assertEquals("Incorrect first byte", content[0], this.inputStream
+				.read());
+		assertEquals("Incorrect available bytes", (content.length - 1),
+				this.inputStream.available());
+
+		// Create another buffer stream
+		BufferStream joinStream = this.createBufferStream();
+		OutputBufferStream joinOutput = joinStream.getOutputBufferStream();
+
+		// Obtain transfer size
+		int transferSize = this.getBufferSize() / 3;
+		int remainingSize = content.length - 1 - transferSize; // -1 for read
+
+		// Read contents from buffer stream into other buffer stream
+		int readSize = this.input.read(transferSize, joinOutput);
+		assertEquals("Incorrect transfer size of bytes", transferSize, readSize);
+		assertEquals("Incorrect available bytes", remainingSize,
+				this.inputStream.available());
+
+		// Validate the remaining data in original buffer
+		this.outputStream.close();
+		byte[] originalResult = new byte[remainingSize];
+		assertEquals("Incorrect remaining read size", remainingSize,
+				this.inputStream.read(originalResult));
+		byte[] orginalContent = Arrays.copyOfRange(content, (1 + transferSize),
+				content.length); // + 1 for read
+		assertEquals(orginalContent, originalResult);
+		assertEquals("No further data for original",
+				BufferStream.END_OF_STREAM, this.inputStream.read());
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+
+		// Validate data transferred to other buffer stream
+		InputBufferStream joinInput = joinStream.getInputBufferStream();
+		assertEquals("Incorrect available bytes", transferSize, joinInput
+				.available());
+		byte[] transferredResult = new byte[transferSize];
+		readSize = joinInput.read(transferredResult);
+		assertEquals("Incorrect number of bytes read", transferSize, readSize);
+		assertEquals("Incorrect available bytes", 0, joinInput.available());
+		byte[] transferredContent = Arrays.copyOfRange(content, 1,
+				(1 + transferSize)); // 1 for read
+		assertEquals(transferredContent, transferredResult);
 
 		// Close stream
 		joinInput.close();

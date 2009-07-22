@@ -72,6 +72,12 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	}
 
 	@Override
+	public int read(byte[] readBuffer, int offset, int length)
+			throws IOException {
+		return this.bufferStream.read(readBuffer, offset, length);
+	}
+
+	@Override
 	public int read(BufferProcessor processor) throws IOException {
 		return this.bufferStream.read(processor);
 	}
@@ -82,8 +88,9 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	}
 
 	@Override
-	public int read(OutputBufferStream outputBufferStream) throws IOException {
-		return this.bufferStream.read(outputBufferStream);
+	public int read(int numberOfBytes, OutputBufferStream outputBufferStream)
+			throws IOException {
+		return this.bufferStream.read(numberOfBytes, outputBufferStream);
 	}
 
 	@Override

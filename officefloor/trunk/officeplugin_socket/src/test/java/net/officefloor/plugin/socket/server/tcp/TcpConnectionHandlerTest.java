@@ -20,12 +20,12 @@ package net.officefloor.plugin.socket.server.tcp;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import net.officefloor.plugin.impl.socket.server.AbstractWriteRead;
+import net.officefloor.plugin.socket.server.impl.AbstractWriteRead;
 import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
 
 /**
  * Tests the {@link TcpConnectionHandler}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TcpConnectionHandlerTest extends AbstractWriteRead {
@@ -66,7 +66,6 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	public void testWriteToConnection() throws Exception {
 		final String TEXT = "test message";
 		this.connectionWrite(TEXT);
-		this.connectionFlush();
 		this.runSocketListener(); // Flag to write
 		this.runSocketListener(); // Writes out
 		this.validateOutputToClient(TEXT);
@@ -101,7 +100,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 
 	/**
 	 * Validates the read on the {@link ServerTcpConnection}.
-	 * 
+	 *
 	 * @param text
 	 *            Expected text.
 	 */
@@ -125,7 +124,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 
 	/**
 	 * Writes to the {@link ServerTcpConnection}.
-	 * 
+	 *
 	 * @param text
 	 *            Text to write.
 	 */
@@ -138,15 +137,6 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		// Write the data to the connection
 		OutputStream outputStream = this.serverTcpConnection.getOutputStream();
 		outputStream.write(data, 0, data.length);
-	}
-
-	/**
-	 * Flushes the {@link ServerTcpConnection#getOutputStream()}.
-	 */
-	@Override
-	protected void connectionFlush() throws IOException {
-		// Flush the data on the connection
-		this.serverTcpConnection.getOutputStream().flush();
 	}
 
 }
