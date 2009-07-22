@@ -55,6 +55,20 @@ public interface BufferStream {
 	void write(byte[] bytes) throws IOException;
 
 	/**
+	 * Writes the bytes to the {@link BufferStream}.
+	 *
+	 * @param bytes
+	 *            Bytes to be written to the {@link BufferStream}.
+	 * @param offset
+	 *            Offset into the bytes to start obtain bytes to write.
+	 * @param length
+	 *            Number of bytes to write.
+	 * @throws IOException
+	 *             If fails to write the bytes.
+	 */
+	void write(byte[] bytes, int offset, int length) throws IOException;
+
+	/**
 	 * Writes content to a {@link ByteBuffer} of the {@link BufferStream}.
 	 *
 	 * @param populator
@@ -66,14 +80,37 @@ public interface BufferStream {
 	void write(BufferPopulator populator) throws IOException;
 
 	/**
+	 * <p>
 	 * Appends the {@link ByteBuffer} to the {@link BufferStream}.
+	 * <p>
+	 * The {@link ByteBuffer} is used directly by the {@link BufferStream} and
+	 * must not be changed until the {@link BufferStream} is no longer being
+	 * used. This should only be used when the {@link ByteBuffer} never changes
+	 * (contains static information).
+	 * <p>
+	 * Use {@link #append(BufferSquirt)} over this method to know when the
+	 * {@link ByteBuffer} can be modified again.
 	 *
 	 * @param buffer
-	 *            {@link ByteBuffer} to append.
+	 *            {@link ByteBuffer} ready to be read from.
 	 * @throws IOException
-	 *             If fails to append {@link ByteBuffer}.
+	 *             If fails to append to the {@link BufferStream}.
 	 */
 	void append(ByteBuffer buffer) throws IOException;
+
+	/**
+	 * <p>
+	 * Appends the {@link BufferSquirt} to the {@link BufferStream}.
+	 * <p>
+	 * {@link BufferSquirt#close()} is invoked when the {@link BufferStream} no
+	 * longer requires the {@link BufferSquirt}.
+	 *
+	 * @param squirt
+	 *            {@link BufferSquirt} to append to the {@link BufferStream}.
+	 * @throws IOException
+	 *             If fails to append to the {@link BufferStream}.
+	 */
+	void append(BufferSquirt squirt) throws IOException;
 
 	/**
 	 * <p>
@@ -123,6 +160,27 @@ public interface BufferStream {
 	int read(byte[] readBuffer) throws IOException;
 
 	/**
+	 * Reads the content from the {@link BufferStream} into the input buffer
+	 * returning the number of bytes loaded.
+	 *
+	 * @param readBuffer
+	 *            Buffer to load {@link BufferStream} content.
+	 * @param offset
+	 *            Offset of the input read buffer to start loading data from the
+	 *            {@link BufferStream}.
+	 * @param length
+	 *            Maximum number of bytes to be loaded.
+	 * @return Number of bytes loaded into the buffer from the
+	 *         {@link BufferStream}. Return of
+	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream with
+	 *         no bytes loaded to buffer.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 */
+	int read(byte[] readBuffer, int offset, int length) throws IOException;
+
+	/**
 	 * Reads and processes the contents of a {@link ByteBuffer} from the
 	 * {@link BufferStream}.
 	 *
@@ -140,9 +198,16 @@ public interface BufferStream {
 	int read(BufferProcessor processor) throws IOException;
 
 	/**
+	 * <p>
 	 * Reads data from this {@link BufferStream} to the
 	 * {@link OutputBufferStream}.
+	 * <p>
+	 * Only available bytes are read to the {@link OutputBufferStream} and
+	 * therefore the request number of bytes may not be read. The return
+	 * provides the number of bytes read.
 	 *
+	 * @param numberOfBytes
+	 *            Number of bytes to read into the {@link OutputBufferStream}.
 	 * @param outputBufferStream
 	 *            {@link OutputBufferStream} to receive the data.
 	 * @return Number of bytes transferred to the {@link OutputBufferStream}.
@@ -152,7 +217,8 @@ public interface BufferStream {
 	 *             If fails to read input. Typically this will be because the
 	 *             input is closed.
 	 */
-	int read(OutputBufferStream outputBufferStream) throws IOException;
+	int read(int numberOfBytes, OutputBufferStream outputBufferStream)
+			throws IOException;
 
 	/**
 	 * Provides an accurate number of bytes available in the

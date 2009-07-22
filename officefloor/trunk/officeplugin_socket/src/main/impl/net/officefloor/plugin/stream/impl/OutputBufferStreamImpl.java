@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import net.officefloor.plugin.stream.BufferPopulator;
+import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
@@ -67,6 +68,11 @@ public class OutputBufferStreamImpl implements OutputBufferStream {
 	}
 
 	@Override
+	public void write(byte[] data, int offset, int length) throws IOException {
+		this.bufferStream.write(data, offset, length);
+	}
+
+	@Override
 	public void write(BufferPopulator populator) throws IOException {
 		this.bufferStream.write(populator);
 	}
@@ -74,6 +80,11 @@ public class OutputBufferStreamImpl implements OutputBufferStream {
 	@Override
 	public void append(ByteBuffer buffer) throws IOException {
 		this.bufferStream.append(buffer);
+	}
+
+	@Override
+	public void append(BufferSquirt squirt) throws IOException {
+		this.bufferStream.append(squirt);
 	}
 
 	@Override

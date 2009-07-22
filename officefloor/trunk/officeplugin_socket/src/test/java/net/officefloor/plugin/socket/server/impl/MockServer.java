@@ -15,45 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
+package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
+
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
+import net.officefloor.plugin.socket.server.Request;
+import net.officefloor.plugin.socket.server.Server;
 
 /**
- * <p>
- * Handler for a {@link Connection}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Mock {@link Server}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ConnectionHandler {
+public class MockServer implements Server<Indexed> {
 
-	/**
-	 * Handles a read from the {@link SocketChannel}.
-	 *
-	 * @param context
-	 *            {@link ReadContext}.
-	 * @throws IOException
-	 *             If fails to obtain data from the {@link ReadContext}.
+	/*
+	 * ================== Server ==============================
 	 */
-	void handleRead(ReadContext context) throws IOException;
 
-	/**
-	 * Handles a potential write to the {@link SocketChannel}.
-	 *
-	 * @param context
-	 *            {@link WriteContext}.
-	 */
-	void handleWrite(WriteContext context);
+	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		// Do nothing
+	}
 
-	/**
-	 * Handles a {@link Connection} being idled.
-	 *
-	 * @param context
-	 *            {@link IdleContext}.
-	 */
-	void handleIdleConnection(IdleContext context);
+	@Override
+	public void processRequest(Request request,
+			ConnectionHandler connectionHandler) throws IOException {
+		// Do nothing
+	}
 
 }

@@ -22,7 +22,7 @@ import net.officefloor.plugin.socket.server.http.HttpStatus;
 
 /**
  * Tests the {@link HttpRequestParser}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRequestParserTest extends OfficeFrameTestCase {
@@ -256,7 +256,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does a valid HTTP request test.
-	 * 
+	 *
 	 * @param httpRequest
 	 *            HTTP request content.
 	 * @param expectedMethod
@@ -276,8 +276,11 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		try {
 			// Parse the content
 			byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
-			boolean isComplete = this.httpRequestParser.parseMoreContent(
-					content, 0, content.length);
+			boolean isComplete = false;
+			for (int i = 0; i < content.length; i++) {
+				isComplete |= this.httpRequestParser
+						.parseMoreContent(content[i]);
+			}
 
 			// Validate request line
 			assertEquals((expectedMethod == null ? "" : expectedMethod),
@@ -318,7 +321,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does an invalid HTTP request test.
-	 * 
+	 *
 	 * @param invalidHttpRequest
 	 *            Invalid HTTP request content.
 	 * @param expectedHttpStatus
@@ -334,7 +337,9 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		// Should not be able parse invalid method
 		try {
-			this.httpRequestParser.parseMoreContent(content, 0, content.length);
+			for (int i = 0; i < content.length; i++) {
+				this.httpRequestParser.parseMoreContent(content[i]);
+			}
 
 			// Should not be parsed
 			fail("Should not parse invalid HTTP request:\n"

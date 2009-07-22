@@ -97,6 +97,26 @@ public class BufferInputStream extends InputStream {
 	}
 
 	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+
+		// Read from the buffer stream
+		int size = this.input.read(b, off, len);
+		switch (size) {
+		case BufferStream.END_OF_STREAM:
+			// End of stream
+			return BufferStream.END_OF_STREAM;
+
+		case 0:
+			// Must have content as will not block waiting for content
+			throw new NoBufferStreamContentException();
+
+		default:
+			// Return the size read
+			return size;
+		}
+	}
+
+	@Override
 	public int available() throws IOException {
 		long availableLength = this.input.available();
 		return ((availableLength > Integer.MAX_VALUE) ? Integer.MAX_VALUE

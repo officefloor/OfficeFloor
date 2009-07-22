@@ -15,31 +15,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
+package net.officefloor.plugin.stream.squirtfactory;
 
-import net.officefloor.plugin.stream.InputBufferStream;
+import java.nio.ByteBuffer;
+
+import net.officefloor.plugin.stream.BufferSquirt;
 
 /**
- * Message identified by the {@link ConnectionHandler}.
+ * {@link BufferSquirt} implementation that wraps a {@link ByteBuffer}.
  *
  * @author Daniel Sagenschneider
  */
-public interface Request {
+public class BufferSquirtImpl implements BufferSquirt {
 
 	/**
-	 * Obtains the attachment provided by the {@link ConnectionHandler}.
-	 *
-	 * @return Attachment provided by the {@link ConnectionHandler}. May be
-	 *         <code>null</code>.
+	 * {@link ByteBuffer}.
 	 */
-	Object getAttachment();
+	private final ByteBuffer buffer;
 
 	/**
-	 * Obtains the {@link InputBufferStream} to obtain data from the client for
-	 * this {@link Request}.
+	 * Initiate.
 	 *
-	 * @return {@link InputBufferStream}.
+	 * @param buffer
+	 *            {@link ByteBuffer}.
 	 */
-	InputBufferStream getInputBufferStream();
+	public BufferSquirtImpl(ByteBuffer buffer) {
+		this.buffer = buffer;
+	}
+
+	/*
+	 * ================= BufferSquirt =================================
+	 */
+
+	@Override
+	public ByteBuffer getBuffer() {
+		return this.buffer;
+	}
+
+	@Override
+	public void close() {
+		// Do nothing (GC will clean up)
+	}
 
 }

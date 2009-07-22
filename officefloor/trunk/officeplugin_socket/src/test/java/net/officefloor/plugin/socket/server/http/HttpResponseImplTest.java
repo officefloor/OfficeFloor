@@ -17,23 +17,24 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.spi.Connection;
-import net.officefloor.plugin.socket.server.spi.MessageSegment;
-import net.officefloor.plugin.socket.server.spi.WriteMessage;
+import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.BufferStreamImpl;
+import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link HttpResponseImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpResponseImplTest extends OfficeFrameTestCase {
@@ -143,7 +144,7 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does a test for {@link HttpResponse} of status OK.
-	 * 
+	 *
 	 * @param body
 	 *            Expected body.
 	 * @param headerNameValues
@@ -158,7 +159,7 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the test.
-	 * 
+	 *
 	 * @param version
 	 *            HTTP version.
 	 * @param httpStatus
@@ -176,12 +177,17 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 		// Create the necessary mock objects
 		Connection connection = this.createMock(Connection.class);
 		HttpRequest request = this.createMock(HttpRequest.class);
-		MockWriteMessage message = new MockWriteMessage();
+
+		// Create the output buffer stream to contain response content
+		BufferStream bufferStream = new BufferStreamImpl(
+				new HeapByteBufferSquirtFactory(1024));
+		OutputBufferStream outputBufferStream = bufferStream
+				.getOutputBufferStream();
 
 		// Record actions on mocks
 		this.recordReturn(request, request.getVersion(), version);
-		this.recordReturn(connection, connection.createWriteMessage(null),
-				message);
+		this.recordReturn(connection, connection.getOutputBufferStream(),
+				outputBufferStream);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -237,9 +243,9 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 				+ body;
 
 		// Obtain the actual HTTP data
-		message.buffer.flush();
-		String actualHttpMessage = UsAsciiUtil.convertToString(message.buffer
-				.toByteArray());
+		byte[] responseBytes = new byte[(int) bufferStream.available()];
+		bufferStream.read(responseBytes);
+		String actualHttpMessage = UsAsciiUtil.convertToString(responseBytes);
 
 		// Verify content
 		assertEquals("Incorrect HTTP message", expectedHttpMessage,
@@ -270,7 +276,7 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param type
 		 *            {@link FunctionalityType}.
 		 * @param content
@@ -282,138 +288,4 @@ public class HttpResponseImplTest extends OfficeFrameTestCase {
 		}
 	}
 
-	/**
-	 * Mock {@link WriteMessage}.
-	 */
-	private class MockWriteMessage implements WriteMessage {
-
-		/**
-		 * Content written to the {@link WriteMessage}.
-		 */
-		public final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-		/**
-		 * Flag indicating if written.
-		 */
-		public boolean isWritten = false;
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.WriteMessage#append(byte[],
-		 * int, int)
-		 */
-		@Override
-		public void append(byte[] data, int offset, int length) {
-			this.buffer.write(data, offset, length);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.WriteMessage#append(byte[])
-		 */
-		@Override
-		public void append(byte[] data) {
-			this.append(data, 0, data.length);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.WriteMessage#appendSegment
-		 * (java.nio.ByteBuffer)
-		 */
-		@Override
-		public MessageSegment appendSegment(ByteBuffer byteBuffer) {
-			byte[] data = byteBuffer.array();
-			this.append(data, 0, byteBuffer.limit());
-			return null; // message segment not required
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.socket.server.spi.WriteMessage#write()
-		 */
-		@Override
-		public void write() {
-			this.isWritten = true;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.WriteMessage#isWritten()
-		 */
-		@Override
-		public boolean isWritten() {
-			fail("Should not require to determine if written");
-			return false;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.WriteMessage#appendSegment()
-		 */
-		@Override
-		public MessageSegment appendSegment() {
-			fail("Should not blank append segment");
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.socket.server.spi.Message#getConnection()
-		 */
-		@Override
-		public Connection getConnection() {
-			fail("Should not require connection");
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.Message#getFirstSegment()
-		 */
-		@Override
-		public MessageSegment getFirstSegment() {
-			fail("Should not require first segment");
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.Message#getLastSegment()
-		 */
-		@Override
-		public MessageSegment getLastSegment() {
-			fail("Should not require second segment");
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.spi.Message#getSegmentCount()
-		 */
-		@Override
-		public int getSegmentCount() {
-			fail("Should not require segment count");
-			return -1;
-		}
-
-	}
 }

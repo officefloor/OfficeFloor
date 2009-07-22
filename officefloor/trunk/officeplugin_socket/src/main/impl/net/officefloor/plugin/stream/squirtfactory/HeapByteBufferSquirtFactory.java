@@ -15,31 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
+package net.officefloor.plugin.stream.squirtfactory;
 
-import net.officefloor.plugin.stream.InputBufferStream;
+import java.nio.ByteBuffer;
+
+import net.officefloor.plugin.stream.BufferSquirt;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
- * Message identified by the {@link ConnectionHandler}.
+ * Heap {@link ByteBuffer} {@link BufferSquirtFactory}.
  *
  * @author Daniel Sagenschneider
  */
-public interface Request {
+public class HeapByteBufferSquirtFactory implements BufferSquirtFactory {
 
 	/**
-	 * Obtains the attachment provided by the {@link ConnectionHandler}.
-	 *
-	 * @return Attachment provided by the {@link ConnectionHandler}. May be
-	 *         <code>null</code>.
+	 * Size of the {@link ByteBuffer} instances.
 	 */
-	Object getAttachment();
+	private final int bufferSize;
 
 	/**
-	 * Obtains the {@link InputBufferStream} to obtain data from the client for
-	 * this {@link Request}.
+	 * Initiate.
 	 *
-	 * @return {@link InputBufferStream}.
+	 * @param bufferSize
+	 *            Size of the {@link ByteBuffer} instances.
 	 */
-	InputBufferStream getInputBufferStream();
+	public HeapByteBufferSquirtFactory(int bufferSize) {
+		this.bufferSize = bufferSize;
+	}
+
+	/*
+	 * =================== BufferSquirtFactory ==============================
+	 */
+
+	@Override
+	public BufferSquirt createBufferSquirt() {
+		return new BufferSquirtImpl(ByteBuffer.allocate(this.bufferSize));
+	}
 
 }

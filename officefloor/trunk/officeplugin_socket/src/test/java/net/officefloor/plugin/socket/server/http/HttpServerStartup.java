@@ -31,7 +31,7 @@ import net.officefloor.plugin.socket.server.http.HttpServer.HttpServerFlows;
 
 /**
  * Provides the startup of the {@link HttpServer} for testing.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase {
@@ -53,7 +53,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
 	 */
 	@Override
@@ -78,8 +78,6 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
 				"1024");
-		serverSocketBuilder.addProperty(
-				HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "3");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Have server socket managed by office
@@ -106,7 +104,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 
 	/**
 	 * Obtains the URL of the server.
-	 * 
+	 *
 	 * @return URL of the server.
 	 */
 	public String getServerUrl() {
@@ -116,7 +114,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 	/**
 	 * Registers the {@link Task}(s) to service the HTTP request and returns
 	 * reference to the entry {@link Task}.
-	 * 
+	 *
 	 * @return {@link TaskReference} to the {@link Task} to handle the HTTP
 	 *         request.
 	 */
@@ -124,7 +122,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 
 	/**
 	 * Reference to a {@link Task}.
-	 * 
+	 *
 	 * @author Daniel Sagenschneider
 	 */
 	protected class TaskReference {
@@ -141,7 +139,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link Work}.
 		 * @param taskName
@@ -156,7 +154,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
 	 */
