@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp;
+package net.officefloor.plugin.socket.server.tcp.source;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,8 +31,8 @@ import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.WriteContext;
-import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
-import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 
 /**
  * TCP {@link ConnectionHandler}.

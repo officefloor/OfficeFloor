@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http;
+package net.officefloor.plugin.socket.server.http.source;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**

@@ -296,6 +296,9 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		return this;
 	}
 
+	// TODO provide synchronized wrapped streams for thread safety
+	// TODO hook into close to trigger close of connection
+
 	@Override
 	public InputBufferStream getInputBufferStream() {
 		return this.fromClientStream.getInputBufferStream();
