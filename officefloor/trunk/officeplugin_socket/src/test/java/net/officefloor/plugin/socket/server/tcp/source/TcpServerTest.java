@@ -39,7 +39,7 @@ import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TcpServerTest extends AbstractOfficeConstructTestCase {
@@ -61,7 +61,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
 	 */
 	@Override
@@ -85,6 +85,9 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		serverSocketBuilder.addProperty(
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(PORT));
+		serverSocketBuilder.addProperty(
+				TcpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_IDLE_TIME,
+				String.valueOf(1000));
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams for socket listening
@@ -164,7 +167,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does parallel requesting.
-	 * 
+	 *
 	 * @param numberOfCallers
 	 *            Number of callers making parallel requests.
 	 * @param numberOfRequestsPerCaller
@@ -181,6 +184,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		final Throwable[] failures = new Throwable[numberOfCallers];
 
 		// Create the callers to run
+		final boolean[] startFlag = new boolean[1];
+		startFlag[0] = false;
 		for (int i = 0; i < numberOfCallers; i++) {
 
 			// Indicate caller index
@@ -191,6 +196,13 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 				@Override
 				public void run() {
 					try {
+
+						// Wait on the start flag
+						synchronized (startFlag) {
+							if (!startFlag[0]) {
+								startFlag.wait();
+							}
+						}
 
 						// Execute the requested number of calls
 						TcpServerTest.this.doRequests(String
@@ -213,6 +225,13 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 			// Start the caller
 			new Thread(caller).start();
+		}
+
+		// Start the callers
+		Thread.yield(); // allow request threads to start
+		synchronized (startFlag) {
+			startFlag[0] = true;
+			startFlag.notifyAll();
 		}
 
 		// Wait for all callers to be complete
@@ -262,7 +281,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Do the requests.
-	 * 
+	 *
 	 * @param requesterId
 	 *            Id identifying the requester.
 	 * @param numberOfRequests
@@ -306,7 +325,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 			if (isLog) {
 				System.out.println("Message [" + requesterId + ":" + i
 						+ "] processed in " + (endTime - startTime)
-						+ " milli-seconds (returned response '" + responseText
+						+ " milliseconds (returned response '" + responseText
 						+ "')");
 			}
 
@@ -327,7 +346,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		long endTime = System.currentTimeMillis();
 		if (isLog) {
 			System.out.println("Message [-1] processed in "
-					+ (endTime - startTime) + " milli-seconds");
+					+ (endTime - startTime) + " milliseconds");
 		}
 	}
 

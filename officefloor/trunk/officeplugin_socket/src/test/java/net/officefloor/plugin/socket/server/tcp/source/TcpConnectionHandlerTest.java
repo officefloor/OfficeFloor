@@ -18,11 +18,9 @@
 package net.officefloor.plugin.socket.server.tcp.source;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 import net.officefloor.plugin.socket.server.impl.AbstractWriteRead;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.socket.server.tcp.source.TcpConnectionHandler;
 
 /**
  * Tests the {@link TcpConnectionHandler}.
@@ -35,7 +33,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	 * {@link TcpConnectionHandler}.
 	 */
 	private TcpConnectionHandler tcpConnectionHandler = new TcpConnectionHandler(
-			this.connection);
+			this.connection, 1000);
 
 	/**
 	 * {@link ServerTcpConnection} which is implemented by the
@@ -76,7 +74,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	 * Ensures can close {@link ServerTcpConnection}.
 	 */
 	public void testCloseConnection() throws Exception {
-		this.serverTcpConnection.close();
+		this.serverTcpConnection.getOutputBufferStream().close();
 		this.runSocketListener();
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
 		assertTrue("Channel should be closed", this.socketChannel.isClosed());
@@ -92,7 +90,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		this.runSocketListener();
 		this.validateConnectionRead(REQUEST);
 		this.connectionWrite(RESPONSE);
-		this.serverTcpConnection.close();
+		this.serverTcpConnection.getOutputBufferStream().close();
 		this.runSocketListener(); // specifies writing
 		this.runSocketListener(); // does the writing
 		assertFalse("Key should be cancelled", this.selectionKey.isValid());
@@ -112,7 +110,8 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		byte[] buffer = new byte[text.getBytes().length];
 
 		// Read data from the connection
-		int bytesRead = this.serverTcpConnection.read(buffer, 0, buffer.length);
+		int bytesRead = this.serverTcpConnection.getInputBufferStream().read(
+				buffer, 0, buffer.length);
 
 		// Obtain text of bytes read
 		String actualText = new String(buffer, 0, bytesRead);
@@ -136,8 +135,8 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 		byte[] data = text.getBytes();
 
 		// Write the data to the connection
-		OutputStream outputStream = this.serverTcpConnection.getOutputStream();
-		outputStream.write(data, 0, data.length);
+		this.serverTcpConnection.getOutputBufferStream().write(data, 0,
+				data.length);
 	}
 
 }

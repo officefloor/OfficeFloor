@@ -18,23 +18,17 @@
 package net.officefloor.plugin.socket.server.tcp;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
- * <p>
  * TCP connection to be handled by the {@link OfficeFloor}.
- * <p>
- * An {@link OutputStream} is provided to write out the data. An
- * {@link InputStream} however is <b>NOT</b> provided due to the blocking
- * method {@link InputStream#read()}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ServerTcpConnection {
@@ -42,50 +36,30 @@ public interface ServerTcpConnection {
 	/**
 	 * Obtains the lock that may be <code>synchronized</code> on to reduce
 	 * locking overhead of making multiple calls on this
-	 * {@link ServerTcpConnection} (ie do course locking).
-	 * 
+	 * {@link ServerTcpConnection}. In other words, it allows course grained
+	 * locking.
+	 *
 	 * @return Lock that governs this {@link ServerTcpConnection}.
 	 */
 	Object getLock();
 
 	/**
-	 * Reads data from the connection into the input buffer.
-	 * 
-	 * @param buffer
-	 *            Buffer to load the data.
-	 * @return Number of bytes loaded to the buffer. <code>-1</code> if
-	 *         connection is closed.
-	 * @throws IOException
-	 *             If fails to read data.
+	 * Obtains the {@link InputBufferStream} that provides access to the data
+	 * sent from the client.
+	 *
+	 * @return {@link InputBufferStream}.
 	 */
-	int read(byte[] buffer) throws IOException;
-
-	/**
-	 * Reads data from the connection into the input buffer, starting at the
-	 * offset for length bytes.
-	 * 
-	 * @param buffer
-	 *            Buffer to load the data.
-	 * @param offset
-	 *            Offset into the buffer to start loading the data.
-	 * @param length
-	 *            Number of bytes to load into the buffer.
-	 * @return Number of bytes loaded to the buffer. <code>-1</code> if
-	 *         connection is closed.
-	 * @throws IOException
-	 *             If fails to read data.
-	 */
-	int read(byte[] buffer, int offset, int length) throws IOException;
+	InputBufferStream getInputBufferStream();
 
 	/**
 	 * <p>
-	 * Flags for the {@link ManagedObject} to stop execution of the {@link Task}
-	 * again until further data is received from the client.
+	 * Flags for the {@link ManagedObject} to not execute another {@link Task}
+	 * until further data is received from the client.
 	 * <p>
-	 * On calling this, the next time a {@link Task} is invoked using this
-	 * {@link ManagedObject} data will be available from a <code>read</code>
-	 * method.
-	 * 
+	 * On calling this the next time a {@link Task} is invoked using this
+	 * {@link ManagedObject}, data will be available from the
+	 * {@link InputBufferStream}.
+	 *
 	 * @throws IOException
 	 *             If fails to initiate waiting on client.
 	 */
@@ -93,54 +67,13 @@ public interface ServerTcpConnection {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OutputStream} to write data back to the client.
+	 * Obtains the {@link OutputBufferStream} to write data back to the client.
 	 * <p>
-	 * Much like {@link SocketChannel}, calling {@link OutputStream#close()}
-	 * will close this {@link ServerTcpConnection}.
-	 * <p>
-	 * Further to this, {@link OutputStream#flush()} is non-blocking and only
-	 * indicates to start writing out the content so far (which is being
-	 * buffered until it is called).
-	 * 
-	 * @return {@link OutputStream} to write data back to the client.
-	 * @throws IOException
-	 *             If fails to obtain, or this {@link ServerTcpConnection} is
-	 *             closed.
+	 * Closing the {@link OutputBufferStream} will result in closing the
+	 * {@link Connection}.
+	 *
+	 * @return {@link OutputBufferStream}.
 	 */
-	OutputStream getOutputStream() throws IOException;
-
-	/**
-	 * <p>
-	 * Writes the {@link ByteBuffer} to the client.
-	 * <p>
-	 * This allows for {@link ByteBuffer} optimisations.
-	 * 
-	 * @param buffer
-	 *            {@link ByteBuffer}.
-	 * @throws IOException
-	 *             If fails to write {@link ByteBuffer}.
-	 */
-	void write(ByteBuffer buffer) throws IOException;
-
-	/**
-	 * Indicates if connection is closed.
-	 * 
-	 * @return <code>true</code> if the connection is closed.
-	 */
-	boolean isClosed();
-
-	/**
-	 * <p>
-	 * Closes the connection.
-	 * <p>
-	 * Connection is closed after all writes are complete. Further more this
-	 * flags for the {@link ManagedObject} to stop execution of the {@link Task}
-	 * again until all writes are complete.
-	 * 
-	 * 
-	 * @throws IOException
-	 *             If fails to close the connection.
-	 */
-	void close() throws IOException;
+	OutputBufferStream getOutputBufferStream();
 
 }
