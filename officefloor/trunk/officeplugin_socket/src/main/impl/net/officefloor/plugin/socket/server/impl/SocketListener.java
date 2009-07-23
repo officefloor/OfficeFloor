@@ -231,6 +231,9 @@ public class SocketListener
 				synchronized (connection.getLock()) {
 					try {
 
+						// Flag that checking connection
+						connection.flagCheckingConnection();
+
 						// Interest Operations
 						int interestOps = 0;
 

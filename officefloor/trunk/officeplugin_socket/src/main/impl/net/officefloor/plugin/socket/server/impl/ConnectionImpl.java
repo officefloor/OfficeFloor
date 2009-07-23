@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
@@ -29,12 +30,14 @@ import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferProcessor;
+import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
 import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
+import net.officefloor.plugin.stream.synchronise.SynchronizedInputBufferStream;
 
 /**
  * Implementation of a {@link Connection}.
@@ -60,9 +63,21 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	private final BufferStream fromClientStream;
 
 	/**
+	 * {@link SynchronizedInputBufferStream} providing application access to the
+	 * data from the client.
+	 */
+	private final SynchronizedInputBufferStream safeFromClientStream;
+
+	/**
 	 * {@link BufferStream} of data to be sent to the client.
 	 */
 	private final BufferStream toClientStream;
+
+	/**
+	 * {@link ConnectionOutputBufferStream} providing application access to send
+	 * data to the client.
+	 */
+	private final ConnectionOutputBufferStream safeToClientStream;
 
 	/**
 	 * Bytes read/written from/to buffers.
@@ -73,6 +88,11 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	 * {@link SocketListener} handling this {@link Connection}.
 	 */
 	private SocketListener socketListener;
+
+	/**
+	 * Flag to only notify of write once per check on the {@link Connection}.
+	 */
+	private boolean isNotifiedOfWrite = false;
 
 	/**
 	 * Flags if this {@link Connection} has been cancelled.
@@ -98,6 +118,12 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		this.fromClientStream = new BufferStreamImpl(bufferSquirtFactory);
 		this.toClientStream = new BufferStreamImpl(bufferSquirtFactory);
 
+		// Create the safe streams to be used by applications
+		this.safeFromClientStream = new SynchronizedInputBufferStream(
+				this.fromClientStream.getInputBufferStream(), this.getLock());
+		this.safeToClientStream = new ConnectionOutputBufferStream(
+				this.toClientStream.getOutputBufferStream());
+
 		// Create the handler for this connection
 		this.connectionHandler = serverSocketHandler
 				.createConnectionHandler(this);
@@ -113,6 +139,15 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		synchronized (this) {
 			this.socketListener = socketListener;
 		}
+	}
+
+	/**
+	 * Flags that this {@link Connection} is being checked by the
+	 * {@link SocketListener}.
+	 */
+	void flagCheckingConnection() {
+		// Flag no longer notified of write as written
+		this.isNotifiedOfWrite = false;
 	}
 
 	/**
@@ -226,7 +261,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 
 		// Obtain the socket listener
 		SocketListener socketListener;
-		synchronized (this) {
+		synchronized (this.getLock()) {
 			socketListener = this.socketListener;
 		}
 
@@ -247,6 +282,22 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		if (this.isCancelled) {
 			throw new ClosedChannelException();
 		}
+	}
+
+	/**
+	 * Notifies of a write.
+	 */
+	void notifyOfWrite() {
+		// Only notify if not already notified
+		if (this.isNotifiedOfWrite) {
+			return;
+		}
+
+		// Wake up socket listener to send data to client
+		this.wakeupSocketListener();
+
+		// Notified
+		this.isNotifiedOfWrite = true;
 	}
 
 	/**
@@ -296,17 +347,161 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		return this;
 	}
 
-	// TODO provide synchronized wrapped streams for thread safety
-	// TODO hook into close to trigger close of connection
-
 	@Override
 	public InputBufferStream getInputBufferStream() {
-		return this.fromClientStream.getInputBufferStream();
+		return this.safeFromClientStream;
 	}
 
 	@Override
 	public OutputBufferStream getOutputBufferStream() {
-		return this.toClientStream.getOutputBufferStream();
+		return this.safeToClientStream;
+	}
+
+	/**
+	 * {@link Connection} {@link OutputBufferStream}.
+	 */
+	private class ConnectionOutputBufferStream implements OutputBufferStream {
+
+		/**
+		 * Backing {@link OutputBufferStream}.
+		 */
+		private final OutputBufferStream backingStream;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param backingStream
+		 *            Backing {@link OutputBufferStream}.
+		 */
+		public ConnectionOutputBufferStream(OutputBufferStream backingStream) {
+			this.backingStream = backingStream;
+		}
+
+		/*
+		 * ================= OutputBufferStream =======================
+		 */
+
+		@Override
+		public OutputStream getOutputStream() {
+			synchronized (ConnectionImpl.this.getLock()) {
+				return new ConnectionOutputStream(this.backingStream
+						.getOutputStream());
+			}
+		}
+
+		@Override
+		public void write(byte[] bytes) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(bytes);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void write(byte[] data, int offset, int length)
+				throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(data, offset, length);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void write(BufferPopulator populator) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(populator);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void append(BufferSquirt squirt) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.append(squirt);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void append(ByteBuffer buffer) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.append(buffer);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void close() {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.close();
+				ConnectionImpl.this.cancel();
+			}
+		}
+	}
+
+	/**
+	 * {@link Connection} {@link OutputStream}.
+	 */
+	private class ConnectionOutputStream extends OutputStream {
+
+		/**
+		 * Backing {@link OutputStream}.
+		 */
+		private final OutputStream backingStream;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param backingStream
+		 *            Backing {@link OutputStream}.
+		 */
+		public ConnectionOutputStream(OutputStream backingStream) {
+			this.backingStream = backingStream;
+		}
+
+		/*
+		 * ================== OutputStream ============================
+		 */
+
+		@Override
+		public void write(int b) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(b);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void write(byte[] b) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(b);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.write(b, off, len);
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void flush() throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.flush();
+				ConnectionImpl.this.notifyOfWrite();
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			synchronized (ConnectionImpl.this.getLock()) {
+				this.backingStream.close();
+				ConnectionImpl.this.cancel();
+			}
+		}
 	}
 
 }
