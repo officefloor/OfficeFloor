@@ -17,15 +17,15 @@
  */
 package net.officefloor.plugin.socket.server.tcp.source;
 
-import java.io.OutputStream;
-
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
+import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Provides for processing a {@link Messages} response.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class MessageWork {
@@ -37,7 +37,7 @@ public class MessageWork {
 
 	/**
 	 * Obtains the input index of the message and responds with the message.
-	 * 
+	 *
 	 * @param connection
 	 *            {@link ServerTcpConnection}.
 	 * @param taskContext
@@ -48,27 +48,35 @@ public class MessageWork {
 		try {
 
 			// Ensure not waiting too long
-			if ((System.currentTimeMillis() - this.startTime) > 20000) {
-				throw new Exception("Waited too long for a message");
+			long waitTimeInSeconds = (System.currentTimeMillis() - this.startTime) / 1000;
+			if ((waitTimeInSeconds) > 20) {
+				throw new Exception("Waited too long for a message ("
+						+ waitTimeInSeconds + " seconds)");
 			}
 
 			// Obtain the index
-			byte[] buffer = new byte[1];
-			int readSize = connection.read(buffer);
-			if (readSize == 0) {
+			InputBufferStream inputBufferStream = connection
+					.getInputBufferStream();
+			switch ((int) inputBufferStream.available()) {
+			case BufferStream.END_OF_STREAM:
+				// Connection prematurely closed
+				throw new Exception("Connection prematurely closed");
 
+			case 0:
 				// No message, wait for one to come
 				connection.waitOnClientData();
 				taskContext.setComplete(false);
 				return;
 			}
-			int index = (int) buffer[0];
+
+			// Obtain the index
+			int index = inputBufferStream.getInputStream().read();
 
 			// Handle message
 			switch (index) {
 			case -1:
 				// Close connection (do not process further messages)
-				connection.close();
+				connection.getOutputBufferStream().close();
 				break;
 
 			default:
@@ -84,9 +92,7 @@ public class MessageWork {
 				data[data.length - 1] = 0;
 
 				// Write the response
-				OutputStream outputStream = connection.getOutputStream();
-				outputStream.write(data);
-				outputStream.flush();
+				connection.getOutputBufferStream().write(data);
 
 				// Invoke flow to process another message when arrives
 				connection.waitOnClientData();
@@ -98,7 +104,7 @@ public class MessageWork {
 		} catch (Throwable ex) {
 			// Indicate failure and close connection
 			ex.printStackTrace();
-			connection.close();
+			connection.getOutputBufferStream().close();
 
 			// Propagate
 			throw ex;

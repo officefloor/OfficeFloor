@@ -212,6 +212,7 @@ public class SocketListener
 
 		// Synchronising at this point as may be removing connections altering
 		// counts that the registerConnection utilises.
+		boolean isUnregisterFromConnectionManager = false;
 		synchronized (this) {
 
 			// Reset current time (optimisation)
@@ -382,9 +383,14 @@ public class SocketListener
 				// Allow task to complete
 				context.setComplete(true);
 
-				// Unregister the socket listener from connection manager
-				context.getWork().socketListenerComplete(this);
+				// Unregister from connection manager
+				isUnregisterFromConnectionManager = true;
 			}
+		}
+
+		// Must unregister from connection manager outside lock
+		if (isUnregisterFromConnectionManager) {
+			context.getWork().socketListenerComplete(this);
 		}
 
 		// No return (as should be looping)
