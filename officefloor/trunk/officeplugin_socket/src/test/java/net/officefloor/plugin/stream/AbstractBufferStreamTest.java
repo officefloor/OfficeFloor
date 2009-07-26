@@ -292,6 +292,96 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure skip of empty stream works as likely override default skip
+	 * routine.
+	 */
+	public void testStream_SkipEmptyStream() throws IOException {
+		InputStream inputStream = this.input.getInputStream();
+		assertEquals("Should not skip if negative", 0, inputStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, inputStream.skip(0));
+		assertEquals("Should not skip if empty", 0, inputStream.skip(10));
+	}
+
+	/**
+	 * Ensure able to skip single byte as likely override default skip routine.
+	 */
+	public void testStream_SkipSingleByte() throws IOException {
+		// Add a byte
+		this.outputStream.write('a');
+
+		// Ensure can skip
+		InputStream inputStream = this.input.getInputStream();
+		assertEquals("Should not skip if negative", 0, inputStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, inputStream.skip(0));
+		assertEquals("Should only skip available", 1, inputStream.skip(10));
+		assertEquals("Should not skip as no available", 0, inputStream.skip(10));
+
+		// Close output to indicate no further data
+		this.output.close();
+
+		// Should now be end of stream
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				inputStream.skip(10));
+	}
+
+	/**
+	 * Ensure able to skip over multiple buffers as likely override default skip
+	 * routine.
+	 */
+	public void testStream_SkipOverMultipleBuffers() throws IOException {
+
+		// Write content
+		byte[] content = this.createContent(this.getBufferSize() * 3);
+		this.output.write(content);
+
+		// Input the content
+		InputStream inputStream = this.input.getInputStream();
+		assertEquals("Should not skip if negative", 0, inputStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, inputStream.skip(0));
+
+		// Skip into first buffer and validate position
+		int position = this.getBufferSize() / 3;
+		assertEquals("Should skip the bytes", position, inputStream
+				.skip(position));
+		byte expectedByte = content[position];
+		byte actualByte = (byte) inputStream.read();
+		assertEquals("Incorrect byte after skip", expectedByte, actualByte);
+		position++; // at next position after read
+
+		// Skip into second buffer and validate position
+		position += this.getBufferSize();
+		assertEquals("Should skip to next buffer", this.getBufferSize(),
+				inputStream.skip(this.getBufferSize()));
+		expectedByte = content[position];
+		actualByte = (byte) inputStream.read();
+		assertEquals("Incorrect byte after skip to next buffer", expectedByte,
+				actualByte);
+		position++; // at next position after read
+
+		// Verify not skipping while in middle of available data
+		assertEquals("Should not skip if negative", 0, inputStream.skip(-1));
+		assertEquals("No effect if skip zero", 0, inputStream.skip(0));
+		expectedByte = content[position];
+		actualByte = (byte) inputStream.read();
+		assertEquals("Incorrect byte after no effect operations", expectedByte,
+				actualByte);
+		position++; // at next position after read
+
+		// Skip past end and ensure end of stream
+		int remainingPositions = content.length - position;
+		assertEquals("Should only skip remaining positions",
+				remainingPositions, inputStream.skip(content.length * 10));
+		assertEquals("Further skips should not move", 0, inputStream.skip(1));
+
+		// Close output to indicate no further data
+		this.output.close();
+
+		// Should now be end of stream
+		assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+				inputStream.skip(10));
+	}
+
+	/**
 	 * Ensure indicates if end of stream (read all data after output stream
 	 * closed).
 	 */

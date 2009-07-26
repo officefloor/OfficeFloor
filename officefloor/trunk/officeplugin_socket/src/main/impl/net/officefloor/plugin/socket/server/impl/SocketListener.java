@@ -18,7 +18,6 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -31,21 +30,22 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.WriteContext;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Listens to {@link Socket} instances.
  *
  * @author Daniel Sagenschneider
  */
-public class SocketListener
+public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 		implements
-		Task<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed>,
+		Task<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed>,
 		ReadContext, WriteContext, IdleContext {
 
 	/**
@@ -70,7 +70,7 @@ public class SocketListener
 	/**
 	 * {@link Server}.
 	 */
-	private final Server<?> server;
+	private final Server<F, CH> server;
 
 	/**
 	 * {@link SelectorFactory}.
@@ -80,7 +80,7 @@ public class SocketListener
 	/**
 	 * List of {@link InternalCommunication} just registered.
 	 */
-	private final List<ConnectionImpl<?>> justRegistered = new LinkedList<ConnectionImpl<?>>();
+	private final List<ConnectionImpl<F, CH>> justRegistered = new LinkedList<ConnectionImpl<F, CH>>();
 
 	/**
 	 * {@link Selector} to aid in listening for connections. This should be
@@ -114,8 +114,8 @@ public class SocketListener
 	 *            Maximum number of {@link Connection} instances that can be
 	 *            registered with this {@link SocketListener}.
 	 */
-	public SocketListener(SelectorFactory selectorFactory, Server<?> server,
-			int maxCommunications) {
+	public SocketListener(SelectorFactory selectorFactory,
+			Server<F, CH> server, int maxCommunications) {
 		this.selectorFactory = selectorFactory;
 		this.server = server;
 		this.maxConnections = maxCommunications;
@@ -130,7 +130,7 @@ public class SocketListener
 	 * @throws IOException
 	 *             If fails to register the connection.
 	 */
-	synchronized boolean registerConnection(ConnectionImpl<?> connection)
+	synchronized boolean registerConnection(ConnectionImpl<F, CH> connection)
 			throws IOException {
 
 		// All connections complete so may not register
@@ -176,8 +176,9 @@ public class SocketListener
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Object doTask(
-			TaskContext<ConnectionManager, SocketListenerDependencies, Indexed> context)
+			TaskContext<ConnectionManager<F, CH>, SocketListenerDependencies, Indexed> context)
 			throws Exception {
 
 		// Flag to loop forever
@@ -193,7 +194,7 @@ public class SocketListener
 					this.selector = this.selectorFactory.createSelector();
 
 					// Obtain the Connection
-					ConnectionImpl<?> connection = (ConnectionImpl<?>) context
+					ConnectionImpl<F, CH> connection = (ConnectionImpl<F, CH>) context
 							.getObject(SocketListenerDependencies.CONNECTION);
 
 					// Listen to the connection
@@ -225,7 +226,7 @@ public class SocketListener
 			for (SelectionKey key : this.selector.keys()) {
 
 				// Obtain the connection
-				ConnectionImpl<?> connection = (ConnectionImpl<?>) key
+				ConnectionImpl<F, CH> connection = (ConnectionImpl<F, CH>) key
 						.attachment();
 
 				// Synchronise on connection to reduce locking
@@ -235,8 +236,8 @@ public class SocketListener
 						// Flag that checking connection
 						connection.flagCheckingConnection();
 
-						// Interest Operations
-						int interestOps = 0;
+						// Interest Operations (always reading)
+						int interestOps = SelectionKey.OP_READ;
 
 						// Reset connection context
 						this.resetConnectionContext(connection);
@@ -270,33 +271,14 @@ public class SocketListener
 									// Determine if active (something read)
 									isActive |= (bytesRead > 0);
 
-									// Handle completed read
-									if (this.requestSize >= 0) {
-
-										// Create the Request
-										Request request = connection
-												.createRequest(
-														this.requestSize,
-														this.attachment);
-
+									// Handle received request
+									if (this.isRequestReceived) {
 										// Process the request
-										this.server
-												.processRequest(
-														request,
-														connection
-																.getConnectionHandler());
-									}
-
-									// Determine if to continue reading
-									if (this.isContinueReading) {
-										// Flag to continue reading
-										interestOps |= SelectionKey.OP_READ;
+										this.server.processRequest(connection
+												.getConnectionHandler());
 									}
 									break;
 								}
-							} else {
-								// Determine if maintain interest in reading
-								interestOps |= (key.interestOps() & SelectionKey.OP_READ);
 							}
 
 							// Writing (or closed attempting to write remaining)
@@ -340,9 +322,6 @@ public class SocketListener
 							interestOps |= SelectionKey.OP_WRITE;
 
 						} else {
-							// Connection not closed, continue reading
-							interestOps |= SelectionKey.OP_READ;
-
 							// Determine if data for the client
 							if (connection.isDataForClient()) {
 								// Flag to write data to client
@@ -368,7 +347,7 @@ public class SocketListener
 			}
 
 			// Start listening to the just registered connections
-			for (Iterator<ConnectionImpl<?>> iterator = this.justRegistered
+			for (Iterator<ConnectionImpl<F, CH>> iterator = this.justRegistered
 					.iterator(); iterator.hasNext();) {
 
 				// Listen to the connection
@@ -409,7 +388,7 @@ public class SocketListener
 	 *             If fails closing.
 	 */
 	private boolean closeConnection(SelectionKey key,
-			ConnectionImpl<?> connection) throws IOException {
+			ConnectionImpl<F, CH> connection) throws IOException {
 
 		// Flag the connection to close
 		connection.cancel();
@@ -438,7 +417,7 @@ public class SocketListener
 	 *             If fails closing.
 	 */
 	private void terminateConnection(SelectionKey key,
-			ConnectionImpl<?> connection) throws IOException {
+			ConnectionImpl<F, CH> connection) throws IOException {
 
 		// Flag connection as closed
 		connection.cancel();
@@ -459,7 +438,7 @@ public class SocketListener
 	 * @throws IOException
 	 *             If fails to start listening to the {@link Connection}.
 	 */
-	private void listenToConnection(ConnectionImpl<?> connection)
+	private void listenToConnection(ConnectionImpl<F, CH> connection)
 			throws IOException {
 
 		// On listening to a connection, always read a message
@@ -492,7 +471,7 @@ public class SocketListener
 	 * @throws IOException
 	 *             If fails to handle read.
 	 */
-	int readData(ConnectionImpl<?> connection) throws IOException {
+	int readData(ConnectionImpl<F, CH> connection) throws IOException {
 
 		// Record the number of bytes read
 		int bytesRead = 0;
@@ -543,7 +522,7 @@ public class SocketListener
 	 * @throws IOException
 	 *             If fails to handle write.
 	 */
-	int writeData(ConnectionImpl<?> connection) throws IOException {
+	int writeData(ConnectionImpl<F, CH> connection) throws IOException {
 
 		// Record the number of bytes written
 		int bytesWritten = 0;
@@ -602,13 +581,13 @@ public class SocketListener
 	/**
 	 * {@link Connection} of the current {@link ConnectionHandlerContext}.
 	 */
-	private ConnectionImpl<?> contextConnection = null;
+	private ConnectionImpl<F, CH> contextConnection = null;
 
 	/**
 	 * Resets the context for the {@link Connection}.
 	 *
 	 */
-	private void resetConnectionContext(ConnectionImpl<?> connection) {
+	private void resetConnectionContext(ConnectionImpl<F, CH> connection) {
 		this.isCloseConnection = false;
 		this.contextConnection = connection;
 	}
@@ -642,43 +621,25 @@ public class SocketListener
 	 */
 
 	/**
-	 * Negative request size indicates {@link Request} not received.
+	 * Flag indicating if the request was received.
 	 */
-	private long requestSize = -1;
-
-	/**
-	 * Attachment for the {@link Request}.
-	 */
-	private Object attachment = null;
-
-	/**
-	 * Flag to indicate continue reading.
-	 */
-	private boolean isContinueReading = true;
+	private boolean isRequestReceived = false;
 
 	/**
 	 * Resets the {@link ReadContext}.
 	 */
 	private void resetReadContext() {
-		this.requestSize = -1;
-		this.attachment = null;
-		this.isContinueReading = true;
+		this.isRequestReceived = false;
 	}
 
 	@Override
-	public InputStream getInputStream() {
-		return this.contextConnection.getAvailableDataFromClientBrowseStream();
+	public InputBufferStream getInputBufferStream() {
+		return this.contextConnection.getConnectionInputBufferStream();
 	}
 
 	@Override
-	public void requestReceived(long requestSize, Object attachment) {
-		this.requestSize = requestSize;
-		this.attachment = attachment;
-	}
-
-	@Override
-	public void setStopReading(boolean isStop) {
-		this.isContinueReading = !isStop;
+	public void requestReceived() {
+		this.isRequestReceived = true;
 	}
 
 	/*

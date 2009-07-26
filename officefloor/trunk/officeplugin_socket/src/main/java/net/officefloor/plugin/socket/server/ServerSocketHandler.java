@@ -27,14 +27,14 @@ import java.net.ServerSocket;
  *
  * @author Daniel Sagenschneider
  */
-public interface ServerSocketHandler<F extends Enum<F>> {
+public interface ServerSocketHandler<F extends Enum<F>, CH extends ConnectionHandler> {
 
 	/**
-	 * Creates the {@link Server} to handle {@link Request} instances.
+	 * Creates the {@link Server} to handle requests.
 	 *
-	 * @return {@link Server} to handle {@link Request} instances.
+	 * @return {@link Server} to handle requests.
 	 */
-	Server<F> createServer();
+	Server<F, CH> createServer();
 
 	/**
 	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
@@ -43,6 +43,6 @@ public interface ServerSocketHandler<F extends Enum<F>> {
 	 *            A new {@link Connection} requiring handling.
 	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	CH createConnectionHandler(Connection connection);
 
 }

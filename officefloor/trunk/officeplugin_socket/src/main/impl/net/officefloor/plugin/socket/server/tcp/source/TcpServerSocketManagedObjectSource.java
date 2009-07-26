@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
@@ -34,8 +33,8 @@ import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
  * @author Daniel Sagenschneider
  */
 public class TcpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<TcpServerFlows> implements
-		ServerSocketHandler<TcpServerFlows> {
+		AbstractServerSocketManagedObjectSource<TcpServerFlows, TcpConnectionHandler> implements
+		ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> {
 
 	/**
 	 * Property to obtain the maximum idle time before the {@link Connection} is
@@ -59,7 +58,7 @@ public class TcpServerSocketManagedObjectSource extends
 	}
 
 	@Override
-	protected ServerSocketHandler<TcpServerFlows> createServerSocketHandler(
+	protected ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> createServerSocketHandler(
 			MetaDataContext<None, TcpServerFlows> context) throws Exception {
 		ManagedObjectSourceContext<TcpServerFlows> mosContext = context
 				.getManagedObjectSourceContext();
@@ -89,12 +88,12 @@ public class TcpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	public Server<TcpServerFlows> createServer() {
+	public Server<TcpServerFlows, TcpConnectionHandler> createServer() {
 		return new TcpServer();
 	}
 
 	@Override
-	public ConnectionHandler createConnectionHandler(Connection connection) {
+	public TcpConnectionHandler createConnectionHandler(Connection connection) {
 		return new TcpConnectionHandler(connection, this.maxIdleTime);
 	}
 

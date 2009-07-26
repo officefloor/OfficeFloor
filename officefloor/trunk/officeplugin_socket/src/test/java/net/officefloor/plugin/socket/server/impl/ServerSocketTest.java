@@ -36,11 +36,9 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.WriteContext;
-import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 
 /**
  * Tests the {@link AbstractServerSocketManagedObjectSource}.
@@ -48,7 +46,8 @@ import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObje
  * @author Daniel Sagenschneider
  */
 public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
-		ServerSocketHandler<Indexed>, Server<Indexed>, ConnectionHandler {
+		ServerSocketHandler<Indexed, ConnectionHandler>,
+		Server<Indexed, ConnectionHandler>, ConnectionHandler {
 
 	/**
 	 * Request message.
@@ -59,11 +58,6 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 * Response message.
 	 */
 	private static final byte[] RESPONSE_MSG = new byte[] { 6, 7, 8, 9, 10 };
-
-	/**
-	 * Mock attachment for the {@link Request}.
-	 */
-	private static final Object MOCK_ATTACHMENT = new Object();
 
 	/**
 	 * Current instance executing.
@@ -141,7 +135,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 */
 
 	@Override
-	public Server<Indexed> createServer() {
+	public Server<Indexed, ConnectionHandler> createServer() {
 		return this;
 	}
 
@@ -160,7 +154,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 
 		// Obtain the data (for small amount should all be available)
 		byte[] data = new byte[REQUEST_MSG.length];
-		int readSize = context.getInputStream().read(data);
+		int readSize = context.getInputBufferStream().getBrowseStream().read(
+				data);
 		assertEquals("Message missing data", readSize, REQUEST_MSG.length);
 
 		// Validate message is correct
@@ -170,7 +165,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		}
 
 		// Flag the request received
-		context.requestReceived(readSize, MOCK_ATTACHMENT);
+		context.requestReceived();
 	}
 
 	@Override
@@ -195,23 +190,19 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	@Override
-	public void processRequest(Request request,
-			ConnectionHandler connectionHandler) throws IOException {
+	public void processRequest(ConnectionHandler connectionHandler)
+			throws IOException {
 		// Ensure connection handler
 		assertSame("Incorrect connection handler", this, connectionHandler);
 
 		// Ensure have the request content
 		byte[] data = new byte[REQUEST_MSG.length];
-		int readSize = request.getInputBufferStream().read(data);
+		int readSize = this.connection.getInputBufferStream().read(data);
 		assertEquals("Message missing data", readSize, REQUEST_MSG.length);
 		for (int i = 0; i < REQUEST_MSG.length; i++) {
 			assertEquals("Incorrect request message byte at " + i,
 					REQUEST_MSG[i], data[i]);
 		}
-
-		// Ensure have the request attachment
-		assertEquals("Incorrect request attachment", MOCK_ATTACHMENT, request
-				.getAttachment());
 
 		// Write the response
 		this.connection.getOutputBufferStream().write(RESPONSE_MSG);
@@ -222,14 +213,14 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 */
 	@TestSource
 	public static class MockServerSocketManagedObjectSource extends
-			AbstractServerSocketManagedObjectSource<Indexed> {
+			AbstractServerSocketManagedObjectSource<Indexed, ConnectionHandler> {
 
 		/*
 		 * ========== AbstractServerSocketManagedObjectSource ============
 		 */
 
 		@Override
-		protected ServerSocketHandler<Indexed> createServerSocketHandler(
+		protected ServerSocketHandler<Indexed, ConnectionHandler> createServerSocketHandler(
 				MetaDataContext<None, Indexed> context) throws Exception {
 			context.setObjectClass(Object.class);
 			return ServerSocketTest.INSTANCE;

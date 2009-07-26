@@ -15,31 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server;
-
-import net.officefloor.plugin.stream.InputBufferStream;
+package net.officefloor.plugin.socket.server.http.parse;
 
 /**
- * Message identified by the {@link ConnectionHandler}.
+ * HTTP header.
  *
  * @author Daniel Sagenschneider
  */
-public interface Request {
+public interface HttpHeader {
 
 	/**
-	 * Obtains the attachment provided by the {@link ConnectionHandler}.
+	 * Obtains the name of the {@link HttpHeader}.
 	 *
-	 * @return Attachment provided by the {@link ConnectionHandler}. May be
-	 *         <code>null</code>.
+	 * @return Name of the {@link HttpHeader}.
 	 */
-	Object getAttachment();
+	String getName();
 
 	/**
-	 * Obtains the {@link InputBufferStream} to obtain data from the client for
-	 * this {@link Request}.
+	 * Obtains the value for the {@link HttpHeader}.
 	 *
-	 * @return {@link InputBufferStream}.
+	 * @return Value for the {@link HttpHeader}.
 	 */
-	InputBufferStream getInputBufferStream();
+	String getValue();
 
 }

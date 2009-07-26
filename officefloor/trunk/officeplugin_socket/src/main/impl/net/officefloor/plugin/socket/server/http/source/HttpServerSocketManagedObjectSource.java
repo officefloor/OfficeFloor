@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -35,9 +34,10 @@ import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObje
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<HttpServerFlows> implements
-		ServerSocketHandler<HttpServerFlows> {
+public class HttpServerSocketManagedObjectSource
+		extends
+		AbstractServerSocketManagedObjectSource<HttpServerFlows, HttpConnectionHandler>
+		implements ServerSocketHandler<HttpServerFlows, HttpConnectionHandler> {
 
 	/**
 	 * Initial size in bytes of the buffer to contain the {@link HttpRequest}
@@ -108,7 +108,7 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	protected ServerSocketHandler<HttpServerFlows> createServerSocketHandler(
+	protected ServerSocketHandler<HttpServerFlows, HttpConnectionHandler> createServerSocketHandler(
 			MetaDataContext<None, HttpServerFlows> context) throws Exception {
 
 		// Specify types
@@ -128,12 +128,12 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	public Server<HttpServerFlows> createServer() {
+	public Server<HttpServerFlows, HttpConnectionHandler> createServer() {
 		return new HttpServer();
 	}
 
 	@Override
-	public ConnectionHandler createConnectionHandler(Connection connection) {
+	public HttpConnectionHandler createConnectionHandler(Connection connection) {
 		return new HttpConnectionHandler(this, connection);
 	}
 

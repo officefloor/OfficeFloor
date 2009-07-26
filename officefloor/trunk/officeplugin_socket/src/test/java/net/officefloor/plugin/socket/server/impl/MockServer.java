@@ -22,7 +22,6 @@ import java.io.IOException;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.Server;
 
 /**
@@ -30,7 +29,7 @@ import net.officefloor.plugin.socket.server.Server;
  *
  * @author Daniel Sagenschneider
  */
-public class MockServer implements Server<Indexed> {
+public class MockServer implements Server<Indexed, ConnectionHandler> {
 
 	/*
 	 * ================== Server ==============================
@@ -43,8 +42,8 @@ public class MockServer implements Server<Indexed> {
 	}
 
 	@Override
-	public void processRequest(Request request,
-			ConnectionHandler connectionHandler) throws IOException {
+	public void processRequest(ConnectionHandler connectionHandler)
+			throws IOException {
 		// Do nothing
 	}
 

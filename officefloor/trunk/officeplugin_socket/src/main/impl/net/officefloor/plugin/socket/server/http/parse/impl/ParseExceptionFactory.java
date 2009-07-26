@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.parse;
+package net.officefloor.plugin.socket.server.http.parse.impl;
+
+import net.officefloor.plugin.socket.server.http.parse.ParseException;
 
 /**
  * Factory for the creation of a {@link ParseException}.

@@ -159,6 +159,13 @@ public class SynchronizedBufferStream implements BufferStream {
 	}
 
 	@Override
+	public long skip(long numberOfBytes) throws IOException {
+		synchronized (this.mutex) {
+			return this.backingStream.skip(numberOfBytes);
+		}
+	}
+
+	@Override
 	public long available() {
 		synchronized (this.mutex) {
 			return this.backingStream.available();

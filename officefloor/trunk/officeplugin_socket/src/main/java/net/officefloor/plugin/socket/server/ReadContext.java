@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.socket.server;
 
-import java.io.InputStream;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Context for handling a read.
@@ -27,47 +27,16 @@ import java.io.InputStream;
 public interface ReadContext extends ConnectionHandlerContext {
 
 	/**
-	 * <p>
-	 * Obtains the {@link InputStream} to obtain the read data from the client.
-	 * <p>
-	 * The end of stream is reached when no further data is immediately
-	 * available from the client. If further data is required for the
-	 * {@link Request} do not flag the {@link Request} as received and the
-	 * {@link ConnectionHandler} will be invoked again when further data is
-	 * available from the client.
+	 * Obtains the {@link InputBufferStream} to read data from the client.
 	 *
-	 * @return {@link InputStream}.
+	 * @return {@link InputBufferStream}.
 	 */
-	InputStream getInputStream();
+	InputBufferStream getInputBufferStream();
 
 	/**
-	 * <p>
-	 * Flags that the {@link Request} has been received.
-	 * <p>
-	 * This will subsequently have the {@link Server} process the
-	 * {@link Request}.
-	 *
-	 * @param requestSize
-	 *            Specifies the size of the {@link Request} in bytes.
-	 * @param attachment
-	 *            Optional attachment for the {@link Request}. May be
-	 *            <code>null</code>.
+	 * Flags that the request has been received. This will subsequently have the
+	 * {@link Server} process the request.
 	 */
-	void requestReceived(long requestSize, Object attachment);
-
-	/**
-	 * <p>
-	 * Flags to stop reading after receiving a {@link Request}.
-	 * <p>
-	 * By default it will be <code>false</code> to continue reading data from
-	 * the client.
-	 *
-	 * @param isContinue
-	 *            <code>false</code> to continue reading for another
-	 *            {@link Request}. <code>true</code> will ignore further data
-	 *            read from client and close the {@link Connection} when
-	 *            response written.
-	 */
-	void setStopReading(boolean isStop);
+	void requestReceived();
 
 }

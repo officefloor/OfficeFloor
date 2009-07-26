@@ -221,6 +221,23 @@ public interface BufferStream {
 			throws IOException;
 
 	/**
+	 * Skips the input number of bytes in the {@link BufferStream}. As there may
+	 * not be the available bytes to skip in the {@link BufferStream}, this
+	 * method returns the actual number of bytes skipped from the available
+	 * bytes.
+	 *
+	 * @param numberOfBytes
+	 *            Maximum number of bytes to skip.
+	 * @return Number of available bytes skipped in the {@link BufferStream}.
+	 *         Return of {@link BufferStream#END_OF_STREAM} indicates end of
+	 *         stream with no bytes skipped.
+	 * @throws IOException
+	 *             If fails to skip the bytes. Typically this will be because
+	 *             the input is closed.
+	 */
+	long skip(long numberOfBytes) throws IOException;
+
+	/**
 	 * Provides an accurate number of bytes available in the
 	 * {@link BufferStream}.
 	 *
