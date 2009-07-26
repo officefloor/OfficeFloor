@@ -27,11 +27,11 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 
 /**
  * {@link ManagedObject} for the {@link ServerHttpConnection}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
@@ -54,7 +54,7 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param connectionHandler
 	 *            {@link HttpConnectionHandler} that has just received a HTTP
 	 *            request.
@@ -134,23 +134,25 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 		private final byte[] body;
 
 		/**
-		 * Initiate from {@link HttpRequestParser}.
-		 * 
+		 * Initiate from {@link HttpRequestParserImpl}.
+		 *
 		 * @param parser
-		 *            {@link HttpRequestParser}.
+		 *            {@link HttpRequestParserImpl}.
 		 */
-		public HttpRequestImpl(HttpRequestParser parser) {
+		public HttpRequestImpl(HttpRequestParserImpl parser) {
 			this.method = parser.getMethod();
-			this.path = parser.getPath();
-			this.version = parser.getVersion();
-			this.headers = parser.getHeaders();
-			this.body = parser.getBody();
+			this.path = parser.getRequestURI();
+			this.version = parser.getHttpVersion();
+
+			// TODO obtain headers and body
+			this.headers = null;
+			this.body = null;
 		}
 
 		/*
 		 * ================ HttpRequest ================================
 		 */
-		
+
 		@Override
 		public String getMethod() {
 			return this.method;

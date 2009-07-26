@@ -83,6 +83,11 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	}
 
 	@Override
+	public long skip(long numberOfBytes) throws IOException {
+		return this.bufferStream.skip(numberOfBytes);
+	}
+
+	@Override
 	public long available() {
 		return this.bufferStream.available();
 	}

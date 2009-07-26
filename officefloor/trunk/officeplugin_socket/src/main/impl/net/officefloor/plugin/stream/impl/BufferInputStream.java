@@ -117,6 +117,11 @@ public class BufferInputStream extends InputStream {
 	}
 
 	@Override
+	public long skip(long n) throws IOException {
+		return this.input.skip(n);
+	}
+
+	@Override
 	public int available() throws IOException {
 		long availableLength = this.input.available();
 		return ((availableLength > Integer.MAX_VALUE) ? Integer.MAX_VALUE

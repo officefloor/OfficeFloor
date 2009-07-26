@@ -22,8 +22,6 @@ import java.io.IOException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.Server;
 
 /**
@@ -31,7 +29,8 @@ import net.officefloor.plugin.socket.server.Server;
  *
  * @author Daniel Sagenschneider
  */
-public class TcpServer implements Server<TcpServer.TcpServerFlows> {
+public class TcpServer implements
+		Server<TcpServer.TcpServerFlows, TcpConnectionHandler> {
 
 	/**
 	 * {@link Flow} instance to handle a new TCP {@link Connection}.
@@ -56,14 +55,11 @@ public class TcpServer implements Server<TcpServer.TcpServerFlows> {
 	}
 
 	@Override
-	public void processRequest(Request request,
-			ConnectionHandler connectionHandler) throws IOException {
-
-		// Down cast to TCP connection handler
-		TcpConnectionHandler tcpConnHandler = (TcpConnectionHandler) connectionHandler;
+	public void processRequest(TcpConnectionHandler connectionHandler)
+			throws IOException {
 
 		// Invoke the process to handle message
-		tcpConnHandler.invokeProcess(request, this.executeContext);
+		connectionHandler.invokeProcess(this.executeContext);
 	}
 
 }

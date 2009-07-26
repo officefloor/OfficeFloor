@@ -30,6 +30,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
 
 /**
  * {@link BufferStream} implementation.
@@ -61,6 +62,20 @@ public class BufferStreamImpl implements BufferStream {
 	 */
 	public BufferStreamImpl(BufferSquirtFactory squirtFactory) {
 		this.squirtFactory = squirtFactory;
+	}
+
+	/**
+	 * Initiate to input data.
+	 *
+	 * @param data
+	 *            Data.
+	 * @throws IOException
+	 *             If fails to initiate.
+	 */
+	public BufferStreamImpl(ByteBuffer data) throws IOException {
+		this.squirtFactory = new NotCreateBufferSquirtFactory();
+		this.append(data);
+		this.output.close();
 	}
 
 	/**
@@ -563,6 +578,65 @@ public class BufferStreamImpl implements BufferStream {
 						transferBuffer));
 
 				// Remove the buffer
+				this.head = element.next;
+				element.squirt.close();
+				readLength = bufferRemaining;
+			}
+
+			// Indicate bytes read and no longer available
+			this.availableSize -= readLength;
+
+			// Update read markers
+			readRemaining -= readLength;
+			readSize += readLength;
+		}
+
+		// Return the bytes read
+		return readSize;
+	}
+
+	@Override
+	public long skip(long numberOfBytes) throws IOException {
+
+		// Determine if content for reading
+		if (this.head == null) {
+			// No content, read size based on whether stream closed
+			return (this.isOutputClosed ? BufferStream.END_OF_STREAM : 0);
+		}
+
+		// Obtain the read markers
+		long readRemaining = numberOfBytes;
+		long readSize = 0; // return value
+
+		// Read content until no data or read buffer full
+		while (readRemaining > 0) {
+
+			// Prepare for the read
+			switch (this.prepareForRead()) {
+			case BufferStream.END_OF_STREAM:
+				// Previous loop may have read data
+				return (readSize > 0 ? readSize : BufferStream.END_OF_STREAM);
+			case 0:
+				// No further data available
+				return readSize;
+
+				// Otherwise data available to read
+			}
+
+			// Determine content remaining in buffer to skip
+			BufferSquirtElement element = this.head;
+			ByteBuffer buffer = element.squirt.getBuffer();
+			int bufferRemaining = buffer.remaining();
+
+			// Transfer the buffer
+			long readLength;
+			if (bufferRemaining > readRemaining) {
+				// Move position to after transferred content
+				buffer.position(buffer.position() + (int) readRemaining);
+				readLength = readRemaining;
+
+			} else {
+				// Skip the remaining of the buffer
 				this.head = element.next;
 				element.squirt.close();
 				readLength = bufferRemaining;

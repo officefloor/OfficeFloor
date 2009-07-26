@@ -17,8 +17,16 @@
  */
 package net.officefloor.plugin.socket.server.http.parse;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.source.HttpStatus;
+import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.impl.BufferStreamImpl;
+import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link HttpRequestParser}.
@@ -30,8 +38,20 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpRequestParser} to test.
 	 */
-	private HttpRequestParser httpRequestParser = new HttpRequestParser(1024,
-			1024 * 1024);
+	private HttpRequestParser httpRequestParser = new HttpRequestParserImpl(
+			1024);
+
+	/**
+	 * Temporary buffer for parsing.
+	 */
+	private char[] tempBuffer = new char[255];
+
+	/**
+	 * Ensure able to handle empty request).
+	 */
+	public void testEmpty() {
+		this.doMethodTest("", false, null, null, null, null);
+	}
 
 	/**
 	 * Ensure able to handle a blank request (only spaces received for it).
@@ -44,29 +64,28 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * Ensure able to handle leading spaces.
 	 */
 	public void testLeadingSpaces() {
-		this.doMethodTest(" GET /path HTTP/1.1\n\n", true, "GET", "/path",
-				"HTTP/1.1", null);
+		this.doMethodTest(" \n GET ", false, "GET", null, null, null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the method.
 	 */
 	public void testToMethod() {
-		this.doMethodTest("GET", false, "GET", null, null, null);
+		this.doMethodTest("GET ", false, "GET", null, null, null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the path.
 	 */
 	public void testToPath() {
-		this.doMethodTest("GET /path", false, "GET", "/path", null, null);
+		this.doMethodTest("GET /path ", false, "GET", "/path", null, null);
 	}
 
 	/**
 	 * Ensure able to parse up to just the version.
 	 */
 	public void testToVersion() {
-		this.doMethodTest("GET /path HTTP/1.1", false, "GET", "/path",
+		this.doMethodTest("GET /path HTTP/1.1\n", false, "GET", "/path",
 				"HTTP/1.1", null);
 	}
 
@@ -74,7 +93,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * Ensure able to parse up to just the header name.
 	 */
 	public void testToHeaderName() {
-		this.doMethodTest("GET /path HTTP/1.1\nContent-Length", false, "GET",
+		this.doMethodTest("GET /path HTTP/1.1\nContent-Length:", false, "GET",
 				"/path", "HTTP/1.1", null);
 	}
 
@@ -82,17 +101,19 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * Ensure able to parse up to just the header name.
 	 */
 	public void testToHeaderValue() {
-		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n", false,
-				"POST", "/path", "HTTP/1.1", null, "Content-Length", "10");
+		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\nHost",
+				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
+				"10");
 	}
 
 	/**
 	 * Ensure able to parse up to the body.
 	 */
 	public void testToBody() {
-		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\nTEST",
-				false, "POST", "/path", "HTTP/1.1", "TEST", "Content-Length",
-				"10");
+		this.doMethodTest(
+				"POST /path HTTP/1.1\nContent-Length: 1000\n\nNOT ALL CONTENT",
+				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
+				"1000");
 	}
 
 	/**
@@ -100,7 +121,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testGet() {
 		this.doMethodTest("GET /path HTTP/1.1\n\n", true, "GET", "/path",
-				"HTTP/1.1", null);
+				"HTTP/1.1", "");
 	}
 
 	/**
@@ -108,17 +129,17 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testGetWithOneParamter() {
 		this.doMethodTest("GET /path?param=value HTTP/1.1\n\n", true, "GET",
-				"/path?param=value", "HTTP/1.1", null);
+				"/path?param=value", "HTTP/1.1", "");
 	}
 
 	/**
 	 * Validate GET with two parameters.
 	 */
-	public void testGetWithOneParamters() {
+	public void testGetWithTwoParamters() {
 		this.doMethodTest(
 				"GET /path?paramOne=valueOne&paramOne=valueTwo HTTP/1.1\n\n",
 				true, "GET", "/path?paramOne=valueOne&paramOne=valueTwo",
-				"HTTP/1.1", null);
+				"HTTP/1.1", "");
 	}
 
 	/**
@@ -127,7 +148,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testGetWithHeaders() {
 		this.doMethodTest(
 				"GET /path HTTP/1.1\nHeader1: Value1\nHeader2: Value2\n\n",
-				true, "GET", "/path", "HTTP/1.1", null, "Header1", "Value1",
+				true, "GET", "/path", "HTTP/1.1", "", "Header1", "Value1",
 				"Header2", "Value2");
 	}
 
@@ -155,48 +176,109 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testPostWithNoEntity() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 0\n\n", true,
-				"POST", "/path", "HTTP/1.1", null, "Content-Length", "0");
+				"POST", "/path", "HTTP/1.1", "", "Content-Length", "0");
 	}
 
 	/**
 	 * Validated POST with not all of the body (entity) received.
 	 */
-	public void testPostWithNoAllOfEntityReceived() {
+	public void testPostWithNotAllOfEntityReceived() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\n12345",
-				false, "POST", "/path", "HTTP/1.1", "12345", "Content-Length",
+				false, "POST", "/path", "HTTP/1.1", null, "Content-Length",
 				"10");
 	}
 
 	/**
-	 * Validates invalid partial method on request.
+	 * Validates partial method being too long.
 	 */
-	public void testInvalidPartialMethod() {
-		this.doInvalidMethodTest("INVALID", HttpStatus._400,
-				"Unknown method: INV...");
+	public void testTooLong_PartialMethod() {
+		this.tempBuffer = new char[1];
+		this
+				.doInvalidMethodTest("TooLarge", HttpStatus._400,
+						"Method too long");
 	}
 
 	/**
-	 * Validates invalid method on request.
+	 * Validates complete method being too long.
 	 */
-	public void testInvalidMethod() {
-		this.doInvalidMethodTest("IV /path HTTP/1.0\n\n", HttpStatus._400,
-				"Unknown method: IV");
+	public void testTooLong_CompleteMethod() {
+		this.tempBuffer = new char[1];
+		this.doInvalidMethodTest("TooLarge ", HttpStatus._400,
+				"Method too long");
 	}
 
 	/**
-	 * Validates invalid partial version on request.
+	 * Validates partial request URI being too long.
 	 */
-	public void testInvalidPartialVersion() {
-		this.doInvalidMethodTest("GET /path InvalidHttpVersion",
-				HttpStatus._400, "Unknown version: InvalidH...");
+	public void testTooLong_PartialRequestURI() {
+		this.tempBuffer = new char[3];
+		this.doInvalidMethodTest("GET /TooLong", HttpStatus._414,
+				"Request-URI Too Long");
 	}
 
 	/**
-	 * Validates invalid version on request.
+	 * Validates complete request URI being too long.
 	 */
-	public void testInvalidVersion() {
-		this.doInvalidMethodTest("GET /path INVALID\n\n", HttpStatus._400,
-				"Unknown version: INVALID");
+	public void testTooLong_CompleteRequestURI() {
+		this.tempBuffer = new char[3];
+		this.doInvalidMethodTest("GET /TooLong ", HttpStatus._414,
+				"Request-URI Too Long");
+	}
+
+	/**
+	 * Validates partial version too long.
+	 */
+	public void testTooLong_PartialVersion() {
+		this.tempBuffer = new char[5];
+		this.doInvalidMethodTest("GET /path TooLong", HttpStatus._400,
+				"Version too long");
+	}
+
+	/**
+	 * Validates complete version too long.
+	 */
+	public void testTooLong_CompleteVersion() {
+		this.tempBuffer = new char[5];
+		this.doInvalidMethodTest("GET /path TooLong\n", HttpStatus._400,
+				"Version too long");
+	}
+
+	/**
+	 * Validates partial header name too long.
+	 */
+	public void testTooLong_PartialHeaderName() {
+		this.tempBuffer = new char[8];
+		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName",
+				HttpStatus._400, "Header name too long");
+	}
+
+	/**
+	 * Validates complete header name too long.
+	 */
+	public void testTooLong_CompleteHeaderName() {
+		this.tempBuffer = new char[8];
+		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName:",
+				HttpStatus._400, "Header name too long");
+	}
+
+	/**
+	 * Validates partial header value too long.
+	 */
+	public void testTooLong_PartialHeaderValue() {
+		this.tempBuffer = new char[8];
+		this.doInvalidMethodTest(
+				"GET /path HTTP/1.1\nName: HeaderValueTooLong",
+				HttpStatus._400, "Header value too long");
+	}
+
+	/**
+	 * Validates complete header value too long.
+	 */
+	public void testTooLong_CompleteHeaderValue() {
+		this.tempBuffer = new char[8];
+		this.doInvalidMethodTest(
+				"GET /path HTTP/1.1\nName: HeaderValueTooLong\n",
+				HttpStatus._400, "Header value too long");
 	}
 
 	/**
@@ -222,7 +304,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.doInvalidMethodTest(
 				"POST /path HTTP/1.1\nContent-Length:\n\nTEST",
 				HttpStatus._411,
-				"Content-Length header value  must be an integer");
+				"Content-Length header value must be an integer");
 	}
 
 	/**
@@ -232,26 +314,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.doInvalidMethodTest(
 				"POST /path HTTP/1.1\nContent-Length: INVALID\n\nTEST",
 				HttpStatus._411,
-				"Content-Length header value INVALID must be an integer");
-	}
-
-	/**
-	 * Ensures that on a method that does not require a Content-Length that the
-	 * Content-Length is provided if there is an entity on the request.
-	 */
-	public void testNoContentLengthButEntityProvided() {
-		this.doInvalidMethodTest("GET /path HTTP/1.1\n\nTEST", HttpStatus._411,
-				"Must provide Content-Length header if sending entity");
-	}
-
-	/**
-	 * Ensures fails if entity is larger than the Content-Length.
-	 */
-	public void testEntityLargerThanContentLength() {
-		this.doInvalidMethodTest(
-				"POST /path HTTP/1.1\nContent-Length: 4\n\n12345",
-				HttpStatus._400,
-				"Request entity exceeded Content-Length size of 4");
+				"Content-Length header value must be an integer");
 	}
 
 	/**
@@ -274,21 +337,26 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			String expectedMethod, String expectedPath, String expectedVersion,
 			String expectedBody, String... expectedHeaderNameValues) {
 		try {
-			// Parse the content
+
+			// Create input buffer stream with content
 			byte[] content = UsAsciiUtil.convertToHttp(httpRequest);
-			boolean isComplete = false;
-			for (int i = 0; i < content.length; i++) {
-				isComplete |= this.httpRequestParser
-						.parseMoreContent(content[i]);
-			}
+			BufferStream bufferStream = new BufferStreamImpl(
+					new HeapByteBufferSquirtFactory(1024));
+			bufferStream.getOutputBufferStream().write(content);
+			InputBufferStream inputBufferStream = bufferStream
+					.getInputBufferStream();
+
+			// Parse the content
+			boolean isComplete = this.httpRequestParser.parse(
+					inputBufferStream, this.tempBuffer);
 
 			// Validate request line
 			assertEquals((expectedMethod == null ? "" : expectedMethod),
 					this.httpRequestParser.getMethod());
 			assertEquals((expectedPath == null ? "" : expectedPath),
-					this.httpRequestParser.getPath());
+					this.httpRequestParser.getRequestURI());
 			assertEquals((expectedVersion == null ? "" : expectedVersion),
-					this.httpRequestParser.getVersion());
+					this.httpRequestParser.getHttpVersion());
 
 			// Validate correct number of headers
 			assertEquals("Incorrect number of headers",
@@ -299,23 +367,49 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			for (int i = 0; i < expectedHeaderNameValues.length; i += 2) {
 				String expectedHeaderName = expectedHeaderNameValues[i];
 				String expectedHeaderValue = expectedHeaderNameValues[i + 1];
+				int headerIndex = i / 2;
+				HttpHeader header = this.httpRequestParser.getHeaders().get(
+						headerIndex);
+				assertEquals("Incorrect name for header (" + headerIndex + ")",
+						expectedHeaderName, header.getName());
 				assertEquals("Incorrect value for header '"
-						+ expectedHeaderName + "'", expectedHeaderValue,
-						this.httpRequestParser.getHeader(expectedHeaderName));
+						+ expectedHeaderName + "' (" + headerIndex + ")",
+						expectedHeaderValue, header.getValue());
 			}
 
 			// Validate the body
-			UsAsciiUtil.assertEquals("Incorrect body",
-					(expectedBody == null ? "" : expectedBody),
-					this.httpRequestParser.getBody());
+			InputBufferStream bodyStream = this.httpRequestParser.getBody();
+			if (expectedBody == null) {
+				// Should not have a body
+				if (bodyStream != null) {
+					// Body being parsed so ensure no content yet
+					assertEquals("Should not have a body", 0, bodyStream
+							.available());
+					assertEquals("Should not be end of stream", 0, bodyStream
+							.read(new byte[10]));
+				}
+
+			} else {
+				// Obtain the body content
+				long available = this.httpRequestParser.getBody().available();
+				byte[] body = new byte[(int) (available < 0 ? 0 : available)];
+				int bodySize = this.httpRequestParser.getBody().read(body);
+				body = Arrays.copyOfRange(body, 0,
+						(bodySize < 0 ? 0 : bodySize));
+				UsAsciiUtil.assertEquals("Incorrect body",
+						(expectedBody == null ? "" : expectedBody), body);
+			}
 
 			// Validate if complete
 			assertEquals("Incorrect completion", expectedIsComplete, isComplete);
 
 		} catch (ParseException ex) {
 			// Parse exception not expected
-			fail("Request should be parsed succesfully [failure "
+			fail("Request should be parsed successfully [failure "
 					+ ex.getHttpStatus() + ": " + ex.getMessage() + "]");
+
+		} catch (IOException ex) {
+			fail("Should not have I/O failure: " + ex.getMessage());
 		}
 	}
 
@@ -332,14 +426,23 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	private void doInvalidMethodTest(String invalidHttpRequest,
 			int expectedHttpStatus, String expectedParseFailureReason) {
 
-		// Parse the invalid content for use
+		// Create input buffer stream with content
 		byte[] content = UsAsciiUtil.convertToHttp(invalidHttpRequest);
+		BufferStream bufferStream = new BufferStreamImpl(
+				new HeapByteBufferSquirtFactory(1024));
+		try {
+			bufferStream.getOutputBufferStream().write(content);
+		} catch (IOException ex) {
+			fail("Should not fail to write content: " + ex.getMessage());
+		}
+		InputBufferStream inputBufferStream = bufferStream
+				.getInputBufferStream();
 
 		// Should not be able parse invalid method
 		try {
-			for (int i = 0; i < content.length; i++) {
-				this.httpRequestParser.parseMoreContent(content[i]);
-			}
+
+			// Parse the content
+			this.httpRequestParser.parse(inputBufferStream, this.tempBuffer);
 
 			// Should not be parsed
 			fail("Should not parse invalid HTTP request:\n"
@@ -351,6 +454,10 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 					.getHttpStatus());
 			assertEquals("Incorrect parse failure reason",
 					expectedParseFailureReason, ex.getMessage());
+
+		} catch (IOException ex) {
+			fail("Should not have I/O failure: " + ex.getMessage());
 		}
 	}
+
 }

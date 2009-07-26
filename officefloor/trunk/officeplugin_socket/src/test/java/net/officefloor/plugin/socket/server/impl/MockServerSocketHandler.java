@@ -29,7 +29,8 @@ import net.officefloor.plugin.socket.server.ServerSocketHandler;
  *
  * @author Daniel Sagenschneider
  */
-public class MockServerSocketHandler implements ServerSocketHandler<Indexed> {
+public class MockServerSocketHandler implements
+		ServerSocketHandler<Indexed, ConnectionHandler> {
 
 	/**
 	 * {@link ConnectionHandler}.
@@ -51,7 +52,7 @@ public class MockServerSocketHandler implements ServerSocketHandler<Indexed> {
 	 */
 
 	@Override
-	public Server<Indexed> createServer() {
+	public Server<Indexed, ConnectionHandler> createServer() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}

@@ -21,7 +21,7 @@ import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 
 /**
  * Indicates that failed to parse.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ParseException extends Exception {
@@ -33,7 +33,7 @@ public class ParseException extends Exception {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param httpStatus
 	 *            HTTP status indicating failure.
 	 * @param message
@@ -46,7 +46,7 @@ public class ParseException extends Exception {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param cause
 	 *            Cause of parsing failure.
 	 */
@@ -59,10 +59,11 @@ public class ParseException extends Exception {
 
 	/**
 	 * Obtains the HTTP status indicating failure.
-	 * 
+	 *
 	 * @return HTTP status indicating failure.
 	 */
 	public int getHttpStatus() {
 		return this.httpStatus;
 	}
+
 }

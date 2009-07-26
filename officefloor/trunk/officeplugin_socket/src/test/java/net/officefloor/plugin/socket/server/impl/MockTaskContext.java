@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.impl.ConnectionImpl;
 import net.officefloor.plugin.socket.server.impl.ConnectionManager;
 import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDependencies;
@@ -30,18 +31,19 @@ import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDe
  *
  * @author Daniel Sagenschneider
  */
-public class MockTaskContext implements
-		TaskContext<ConnectionManager, SocketListenerDependencies, Indexed> {
+public class MockTaskContext
+		implements
+		TaskContext<ConnectionManager<Indexed, ConnectionHandler>, SocketListenerDependencies, Indexed> {
 
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager connectionManager;
+	private final ConnectionManager<Indexed, ConnectionHandler> connectionManager;
 
 	/**
 	 * Parameter.
 	 */
-	private final ConnectionImpl<Indexed> parameter;
+	private final ConnectionImpl<Indexed, ConnectionHandler> parameter;
 
 	/**
 	 * Initiate.
@@ -51,8 +53,9 @@ public class MockTaskContext implements
 	 * @param parameter
 	 *            Parameter.
 	 */
-	public MockTaskContext(ConnectionManager connectionManager,
-			ConnectionImpl<Indexed> parameter) {
+	public MockTaskContext(
+			ConnectionManager<Indexed, ConnectionHandler> connectionManager,
+			ConnectionImpl<Indexed, ConnectionHandler> parameter) {
 		this.connectionManager = connectionManager;
 		this.parameter = parameter;
 	}
@@ -95,7 +98,7 @@ public class MockTaskContext implements
 	}
 
 	@Override
-	public ConnectionManager getWork() {
+	public ConnectionManager<Indexed, ConnectionHandler> getWork() {
 		return this.connectionManager;
 	}
 

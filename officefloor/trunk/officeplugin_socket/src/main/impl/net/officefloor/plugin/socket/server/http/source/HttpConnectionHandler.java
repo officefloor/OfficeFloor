@@ -25,10 +25,9 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.WriteContext;
-import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.stream.BufferStream;
 
 /**
@@ -68,11 +67,11 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	}
 
 	/**
-	 * Obtains the {@link HttpRequestParser}.
+	 * Obtains the {@link HttpRequestParserImpl}.
 	 *
-	 * @return {@link HttpRequestParser}.
+	 * @return {@link HttpRequestParserImpl}.
 	 */
-	public HttpRequestParser getHttpRequestParser() {
+	public HttpRequestParserImpl getHttpRequestParser() {
 		return this.httpRequestParser;
 	}
 
@@ -113,14 +112,9 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 */
 
 	/**
-	 * {@link HttpRequestParser}.
+	 * {@link HttpRequestParserImpl}.
 	 */
-	private HttpRequestParser httpRequestParser;
-
-	/**
-	 * Size of the {@link Request}.
-	 */
-	private long requestSize = 0;
+	private HttpRequestParserImpl httpRequestParser;
 
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
@@ -131,34 +125,32 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 			// Ensure a parser is available
 			if (this.httpRequestParser == null) {
-				this.httpRequestParser = new HttpRequestParser(this.source
-						.getInitialRequestBodyBufferLength(), this.source
+				this.httpRequestParser = new HttpRequestParserImpl(this.source
 						.getMaximumRequestBodyLength());
 			}
 
-			// Obtain the input stream at next byte of request
-			InputStream inputStream = context.getInputStream();
-			inputStream.skip(this.requestSize);
+			// TODO obtain temp buffer
+			char[] tempBuffer = new char[255];
 
-			// Attempt to read the remaining content of request
-			for (int value = inputStream.read(); value != BufferStream.END_OF_STREAM; value = inputStream
-					.read()) {
-				this.requestSize++;
-				if (this.httpRequestParser.parseMoreContent((byte) value)) {
-					// Received the full HTTP request to start processing
-					context.requestReceived(this.requestSize,
-							this.httpRequestParser);
-				}
+			// Attempt to parse the remaining content of request
+			if (this.httpRequestParser.parse(context.getInputBufferStream(),
+					tempBuffer)) {
+				// Received the full HTTP request to start processing
+
+				// TODO obtain contents of request
+
+				// Flag request received to start processing it
+				context.requestReceived();
 			}
 
 		} catch (ParseException ex) {
 			try {
 
 				// Attempt to obtain version
-				String version = this.httpRequestParser.getVersion();
+				String version = this.httpRequestParser.getHttpVersion();
 				if ((version == null) || (version.trim().length() == 0)) {
 					// Use default version
-					version = HttpRequestParser.DEFAULT_HTTP_VERSION;
+					version = HttpRequestParserImpl.DEFAULT_HTTP_VERSION;
 				}
 
 				// Send HTTP response, indicating parse failure
@@ -167,7 +159,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 				// Flag read over
 				this.httpRequestParser = null;
-				context.requestReceived(0, null);
+				context.requestReceived();
 
 			} catch (IOException io) {
 				// Failure constructing response, so fail connection

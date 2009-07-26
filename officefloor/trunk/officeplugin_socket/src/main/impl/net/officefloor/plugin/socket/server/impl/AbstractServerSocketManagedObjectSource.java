@@ -29,6 +29,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDependencies;
@@ -40,7 +41,7 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
  *
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
+public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>, CH extends ConnectionHandler>
 		extends AbstractManagedObjectSource<None, F> {
 
 	/**
@@ -66,12 +67,12 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	/**
 	 * {@link ServerSocketAccepter} that requires binding on starting.
 	 */
-	private ServerSocketAccepter serverSocketAccepter;
+	private ServerSocketAccepter<F, CH> serverSocketAccepter;
 
 	/**
 	 * {@link Server}.
 	 */
-	private Server<F> server;
+	private Server<F, CH> server;
 
 	/**
 	 * Default constructor necessary as per {@link ManagedObjectSource}.
@@ -98,6 +99,17 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	SelectorFactory getSelectorFactory() {
 		return this.selectorFactory;
 	}
+
+	/**
+	 * Creates the {@link ServerSocketHandler}.
+	 *
+	 * @param context
+	 *            {@link MetaDataContext}.
+	 * @throws Exception
+	 *             If fails to create the {@link ServerSocketHandler}.
+	 */
+	protected abstract ServerSocketHandler<F, CH> createServerSocketHandler(
+			MetaDataContext<None, F> context) throws Exception;
 
 	/*
 	 * =================== AbstractManagedObjectSource ==================
@@ -129,16 +141,16 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 				bufferSize);
 
 		// Create the server socket handler and create the server
-		ServerSocketHandler<F> serverSocketHandler = this
+		ServerSocketHandler<F, CH> serverSocketHandler = this
 				.createServerSocketHandler(context);
 		this.server = serverSocketHandler.createServer();
 
 		// Create the connection manager
-		ConnectionManager connectionManager = new ConnectionManager(
+		ConnectionManager<F, CH> connectionManager = new ConnectionManager<F, CH>(
 				this.selectorFactory, this.server, maxConn);
 
 		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter(
+		this.serverSocketAccepter = new ServerSocketAccepter<F, CH>(
 				new InetSocketAddress(port), serverSocketHandler,
 				connectionManager, bufferSquirtFactory);
 		ManagedObjectTaskBuilder<None, ServerSocketAccepter.ServerSocketAccepterFlows> accepterTask = mosContext
@@ -177,16 +189,5 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 		throw new IllegalStateException("Can not source managed object from a "
 				+ this.getClass().getSimpleName());
 	}
-
-	/**
-	 * Creates the {@link ServerSocketHandler}.
-	 *
-	 * @param context
-	 *            {@link MetaDataContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link ServerSocketHandler}.
-	 */
-	protected abstract ServerSocketHandler<F> createServerSocketHandler(
-			MetaDataContext<None, F> context) throws Exception;
 
 }

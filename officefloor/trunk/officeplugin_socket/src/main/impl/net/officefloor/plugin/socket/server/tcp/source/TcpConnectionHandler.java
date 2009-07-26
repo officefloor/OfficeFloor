@@ -26,7 +26,6 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
@@ -93,12 +92,10 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * <p>
 	 * Called within the lock on the {@link Connection}.
 	 *
-	 * @param request
-	 *            {@link Request}.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
-	public void invokeProcess(Request request,
+	public void invokeProcess(
 			ManagedObjectExecuteContext<TcpServerFlows> executeContext) {
 
 		// Only invoke the process once
@@ -163,7 +160,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		// Always new message on start reading to kick of processing
 		if (!this.isReadStarted) {
 			// To ensure streaming always input first read
-			context.requestReceived(0, null);
+			context.requestReceived();
 
 			// Flag that the read has started
 			this.isReadStarted = true;

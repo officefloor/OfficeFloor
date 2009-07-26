@@ -18,15 +18,13 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Request;
+import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferProcessor;
@@ -36,16 +34,16 @@ import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
-import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
 import net.officefloor.plugin.stream.synchronise.SynchronizedInputBufferStream;
+import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 
 /**
  * Implementation of a {@link Connection}.
  *
  * @author Daniel Sagenschneider
  */
-public class ConnectionImpl<F extends Enum<F>> implements Connection,
-		BufferProcessor, BufferPopulator {
+public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
+		implements Connection, BufferProcessor, BufferPopulator {
 
 	/**
 	 * {@link SocketChannel} of this {@link Connection}.
@@ -55,7 +53,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	/**
 	 * {@link ConnectionHandler} for this {@link Connection}.
 	 */
-	private final ConnectionHandler connectionHandler;
+	private final CH connectionHandler;
 
 	/**
 	 * {@link BufferStream} containing the data from the client.
@@ -74,10 +72,10 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	private final BufferStream toClientStream;
 
 	/**
-	 * {@link ConnectionOutputBufferStream} providing application access to send
-	 * data to the client.
+	 * {@link SynchronizedOutputBufferStream} providing application access to
+	 * send data to the client.
 	 */
-	private final ConnectionOutputBufferStream safeToClientStream;
+	private final SynchronizedOutputBufferStream safeToClientStream;
 
 	/**
 	 * Bytes read/written from/to buffers.
@@ -87,7 +85,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	/**
 	 * {@link SocketListener} handling this {@link Connection}.
 	 */
-	private SocketListener socketListener;
+	private SocketListener<F, CH> socketListener;
 
 	/**
 	 * Flag to only notify of write once per check on the {@link Connection}.
@@ -110,7 +108,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	 *            {@link BufferSquirtFactory}.
 	 */
 	public ConnectionImpl(NonblockingSocketChannel nonblockingSocketChannel,
-			ServerSocketHandler<?> serverSocketHandler,
+			ServerSocketHandler<?, CH> serverSocketHandler,
 			BufferSquirtFactory bufferSquirtFactory) {
 		this.socketChannel = nonblockingSocketChannel;
 
@@ -121,8 +119,9 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		// Create the safe streams to be used by applications
 		this.safeFromClientStream = new SynchronizedInputBufferStream(
 				this.fromClientStream.getInputBufferStream(), this.getLock());
-		this.safeToClientStream = new ConnectionOutputBufferStream(
-				this.toClientStream.getOutputBufferStream());
+		this.safeToClientStream = new SynchronizedOutputBufferStream(
+				new ConnectionOutputBufferStream(this.toClientStream
+						.getOutputBufferStream()), this.getLock());
 
 		// Create the handler for this connection
 		this.connectionHandler = serverSocketHandler
@@ -135,8 +134,8 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	 * @param socketListener
 	 *            {@link SocketListener} handling this {@link Connection}.
 	 */
-	void setSocketListener(SocketListener socketListener) {
-		synchronized (this) {
+	void setSocketListener(SocketListener<F, CH> socketListener) {
+		synchronized (this.getLock()) {
 			this.socketListener = socketListener;
 		}
 	}
@@ -155,7 +154,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	 *
 	 * @return {@link ConnectionHandler} for this {@link Connection}.
 	 */
-	ConnectionHandler getConnectionHandler() {
+	CH getConnectionHandler() {
 		return this.connectionHandler;
 	}
 
@@ -183,13 +182,18 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	}
 
 	/**
-	 * Obtains the {@link InputStream} to browse the data available from the
+	 * <p>
+	 * Obtains the {@link InputBufferStream} to read data available from the
 	 * client.
+	 * <p>
+	 * The {@link InputBufferStream} is not wrapped by
+	 * {@link SynchronizedInputBufferStream} as {@link ReadContext} should be
+	 * called synchronized on {@link #getLock()}.
 	 *
-	 * @return {@link InputStream} to browse the data available from the client.
+	 * @return {@link InputBufferStream} to read data available from the client.
 	 */
-	InputStream getAvailableDataFromClientBrowseStream() {
-		return this.fromClientStream.getInputBufferStream().getBrowseStream();
+	InputBufferStream getConnectionInputBufferStream() {
+		return this.fromClientStream.getInputBufferStream();
 	}
 
 	/**
@@ -216,40 +220,6 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	}
 
 	/**
-	 * Creates the {@link Request}.
-	 *
-	 * @param requestByteSize
-	 *            Number of bytes for the {@link Request}.
-	 * @param attachment
-	 *            Attachment for the {@link Request}.
-	 * @return {@link Request}.
-	 * @throws IOException
-	 *             If fails to read {@link Request}.
-	 */
-	Request createRequest(long requestByteSize, Object attachment)
-			throws IOException {
-
-		// Create the request
-		BufferStream content = new BufferStreamImpl(
-				new NotCreateBufferSquirtFactory());
-		Request request = new RequestImpl(content.getInputBufferStream(),
-				attachment);
-
-		// Write content to the request (take into account long -> int)
-		OutputBufferStream outputBufferStream = content.getOutputBufferStream();
-		long remaining = requestByteSize;
-		while (remaining > Integer.MAX_VALUE) {
-			this.fromClientStream.read(Integer.MAX_VALUE, outputBufferStream);
-			remaining -= Integer.MAX_VALUE;
-		}
-		this.fromClientStream.read((int) remaining, outputBufferStream);
-		outputBufferStream.close();
-
-		// Return the request
-		return request;
-	}
-
-	/**
 	 * <p>
 	 * Wakes up the {@link SocketListener}.
 	 * <p>
@@ -260,7 +230,7 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 	void wakeupSocketListener() {
 
 		// Obtain the socket listener
-		SocketListener socketListener;
+		SocketListener<F, CH> socketListener;
 		synchronized (this.getLock()) {
 			socketListener = this.socketListener;
 		}
@@ -268,19 +238,6 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 		// Wake up the socket listener if available
 		if (socketListener != null) {
 			socketListener.wakeup();
-		}
-	}
-
-	/**
-	 * Ensures the state of the {@link Connection} is valid for further I/O
-	 * operations.
-	 *
-	 * @throws IOException
-	 *             Indicate the state is not valid.
-	 */
-	void checkIOState() throws IOException {
-		if (this.isCancelled) {
-			throw new ClosedChannelException();
 		}
 	}
 
@@ -383,59 +340,45 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 
 		@Override
 		public OutputStream getOutputStream() {
-			synchronized (ConnectionImpl.this.getLock()) {
-				return new ConnectionOutputStream(this.backingStream
-						.getOutputStream());
-			}
+			return new ConnectionOutputStream(this.backingStream
+					.getOutputStream());
 		}
 
 		@Override
 		public void write(byte[] bytes) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(bytes);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(bytes);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void write(byte[] data, int offset, int length)
 				throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(data, offset, length);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(data, offset, length);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void write(BufferPopulator populator) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(populator);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(populator);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void append(BufferSquirt squirt) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.append(squirt);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.append(squirt);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void append(ByteBuffer buffer) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.append(buffer);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.append(buffer);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void close() {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.close();
-				ConnectionImpl.this.cancel();
-			}
+			this.backingStream.close();
+			ConnectionImpl.this.cancel();
 		}
 	}
 
@@ -465,42 +408,32 @@ public class ConnectionImpl<F extends Enum<F>> implements Connection,
 
 		@Override
 		public void write(int b) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(b);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(b);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void write(byte[] b) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(b);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(b);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.write(b, off, len);
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.write(b, off, len);
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void flush() throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.flush();
-				ConnectionImpl.this.notifyOfWrite();
-			}
+			this.backingStream.flush();
+			ConnectionImpl.this.notifyOfWrite();
 		}
 
 		@Override
 		public void close() throws IOException {
-			synchronized (ConnectionImpl.this.getLock()) {
-				this.backingStream.close();
-				ConnectionImpl.this.cancel();
-			}
+			this.backingStream.close();
+			ConnectionImpl.this.cancel();
 		}
 	}
 

@@ -21,8 +21,6 @@ import java.io.IOException;
 
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.plugin.socket.server.ConnectionHandler;
-import net.officefloor.plugin.socket.server.Request;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
@@ -31,7 +29,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServer implements Server<HttpServer.HttpServerFlows> {
+public class HttpServer implements
+		Server<HttpServer.HttpServerFlows, HttpConnectionHandler> {
 
 	/**
 	 * {@link Flow} to handle the {@link HttpRequest}.
@@ -56,17 +55,18 @@ public class HttpServer implements Server<HttpServer.HttpServerFlows> {
 	}
 
 	@Override
-	public void processRequest(Request request,
-			ConnectionHandler connectionHandler) throws IOException {
+	public void processRequest(HttpConnectionHandler connectionHandler)
+			throws IOException {
 
-		// Downcast to HTTP connection handler
-		HttpConnectionHandler httpConnHandler = (HttpConnectionHandler) connectionHandler;
+		// TODO take advantage of request
+		// TODO list requests and send response only for first request
 
 		// Create the HTTP managed object
-		HttpManagedObject managedObject = new HttpManagedObject(httpConnHandler);
+		HttpManagedObject managedObject = new HttpManagedObject(
+				connectionHandler);
 
 		// Reset the connection handler for next request
-		httpConnHandler.resetForNextRequest();
+		connectionHandler.resetForNextRequest();
 
 		// Invoke with the managed object
 		this.executeContext.invokeProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,

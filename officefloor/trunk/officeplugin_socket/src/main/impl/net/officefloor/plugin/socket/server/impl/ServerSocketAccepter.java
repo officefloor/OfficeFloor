@@ -31,6 +31,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
@@ -39,9 +40,9 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  *
  * @author Daniel Sagenschneider
  */
-public class ServerSocketAccepter
+public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandler>
 		extends
-		AbstractSingleTask<ServerSocketAccepter, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
+		AbstractSingleTask<ServerSocketAccepter<F, CH>, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
 
 	/**
 	 * {@link Flow} instances for the {@link ServerSocketAccepter}.
@@ -53,7 +54,7 @@ public class ServerSocketAccepter
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager connectionManager;
+	private final ConnectionManager<F, CH> connectionManager;
 
 	/**
 	 * {@link BufferSquirtFactory}.
@@ -63,7 +64,7 @@ public class ServerSocketAccepter
 	/**
 	 * {@link ServerSocketHandler}.
 	 */
-	private final ServerSocketHandler<?> serverSocketHandler;
+	private final ServerSocketHandler<?, CH> serverSocketHandler;
 
 	/**
 	 * {@link InetSocketAddress} to listen for connections.
@@ -85,8 +86,8 @@ public class ServerSocketAccepter
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
 	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			ServerSocketHandler<?> serverSocketHandler,
-			ConnectionManager connectionManager,
+			ServerSocketHandler<F, CH> serverSocketHandler,
+			ConnectionManager<F, CH> connectionManager,
 			BufferSquirtFactory bufferSquirtFactory) throws IOException {
 		this.serverSocketHandler = serverSocketHandler;
 		this.connectionManager = connectionManager;
@@ -127,9 +128,8 @@ public class ServerSocketAccepter
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Object doTask(
-			TaskContext<ServerSocketAccepter, None, ServerSocketAccepterFlows> context)
+			TaskContext<ServerSocketAccepter<F, CH>, None, ServerSocketAccepterFlows> context)
 			throws Exception {
 
 		// Loop accepting connections
@@ -160,7 +160,7 @@ public class ServerSocketAccepter
 							socketChannel.configureBlocking(false);
 
 							// Create the connection
-							ConnectionImpl<?> connection = new ConnectionImpl(
+							ConnectionImpl<F, CH> connection = new ConnectionImpl<F, CH>(
 									new NonblockingSocketChannelImpl(
 											socketChannel),
 									this.serverSocketHandler,

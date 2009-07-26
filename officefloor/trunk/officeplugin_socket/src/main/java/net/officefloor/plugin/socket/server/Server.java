@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
  *
  * @author Daniel Sagenschneider
  */
-public interface Server<F extends Enum<F>> {
+public interface Server<F extends Enum<F>, CH extends ConnectionHandler> {
 
 	/**
 	 * Provides the {@link Server} the {@link ManagedObjectExecuteContext} to
@@ -44,20 +44,18 @@ public interface Server<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Starts the processing the {@link Request} with the {@link Server}.
+	 * Starts the processing the request identified by the
+	 * {@link ConnectionHandler} with the {@link Server}.
 	 * <p>
 	 * To process a stream of input have the {@link ConnectionHandler} complete
 	 * the {@link Request} with zero size and use the {@link Connection} passed
 	 * to the {@link ConnectionHandler}.
 	 *
-	 * @param request
-	 *            {@link Request}.
 	 * @param connectionHandler
 	 *            {@link ConnectionHandler} for the {@link Connection}.
 	 * @throws IOException
-	 *             If fails to start processing the {@link Request}.
+	 *             If fails to start processing the request.
 	 */
-	void processRequest(Request request, ConnectionHandler connectionHandler)
-			throws IOException;
+	void processRequest(CH connectionHandler) throws IOException;
 
 }

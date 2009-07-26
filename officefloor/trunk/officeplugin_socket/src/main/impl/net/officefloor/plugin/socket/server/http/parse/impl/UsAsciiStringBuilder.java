@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.parse;
+package net.officefloor.plugin.socket.server.http.parse.impl;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import net.officefloor.plugin.socket.server.http.parse.ParseException;
+
 /**
  * Provides manipulation of US-ASCII raw data.
- * 
+ *
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class UsAsciiStringBuilder {
 
 	/**
@@ -54,7 +57,7 @@ public class UsAsciiStringBuilder {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param initialCapacity
 	 *            Initial capacity of the underlying buffer.
 	 * @param maxChars
@@ -71,7 +74,7 @@ public class UsAsciiStringBuilder {
 
 	/**
 	 * Appends a character.
-	 * 
+	 *
 	 * @param character
 	 *            US-ASCII character value.
 	 * @throws ParseException
@@ -101,7 +104,7 @@ public class UsAsciiStringBuilder {
 	 * Obtains the underlying buffer.
 	 * <p>
 	 * This allows for efficient manipulation of the buffer.
-	 * 
+	 *
 	 * @return Underlying buffer.
 	 */
 	public byte[] getBuffer() {
@@ -110,7 +113,7 @@ public class UsAsciiStringBuilder {
 
 	/**
 	 * Obtains the number of valid characters in the buffer.
-	 * 
+	 *
 	 * @return Number of valid characters in the buffer.
 	 */
 	public int getCharacterCount() {
@@ -119,7 +122,7 @@ public class UsAsciiStringBuilder {
 
 	/**
 	 * Obtains the US-ASCII data.
-	 * 
+	 *
 	 * @return US-ASCII data.
 	 */
 	public byte[] toUsAscii() {
@@ -128,7 +131,7 @@ public class UsAsciiStringBuilder {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

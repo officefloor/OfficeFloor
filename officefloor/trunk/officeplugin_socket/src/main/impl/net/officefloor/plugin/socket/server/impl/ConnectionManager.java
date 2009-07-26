@@ -18,7 +18,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -29,6 +29,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSocketAccepterFlows;
 
@@ -37,11 +38,11 @@ import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSock
  *
  * @author Daniel Sagenschneider
  */
-public class ConnectionManager
+public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 		implements
 		Work,
-		WorkFactory<ConnectionManager>,
-		TaskFactory<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed> {
+		WorkFactory<ConnectionManager<F, CH>>,
+		TaskFactory<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed> {
 
 	/**
 	 * {@link SelectorFactory}.
@@ -51,7 +52,7 @@ public class ConnectionManager
 	/**
 	 * {@link Server}.
 	 */
-	private final Server<?> server;
+	private final Server<F, CH> server;
 
 	/**
 	 * Maximum {@link Connection} instances per {@link SocketListener}.
@@ -61,7 +62,7 @@ public class ConnectionManager
 	/**
 	 * Listing of active {@link SocketListener} instances.
 	 */
-	private final List<SocketListener> socketListeners = new ArrayList<SocketListener>();
+	private final List<SocketListener<F, CH>> socketListeners = new LinkedList<SocketListener<F, CH>>();
 
 	/**
 	 * Initiate.
@@ -74,8 +75,8 @@ public class ConnectionManager
 	 * @throws IOException
 	 *             If fails creation.
 	 */
-	public ConnectionManager(SelectorFactory selectorFactory, Server<?> server,
-			int maxConnPerListener) {
+	public ConnectionManager(SelectorFactory selectorFactory,
+			Server<F, CH> server, int maxConnPerListener) {
 		this.selectorFactory = selectorFactory;
 		this.server = server;
 		this.maxConnPerListener = maxConnPerListener;
@@ -92,13 +93,13 @@ public class ConnectionManager
 	 *             If fails registering the {@link Connection}.
 	 */
 	void registerConnection(
-			ConnectionImpl<?> connection,
-			TaskContext<ServerSocketAccepter, None, ServerSocketAccepterFlows> taskContext)
+			ConnectionImpl<F, CH> connection,
+			TaskContext<ServerSocketAccepter<F, CH>, None, ServerSocketAccepterFlows> taskContext)
 			throws IOException {
 
 		// Attempt to register with an existing socket listener
 		synchronized (this.socketListeners) {
-			for (SocketListener listener : this.socketListeners) {
+			for (SocketListener<F, CH> listener : this.socketListeners) {
 				if (listener.registerConnection(connection)) {
 					// Registered
 					return;
@@ -117,7 +118,7 @@ public class ConnectionManager
 	 * @param socketListener
 	 *            Completed {@link SocketListener}.
 	 */
-	void socketListenerComplete(SocketListener socketListener) {
+	void socketListenerComplete(SocketListener<F, CH> socketListener) {
 		synchronized (this.socketListeners) {
 			this.socketListeners.remove(socketListener);
 		}
@@ -128,7 +129,7 @@ public class ConnectionManager
 	 */
 
 	@Override
-	public ConnectionManager createWork() {
+	public ConnectionManager<F, CH> createWork() {
 		return this;
 	}
 
@@ -137,11 +138,11 @@ public class ConnectionManager
 	 */
 
 	@Override
-	public Task<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed> createTask(
-			ConnectionManager work) {
+	public Task<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed> createTask(
+			ConnectionManager<F, CH> work) {
 
 		// Create the socket listener
-		SocketListener socketListener = new SocketListener(
+		SocketListener<F, CH> socketListener = new SocketListener<F, CH>(
 				this.selectorFactory, this.server, this.maxConnPerListener);
 
 		// Register the socket listener
