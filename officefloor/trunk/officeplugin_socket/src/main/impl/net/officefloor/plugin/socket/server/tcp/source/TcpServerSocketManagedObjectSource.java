@@ -26,15 +26,17 @@ import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerTcpConnection}.
  *
  * @author Daniel Sagenschneider
  */
-public class TcpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<TcpServerFlows, TcpConnectionHandler> implements
-		ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> {
+public class TcpServerSocketManagedObjectSource
+		extends
+		AbstractServerSocketManagedObjectSource<TcpServerFlows, TcpConnectionHandler>
+		implements ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> {
 
 	/**
 	 * Property to obtain the maximum idle time before the {@link Connection} is
@@ -59,7 +61,8 @@ public class TcpServerSocketManagedObjectSource extends
 
 	@Override
 	protected ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> createServerSocketHandler(
-			MetaDataContext<None, TcpServerFlows> context) throws Exception {
+			MetaDataContext<None, TcpServerFlows> context,
+			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 		ManagedObjectSourceContext<TcpServerFlows> mosContext = context
 				.getManagedObjectSourceContext();
 

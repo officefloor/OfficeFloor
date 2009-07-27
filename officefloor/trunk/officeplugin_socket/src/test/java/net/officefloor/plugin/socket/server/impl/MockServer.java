@@ -42,8 +42,8 @@ public class MockServer implements Server<Indexed, ConnectionHandler> {
 	}
 
 	@Override
-	public void processRequest(ConnectionHandler connectionHandler)
-			throws IOException {
+	public void processRequest(ConnectionHandler connectionHandler,
+			Object attachment) throws IOException {
 		// Do nothing
 	}
 

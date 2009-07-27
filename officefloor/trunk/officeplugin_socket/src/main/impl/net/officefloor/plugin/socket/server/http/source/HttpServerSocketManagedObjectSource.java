@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.source;
 
-import java.io.OutputStream;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.Connection;
@@ -26,8 +24,14 @@ import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpConversationImpl;
+import net.officefloor.plugin.socket.server.http.conversation.impl.HttpManagedObjectImpl;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.source.HttpServer.HttpServerFlows;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerHttpConnection}.
@@ -40,68 +44,27 @@ public class HttpServerSocketManagedObjectSource
 		implements ServerSocketHandler<HttpServerFlows, HttpConnectionHandler> {
 
 	/**
-	 * Initial size in bytes of the buffer to contain the {@link HttpRequest}
-	 * body.
-	 */
-	// TODO provide via property
-	protected int initialRequestBodyBufferLength = 1024;
-
-	/**
-	 * Obtains the initial size in bytes of the buffer to contain the
-	 * {@link HttpRequest} body.
-	 *
-	 * @return Initial buffer size.
-	 */
-	protected int getInitialRequestBodyBufferLength() {
-		return this.initialRequestBodyBufferLength;
-	}
-
-	/**
 	 * Maximum length in bytes of the {@link HttpRequest} body.
 	 */
 	// TODO provide via property
-	protected int maximumRequestBodyLength = (1024 * 1024);
-
-	/**
-	 * Obtains the maximum length in bytes of the {@link HttpRequest} body.
-	 *
-	 * @return Maximum length.
-	 */
-	protected int getMaximumRequestBodyLength() {
-		return this.maximumRequestBodyLength;
-	}
-
-	/**
-	 * Response buffer length for each {@link MessageSegment} being appended to
-	 * by the {@link OutputStream} to populate the body.
-	 */
-	// TODO provide via property
-	protected int responseBufferLength = 1024;
-
-	/**
-	 * Obtains the response buffer length for each {@link MessageSegment} being
-	 * appended to by the {@link OutputStream} to populate the body.
-	 *
-	 * @return Response buffer length.
-	 */
-	protected int getResponseBufferLength() {
-		return this.responseBufferLength;
-	}
+	private long maximumRequestBodyLength = (1024 * 1024);
 
 	/**
 	 * Timeout of the {@link Connection} in milliseconds.
 	 */
 	// TODO provide via property
-	protected long connectionTimeout = 5 * 60 * 1000;
+	private long connectionTimeout = 5 * 60 * 1000;
 
 	/**
-	 * Returns the {@link Connection} timeout in milliseconds.
-	 *
-	 * @return {@link Connection} timeout.
+	 * Maximum length of text part for {@link HttpRequest}.
 	 */
-	protected long getConnectionTimeout() {
-		return this.connectionTimeout;
-	}
+	// TODO provide via property
+	private int maxTextPartLength = 255;
+
+	/**
+	 * {@link BufferSquirtFactory}.
+	 */
+	private BufferSquirtFactory bufferSquirtFactory;
 
 	/*
 	 * ============= AbstractServerSocketManagedObjectSource ===============
@@ -109,10 +72,12 @@ public class HttpServerSocketManagedObjectSource
 
 	@Override
 	protected ServerSocketHandler<HttpServerFlows, HttpConnectionHandler> createServerSocketHandler(
-			MetaDataContext<None, HttpServerFlows> context) throws Exception {
+			MetaDataContext<None, HttpServerFlows> context,
+			BufferSquirtFactory bufferSquirtFactory) throws Exception {
+		this.bufferSquirtFactory = bufferSquirtFactory;
 
 		// Specify types
-		context.setManagedObjectClass(HttpManagedObject.class);
+		context.setManagedObjectClass(HttpManagedObjectImpl.class);
 		context.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the flow to handle the HTTP request
@@ -134,7 +99,12 @@ public class HttpServerSocketManagedObjectSource
 
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
-		return new HttpConnectionHandler(this, connection);
+		HttpConversation conversation = new HttpConversationImpl(connection,
+				this.bufferSquirtFactory);
+		HttpRequestParser parser = new HttpRequestParserImpl(
+				this.maximumRequestBodyLength);
+		return new HttpConnectionHandler(conversation, parser,
+				this.maxTextPartLength, this.connectionTimeout);
 	}
 
 }

@@ -23,8 +23,8 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.HttpHeader;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.http.source.HttpStatus;
@@ -76,21 +76,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * Header name for the Content-Length.
 	 */
 	private static final String HEADER_NAME_CONTENT_LENGTH = "CONTENT-LENGTH";
-
-	/**
-	 * HTTP version. HTTP/1.1.
-	 */
-	public static final String HTTP_1_1 = "HTTP/1.1";
-
-	/**
-	 * HTTP version. HTTP/1.0.
-	 */
-	public static final String HTTP_1_0 = "HTTP/1.0";
-
-	/**
-	 * Default HTTP version.
-	 */
-	public static final String DEFAULT_HTTP_VERSION = HTTP_1_0;
 
 	/**
 	 * Determines if character is a letter of the alphabet.

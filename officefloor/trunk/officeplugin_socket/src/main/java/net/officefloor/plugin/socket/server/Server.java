@@ -53,9 +53,13 @@ public interface Server<F extends Enum<F>, CH extends ConnectionHandler> {
 	 *
 	 * @param connectionHandler
 	 *            {@link ConnectionHandler} for the {@link Connection}.
+	 * @param attachment
+	 *            Optional attachment provided by the {@link ConnectionHandler}
+	 *            specific to this request. May be <code>null</code>.
 	 * @throws IOException
 	 *             If fails to start processing the request.
 	 */
-	void processRequest(CH connectionHandler) throws IOException;
+	void processRequest(CH connectionHandler, Object attachment)
+			throws IOException;
 
 }

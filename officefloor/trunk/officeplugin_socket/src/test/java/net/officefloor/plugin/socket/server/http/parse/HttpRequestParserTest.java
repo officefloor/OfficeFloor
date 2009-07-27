@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.stream.BufferStream;

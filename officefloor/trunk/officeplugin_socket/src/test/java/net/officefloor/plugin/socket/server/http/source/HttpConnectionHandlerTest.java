@@ -17,23 +17,21 @@
  */
 package net.officefloor.plugin.socket.server.http.source;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.WriteContext;
-import net.officefloor.plugin.socket.server.http.parse.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.OutputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
 
 /**
  * Tests the {@link HttpConnectionHandler}.
@@ -46,16 +44,6 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 * Timeout of the {@link Connection}.
 	 */
 	private static final long CONNECTION_TIMEOUT = 10;
-
-	/**
-	 * {@link HttpConnectionHandler} being tested.
-	 */
-	public HttpConnectionHandler handler;
-
-	/**
-	 * Mock {@link Connection}.
-	 */
-	private Connection connection = this.createMock(Connection.class);
 
 	/**
 	 * Mock {@link ReadContext}.
@@ -72,45 +60,65 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 */
 	private IdleContext idleContext = this.createMock(IdleContext.class);
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#setUp()
+	/**
+	 * Mock {@link InputBufferStream}.
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		// Source with specified timeout
-		HttpServerSocketManagedObjectSource source = new HttpServerSocketManagedObjectSource();
-		source.connectionTimeout = CONNECTION_TIMEOUT;
-
-		// Create the handler to test
-		this.handler = new HttpConnectionHandler(source, this.connection);
-	}
+	private InputBufferStream inputBufferStream = this
+			.createMock(InputBufferStream.class);
 
 	/**
-	 * Ensures successful read of HTTP request.
+	 * Mock {@link HttpConversation}.
+	 */
+	private HttpConversation conversation = this
+			.createMock(HttpConversation.class);
+
+	/**
+	 * Mock {@link HttpRequestParser}.
+	 */
+	private HttpRequestParser parser = this.createMock(HttpRequestParser.class);
+
+	/**
+	 * {@link HttpConnectionHandler} being tested.
+	 */
+	public HttpConnectionHandler handler = new HttpConnectionHandler(
+			this.conversation, this.parser, 255, CONNECTION_TIMEOUT);
+
+	/**
+	 * Ensures successful read of {@link HttpRequest}.
 	 */
 	public void testSuccessfulRead() throws Exception {
 
-		// Create mocks
-		InputBufferStream requestInputBufferStream = this
-				.createMock(InputBufferStream.class);
-
-		// Obtain the request and input stream to its contents
-		String requestText = "GET /path HTTP/1.1\nhost: localhost\n\n";
-		final byte[] request = UsAsciiUtil.convertToHttp(requestText);
-		InputStream requestInputStream = new ByteArrayInputStream(request);
+		// Additional test objects
+		final char[] tempBuffer = new char[255];
+		final String method = "GET";
+		final String requestURI = "/path";
+		final String httpVersion = "HTTP/1.1";
+		final List<HttpHeader> headers = new LinkedList<HttpHeader>();
+		final InputBufferStream body = this.createMock(InputBufferStream.class);
+		final HttpManagedObject managedObject = this
+				.createMock(HttpManagedObject.class);
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
 				.currentTimeMillis());
+		this.recordReturn(this.readContext,
+				this.readContext.getContextObject(), tempBuffer);
 		this.recordReturn(this.readContext, this.readContext
-				.getInputBufferStream(), requestInputBufferStream);
-		this.recordReturn(requestInputBufferStream, requestInputBufferStream
-				.getBrowseStream(), requestInputStream);
-		this.readContext.requestReceived();
+				.getInputBufferStream(), this.inputBufferStream);
+		this.recordReturn(this.parser, this.parser.parse(
+				this.inputBufferStream, tempBuffer), true);
+		this.recordReturn(this.parser, this.parser.getMethod(), method);
+		this.recordReturn(this.parser, this.parser.getRequestURI(), requestURI);
+		this.recordReturn(this.parser, this.parser.getHttpVersion(),
+				httpVersion);
+		this.recordReturn(this.parser, this.parser.getHeaders(), headers);
+		this.recordReturn(this.parser, this.parser.getBody(), body);
+		this.parser.reset();
+		this.recordReturn(this.conversation, this.conversation.addRequest(
+				method, requestURI, httpVersion, headers, body), managedObject);
+		this.readContext.processRequest(managedObject);
+		this.recordReturn(this.parser, this.parser.parse(
+				this.inputBufferStream, tempBuffer), false);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -120,74 +128,29 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 		// Verify mocks
 		this.verifyMockObjects();
-
-		// Validate HTTP request
-		HttpRequestParser parser = this.handler.getHttpRequestParser();
-		assertEquals("Incorrect method", "GET", parser.getMethod());
-		assertEquals("Incorrect path", "/path", parser.getRequestURI());
-		assertEquals("Incorrect version", "HTTP/1.1", parser.getHttpVersion());
-		assertEquals("Incorrect number of headers", 1, parser.getHeaders()
-				.size());
-		HttpHeader header = parser.getHeaders().get(0);
-		assertEquals("Incorrect header name", "host", header.getName());
-		assertEquals("Incorrect header value", "localhost", header.getValue());
-		assertEquals("Incorrect body", 0, parser.getBody().available());
 	}
 
 	/**
-	 * Ensures correctly handles an invalid HTTP request.
+	 * Ensures correctly handles {@link ParseException}.
 	 */
-	public void testInvalidRead() throws Exception {
+	public void testParseFailure() throws Exception {
 
-		// Create mocks
-		InputBufferStream requestInputBufferStream = this
-				.createMock(InputBufferStream.class);
-		OutputBufferStream outputBufferStream = this
-				.createMock(OutputBufferStream.class);
-
-		// Create invalid request
-		String invalidRequestText = "Invalid Request";
-		final byte[] request = UsAsciiUtil.convertToHttp(invalidRequestText);
-		InputStream requestInputStream = new ByteArrayInputStream(request);
-
-		// Generate details of invalid response message
-		byte[] badRequestResponseHeader = null;
-		byte[] badRequestResponseDetail = null;
-		try {
-			new HttpRequestParserImpl(1024).parse(new BufferStreamImpl(
-					ByteBuffer.wrap(request)).getInputBufferStream(),
-					new char[255]);
-			fail("Test invalid as should not be able to parse request");
-		} catch (ParseException ex) {
-			// Obtain detail of bad request
-			badRequestResponseDetail = UsAsciiUtil.convertToUsAscii(ex
-					.getMessage());
-
-			// Provide header of bad request response
-			int status = ex.getHttpStatus();
-			String statusMsg = HttpStatus.getStatusMessage(status);
-			badRequestResponseHeader = UsAsciiUtil.convertToHttp("HTTP/1.0 "
-					+ status + " " + statusMsg + "\nContent-Length: "
-					+ badRequestResponseDetail.length + "\n\n");
-		}
+		// Additional test objects
+		final char[] tempBuffer = new char[255];
+		final ParseException failure = new ParseException(HttpStatus._400,
+				"Parse Failure");
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
 				.currentTimeMillis());
+		this.recordReturn(this.readContext,
+				this.readContext.getContextObject(), tempBuffer);
 		this.recordReturn(this.readContext, this.readContext
-				.getInputBufferStream(), requestInputBufferStream);
-		this.recordReturn(requestInputBufferStream, requestInputBufferStream
-				.getBrowseStream(), requestInputStream);
-		this.recordReturn(this.connection, this.connection
-				.getOutputBufferStream(), outputBufferStream);
-		outputBufferStream.write(badRequestResponseHeader, 0,
-				badRequestResponseHeader.length);
-		this.control(outputBufferStream).setMatcher(
-				UsAsciiUtil.createUsAsciiMatcher());
-		outputBufferStream.append(ByteBuffer.wrap(badRequestResponseDetail));
-		this.control(outputBufferStream).setMatcher(
-				UsAsciiUtil.createUsAsciiMatcher());
-		this.readContext.requestReceived();
+				.getInputBufferStream(), this.inputBufferStream);
+		this.parser.parse(this.inputBufferStream, tempBuffer);
+		this.control(this.parser).setThrowable(failure);
+		this.conversation.parseFailure(failure);
+		this.readContext.setCloseConnection(true);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -197,10 +160,6 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 		// Verify mocks
 		this.verifyMockObjects();
-
-		// Validate HTTP request
-		assertNull("Should not have parser", this.handler
-				.getHttpRequestParser());
 	}
 
 	/**

@@ -105,11 +105,14 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 	 *
 	 * @param context
 	 *            {@link MetaDataContext}.
+	 * @param bufferSquirtFactory
+	 *            {@link BufferSquirtFactory}.
 	 * @throws Exception
 	 *             If fails to create the {@link ServerSocketHandler}.
 	 */
 	protected abstract ServerSocketHandler<F, CH> createServerSocketHandler(
-			MetaDataContext<None, F> context) throws Exception;
+			MetaDataContext<None, F> context,
+			BufferSquirtFactory bufferSquirtFactory) throws Exception;
 
 	/*
 	 * =================== AbstractManagedObjectSource ==================
@@ -142,7 +145,7 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 
 		// Create the server socket handler and create the server
 		ServerSocketHandler<F, CH> serverSocketHandler = this
-				.createServerSocketHandler(context);
+				.createServerSocketHandler(context, bufferSquirtFactory);
 		this.server = serverSocketHandler.createServer();
 
 		// Create the connection manager

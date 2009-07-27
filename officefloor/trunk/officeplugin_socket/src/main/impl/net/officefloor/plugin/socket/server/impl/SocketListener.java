@@ -270,13 +270,6 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 								default:
 									// Determine if active (something read)
 									isActive |= (bytesRead > 0);
-
-									// Handle received request
-									if (this.isRequestReceived) {
-										// Process the request
-										this.server.processRequest(connection
-												.getConnectionHandler());
-									}
 									break;
 								}
 							}
@@ -504,8 +497,8 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 		}
 
 		// Handle the read (only if read data)
-		this.resetReadContext();
 		if (bytesRead > 0) {
+			// Handle the read
 			connection.getConnectionHandler().handleRead(this);
 		}
 
@@ -586,6 +579,8 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * Resets the context for the {@link Connection}.
 	 *
+	 * @param connection
+	 *            {@link ConnectionImpl} currently being processed.
 	 */
 	private void resetConnectionContext(ConnectionImpl<F, CH> connection) {
 		this.isCloseConnection = false;
@@ -614,23 +609,26 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 		return this.currentTime;
 	}
 
+	/**
+	 * Context object.
+	 */
+	private Object contextObject = null;
+
+	@Override
+	public Object getContextObject() {
+		return this.contextObject;
+	}
+
+	@Override
+	public void setContextObject(Object contextObject) {
+		this.contextObject = contextObject;
+	}
+
 	/*
 	 * ================== ReadContext =====================================
 	 * ReadContext does not require thread-safety as only accessed by the same
 	 * Thread.
 	 */
-
-	/**
-	 * Flag indicating if the request was received.
-	 */
-	private boolean isRequestReceived = false;
-
-	/**
-	 * Resets the {@link ReadContext}.
-	 */
-	private void resetReadContext() {
-		this.isRequestReceived = false;
-	}
 
 	@Override
 	public InputBufferStream getInputBufferStream() {
@@ -638,8 +636,10 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	}
 
 	@Override
-	public void requestReceived() {
-		this.isRequestReceived = true;
+	public void processRequest(Object attachment) throws IOException {
+		// Have the server process the request
+		this.server.processRequest(this.contextConnection
+				.getConnectionHandler(), attachment);
 	}
 
 	/*

@@ -17,59 +17,53 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
-import java.io.InputStream;
-import java.util.Set;
+import java.util.List;
+
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * HTTP request from the {@link ServerHttpConnection}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface HttpRequest {
 
 	/**
 	 * Obtains the HTTP method. For example GET, POST, etc.
-	 * 
+	 *
 	 * @return HTTP method.
 	 */
 	String getMethod();
 
 	/**
-	 * Obtains the path as provided on the request.
-	 * 
-	 * @return Path as provided on the request.
+	 * Obtains the Request URI as provided on the request.
+	 *
+	 * @return Request URI as provided on the request.
 	 */
-	String getPath();
+	String getRequestURI();
 
 	/**
 	 * Obtains the HTTP version of the request. For example HTTP/1.0, HTTP/1.1,
 	 * etc.
-	 * 
+	 *
 	 * @return HTTP version of the request.
 	 */
 	String getVersion();
 
 	/**
-	 * Obtains the set of HTTP header names on the request.
-	 * 
-	 * @return Set of HTTP header names on the request.
+	 * Obtains the {@link HttpHeader} instances in the order they appear on the
+	 * request.
+	 *
+	 * @return {@link HttpHeader} instances in the order they appear on the
+	 *         request.
 	 */
-	Set<String> getHeaderNames();
+	List<HttpHeader> getHeaders();
 
 	/**
-	 * Obtains the HTTP header value.
-	 * 
-	 * @param name
-	 *            Name of header value.
-	 * @return Value or <code>null</code> if not provided in request.
+	 * Obtains the {@link InputBufferStream} to the body of the HTTP request.
+	 *
+	 * @return {@link InputBufferStream} to the body of the HTTP request.
 	 */
-	String getHeader(String name);
-
-	/**
-	 * Obtains the {@link InputStream} to the body of the HTTP request.
-	 * 
-	 * @return {@link InputStream} to the body of the HTTP request.
-	 */
-	InputStream getBody();
+	InputBufferStream getBody();
 
 }

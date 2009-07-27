@@ -17,13 +17,11 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * {@link HttpResponse} for the {@link ServerHttpConnection}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface HttpResponse {
@@ -34,7 +32,7 @@ public interface HttpResponse {
 	 * either HTTP/1.0 or HTTP/1.1.
 	 * <p>
 	 * This defaults to value on {@link HttpRequest}.
-	 * 
+	 *
 	 * @param version
 	 *            HTTP version.
 	 */
@@ -45,7 +43,7 @@ public interface HttpResponse {
 	 * Specifies the status of the response with the default status message.
 	 * <p>
 	 * This defaults to 200 assuming the request was processed successfully.
-	 * 
+	 *
 	 * @param status
 	 *            Status of the response.
 	 */
@@ -54,7 +52,7 @@ public interface HttpResponse {
 	/**
 	 * Specifies the status of the response including specifying the status
 	 * human readable message.
-	 * 
+	 *
 	 * @param status
 	 *            Status of the response.
 	 * @param statusMessage
@@ -68,7 +66,7 @@ public interface HttpResponse {
 	 * Specifies a header on the response.
 	 * <p>
 	 * Headers are provided on the response in the order they are added.
-	 * 
+	 *
 	 * @param name
 	 *            Name of header.
 	 * @param value
@@ -77,34 +75,10 @@ public interface HttpResponse {
 	void addHeader(String name, String value);
 
 	/**
-	 * <p>
-	 * Obtains the {@link OutputStream} to write the body of the response.
-	 * <p>
-	 * The returned {@link OutputStream} works in conjunction with
-	 * {@link #appendToBody(ByteBuffer)}.
-	 * 
-	 * @return {@link OutputStream} to write the body of the response.
+	 * Obtains the {@link OutputBufferStream} to write the body of the response.
+	 *
+	 * @return {@link OutputBufferStream} to write the body of the response.
 	 */
-	OutputStream getBody();
-
-	/**
-	 * <p>
-	 * Appends the content to the body of the HTTP response.
-	 * <p>
-	 * This enables for optimisations for {@link java.nio.DirectByteBuffer}
-	 * instances.
-	 * 
-	 * @param content
-	 *            Content to appended to the HTTP response.
-	 */
-	void appendToBody(ByteBuffer content);
-
-	/**
-	 * Sends this HTTP response to the client.
-	 * 
-	 * @throws IOException
-	 *             If fails to trigger sending the message.
-	 */
-	void send() throws IOException;
+	OutputBufferStream getBody();
 
 }

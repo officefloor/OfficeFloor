@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -34,7 +35,7 @@ import net.officefloor.plugin.socket.server.http.request.config.RequestConfig;
 
 /**
  * Services the HTTP requests for the {@link HttpRequestTest}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RequestWork {
@@ -51,7 +52,7 @@ public class RequestWork {
 
 	/**
 	 * Specifies the {@link ProcessConfig} on how to process the request.
-	 * 
+	 *
 	 * @param communication
 	 *            {@link CommunicationConfig}.
 	 */
@@ -66,7 +67,7 @@ public class RequestWork {
 
 	/**
 	 * Obtains the exception thrown in failing to process request.
-	 * 
+	 *
 	 * @return Exception thrown in failing to process request.
 	 */
 	public static Throwable getException() {
@@ -77,7 +78,7 @@ public class RequestWork {
 
 	/**
 	 * Processes the HTTP request.
-	 * 
+	 *
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 */
@@ -94,19 +95,25 @@ public class RequestWork {
 		HttpRequest request = connection.getHttpRequest();
 		TestCase.assertEquals("Incorrect method", req.method, request
 				.getMethod());
-		TestCase.assertEquals("Incorrect path", req.path, request.getPath());
+		TestCase.assertEquals("Incorrect request URI", req.path, request
+				.getRequestURI());
 		TestCase.assertEquals("Incorrect version", req.version, request
 				.getVersion());
 
 		// Validate request headers provided
-		for (HeaderConfig header : req.headers) {
-			TestCase.assertEquals("Invalid request header for name '"
-					+ header.name + "'", header.value, request
-					.getHeader(header.name));
+		for (int i = 0; i < req.headers.size(); i++) {
+			HeaderConfig headerConfig = req.headers.get(i);
+			HttpHeader httpHeader = request.getHeaders().get(i);
+			TestCase.assertEquals("Invalid request header name (" + i + ")",
+					headerConfig.name, httpHeader.getName());
+			TestCase.assertEquals("Invalid request header value ("
+					+ headerConfig.name + ", " + i + ")", headerConfig.value,
+					httpHeader.getName());
 		}
 
 		// Validate the request body
-		Reader reader = new InputStreamReader(request.getBody());
+		Reader reader = new InputStreamReader(request.getBody()
+				.getInputStream());
 		StringWriter bodyBuffer = new StringWriter();
 		for (int value = reader.read(); value != -1; value = reader.read()) {
 			bodyBuffer.write(value);
@@ -127,12 +134,14 @@ public class RequestWork {
 		// Provide the response
 		HttpResponse response = connection.getHttpResponse();
 		if (process.body != null) {
-			Writer writer = new OutputStreamWriter(response.getBody());
+			Writer writer = new OutputStreamWriter(response.getBody()
+					.getOutputStream());
 			writer.write(process.body);
 			writer.flush();
 		}
 
 		// Send the response
-		connection.getHttpResponse().send();
+		connection.getHttpResponse().getBody().close();
 	}
+
 }

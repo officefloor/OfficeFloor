@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.source;
+package net.officefloor.plugin.socket.server.http.integrate;
 
 import java.io.OutputStreamWriter;
 
@@ -25,14 +25,14 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * Provides for processing a {@link HttpRequest}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpWork {
 
 	/**
 	 * Processes the {@link HttpRequest}.
-	 * 
+	 *
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 */
@@ -44,17 +44,18 @@ public class HttpWork {
 		// Detail request being serviced
 		System.out.println(this.getClass().getSimpleName()
 				+ " serving request: " + request.getMethod() + " "
-				+ request.getPath() + " " + request.getVersion());
+				+ request.getRequestURI() + " " + request.getVersion());
 
 		// Obtain response for the request
 		HttpResponse response = connection.getHttpResponse();
 
 		// Write the body of the response
 		String message = "Hello World";
-		new OutputStreamWriter(response.getBody()).append(message).flush();
+		new OutputStreamWriter(response.getBody().getOutputStream()).append(
+				message).flush();
 
 		// Send response
-		response.send();
+		response.getBody().close();
 	}
 
 }

@@ -23,6 +23,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 
 /**
  * HTTP {@link Server}.
@@ -55,22 +56,16 @@ public class HttpServer implements
 	}
 
 	@Override
-	public void processRequest(HttpConnectionHandler connectionHandler)
-			throws IOException {
+	public void processRequest(HttpConnectionHandler connectionHandler,
+			Object attachment) throws IOException {
 
-		// TODO take advantage of request
-		// TODO list requests and send response only for first request
+		// Obtain the HTTP managed object
+		HttpManagedObject managedObject = (HttpManagedObject) attachment;
 
-		// Create the HTTP managed object
-		HttpManagedObject managedObject = new HttpManagedObject(
-				connectionHandler);
-
-		// Reset the connection handler for next request
-		connectionHandler.resetForNextRequest();
-
-		// Invoke with the managed object
+		// Invoke processing of the HTTP managed object
 		this.executeContext.invokeProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,
-				managedObject, managedObject, managedObject);
+				managedObject.getServerHttpConnection(), managedObject,
+				managedObject.getEscalationHandler());
 	}
 
 }

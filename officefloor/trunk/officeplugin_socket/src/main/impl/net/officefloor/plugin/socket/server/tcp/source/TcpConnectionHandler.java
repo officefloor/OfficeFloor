@@ -145,7 +145,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	@Override
-	public void handleRead(ReadContext context) {
+	public void handleRead(ReadContext context) throws IOException {
 
 		// Connection not idle
 		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
@@ -160,7 +160,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		// Always new message on start reading to kick of processing
 		if (!this.isReadStarted) {
 			// To ensure streaming always input first read
-			context.requestReceived();
+			context.processRequest(null);
 
 			// Flag that the read has started
 			this.isReadStarted = true;

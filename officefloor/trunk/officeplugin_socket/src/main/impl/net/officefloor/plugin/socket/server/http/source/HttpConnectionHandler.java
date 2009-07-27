@@ -18,17 +18,20 @@
 package net.officefloor.plugin.socket.server.http.source;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.List;
 
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.WriteContext;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
-import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * HTTP {@link ConnectionHandler}.
@@ -38,14 +41,24 @@ import net.officefloor.plugin.stream.BufferStream;
 public class HttpConnectionHandler implements ConnectionHandler {
 
 	/**
-	 * {@link HttpServerSocketManagedObjectSource}.
+	 * {@link HttpConversation}.
 	 */
-	private final HttpServerSocketManagedObjectSource source;
+	private final HttpConversation conversation;
 
 	/**
-	 * {@link Connection}.
+	 * {@link HttpRequestParser}.
 	 */
-	private final Connection connection;
+	private final HttpRequestParser parser;
+
+	/**
+	 * Maximum length of text part for {@link HttpRequest}.
+	 */
+	private final int maxTextPartLength;
+
+	/**
+	 * {@link Connection} timeout in milliseconds.
+	 */
+	private final long connectionTimout;
 
 	/**
 	 * Time of last interaction. Will be set on the first read.
@@ -55,66 +68,28 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Initiate.
 	 *
-	 * @param source
-	 *            {@link HttpServerSocketManagedObjectSource}.
-	 * @param connection
-	 *            {@link Connection}.
+	 * @param conversation
+	 *            {@link HttpConversation}.
+	 * @param parser
+	 *            {@link HttpRequestParser}.
+	 * @param maxTextPartLength
+	 *            Maximum length of text part for {@link HttpRequest}.
+	 * @param connectionTimeout
+	 *            {@link Connection} timeout in milliseconds.
 	 */
-	public HttpConnectionHandler(HttpServerSocketManagedObjectSource source,
-			Connection connection) {
-		this.source = source;
-		this.connection = connection;
-	}
-
-	/**
-	 * Obtains the {@link HttpRequestParserImpl}.
-	 *
-	 * @return {@link HttpRequestParserImpl}.
-	 */
-	public HttpRequestParserImpl getHttpRequestParser() {
-		return this.httpRequestParser;
-	}
-
-	/**
-	 * Resets for next request.
-	 */
-	public void resetForNextRequest() {
-		// Clear parser so new created on next request
-		this.httpRequestParser = null;
-	}
-
-	/**
-	 * Sends the {@link HttpResponseImpl}.
-	 *
-	 * @param response
-	 *            {@link HttpResponseImpl}.
-	 * @throws IOException
-	 *             If failure of {@link Connection} (may be closed).
-	 */
-	public void sendResponse(HttpResponseImpl response) throws IOException {
-		// Create the message, loading response content and writing to client
-		response.loadContent(this.connection.getOutputBufferStream());
-	}
-
-	/**
-	 * Obtains the response buffer length for each {@link MessageSegment} being
-	 * appended to by the {@link OutputStream} to populate the body.
-	 *
-	 * @return Response buffer length.
-	 */
-	protected int getResponseBufferLength() {
-		return this.source.getResponseBufferLength();
+	public HttpConnectionHandler(HttpConversation conversation,
+			HttpRequestParser parser, int maxTextPartLength,
+			long connectionTimeout) {
+		this.conversation = conversation;
+		this.parser = parser;
+		this.maxTextPartLength = maxTextPartLength;
+		this.connectionTimout = connectionTimeout;
 	}
 
 	/*
 	 * ================ ConnectionHandler ==============================
 	 * Thread-safe by the lock taken in SockerListener.
 	 */
-
-	/**
-	 * {@link HttpRequestParserImpl}.
-	 */
-	private HttpRequestParserImpl httpRequestParser;
 
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
@@ -123,48 +98,46 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			// New last interaction time
 			this.lastInteractionTime = context.getTime();
 
-			// Ensure a parser is available
-			if (this.httpRequestParser == null) {
-				this.httpRequestParser = new HttpRequestParserImpl(this.source
-						.getMaximumRequestBodyLength());
+			// Lazy obtain the temporary buffer
+			char[] tempBuffer = (char[]) context.getContextObject();
+			if (tempBuffer == null) {
+				tempBuffer = new char[this.maxTextPartLength];
+				context.setContextObject(tempBuffer);
 			}
 
-			// TODO obtain temp buffer
-			char[] tempBuffer = new char[255];
+			// Loop as may have more than one request on read
+			InputBufferStream inputBufferStream = context
+					.getInputBufferStream();
+			for (;;) {
+				// Attempt to parse the remaining content of request
+				if (this.parser.parse(inputBufferStream, tempBuffer)) {
 
-			// Attempt to parse the remaining content of request
-			if (this.httpRequestParser.parse(context.getInputBufferStream(),
-					tempBuffer)) {
-				// Received the full HTTP request to start processing
+					// Received the full HTTP request to start processing
+					String method = this.parser.getMethod();
+					String requestURI = this.parser.getRequestURI();
+					String httpVersion = this.parser.getHttpVersion();
+					List<HttpHeader> headers = this.parser.getHeaders();
+					InputBufferStream body = this.parser.getBody();
+					this.parser.reset(); // reset for next request
 
-				// TODO obtain contents of request
+					// Process the request
+					HttpManagedObject managedObject = this.conversation
+							.addRequest(method, requestURI, httpVersion,
+									headers, body);
+					context.processRequest(managedObject);
 
-				// Flag request received to start processing it
-				context.requestReceived();
+				} else {
+					// No further content to parse
+					return;
+				}
 			}
 
 		} catch (ParseException ex) {
-			try {
+			// Failed parsing request
+			this.conversation.parseFailure(ex);
 
-				// Attempt to obtain version
-				String version = this.httpRequestParser.getHttpVersion();
-				if ((version == null) || (version.trim().length() == 0)) {
-					// Use default version
-					version = HttpRequestParserImpl.DEFAULT_HTTP_VERSION;
-				}
-
-				// Send HTTP response, indicating parse failure
-				new HttpResponseImpl(this, version, ex.getHttpStatus(), ex
-						.getMessage()).send();
-
-				// Flag read over
-				this.httpRequestParser = null;
-				context.requestReceived();
-
-			} catch (IOException io) {
-				// Failure constructing response, so fail connection
-				context.setCloseConnection(true);
-			}
+			// Invalid request so close
+			context.setCloseConnection(true);
 		}
 	}
 
@@ -184,7 +157,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		long timeIdle = currentTime - this.lastInteractionTime;
 
 		// Close connection if idle too long
-		if (timeIdle >= this.source.getConnectionTimeout()) {
+		if (timeIdle >= this.connectionTimout) {
 			context.setCloseConnection(true);
 		}
 	}
