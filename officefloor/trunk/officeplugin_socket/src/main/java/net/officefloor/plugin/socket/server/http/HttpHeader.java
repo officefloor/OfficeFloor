@@ -15,52 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.parse.impl;
-
-import net.officefloor.plugin.socket.server.http.HttpHeader;
+package net.officefloor.plugin.socket.server.http;
 
 /**
- * {@link HttpHeader} implementation.
+ * HTTP header.
  *
  * @author Daniel Sagenschneider
  */
-public class HttpHeaderImpl implements HttpHeader {
+public interface HttpHeader {
 
 	/**
-	 * Name.
-	 */
-	private final String name;
-
-	/**
-	 * Value.
-	 */
-	private final String value;
-
-	/**
-	 * Initiate.
+	 * Obtains the name of the {@link HttpHeader}.
 	 *
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
+	 * @return Name of the {@link HttpHeader}.
 	 */
-	public HttpHeaderImpl(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
+	String getName();
 
-	/*
-	 * =================== HttpHeader ============================
+	/**
+	 * Obtains the value for the {@link HttpHeader}.
+	 *
+	 * @return Value for the {@link HttpHeader}.
 	 */
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public String getValue() {
-		return this.value;
-	}
+	String getValue();
 
 }

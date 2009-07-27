@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.source;
+package net.officefloor.plugin.socket.server.http.integrate;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -31,7 +31,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpServerTest extends HttpServerStartup {
@@ -109,7 +109,7 @@ public class HttpServerTest extends HttpServerStartup {
 
 	/**
 	 * Does the {@link HttpMethod}.
-	 * 
+	 *
 	 * @param request
 	 *            {@link HttpMethod}.
 	 * @return Resulting body of response.
@@ -121,7 +121,7 @@ public class HttpServerTest extends HttpServerStartup {
 
 	/**
 	 * Does the {@link HttpMethod}.
-	 * 
+	 *
 	 * @param client
 	 *            {@link HttpClient}.
 	 * @param method

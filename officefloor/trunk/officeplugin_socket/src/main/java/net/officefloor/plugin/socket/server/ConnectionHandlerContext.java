@@ -47,4 +47,19 @@ public interface ConnectionHandlerContext {
 	 */
 	long getTime();
 
+	/**
+	 * Obtains the context bound object.
+	 *
+	 * @return Context bound object.
+	 */
+	Object getContextObject();
+
+	/**
+	 * Specifies the context bound object.
+	 *
+	 * @param contextObject
+	 *            Context bound object.
+	 */
+	void setContextObject(Object contextObject);
+
 }

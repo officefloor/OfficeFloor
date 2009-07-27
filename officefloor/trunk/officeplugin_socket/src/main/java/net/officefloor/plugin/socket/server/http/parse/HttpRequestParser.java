@@ -20,6 +20,7 @@ package net.officefloor.plugin.socket.server.http.parse;
 import java.io.IOException;
 import java.util.List;
 
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.stream.InputBufferStream;
 

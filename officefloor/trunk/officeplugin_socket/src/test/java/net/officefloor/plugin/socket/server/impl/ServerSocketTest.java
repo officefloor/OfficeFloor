@@ -39,6 +39,7 @@ import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.WriteContext;
+import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Tests the {@link AbstractServerSocketManagedObjectSource}.
@@ -164,8 +165,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 					REQUEST_MSG[i], data[i]);
 		}
 
-		// Flag the request received
-		context.requestReceived();
+		// Process the request
+		context.processRequest(null);
 	}
 
 	@Override
@@ -190,10 +191,12 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	@Override
-	public void processRequest(ConnectionHandler connectionHandler)
-			throws IOException {
-		// Ensure connection handler
+	public void processRequest(ConnectionHandler connectionHandler,
+			Object attachment) throws IOException {
+
+		// Ensure inputs correct
 		assertSame("Incorrect connection handler", this, connectionHandler);
+		assertNull("Should not have attachment", attachment);
 
 		// Ensure have the request content
 		byte[] data = new byte[REQUEST_MSG.length];
@@ -221,7 +224,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 
 		@Override
 		protected ServerSocketHandler<Indexed, ConnectionHandler> createServerSocketHandler(
-				MetaDataContext<None, Indexed> context) throws Exception {
+				MetaDataContext<None, Indexed> context,
+				BufferSquirtFactory bufferSquirtFactory) throws Exception {
 			context.setObjectClass(Object.class);
 			return ServerSocketTest.INSTANCE;
 		}

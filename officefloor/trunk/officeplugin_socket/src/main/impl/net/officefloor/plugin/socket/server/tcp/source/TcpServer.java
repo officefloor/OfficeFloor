@@ -55,8 +55,8 @@ public class TcpServer implements
 	}
 
 	@Override
-	public void processRequest(TcpConnectionHandler connectionHandler)
-			throws IOException {
+	public void processRequest(TcpConnectionHandler connectionHandler,
+			Object attachment) throws IOException {
 
 		// Invoke the process to handle message
 		connectionHandler.invokeProcess(this.executeContext);

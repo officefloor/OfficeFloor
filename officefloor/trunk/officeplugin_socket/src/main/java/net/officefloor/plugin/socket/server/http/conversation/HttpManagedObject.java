@@ -15,27 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.parse;
+package net.officefloor.plugin.socket.server.http.conversation;
+
+import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * HTTP header.
+ * HTTP {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public interface HttpHeader {
+public interface HttpManagedObject extends ManagedObject {
 
 	/**
-	 * Obtains the name of the {@link HttpHeader}.
+	 * Obtains the {@link ServerHttpConnection}.
 	 *
-	 * @return Name of the {@link HttpHeader}.
+	 * @return {@link ServerHttpConnection}.
 	 */
-	String getName();
+	ServerHttpConnection getServerHttpConnection();
 
 	/**
-	 * Obtains the value for the {@link HttpHeader}.
+	 * Obtains the {@link EscalationHandler}.
 	 *
-	 * @return Value for the {@link HttpHeader}.
+	 * @return {@link EscalationHandler}.
 	 */
-	String getValue();
+	EscalationHandler getEscalationHandler();
+
+	/**
+	 * Cleans up this {@link HttpManagedObject}.
+	 */
+	void cleanup();
 
 }
