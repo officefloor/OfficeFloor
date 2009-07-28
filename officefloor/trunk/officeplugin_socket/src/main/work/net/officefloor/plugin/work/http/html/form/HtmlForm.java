@@ -22,18 +22,18 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
  * Wraps the HTTP path providing the various segment details.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HtmlForm {
 
 	/**
 	 * Parse the query to obtain the {@link HtmlFormParameter} instances.
-	 * 
+	 *
 	 * @param query
 	 *            HTTP query segment.
 	 * @return {@link HtmlFormParameter} instances.
@@ -126,7 +126,7 @@ public class HtmlForm {
 
 	/**
 	 * Initiate from a GET {@link HttpRequest}.
-	 * 
+	 *
 	 * @param httpGetPath
 	 *            HTTP GET path.
 	 * @throws URISyntaxException
@@ -138,7 +138,7 @@ public class HtmlForm {
 
 	/**
 	 * Initiate from a POST {@link HttpRequest}.
-	 * 
+	 *
 	 * @param httpPostPath
 	 *            HTTP POST path.
 	 * @param httpPostBody
@@ -172,7 +172,7 @@ public class HtmlForm {
 
 	/**
 	 * Obtains the path.
-	 * 
+	 *
 	 * @return Path.
 	 */
 	public String getPath() {
@@ -181,7 +181,7 @@ public class HtmlForm {
 
 	/**
 	 * Obtains the {@link HtmlFormParameter} instances.
-	 * 
+	 *
 	 * @return {@link HtmlFormParameter} instances.
 	 */
 	public List<HtmlFormParameter> getParameters() {
@@ -190,7 +190,7 @@ public class HtmlForm {
 
 	/**
 	 * Obtains the fragment.
-	 * 
+	 *
 	 * @return Fragment.
 	 */
 	public String getFragment() {

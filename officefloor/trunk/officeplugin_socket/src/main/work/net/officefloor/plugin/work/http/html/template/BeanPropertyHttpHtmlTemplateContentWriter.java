@@ -23,13 +23,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.socket.server.http.HttpStatus;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.work.http.HttpException;
 
 /**
  * {@link HttpHtmlTemplateContentWriter} to write a bean's property.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanPropertyHttpHtmlTemplateContentWriter implements
@@ -48,7 +48,7 @@ public class BeanPropertyHttpHtmlTemplateContentWriter implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param beanSuperType
 	 *            Bean type. The bean's class will either be an instance of this
 	 *            type or a sub type of it.
@@ -61,14 +61,6 @@ public class BeanPropertyHttpHtmlTemplateContentWriter implements
 		this.propertyMethodName = propertyMethod.getName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.http.html.template.HttpHtmlTemplateContentWriter
-	 * #writeContent(java.lang.Object, java.io.Writer,
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse)
-	 */
 	@Override
 	public void writeContent(Object bean, Writer httpBody,
 			HttpResponse httpResponse) throws IOException, HttpException {

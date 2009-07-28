@@ -25,14 +25,14 @@ import java.util.Map;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
  * Tests the {@link HttpHtmlFormToBeanTask}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
@@ -79,7 +79,7 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the test.
-	 * 
+	 *
 	 * @param method
 	 *            HTTP method.
 	 * @param uriPath
@@ -96,6 +96,8 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 			String expectedName, String... aliasMappings) throws Throwable {
 
 		// Obtain the input stream body
+		final InputBufferStream bodyInputBufferStream = this
+				.createMock(InputBufferStream.class);
 		final InputStream body = new ByteArrayInputStream(
 				httpBody == null ? new byte[0] : "name=value".getBytes());
 
@@ -122,10 +124,12 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 				this.httpRequest);
 		this.recordReturn(this.httpRequest, this.httpRequest.getMethod(),
 				method);
-		this
-				.recordReturn(this.httpRequest, this.httpRequest.getPath(),
-						uriPath);
-		this.recordReturn(this.httpRequest, this.httpRequest.getBody(), body);
+		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
+				uriPath);
+		this.recordReturn(this.httpRequest, this.httpRequest.getBody(),
+				bodyInputBufferStream);
+		this.recordReturn(bodyInputBufferStream, bodyInputBufferStream
+				.getInputStream(), body);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -139,4 +143,5 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 		// Verify properties loaded
 		assertEquals("Incorrect value for property name", "value", bean.name);
 	}
+
 }

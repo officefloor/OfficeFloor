@@ -25,14 +25,13 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.plugin.work.http.route.HttpRouteTask;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * Tests the {@link HttpRouteTask}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRouteTaskTest extends OfficeFrameTestCase {
@@ -111,7 +110,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the routing test.
-	 * 
+	 *
 	 * @param path
 	 *            Path on the {@link HttpRequest}.
 	 * @param flowIndex
@@ -137,7 +136,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				this.serverHttpConnection);
 		this.recordReturn(this.serverHttpConnection, this.serverHttpConnection
 				.getHttpRequest(), this.httpRequest);
-		this.recordReturn(this.httpRequest, this.httpRequest.getPath(), path);
+		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
+				path);
 		this.recordReturn(this.taskContext, this.taskContext.doFlow(flowIndex,
 				null), this.flowFuture);
 

@@ -24,12 +24,12 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * {@link Task} to send the {@link HttpResponse}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpResponseSendTask

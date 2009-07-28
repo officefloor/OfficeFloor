@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
@@ -75,10 +77,25 @@ public interface HttpResponse {
 	void addHeader(String name, String value);
 
 	/**
+	 * <p>
 	 * Obtains the {@link OutputBufferStream} to write the body of the response.
+	 * <p>
+	 * Closing the returned {@link OutputBufferStream} is similar to calling
+	 * {@link #send()}.
 	 *
 	 * @return {@link OutputBufferStream} to write the body of the response.
+	 *
+	 * @see #send()
 	 */
 	OutputBufferStream getBody();
+
+	/**
+	 * Sends this {@link HttpResponse}. After calling this {@link #getBody()} is
+	 * closed and the corresponding {@link HttpRequest#getBody()} is closed.
+	 *
+	 * @throws IOException
+	 *             If fails to send this {@link HttpResponse}.
+	 */
+	void send() throws IOException;
 
 }

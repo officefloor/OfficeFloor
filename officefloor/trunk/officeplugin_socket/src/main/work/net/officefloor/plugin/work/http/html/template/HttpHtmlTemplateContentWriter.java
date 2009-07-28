@@ -20,20 +20,20 @@ package net.officefloor.plugin.work.http.html.template;
 import java.io.IOException;
 import java.io.Writer;
 
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.html.template.parse.TemplateSection;
 
 /**
  * Interface to write contents to {@link HttpResponse}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface HttpHtmlTemplateContentWriter {
 
 	/**
 	 * Writes the content to the {@link HttpResponse}.
-	 * 
+	 *
 	 * @param bean
 	 *            Bean to potentially obtain data. May be <code>null</code> if
 	 *            {@link TemplateSection} does not require a bean.
@@ -50,4 +50,5 @@ public interface HttpHtmlTemplateContentWriter {
 	 */
 	void writeContent(Object bean, Writer httpBody, HttpResponse httpResponse)
 			throws IOException, HttpException;
+
 }

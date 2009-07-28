@@ -24,12 +24,12 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * {@link Work} and {@link Task} for routing HTTP requests.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRouteTask
@@ -50,7 +50,7 @@ public class HttpRouteTask
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param routings
 	 *            {@link Pattern} match against paths to route the
 	 *            {@link HttpRequest}.
@@ -74,7 +74,7 @@ public class HttpRouteTask
 		HttpRequest request = connection.getHttpRequest();
 
 		// Obtain the path from the request
-		String path = request.getPath();
+		String path = request.getRequestURI();
 		if (path == null) {
 			// Ensure path not null
 			path = "";

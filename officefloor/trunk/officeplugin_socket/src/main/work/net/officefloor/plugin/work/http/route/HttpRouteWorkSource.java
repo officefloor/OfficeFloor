@@ -27,12 +27,12 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * {@link WorkSource} to provide routing of HTTP requests.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {

@@ -25,7 +25,7 @@ import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependencies;
 
