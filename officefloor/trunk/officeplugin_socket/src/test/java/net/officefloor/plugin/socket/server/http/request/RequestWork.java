@@ -108,7 +108,7 @@ public class RequestWork {
 					headerConfig.name, httpHeader.getName());
 			TestCase.assertEquals("Invalid request header value ("
 					+ headerConfig.name + ", " + i + ")", headerConfig.value,
-					httpHeader.getName());
+					httpHeader.getValue());
 		}
 
 		// Validate the request body

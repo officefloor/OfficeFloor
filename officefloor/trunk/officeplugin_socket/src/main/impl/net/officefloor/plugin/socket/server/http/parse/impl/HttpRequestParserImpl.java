@@ -123,9 +123,9 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	};
 
 	/**
-	 * {@link ParseState} which starts with the HTTP method.
+	 * Maximum number of {@link HttpHeader} instances for a {@link HttpRequest}.
 	 */
-	private ParseState parseState = ParseState.START;
+	private final int maxHeaderCount;
 
 	/**
 	 * Maximum length of the body (entity).
@@ -133,36 +133,66 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private final long maxBodyLength;
 
 	/**
+	 * {@link ParseState} which starts with the HTTP method.
+	 */
+	private ParseState parseState;
+
+	/**
 	 * Content length value for request.
 	 */
-	private long contentLength = -1;
+	private long contentLength;
 
 	/**
 	 * Length of current text of the {@link HttpRequest} being parsed.
 	 */
-	private int textLength = 0;
+	private int textLength;
 
-	private String text_method = "";
+	/**
+	 * Method.
+	 */
+	private String text_method;
 
-	private String text_path = "";
+	/**
+	 * Request URI.
+	 */
+	private String text_path;
 
-	private String text_version = "";
+	/**
+	 * HTTP version.
+	 */
+	private String text_version;
 
-	private String text_headerName = "";
+	/**
+	 * Header name just parsed.
+	 */
+	private String text_headerName;
 
-	private List<HttpHeader> headers = new LinkedList<HttpHeader>();
+	/**
+	 * {@link HttpHeader} instances.
+	 */
+	private List<HttpHeader> headers;
 
-	private InputBufferStream body = null;
+	/**
+	 * Body.
+	 */
+	private InputBufferStream body;
 
 	/**
 	 * Initiate.
 	 *
+	 * @param maxHeaderCount
+	 *            Maximum number of {@link HttpHeader} instances for a
+	 *            {@link HttpRequest}.
 	 * @param maxBodyLength
 	 *            Maximum length of the body buffer. Requests with bodies
 	 *            greater that this will fail parsing.
 	 */
-	public HttpRequestParserImpl(long maxBodyLength) {
+	public HttpRequestParserImpl(int maxHeaderCount, long maxBodyLength) {
+		this.maxHeaderCount = maxHeaderCount;
 		this.maxBodyLength = maxBodyLength;
+
+		// Initiate state
+		this.reset();
 	}
 
 	/**
@@ -215,6 +245,19 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 */
 
 	@Override
+	public void reset() {
+		this.parseState = ParseState.START;
+		this.contentLength = -1;
+		this.textLength = 0;
+		this.text_method = "";
+		this.text_path = "";
+		this.text_version = "";
+		this.text_headerName = "";
+		this.headers = new LinkedList<HttpHeader>();
+		this.body = null;
+	}
+
+	@Override
 	public boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
 			throws IOException, ParseException {
 
@@ -228,9 +271,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			LOOP: for (int value = browse.read(); value != -1; value = browse
 					.read()) {
 				byte character = (byte) value;
-
-				// TODO remove
-				System.out.print(new String(new byte[] { character }, 0, 1));
 
 				// Parse the character of the HTTP request
 				switch (this.parseState) {
@@ -343,7 +383,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.HEADER_NAME_VALUE_SEPARATION;
 						break;
 					} else {
-						// New header
+						// New header, determine if too many headers
+						if (this.headers.size() >= this.maxHeaderCount) {
+							throw new ParseException(HttpStatus._400,
+									"Too Many Headers");
+						}
 						this.parseState = ParseState.HEADER_NAME;
 					}
 
@@ -506,12 +550,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		// All of request received and parsed
 		return true;
-	}
-
-	@Override
-	public void reset() {
-		// TODO Implement HttpRequestParser.reset
-		throw new UnsupportedOperationException("HttpRequestParser.reset");
 	}
 
 	@Override

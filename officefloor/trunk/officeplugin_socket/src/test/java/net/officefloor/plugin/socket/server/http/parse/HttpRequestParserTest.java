@@ -37,15 +37,41 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
+	 * Maximum number of {@link HttpHeader} instances for testing.
+	 */
+	private static final int MAX_HEADER_COUNT = 255;
+
+	/**
+	 * Maximum length of the body in bytes for testing.
+	 */
+	private static final long MAX_BODY_LENGTH = 1024;
+
+	/**
 	 * {@link HttpRequestParser} to test.
 	 */
 	private HttpRequestParser httpRequestParser = new HttpRequestParserImpl(
-			1024);
+			MAX_HEADER_COUNT, MAX_BODY_LENGTH);
 
 	/**
 	 * Temporary buffer for parsing.
 	 */
 	private char[] tempBuffer = new char[255];
+
+	/**
+	 * Ensure correct initial state.
+	 */
+	public void testInitialState() {
+		assertEquals("Incorrect initial method", "", this.httpRequestParser
+				.getMethod());
+		assertEquals("Incorrect initial request URI", "",
+				this.httpRequestParser.getRequestURI());
+		assertEquals("Incorrect initial HTTP version", "",
+				this.httpRequestParser.getHttpVersion());
+		assertEquals("Incorrect initial HTTP headers", 0,
+				this.httpRequestParser.getHeaders().size());
+		assertNull("Initially should be no body", this.httpRequestParser
+				.getBody());
+	}
 
 	/**
 	 * Ensure able to handle empty request).
@@ -283,6 +309,33 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure fails if too many {@link HttpHeader} instances.
+	 */
+	public void testTooMany_Headers() {
+		// Create request with too many headers
+		StringBuilder request = new StringBuilder();
+		request.append("GET /path HTTP/1.1\n");
+		for (int i = 0; i < (MAX_HEADER_COUNT + 1); i++) {
+			request.append("Header" + i + ": Value" + i + "\n");
+		}
+		request.append("\n");
+		this.doInvalidMethodTest(request.toString(), HttpStatus._400,
+				"Too Many Headers");
+	}
+
+	/**
+	 * Ensures fails if body is bigger than maximum size.
+	 */
+	public void testTooLong_Body() {
+		// Create body that is too large
+		long tooLargeBodySize = MAX_BODY_LENGTH + 1;
+		this.doInvalidMethodTest("POST /path HTTP/1.1\nContent-Length: "
+				+ tooLargeBodySize + "\n\n", HttpStatus._413,
+				"Request entity must be less than maximum of "
+						+ MAX_BODY_LENGTH + " bytes");
+	}
+
+	/**
 	 * Validates that Content-Length is required for POST.
 	 */
 	public void testNoContentLengthForPost() {
@@ -316,6 +369,26 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				"POST /path HTTP/1.1\nContent-Length: INVALID\n\nTEST",
 				HttpStatus._411,
 				"Content-Length header value must be an integer");
+	}
+
+	/**
+	 * Ensure able to reset {@link HttpRequestParser} to parse another request.
+	 */
+	public void testReset() {
+		// Parse first request
+		this
+				.doMethodTest(
+						"POST /one HTTP/1.1\nContent-Length: 4\nHeaderOne: ValueOne\n\nTEST",
+						true, "POST", "/one", "HTTP/1.1", "TEST",
+						"Content-Length", "4", "HeaderOne", "ValueOne");
+
+		// Reset and parse second request
+		this.httpRequestParser.reset();
+		this
+				.doMethodTest(
+						"PUT /two HTTP/1.0\nContent-Length: 7\nHeaderTwo: ValueTwo\n\nANOTHER",
+						true, "PUT", "/two", "HTTP/1.0", "ANOTHER",
+						"Content-Length", "7", "HeaderTwo", "ValueTwo");
 	}
 
 	/**

@@ -27,8 +27,10 @@ import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpResponseImpl;
+import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
+import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
@@ -57,6 +59,17 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 			new HeapByteBufferSquirtFactory(1024));
 
 	/**
+	 * {@link HttpConversation} to create the {@link HttpResponse}.
+	 */
+	private final HttpConversation conversation = new HttpConversationImpl(
+			new MockConnection(), new BufferSquirtFactory() {
+				@Override
+				public BufferSquirt createBufferSquirt() {
+					return new MockBufferSquirt();
+				}
+			});
+
+	/**
 	 * Listing of {@link MockBufferSquirt} instances.
 	 */
 	private final List<MockBufferSquirt> squirts = new LinkedList<MockBufferSquirt>();
@@ -65,9 +78,9 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 * Ensure can send a simple response.
 	 */
 	public void testSimpleResponse() throws IOException {
-		HttpResponseImpl response = this.createHttpResponse();
+		HttpResponse response = this.createHttpResponse();
 		this.writeBody(response, "TEST");
-		response.write();
+		response.getBody().close();
 		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
 	}
 
@@ -75,8 +88,8 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 * Ensures provides correct response if no content.
 	 */
 	public void testNoContent() throws IOException {
-		HttpResponseImpl response = this.createHttpResponse();
-		response.write();
+		HttpResponse response = this.createHttpResponse();
+		response.getBody().close();
 		this
 				.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
 	}
@@ -86,18 +99,25 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	 */
 
 	/**
-	 * Creates a {@link HttpResponseImpl} to be tested.
+	 * Creates a {@link HttpResponse} to be tested.
 	 *
-	 * @return New {@link HttpResponseImpl}.
+	 * @return New {@link HttpResponse}.
 	 */
-	private HttpResponseImpl createHttpResponse() {
-		return new HttpResponseImpl(new MockConnection(),
-				new BufferSquirtFactory() {
-					@Override
-					public BufferSquirt createBufferSquirt() {
-						return new MockBufferSquirt();
-					}
-				}, "HTTP/1.1");
+	private HttpResponse createHttpResponse() {
+		try {
+			// Add the request
+			HttpManagedObject mo = this.conversation.addRequest("GET", "/mock",
+					"HTTP/1.1", new LinkedList<HttpHeader>(),
+					new BufferStreamImpl(ByteBuffer.wrap(new byte[0]))
+							.getInputBufferStream());
+
+			// Return the http response from managed object
+			return mo.getServerHttpConnection().getHttpResponse();
+
+		} catch (IOException ex) {
+			fail("Should not fail to add request: " + ex.getMessage());
+			return null; // should fail
+		}
 	}
 
 	/**

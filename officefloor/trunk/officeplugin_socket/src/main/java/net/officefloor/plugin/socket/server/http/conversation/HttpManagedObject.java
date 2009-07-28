@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http.conversation;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -44,7 +46,10 @@ public interface HttpManagedObject extends ManagedObject {
 
 	/**
 	 * Cleans up this {@link HttpManagedObject}.
+	 *
+	 * @throws IOException
+	 *             If fails to clean up {@link HttpManagedObject}.
 	 */
-	void cleanup();
+	void cleanup() throws IOException;
 
 }

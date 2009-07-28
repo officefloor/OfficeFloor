@@ -22,6 +22,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
@@ -42,6 +43,12 @@ public class HttpServerSocketManagedObjectSource
 		extends
 		AbstractServerSocketManagedObjectSource<HttpServerFlows, HttpConnectionHandler>
 		implements ServerSocketHandler<HttpServerFlows, HttpConnectionHandler> {
+
+	/**
+	 * Maximum number of {@link HttpHeader} instances per {@link HttpRequest}.
+	 */
+	// TODO provide via property
+	private int maximumHttpRequestHeaders = 255;
 
 	/**
 	 * Maximum length in bytes of the {@link HttpRequest} body.
@@ -102,7 +109,7 @@ public class HttpServerSocketManagedObjectSource
 		HttpConversation conversation = new HttpConversationImpl(connection,
 				this.bufferSquirtFactory);
 		HttpRequestParser parser = new HttpRequestParserImpl(
-				this.maximumRequestBodyLength);
+				this.maximumHttpRequestHeaders, this.maximumRequestBodyLength);
 		return new HttpConnectionHandler(conversation, parser,
 				this.maxTextPartLength, this.connectionTimeout);
 	}

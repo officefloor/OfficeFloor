@@ -104,7 +104,7 @@ public class SynchronizedOutputBufferStream implements OutputBufferStream {
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		synchronized (this.mutex) {
 			this.backingStream.close();
 		}

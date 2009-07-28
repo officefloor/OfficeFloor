@@ -45,15 +45,20 @@ public interface ConnectionHandler {
 	 *
 	 * @param context
 	 *            {@link WriteContext}.
+	 * @throws IOException
+	 *             If fails to handle write.
 	 */
-	void handleWrite(WriteContext context);
+	void handleWrite(WriteContext context) throws IOException;
 
 	/**
 	 * Handles a {@link Connection} being idled.
 	 *
 	 * @param context
 	 *            {@link IdleContext}.
+	 * @throws IOException
+	 *             If fails to handle idle {@link Connection}. Possibly from
+	 *             attempting to close it.
 	 */
-	void handleIdleConnection(IdleContext context);
+	void handleIdleConnection(IdleContext context) throws IOException;
 
 }

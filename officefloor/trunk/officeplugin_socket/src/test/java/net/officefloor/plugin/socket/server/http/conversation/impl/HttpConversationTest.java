@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -35,7 +36,9 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
@@ -88,11 +91,12 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpManagedObject mo = this
 				.addRequest("GET", "/path", "HTTP/1.1", null);
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
-		writeUsAscii(response.getBody(), "TEST");
+		OutputBufferStream body = response.getBody();
+		writeUsAscii(body, "TEST");
 		this.assertWireData("");
 
 		// Close to ensure buffers get closed
-		response.getBody().close();
+		body.close();
 	}
 
 	/**
@@ -135,7 +139,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.getHttpResponse();
 		writeUsAscii(responseOne.getBody(), "ONE");
 		responseOne.getBody().getOutputStream().close();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nTWO");
+		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nONE");
 
 		// Ensure responds immediately to second request (as first sent)
 		HttpResponse responseTwo = moTwo.getServerHttpConnection()
@@ -148,7 +152,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure second response is not sent until first sent.
 	 */
-	public void testFirstResponseDelaysSecondSecond() throws IOException {
+	public void testFirstResponseDelaysSecond() throws IOException {
 		// Two requests
 		HttpManagedObject moOne = this.addRequest("GET", "/pathOne",
 				"HTTP/1.1", null);
@@ -175,7 +179,85 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * Ensure {@link ParseException} response is sent immediately.
 	 */
 	public void testParseFailure() throws IOException {
-		fail("TODO implement");
+		final ParseException failure = new ParseException(HttpStatus._400,
+				"Body of parse failure response");
+		this.conversation.parseFailure(failure, true);
+		String message = failure.getMessage();
+		this
+				.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html\nContent-Encoding: "
+						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
+						+ "\nContent-Length: "
+						+ message.length()
+						+ "\n\n"
+						+ message);
+
+		// Ensure the connection is closed
+		assertEquals("Connection should be closed", BufferStream.END_OF_STREAM,
+				this.wire.getInputBufferStream().available());
+	}
+
+	/**
+	 * Ensures {@link ParseException} response sent to correct request. In other
+	 * words all previous requests are sent response and {@link ParseException}
+	 * is then sent immediately.
+	 */
+	public void testStopProcessingOnParseFailure() throws IOException {
+		final ParseException failure = new ParseException(HttpStatus._414,
+				"Body of parse failure response");
+
+		// Add request and then parse failure
+		HttpResponse response = this.addRequest("GET", "/pathOne", "HTTP/1.1",
+				null).getServerHttpConnection().getHttpResponse();
+		this.conversation.parseFailure(failure, true);
+
+		// Should be no response sent until first request serviced
+		this.assertWireData("");
+
+		// Send the request which should also send the parse fail response
+		writeUsAscii(response.getBody(), "TEST");
+		response.getBody().close();
+
+		// Both request and parse failure responses should be sent
+		String message = failure.getMessage();
+		this
+				.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST"
+						+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html\nContent-Encoding: "
+						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
+						+ "\nContent-Length: " + message.length() + "\n\n"
+						+ message);
+
+		// Ensure the connection is closed
+		assertEquals("Connection should be closed", BufferStream.END_OF_STREAM,
+				this.wire.getInputBufferStream().available());
+	}
+
+	/**
+	 * Ensure able to provide failure from {@link EscalationHandler}.
+	 */
+	public void testEscalationHandler() throws Throwable {
+		final Throwable failure = new Throwable("Handle Failure");
+
+		// Add request
+		HttpManagedObject mo = this.addRequest("POST", "/path", "HTTP/1.1",
+				"REQUEST BODY");
+
+		// Provide some content on response
+		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
+		response.addHeader("SuccessfulHeader", "SuccessfulValue");
+		response.getBody().write("SUCCESSFUL CONTENT".getBytes());
+
+		// Handle failure in processing the request
+		mo.getEscalationHandler().handleEscalation(failure);
+
+		// Ensure failure written as response
+		String message = failure.getMessage();
+		this
+				.assertWireData("HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Encoding: "
+						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
+						+ "\nContent-Length: "
+						+ message.length()
+						+ "\n\n"
+						+ message);
 	}
 
 	/*
@@ -208,12 +290,17 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 */
 	private void assertWireData(String expectedData) {
 
+		// Transform the expected data to HTTP
+		String expectedWireData = UsAsciiUtil.convertToString(UsAsciiUtil
+				.convertToHttp(expectedData));
+
 		// Obtain the wire data
 		Reader reader = new InputStreamReader(this.wire.getInputBufferStream()
 				.getInputStream(), US_ASCII);
-		StringBuilder data = new StringBuilder((int) this.wire.available());
+		int availableBytes = (int) this.wire.available();
+		StringBuilder data = new StringBuilder(availableBytes);
 		try {
-			while (this.wire.available() > 0) {
+			for (int i = 0; i < availableBytes; i++) {
 				char character = (char) reader.read();
 				data.append(character);
 			}
@@ -224,7 +311,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		// Assert that the wire data
 		String wireData = data.toString();
-		assertEquals("Invalid data on the wire", expectedData, wireData);
+		assertEquals("Invalid data on the wire", expectedWireData, wireData);
 	}
 
 	/**
@@ -275,7 +362,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 
 		// Close the wire
-		this.wire.getOutputBufferStream().close();
+		this.wire.getInputBufferStream().close();
 
 		// Ensure all buffers are closed
 		for (int i = 0; i < this.squirts.size(); i++) {

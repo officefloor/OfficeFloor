@@ -119,7 +119,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 
 	@Override
-	public void handleIdleConnection(IdleContext context) {
+	public void handleIdleConnection(IdleContext context) throws IOException {
 
 		// Determine if have to handle connection idle too long
 		if (this.idleSinceTimestamp == NON_IDLE_SINCE_TIMESTAMP) {

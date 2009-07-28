@@ -66,6 +66,13 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private long lastInteractionTime;
 
 	/**
+	 * Flag indicating if {@link ParseException} on processing input. Once a
+	 * {@link ParseException} occurs it is unrecoverable and the
+	 * {@link Connection} should be closed.
+	 */
+	private boolean isParseFailure = false;
+
+	/**
 	 * Initiate.
 	 *
 	 * @param conversation
@@ -94,6 +101,14 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
 		try {
+
+			// Ignore all further content if parse failure
+			if (this.isParseFailure) {
+				// Consume all content read (ignore as become invalid)
+				InputBufferStream ignore = context.getInputBufferStream();
+				ignore.skip(ignore.available());
+				return; // no further processing
+			}
 
 			// New last interaction time
 			this.lastInteractionTime = context.getTime();
@@ -133,11 +148,11 @@ public class HttpConnectionHandler implements ConnectionHandler {
 			}
 
 		} catch (ParseException ex) {
-			// Failed parsing request
-			this.conversation.parseFailure(ex);
+			// Flag that input no longer valid
+			this.isParseFailure = true;
 
-			// Invalid request so close
-			context.setCloseConnection(true);
+			// Process failed parsing (close connection when response sent)
+			this.conversation.parseFailure(ex, true);
 		}
 	}
 
