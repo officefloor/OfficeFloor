@@ -30,15 +30,15 @@ import java.util.Map;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.http.HttpStatus;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.work.http.HttpException;
 
 /**
  * Loads the HTML FORM parameter values onto the corresponding properties of the
  * bean.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpHtmlFormToBeanTask
@@ -65,7 +65,7 @@ public class HttpHtmlFormToBeanTask
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param beanClass
 	 *            Class of the bean to load with values from HTML FORM.
 	 * @param aliasMappings
@@ -175,12 +175,12 @@ public class HttpHtmlFormToBeanTask
 
 		// Obtain the HTTP method and path
 		String method = request.getMethod().toUpperCase();
-		String path = request.getPath();
+		String path = request.getRequestURI();
 
 		// Obtain the body (expect body if POST so give greater capacity)
 		CharacterBuffer httpBody = new CharacterBuffer(
 				("POST".equals(method) ? 256 : 32));
-		InputStream body = request.getBody();
+		InputStream body = request.getBody().getInputStream();
 		try {
 			for (int value = body.read(); value != -1; value = body.read()) {
 				httpBody.append((char) value);

@@ -28,7 +28,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.HttpResponseSendTask;
@@ -38,7 +38,7 @@ import net.officefloor.plugin.work.http.html.template.HttpHtmlTemplateTask.HttpH
 
 /**
  * Tests the {@link HttpHtmlTemplateWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
@@ -229,7 +229,7 @@ public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the {@link Task} on the {@link WorkType}.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of {@link Task} on {@link WorkType} to execute.
 	 * @param work

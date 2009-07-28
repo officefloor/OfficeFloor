@@ -25,13 +25,13 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.work.http.HttpException;
 
 /**
  * HTTP HTML Template {@link Task}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpHtmlTemplateTask
@@ -57,7 +57,7 @@ public class HttpHtmlTemplateTask
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param isRequireBean
 	 *            Flag indicating if bean is required.
 	 * @param contents
@@ -88,7 +88,8 @@ public class HttpHtmlTemplateTask
 		Writer writer = null;
 		if (this.isRequireBean) {
 			bean = context.getObject(HttpHtmlTemplateTaskDependencies.BEAN);
-			writer = new OutputStreamWriter(response.getBody());
+			writer = new OutputStreamWriter(response.getBody()
+					.getOutputStream());
 		}
 
 		// Write the contents to the response

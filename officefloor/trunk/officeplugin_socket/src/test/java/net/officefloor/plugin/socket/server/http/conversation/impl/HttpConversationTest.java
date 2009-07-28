@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -107,6 +108,36 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.addRequest("GET", "/path", "HTTP/1.1", null);
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		writeUsAscii(response.getBody(), "TEST");
+		response.send();
+		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+	}
+
+	/**
+	 * Ensures that closing the {@link OutputBufferStream} body triggers sending
+	 * the {@link HttpResponse}.
+	 */
+	public void testInputBufferStreamCloseTriggersSend() throws IOException {
+		HttpManagedObject mo = this
+				.addRequest("GET", "/path", "HTTP/1.1", null);
+		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
+		writeUsAscii(response.getBody(), "TEST");
+
+		// Close body as should trigger sending response
+		response.getBody().close();
+		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+	}
+
+	/**
+	 * Ensures that closing the {@link OutputStream} body triggers sending the
+	 * {@link HttpResponse}.
+	 */
+	public void testInputStreamCloseTriggersSend() throws IOException {
+		HttpManagedObject mo = this
+				.addRequest("GET", "/path", "HTTP/1.1", null);
+		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
+		writeUsAscii(response.getBody(), "TEST");
+
+		// Close body as should trigger sending response
 		response.getBody().getOutputStream().close();
 		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
 	}
@@ -138,14 +169,14 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpResponse responseOne = moOne.getServerHttpConnection()
 				.getHttpResponse();
 		writeUsAscii(responseOne.getBody(), "ONE");
-		responseOne.getBody().getOutputStream().close();
+		responseOne.send();
 		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nONE");
 
 		// Ensure responds immediately to second request (as first sent)
 		HttpResponse responseTwo = moTwo.getServerHttpConnection()
 				.getHttpResponse();
 		writeUsAscii(responseTwo.getBody(), "TWO");
-		responseTwo.getBody().getOutputStream().close();
+		responseTwo.send();
 		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nTWO");
 	}
 
@@ -163,14 +194,14 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpResponse responseTwo = moTwo.getServerHttpConnection()
 				.getHttpResponse();
 		writeUsAscii(responseTwo.getBody(), "TWO");
-		responseTwo.getBody().getOutputStream().close();
+		responseTwo.send();
 		this.assertWireData(""); // no data as first response must be sent
 
 		// Send first response and ensure second also gets sent
 		HttpResponse responseOne = moOne.getServerHttpConnection()
 				.getHttpResponse();
 		writeUsAscii(responseOne.getBody(), "ONE");
-		responseOne.getBody().getOutputStream().close();
+		responseOne.send();
 		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nONE"
 				+ "HTTP/1.1 200 OK\nContent-Length: 3\n\nTWO");
 	}

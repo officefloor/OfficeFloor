@@ -22,12 +22,12 @@ import java.io.ByteArrayOutputStream;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpStatus;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.work.http.file.HttpFileTask;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
+import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependencies;
 
 /**
@@ -104,6 +104,10 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 	private void doTest(String path, String fileName, boolean isFileAvailable)
 			throws Throwable {
 
+		// Mocks
+		OutputBufferStream bodyOutputBufferStream = this
+				.createMock(OutputBufferStream.class);
+
 		// Obtain the package prefix and default index file name
 		String packagePrefix = this.getClass().getPackage().getName().replace(
 				'.', '/');
@@ -119,7 +123,8 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.httpRequest);
-		this.recordReturn(this.httpRequest, this.httpRequest.getPath(), path);
+		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
+				path);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.httpResponse);
 		if (!isFileAvailable) {
@@ -127,7 +132,9 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 			this.httpResponse.setStatus(HttpStatus._404);
 		}
 		this.recordReturn(this.httpResponse, this.httpResponse.getBody(),
-				this.body);
+				bodyOutputBufferStream);
+		this.recordReturn(bodyOutputBufferStream, bodyOutputBufferStream
+				.getOutputStream(), this.body);
 		this.httpResponse.send();
 
 		// Replay mocks

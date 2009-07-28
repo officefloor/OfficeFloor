@@ -17,19 +17,20 @@
  */
 package net.officefloor.plugin.work.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.impl.BufferStreamImpl;
+import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Mock {@link HttpResponse}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class MockHttpResponse implements HttpResponse {
@@ -57,7 +58,8 @@ public class MockHttpResponse implements HttpResponse {
 	/**
 	 * Body.
 	 */
-	private ByteArrayOutputStream body = new ByteArrayOutputStream();
+	private BufferStream body = new BufferStreamImpl(
+			new HeapByteBufferSquirtFactory(1024));
 
 	/**
 	 * Flag indicating if sent.
@@ -66,7 +68,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP status.
-	 * 
+	 *
 	 * @return HTTP status.
 	 */
 	public int getStatus() {
@@ -75,7 +77,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP status message.
-	 * 
+	 *
 	 * @return HTTP status message.
 	 */
 	public String getStatusMessage() {
@@ -84,7 +86,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP version.
-	 * 
+	 *
 	 * @return HTTP version.
 	 */
 	public String getVersion() {
@@ -93,7 +95,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the header value.
-	 * 
+	 *
 	 * @param name
 	 *            Header name.
 	 * @return Corresponding header value.
@@ -104,16 +106,27 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the body content.
-	 * 
+	 *
 	 * @return Body content.
 	 */
 	public byte[] getBodyContent() {
-		return this.body.toByteArray();
+		InputBufferStream input = this.body.getInputBufferStream();
+		int availableBytes = (int) input.available();
+		byte[] data = new byte[availableBytes];
+		try {
+			// Ensure read all data
+			TestCase.assertEquals("Failed obtaining body content",
+					availableBytes, input.read(data));
+		} catch (IOException ex) {
+			TestCase.fail("Should not fail on reading body data: "
+					+ ex.getMessage());
+		}
+		return data;
 	}
 
 	/**
 	 * Flags if this {@link HttpResponse} is sent.
-	 * 
+	 *
 	 * @return <code>true</code> if this {@link HttpResponse} is sent.
 	 */
 	public boolean isSent() {
@@ -124,98 +137,32 @@ public class MockHttpResponse implements HttpResponse {
 	 * =============== HttpResponse =========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int)
-	 */
 	@Override
 	public void setStatus(int status) {
 		this.status = status;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int,
-	 * java.lang.String)
-	 */
 	@Override
 	public void setStatus(int status, String statusMessage) {
 		this.status = status;
 		this.statusMessage = statusMessage;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setVersion
-	 * (java.lang.String)
-	 */
 	@Override
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#addHeader(
-	 * java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void addHeader(String name, String value) {
 		headers.setProperty(name, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#appendToBody
-	 * (java.nio.ByteBuffer)
-	 */
 	@Override
-	public void appendToBody(ByteBuffer content) {
-		try {
-			// Obtain the content
-			ByteBuffer buffer = content.duplicate();
-			if (buffer.position() > 0) {
-				buffer.flip();
-			}
-			byte[] data = new byte[buffer.limit()];
-			buffer.get(data);
-
-			// Write the content to body
-			this.body.write(data);
-			this.body.flush();
-
-		} catch (IOException ex) {
-			// Should not have failure
-			TestCase.fail("Failed to appendToBody by mock: " + ex.getMessage()
-					+ " [" + ex.getClass().getSimpleName() + "]");
-		}
+	public OutputBufferStream getBody() {
+		return this.body.getOutputBufferStream();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#getBody()
-	 */
-	@Override
-	public OutputStream getBody() {
-		return this.body;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#send()
-	 */
 	@Override
 	public void send() throws IOException {
 		this.isSent = true;

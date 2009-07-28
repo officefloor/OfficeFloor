@@ -28,10 +28,10 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.plugin.socket.server.http.HttpStatus;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.source.HttpStatus;
 import net.officefloor.plugin.work.http.HttpException;
 
 /**
@@ -90,7 +90,7 @@ public class HttpFileTask
 		HttpRequest request = connection.getHttpRequest();
 
 		// Obtain the path from the request
-		String path = request.getPath();
+		String path = request.getRequestURI();
 		int parameterStart = path.indexOf('?');
 		if (parameterStart > 0) {
 			// Obtain the path minus the parameters
@@ -129,11 +129,14 @@ public class HttpFileTask
 		if (content == null) {
 			// Item not found
 			response.setStatus(HttpStatus._404); // not found
-			new OutputStreamWriter(response.getBody()).append(
-					"Can not find resource " + requestPath).flush();
+			new OutputStreamWriter(response.getBody().getOutputStream())
+					.append("Can not find resource " + requestPath).flush();
 		} else {
+
+			// TODO cache file and append as ByteBuffer
+
 			// Return the file content as response
-			OutputStream responseBody = response.getBody();
+			OutputStream responseBody = response.getBody().getOutputStream();
 			for (int value = content.read(); value != -1; value = content
 					.read()) {
 				responseBody.write(value);

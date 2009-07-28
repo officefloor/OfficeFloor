@@ -26,14 +26,15 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.api.HttpRequest;
-import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
  * Tests the {@link HttpHtmlFormToBeanWorkSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpHtmlFormToBeanWorkSourceTest extends OfficeFrameTestCase {
@@ -82,6 +83,8 @@ public class HttpHtmlFormToBeanWorkSourceTest extends OfficeFrameTestCase {
 		final ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		final HttpRequest request = this.createMock(HttpRequest.class);
+		final InputBufferStream bodyInputBufferStream = this
+				.createMock(InputBufferStream.class);
 		final String VALUE = "VALUE";
 
 		// Load the work
@@ -104,9 +107,11 @@ public class HttpHtmlFormToBeanWorkSourceTest extends OfficeFrameTestCase {
 						connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getMethod(), "GET");
-		this.recordReturn(request, request.getPath(), "path?another=" + VALUE);
-		this.recordReturn(request, request.getBody(), new ByteArrayInputStream(
-				new byte[0]));
+		this.recordReturn(request, request.getRequestURI(), "path?another="
+				+ VALUE);
+		this.recordReturn(request, request.getBody(), bodyInputBufferStream);
+		this.recordReturn(bodyInputBufferStream, bodyInputBufferStream
+				.getInputStream(), new ByteArrayInputStream(new byte[0]));
 
 		// Run the task
 		this.replayMockObjects();

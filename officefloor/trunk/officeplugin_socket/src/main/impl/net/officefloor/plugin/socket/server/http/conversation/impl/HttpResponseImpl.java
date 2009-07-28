@@ -371,6 +371,12 @@ public class HttpResponseImpl implements HttpResponse {
 		return this.safeOutputBufferStream;
 	}
 
+	@Override
+	public void send() throws IOException {
+		// Close the body which triggers sending response
+		this.getBody().close();
+	}
+
 	/**
 	 * Response {@link OutputBufferStream}.
 	 */

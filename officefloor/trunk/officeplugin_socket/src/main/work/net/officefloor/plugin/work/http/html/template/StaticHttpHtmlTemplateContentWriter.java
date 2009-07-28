@@ -17,14 +17,15 @@
  */
 package net.officefloor.plugin.work.http.html.template;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 
-import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
  * {@link HttpHtmlTemplateContentWriter} to write static content.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StaticHttpHtmlTemplateContentWriter implements
@@ -37,29 +38,30 @@ public class StaticHttpHtmlTemplateContentWriter implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param staticContent
 	 *            Static content to write.
 	 */
 	public StaticHttpHtmlTemplateContentWriter(String staticContent) {
+
 		// Create byte buffer to contain the data
 		byte[] data = staticContent.getBytes();
-		this.content = ByteBuffer.allocateDirect(data.length);
-		this.content.put(data);
+		ByteBuffer buffer = ByteBuffer.allocateDirect(data.length);
+		buffer.put(data);
+		buffer.flip();
+
+		// Specify static content
+		this.content = buffer.asReadOnlyBuffer();
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.http.html.template.HttpHtmlTemplateContentWriter
-	 * #writeContent(java.lang.Object, java.io.Writer,
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse)
+	 * ========================= HttpHtmlTemplateContentWriter =============
 	 */
+
 	@Override
 	public void writeContent(Object bean, Writer httpBody,
-			HttpResponse httpResponse) {
-		httpResponse.appendToBody(this.content);
+			HttpResponse httpResponse) throws IOException {
+		httpResponse.getBody().append(this.content);
 	}
 
 }
