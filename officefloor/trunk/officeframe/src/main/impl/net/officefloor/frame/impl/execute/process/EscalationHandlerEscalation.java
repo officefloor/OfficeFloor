@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
@@ -39,7 +40,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * {@link EscalationFlow} for an {@link EscalationHandler}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class EscalationHandlerEscalation implements EscalationFlow {
@@ -56,11 +57,12 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @param team
-	 *            {@link Team} responsible to undertake the {@link EscalationFlow}.
+	 *            {@link Team} responsible to undertake the
+	 *            {@link EscalationFlow}.
 	 */
 	@SuppressWarnings("unchecked")
 	public EscalationHandlerEscalation(EscalationHandler escalationHandler,
@@ -86,7 +88,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 				new AdministratorMetaData[0], null,
 				new TaskMetaData[] { taskMetaData });
 		taskMetaData.loadRemainingState(workMetaData, new FlowMetaData[0],
-				null, null);
+				null, new EscalationProcedureImpl());
 
 		// Create the escalation flow meta-data
 		this.flowMetaData = new FlowMetaDataImpl<EscalationHandlerTask>(
@@ -95,7 +97,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * Obtains the {@link EscalationHandler}.
-	 * 
+	 *
 	 * @return {@link EscalationHandler}.
 	 */
 	public EscalationHandler getEscalationHandler() {
