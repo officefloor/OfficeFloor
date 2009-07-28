@@ -149,8 +149,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				.getInputBufferStream(), this.inputBufferStream);
 		this.parser.parse(this.inputBufferStream, tempBuffer);
 		this.control(this.parser).setThrowable(failure);
-		this.conversation.parseFailure(failure);
-		this.readContext.setCloseConnection(true);
+		this.conversation.parseFailure(failure, true);
 
 		// Replay mocks
 		this.replayMockObjects();

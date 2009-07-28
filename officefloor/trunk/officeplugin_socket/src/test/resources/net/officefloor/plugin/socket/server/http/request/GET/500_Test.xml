@@ -4,9 +4,10 @@
 	<communication>
 		<request method="GET" path="/path" />
 		<process close="true">
-            <exception>FAILED</exception>
-        </process>
-		<response status="500" message="Internal Server Error" closed="true">
+			<exception>FAILED</exception>
+		</process>
+		<response status="500" message="Internal Server Error"
+			closed="true">
 			<body>FAILED</body>
 		</response>
 	</communication>

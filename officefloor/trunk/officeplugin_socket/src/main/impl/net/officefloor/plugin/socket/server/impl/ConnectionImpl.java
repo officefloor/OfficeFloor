@@ -376,7 +376,7 @@ public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
 		}
 
 		@Override
-		public void close() {
+		public void close() throws IOException {
 			this.backingStream.close();
 			ConnectionImpl.this.cancel();
 		}

@@ -64,7 +64,7 @@ public class MockConnectionHandler implements ConnectionHandler {
 	 */
 
 	@Override
-	public void handleIdleConnection(IdleContext context) {
+	public void handleIdleConnection(IdleContext context) throws IOException {
 
 		// Handle close
 		if (this.isClose) {
@@ -92,7 +92,7 @@ public class MockConnectionHandler implements ConnectionHandler {
 	}
 
 	@Override
-	public void handleWrite(WriteContext context) {
+	public void handleWrite(WriteContext context) throws IOException {
 
 		// Handle close
 		if (this.isClose) {

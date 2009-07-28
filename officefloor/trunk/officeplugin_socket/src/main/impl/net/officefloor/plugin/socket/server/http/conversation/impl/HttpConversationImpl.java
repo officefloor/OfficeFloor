@@ -17,10 +17,14 @@
  */
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
@@ -45,6 +49,11 @@ public class HttpConversationImpl implements HttpConversation {
 	private final BufferSquirtFactory bufferSquirtFactory;
 
 	/**
+	 * {@link HttpManagedObjectImpl} instances.
+	 */
+	private final List<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
+
+	/**
 	 * Initiate.
 	 *
 	 * @param connection
@@ -56,6 +65,29 @@ public class HttpConversationImpl implements HttpConversation {
 			BufferSquirtFactory bufferSquirtFactory) {
 		this.connection = connection;
 		this.bufferSquirtFactory = bufferSquirtFactory;
+	}
+
+	/**
+	 * Sends complete {@link HttpResponse} instances.
+	 *
+	 * @throws IOException
+	 *             If fails to send complete {@link HttpResponse} instances.
+	 */
+	void sendCompleteResponses() throws IOException {
+		// Send the complete responses in order registered
+		for (Iterator<HttpManagedObjectImpl> iterator = this.managedObjects
+				.iterator(); iterator.hasNext();) {
+			HttpManagedObjectImpl managedObject = iterator.next();
+
+			// Attempt to send response
+			if (!managedObject.attemptSendResponse()) {
+				// Response not yet complete to send
+				return; // send no further responses
+			}
+
+			// Response sent, so remove managed object
+			iterator.remove();
+		}
 	}
 
 	/*
@@ -70,22 +102,38 @@ public class HttpConversationImpl implements HttpConversation {
 		HttpRequestImpl request = new HttpRequestImpl(method, requestURI,
 				httpVersion, headers, body);
 
-		// Create the corresponding response
-		HttpResponseImpl response = new HttpResponseImpl(this.connection,
-				this.bufferSquirtFactory, httpVersion);
+		// Create the corresponding response (keeping connection open)
+		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
+				this.bufferSquirtFactory, httpVersion, false);
 
-		// Create the http managed object
-		HttpManagedObject managedObject = new HttpManagedObjectImpl(request,
-				response);
+		// Create the HTTP managed object
+		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
+				request, response);
+
+		// Register the HTTP managed object
+		this.managedObjects.add(managedObject);
 
 		// Return the managed object
 		return managedObject;
 	}
 
 	@Override
-	public void parseFailure(ParseException failure) {
-		// TODO Implement HttpConversation.parseFailure
-		throw new UnsupportedOperationException("HttpConversation.parseFailure");
+	public void parseFailure(ParseException failure, boolean isCloseConnection)
+			throws IOException {
+
+		// Create response for parse failure
+		HttpResponseImpl response = new HttpResponseImpl(this, this.connection,
+				this.bufferSquirtFactory, "HTTP/1.0", isCloseConnection);
+
+		// Create the HTTP managed object
+		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
+				response);
+
+		// Register the HTTP managed object
+		this.managedObjects.add(managedObject);
+
+		// Send the failure
+		response.sendFailure(failure);
 	}
 
 }

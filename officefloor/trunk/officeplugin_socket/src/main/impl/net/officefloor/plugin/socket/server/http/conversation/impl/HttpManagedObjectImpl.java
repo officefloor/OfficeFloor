@@ -17,8 +17,11 @@
  */
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -43,7 +46,8 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	private final HttpResponseImpl response;
 
 	/**
-	 * Initiate.
+	 * Initiate to process the {@link HttpRequest} by populating the
+	 * {@link HttpResponse}.
 	 *
 	 * @param request
 	 *            {@link HttpRequestImpl}.
@@ -54,6 +58,39 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 			HttpResponseImpl response) {
 		this.request = request;
 		this.response = response;
+	}
+
+	/**
+	 * Initiate with {@link HttpResponse} ready to be sent.
+	 *
+	 * @param completedResponse
+	 *            {@link HttpResponse} ready to be sent.
+	 */
+	public HttpManagedObjectImpl(HttpResponseImpl completedResponse) {
+		this.request = null;
+		this.response = completedResponse;
+	}
+
+	/**
+	 * Sends the {@link HttpResponse} if it is completed.
+	 *
+	 * @return <code>true</code> if {@link HttpResponse} is completed and was
+	 *         added to the {@link Connection} output to be sent.
+	 * @throws IOException
+	 *             If fails to send the {@link HttpResponse}.
+	 */
+	boolean attemptSendResponse() throws IOException {
+		// Attempt to send the response
+		if (this.response.attemptSendResponse()) {
+			// Response sent, so clean up request (if available)
+			if (this.request != null) {
+				this.request.cleanup();
+			}
+			return true;
+		}
+
+		// Response not sent
+		return false;
 	}
 
 	/*
@@ -76,9 +113,9 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
-	public void cleanup() {
-		// TODO Implement HttpManagedObject.cleanup
-		throw new UnsupportedOperationException("HttpManagedObject.cleanup");
+	public void cleanup() throws IOException {
+		// Close the response to trigger sending it
+		this.response.getBody().close();
 	}
 
 	/*
@@ -86,7 +123,7 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	 */
 
 	@Override
-	public synchronized HttpRequest getHttpRequest() {
+	public HttpRequest getHttpRequest() {
 		return this.request;
 	}
 
@@ -101,8 +138,8 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
-		// Indicate failure on handling request
-		this.response.flagFailure(escalation);
+		// Send failure on handling request
+		this.response.sendFailure(escalation);
 	}
 
 }

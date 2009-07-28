@@ -19,8 +19,6 @@ package net.officefloor.plugin.socket.server.http.request;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -50,19 +48,19 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 
 /**
  * Runs requests against a started instance based on XML configuration.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Create the {@link TestSuite} of the tests to be run.
-	 * 
+	 *
 	 * @return {@link TestSuite} of tests to be run.
 	 */
 	public static Test suite() throws Exception {
 		// Create the test suite
-		TestSuite suite = new TestSuite();
+		TestSuite suite = new TestSuite(HttpRequestTest.class.getName());
 
 		try {
 
@@ -121,7 +119,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Loads the tests for the *Test.xml files.
-	 * 
+	 *
 	 * @param testNamePrefix
 	 *            Prefix for the test name.
 	 * @param directory
@@ -181,7 +179,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
 	 * @param testName
 	 *            Name of the test.
 	 * @param configuration
@@ -198,7 +196,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -310,20 +308,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 							+ "'", header.value, method.getResponseHeader(
 							header.name).getValue());
 				}
-
-				// Validate the body
-				Throwable exception = RequestWork.getException();
-				if (exception == null) {
-					// Ensure body matches
-					assertEquals("Incorrect response body", response.body,
-							actualResponseBody);
-				} else {
-					// Ensure exception reported
-					StringWriter exceptionBody = new StringWriter();
-					exception.printStackTrace(new PrintWriter(exceptionBody));
-					assertEquals("Incorrect response exception", exceptionBody
-							.toString(), actualResponseBody);
-				}
+				assertEquals("Incorrect response body", response.body,
+						actualResponseBody);
 
 			} finally {
 				// Release the method from the connection
@@ -331,4 +317,5 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			}
 		}
 	}
+
 }

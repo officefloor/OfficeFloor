@@ -117,7 +117,10 @@ public interface OutputBufferStream {
 
 	/**
 	 * Closes the stream releasing resources.
+	 *
+	 * @throws IOException
+	 *             If fails to close the {@link BufferStream}.
 	 */
-	void close();
+	void close() throws IOException;
 
 }

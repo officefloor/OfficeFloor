@@ -78,6 +78,14 @@ public class HttpRequestImpl implements HttpRequest {
 		this.body = body;
 	}
 
+	/**
+	 * Cleans up this {@link HttpRequest}.
+	 */
+	void cleanup() {
+		// Close the body to clean it up
+		this.body.close();
+	}
+
 	/*
 	 * ================ HttpRequest ================================
 	 */

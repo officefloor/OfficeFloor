@@ -17,8 +17,10 @@
  */
 package net.officefloor.plugin.socket.server.http.conversation;
 
+import java.io.IOException;
 import java.util.List;
 
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
@@ -55,7 +57,14 @@ public interface HttpConversation {
 	 *
 	 * @param failure
 	 *            Failure in parsing a {@link HttpRequest}.
+	 * @param isCloseConnection
+	 *            Flags to close the {@link Connection} once the
+	 *            {@link ParseException} has been processed.
+	 * @throws IOException
+	 *             If fails to write response regarding the
+	 *             {@link ParseException}.
 	 */
-	void parseFailure(ParseException failure);
+	void parseFailure(ParseException failure, boolean isCloseConnection)
+			throws IOException;
 
 }

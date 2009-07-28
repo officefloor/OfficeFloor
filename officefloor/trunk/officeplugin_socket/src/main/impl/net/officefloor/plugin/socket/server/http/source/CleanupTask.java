@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http.source;
 
+import java.io.IOException;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -35,7 +37,7 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 
 	@Override
 	public Object doTask(TaskContext<Work, None, None> context)
-			throws Throwable {
+			throws IOException {
 
 		// Flag to clean up the http managed object
 		HttpManagedObject managedObject = this
