@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.integrate.escalation;
 
+import java.io.IOException;
+
 import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -34,7 +36,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 /**
  * Validates that escalations of tasks is appropriately managed by the
  * {@link EscalationHandler} instances.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
@@ -115,6 +117,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object source
+		EscalationManagedObjectSource.reset(null);
 		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this
 				.constructManagedObject("MO",
 						EscalationManagedObjectSource.class);
@@ -162,6 +165,76 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
+	 * Ensures the {@link ManagedObjectSource} failure is handled by
+	 * {@link OfficeFloor} {@link EscalationHandler}.
+	 */
+	public void testManagedObjectEscalationFailure() throws Throwable {
+
+		// Create the escalation
+		Throwable escalation = new Throwable("Escalation");
+		IOException handleEscalation = new IOException("Handle Escalation");
+
+		// Obtain the name of the office
+		String officeName = this.getOfficeName();
+
+		// Construct the managed object source
+		EscalationManagedObjectSource.reset(handleEscalation);
+		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this
+				.constructManagedObject("MO",
+						EscalationManagedObjectSource.class);
+
+		// Flag managing office and invocation of flow
+		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
+				.setManagingOffice(officeName);
+		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+		managingOfficeBuilder.linkProcess(
+				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
+				"task");
+
+		// Construct the work
+		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+				"task");
+		workBuilder.buildTask("task", "TEAM").buildParameter();
+		this.constructTeam("TEAM", new PassiveTeam());
+
+		// Capture office floor escalation (from managed object source)
+		final Throwable[] officeFloorEscalation = new Throwable[1];
+		this.getOfficeFloorBuilder().setEscalationHandler(
+				new EscalationHandler() {
+					@Override
+					public void handleEscalation(Throwable escalation)
+							throws Throwable {
+						officeFloorEscalation[0] = escalation;
+					}
+				});
+
+		// Create and open the office
+		this.constructOfficeFloor().openOfficeFloor();
+
+		final String FLOW_ARGUMENT = "FLOW_ARGUMENT";
+
+		// Invoke processing from the managed object
+		EscalationManagedObjectSource.invokeProcessing(FLOW_ARGUMENT);
+
+		// Ensure argument passed to task
+		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT,
+				work.taskParameter);
+
+		// Ensure escalation is handled by managed object escalation handler
+		try {
+			EscalationManagedObjectSource.throwPossibleEscalation();
+			fail("Should have a managed object escalation");
+		} catch (Throwable ex) {
+			assertEquals("Incorrect escalation", escalation, ex);
+		}
+
+		// Ensure managed object source escalation handled by office floor
+		assertEquals("Incorrect handle escalation", handleEscalation,
+				officeFloorEscalation[0]);
+	}
+
+	/**
 	 * {@link Work} functionality to throw {@link Throwable} for escalation
 	 * handling.
 	 */
@@ -180,11 +253,11 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * Exception handled by the {@link Office}.
 		 */
-		public RuntimeException officeException;
+		public Exception officeException;
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param escalation
 		 *            Escalation to be thrown by the task.
 		 */
@@ -194,7 +267,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Task causing an escalation.
-		 * 
+		 *
 		 * @param parameter
 		 *            Argument passed from the {@link ManagedObjectSource}.
 		 * @throws Throwable
@@ -207,11 +280,11 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Provides for the {@link Office} {@link EscalationProcedure}.
-		 * 
+		 *
 		 * @param exception
 		 *            Failure to be handled.
 		 */
-		public void officeEscalation(RuntimeException exception) {
+		public void officeEscalation(Exception exception) {
 			this.officeException = exception;
 		}
 	}
