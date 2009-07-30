@@ -22,6 +22,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -39,10 +40,11 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Meta-data of the {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
@@ -122,7 +124,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
-	 * 
+	 *
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} bound within the
 	 *            {@link ManagedObjectScope}.
@@ -173,7 +175,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 	/**
 	 * Loads the remaining state of this {@link ManagedObjectMetaData}.
-	 * 
+	 *
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} of the {@link Office} containing this
 	 *            {@link ManagedObjectMetaData}.
@@ -243,6 +245,14 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
+	public <W extends Work> boolean isDependenciesReady(
+			WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet) {
+		return workContainer.isManagedObjectsReady(this.dependencyMapping,
+				jobContext, jobNode, activateSet);
+	}
+
+	@Override
 	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
 			WorkContainer<W> workContainer, ThreadState threadState) {
 		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping,
@@ -291,7 +301,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param managedObject
 		 *            {@link ManagedObject} to recycle.
 		 */

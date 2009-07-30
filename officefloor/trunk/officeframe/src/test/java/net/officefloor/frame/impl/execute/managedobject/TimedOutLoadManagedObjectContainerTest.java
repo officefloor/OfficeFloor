@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests timing out load of the {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TimedOutLoadManagedObjectContainerTest extends
@@ -36,7 +36,7 @@ public class TimedOutLoadManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -46,11 +46,14 @@ public class TimedOutLoadManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
 	protected void runTest() throws Throwable {
+
+		// Coordinate uses same check as isReady so using this to test Managed
+		// Object loaded.
 
 		// Record loading managed object (that is delayed)
 		this.record_MoContainer_init(Connection.class);
@@ -71,7 +74,7 @@ public class TimedOutLoadManagedObjectContainerTest extends
 
 		// Create the managed object container and attempt to load
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, false);
+		this.loadManagedObject(mo);
 
 		// Check if loaded but not yet loaded (likely checking as another
 		// managed object has woken up the job)

@@ -45,7 +45,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container of a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectContainerImpl implements ManagedObjectContainer,
@@ -122,7 +122,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Initiate the container.
-	 * 
+	 *
 	 * @param metaData
 	 *            Meta-data of the {@link ManagedObject}.
 	 * @param processState
@@ -152,15 +152,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Allows loading the {@link ManagedObject} directly when creating a
 	 * {@link ProcessState}.
-	 * 
+	 *
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 */
 	public void loadManagedObject(ManagedObject managedObject) {
 		synchronized (this.lock) {
 			// Flag managed object loaded
-			this.containerState = ManagedObjectContainerState.LOADING;
 			this.managedObject = managedObject;
+			this.containerState = ManagedObjectContainerState.LOADED;
 
 			try {
 				// Provide listener if asynchronous managed object
@@ -168,10 +168,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					((AsynchronousManagedObject) this.managedObject)
 							.registerAsynchronousCompletionListener(this);
 				}
-
-				// Obtain the Object
-				this.object = this.managedObject.getObject();
-
 			} catch (Throwable ex) {
 				// Flag failure to handle later when Job attempts to use it
 				this.setFailedState(new FailedToSourceManagedObjectEscalation(
@@ -186,7 +182,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param managedObject
 	 *            {@link ManagedObject} to be unloaded.
 	 * @param recycleJob
@@ -216,13 +212,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/*
 	 * =============== ManagedObjectContainer =============================
-	 * 
+	 *
 	 * Note: Synchronising of the methods is done by JobContainer holding a
 	 * ProcessState lock.
 	 */
 
 	@Override
-	public boolean loadManagedObject(JobContext executionContext,
+	public void loadManagedObject(JobContext executionContext,
 			JobNode jobNode, JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
@@ -257,10 +253,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				}
 
 			} catch (Throwable ex) {
-				// Flag in failed state
+				// Flag failed to source Managed Object
 				this.setFailedState(new FailedToSourceManagedObjectEscalation(
 						this.metaData.getObjectType(), ex), activateSet);
-
 			} finally {
 				// Ensure clear activate set
 				this.assetActivateSet = null;
@@ -278,19 +273,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			}
 
 		case LOADING:
+			// Loading triggered so continue on to coordinate
+			return;
+
 		case LOADED:
-			// Determine if loaded managed object
-			if (this.managedObject != null) {
-				// Managed object loaded
-				return true;
-
-			} else {
-				// Not loaded therefore wait for being loaded
-				this.sourcingMonitor.waitOnAsset(jobNode, activateSet);
-
-				// Waiting on managed object to be loaded
-				return false;
-			}
+		case COORDINATING:
+		case OBJECT_AVAILABLE:
+			// Managed Object loaded
+			return;
 
 		case UNLOADING:
 			// Should never be called in this state
@@ -306,14 +296,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void coordinateManagedObject(WorkContainer workContainer,
+	public boolean coordinateManagedObject(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
 			JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
 
-		// Always propagate any failure to the Job container to handle.
+		// Always propagate any failure to the Job container to handle
 		if (this.failure != null) {
 			throw this.failure;
 		}
@@ -326,14 +316,27 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					"loadManagedObject must be called before coordinateManagedObject");
 
 		case LOADING:
-			// Ensure have the managed object
-			if (this.managedObject == null) {
-				throw new IllegalStateException(
-						"Managed Object must be loaded before its coordinated");
-			}
+			// Still loading managed object so wait until loaded
+			this.sourcingMonitor.waitOnAsset(jobNode, activateSet);
+			return false;
 
-			// Determine if coordinating managed object
+		case LOADED:
+			// Determine if require coordinating Managed Object
 			if (this.metaData.isCoordinatingManagedObject()) {
+
+				// Ensure the dependencies are ready for coordination
+				if (!this.metaData.isDependenciesReady(workContainer,
+						executionContext, jobNode, activateSet)) {
+					// Dependencies must be ready before coordinating
+					return false;
+				}
+
+				// Ensure this managed object is ready
+				if (!this.checkManagedObjectReady(executionContext, jobNode,
+						activateSet, ManagedObjectContainerState.LOADED)) {
+					// This object must be ready before coordinating it
+					return false;
+				}
 
 				// Obtain the thread state
 				ThreadState threadState = jobNode.getFlow().getThreadState();
@@ -356,13 +359,34 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				}
 			}
 
-			// Flag that now loaded and coordinated
-			this.containerState = ManagedObjectContainerState.LOADED;
-			break;
+			// Flag that now coordinating managed object
+			this.containerState = ManagedObjectContainerState.COORDINATING;
 
-		case LOADED:
-			// Do nothing as already coordinated
-			break;
+		case COORDINATING:
+
+			// Wait until managed object ready
+			if (!this.checkManagedObjectReady(executionContext, jobNode,
+					activateSet, ManagedObjectContainerState.COORDINATING)) {
+				// Must be ready before obtaining the object
+				return false;
+			}
+
+			try {
+				// Obtain the object
+				this.object = this.managedObject.getObject();
+			} catch (Throwable ex) {
+				// Flag in failed state
+				this.setFailedState(new FailedToSourceManagedObjectEscalation(
+						this.metaData.getObjectType(), ex), activateSet);
+				throw this.failure;
+			}
+
+			// Flag that object available
+			this.containerState = ManagedObjectContainerState.OBJECT_AVAILABLE;
+
+		case OBJECT_AVAILABLE:
+			// Object available and coordinated
+			return true;
 
 		case UNLOADING:
 			// Should never be called in this state
@@ -388,6 +412,29 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			throw this.failure;
 		}
 
+		// Return check on ready (object must be available)
+		return this.checkManagedObjectReady(executionContext, jobNode,
+				activateSet, ManagedObjectContainerState.OBJECT_AVAILABLE);
+	}
+
+	/**
+	 * Checks that the {@link ManagedObject} is ready.
+	 *
+	 * @param executionContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param expectedContainerState
+	 *            Should the {@link ManagedObject} be ready it is illegal for it
+	 *            to be in any other state other than this one.
+	 * @return <code>true</code> if the {@link ManagedObject} is ready.
+	 */
+	private boolean checkManagedObjectReady(JobContext executionContext,
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ManagedObjectContainerState expectedContainerState) {
+
 		// Handle based on state
 		switch (this.containerState) {
 		case NOT_LOADED:
@@ -397,6 +444,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		case LOADING:
 		case LOADED:
+		case COORDINATING:
+		case OBJECT_AVAILABLE:
 
 			// Determine if not sourced or asynchronous
 			if ((this.managedObject == null)
@@ -446,7 +495,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				return false;
 			}
 
-			// If here then ready
+			// Ready so should be in expected container state
+			if (this.containerState != expectedContainerState) {
+				throw new IllegalStateException(
+						"Ready but in wrong container state [expected "
+								+ expectedContainerState + ", actual "
+								+ this.containerState + "]");
+			}
+
+			// Ready for use
 			return true;
 
 		case UNLOADING:
@@ -514,6 +571,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		// Unload the managed object
 		this.unloadManagedObject(this.managedObject, this.recycleJobNode);
+
+		// Release reference to managed object to not unload again
+		this.managedObject = null;
 	}
 
 	/*
@@ -605,7 +665,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						"loadManagedObject must be called before setManagedObject");
 
 			case LOADING:
-			case LOADED:
 				// Determine if already loaded
 				if (this.managedObject != null) {
 					// Discard managed object as already loaded
@@ -614,8 +673,23 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					return; // discarded, nothing further
 				}
 
-				// Load the managed object and flag no longer waiting to source
+				// Ensure have the managed object
+				if (managedObject == null) {
+					// Flag no managed object provided
+					this.setFailedState(
+							new FailedToSourceManagedObjectEscalation(
+									this.metaData.getObjectType(),
+									new NullPointerException(
+											"No ManagedObject provided")),
+							activateSet);
+
+					// Allow load/isReady methods to propagate failure
+					return;
+				}
+
+				// Flag loaded and no longer waiting to source
 				this.managedObject = managedObject;
+				this.containerState = ManagedObjectContainerState.LOADED;
 				this.asynchronousStartTime = NO_ASYNC_OPERATION;
 
 				try {
@@ -624,10 +698,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						((AsynchronousManagedObject) this.managedObject)
 								.registerAsynchronousCompletionListener(this);
 					}
-
-					// Obtain the object
-					this.object = this.managedObject.getObject();
-
 				} catch (Throwable ex) {
 					// Flag in failed state
 					this.setFailedState(
@@ -646,6 +716,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Activate jobs waiting to source permanently
 				this.sourcingMonitor.activateJobNodes(activateSet, true);
 
+				break;
+
+			case LOADED:
+			case COORDINATING:
+			case OBJECT_AVAILABLE:
+				// Discard the managed object as already have a Managed Object
+				this.unloadManagedObject(managedObject, this.metaData
+						.createRecycleJobNode(managedObject));
 				break;
 
 			case UNLOADING:
@@ -731,7 +809,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Sets the {@link ManagedObjectContainer} into a failed state and makes the
 	 * {@link AssetMonitor} instances aware.
-	 * 
+	 *
 	 * @param failure
 	 *            Failure.
 	 * @param activateSet
@@ -764,19 +842,32 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		NOT_LOADED,
 
 		/**
-		 * Indicates that loading (or has loaded) the {@link ManagedObject}.
+		 * Indicates that loading the {@link ManagedObject} from the
+		 * {@link ManagedObjectSource}.
 		 */
 		LOADING,
 
 		/**
-		 * Indicates that loaded and coordinated the {@link ManagedObject}.
+		 * Indicates that {@link ManagedObject} has been obtained from the
+		 * {@link ManagedObjectSource}.
 		 */
 		LOADED,
 
 		/**
+		 * Indicates coordinating the {@link ManagedObject}.
+		 */
+		COORDINATING,
+
+		/**
+		 * Indicates that the {@link Object} from the {@link ManagedObject} is
+		 * available.
+		 */
+		OBJECT_AVAILABLE,
+
+		/**
 		 * Indicates the {@link ManagedObject} is being unloaded.
 		 */
-		UNLOADING,
+		UNLOADING
 	}
 
 }

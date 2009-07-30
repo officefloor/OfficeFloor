@@ -24,14 +24,14 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container managing a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectContainer {
 
 	/**
-	 * Loads the {@link ManagedObject}.
-	 * 
+	 * Triggers loading the {@link ManagedObject}.
+	 *
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
@@ -40,17 +40,15 @@ public interface ManagedObjectContainer {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
-	 * @return <code>true</code> if the {@link ManagedObject} was loaded,
-	 *         otherwise <code>false</code> indicating that the {@link JobNode}
-	 *         is waiting on the {@link ManagedObject} to be loaded.
 	 */
-	boolean loadManagedObject(JobContext jobContext, JobNode jobNode,
+	void loadManagedObject(JobContext jobContext, JobNode jobNode,
 			JobNodeActivateSet activateSet);
 
 	/**
 	 * Allows this {@link ManagedObject} to coordinate with the other
-	 * {@link ManagedObject} instances.
-	 * 
+	 * {@link ManagedObject} instances. Also handles completion of loading the
+	 * {@link ManagedObject} and obtaining the {@link Object}.
+	 *
 	 * @param workContainer
 	 *            {@link WorkContainer} to source the other
 	 *            {@link ManagedObject} instances.
@@ -62,21 +60,20 @@ public interface ManagedObjectContainer {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @return <code>true</code> if the {@link ManagedObject} was coordinated.
+	 *         <code>false</code> indicates this method must be called again for
+	 *         the {@link ManagedObject} to be coordinated.
 	 */
-	<W extends Work> void coordinateManagedObject(
+	<W extends Work> boolean coordinateManagedObject(
 			WorkContainer<W> workContainer, JobContext jobContext,
 			JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
 	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
-	 * {@link ManagedObject}:
-	 * <ol>
-	 * <li>is loaded, and</li>
-	 * <li>is not currently involved within an asynchronous operation (in other
-	 * words the {@link AsynchronousManagedObject} completed execution and ready
-	 * for another operation)</li>
-	 * </ol>
-	 * 
+	 * {@link ManagedObject} is not currently involved within an asynchronous
+	 * operation (in other words the {@link AsynchronousManagedObject} completed
+	 * execution and ready for another operation).
+	 *
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
@@ -94,7 +91,7 @@ public interface ManagedObjectContainer {
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param threadState
 	 *            {@link ThreadState} of thread requiring the object.
 	 * @return Object being managed by the {@link ManagedObject}.
@@ -105,7 +102,7 @@ public interface ManagedObjectContainer {
 	 * Obtains the {@link ManagedObject} or <code>null</code> if it is not
 	 * loaded. This allows for access to the extension interfaces of the
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @param threadState
 	 *            {@link ThreadState} requiring the {@link ManagedObject}.
 	 * @return {@link ManagedObject} or <code>null</code> if it is not loaded.
@@ -114,7 +111,7 @@ public interface ManagedObjectContainer {
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.

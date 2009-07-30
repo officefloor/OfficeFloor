@@ -62,7 +62,7 @@ import org.easymock.MockControl;
 
 /**
  * {@link TestCase} providing additional helper functions.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class OfficeFrameTestCase extends TestCase {
@@ -83,7 +83,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		try {
 			Method testMethod = this.getClass().getMethod(this.getName());
 			if (testMethod.getAnnotation(StressTest.class) != null) {
-				isStressTest = true; // is s stress test
+				isStressTest = true; // is stress test
 			}
 		} catch (Throwable ex) {
 			// Ignore and not consider a stress test
@@ -105,7 +105,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Displays the graph of objects starting at root.
-	 * 
+	 *
 	 * @param root
 	 *            Root of graph to display.
 	 */
@@ -116,7 +116,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Displays the graph of objects starting at root ignoring following
 	 * verticies by the input method names.
-	 * 
+	 *
 	 * @param root
 	 *            Root of graph to display.
 	 * @param ignoreMethodNames
@@ -132,7 +132,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Displays the graph of objects starting at root.
-	 * 
+	 *
 	 * @param root
 	 *            Root of graph to display.
 	 * @param displayedObjects
@@ -245,7 +245,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts the input texts match taking into account platform differences.
-	 * 
+	 *
 	 * @param message
 	 *            Message.
 	 * @param expected
@@ -262,7 +262,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Creates the platform independent text for comparing.
-	 * 
+	 *
 	 * @param text
 	 *            Raw text.
 	 * @return Platform independent text.
@@ -275,7 +275,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input graph is as expected.
-	 * 
+	 *
 	 * @param O
 	 *            Type of root object for graph.
 	 * @param expectedRoot
@@ -290,7 +290,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input graph is as expected.
-	 * 
+	 *
 	 * @param O
 	 *            Type of root object for graph.
 	 * @param expectedRoot
@@ -327,7 +327,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param object
 		 *            Object being checked.
 		 */
@@ -360,7 +360,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input graph is as expected.
-	 * 
+	 *
 	 * @param O
 	 *            Type of root object for graph.
 	 * @param expectedRoot
@@ -507,7 +507,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input collection is as expected.
-	 * 
+	 *
 	 * @param O
 	 *            Type of root object for graph.
 	 * @param expected
@@ -548,7 +548,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts the contents of the input {@link File} instances are the same.
-	 * 
+	 *
 	 * @param expected
 	 *            Expected file.
 	 * @param actual
@@ -563,7 +563,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts the contents of the input {@link Reader} instances are the same.
-	 * 
+	 *
 	 * @param expected
 	 *            Expected content.
 	 * @param actual
@@ -588,7 +588,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that the input list is as expected.
-	 * 
+	 *
 	 * @param matcher
 	 *            Matches the items of the list.
 	 * @param list
@@ -611,7 +611,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that the input list equals the expected.
-	 * 
+	 *
 	 * @param list
 	 *            List to be checked.
 	 * @param expectedItems
@@ -627,7 +627,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that properties on items within list match.
-	 * 
+	 *
 	 * @param methods
 	 *            Method names to specify the properties on the items to match.
 	 * @param list
@@ -651,7 +651,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that properties on items within the array match.
-	 * 
+	 *
 	 * @param methods
 	 *            Method names to specify the properties on the items to match.
 	 * @param array
@@ -667,7 +667,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within list match after the list is
 	 * sorted.
-	 * 
+	 *
 	 * @param sortMethod
 	 *            Name of method on the items to sort the list by to ensure
 	 *            match in order.
@@ -704,7 +704,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on the input objects match for the specified
 	 * methods.
-	 * 
+	 *
 	 * @param expected
 	 *            Expected item.
 	 * @param actual
@@ -723,7 +723,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the property on the Object.
-	 * 
+	 *
 	 * @param object
 	 *            Object.
 	 * @param methodName
@@ -769,7 +769,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the item within the items whose property by methodName matches
 	 * the input value.
-	 * 
+	 *
 	 * @param items
 	 *            Items to search.
 	 * @param methodName
@@ -819,7 +819,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Initiate allowing specifying name of test.
-	 * 
+	 *
 	 * @param name
 	 *            Test name.
 	 */
@@ -829,7 +829,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Specifies to provide verbose output to aid in debugging.
-	 * 
+	 *
 	 * @param isVerbose
 	 *            <code>true</code> to turn on verbose output.
 	 */
@@ -840,7 +840,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates a mock object registering the {@link MockControl}of the mock
 	 * object with registry for management.
-	 * 
+	 *
 	 * @param classToMock
 	 *            {@link Class} to be mocked.
 	 * @return Mock object.
@@ -870,7 +870,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates a mock object that synchronises on its {@link MockControl} before
 	 * making any method calls.
-	 * 
+	 *
 	 * @param interfaceToMock
 	 *            {@link Class} to mock.
 	 * @return Mock object.
@@ -903,7 +903,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Registers the object and its {@link MockControl}to be managed.
-	 * 
+	 *
 	 * @param object
 	 *            Mock object.
 	 * @param mockControl
@@ -916,7 +916,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the {@link MockControl} for the input mock object.
-	 * 
+	 *
 	 * @param mockObject
 	 *            Mock object of the {@link MockControl}.
 	 * @return Registered {@link MockControl}.
@@ -927,7 +927,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Convenience method to record a method and its return on a mock object.
-	 * 
+	 *
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore
@@ -970,7 +970,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Convenience method to record a method, an {@link ArgumentsMatcher} and
 	 * return value.
-	 * 
+	 *
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore
@@ -1021,7 +1021,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the file at the relative path.
-	 * 
+	 *
 	 * @param relativePath
 	 *            Relative path to the file.
 	 * @return {@link File}.
@@ -1059,7 +1059,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the file by the input file name located in the package of the
 	 * input class.
-	 * 
+	 *
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
 	 * @param fileName
@@ -1082,7 +1082,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Obtains the file location of the input file located in the package of the
 	 * input class.
-	 * 
+	 *
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
 	 * @param fileName
@@ -1095,7 +1095,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Creates the input directory.
-	 * 
+	 *
 	 * @param directory
 	 *            Directory to be cleared.
 	 */
@@ -1117,7 +1117,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Deletes the input directory.
-	 * 
+	 *
 	 * @param directory
 	 *            Directory to be deleted.
 	 */
@@ -1143,7 +1143,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Copies the contents of the <code>source</code> directory to the
 	 * <code>target</code> directory.
-	 * 
+	 *
 	 * @param source
 	 *            Source directory.
 	 * @param target
@@ -1194,7 +1194,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * the package of the input class.
 	 * <p>
 	 * Note: this also searches the class path for the file.
-	 * 
+	 *
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
 	 * @param fileName
@@ -1223,7 +1223,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the relative path of the package of the class.
-	 * 
+	 *
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
 	 * @return Relative path of class's package.
@@ -1238,7 +1238,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the contents of the output file.
-	 * 
+	 *
 	 * @param file
 	 *            File to obtain contents from.
 	 * @return Contents of the output file.
@@ -1275,7 +1275,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Creates the target file with the content.
-	 * 
+	 *
 	 * @param content
 	 *            Content for the file.
 	 * @param target
@@ -1302,7 +1302,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Facade helper function for invoking {@link Thread#sleep(long)}.
-	 * 
+	 *
 	 * @param time
 	 *            Sleep time in seconds.
 	 */
@@ -1316,7 +1316,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Facade method to timeout operations after 3 seconds.
-	 * 
+	 *
 	 * @param startTime
 	 *            Start time from {@link System#currentTimeMillis()}.
 	 */
@@ -1326,7 +1326,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Facade method to timeout operations after a second.
-	 * 
+	 *
 	 * @param startTime
 	 *            Start time from {@link System#currentTimeMillis()}.
 	 * @param millisecondsToRun
@@ -1340,7 +1340,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Determines if printing messages.
-	 * 
+	 *
 	 * @return <code>true</code> to print messages.
 	 */
 	private boolean isPrintMessages() {
@@ -1357,7 +1357,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * running for functionality the stress tests can reduce turn around time
 	 * and subsequently the effectiveness of the tests. This is therefore
 	 * provided to maintain effectiveness of unit tests.
-	 * 
+	 *
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	private boolean isIgnoreStressTests() {
@@ -1398,7 +1398,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains the memory size in human readable form.
-	 * 
+	 *
 	 * @param memorySize
 	 *            Memory size in bytes.
 	 * @return Memory size in human readable form.
@@ -1422,7 +1422,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Obtains run time in human readable form.
-	 * 
+	 *
 	 * @param startTime
 	 *            Start time of running.
 	 * @return Run time in human readable form.
@@ -1447,7 +1447,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Prints a message regarding the test.
-	 * 
+	 *
 	 * @param message
 	 *            Message to be printed.
 	 */
@@ -1465,7 +1465,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Prints a message regarding the test.
-	 * 
+	 *
 	 * @param message
 	 *            Message to be printed.
 	 * @throws IOException
@@ -1477,7 +1477,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Prints a message regarding the test.
-	 * 
+	 *
 	 * @param message
 	 *            Message to be printed.
 	 * @throws IOException

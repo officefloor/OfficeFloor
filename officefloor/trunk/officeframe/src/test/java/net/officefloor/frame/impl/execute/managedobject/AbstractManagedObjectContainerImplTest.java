@@ -56,7 +56,7 @@ import org.easymock.MockControl;
 
 /**
  * Contains functionality for testing the {@link ManagedObjectContainerImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractManagedObjectContainerImplTest extends
@@ -64,7 +64,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Creates all meta-data combinations for the input {@link TestCase} class.
-	 * 
+	 *
 	 * @param testCaseClass
 	 *            {@link AbstractManagedObjectContainerImplTest} class.
 	 * @param filters
@@ -162,7 +162,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		/**
 		 * Indicates if to filter out the scenario.
-		 * 
+		 *
 		 * @param isAsynchronous
 		 *            Is {@link AsynchronousManagedObject}.
 		 * @param isCoordinating
@@ -387,7 +387,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records sourcing the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param isSourced
 	 *            Indicates if the {@link ManagedObject} is sourced.
 	 * @param failure
@@ -456,11 +456,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				long currentTime = System.currentTimeMillis();
 				this.recordReturn(this.jobContext, this.jobContext.getTime(),
 						currentTime);
-
-				// Record waiting to source the managed object
-				this.recordReturn(this.sourcingAssetMonitor,
-						this.sourcingAssetMonitor.waitOnAsset(this.jobNode,
-								this.jobActivateSet), true);
 			}
 		}
 	}
@@ -468,16 +463,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Records setting the {@link ManagedObject} on the
 	 * {@link ManagedObjectUser}.
-	 * 
+	 *
 	 * @param isInLoadScope
-	 *            Flag indicating if set within
-	 *            {@link ManagedObjectContainer#loadManagedObject(JobContext, JobNode, JobNodeActivateSet)}
-	 *            method.
-	 * @param object
-	 *            Object of the {@link ManagedObject}.
+	 *            Flag indicating if {@link ManagedObject} set immediately (in
+	 *            other words not at a later time).
 	 */
-	protected void record_MoUser_setManagedObject(boolean isInLoadScope,
-			Object object) {
+	protected void record_MoUser_setManagedObject(boolean isInLoadScope) {
 
 		// Indicate if asynchronous
 		this.recordReturn(this.managedObjectMetaData,
@@ -487,14 +478,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.managedObject.registerAsynchronousCompletionListener(null);
 			this.control(this.managedObject).setMatcher(
 					new TypeMatcher(ManagedObjectContainerImpl.class));
-		}
-
-		// Obtain the object
-		try {
-			this.recordReturn(this.managedObject, this.managedObject
-					.getObject(), object);
-		} catch (Throwable ex) {
-			fail("Should not have exception: " + ex.getMessage());
 		}
 
 		// Indicates if recycled
@@ -541,19 +524,62 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
+	 * Records coordinating {@link ManagedObject} that is still loading.
+	 */
+	protected void record_MoContainer_coordinateManagedObject_stillLoading() {
+		this.recordReturn(this.sourcingAssetMonitor, this.sourcingAssetMonitor
+				.waitOnAsset(this.jobNode, this.jobActivateSet), true);
+	}
+
+	/**
 	 * Records coordinating the {@link CoordinatingManagedObject}.
-	 * 
-	 * @param isCoordinating
-	 *            Flag indicating if coordinating.
+	 *
 	 * @param coordinateFailure
+	 *            Failure in coordinating.
+	 * @param object
+	 *            Object from the {@link ManagedObject}.
 	 */
 	protected void record_MoContainer_coordinateManagedObject(
-			Throwable coordinateFailure) {
+			boolean isDependenciesReady, boolean isManagedObjectReady,
+			Throwable coordinateFailure, Object object) {
+
+		// Determine if coordinating Managed Object
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.isCoordinatingManagedObject(),
-				isCoordinating);
-		if (isCoordinating) {
-			// Coordinating so record coordination
+				this.isCoordinating);
+		if (this.isCoordinating) {
+			// Coordinating so determine if dependencies ready
+			this.recordReturn(this.managedObjectMetaData,
+					this.managedObjectMetaData.isDependenciesReady(
+							this.workContainer, this.jobContext, this.jobNode,
+							this.jobActivateSet), isDependenciesReady);
+			if (!isDependenciesReady) {
+				// Dependencies not ready so no further processing
+				return;
+			}
+
+			// Dependencies ready so ensure Managed Object ready
+			this.recordReturn(this.managedObjectMetaData,
+					this.managedObjectMetaData.isManagedObjectAsynchronous(),
+					this.isAsynchronous);
+			if (!isManagedObjectReady) {
+				assertTrue(
+						"Managed Object can only not be ready if asynchronous",
+						this.isAsynchronous);
+				// Never time out but not ready
+				this.recordReturn(this.jobContext, this.jobContext.getTime(),
+						System.currentTimeMillis());
+				this
+						.recordReturn(this.managedObjectMetaData,
+								this.managedObjectMetaData.getTimeout(),
+								Long.MAX_VALUE);
+				this.recordReturn(this.operationsAssetMonitor,
+						this.operationsAssetMonitor.waitOnAsset(this.jobNode,
+								this.jobActivateSet), true);
+				return; // Not ready so no further processing
+			}
+
+			// Ready so coordinate Managed Object
 			this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
 			this.recordReturn(this.flow, this.flow.getThreadState(),
 					this.threadState);
@@ -564,12 +590,26 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			try {
 				this.managedObject.loadObjects(this.objectRegistry);
 			} catch (Throwable ex) {
-				fail("Should not have exception: " + ex.getMessage());
+				fail("Exception while recording: " + ex.getMessage());
 			}
 			if (coordinateFailure != null) {
 				this.control(this.managedObject)
 						.setThrowable(coordinateFailure);
 			}
+		}
+
+		// For testing always ready after coordinating
+		// TODO test not ready after coordinating
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.isManagedObjectAsynchronous(),
+				this.isAsynchronous);
+
+		// Obtain the object
+		try {
+			this.recordReturn(this.managedObject, this.managedObject
+					.getObject(), object);
+		} catch (Throwable ex) {
+			fail("Should not have exception: " + ex.getMessage());
 		}
 	}
 
@@ -584,7 +624,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Records the checking the particular state of the
 	 * {@link ManagedObjectContainer}.
-	 * 
+	 *
 	 * @param readyState
 	 *            {@link ReadyState}.
 	 */
@@ -636,7 +676,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records whether {@link ManagedObject} is ready.
-	 * 
+	 *
 	 * @param isSourced
 	 *            Indicates if {@link ManagedObject} sourced.
 	 * @param isInAsyncOperation
@@ -759,7 +799,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records a check on the {@link ManagedObjectContainer} {@link Asset}.
-	 * 
+	 *
 	 * @param timeout
 	 *            Timeout for the {@link ManagedObject}.
 	 */
@@ -770,7 +810,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records unloading the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param isUnload
 	 *            <code>true</code> indicates that the {@link ManagedObject}
 	 *            requires unloading.
@@ -812,7 +852,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Creates the {@link ManagedObjectContainer}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectContainer}.
 	 */
 	protected ManagedObjectContainer createManagedObjectContainer() {
@@ -822,34 +862,35 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Loads the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
-	 * @param isExpectedLoaded
-	 *            If indicates should be loaded.
 	 */
-	protected void loadManagedObject(ManagedObjectContainer mo,
-			boolean isExpectedLoaded) {
-		boolean isLoaded = mo.loadManagedObject(this.jobContext, this.jobNode,
-				this.jobActivateSet);
-		assertEquals("Incorrect indicating if loaded", isExpectedLoaded,
-				isLoaded);
+	protected void loadManagedObject(ManagedObjectContainer mo) {
+		mo
+				.loadManagedObject(this.jobContext, this.jobNode,
+						this.jobActivateSet);
 	}
 
 	/**
 	 * Coordinates the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
+	 * @param isExpectedCoordinate
+	 *            Indicates if should be coordinated.
 	 */
-	protected void coordinateManagedObject(ManagedObjectContainer mo) {
-		mo.coordinateManagedObject(this.workContainer, this.jobContext,
-				this.jobNode, this.jobActivateSet);
+	protected void coordinateManagedObject(ManagedObjectContainer mo,
+			boolean isExpectedCoordinate) {
+		boolean isCoordinated = mo.coordinateManagedObject(this.workContainer,
+				this.jobContext, this.jobNode, this.jobActivateSet);
+		assertEquals("Incorrect indicating if coordinated",
+				isExpectedCoordinate, isCoordinated);
 	}
 
 	/**
 	 * Checks if the {@link ManagedObject} is ready.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param isExpectedReady
@@ -864,7 +905,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -874,7 +915,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Sets the {@link ManagedObject} on the {@link ManagedObjectUser}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param object
@@ -888,7 +929,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Sets the failure on the {@link ManagedObjectUser}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param failure
@@ -902,7 +943,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Obtains the Object of the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @return Object of the {@link ManagedObject}.
@@ -921,7 +962,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Asserts the object of the {@link ManagedObject} is correct.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param expectedObject
@@ -936,7 +977,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Notifies the {@link AsynchronousListener} that started asynchronous
 	 * operation.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -948,7 +989,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Notifies the {@link AsynchronousListener} that completed asynchronous
 	 * operation.
-	 * 
+	 *
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -959,7 +1000,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Asserts the correct {@link Escalation} returning the {@link Escalation}.
-	 * 
+	 *
 	 * @param propagate
 	 *            {@link PropagateEscalationError}.
 	 * @param escalationType
@@ -986,7 +1027,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Asserts the correct {@link ManagedObjectEscalation} returning the cause
 	 * of the {@link ManagedObjectEscalation}.
-	 * 
+	 *
 	 * @param propagate
 	 *            {@link PropagateEscalationError}.
 	 * @param escalationType
@@ -1013,7 +1054,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Obtains the current time.
-	 * 
+	 *
 	 * @param millisecondsInFuture
 	 *            Time to be added to current time for return.
 	 * @return Current time.

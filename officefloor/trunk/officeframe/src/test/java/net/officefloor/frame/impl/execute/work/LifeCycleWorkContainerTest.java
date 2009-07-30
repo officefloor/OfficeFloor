@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 
 /**
  * Tests life cycle of the {@link WorkContainer}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
@@ -92,7 +92,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		WorkContainer<?> work = this.createWorkContainer();
 
 		// Should fail to obtain managed object container before loaded
-		this.loadManagedObjects(work, true, moWork, moThread, moProcess);
+		this.loadManagedObjects(work, moWork, moThread, moProcess);
 		this.coordinateManagedObject(work, moWork, moThread, moProcess);
 		this.isManagedObjectsReady(work, true, moWork, moThread, moProcess);
 
@@ -198,7 +198,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		WorkContainer<?> work = this.createWorkContainer();
 
 		// Task one initialising its managed objects
-		this.loadManagedObjects(work, true, taskOneManagedObjects);
+		this.loadManagedObjects(work, taskOneManagedObjects);
 		this.coordinateManagedObject(work, taskOneManagedObjects);
 		this.isManagedObjectsReady(work, true, taskOneManagedObjects);
 
@@ -206,7 +206,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.administerManagedObjects(work);
 
 		// Task two initialising its managed objects
-		this.loadManagedObjects(work, true, taskTwoManagedObjects);
+		this.loadManagedObjects(work, taskTwoManagedObjects);
 		this.coordinateManagedObject(work, taskTwoManagedObjects);
 		this.isManagedObjectsReady(work, true, taskTwoManagedObjects);
 

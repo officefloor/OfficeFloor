@@ -23,7 +23,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 
 /**
  * Tests simple life-cycle of the {@link ManagedObjectContainer}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class LifeCycleManagedObjectContainerTest extends
@@ -31,7 +31,7 @@ public class LifeCycleManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -41,7 +41,7 @@ public class LifeCycleManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -52,8 +52,9 @@ public class LifeCycleManagedObjectContainerTest extends
 		// Record loading managed object
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
-		this.record_MoUser_setManagedObject(true, object);
-		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_coordinateManagedObject(true, true, null,
+				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 		this.record_MoContainer_unloadManagedObject(true);
 
@@ -62,8 +63,8 @@ public class LifeCycleManagedObjectContainerTest extends
 
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, true);
-		this.coordinateManagedObject(mo);
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
 		this.unloadManagedObject(mo);

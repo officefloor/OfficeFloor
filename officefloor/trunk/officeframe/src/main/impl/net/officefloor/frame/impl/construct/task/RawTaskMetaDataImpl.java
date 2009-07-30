@@ -19,9 +19,11 @@ package net.officefloor.frame.impl.construct.task;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -36,10 +38,10 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -60,11 +62,12 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Task}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
@@ -72,7 +75,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Obtains the {@link RawTaskMetaDataFactory}.
-	 * 
+	 *
 	 * @return {@link RawTaskMetaDataFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -102,7 +105,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param configuration
@@ -129,7 +132,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	@Override
 	public <w extends Work, d extends Enum<d>, f extends Enum<f>> RawTaskMetaData<w, d, f> constructRawTaskMetaData(
 			TaskConfiguration<w, d, f> configuration, OfficeFloorIssues issues,
-			RawWorkMetaData<w> rawWorkMetaData) {
+			final RawWorkMetaData<w> rawWorkMetaData) {
 
 		// Obtain the task name
 		String taskName = configuration.getTaskName();
@@ -163,8 +166,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			return null; // no team
 		}
 
-		// Keep track of all the required managed object indexes
-		Set<ManagedObjectIndex> requiredManagedObjectIndexes = new HashSet<ManagedObjectIndex>();
+		// Keep track of all the required managed objects
+		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>>();
 
 		// Obtain the managed objects used directly by this task.
 		// Also obtain the parameter type for the task if specified.
@@ -247,7 +250,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 			// Specify index for task translation and load required indexes
 			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(
-					scopeMo, requiredManagedObjectIndexes);
+					scopeMo, requiredManagedObjects);
 		}
 
 		// Obtain the duties for this task
@@ -255,42 +258,33 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				.createTaskDutyAssociations(configuration
 						.getPreTaskAdministratorDutyConfiguration(),
 						rawWorkMetaData, issues, taskName, true,
-						requiredManagedObjectIndexes);
+						requiredManagedObjects);
 		TaskDutyAssociation<?>[] postTaskDuties = this
 				.createTaskDutyAssociations(configuration
 						.getPostTaskAdministratorDutyConfiguration(),
 						rawWorkMetaData, issues, taskName, false,
-						requiredManagedObjectIndexes);
+						requiredManagedObjects);
 
-		// Create the listing of required managed object indexes
-		ManagedObjectIndex[] requiredManagedObjects = new ManagedObjectIndex[requiredManagedObjectIndexes
+		// Create the required managed object indexes
+		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects
 				.size()];
 		int i = 0;
-		for (ManagedObjectIndex requiredManagedObject : requiredManagedObjectIndexes) {
-			requiredManagedObjects[i++] = requiredManagedObject;
+		for (ManagedObjectIndex requiredManagedObjectIndex : requiredManagedObjects
+				.keySet()) {
+			requiredManagedObjectIndexes[i++] = requiredManagedObjectIndex;
 		}
 
-		// Order to provide work, thread then process managed object loading.
-		// This stops deadlock/starvation as retrieval will now be ordered.
-		Arrays.sort(requiredManagedObjects,
-				new Comparator<ManagedObjectIndex>() {
-					@Override
-					public int compare(ManagedObjectIndex a,
-							ManagedObjectIndex b) {
-						int comparison = a.getManagedObjectScope().ordinal()
-								- b.getManagedObjectScope().ordinal();
-						if (comparison == 0) {
-							comparison = a.getIndexOfManagedObjectWithinScope()
-									- b.getIndexOfManagedObjectWithinScope();
-						}
-						return comparison;
-					}
-				});
+		// Sort the required managed objects
+		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes,
+				requiredManagedObjects, taskName, issues)) {
+			// Must be able to sort to allow coordination
+			return null;
+		}
 
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
 				taskName, taskFactory, parameterType, team,
-				requiredManagedObjects, taskToWorkMoTranslations,
+				requiredManagedObjectIndexes, taskToWorkMoTranslations,
 				preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data
@@ -301,31 +295,32 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * Recursively loads all the {@link ManagedObjectIndex} instances for the
 	 * {@link RawBoundManagedObjectMetaData}.
-	 * 
+	 *
 	 * @param boundMo
 	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param requiredManagedObjectIndexes
-	 *            {@link Set} maintaining the unique {@link ManagedObjectIndex}
-	 *            instances required by the {@link Task}.
+	 * @param requiredManagedObjects
+	 *            Mapping of the required {@link ManagedObjectIndex} instances
+	 *            by the {@link Task} to their respective
+	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @return {@link ManagedObjectIndex} of the input
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
 	private <d extends Enum<d>> ManagedObjectIndex loadRequiredManagedObjects(
 			RawBoundManagedObjectMetaData<d> boundMo,
-			Set<ManagedObjectIndex> requiredManagedObjectIndexes) {
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects) {
 
 		// Obtain the bound managed object index
 		ManagedObjectIndex boundMoIndex = boundMo.getManagedObjectIndex();
-		if (!requiredManagedObjectIndexes.contains(boundMoIndex)) {
+		if (!requiredManagedObjects.containsKey(boundMoIndex)) {
 
 			// Not yet required, so add and include all its dependencies
-			requiredManagedObjectIndexes.add(boundMoIndex);
+			requiredManagedObjects.put(boundMoIndex, boundMo);
 			RawBoundManagedObjectMetaData<?>[] dependencies = boundMo
 					.getDependencies();
 			if (dependencies != null) {
 				for (RawBoundManagedObjectMetaData<?> dependency : dependencies) {
 					this.loadRequiredManagedObjects(dependency,
-							requiredManagedObjectIndexes);
+							requiredManagedObjects);
 				}
 			}
 		}
@@ -336,7 +331,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Creates the {@link TaskDutyAssociation} instances.
-	 * 
+	 *
 	 * @param configurations
 	 *            {@link TaskDutyConfiguration} instances.
 	 * @param rawWorkMetaData
@@ -345,17 +340,20 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 *            {@link OfficeFloorIssues}.
 	 * @param isPreNotPost
 	 *            Flag indicating if pre {@link Task}.
-	 * @param requiredManagedObjectIndexes
-	 *            {@link Set} maintaining the unique {@link ManagedObjectIndex}
-	 *            instances required by the {@link Task}.
+	 * @param requiredManagedObjects
+	 *            Mapping of the required {@link ManagedObjectIndex} instances
+	 *            by the {@link Task} to their respective
+	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @return {@link TaskDutyAssociation} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	private TaskDutyAssociation<?>[] createTaskDutyAssociations(
 			TaskDutyConfiguration<?>[] configurations,
-			RawWorkMetaData<?> rawWorkMetaData, OfficeFloorIssues issues,
-			String taskName, boolean isPreNotPost,
-			Set<ManagedObjectIndex> requiredManagedObjectIndexes) {
+			RawWorkMetaData<?> rawWorkMetaData,
+			OfficeFloorIssues issues,
+			String taskName,
+			boolean isPreNotPost,
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
 		List<TaskDutyAssociation<?>> taskDuties = new LinkedList<TaskDutyAssociation<?>>();
@@ -421,7 +419,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			for (RawBoundManagedObjectMetaData<?> administeredManagedObject : scopeAdmin
 					.getAdministeredRawBoundManagedObjects()) {
 				this.loadRequiredManagedObjects(administeredManagedObject,
-						requiredManagedObjectIndexes);
+						requiredManagedObjects);
 			}
 
 			// Create and add the task duty association
@@ -432,6 +430,138 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		// Return the task duty associations
 		return taskDuties.toArray(new TaskDutyAssociation[0]);
+	}
+
+	/**
+	 * <p>
+	 * Sorts the required {@link ManagedObjectIndex} instances for the
+	 * {@link Task} so that dependency {@link ManagedObject} instances are
+	 * before the {@link ManagedObject} instances using them. In essence this is
+	 * a topological sort so that dependencies are first.
+	 * <p>
+	 * This is necessary for coordinating so that dependencies are coordinated
+	 * before the {@link ManagedObject} instances using them are coordinated.
+	 *
+	 * @param requiredManagedObjectIndexes
+	 *            Listing of required {@link ManagedObject} instances to be
+	 *            sorted.
+	 * @param requiredManagedObjects
+	 *            Mapping of the {@link ManagedObjectIndex} to its
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param taskName
+	 *            Name of {@link Task} to issues.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return <code>true</code> indicating that able to sort.
+	 *         <code>false</code> indicates unable to sort, possible because of
+	 *         cyclic dependencies.
+	 */
+	private boolean sortRequiredManagedObjects(
+			ManagedObjectIndex[] requiredManagedObjectIndexes,
+			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects,
+			String taskName, OfficeFloorIssues issues) {
+
+		// Initially sort by scope and index
+		Arrays.sort(requiredManagedObjectIndexes,
+				new Comparator<ManagedObjectIndex>() {
+					@Override
+					public int compare(ManagedObjectIndex a,
+							ManagedObjectIndex b) {
+						int value = a.getManagedObjectScope().ordinal()
+								- b.getManagedObjectScope().ordinal();
+						if (value == 0) {
+							value = a.getIndexOfManagedObjectWithinScope()
+									- b.getIndexOfManagedObjectWithinScope();
+						}
+						return value;
+					}
+				});
+
+		// Create the set of dependencies for each required managed object
+		final Map<ManagedObjectIndex, Set<ManagedObjectIndex>> dependencies = new HashMap<ManagedObjectIndex, Set<ManagedObjectIndex>>();
+		for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
+
+			// Obtain the managed object for index
+			RawBoundManagedObjectMetaData<?> managedObject = requiredManagedObjects
+					.get(index);
+
+			// Load the dependencies
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>>();
+			RawTaskMetaDataImpl.this.loadRequiredManagedObjects(managedObject,
+					moDependencies);
+
+			// Register the dependencies for the index
+			dependencies.put(index, new HashSet<ManagedObjectIndex>(
+					moDependencies.keySet()));
+		}
+
+		try {
+			// Sort so dependencies are first (detecting cyclic dependencies)
+			Arrays.sort(requiredManagedObjectIndexes,
+					new Comparator<ManagedObjectIndex>() {
+						@Override
+						public int compare(ManagedObjectIndex a,
+								ManagedObjectIndex b) {
+
+							// Obtain the dependencies
+							Set<ManagedObjectIndex> aDep = dependencies.get(a);
+							Set<ManagedObjectIndex> bDep = dependencies.get(b);
+
+							// Determine dependency relationship
+							boolean isAdepB = bDep.contains(a);
+							boolean isBdepA = aDep.contains(b);
+
+							// Compare based on relationship
+							if (isAdepB && isBdepA) {
+								// Cyclic dependency
+								String[] names = new String[2];
+								names[0] = requiredManagedObjects.get(a)
+										.getBoundManagedObjectName();
+								names[1] = requiredManagedObjects.get(b)
+										.getBoundManagedObjectName();
+								Arrays.sort(names);
+								throw new CyclicDependencyException(
+										"Can not have cyclic dependencies ("
+												+ names[0] + ", " + names[1]
+												+ ")");
+							} else if (isAdepB) {
+								// A dependent on B, so B must come first
+								return -1;
+							} else if (isBdepA) {
+								// B dependent on A, so A must come first
+								return 1;
+							} else {
+								// No dependency relationship (same)
+								return 0;
+							}
+						}
+					});
+		} catch (CyclicDependencyException ex) {
+			// Register issue that cyclic dependency
+			issues.addIssue(AssetType.TASK, taskName, ex.getMessage());
+
+			// Not sorted as cyclic dependency
+			return false;
+		}
+
+		// As here must be sorted
+		return true;
+	}
+
+	/**
+	 * Thrown to indicate a cyclic dependency.
+	 */
+	private static class CyclicDependencyException extends RuntimeException {
+
+		/**
+		 * Initiate.
+		 *
+		 * @param message
+		 *            Initiate with description for {@link OfficeFloorIssues}.
+		 */
+		public CyclicDependencyException(String message) {
+			super(message);
+		}
 	}
 
 	/*

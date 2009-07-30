@@ -51,7 +51,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknown
 
 /**
  * Raw {@link ManagedObjectMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
@@ -60,7 +60,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaDataFactory}.
-	 * 
+	 *
 	 * @return {@link RawManagedObjectMetaDataFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -122,7 +122,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceConfiguration
@@ -434,6 +434,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 					AssetType.MANAGED_OBJECT, scope + ":" + boundName,
 					"operations", issues);
 		}
+
+		// TODO ensure dependencyMappings appends not directly used to end
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(

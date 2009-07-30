@@ -48,7 +48,7 @@ import net.officefloor.frame.spi.team.Team;
 /**
  * Abstract implementation of the {@link Job} that provides the additional
  * {@link JobNode} functionality.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
@@ -84,7 +84,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param flow
 	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
@@ -113,7 +113,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Overridden by specific container to execute the {@link Job}.
-	 * 
+	 *
 	 * @return Parameter for the next {@link Job}.
 	 * @throws Throwable
 	 *             If failure in executing the {@link Job}.
@@ -236,60 +236,45 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						} else {
 							// Within process lock, ensure managed objects ready
 							synchronized (processState.getProcessLock()) {
-								boolean isJustLoaded = false;
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
 									// Load the managed objects
-									boolean isAllLoaded = this.workContainer
+									this.workContainer
 											.loadManagedObjects(
 													this.requiredManagedObjects,
 													executionContext, this,
 													activateSet);
 
 									// Flag Managed Objects are being loaded
-									this.jobState = JobState.ENSURE_MANAGED_OBJECTS_LOADED;
+									this.jobState = JobState.COORDINATE_MANAGED_OBJECTS;
 
-									// Determine if managed objects are loaded
-									if (!isAllLoaded) {
-										// Wakened up when loaded
-										return true;
-									}
-
-									// Flag all just loaded
-									isJustLoaded = true;
-
-								case ENSURE_MANAGED_OBJECTS_LOADED:
-									// Must check ready if not just loaded
-									if (!isJustLoaded) {
-										// Ensure managed objects are ready
-										if (!this.workContainer
-												.isManagedObjectsReady(
-														this.requiredManagedObjects,
-														executionContext, this,
-														activateSet)) {
-											// Wakened up when ready
-											return true;
-										}
-									}
-
-									// Coordinate the managed objects
-									this.workContainer
+								case COORDINATE_MANAGED_OBJECTS:
+									// Coordinate the managed objects.
+									// (Handles managed objects not ready)
+									boolean isCoordinated = this.workContainer
 											.coordinateManagedObjects(
 													this.requiredManagedObjects,
 													executionContext, this,
 													activateSet);
 
+									// Determine if managed objects coordinated
+									if (!isCoordinated) {
+										// Woken when ready to coordinate again
+										return true;
+									}
+
 									// Flag Managed Objects are coordinated
 									this.jobState = JobState.EXECUTE_JOB;
 
 								default:
-									// Ensure managed objects are ready
+									// Ensure managed objects are ready.
+									// Coordinating cause asynchronous operation
 									if (!this.workContainer
 											.isManagedObjectsReady(
 													this.requiredManagedObjects,
 													executionContext, this,
 													activateSet)) {
-										// Wakened up when ready
+										// Woken up when ready
 										return true;
 									}
 								}
@@ -565,7 +550,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Completes this {@link Job}.
-	 * 
+	 *
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
 	 */
@@ -587,7 +572,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Indicates if the graph of parallel {@link JobNode} instances from this
 	 * {@link JobNode}are complete.
-	 * 
+	 *
 	 * @return <code>true</code> if the {@link JobNode} is not complete and this
 	 *         {@link JobNode} should release the
 	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
@@ -612,7 +597,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * Passive teams may complete the {@link JobNode} immediately on
 	 * {@link Team#assignJob(Job)} and hence processing of this {@link JobNode}
 	 * should continue.
-	 * 
+	 *
 	 * @param parallelJob
 	 *            Parallel {@link JobNode} to check if complete.
 	 * @return <code>true</code> if the {@link JobNode} is not complete and this
@@ -649,7 +634,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Obtains the parallel {@link JobNode} to execute.
-	 * 
+	 *
 	 * @return Parallel {@link JobNode} to execute.
 	 */
 	private JobNode getParallelJobNodeToExecute() {
@@ -673,7 +658,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Obtains the next {@link JobNode} to execute.
-	 * 
+	 *
 	 * @return Next {@link JobNode} to execute.
 	 */
 	private JobNode getNextJobNodeToExecute() {
@@ -708,7 +693,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/*
 	 * ======================= JobExecuteContext ==========================
-	 * 
+	 *
 	 * All methods will be guarded by lock taken in the doJob method.
 	 * Furthermore the JobContext methods do not require synchronised
 	 * coordination between themselves as executing a task is single threaded.
@@ -775,7 +760,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Creates an {@link EscalationFlow} {@link JobNode} from the input
 	 * {@link FlowMetaData}.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -805,7 +790,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates an asynchronous {@link Flow} from the input {@link FlowMetaData}.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -837,7 +822,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates a parallel {@link Flow} from the input {@link FlowMetaData}.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -868,7 +853,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates a sequential {@link Flow} from the input {@link FlowMetaData}.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -896,7 +881,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Loads a sequential {@link JobNode} relative to this {@link JobNode}
 	 * within the tree of {@link JobNode} instances.
-	 * 
+	 *
 	 * @param sequentialJobNode
 	 *            {@link JobNode} to load to tree.
 	 */
@@ -917,7 +902,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Loads a parallel {@link JobNode} relative to this {@link JobNode} within
 	 * the tree of {@link JobNode} instances.
-	 * 
+	 *
 	 * @param parallelJobNode
 	 *            {@link JobNode} to load to tree.
 	 */
@@ -1084,10 +1069,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		LOAD_MANAGED_OBJECTS,
 
 		/**
-		 * Indicates to check that all required {@link ManagedObject} instances
-		 * are loaded.
+		 * Indicates the {@link ManagedObject} instances require coordinating.
 		 */
-		ENSURE_MANAGED_OBJECTS_LOADED,
+		COORDINATE_MANAGED_OBJECTS,
 
 		/**
 		 * Indicates the {@link Job} is to be executed.
@@ -1140,7 +1124,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param flowAsset
 		 *            {@link FlowAsset} that this {@link JobNode} is to join on.
 		 * @param timeout
@@ -1182,7 +1166,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param flowFuture
 		 *            Actual {@link FlowFuture}.
 		 */

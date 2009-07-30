@@ -43,7 +43,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container of a {@link Work} instance.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
@@ -72,11 +72,13 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param work
 	 *            {@link Work} to be managed.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
+	 * @param processState
+	 *            {@link ProcessState}.
 	 */
 	@SuppressWarnings("unchecked")
 	public WorkContainerImpl(W work, WorkMetaData<W> workMetaData,
@@ -105,14 +107,11 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public boolean loadManagedObjects(
-			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet notifySet) {
+	public void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			JobContext jobContext, JobNode jobNode, JobNodeActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
-
-		boolean isAllLoaded = true;
 
 		// Obtain the states
 		ThreadState threadState = jobNode.getFlow().getThreadState();
@@ -152,17 +151,13 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 						+ index.getManagedObjectScope());
 			}
 
-			// Load the managed object
-			isAllLoaded &= container.loadManagedObject(jobContext, jobNode,
-					notifySet);
+			// Trigger loading the managed object
+			container.loadManagedObject(jobContext, jobNode, notifySet);
 		}
-
-		// Return whether all loaded
-		return isAllLoaded;
 	}
 
 	@Override
-	public void coordinateManagedObjects(
+	public boolean coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
 			JobNode jobNode, JobNodeActivateSet notifySet) {
 
@@ -200,10 +195,15 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 						+ index.getManagedObjectScope());
 			}
 
-			// Coordinate the managed object
-			container.coordinateManagedObject(this, jobContext, jobNode,
-					notifySet);
+			// Do not continue onto next unless coordinated
+			if (!container.coordinateManagedObject(this, jobContext, jobNode,
+					notifySet)) {
+				return false;
+			}
 		}
+
+		// As here, all managed objects are coordinated
+		return true;
 	}
 
 	@Override

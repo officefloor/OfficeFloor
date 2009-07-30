@@ -25,7 +25,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 /**
  * Tests duplicate calls to the {@link ManagedObjectContainer} when re-used
  * across {@link ProcessState}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DuplicateCallsManagedObjectContainerTest extends
@@ -33,7 +33,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -43,7 +43,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -54,8 +54,9 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		// Record loading managed object (each should only be run once)
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
-		this.record_MoUser_setManagedObject(true, object);
-		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_coordinateManagedObject(true, true, null,
+				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 		this.record_MoContainer_unloadManagedObject(true);
 
@@ -66,16 +67,16 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
 
 		// Attempt to load twice (with only first taking effect)
-		this.loadManagedObject(mo, true);
-		this.loadManagedObject(mo, true);
+		this.loadManagedObject(mo);
+		this.loadManagedObject(mo);
 
 		// Attempt to coordinate twice (with only first taking effect)
-		this.coordinateManagedObject(mo);
-		this.coordinateManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
+		this.coordinateManagedObject(mo, true);
 
 		// Attempt another load, coordinate that should do nothing
-		this.loadManagedObject(mo, true);
-		this.coordinateManagedObject(mo);
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
 
 		// Should be ready and working
 		this.isManagedObjectReady(mo, true);
