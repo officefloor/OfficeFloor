@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests failure as {@link Throwable} thrown on sourcing {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class FailedThrowLoadManagedObjectContainerTest extends
@@ -36,7 +36,7 @@ public class FailedThrowLoadManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -46,7 +46,7 @@ public class FailedThrowLoadManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -73,7 +73,7 @@ public class FailedThrowLoadManagedObjectContainerTest extends
 
 		try {
 			// Loading managed object fails
-			this.loadManagedObject(mo, true);
+			this.loadManagedObject(mo);
 			fail("Should fail on loading object");
 		} catch (PropagateEscalationError ex) {
 			// Ensure correct error

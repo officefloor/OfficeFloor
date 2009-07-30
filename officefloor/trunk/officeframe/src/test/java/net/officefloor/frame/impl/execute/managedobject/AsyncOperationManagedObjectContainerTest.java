@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 
 /**
  * Tests {@link AsynchronousManagedObject} doing asynchronous operations.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AsyncOperationManagedObjectContainerTest extends
@@ -32,7 +32,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -52,7 +52,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -63,8 +63,9 @@ public class AsyncOperationManagedObjectContainerTest extends
 		// Record making the managed object available
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
-		this.record_MoUser_setManagedObject(true, object);
-		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_coordinateManagedObject(true, true, null,
+				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 
 		// Record under taking an asynchronous operation
@@ -88,8 +89,8 @@ public class AsyncOperationManagedObjectContainerTest extends
 
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, true);
-		this.coordinateManagedObject(mo);
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
 

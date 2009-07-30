@@ -23,7 +23,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObjectIndex} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectIndexImpl implements ManagedObjectIndex {
@@ -40,7 +40,7 @@ public class ManagedObjectIndexImpl implements ManagedObjectIndex {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope}.
 	 * @param indexOfManagedObjectWithinScope
@@ -57,26 +57,31 @@ public class ManagedObjectIndexImpl implements ManagedObjectIndex {
 	 * ========================= ManagedObjectIndex ===========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectIndex#
-	 * getManagedObjectScope()
-	 */
 	@Override
 	public ManagedObjectScope getManagedObjectScope() {
 		return this.managedObjectScope;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectIndex#
-	 * getIndexOfManagedObjectWithinScope()
-	 */
 	@Override
 	public int getIndexOfManagedObjectWithinScope() {
 		return this.indexOfManagedObjectWithinScope;
+	}
+
+	/*
+	 * ========================= Object ===========================
+	 */
+
+	@Override
+	public String toString() {
+		// Provide details of index
+		StringBuilder text = new StringBuilder();
+		text.append(this.getClass().getSimpleName());
+		text.append("[");
+		text.append(this.managedObjectScope.toString());
+		text.append(":");
+		text.append(this.indexOfManagedObjectWithinScope);
+		text.append("]");
+		return text.toString();
 	}
 
 }

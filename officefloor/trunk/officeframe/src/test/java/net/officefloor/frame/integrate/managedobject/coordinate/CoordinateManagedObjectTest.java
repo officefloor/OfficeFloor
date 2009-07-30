@@ -34,7 +34,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 
 /**
  * Tests coordinating of {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class CoordinateManagedObjectTest extends
@@ -62,7 +62,12 @@ public class CoordinateManagedObjectTest extends
 		String officeName = this.getOfficeName();
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
+		// Construct the coordinating managed object
+		this.constructManagedObject("coordinate",
+				CoordinatingManagedObjectSource.class, officeName);
+
 		// Construct the managed objects
+		// (Constructed after coordinating to ensure dependency ordering)
 		this.constructManagedObject(workOne, "workOne", officeName);
 		this.constructManagedObject(workTwo, "workTwo", officeName);
 		this.constructManagedObject(threadOne, "threadOne", officeName);
@@ -73,10 +78,6 @@ public class CoordinateManagedObjectTest extends
 		officeBuilder.addProcessManagedObject("processOne", "processOne");
 		this.constructManagedObject(processTwo, "processTwo", officeName);
 		officeBuilder.addProcessManagedObject("processTwo", "processTwo");
-
-		// Construct the coordinating managed object
-		this.constructManagedObject("coordinate",
-				CoordinatingManagedObjectSource.class, officeName);
 
 		// Construct work to obtain the coordinating managed object
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
@@ -235,7 +236,7 @@ public class CoordinateManagedObjectTest extends
 
 		/**
 		 * Task to obtain the {@link CoordinatingMo}.
-		 * 
+		 *
 		 * @param mo
 		 *            {@link CoordinatingMo}.
 		 */

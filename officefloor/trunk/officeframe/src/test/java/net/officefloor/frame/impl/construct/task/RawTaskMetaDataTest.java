@@ -64,7 +64,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link RawTaskMetaDataImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends Enum<F>>
@@ -512,24 +512,93 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure able to link in {@link ManagedObject} dependency.
+	 * Ensure able to construct with a single {@link ManagedObject} that has no
+	 * dependencies or administration.
 	 */
-	public void testManagedObjectDependency() {
+	public void testManagedObject() {
 
 		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
+
+		// Work required Managed Object
+		final RawBoundManagedObjectMetaData<?> rawMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> mo = this
+				.createMock(RawManagedObjectMetaData.class);
+		final ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+
+		// Record
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Object.class);
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
+		this.recordReturn(moConfiguration, moConfiguration
+				.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getScopeManagedObjectMetaData("MO"), rawMo);
+		this.recordReturn(rawMo, rawMo.getRawManagedObjectMetaData(), mo);
+		this.recordReturn(mo, mo.getObjectType(), Connection.class);
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencies(), null);
+		this.record_NoAdministration();
+		// Record dependency sorting
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencies(), null);
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure have the required managed object
+		ManagedObjectIndex[] requiredManagedObjects = metaData
+				.getTaskMetaData().getRequiredManagedObjects();
+		assertEquals("Incorrect number of managed objects", 1,
+				requiredManagedObjects.length);
+		assertEquals("Incorrect required managed object", moIndex,
+				requiredManagedObjects[0]);
+
+		// Ensure can translate
+		assertEquals("Incorrect task managed object", moIndex, metaData
+				.getTaskMetaData().translateManagedObjectIndexForWork(0));
+	}
+
+	/**
+	 * Ensure able to order {@link ManagedObject} dependencies so that
+	 * dependencies come first (required for coordinating).
+	 */
+	public void testManagedObjectDependencyOrdering() {
+
+		final TaskObjectConfiguration<?> moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
+
+		// Work required Managed Object
 		final RawBoundManagedObjectMetaData<?> rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final RawManagedObjectMetaData<?, ?> workMo = this
 				.createMock(RawManagedObjectMetaData.class);
 		final ManagedObjectIndex workMoIndex = new ManagedObjectIndexImpl(
 				ManagedObjectScope.THREAD, 0);
-		final RawBoundManagedObjectMetaData<?> dependencyWorkMo = this
+
+		// Dependency of the work required Managed Object
+		final RawBoundManagedObjectMetaData<?> dependencyMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final ManagedObjectIndex dependencyMoIndex = new ManagedObjectIndexImpl(
 				ManagedObjectScope.THREAD, 1);
 
-		// Record unknown managed object
+		// Dependency of the dependency Managed Object
+		final RawBoundManagedObjectMetaData<?> dependencyDependency = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex dependencyDependencyIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.PROCESS, 0);
+
+		// Record
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration, this.configuration
 				.getObjectConfiguration(),
@@ -546,34 +615,142 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(rawWorkMo, rawWorkMo.getRawManagedObjectMetaData(),
 				workMo);
 		this.recordReturn(workMo, workMo.getObjectType(), Connection.class);
+		// Work to dependency
 		this.recordReturn(rawWorkMo, rawWorkMo.getManagedObjectIndex(),
 				workMoIndex);
 		this.recordReturn(rawWorkMo, rawWorkMo.getDependencies(),
-				new RawBoundManagedObjectMetaData[] { dependencyWorkMo });
-		this.recordReturn(dependencyWorkMo, dependencyWorkMo
-				.getManagedObjectIndex(), dependencyMoIndex);
-		this.recordReturn(dependencyWorkMo, dependencyWorkMo.getDependencies(),
-				null);
+				new RawBoundManagedObjectMetaData[] { dependencyMo });
+		// Dependency to its dependency
+		this.recordReturn(dependencyMo, dependencyMo.getManagedObjectIndex(),
+				dependencyMoIndex);
+		this.recordReturn(dependencyMo, dependencyMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { dependencyDependency });
+		// Dependency dependency with no dependencies
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getManagedObjectIndex(), dependencyDependencyIndex);
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getDependencies(), null);
 		this.record_NoAdministration();
+		// Record dependency sorting
+		// -> Work and its dependencies
+		this.recordReturn(rawWorkMo, rawWorkMo.getManagedObjectIndex(),
+				workMoIndex);
+		this.recordReturn(rawWorkMo, rawWorkMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { dependencyMo });
+		this.recordReturn(dependencyMo, dependencyMo.getManagedObjectIndex(),
+				dependencyMoIndex);
+		this.recordReturn(dependencyMo, dependencyMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { dependencyDependency });
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getManagedObjectIndex(), dependencyDependencyIndex);
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getDependencies(), null);
+		// -> Dependency and its dependencies
+		this.recordReturn(dependencyMo, dependencyMo.getManagedObjectIndex(),
+				dependencyMoIndex);
+		this.recordReturn(dependencyMo, dependencyMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { dependencyDependency });
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getManagedObjectIndex(), dependencyDependencyIndex);
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getDependencies(), null);
+		// -> Dependency dependency with no dependencies
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getManagedObjectIndex(), dependencyDependencyIndex);
+		this.recordReturn(dependencyDependency, dependencyDependency
+				.getDependencies(), null);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
 		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
-		// Ensure have managed object
+		// Ensure have managed objects with dependency first
 		ManagedObjectIndex[] requiredManagedObjects = metaData
 				.getTaskMetaData().getRequiredManagedObjects();
-		assertEquals("Should have managed objects", 2,
+		assertEquals("Incorrect number of managed objects", 3,
 				requiredManagedObjects.length);
-		assertEquals("Incorrect required managed object", workMoIndex,
-				requiredManagedObjects[0]);
-		assertEquals("Incorrect dependency managed object", dependencyMoIndex,
-				requiredManagedObjects[1]);
+		assertEquals("Dependency of dependency should be first",
+				dependencyDependencyIndex, requiredManagedObjects[0]);
+		assertEquals("Dependency should be after its dependency",
+				dependencyMoIndex, requiredManagedObjects[1]);
+		assertEquals("Coordinating should be after its dependency",
+				workMoIndex, requiredManagedObjects[2]);
 
 		// Ensure can translate
 		assertEquals("Incorrect task managed object", workMoIndex, metaData
 				.getTaskMetaData().translateManagedObjectIndexForWork(0));
+	}
+
+	/**
+	 * Ensure issue if there is a cyclic dependency between the required
+	 * {@link ManagedObject} instances.
+	 */
+	public void testManagedObjectCyclicDependency() {
+
+		final TaskObjectConfiguration<?> moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
+		final RawBoundManagedObjectMetaData<?> rawMoA = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> moA = this
+				.createMock(RawManagedObjectMetaData.class);
+		final ManagedObjectIndex aIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+		final RawBoundManagedObjectMetaData<?> rawMoB = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex bIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 1);
+
+		// Record
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Object.class);
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
+		this.recordReturn(moConfiguration, moConfiguration
+				.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getScopeManagedObjectMetaData("MO"), rawMoA);
+		this.recordReturn(rawMoA, rawMoA.getRawManagedObjectMetaData(), moA);
+		this.recordReturn(moA, moA.getObjectType(), Connection.class);
+		// Record cyclic dependency
+		this.recordReturn(rawMoA, rawMoA.getManagedObjectIndex(), aIndex);
+		this.recordReturn(rawMoA, rawMoA.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoB });
+		this.recordReturn(rawMoB, rawMoB.getManagedObjectIndex(), bIndex);
+		this.recordReturn(rawMoB, rawMoB.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoA });
+		this.recordReturn(rawMoA, rawMoA.getManagedObjectIndex(), aIndex);
+		this.record_NoAdministration();
+		// Record dependency sorting
+		// -> A depends on B
+		this.recordReturn(rawMoA, rawMoA.getManagedObjectIndex(), aIndex);
+		this.recordReturn(rawMoA, rawMoA.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoB });
+		this.recordReturn(rawMoB, rawMoB.getManagedObjectIndex(), bIndex);
+		this.recordReturn(rawMoB, rawMoB.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoA });
+		this.recordReturn(rawMoA, rawMoA.getManagedObjectIndex(), aIndex);
+		// -> B depends on A
+		this.recordReturn(rawMoB, rawMoB.getManagedObjectIndex(), bIndex);
+		this.recordReturn(rawMoB, rawMoB.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoA });
+		this.recordReturn(rawMoA, rawMoA.getManagedObjectIndex(), aIndex);
+		this.recordReturn(rawMoA, rawMoA.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawMoB });
+		this.recordReturn(rawMoB, rawMoB.getManagedObjectIndex(), bIndex);
+		this.recordReturn(rawMoA, rawMoA.getBoundManagedObjectName(), "MO_A");
+		this.recordReturn(rawMoB, rawMoB.getBoundManagedObjectName(), "MO_B");
+		this.record_taskIssue("Can not have cyclic dependencies (MO_A, MO_B)");
+
+		// Should not construct task meta-data as cyclic dependency
+		this.replayMockObjects();
+		this.constructRawTaskMetaData(false);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -724,6 +901,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencies(), null);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -802,6 +981,18 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(rawDependency, rawDependency.getManagedObjectIndex(),
 				dependencyIndex);
 		this.recordReturn(rawDependency, rawDependency.getDependencies(), null);
+		// Record dependency ordering
+		// -> Admin MO to dependency
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawDependency });
+		this.recordReturn(rawDependency, rawDependency.getManagedObjectIndex(),
+				dependencyIndex);
+		this.recordReturn(rawDependency, rawDependency.getDependencies(), null);
+		// Dependency with no further dependencies
+		this.recordReturn(rawDependency, rawDependency.getManagedObjectIndex(),
+				dependencyIndex);
+		this.recordReturn(rawDependency, rawDependency.getDependencies(), null);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -820,13 +1011,16 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey()
 				.getKey());
 
-		// Ensure have administered managed object and dependency in required
+		// Ensure have administered managed object and dependency as required
+		ManagedObjectIndex[] requiredManagedObjects = taskMetaData
+				.getRequiredManagedObjects();
 		assertEquals("Administered managed objects should be required", 2,
-				taskMetaData.getRequiredManagedObjects().length);
-		assertEquals("Incorrect administered managed object", moIndex,
-				taskMetaData.getRequiredManagedObjects()[0]);
-		assertEquals("Incorrect administered dependency", dependencyIndex,
-				taskMetaData.getRequiredManagedObjects()[1]);
+				requiredManagedObjects.length);
+		assertEquals("Administered dependency must be first", dependencyIndex,
+				requiredManagedObjects[0]);
+		assertEquals(
+				"Administered managed object must be after its dependency",
+				moIndex, requiredManagedObjects[1]);
 	}
 
 	/**
@@ -1556,7 +1750,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Records an issue on the {@link OfficeFloorIssues} about the {@link Task}.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Issue description expected.
 	 */
@@ -1566,7 +1760,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Constructs the {@link RawTaskMetaData}.
-	 * 
+	 *
 	 * @param isExpectConstruct
 	 *            If expected to be constructed.
 	 * @return {@link RawTaskMetaData}.
@@ -1591,7 +1785,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * Fully constructs the {@link RawTaskMetaData} by ensuring remaining state
 	 * is loaded. Will always expect to construct the {@link RawTaskMetaData}.
-	 * 
+	 *
 	 * @return {@link RawTaskMetaData}.
 	 */
 	private RawTaskMetaData<W, D, F> fullyConstructRawTaskMetaData() {

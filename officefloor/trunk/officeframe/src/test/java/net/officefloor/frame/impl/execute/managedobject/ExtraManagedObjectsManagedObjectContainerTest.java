@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests extra {@link ManagedObject} instances loaded.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExtraManagedObjectsManagedObjectContainerTest extends
@@ -32,7 +32,7 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -42,7 +42,7 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -53,8 +53,9 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 		// Record loading managed object
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
-		this.record_MoUser_setManagedObject(true, object);
-		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_coordinateManagedObject(true, true, null,
+				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 
 		// Record another object that is immediately unloaded
@@ -71,8 +72,8 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, true);
-		this.coordinateManagedObject(mo);
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
 

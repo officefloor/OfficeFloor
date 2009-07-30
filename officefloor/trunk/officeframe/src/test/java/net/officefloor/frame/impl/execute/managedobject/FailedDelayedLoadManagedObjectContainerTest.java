@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests failure {@link ManagedObject} taken time to load.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class FailedDelayedLoadManagedObjectContainerTest extends
@@ -34,7 +34,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -44,7 +44,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -70,7 +70,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 
 		// Create the managed object container and attempt to load
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, false);
+		this.loadManagedObject(mo);
 
 		// Specify failure in attempting to load
 		this.managedObjectUser_setFailure(mo, failure);

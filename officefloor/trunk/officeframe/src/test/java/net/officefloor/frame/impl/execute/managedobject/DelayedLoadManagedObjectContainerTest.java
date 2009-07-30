@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests {@link ManagedObject} taking time to be loaded.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DelayedLoadManagedObjectContainerTest extends
@@ -32,7 +32,7 @@ public class DelayedLoadManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 * 
+	 *
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -42,7 +42,7 @@ public class DelayedLoadManagedObjectContainerTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -54,15 +54,18 @@ public class DelayedLoadManagedObjectContainerTest extends
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(false, null);
 
-		// Record attempting to check managed object available
-		this.record_MoContainer_isManagedObjectReady(ReadyState.NOT_SOURCED);
+		// Record attempting to coordinate when still loading
+		this.record_MoContainer_coordinateManagedObject_stillLoading();
+
+		// Another job attempting to use
+		this.record_MoContainer_coordinateManagedObject_stillLoading();
 
 		// Record loading the managed object
-		this.record_MoUser_setManagedObject(false, object);
+		this.record_MoUser_setManagedObject(false);
 
 		// Record completion life cycle as managed object loaded
-		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
-		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoContainer_coordinateManagedObject(true, true, null,
+				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 		this.record_MoContainer_unloadManagedObject(true);
 
@@ -71,18 +74,18 @@ public class DelayedLoadManagedObjectContainerTest extends
 
 		// Create the managed object container and attempt to load
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, false);
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, false);
 
-		// Check if loaded but not yet loaded (likely checking as another
-		// managed object has woken up the job)
-		this.isManagedObjectReady(mo, false);
+		// In mean time another job attempts to use object
+		this.loadManagedObject(mo);
+		this.coordinateManagedObject(mo, false);
 
 		// Now load the managed object
 		this.managedObjectUser_setManagedObject(mo, object);
 
 		// Complete the life cycle as now loaded
-		this.isManagedObjectReady(mo, true);
-		this.coordinateManagedObject(mo);
+		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
 		this.unloadManagedObject(mo);
