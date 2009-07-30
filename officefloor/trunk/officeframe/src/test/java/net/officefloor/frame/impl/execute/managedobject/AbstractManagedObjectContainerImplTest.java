@@ -599,7 +599,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		}
 
 		// For testing always ready after coordinating
-		// TODO test not ready after coordinating
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.isManagedObjectAsynchronous(),
 				this.isAsynchronous);
