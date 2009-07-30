@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.socket;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
@@ -25,23 +24,16 @@ import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.http.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.HttpServer.HttpServerFlows;
+import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.source.HttpServer.HttpServerFlows;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
  * {@link HttpServerSocketManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpManagedObjectSourceExtension
@@ -71,70 +63,17 @@ public class HttpManagedObjectSourceExtension
 		page.setLayout(new GridLayout(2, false));
 
 		// Provide the properties
-		this.createPropertyDisplay("Port: ",
+		SourceExtensionUtil.createPropertyDisplay("Port: ",
 				HttpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
 				context);
-		this.createPropertyDisplay("Buffer size: ",
+		SourceExtensionUtil.createPropertyDisplay("Buffer size: ",
 				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
 				"1024", page, context);
-		this.createPropertyDisplay("Recommended segments per message: ",
-				HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE,
-				"10", page, context);
-		this
+		SourceExtensionUtil
 				.createPropertyDisplay(
-						"Maximum connextions per listener: ",
-						HttpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS,
+						"Maximum connections per listener: ",
+						HttpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
 						"64", page, context);
-	}
-
-	/**
-	 * Creates the display for the input {@link Property}.
-	 * 
-	 * @param label
-	 *            Label for the {@link Property}.
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param defaultValue
-	 *            Default value for the {@link Property}.
-	 * @param page
-	 *            {@link Composite} to add display {@link Control} instances.
-	 * @param context
-	 *            {@link ManagedObjectSourceExtensionContext}.
-	 */
-	private void createPropertyDisplay(String label, String name,
-			String defaultValue, Composite page,
-			final ManagedObjectSourceExtensionContext context) {
-
-		// Obtain the properties
-		PropertyList properties = context.getPropertyList();
-
-		// Obtain the property
-		Property item = properties.getProperty(name);
-		if (item == null) {
-			item = properties.addProperty(name);
-		}
-		final Property property = item;
-
-		// Default the property value if blank
-		String propertyValue = property.getValue();
-		if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
-			property.setValue(defaultValue);
-		}
-
-		// Provide the label
-		new Label(page, SWT.NONE).setText(label);
-
-		// Provide the text to specify value
-		final Text text = new Text(page, SWT.SINGLE | SWT.BORDER);
-		text.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-		text.setText(property.getValue());
-		text.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				property.setValue(text.getText());
-				context.notifyPropertiesChanged();
-			}
-		});
 	}
 
 	@Override

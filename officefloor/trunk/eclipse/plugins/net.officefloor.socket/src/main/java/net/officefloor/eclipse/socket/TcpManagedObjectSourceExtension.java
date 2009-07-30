@@ -17,17 +17,18 @@
  */
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.tcp.TcpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
+
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the
@@ -37,7 +38,8 @@ import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
  */
 public class TcpManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<None, TcpServerFlows, TcpServerSocketManagedObjectSource> {
+		ManagedObjectSourceExtension<None, TcpServerFlows, TcpServerSocketManagedObjectSource>,
+		ExtensionClasspathProvider {
 
 	@Override
 	public Class<TcpServerSocketManagedObjectSource> getManagedObjectSourceClass() {
@@ -52,14 +54,37 @@ public class TcpManagedObjectSourceExtension
 	@Override
 	public void createControl(Composite page,
 			ManagedObjectSourceExtensionContext context) {
-		page.setLayout(new GridLayout());
-		new Label(page, SWT.NONE).setText("TODO implement "
-				+ this.getClass().getSimpleName());
+
+		// Specify layout of page
+		page.setLayout(new GridLayout(2, false));
+
+		// Provide the properties
+		SourceExtensionUtil.createPropertyDisplay("Port: ",
+				TcpServerSocketManagedObjectSource.PROPERTY_PORT, "80", page,
+				context);
+		SourceExtensionUtil.createPropertyDisplay("Buffer size: ",
+				TcpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
+				"1024", page, context);
+		SourceExtensionUtil
+				.createPropertyDisplay(
+						"Maximum connections per listener: ",
+						TcpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
+						"64", page, context);
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 		return "TCP";
+	}
+
+	/*
+	 * ========================== ExtensionClasspathProvider =================
+	 */
+
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[] { new TypeClasspathProvision(
+				TcpServerSocketManagedObjectSource.class) };
 	}
 
 }
