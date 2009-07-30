@@ -181,9 +181,10 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 					this.previousDependency, dependency);
 			this.previousDependency = dependency;
 
-			// Ensure asynchronous operation is complete
-			assertTrue("Asynchronous operation should be complete",
-					dependency.isAsynchronousOperationComplete);
+			// Ensure asynchronous operations complete
+			assertEquals("Dependency should be ready",
+					TransitionState.COORDINATE_COMPLETE,
+					dependency.transitionState);
 
 			// Increment the number of times invoked
 			this.invokeCount++;
@@ -226,9 +227,11 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public void loadObjects(ObjectRegistry<Indexed> registry)
 				throws Throwable {
-			// Trigger asynchronous operation on dependency
+			// Start operation to indicate object not ready for use by task
 			this.dependency = (DependencyManagedObject) registry.getObject(0);
-			this.dependency.startAsynchronousOperation();
+			this.dependency.startAsynchronousOperation(
+					TransitionState.LOAD_COMPLETE,
+					TransitionState.COORDINATE_START);
 		}
 
 		@Override
@@ -285,9 +288,9 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		private AsynchronousListener listener;
 
 		/**
-		 * Flag indicating if the asynchronous operation is complete.
+		 * {@link TransitionState}.
 		 */
-		public volatile boolean isAsynchronousOperationComplete = false;
+		public volatile TransitionState transitionState = TransitionState.INIT;
 
 		/**
 		 * Initiate.
@@ -302,10 +305,21 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Starts the asynchronous operation.
+		 *
+		 * @param expectedState
+		 *            Expected {@link TransitionState}.
+		 * @param nextState
+		 *            Next {@link TransitionState}.
 		 */
-		public void startAsynchronousOperation() {
+		public void startAsynchronousOperation(TransitionState expectedState,
+				TransitionState nextState) {
 			// Flag asynchronous operation occurring
 			this.listener.notifyStarted();
+
+			// Ensure correct state and move to next state
+			assertEquals("Incorrect state on start", expectedState,
+					this.transitionState);
+			this.transitionState = nextState;
 
 			// Run process for asynchronous operation
 			this.executeContext.invokeProcess(0, this, this);
@@ -313,10 +327,14 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Completes the asynchronous operation.
+		 *
+		 * @param nextState
+		 *            Next {@link TransitionState}.
 		 */
-		public void completeAsynchronousOperation() {
+		public void completeAsynchronousOperation(TransitionState nextState) {
+
 			// Flag asynchronous operation complete
-			this.isAsynchronousOperationComplete = true;
+			this.transitionState = nextState;
 			this.listener.notifyComplete();
 		}
 
@@ -327,9 +345,14 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public void registerAsynchronousCompletionListener(
 				AsynchronousListener listener) {
-			// Only load the first listener (as second is from task)
+			// Only load the first listener (as second from invoked process)
 			if (this.listener == null) {
 				this.listener = listener;
+
+				// Start operation on sourcing Managed Object.
+				// In other words not ready to coordinate.
+				this.startAsynchronousOperation(TransitionState.INIT,
+						TransitionState.LOAD_START);
 			}
 		}
 
@@ -420,12 +443,30 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 			DependencyManagedObject dependency = (DependencyManagedObject) context
 					.getObject(0);
 
-			// Flag asynchronous operation complete
-			dependency.completeAsynchronousOperation();
+			// Indicate flag next state
+			switch (dependency.transitionState) {
+			case LOAD_START:
+				dependency
+						.completeAsynchronousOperation(TransitionState.LOAD_COMPLETE);
+				break;
+			case COORDINATE_START:
+				dependency
+						.completeAsynchronousOperation(TransitionState.COORDINATE_COMPLETE);
+				break;
+			default:
+				fail("Invalid state " + dependency.transitionState);
+			}
 
 			// No further processing
 			return null;
 		}
+	}
+
+	/**
+	 * States indicating state of coordination.
+	 */
+	private enum TransitionState {
+		INIT, LOAD_START, LOAD_COMPLETE, COORDINATE_START, COORDINATE_COMPLETE
 	}
 
 }
