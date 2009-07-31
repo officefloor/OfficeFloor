@@ -218,8 +218,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 */
 
 	@Override
-	public void loadManagedObject(JobContext executionContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
+	public void loadManagedObject(JobContext executionContext, JobNode jobNode,
+			JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -317,7 +317,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		case LOADING:
 			// Still loading managed object so wait until loaded
-			this.sourcingMonitor.waitOnAsset(jobNode, activateSet);
+			if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
+				throw new IllegalStateException(
+						"Must be able to wait until Managed Object loaded");
+			}
 			return false;
 
 		case LOADED:
@@ -479,8 +482,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					// Determine if asynchronous operation
 					if (this.managedObject != null) {
 						// Not ready as waiting on asynchronous operation
-						this.operationsMonitor
-								.waitOnAsset(jobNode, activateSet);
+						if (!this.operationsMonitor.waitOnAsset(jobNode,
+								activateSet)) {
+							throw new IllegalStateException(
+									"Must be able to wait on asynchronous operation");
+						}
 						return false;
 					}
 				}
