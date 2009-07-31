@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Implementation of the {@link WorkManager}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkManagerImpl implements WorkManager {
@@ -48,7 +48,7 @@ public class WorkManagerImpl implements WorkManager {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param officeMetaData
@@ -93,7 +93,9 @@ public class WorkManagerImpl implements WorkManager {
 	public ManagedObject getManagedObject(String managedObjectName)
 			throws Throwable {
 		// TODO implement obtaining managed object externally from WorkManager
-		throw new UnsupportedOperationException("TODO implement");
+		throw new UnsupportedOperationException(
+				"TODO still considering how to provide management of a ManagedObject once outside OfficeFrame "
+						+ "(should this just be a factory method? if so what about pooling? open for ideas");
 	}
 
 }
