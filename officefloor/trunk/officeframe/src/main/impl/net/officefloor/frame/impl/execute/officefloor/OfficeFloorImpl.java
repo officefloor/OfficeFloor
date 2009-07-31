@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of {@link OfficeFloor}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorImpl implements OfficeFloor {
@@ -51,7 +51,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeFloorMetaData
 	 *            {@link OfficeFloorMetaData}.
 	 */
@@ -115,7 +115,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
 	 * Starts the {@link ManagedObjectSourceInstance}.
-	 * 
+	 *
 	 * @param mosInstance
 	 *            {@link ManagedObjectSourceInstance}.
 	 * @throws Exception
@@ -145,10 +145,33 @@ public class OfficeFloorImpl implements OfficeFloor {
 			return;
 		}
 
-		// TODO provide notification to managed objects to stop working
+		/*
+		 * TODO provide notification to managed objects to stop working.
+		 *
+		 * DETAILS: Likely candidate for this is to add a stop() method to the
+		 * ManagedObjectSource interface. The requirements of this method would
+		 * be to stop ManagedObjectSource instances invoking further
+		 * ProcessStates. An example being ServerSockets no longer accepting new
+		 * connections (but would allow existing connections to be completed).
+		 * Once this is added then no further ProcessStates should be created
+		 * and when Job counts with Teams reach zero the OfficeFloor is ready to
+		 * be closed.
+		 */
 
 		// Stop the teams working as closing
-		// TODO need to consider teams handing off tasks between each other
+		/*
+		 * FIXME stopping teams must tie in with stopping ManagedObjectSources.
+		 *
+		 * DETAILS: Stopping a team when has no further Jobs does not lead to
+		 * closing as another Team may require handing it another Job for
+		 * completion. As the Team is no longer processing the Job does not get
+		 * completed leaving OfficeFloor hanging waiting for the Job to
+		 * complete. This is not so much of an issues as OfficeFloor is closing
+		 * but would be nice to have graceful close.
+		 *
+		 * MITIGATION: Will still close OfficeFloor (just some ProcessStates may
+		 * end up half processed giving a not so graceful close).
+		 */
 		for (Team team : this.officeFloorMetaData.getTeams()) {
 			team.stopWorking();
 		}

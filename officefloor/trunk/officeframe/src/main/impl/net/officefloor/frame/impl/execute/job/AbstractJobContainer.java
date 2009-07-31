@@ -404,7 +404,25 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 					this.jobState = JobState.FAILED;
 					try {
 
-						// TODO escalation path takes account many sequential
+						/*
+						 * FIXME escalation path takes account many sequential.
+						 *
+						 * DETAILS: Adding another sequential flow transforms
+						 * the previous sequential flow into a parallel flow.
+						 * This allows the flows to be executed in order and
+						 * maintain the sequential nature of invocation. This
+						 * however may result in this flow becoming an
+						 * escalation handler for the invoked sequential flow
+						 * (which it should not). Some identifier is to be
+						 * provided to know when actually invoked as parallel
+						 * rather than sequential transformed to parallel.
+						 *
+						 * MITIGATION: This is an edge case where two sequential
+						 * flows are invoked and the first flow throws an
+						 * Escalation that is handled by this Node. Require
+						 * 'real world' example to model tests for this
+						 * scenario.
+						 */
 
 						// Obtain the node to handle the escalation
 						JobNode escalationNode = null;

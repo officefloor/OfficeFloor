@@ -33,7 +33,7 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
  * Implementation of the {@link OfficeManager}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeManagerImpl implements OfficeManager {
@@ -76,7 +76,7 @@ public class OfficeManagerImpl implements OfficeManager {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office} being managed.
 	 * @param monitorInterval
@@ -258,7 +258,12 @@ public class OfficeManagerImpl implements OfficeManager {
 					try {
 						assetManager.checkOnAssets(activatableSet);
 					} catch (Throwable ex) {
-						// TODO OfficeFloor EscalationHandler for Asset failures
+						/*
+						 * TODO OfficeFloor EscalationHandler for Asset failures
+						 *
+						 * DETAIL: consider whether another approach other than
+						 * writing to stderr.
+						 */
 						System.err.println("Failed managing asset: "
 								+ ex.getMessage() + " ["
 								+ ex.getClass().getName() + "]");
@@ -287,7 +292,7 @@ public class OfficeManagerImpl implements OfficeManager {
 
 		/**
 		 * Initialise.
-		 * 
+		 *
 		 * @param activatableSet
 		 *            {@link JobNodeActivatableSet} to activate.
 		 */

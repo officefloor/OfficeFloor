@@ -435,7 +435,28 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 					"operations", issues);
 		}
 
-		// TODO ensure dependencyMappings appends not directly used to end
+		/*
+		 * FIXME ensure all dependencies are required for coordination.
+		 *
+		 * DETAILS: As coordination uses the dependencyMappings array as the
+		 * required dependencies for coordination, the dependencyMappings should
+		 * be:
+		 *
+		 * - appended with any dependencies not used directly in coordination.
+		 * This then will allow coordination to not proceed until 'ALL'
+		 * dependencies are available (not just direct dependencies of
+		 * coordination).
+		 *
+		 * - index into dependencyMappings array identifying where direct
+		 * dependencies stop and indirect dependencies begin. This will allow
+		 * the ObjectRegistry to throw an exception if not requesting direct
+		 * dependency.
+		 *
+		 * MITIGATION: This is an edge case where a dependency has another
+		 * dependency that is Asynchronous and not usable unless current
+		 * asynchronous operation is not complete. Will fix once have 'real
+		 * world' example requiring this (that can base tests on).
+		 */
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(
