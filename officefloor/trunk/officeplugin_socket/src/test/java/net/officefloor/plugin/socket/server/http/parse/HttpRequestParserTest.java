@@ -392,6 +392,85 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure <code>%HH</code> results in respective byte value.
+	 */
+	public void testPercentageEscape() {
+		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", true, "GET",
+				"/space byte", "HTTP/1.1", null);
+	}
+
+	/**
+	 * Ensure bad parse with invalid value for <code>%HH</code>.
+	 */
+	public void testPercentageInvalidValue() {
+		this.doInvalidMethodTest("GET /invalid%WRONG", HttpStatus._400,
+				"Invalid hexidecimal value 'W'");
+	}
+
+	/**
+	 * Validate possible values for <code>%HH</code> values.
+	 */
+	public void testAllPercentageValues() {
+
+		// Validate transforms
+		assertEquals("Ensure transform to HTTP", " ", this.getCharacterValue(
+				(byte) 2, (byte) 0));
+		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
+		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
+
+		// Validate the range of percentage values
+		for (int highBits = 0; highBits <= 0xF; highBits++) {
+			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
+
+				// Obtain the characters
+				String high = this.getCharacterValue(highBits);
+				String low = this.getCharacterValue(lowBits);
+				String character = this.getCharacterValue((byte) highBits,
+						(byte) lowBits);
+
+				// Validate the percentage value
+				this.doMethodTest("GET %" + high + low + " HTTP/1.1\n\n", true,
+						"GET", character, "HTTP/1.1", null);
+				this.httpRequestParser.reset();
+			}
+		}
+	}
+
+	/**
+	 * Transforms the high and low bits to the corresponding character value.
+	 *
+	 * @param highBits
+	 *            High bits.
+	 * @param lowBits
+	 *            Low bits
+	 * @return Character value.
+	 */
+	private String getCharacterValue(byte highBits, byte lowBits) {
+		byte byteValue = (byte) ((highBits << 4) + lowBits);
+		return UsAsciiUtil.convertToString(new byte[] { byteValue });
+	}
+
+	/**
+	 * Obtains the character value for the hexidecimal value.
+	 *
+	 * @param hexidecimal
+	 *            Hexidecimal value.
+	 * @return Character value.
+	 */
+	private String getCharacterValue(int hexidecimal) {
+		int charValue;
+		if ((0 <= hexidecimal) && (hexidecimal <= 9)) {
+			charValue = '0' + hexidecimal;
+		} else if ((0xA <= hexidecimal) && (hexidecimal <= 0xF)) {
+			charValue = 'A' + (hexidecimal - 0xA);
+		} else {
+			throw new IllegalArgumentException("Invalid hexidecimal value "
+					+ hexidecimal);
+		}
+		return String.valueOf((char) charValue);
+	}
+
+	/**
 	 * Does a valid HTTP request test.
 	 *
 	 * @param httpRequest
