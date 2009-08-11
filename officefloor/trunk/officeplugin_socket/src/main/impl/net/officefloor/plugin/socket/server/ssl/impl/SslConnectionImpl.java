@@ -291,6 +291,9 @@ public class SslConnectionImpl implements SslConnection {
 					// Process based on status
 					Status status = result.getStatus();
 					switch (status) {
+					case BUFFER_UNDERFLOW:
+						// Return waiting for more data as require more
+						return;
 					case OK:
 						// Transfer the plain text to input buffer
 						this.inputBuffer.write(tempBytes, 0, result
