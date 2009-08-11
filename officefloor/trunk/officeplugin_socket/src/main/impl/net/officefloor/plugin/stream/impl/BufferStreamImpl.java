@@ -40,6 +40,12 @@ import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
 public class BufferStreamImpl implements BufferStream {
 
 	/**
+	 * Empty {@link ByteBuffer}.
+	 */
+	private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer
+			.wrap(new byte[0]);
+
+	/**
 	 * {@link BufferSquirtFactory}.
 	 */
 	private final BufferSquirtFactory squirtFactory;
@@ -472,6 +478,8 @@ public class BufferStreamImpl implements BufferStream {
 		case BufferStream.END_OF_STREAM:
 			return BufferStream.END_OF_STREAM;
 		case 0:
+			// Process empty buffer
+			processor.process(EMPTY_BYTE_BUFFER);
 			return 0;
 			// Otherwise data available to read
 		}

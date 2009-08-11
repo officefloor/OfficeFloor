@@ -38,7 +38,7 @@ public class SSLEngineTest extends OfficeFrameTestCase {
 	/**
 	 * Test to understand how the {@link SSLEngine} works.
 	 */
-	public void testSsl() throws NoSuchAlgorithmException, SSLException {
+	public void testSSLEngine() throws NoSuchAlgorithmException, SSLException {
 
 		SSLContext context = SSLContext.getDefault();
 

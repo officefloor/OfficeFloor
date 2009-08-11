@@ -617,7 +617,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				.available());
 
 		// Ensure data read and no further data available
-		CompareBufferProcessor.assertRead(this.input, null);
+		CompareBufferProcessor.assertRead(this.input, new byte[0]);
 		assertEquals("Incorrect available bytes", 0, this.inputStream
 				.available());
 
@@ -1409,7 +1409,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 					.remaining() >= this.expected.length));
 
 			// Ensure contents are correct
-			byte[] actual = new byte[expected.length];
+			byte[] actual = new byte[this.expected.length];
 			buffer.get(actual);
 			AbstractBufferStreamTest.assertEquals(this.expected, actual);
 		}
