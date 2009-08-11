@@ -20,6 +20,9 @@ package net.officefloor.plugin.stream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.GatheringByteChannel;
+
+import javax.net.ssl.SSLEngine;
 
 /**
  * Retreives input from the {@link BufferStream}.
@@ -98,8 +101,9 @@ public interface InputBufferStream {
 	 * Reads and processes the contents of a {@link ByteBuffer} from the
 	 * {@link BufferStream}.
 	 * <p>
-	 * If there is no data in the {@link BufferStream} then the
-	 * {@link BufferProcessor} will not be invoked.
+	 * As {@link ByteBuffer} instances may be stored in varying sizes within the
+	 * {@link BufferStream} and data already consumed from them, the provided
+	 * {@link ByteBuffer} will have a variable number of bytes remaining.
 	 *
 	 * @param processor
 	 *            {@link BufferProcessor} to process the data of the
@@ -110,8 +114,37 @@ public interface InputBufferStream {
 	 * @throws IOException
 	 *             If fails to read input. Typically this will be because the
 	 *             input is closed.
+	 *
+	 * @see #read(int, GatheringBufferProcessor)
 	 */
 	int read(BufferProcessor processor) throws IOException;
+
+	/**
+	 * <p>
+	 * Processes a batch number of {@link ByteBuffer} instances so that the
+	 * available data in the {@link ByteBuffer} instances is greater than or
+	 * equal to the number of bytes specified.
+	 * <p>
+	 * Should the number of bytes be greater than the available, all
+	 * {@link ByteBuffer} instances are provided to the
+	 * {@link GatheringBufferProcessor}. In this case the provided data will be less
+	 * than the number of bytes specified.
+	 * <p>
+	 * Typically this will be used by gather operations such as with the
+	 * {@link GatheringByteChannel} and {@link SSLEngine}.
+	 *
+	 * @param numberOfBytes
+	 *            Number of bytes to be processed from this
+	 *            {@link InputBufferStream}.
+	 * @param processor
+	 *            {@link GatheringBufferProcessor}.
+	 * @return Number of bytes read by the {@link GatheringBufferProcessor}.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 */
+	int read(int numberOfBytes, GatheringBufferProcessor processor)
+			throws IOException;
 
 	/**
 	 * <p>
@@ -119,7 +152,7 @@ public interface InputBufferStream {
 	 * {@link OutputBufferStream}.
 	 * <p>
 	 * Only available bytes are read to the {@link OutputBufferStream} and
-	 * therefore the request number of bytes may not be read. The return
+	 * therefore the requested number of bytes may not be read. The return
 	 * provides the number of bytes read.
 	 *
 	 * @param numberOfBytes

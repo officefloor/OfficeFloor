@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.GatheringBufferProcessor;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
@@ -83,6 +84,19 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	}
 
 	@Override
+	public int read(int numberOfBytes, GatheringBufferProcessor processor)
+			throws IOException {
+		// TODO Implement InputBufferStream.read
+		throw new UnsupportedOperationException("InputBufferStream.read");
+	}
+
+	@Override
+	public int read(int numberOfBytes, OutputBufferStream outputBufferStream)
+			throws IOException {
+		return this.bufferStream.read(numberOfBytes, outputBufferStream);
+	}
+
+	@Override
 	public long skip(long numberOfBytes) throws IOException {
 		return this.bufferStream.skip(numberOfBytes);
 	}
@@ -90,12 +104,6 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	@Override
 	public long available() {
 		return this.bufferStream.available();
-	}
-
-	@Override
-	public int read(int numberOfBytes, OutputBufferStream outputBufferStream)
-			throws IOException {
-		return this.bufferStream.read(numberOfBytes, outputBufferStream);
 	}
 
 	@Override

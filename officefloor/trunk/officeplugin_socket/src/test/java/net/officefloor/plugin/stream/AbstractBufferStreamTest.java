@@ -695,6 +695,95 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to read gathering of {@link ByteBuffer} instances.
+	 */
+	public void testBuffer_ReadGatherBuffer() throws IOException {
+
+		// Append many buffers to gather in a read
+		final int BYTE_COUNT = 1000;
+		byte[][] totalContent = new byte[BYTE_COUNT][];
+		for (int i = 0; i < 1000; i++) {
+			byte[] content = this.createContent(1);
+			totalContent[i] = content;
+			this.output.append(ByteBuffer.wrap(content));
+		}
+
+		// Gather read the byte buffers
+		CompareGatheringBufferProcessor.assertRead(this.input, totalContent);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Ensure data read and no further data available
+		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Ensure verify end of stream
+		this.output.close();
+		CompareGatheringBufferProcessor.assertEndOfStream(this.input);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+
+		// All squirts should be closed
+	}
+
+	/**
+	 * Ensure able to read gathering of {@link ByteBuffer} instances only up to
+	 * the specified number of bytes.
+	 */
+	public void testBuffer_LimitReadGatherBuffer() throws IOException {
+
+		// Append many buffers to gather in a read
+		final int BYTE_COUNT = 1000;
+		byte[][] firstReadContent = new byte[BYTE_COUNT][];
+		for (int i = 0; i < BYTE_COUNT; i++) {
+			byte[] content = this.createContent((i % 5) + 1);
+			firstReadContent[i] = content;
+			this.output.append(ByteBuffer.wrap(content));
+		}
+
+		// Append further buffer content
+		byte[][] secondReadContent = new byte[BYTE_COUNT][];
+		int secondReadSize = 0;
+		for (int i = 0; i < BYTE_COUNT; i++) {
+			byte[] content = this.createContent((i % 3) + 1);
+			secondReadContent[i] = content;
+			secondReadSize += content.length;
+			this.output.append(ByteBuffer.wrap(content));
+		}
+
+		// Gather read the first lot of bytes
+		CompareGatheringBufferProcessor
+				.assertRead(this.input, firstReadContent);
+		assertEquals("Incorrect available bytes", secondReadSize,
+				this.inputStream.available());
+
+		// Gather read the second lot of bytes
+		CompareGatheringBufferProcessor.assertRead(this.input,
+				secondReadContent);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Ensure data read and no further data available
+		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Ensure data read and no further data available
+		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
+		assertEquals("Incorrect available bytes", 0, this.inputStream
+				.available());
+
+		// Ensure verify end of stream
+		this.output.close();
+		CompareGatheringBufferProcessor.assertEndOfStream(this.input);
+		assertEquals("Incorrect available bytes", BufferStream.END_OF_STREAM,
+				this.inputStream.available());
+
+		// All squirts should be closed
+	}
+
+	/**
 	 * Ensure can populate {@link ByteBuffer}.
 	 */
 	public void testBuffer_PopulateBuffer() throws IOException {
@@ -1259,6 +1348,12 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	 */
 
 	/**
+	 * Next content value to ensure it changes continually on creating new
+	 * {@link ByteBuffer} content.
+	 */
+	private int nextContentValue = 1;
+
+	/**
 	 * Creates a byte array with populated values.
 	 *
 	 * @param size
@@ -1268,7 +1363,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	private byte[] createContent(int size) {
 		final byte[] content = new byte[size];
 		for (int i = 0; i < content.length; i++) {
-			content[i] = (byte) (i % 10);
+			content[i] = (byte) this.nextContentValue;
+			this.nextContentValue = (this.nextContentValue + 1) % 10;
 		}
 		return content;
 	}
@@ -1336,17 +1432,9 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				return; // not reach here as should fail
 			}
 
-			// Verify the read
-			if (expected == null) {
-				// Verify no content read
-				assertFalse("Should not be processed",
-						processor.isProcessInvoked);
-				assertEquals("Should not have read", 0, readSize);
-			} else {
-				// Verify content read
-				assertTrue("Should be processed", processor.isProcessInvoked);
-				assertEquals("Incorrect read size", expected.length, readSize);
-			}
+			// Verify content read
+			assertTrue("Should be processed", processor.isProcessInvoked);
+			assertEquals("Incorrect read size", expected.length, readSize);
 		}
 
 		/**
@@ -1412,6 +1500,124 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 			byte[] actual = new byte[this.expected.length];
 			buffer.get(actual);
 			AbstractBufferStreamTest.assertEquals(this.expected, actual);
+		}
+	}
+
+	/**
+	 * {@link GatheringBufferProcessor} that compares the {@link ByteBuffer}
+	 * instances content to expected content.
+	 */
+	private static class CompareGatheringBufferProcessor implements
+			GatheringBufferProcessor {
+
+		/**
+		 * Asserts contents of read.
+		 *
+		 * @param stream
+		 *            {@link InputBufferStream}.
+		 * @param expected
+		 *            Expected content to read from {@link InputBufferStream}.
+		 */
+		public static void assertRead(InputBufferStream stream,
+				byte[][] expected) {
+
+			// Calculate the number of bytes expected
+			int expectedNumberOfBytes = 0;
+			for (byte[] expectedContent : expected) {
+				expectedNumberOfBytes += expectedContent.length;
+			}
+
+			// Do the read
+			CompareGatheringBufferProcessor processor = new CompareGatheringBufferProcessor(
+					expected);
+			int readSize;
+			try {
+				readSize = stream.read(expectedNumberOfBytes, processor);
+			} catch (Exception ex) {
+				fail("Exception not expected: " + ex.getMessage() + " ["
+						+ ex.getClass().getName() + "]");
+				return; // not reach here as should fail
+			}
+
+			// Verify content read
+			assertTrue("Should be processed", processor.isProcessInvoked);
+			assertEquals("Incorrect read size", expectedNumberOfBytes, readSize);
+		}
+
+		/**
+		 * Asserts end of stream for the {@link InputBufferStream}.
+		 *
+		 * @param stream
+		 *            {@link InputBufferStream}.
+		 */
+		public static void assertEndOfStream(InputBufferStream stream) {
+
+			// Do the read
+			CompareGatheringBufferProcessor processor = new CompareGatheringBufferProcessor(
+					null);
+			int readSize;
+			try {
+				readSize = stream.read(1, processor);
+			} catch (Exception ex) {
+				fail("Exception not expected: " + ex.getMessage() + " ["
+						+ ex.getClass().getName() + "]");
+				return; // not reach here as should fail
+			}
+
+			// Verify end of stream
+			assertFalse("Should not be processed", processor.isProcessInvoked);
+			assertEquals("Should be end of stream", BufferStream.END_OF_STREAM,
+					readSize);
+		}
+
+		/**
+		 * Expected content.
+		 */
+		private final byte[][] expected;
+
+		/**
+		 * Flag indicating if {@link #process(ByteBuffer)} method invoked.
+		 */
+		public boolean isProcessInvoked = false;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param expected
+		 *            Expected content.
+		 */
+		public CompareGatheringBufferProcessor(byte[][] expected) {
+			this.expected = expected;
+		}
+
+		/*
+		 * ================ GatheringBufferProcessor ==========================
+		 */
+
+		@Override
+		public void process(ByteBuffer[] buffers) {
+
+			// Flag invoked
+			this.isProcessInvoked = true;
+
+			// Ensure there are the expected number of buffers
+			assertEquals("Incorrect number of buffers for gather read",
+					this.expected.length, buffers.length);
+
+			// Validate each buffer in turn
+			for (int i = 0; i < this.expected.length; i++) {
+				byte[] expectedContent = this.expected[i];
+				ByteBuffer buffer = buffers[i];
+
+				// Ensure buffer markers are valid
+				assertEquals("Buffer not containing expected content", buffer
+						.remaining(), expectedContent.length);
+
+				// Ensure contents are correct
+				byte[] actual = new byte[expectedContent.length];
+				buffer.get(actual);
+				AbstractBufferStreamTest.assertEquals(this.expected, actual);
+			}
 		}
 	}
 
