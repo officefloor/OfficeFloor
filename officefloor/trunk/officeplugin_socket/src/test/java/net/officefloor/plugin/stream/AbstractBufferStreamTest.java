@@ -697,15 +697,15 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to read gathering of {@link ByteBuffer} instances.
 	 */
-	public void testBuffer_ReadGatherBuffer() throws IOException {
+	public void testBuffer_GatheringReadOfBuffers() throws IOException {
 
-		// Append many buffers to gather in a read
-		final int BYTE_COUNT = 1000;
+		// Write many buffers to gather in a read
+		final int BYTE_COUNT = 100;
 		byte[][] totalContent = new byte[BYTE_COUNT][];
-		for (int i = 0; i < 1000; i++) {
-			byte[] content = this.createContent(1);
+		for (int i = 0; i < BYTE_COUNT; i++) {
+			byte[] content = this.createContent(this.getBufferSize());
 			totalContent[i] = content;
-			this.output.append(ByteBuffer.wrap(content));
+			this.output.write(content);
 		}
 
 		// Gather read the byte buffers
@@ -714,7 +714,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				.available());
 
 		// Ensure data read and no further data available
-		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
+		CompareGatheringBufferProcessor.assertRead(this.input,
+				new byte[][] { new byte[0] });
 		assertEquals("Incorrect available bytes", 0, this.inputStream
 				.available());
 
@@ -731,25 +732,25 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 	 * Ensure able to read gathering of {@link ByteBuffer} instances only up to
 	 * the specified number of bytes.
 	 */
-	public void testBuffer_LimitReadGatherBuffer() throws IOException {
+	public void testBuffer_LimitGatheringReadOfBuffers() throws IOException {
 
 		// Append many buffers to gather in a read
-		final int BYTE_COUNT = 1000;
+		final int BYTE_COUNT = 100;
 		byte[][] firstReadContent = new byte[BYTE_COUNT][];
 		for (int i = 0; i < BYTE_COUNT; i++) {
-			byte[] content = this.createContent((i % 5) + 1);
+			byte[] content = this.createContent(this.getBufferSize());
 			firstReadContent[i] = content;
-			this.output.append(ByteBuffer.wrap(content));
+			this.output.write(content);
 		}
 
 		// Append further buffer content
 		byte[][] secondReadContent = new byte[BYTE_COUNT][];
 		int secondReadSize = 0;
 		for (int i = 0; i < BYTE_COUNT; i++) {
-			byte[] content = this.createContent((i % 3) + 1);
+			byte[] content = this.createContent(this.getBufferSize());
 			secondReadContent[i] = content;
 			secondReadSize += content.length;
-			this.output.append(ByteBuffer.wrap(content));
+			this.output.write(content);
 		}
 
 		// Gather read the first lot of bytes
@@ -765,12 +766,8 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				.available());
 
 		// Ensure data read and no further data available
-		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
-		assertEquals("Incorrect available bytes", 0, this.inputStream
-				.available());
-
-		// Ensure data read and no further data available
-		CompareGatheringBufferProcessor.assertRead(this.input, new byte[0][0]);
+		CompareGatheringBufferProcessor.assertRead(this.input,
+				new byte[][] { new byte[0] });
 		assertEquals("Incorrect available bytes", 0, this.inputStream
 				.available());
 
@@ -1616,7 +1613,7 @@ public abstract class AbstractBufferStreamTest extends OfficeFrameTestCase {
 				// Ensure contents are correct
 				byte[] actual = new byte[expectedContent.length];
 				buffer.get(actual);
-				AbstractBufferStreamTest.assertEquals(this.expected, actual);
+				AbstractBufferStreamTest.assertEquals(expectedContent, actual);
 			}
 		}
 	}

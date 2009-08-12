@@ -25,6 +25,7 @@ import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.GatheringBufferProcessor;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
@@ -147,6 +148,14 @@ public class SynchronizedBufferStream implements BufferStream {
 	public int read(BufferProcessor processor) throws IOException {
 		synchronized (this.mutex) {
 			return this.backingStream.read(processor);
+		}
+	}
+
+	@Override
+	public int read(int numberOfBytes, GatheringBufferProcessor processor)
+			throws IOException {
+		synchronized (this.mutex) {
+			return this.backingStream.read(numberOfBytes, processor);
 		}
 	}
 

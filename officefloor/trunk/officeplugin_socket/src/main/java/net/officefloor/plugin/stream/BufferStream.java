@@ -20,6 +20,9 @@ package net.officefloor.plugin.stream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.GatheringByteChannel;
+
+import javax.net.ssl.SSLEngine;
 
 /**
  * Stream of buffers.
@@ -196,6 +199,33 @@ public interface BufferStream {
 	 *             input is closed.
 	 */
 	int read(BufferProcessor processor) throws IOException;
+
+	/**
+	 * <p>
+	 * Processes a batch number of {@link ByteBuffer} instances so that the
+	 * available data in the {@link ByteBuffer} instances is greater than or
+	 * equal to the number of bytes specified.
+	 * <p>
+	 * Should the number of bytes be greater than the available, all
+	 * {@link ByteBuffer} instances are provided to the
+	 * {@link GatheringBufferProcessor}. In this case the provided data will be
+	 * less than the number of bytes specified.
+	 * <p>
+	 * Typically this will be used by gather operations such as with the
+	 * {@link GatheringByteChannel} and {@link SSLEngine}.
+	 *
+	 * @param numberOfBytes
+	 *            Number of bytes to be processed from this
+	 *            {@link InputBufferStream}.
+	 * @param processor
+	 *            {@link GatheringBufferProcessor}.
+	 * @return Number of bytes read by the {@link GatheringBufferProcessor}.
+	 * @throws IOException
+	 *             If fails to read input. Typically this will be because the
+	 *             input is closed.
+	 */
+	int read(int numberOfBytes, GatheringBufferProcessor processor)
+			throws IOException;
 
 	/**
 	 * <p>

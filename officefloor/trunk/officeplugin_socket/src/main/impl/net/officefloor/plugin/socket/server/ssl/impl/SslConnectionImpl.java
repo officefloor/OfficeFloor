@@ -26,14 +26,14 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 
-import net.officefloor.plugin.socket.server.ssl.ByteArrayFactory;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
 import net.officefloor.plugin.stream.BufferPopulator;
-import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.GatheringBufferProcessor;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
@@ -91,10 +91,10 @@ public class SslConnectionImpl implements SslConnection {
 	private final SSLEngine engine;
 
 	/**
-	 * {@link ByteArrayFactory} to create necessary temporary
+	 * {@link TemporaryByteArrayFactory} to create necessary temporary
 	 * <code>byte array</code> instances.
 	 */
-	private final ByteArrayFactory byteArrayFactory;
+	private final TemporaryByteArrayFactory byteArrayFactory;
 
 	/**
 	 * {@link SslTaskExecutor} to execute any necessary {@link SslTask}
@@ -114,28 +114,92 @@ public class SslConnectionImpl implements SslConnection {
 	private SSLEngineResult sslEngineResult = null;
 
 	/**
-	 * {@link BufferProcessor} to handle inputting data.
+	 * {@link GatheringBufferProcessor} to handle inputting data.
 	 */
-	private final BufferProcessor inputProcessor = new BufferProcessor() {
+	private final GatheringBufferProcessor inputProcessor = new GatheringBufferProcessor() {
 		@Override
-		public void process(ByteBuffer buffer) throws IOException {
+		public void process(ByteBuffer[] buffers) throws IOException {
+
+			// Create the temporary buffer to write bytes
 			ByteBuffer tempBuffer = ByteBuffer
 					.wrap(SslConnectionImpl.this.temporaryBytes);
+
+			// Attempt with first buffer (save copying if in first buffer)
 			SslConnectionImpl.this.sslEngineResult = SslConnectionImpl.this.engine
-					.unwrap(buffer, tempBuffer);
+					.unwrap(buffers[0], tempBuffer);
+			Status status = SslConnectionImpl.this.sslEngineResult.getStatus();
+			switch (status) {
+			case BUFFER_UNDERFLOW:
+				// Need more content so try with multiple buffers
+
+				// Create temporary byte array for content of multiple buffers
+				int packetBufferSize = SslConnectionImpl.this.engine
+						.getSession().getPacketBufferSize();
+				byte[] sourceBytes = SslConnectionImpl.this.byteArrayFactory
+						.createSourceByteArray(packetBufferSize);
+
+				// Ensure temporary byte array not used by another thread
+				synchronized (sourceBytes) {
+
+					// Fill the source bytes with contents of buffers
+					int sourceIndex = 0;
+					SOURCE_BYTES_READ: for (ByteBuffer buffer : buffers) {
+						for (int i = buffer.position(); i < buffer.limit(); i++) {
+							sourceBytes[sourceIndex++] = buffer.get(i);
+							if (sourceIndex == sourceBytes.length) {
+								// All bytes read
+								break SOURCE_BYTES_READ;
+							}
+						}
+					}
+
+					// Create byte buffer with source bytes
+					ByteBuffer sourceBuffer = ByteBuffer.wrap(sourceBytes, 0,
+							sourceIndex);
+
+					// Attempt to unwrap
+					SslConnectionImpl.this.sslEngineResult = SslConnectionImpl.this.engine
+							.unwrap(sourceBuffer, tempBuffer);
+					status = SslConnectionImpl.this.sslEngineResult.getStatus();
+					switch (status) {
+					case OK:
+						// Unwrapped content, so ensure processed from buffers
+						int bytesConsumed = SslConnectionImpl.this.sslEngineResult
+								.bytesConsumed();
+						BYTES_CONSUMED: for (ByteBuffer buffer : buffers) {
+							int bufferRemaining = buffer.remaining();
+							if (bufferRemaining < bytesConsumed) {
+								// Entire contents of buffer read
+								buffer.position(buffer.limit());
+								bytesConsumed -= bufferRemaining;
+							} else {
+								// Only partially read from buffer
+								buffer.position(buffer.position()
+										+ bytesConsumed);
+								bytesConsumed = 0;
+
+								// All bytes consumed
+								break BYTES_CONSUMED;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
 		}
 	};
 
 	/**
-	 * {@link BufferProcessor} to handle outputting data.
+	 * {@link GatheringBufferProcessor} to handle outputting data.
 	 */
-	private final BufferProcessor outputProcessor = new BufferProcessor() {
+	private final GatheringBufferProcessor outputProcessor = new GatheringBufferProcessor() {
 		@Override
-		public void process(ByteBuffer buffer) throws IOException {
+		public void process(ByteBuffer[] buffers) throws IOException {
 			ByteBuffer tempBuffer = ByteBuffer
 					.wrap(SslConnectionImpl.this.temporaryBytes);
 			SslConnectionImpl.this.sslEngineResult = SslConnectionImpl.this.engine
-					.wrap(buffer, tempBuffer);
+					.wrap(buffers, tempBuffer);
 		}
 	};
 
@@ -167,8 +231,8 @@ public class SslConnectionImpl implements SslConnection {
 	 *            {@link BufferSquirtFactory} for the {@link BufferStream}
 	 *            instances containing the application data.
 	 * @param byteArrayFactory
-	 *            {@link ByteArrayFactory} to create necessary temporary
-	 *            <code>byte array</code> instances.
+	 *            {@link TemporaryByteArrayFactory} to create necessary
+	 *            temporary <code>byte array</code> instances.
 	 * @param taskExecutor
 	 *            {@link SslTaskExecutor} to execute any necessary
 	 *            {@link SslTask} instances.
@@ -176,7 +240,8 @@ public class SslConnectionImpl implements SslConnection {
 	public SslConnectionImpl(Object lock, InputBufferStream inputDelegate,
 			OutputBufferStream outputDelegate, SSLEngine engine,
 			BufferSquirtFactory bufferSquirtFactory,
-			ByteArrayFactory byteArrayFactory, SslTaskExecutor taskExecutor) {
+			TemporaryByteArrayFactory byteArrayFactory,
+			SslTaskExecutor taskExecutor) {
 		this.lock = lock;
 		this.inputDelegate = inputDelegate;
 		this.outputDelegate = outputDelegate;
@@ -279,55 +344,67 @@ public class SslConnectionImpl implements SslConnection {
 					// Handle inputting data
 
 					// Obtain temporary buffer to receive plain text
-					this.temporaryBytes = this.byteArrayFactory
-							.createByteArray(this.engine.getSession()
-									.getApplicationBufferSize());
+					int applicationBufferSize = this.engine.getSession()
+							.getApplicationBufferSize();
+					byte[] tempBytes = this.byteArrayFactory
+							.createDestinationByteArray(applicationBufferSize);
 
-					// Attempt to input data (and obtain results locally)
-					this.inputDelegate.read(this.inputProcessor);
-					SSLEngineResult result = this.sslEngineResult;
-					byte[] tempBytes = this.temporaryBytes;
+					// Ensure temporary byte array not used by another thread
+					synchronized (tempBytes) {
 
-					// Process based on status
-					Status status = result.getStatus();
-					switch (status) {
-					case BUFFER_UNDERFLOW:
-						// Return waiting for more data as require more
-						return;
-					case OK:
-						// Transfer the plain text to input buffer
-						this.inputBuffer.write(tempBytes, 0, result
-								.bytesProduced());
-						break;
-					default:
-						throw new IllegalStateException("Unknown status "
-								+ status);
+						// Attempt to input data (and obtain results locally)
+						this.temporaryBytes = tempBytes;
+						this.inputDelegate.read(applicationBufferSize,
+								this.inputProcessor);
+						SSLEngineResult result = this.sslEngineResult;
+
+						// Process based on status
+						Status status = result.getStatus();
+						switch (status) {
+						case BUFFER_UNDERFLOW:
+							// Return waiting for more data as require more
+							return;
+						case OK:
+							// Transfer the plain text to input buffer
+							this.inputBuffer.write(tempBytes, 0, result
+									.bytesProduced());
+							break;
+						default:
+							throw new IllegalStateException("Unknown status "
+									+ status);
+						}
 					}
 
 				} else if (isOutputData) {
 					// Handle outputting data
 
 					// Obtain temporary buffer to receive cipher text
-					this.temporaryBytes = this.byteArrayFactory
-							.createByteArray(this.engine.getSession()
-									.getPacketBufferSize());
+					int packetBufferSize = this.engine.getSession()
+							.getPacketBufferSize();
+					byte[] tempBytes = this.byteArrayFactory
+							.createDestinationByteArray(packetBufferSize);
 
-					// Attempt to output data (and obtain results locally)
-					this.outputBuffer.read(this.outputProcessor);
-					SSLEngineResult result = this.sslEngineResult;
-					byte[] tempBytes = this.temporaryBytes;
+					// Ensure temporary byte array not used by another thread
+					synchronized (tempBytes) {
 
-					// Process based on status
-					Status status = result.getStatus();
-					switch (status) {
-					case OK:
-						// Transfer the cipher text to output delegate
-						this.outputDelegate.write(tempBytes, 0, result
-								.bytesProduced());
-						break;
-					default:
-						throw new IllegalStateException("Unknown status "
-								+ status);
+						// Attempt to output data (and obtain results locally)
+						this.temporaryBytes = tempBytes;
+						this.outputBuffer.read(packetBufferSize,
+								this.outputProcessor);
+						SSLEngineResult result = this.sslEngineResult;
+
+						// Process based on status
+						Status status = result.getStatus();
+						switch (status) {
+						case OK:
+							// Transfer the cipher text to output delegate
+							this.outputDelegate.write(tempBytes, 0, result
+									.bytesProduced());
+							break;
+						default:
+							throw new IllegalStateException("Unknown status "
+									+ status);
+						}
 					}
 
 				} else {

@@ -28,6 +28,7 @@ import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
+import net.officefloor.plugin.stream.GatheringBufferProcessor;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
@@ -337,10 +338,10 @@ public class BufferStreamImpl implements BufferStream {
 	@Override
 	public void append(ByteBuffer buffer) throws IOException {
 
-		// Use duplicate to not change original buffer markers.
+		// Use slice to obtain content of interest with position at zero.
 		// Also means not subject to external changes in buffer markers.
 		// Note: Will still be subject to data changes.
-		buffer = buffer.duplicate();
+		buffer = buffer.slice();
 
 		// Add the appended buffer
 		this.append(new AppendedBufferSquirt(buffer));
@@ -352,8 +353,8 @@ public class BufferStreamImpl implements BufferStream {
 		// Ensure the output is open
 		this.ensureOutputOpen();
 
-		// Obtain the buffer of the squirt
-		ByteBuffer buffer = squirt.getBuffer();
+		// Obtain the buffer of the squirt (slice for position to be zero)
+		ByteBuffer buffer = squirt.getBuffer().slice();
 
 		// Create the element and management for the squirt
 		BufferSquirtElement element = new BufferSquirtElement(
@@ -518,6 +519,117 @@ public class BufferStreamImpl implements BufferStream {
 
 		// Return the bytes read in processing the buffer
 		return readSize;
+	}
+
+	@Override
+	public int read(int numberOfBytes, GatheringBufferProcessor processor)
+			throws IOException {
+
+		// Ensure the input is open
+		this.ensureInputOpen();
+
+		// Prepare for the read
+		switch (this.prepareForRead()) {
+		case BufferStream.END_OF_STREAM:
+			return BufferStream.END_OF_STREAM;
+		case 0:
+			// Process empty buffer (always provide at least one buffer)
+			processor.process(new ByteBuffer[] { EMPTY_BYTE_BUFFER });
+			return 0;
+			// Otherwise data available to read
+		}
+
+		// Ensure read contents of write buffer is separated for reading
+		if (this.tail.squirt.getBuffer().position() > 0) {
+			this.sliceWriteBufferForReading();
+		}
+
+		// Determine number of buffers required to obtain the bytes
+		int bufferCount = 0;
+		long bytesForBuffers = 0; // long as may be larger than max integer
+		BufferSquirtElement element = this.head;
+		while ((element != this.tail) && (bytesForBuffers < numberOfBytes)) {
+			// Not last buffer (write buffer) so include as need more bytes
+			bufferCount++;
+			bytesForBuffers += element.squirt.getBuffer().remaining();
+
+			// Move to next buffer to determine if need included
+			element = element.next;
+		}
+
+		// Create the array of buffers to process
+		ByteBuffer[] buffers = new ByteBuffer[bufferCount];
+		element = this.head;
+		for (int i = 0; i < bufferCount; i++) {
+			buffers[i] = element.squirt.getBuffer();
+			element = element.next;
+		}
+
+		// Record position of first buffer to ensure not moved backwards
+		int firstBufferInitialPosition = this.head.squirt.getBuffer()
+				.position();
+
+		int bytesProcessed;
+		try {
+			// Process the buffers
+			processor.process(buffers);
+
+		} finally {
+			// Determine number of bytes processed and ensure in correct state
+
+			// Ensure position of first buffer has not moved backwards
+			ByteBuffer firstBuffer = buffers[0];
+			if (firstBuffer.position() < firstBufferInitialPosition) {
+				throw new IOException(
+						"Can not move position of first buffer backwards");
+			}
+
+			// Determine the number of bytes processed (and remove read buffers)
+			bytesProcessed = firstBuffer.position()
+					- firstBufferInitialPosition;
+			boolean isReadComplete = (firstBuffer.position() < firstBuffer
+					.limit());
+			if (!isReadComplete) {
+				// Buffer fully processed so remove
+				element = this.head;
+				this.head = this.head.next;
+				element.squirt.close();
+			}
+			for (int i = 1; i < bufferCount; i++) {
+				ByteBuffer buffer = buffers[i];
+
+				// Determine the number of bytes processed from buffer
+				int bufferPosition = buffer.position();
+
+				// Ensure no extra reading after read complete
+				if (isReadComplete) {
+					// Buffer not to be read as data still in previous buffer
+					if (bufferPosition != 0) {
+						throw new IOException(
+								"Invalid gathering as data read from buffer with data still available in previous buffer");
+					}
+
+				} else {
+					// Read not complete so include bytes processed from buffer
+					bytesProcessed += bufferPosition;
+
+					// Determine if buffer complete
+					isReadComplete = (bufferPosition < buffer.limit());
+					if (!isReadComplete) {
+						// Buffer fully processed so remove
+						element = this.head;
+						this.head = this.head.next;
+						element.squirt.close();
+					}
+				}
+			}
+
+			// Adjust the available bytes
+			this.availableSize -= bytesProcessed;
+		}
+
+		// Return the number of bytes processed
+		return bytesProcessed;
 	}
 
 	@Override
@@ -808,18 +920,13 @@ public class BufferStreamImpl implements BufferStream {
 	 */
 	private static class EmptyBufferSquirt implements BufferSquirt {
 
-		/**
-		 * Empty {@link ByteBuffer}.
-		 */
-		private static final ByteBuffer BUFFER = ByteBuffer.wrap(new byte[0]);
-
 		/*
 		 * ================= BufferSquirt ===========================
 		 */
 
 		@Override
 		public ByteBuffer getBuffer() {
-			return BUFFER;
+			return EMPTY_BYTE_BUFFER;
 		}
 
 		@Override
