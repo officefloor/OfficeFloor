@@ -42,7 +42,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests construction scenarios of a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
@@ -64,7 +64,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
 	 */
 	@Override
@@ -78,7 +78,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
 	 */
@@ -201,7 +201,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the test given the input parameters.
-	 * 
+	 *
 	 * @param isManagedObjectOutside
 	 *            Flag indicating the {@link ManagedObject} is handling external
 	 *            events.
@@ -263,7 +263,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Validates the {@link Task} was invoked.
-	 * 
+	 *
 	 * @param parameter
 	 *            Expected parameter.
 	 * @param managedObject
@@ -288,7 +288,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Initiates the {@link OfficeFloor} with the {@link ManagedObject}
 	 * available as per input flags.
-	 * 
+	 *
 	 * @param isManagedObjectOutside
 	 *            Flag indicating the {@link ManagedObject} is handling external
 	 *            events.
@@ -402,7 +402,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * {@link ManagedObjectSource} has an external event that triggers
 		 * functionality to handle it.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter providing detail of the event to be passed to
 		 *            the initial {@link Task}.
@@ -433,7 +433,9 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			// Determine if load the flow
 			if (isLoadFlow) {
 				// Load the flow
-				context.addFlow(Flows.FLOW, Object.class);
+				Labeller labeller = context.addFlow(Flows.FLOW, Object.class);
+				assertEquals("Incorrect flow index", Flows.FLOW.ordinal(),
+						labeller.getIndex());
 			}
 		}
 
@@ -497,7 +499,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * {@link Task} executed by the external event.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter to the {@link Task}.
 		 */
@@ -508,7 +510,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * {@link Task} invoked that depends on {@link ManagedObject}.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter to the {@link Task}.
 		 * @param managedObject
