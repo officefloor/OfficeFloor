@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.ssl.impl;
+package net.officefloor.plugin.socket.ssl.protocol;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
-import net.officefloor.plugin.socket.server.ssl.impl.SslConnectionImpl;
+import net.officefloor.plugin.socket.server.ssl.protocol.SslConnectionImpl;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.impl.BufferStreamImpl;
@@ -34,17 +34,27 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
  *
  * @author Daniel Sagenschneider
  */
-public class SslConnectionTest extends AbstractSslConnectionTestCase {
+public class SslConnectionPartialDataTest extends AbstractSslConnectionTestCase {
 
 	/**
-	 * Stream of data from client to server.
+	 * Stream of data from client to wire.
 	 */
-	private BufferStream clientToServerStream;
+	private BufferStream clientToWireStream;
 
 	/**
-	 * Stream of data from server to client;
+	 * Stream of data from wire to server.
 	 */
-	private BufferStream serverToClientStream;
+	private BufferStream wireToServerStream;
+
+	/**
+	 * Stream of data from server to wire;
+	 */
+	private BufferStream serverToWireStream;
+
+	/**
+	 * Stream of data from wire to client.
+	 */
+	private BufferStream wireToClientStream;
 
 	/*
 	 * ================== AbstractSslConnectionTest ============================
@@ -56,8 +66,10 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		// Create the connection streams
 		BufferSquirtFactory squirtFactory = new HeapByteBufferSquirtFactory(
 				1024);
-		this.clientToServerStream = new BufferStreamImpl(squirtFactory);
-		this.serverToClientStream = new BufferStreamImpl(squirtFactory);
+		this.clientToWireStream = new BufferStreamImpl(squirtFactory);
+		this.wireToServerStream = new BufferStreamImpl(squirtFactory);
+		this.serverToWireStream = new BufferStreamImpl(squirtFactory);
+		this.wireToClientStream = new BufferStreamImpl(squirtFactory);
 
 		// Obtain the SSL Context
 		SSLContext sslContext = SSLContext.getDefault();
@@ -68,9 +80,9 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		serverEngine.setEnabledCipherSuites(serverEngine
 				.getSupportedCipherSuites());
 		this.server = new SslConnectionImpl(new Object(),
-				this.clientToServerStream.getInputBufferStream(),
-				this.serverToClientStream.getOutputBufferStream(),
-				serverEngine, squirtFactory, this, this);
+				this.wireToServerStream.getInputBufferStream(),
+				this.serverToWireStream.getOutputBufferStream(), serverEngine,
+				squirtFactory, this, this);
 
 		// Create the client side of connection
 		SSLEngine clientEngine = sslContext.createSSLEngine("server", 443);
@@ -78,21 +90,35 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		clientEngine.setEnabledCipherSuites(clientEngine
 				.getSupportedCipherSuites());
 		this.client = new SslConnectionImpl(new Object(),
-				this.serverToClientStream.getInputBufferStream(),
-				this.clientToServerStream.getOutputBufferStream(),
-				clientEngine, squirtFactory, this, this);
+				this.wireToClientStream.getInputBufferStream(),
+				this.clientToWireStream.getOutputBufferStream(), clientEngine,
+				squirtFactory, this, this);
 	}
 
 	@Override
 	protected void transferDataFromClientToServer() throws IOException {
-		// Data already available, only notify server available
-		this.server.processDataFromPeer();
+		while (this.clientToWireStream.available() > 0) {
+
+			// Transfer a byte at a time
+			this.clientToWireStream.read(1, this.wireToServerStream
+					.getOutputBufferStream());
+
+			// Inform server that byte is available
+			this.server.processDataFromPeer();
+		}
 	}
 
 	@Override
 	protected void transferDataFromServerToClient() throws IOException {
-		// Data already available, only notify client available
-		this.client.processDataFromPeer();
+		while (this.serverToWireStream.available() > 0) {
+
+			// Transfer a byte at a time
+			this.serverToWireStream.read(1, this.wireToClientStream
+					.getOutputBufferStream());
+
+			// Inform client that byte is available
+			this.client.processDataFromPeer();
+		}
 	}
 
 }

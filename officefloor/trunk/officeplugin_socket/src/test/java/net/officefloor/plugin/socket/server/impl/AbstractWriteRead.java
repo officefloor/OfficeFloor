@@ -67,7 +67,7 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * {@link Server}.
 	 */
-	private final Server<Indexed, ConnectionHandler> server = new MockServer();
+	private final Server<ConnectionHandler> server = new MockServer();
 
 	/**
 	 * {@link SelectorFactory}.
@@ -82,13 +82,13 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * {@link SocketListener}.
 	 */
-	protected final SocketListener<Indexed, ConnectionHandler> socketListener = new SocketListener<Indexed, ConnectionHandler>(
+	protected final SocketListener<ConnectionHandler> socketListener = new SocketListener<ConnectionHandler>(
 			this.selectorFactory, this.server, 1);
 
 	/**
 	 * {@link ConnectionImpl}.
 	 */
-	protected final ConnectionImpl<Indexed, ConnectionHandler> connection = new ConnectionImpl<Indexed, ConnectionHandler>(
+	protected final ConnectionImpl<ConnectionHandler> connection = new ConnectionImpl<ConnectionHandler>(
 			this.socketChannel, new MockServerSocketHandler(
 					this.connectionHandler),
 			new HeapByteBufferSquirtFactory(64));
@@ -96,13 +96,13 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager<Indexed, ConnectionHandler> connectionManager = new ConnectionManager<Indexed, ConnectionHandler>(
+	private final ConnectionManager<ConnectionHandler> connectionManager = new ConnectionManager<ConnectionHandler>(
 			this.selectorFactory, this.server, 1);
 
 	/**
 	 * {@link TaskContext}.
 	 */
-	private final TaskContext<ConnectionManager<Indexed, ConnectionHandler>, SocketListenerDependencies, Indexed> taskContext = new MockTaskContext(
+	private final TaskContext<ConnectionManager<ConnectionHandler>, SocketListenerDependencies, Indexed> taskContext = new MockTaskContext(
 			this.connectionManager, this.connection);
 
 	/**

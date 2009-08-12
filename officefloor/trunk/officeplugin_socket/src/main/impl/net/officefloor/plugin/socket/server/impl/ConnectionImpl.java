@@ -42,8 +42,8 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
  *
  * @author Daniel Sagenschneider
  */
-public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
-		implements Connection, BufferProcessor, BufferPopulator {
+public class ConnectionImpl<CH extends ConnectionHandler> implements
+		Connection, BufferProcessor, BufferPopulator {
 
 	/**
 	 * {@link SocketChannel} of this {@link Connection}.
@@ -85,7 +85,7 @@ public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * {@link SocketListener} handling this {@link Connection}.
 	 */
-	private SocketListener<F, CH> socketListener;
+	private SocketListener<CH> socketListener;
 
 	/**
 	 * Flag to only notify of write once per check on the {@link Connection}.
@@ -108,7 +108,7 @@ public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
 	 *            {@link BufferSquirtFactory}.
 	 */
 	public ConnectionImpl(NonblockingSocketChannel nonblockingSocketChannel,
-			ServerSocketHandler<?, CH> serverSocketHandler,
+			ServerSocketHandler<CH> serverSocketHandler,
 			BufferSquirtFactory bufferSquirtFactory) {
 		this.socketChannel = nonblockingSocketChannel;
 
@@ -134,7 +134,7 @@ public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @param socketListener
 	 *            {@link SocketListener} handling this {@link Connection}.
 	 */
-	void setSocketListener(SocketListener<F, CH> socketListener) {
+	void setSocketListener(SocketListener<CH> socketListener) {
 		synchronized (this.getLock()) {
 			this.socketListener = socketListener;
 		}
@@ -230,7 +230,7 @@ public class ConnectionImpl<F extends Enum<F>, CH extends ConnectionHandler>
 	void wakeupSocketListener() {
 
 		// Obtain the socket listener
-		SocketListener<F, CH> socketListener;
+		SocketListener<CH> socketListener;
 		synchronized (this.getLock()) {
 			socketListener = this.socketListener;
 		}

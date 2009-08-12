@@ -19,7 +19,7 @@ package net.officefloor.plugin.socket.server.tcp.source;
 
 /**
  * Provides translations of messages.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class Messages {
@@ -32,7 +32,7 @@ public class Messages {
 
 	/**
 	 * Obtains the number of messages.
-	 * 
+	 *
 	 * @return Number of messages.
 	 */
 	public static int getSize() {
@@ -41,7 +41,7 @@ public class Messages {
 
 	/**
 	 * Obtains the particular message.
-	 * 
+	 *
 	 * @param index
 	 *            Index for the message.
 	 * @return Message.
@@ -49,4 +49,5 @@ public class Messages {
 	public static String getMessage(int index) {
 		return messages[index];
 	}
+
 }

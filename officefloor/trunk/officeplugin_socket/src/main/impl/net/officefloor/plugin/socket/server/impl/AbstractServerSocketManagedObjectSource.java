@@ -18,7 +18,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
+import java.nio.channels.ServerSocketChannel;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -29,6 +29,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
@@ -37,12 +38,12 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
- * Abstract {@link ManagedObjectSource} for a {@link ServerSocket}.
+ * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
  *
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>, CH extends ConnectionHandler>
-		extends AbstractManagedObjectSource<None, F> {
+public abstract class AbstractServerSocketManagedObjectSource<CH extends ConnectionHandler>
+		extends AbstractManagedObjectSource<None, Indexed> {
 
 	/**
 	 * Port property name.
@@ -65,14 +66,19 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 	private final SelectorFactory selectorFactory;
 
 	/**
+	 * {@link CommunicationProtocol}.
+	 */
+	private final CommunicationProtocol<CH> communicationProtocol;
+
+	/**
 	 * {@link ServerSocketAccepter} that requires binding on starting.
 	 */
-	private ServerSocketAccepter<F, CH> serverSocketAccepter;
+	private ServerSocketAccepter<CH> serverSocketAccepter;
 
 	/**
 	 * {@link Server}.
 	 */
-	private Server<F, CH> server;
+	private Server<CH> server;
 
 	/**
 	 * Default constructor necessary as per {@link ManagedObjectSource}.
@@ -89,6 +95,14 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 	 */
 	AbstractServerSocketManagedObjectSource(SelectorFactory selectorFactory) {
 		this.selectorFactory = selectorFactory;
+
+		// Create the communication protocol
+		CommunicationProtocol<CH> commProtocol = this
+				.createCommunicationProtocol();
+
+		// Provide possible wrapping around the communication protocol
+		this.communicationProtocol = this
+				.createWrappingCommunicationProtocol(commProtocol);
 	}
 
 	/**
@@ -101,18 +115,31 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 	}
 
 	/**
-	 * Creates the {@link ServerSocketHandler}.
+	 * Creates the {@link CommunicationProtocol}.
 	 *
-	 * @param context
-	 *            {@link MetaDataContext}.
-	 * @param bufferSquirtFactory
-	 *            {@link BufferSquirtFactory}.
-	 * @throws Exception
-	 *             If fails to create the {@link ServerSocketHandler}.
+	 * @return {@link CommunicationProtocol}.
 	 */
-	protected abstract ServerSocketHandler<F, CH> createServerSocketHandler(
-			MetaDataContext<None, F> context,
-			BufferSquirtFactory bufferSquirtFactory) throws Exception;
+	protected abstract CommunicationProtocol<CH> createCommunicationProtocol();
+
+	/**
+	 * <p>
+	 * Creates a wrapping {@link CommunicationProtocol} around the input
+	 * {@link CommunicationProtocol}.
+	 * <p>
+	 * An example would be to add SSL {@link CommunicationProtocol}.
+	 * <p>
+	 * This default implementation returns the input
+	 * {@link CommunicationProtocol} as is.
+	 *
+	 * @param communicationProtocol
+	 *            {@link CommunicationProtocol} to possibly wrap.
+	 * @return This default implementation returns the input
+	 *         {@link CommunicationProtocol} (no wrapping).
+	 */
+	protected CommunicationProtocol<CH> createWrappingCommunicationProtocol(
+			CommunicationProtocol<CH> communicationProtocol) {
+		return communicationProtocol;
+	}
 
 	/*
 	 * =================== AbstractManagedObjectSource ==================
@@ -120,15 +147,19 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
+		// Add required properties for Server Socket
 		context.addProperty(PROPERTY_PORT);
+
+		// Add communication protocol required properties
+		this.communicationProtocol.loadSpecification(context);
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, F> context)
+	protected void loadMetaData(MetaDataContext<None, Indexed> context)
 			throws Exception {
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<F> mosContext = context
+		ManagedObjectSourceContext<Indexed> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain the configuration
@@ -144,16 +175,16 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 				bufferSize);
 
 		// Create the server socket handler and create the server
-		ServerSocketHandler<F, CH> serverSocketHandler = this
+		ServerSocketHandler<CH> serverSocketHandler = this.communicationProtocol
 				.createServerSocketHandler(context, bufferSquirtFactory);
 		this.server = serverSocketHandler.createServer();
 
 		// Create the connection manager
-		ConnectionManager<F, CH> connectionManager = new ConnectionManager<F, CH>(
+		ConnectionManager<CH> connectionManager = new ConnectionManager<CH>(
 				this.selectorFactory, this.server, maxConn);
 
 		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter<F, CH>(
+		this.serverSocketAccepter = new ServerSocketAccepter<CH>(
 				new InetSocketAddress(port), serverSocketHandler,
 				connectionManager, bufferSquirtFactory);
 		ManagedObjectTaskBuilder<None, ServerSocketAccepter.ServerSocketAccepterFlows> accepterTask = mosContext
@@ -178,7 +209,8 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>,
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<F> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<Indexed> context)
+			throws Exception {
 		// Make the execute context available to the server
 		this.server.setManagedObjectExecuteContext(context);
 

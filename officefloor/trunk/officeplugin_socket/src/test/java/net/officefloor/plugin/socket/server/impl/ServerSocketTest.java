@@ -32,6 +32,7 @@ import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.IdleContext;
@@ -47,8 +48,8 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * @author Daniel Sagenschneider
  */
 public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
-		ServerSocketHandler<Indexed, ConnectionHandler>,
-		Server<Indexed, ConnectionHandler>, ConnectionHandler {
+		ServerSocketHandler<ConnectionHandler>, Server<ConnectionHandler>,
+		ConnectionHandler {
 
 	/**
 	 * Request message.
@@ -136,7 +137,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 */
 
 	@Override
-	public Server<Indexed, ConnectionHandler> createServer() {
+	public Server<ConnectionHandler> createServer() {
 		return this;
 	}
 
@@ -216,18 +217,29 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 */
 	@TestSource
 	public static class MockServerSocketManagedObjectSource extends
-			AbstractServerSocketManagedObjectSource<Indexed, ConnectionHandler> {
+			AbstractServerSocketManagedObjectSource<ConnectionHandler> {
 
 		/*
 		 * ========== AbstractServerSocketManagedObjectSource ============
 		 */
 
 		@Override
-		protected ServerSocketHandler<Indexed, ConnectionHandler> createServerSocketHandler(
-				MetaDataContext<None, Indexed> context,
-				BufferSquirtFactory bufferSquirtFactory) throws Exception {
-			context.setObjectClass(Object.class);
-			return ServerSocketTest.INSTANCE;
+		protected CommunicationProtocol<ConnectionHandler> createCommunicationProtocol() {
+			return new CommunicationProtocol<ConnectionHandler>() {
+				@Override
+				public void loadSpecification(SpecificationContext context) {
+					// No specification required for testing
+				}
+
+				@Override
+				public ServerSocketHandler<ConnectionHandler> createServerSocketHandler(
+						MetaDataContext<None, Indexed> context,
+						BufferSquirtFactory bufferSquirtFactory)
+						throws Exception {
+					context.setObjectClass(Object.class);
+					return ServerSocketTest.INSTANCE;
+				}
+			};
 		}
 	}
 

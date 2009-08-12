@@ -15,10 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp.source;
+package net.officefloor.plugin.socket.server.tcp.protocol;
 
 import java.io.IOException;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -28,7 +30,6 @@ import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
@@ -92,18 +93,19 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * <p>
 	 * Called within the lock on the {@link Connection}.
 	 *
+	 * @param newConnectionFlowIndex
+	 *            {@link Flow} index to handle a new connection.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
-	public void invokeProcess(
-			ManagedObjectExecuteContext<TcpServerFlows> executeContext) {
+	public void invokeProcess(int newConnectionFlowIndex,
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 
 		// Only invoke the process once
 		if (!this.isProcessStarted) {
 
 			// Invokes the process
-			executeContext.invokeProcess(TcpServerFlows.NEW_CONNECTION, this,
-					this);
+			executeContext.invokeProcess(newConnectionFlowIndex, this, this);
 
 			// Indicate process started
 			this.isProcessStarted = true;

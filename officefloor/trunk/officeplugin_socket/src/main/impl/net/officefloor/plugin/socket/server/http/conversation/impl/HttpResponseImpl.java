@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.socket.server.http.source.HttpStatus;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;

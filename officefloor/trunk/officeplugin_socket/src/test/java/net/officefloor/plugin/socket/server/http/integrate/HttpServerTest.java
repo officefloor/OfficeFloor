@@ -42,6 +42,7 @@ public class HttpServerTest extends HttpServerStartup {
 
 	@Override
 	protected TaskReference registerHttpServiceTask() throws Exception {
+
 		// Register team to do the work
 		this.constructTeam("WORKER", new OnePersonTeam(100));
 

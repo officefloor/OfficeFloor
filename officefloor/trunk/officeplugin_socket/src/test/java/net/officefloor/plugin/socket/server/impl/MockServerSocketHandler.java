@@ -18,7 +18,6 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
@@ -30,7 +29,7 @@ import net.officefloor.plugin.socket.server.ServerSocketHandler;
  * @author Daniel Sagenschneider
  */
 public class MockServerSocketHandler implements
-		ServerSocketHandler<Indexed, ConnectionHandler> {
+		ServerSocketHandler<ConnectionHandler> {
 
 	/**
 	 * {@link ConnectionHandler}.
@@ -52,7 +51,7 @@ public class MockServerSocketHandler implements
 	 */
 
 	@Override
-	public Server<Indexed, ConnectionHandler> createServer() {
+	public Server<ConnectionHandler> createServer() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
