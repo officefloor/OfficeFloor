@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.integrate;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -24,12 +25,10 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.plugin.socket.server.http.source.HttpServer;
+import net.officefloor.plugin.socket.server.http.protocol.HttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.source.HttpServer.HttpServerFlows;
 
 /**
  * Provides the startup of the {@link HttpServer} for testing.
@@ -71,7 +70,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<HttpServerFlows> serverSocketBuilder = this
+		ManagedObjectBuilder<Indexed> serverSocketBuilder = this
 				.constructManagedObject("MO",
 						HttpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
@@ -83,7 +82,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Have server socket managed by office
-		ManagingOfficeBuilder<HttpServerFlows> managingOfficeBuilder = serverSocketBuilder
+		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
 
@@ -92,12 +91,12 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
 		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");
-		this.constructTeam("CLEANUP_TEAM", new PassiveTeam());
+		this.constructTeam("CLEANUP_TEAM", new OnePersonTeam(100));
+		officeBuilder.registerTeam("of-MO.cleanup", "of-CLEANUP_TEAM");
 
 		// Register the task to service the HTTP request
 		final TaskReference task = this.registerHttpServiceTask();
-		managingOfficeBuilder.linkProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,
-				task.workName, task.taskName);
+		managingOfficeBuilder.linkProcess(0, task.workName, task.taskName);
 
 		// Create and open the Office Floor
 		this.officeFloor = this.constructOfficeFloor();

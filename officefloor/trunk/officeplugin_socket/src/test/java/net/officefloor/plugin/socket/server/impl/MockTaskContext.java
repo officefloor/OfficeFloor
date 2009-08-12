@@ -33,17 +33,17 @@ import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDe
  */
 public class MockTaskContext
 		implements
-		TaskContext<ConnectionManager<Indexed, ConnectionHandler>, SocketListenerDependencies, Indexed> {
+		TaskContext<ConnectionManager<ConnectionHandler>, SocketListenerDependencies, Indexed> {
 
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager<Indexed, ConnectionHandler> connectionManager;
+	private final ConnectionManager<ConnectionHandler> connectionManager;
 
 	/**
 	 * Parameter.
 	 */
-	private final ConnectionImpl<Indexed, ConnectionHandler> parameter;
+	private final ConnectionImpl<ConnectionHandler> parameter;
 
 	/**
 	 * Initiate.
@@ -54,8 +54,8 @@ public class MockTaskContext
 	 *            Parameter.
 	 */
 	public MockTaskContext(
-			ConnectionManager<Indexed, ConnectionHandler> connectionManager,
-			ConnectionImpl<Indexed, ConnectionHandler> parameter) {
+			ConnectionManager<ConnectionHandler> connectionManager,
+			ConnectionImpl<ConnectionHandler> parameter) {
 		this.connectionManager = connectionManager;
 		this.parameter = parameter;
 	}
@@ -98,7 +98,7 @@ public class MockTaskContext
 	}
 
 	@Override
-	public ConnectionManager<Indexed, ConnectionHandler> getWork() {
+	public ConnectionManager<ConnectionHandler> getWork() {
 		return this.connectionManager;
 	}
 

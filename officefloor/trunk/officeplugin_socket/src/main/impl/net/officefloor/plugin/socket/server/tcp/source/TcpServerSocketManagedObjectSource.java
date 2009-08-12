@@ -17,87 +17,28 @@
  */
 package net.officefloor.plugin.socket.server.tcp.source;
 
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.plugin.socket.server.Connection;
-import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
-import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
-import net.officefloor.plugin.stream.BufferSquirtFactory;
+import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
+import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerTcpConnection}.
  *
  * @author Daniel Sagenschneider
  */
-public class TcpServerSocketManagedObjectSource
-		extends
-		AbstractServerSocketManagedObjectSource<TcpServerFlows, TcpConnectionHandler>
-		implements ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> {
-
-	/**
-	 * Property to obtain the maximum idle time before the {@link Connection} is
-	 * closed.
-	 */
-	public static final String PROPERTY_MAXIMUM_IDLE_TIME = "max.idle.time";
-
-	/**
-	 * Maximum idle time before the {@link Connection} is closed.
-	 */
-	private long maxIdleTime;
+public class TcpServerSocketManagedObjectSource extends
+		AbstractServerSocketManagedObjectSource<TcpConnectionHandler> {
 
 	/*
 	 * ============== AbstractServerSocketManagedObjectSource ===============
 	 */
 
 	@Override
-	protected void loadSpecification(SpecificationContext context) {
-		super.loadSpecification(context);
-		context.addProperty(PROPERTY_MAXIMUM_IDLE_TIME);
-	}
-
-	@Override
-	protected ServerSocketHandler<TcpServerFlows, TcpConnectionHandler> createServerSocketHandler(
-			MetaDataContext<None, TcpServerFlows> context,
-			BufferSquirtFactory bufferSquirtFactory) throws Exception {
-		ManagedObjectSourceContext<TcpServerFlows> mosContext = context
-				.getManagedObjectSourceContext();
-
-		// Obtain the maximum idle time
-		this.maxIdleTime = Long.parseLong(mosContext
-				.getProperty(PROPERTY_MAXIMUM_IDLE_TIME));
-
-		// Specify types
-		context.setManagedObjectClass(TcpConnectionHandler.class);
-		context.setObjectClass(ServerTcpConnection.class);
-
-		// Provide the flow to process a new connection
-		context.addFlow(TcpServerFlows.NEW_CONNECTION,
-				ServerTcpConnection.class);
-
-		// Ensure connection is cleaned up when process finished
-		new CleanupTask().registerAsRecycleTask(context
-				.getManagedObjectSourceContext(), "cleanup");
-
-		// Return this as the server socket handler
-		return this;
-	}
-
-	/*
-	 * ==================== ServerSocketHandler ===========================
-	 */
-
-	@Override
-	public Server<TcpServerFlows, TcpConnectionHandler> createServer() {
-		return new TcpServer();
-	}
-
-	@Override
-	public TcpConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(connection, this.maxIdleTime);
+	protected CommunicationProtocol<TcpConnectionHandler> createCommunicationProtocol() {
+		return new TcpCommunicationProtocol();
 	}
 
 }

@@ -43,9 +43,9 @@ import net.officefloor.plugin.stream.InputBufferStream;
  *
  * @author Daniel Sagenschneider
  */
-public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
+public class SocketListener<CH extends ConnectionHandler>
 		implements
-		Task<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed>,
+		Task<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed>,
 		ReadContext, WriteContext, IdleContext {
 
 	/**
@@ -70,7 +70,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * {@link Server}.
 	 */
-	private final Server<F, CH> server;
+	private final Server<CH> server;
 
 	/**
 	 * {@link SelectorFactory}.
@@ -80,7 +80,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * List of {@link InternalCommunication} just registered.
 	 */
-	private final List<ConnectionImpl<F, CH>> justRegistered = new LinkedList<ConnectionImpl<F, CH>>();
+	private final List<ConnectionImpl<CH>> justRegistered = new LinkedList<ConnectionImpl<CH>>();
 
 	/**
 	 * {@link Selector} to aid in listening for connections. This should be
@@ -115,7 +115,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 *            registered with this {@link SocketListener}.
 	 */
 	public SocketListener(SelectorFactory selectorFactory,
-			Server<F, CH> server, int maxCommunications) {
+			Server<CH> server, int maxCommunications) {
 		this.selectorFactory = selectorFactory;
 		this.server = server;
 		this.maxConnections = maxCommunications;
@@ -130,7 +130,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails to register the connection.
 	 */
-	synchronized boolean registerConnection(ConnectionImpl<F, CH> connection)
+	synchronized boolean registerConnection(ConnectionImpl<CH> connection)
 			throws IOException {
 
 		// All connections complete so may not register
@@ -178,7 +178,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object doTask(
-			TaskContext<ConnectionManager<F, CH>, SocketListenerDependencies, Indexed> context)
+			TaskContext<ConnectionManager<CH>, SocketListenerDependencies, Indexed> context)
 			throws Exception {
 
 		// Flag to loop forever
@@ -194,7 +194,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 					this.selector = this.selectorFactory.createSelector();
 
 					// Obtain the Connection
-					ConnectionImpl<F, CH> connection = (ConnectionImpl<F, CH>) context
+					ConnectionImpl<CH> connection = (ConnectionImpl<CH>) context
 							.getObject(SocketListenerDependencies.CONNECTION);
 
 					// Listen to the connection
@@ -226,7 +226,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 			for (SelectionKey key : this.selector.keys()) {
 
 				// Obtain the connection
-				ConnectionImpl<F, CH> connection = (ConnectionImpl<F, CH>) key
+				ConnectionImpl<CH> connection = (ConnectionImpl<CH>) key
 						.attachment();
 
 				// Synchronise on connection to reduce locking
@@ -340,7 +340,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 			}
 
 			// Start listening to the just registered connections
-			for (Iterator<ConnectionImpl<F, CH>> iterator = this.justRegistered
+			for (Iterator<ConnectionImpl<CH>> iterator = this.justRegistered
 					.iterator(); iterator.hasNext();) {
 
 				// Listen to the connection
@@ -381,7 +381,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 *             If fails closing.
 	 */
 	private boolean closeConnection(SelectionKey key,
-			ConnectionImpl<F, CH> connection) throws IOException {
+			ConnectionImpl<CH> connection) throws IOException {
 
 		// Flag the connection to close
 		connection.cancel();
@@ -410,7 +410,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 *             If fails closing.
 	 */
 	private void terminateConnection(SelectionKey key,
-			ConnectionImpl<F, CH> connection) throws IOException {
+			ConnectionImpl<CH> connection) throws IOException {
 
 		// Flag connection as closed
 		connection.cancel();
@@ -431,7 +431,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails to start listening to the {@link Connection}.
 	 */
-	private void listenToConnection(ConnectionImpl<F, CH> connection)
+	private void listenToConnection(ConnectionImpl<CH> connection)
 			throws IOException {
 
 		// On listening to a connection, always read a message
@@ -464,7 +464,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails to handle read.
 	 */
-	int readData(ConnectionImpl<F, CH> connection) throws IOException {
+	int readData(ConnectionImpl<CH> connection) throws IOException {
 
 		// Record the number of bytes read
 		int bytesRead = 0;
@@ -515,7 +515,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @throws IOException
 	 *             If fails to handle write.
 	 */
-	int writeData(ConnectionImpl<F, CH> connection) throws IOException {
+	int writeData(ConnectionImpl<CH> connection) throws IOException {
 
 		// Record the number of bytes written
 		int bytesWritten = 0;
@@ -574,7 +574,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * {@link Connection} of the current {@link ConnectionHandlerContext}.
 	 */
-	private ConnectionImpl<F, CH> contextConnection = null;
+	private ConnectionImpl<CH> contextConnection = null;
 
 	/**
 	 * Resets the context for the {@link Connection}.
@@ -582,7 +582,7 @@ public class SocketListener<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @param connection
 	 *            {@link ConnectionImpl} currently being processed.
 	 */
-	private void resetConnectionContext(ConnectionImpl<F, CH> connection) {
+	private void resetConnectionContext(ConnectionImpl<CH> connection) {
 		this.isCloseConnection = false;
 		this.contextConnection = connection;
 	}

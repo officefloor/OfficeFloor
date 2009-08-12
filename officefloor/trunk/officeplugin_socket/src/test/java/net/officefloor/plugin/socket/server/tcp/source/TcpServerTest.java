@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -34,8 +35,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.tcp.source.TcpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
+import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtocol;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
@@ -79,15 +79,15 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<TcpServerFlows> serverSocketBuilder = this
+		ManagedObjectBuilder<Indexed> serverSocketBuilder = this
 				.constructManagedObject("MO",
 						TcpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(PORT));
 		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_IDLE_TIME,
-				String.valueOf(1000));
+				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String
+						.valueOf(1000));
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams for socket listening
@@ -99,11 +99,10 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		officeBuilder.registerTeam("of-MO.cleanup", "of-CLEANUP_TEAM");
 
 		// Have server socket managed by office
-		ManagingOfficeBuilder<TcpServerFlows> managingOfficeBuilder = serverSocketBuilder
+		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
-		managingOfficeBuilder.linkProcess(TcpServerFlows.NEW_CONNECTION,
-				"servicer", "service");
+		managingOfficeBuilder.linkProcess(0, "servicer", "service");
 
 		// Register the work to process messages
 		ReflectiveWorkBuilder workBuilder = this.constructWork(

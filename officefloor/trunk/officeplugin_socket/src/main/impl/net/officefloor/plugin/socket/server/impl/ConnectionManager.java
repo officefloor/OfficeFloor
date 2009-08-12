@@ -38,11 +38,11 @@ import net.officefloor.plugin.socket.server.impl.ServerSocketAccepter.ServerSock
  *
  * @author Daniel Sagenschneider
  */
-public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
+public class ConnectionManager<CH extends ConnectionHandler>
 		implements
 		Work,
-		WorkFactory<ConnectionManager<F, CH>>,
-		TaskFactory<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed> {
+		WorkFactory<ConnectionManager<CH>>,
+		TaskFactory<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed> {
 
 	/**
 	 * {@link SelectorFactory}.
@@ -52,7 +52,7 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * {@link Server}.
 	 */
-	private final Server<F, CH> server;
+	private final Server<CH> server;
 
 	/**
 	 * Maximum {@link Connection} instances per {@link SocketListener}.
@@ -62,7 +62,7 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	/**
 	 * Listing of active {@link SocketListener} instances.
 	 */
-	private final List<SocketListener<F, CH>> socketListeners = new LinkedList<SocketListener<F, CH>>();
+	private final List<SocketListener<CH>> socketListeners = new LinkedList<SocketListener<CH>>();
 
 	/**
 	 * Initiate.
@@ -76,7 +76,7 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	 *             If fails creation.
 	 */
 	public ConnectionManager(SelectorFactory selectorFactory,
-			Server<F, CH> server, int maxConnPerListener) {
+			Server<CH> server, int maxConnPerListener) {
 		this.selectorFactory = selectorFactory;
 		this.server = server;
 		this.maxConnPerListener = maxConnPerListener;
@@ -93,13 +93,13 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	 *             If fails registering the {@link Connection}.
 	 */
 	void registerConnection(
-			ConnectionImpl<F, CH> connection,
-			TaskContext<ServerSocketAccepter<F, CH>, None, ServerSocketAccepterFlows> taskContext)
+			ConnectionImpl<CH> connection,
+			TaskContext<ServerSocketAccepter<CH>, None, ServerSocketAccepterFlows> taskContext)
 			throws IOException {
 
 		// Attempt to register with an existing socket listener
 		synchronized (this.socketListeners) {
-			for (SocketListener<F, CH> listener : this.socketListeners) {
+			for (SocketListener<CH> listener : this.socketListeners) {
 				if (listener.registerConnection(connection)) {
 					// Registered
 					return;
@@ -118,7 +118,7 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	 * @param socketListener
 	 *            Completed {@link SocketListener}.
 	 */
-	void socketListenerComplete(SocketListener<F, CH> socketListener) {
+	void socketListenerComplete(SocketListener<CH> socketListener) {
 		synchronized (this.socketListeners) {
 			this.socketListeners.remove(socketListener);
 		}
@@ -129,7 +129,7 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	 */
 
 	@Override
-	public ConnectionManager<F, CH> createWork() {
+	public ConnectionManager<CH> createWork() {
 		return this;
 	}
 
@@ -138,11 +138,11 @@ public class ConnectionManager<F extends Enum<F>, CH extends ConnectionHandler>
 	 */
 
 	@Override
-	public Task<ConnectionManager<F, CH>, SocketListener.SocketListenerDependencies, Indexed> createTask(
-			ConnectionManager<F, CH> work) {
+	public Task<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed> createTask(
+			ConnectionManager<CH> work) {
 
 		// Create the socket listener
-		SocketListener<F, CH> socketListener = new SocketListener<F, CH>(
+		SocketListener<CH> socketListener = new SocketListener<CH>(
 				this.selectorFactory, this.server, this.maxConnPerListener);
 
 		// Register the socket listener

@@ -29,7 +29,7 @@ import net.officefloor.plugin.socket.server.Server;
  *
  * @author Daniel Sagenschneider
  */
-public class MockServer implements Server<Indexed, ConnectionHandler> {
+public class MockServer implements Server<ConnectionHandler> {
 
 	/*
 	 * ================== Server ==============================

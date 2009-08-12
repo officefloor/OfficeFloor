@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.tcp.source;
+package net.officefloor.plugin.socket.server.tcp.protocol;
 
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.impl.AbstractWriteRead;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
+import net.officefloor.plugin.socket.server.tcp.protocol.TcpConnectionHandler;
 
 /**
  * Tests the {@link TcpConnectionHandler}.

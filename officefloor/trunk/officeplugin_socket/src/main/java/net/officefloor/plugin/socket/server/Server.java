@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server;
 
 import java.io.IOException;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 
@@ -30,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
  *
  * @author Daniel Sagenschneider
  */
-public interface Server<F extends Enum<F>, CH extends ConnectionHandler> {
+public interface Server<CH extends ConnectionHandler> {
 
 	/**
 	 * Provides the {@link Server} the {@link ManagedObjectExecuteContext} to
@@ -40,7 +41,7 @@ public interface Server<F extends Enum<F>, CH extends ConnectionHandler> {
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
 	void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<F> executeContext);
+			ManagedObjectExecuteContext<Indexed> executeContext);
 
 	/**
 	 * <p>

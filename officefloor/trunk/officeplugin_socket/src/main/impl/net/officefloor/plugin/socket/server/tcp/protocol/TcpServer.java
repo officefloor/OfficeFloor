@@ -15,57 +15,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.source;
+package net.officefloor.plugin.socket.server.tcp.protocol;
 
 import java.io.IOException;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.Server;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 
 /**
- * HTTP {@link Server}.
+ * TCP {@link Server}.
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServer implements
-		Server<HttpServer.HttpServerFlows, HttpConnectionHandler> {
+public class TcpServer implements Server<TcpConnectionHandler> {
 
 	/**
-	 * {@link Flow} to handle the {@link HttpRequest}.
+	 * {@link Flow} index to handle a new connection.
 	 */
-	public static enum HttpServerFlows {
-		HANDLE_HTTP_REQUEST
-	}
+	private final int newConnectionFlowIndex;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private ManagedObjectExecuteContext<HttpServerFlows> executeContext;
+	private ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * Initiate.
+	 *
+	 * @param newConnectionFlowIndex
+	 *            {@link Flow} index to handle a new connection.
+	 */
+	public TcpServer(int newConnectionFlowIndex) {
+		this.newConnectionFlowIndex = newConnectionFlowIndex;
+	}
 
 	/*
-	 * ====================== Server ==================================
+	 * ==================== Server ====================================
 	 */
 
 	@Override
 	public void setManagedObjectExecuteContext(
-			ManagedObjectExecuteContext<HttpServerFlows> executeContext) {
+			ManagedObjectExecuteContext<Indexed> executeContext) {
 		this.executeContext = executeContext;
 	}
 
 	@Override
-	public void processRequest(HttpConnectionHandler connectionHandler,
+	public void processRequest(TcpConnectionHandler connectionHandler,
 			Object attachment) throws IOException {
 
-		// Obtain the HTTP managed object
-		HttpManagedObject managedObject = (HttpManagedObject) attachment;
-
-		// Invoke processing of the HTTP managed object
-		this.executeContext.invokeProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,
-				managedObject.getServerHttpConnection(), managedObject,
-				managedObject.getEscalationHandler());
+		// Invoke the process to handle message
+		connectionHandler.invokeProcess(this.newConnectionFlowIndex,
+				this.executeContext);
 	}
 
 }

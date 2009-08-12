@@ -40,9 +40,9 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  *
  * @author Daniel Sagenschneider
  */
-public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandler>
+public class ServerSocketAccepter<CH extends ConnectionHandler>
 		extends
-		AbstractSingleTask<ServerSocketAccepter<F, CH>, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
+		AbstractSingleTask<ServerSocketAccepter<CH>, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
 
 	/**
 	 * {@link Flow} instances for the {@link ServerSocketAccepter}.
@@ -54,7 +54,7 @@ public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandle
 	/**
 	 * {@link ConnectionManager}.
 	 */
-	private final ConnectionManager<F, CH> connectionManager;
+	private final ConnectionManager<CH> connectionManager;
 
 	/**
 	 * {@link BufferSquirtFactory}.
@@ -64,7 +64,7 @@ public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandle
 	/**
 	 * {@link ServerSocketHandler}.
 	 */
-	private final ServerSocketHandler<?, CH> serverSocketHandler;
+	private final ServerSocketHandler<CH> serverSocketHandler;
 
 	/**
 	 * {@link InetSocketAddress} to listen for connections.
@@ -86,8 +86,8 @@ public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandle
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
 	public ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			ServerSocketHandler<F, CH> serverSocketHandler,
-			ConnectionManager<F, CH> connectionManager,
+			ServerSocketHandler<CH> serverSocketHandler,
+			ConnectionManager<CH> connectionManager,
 			BufferSquirtFactory bufferSquirtFactory) throws IOException {
 		this.serverSocketHandler = serverSocketHandler;
 		this.connectionManager = connectionManager;
@@ -129,7 +129,7 @@ public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandle
 
 	@Override
 	public Object doTask(
-			TaskContext<ServerSocketAccepter<F, CH>, None, ServerSocketAccepterFlows> context)
+			TaskContext<ServerSocketAccepter<CH>, None, ServerSocketAccepterFlows> context)
 			throws Exception {
 
 		// Loop accepting connections
@@ -160,7 +160,7 @@ public class ServerSocketAccepter<F extends Enum<F>, CH extends ConnectionHandle
 							socketChannel.configureBlocking(false);
 
 							// Create the connection
-							ConnectionImpl<F, CH> connection = new ConnectionImpl<F, CH>(
+							ConnectionImpl<CH> connection = new ConnectionImpl<CH>(
 									new NonblockingSocketChannelImpl(
 											socketChannel),
 									this.serverSocketHandler,
