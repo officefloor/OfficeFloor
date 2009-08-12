@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.ssl.ByteArrayFactory;
+import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -32,7 +32,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
-		implements ByteArrayFactory, SslTaskExecutor {
+		implements TemporaryByteArrayFactory, SslTaskExecutor {
 
 	/**
 	 * Server side of the {@link SslConnection}.
@@ -174,20 +174,39 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 	 */
 
 	/**
-	 * Allow reuse of byte array.
+	 * Allow reuse of source byte array.
 	 */
-	private byte[] byteArray = null;
+	private byte[] sourceByteArray = null;
 
 	@Override
-	public byte[] createByteArray(int minimumSize) {
+	public byte[] createSourceByteArray(int minimumSize) {
 
 		// Ensure have byte array of minimum size
-		if ((this.byteArray == null) || (this.byteArray.length < minimumSize)) {
-			this.byteArray = new byte[minimumSize];
+		if ((this.sourceByteArray == null)
+				|| (this.sourceByteArray.length < minimumSize)) {
+			this.sourceByteArray = new byte[minimumSize];
 		}
 
 		// Return the byte array
-		return this.byteArray;
+		return this.sourceByteArray;
+	}
+
+	/**
+	 * Allow reuse of destination byte array.
+	 */
+	private byte[] destinationByteArray = null;
+
+	@Override
+	public byte[] createDestinationByteArray(int minimumSize) {
+
+		// Ensure have byte array of minimum size
+		if ((this.destinationByteArray == null)
+				|| (this.destinationByteArray.length < minimumSize)) {
+			this.destinationByteArray = new byte[minimumSize];
+		}
+
+		// Return the byte array
+		return this.destinationByteArray;
 	}
 
 	/*

@@ -86,8 +86,7 @@ public class InputBufferStreamImpl implements InputBufferStream {
 	@Override
 	public int read(int numberOfBytes, GatheringBufferProcessor processor)
 			throws IOException {
-		// TODO Implement InputBufferStream.read
-		throw new UnsupportedOperationException("InputBufferStream.read");
+		return this.bufferStream.read(numberOfBytes, processor);
 	}
 
 	@Override
