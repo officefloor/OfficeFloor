@@ -387,6 +387,26 @@ public class SslConnectionImpl implements SslConnection {
 							this.inputBuffer.write(tempBytes, 0, result
 									.bytesProduced());
 							break;
+						case CLOSED:
+							// Should be no application input data on close.
+							// Determine if in close handshake.
+							HandshakeStatus closeHandshakeStatus = this.engine
+									.getHandshakeStatus();
+							switch (closeHandshakeStatus) {
+							case NEED_TASK:
+							case NEED_UNWRAP:
+							case NEED_WRAP:
+								// Allow close handshake to proceed
+								break;
+							case NOT_HANDSHAKING:
+								// Close handshake complete, clean up resources
+								this.cleanupResources();
+								break;
+							default:
+								throw new IllegalStateException(
+										"Unknown status " + status);
+							}
+							break;
 						default:
 							throw new IllegalStateException("Unknown status "
 									+ status);
@@ -419,6 +439,29 @@ public class SslConnectionImpl implements SslConnection {
 							this.outputDelegate.write(tempBytes, 0, result
 									.bytesProduced());
 							break;
+						case CLOSED:
+							// Transfer close handshake data to output delegate
+							this.outputDelegate.write(tempBytes, 0, result
+									.bytesProduced());
+
+							// Determine if in close handshake
+							HandshakeStatus closeHandshakeStatus = this.engine
+									.getHandshakeStatus();
+							switch (closeHandshakeStatus) {
+							case NEED_TASK:
+							case NEED_UNWRAP:
+							case NEED_WRAP:
+								// Allow close handshake to proceed
+								break;
+							case NOT_HANDSHAKING:
+								// Close handshake complete, clean up resources
+								this.cleanupResources();
+								break;
+							default:
+								throw new IllegalStateException(
+										"Unknown status " + status);
+							}
+							break;
 						default:
 							throw new IllegalStateException("Unknown status "
 									+ status);
@@ -435,6 +478,24 @@ public class SslConnectionImpl implements SslConnection {
 			// Record failure of processing to fail further interaction
 			this.failure = ex;
 		}
+	}
+
+	/**
+	 * Cleans up the resources.
+	 *
+	 * @throws IOException
+	 *             If fails to clean up resources.
+	 */
+	private void cleanupResources() throws IOException {
+		// Close input streams
+		this.inputDelegate.close();
+		this.inputBuffer.closeInput();
+		this.inputBuffer.closeOutput();
+
+		// Close output streams
+		this.outputDelegate.close();
+		this.outputBuffer.closeInput();
+		this.outputBuffer.closeOutput();
 	}
 
 	/*
@@ -545,7 +606,9 @@ public class SslConnectionImpl implements SslConnection {
 		@Override
 		public void close() throws IOException {
 			SslConnectionImpl.this.ensureNoFailure();
-			this.delegate.close();
+
+			// Trigger close of connection and process to close gracefully
+			SslConnectionImpl.this.engine.closeOutbound();
 			SslConnectionImpl.this.process();
 		}
 	}
@@ -598,7 +661,9 @@ public class SslConnectionImpl implements SslConnection {
 		@Override
 		public void close() throws IOException {
 			SslConnectionImpl.this.ensureNoFailure();
-			this.delegate.close();
+
+			// Trigger close of connection and process to close gracefully
+			SslConnectionImpl.this.engine.closeOutbound();
 			SslConnectionImpl.this.process();
 		}
 	}

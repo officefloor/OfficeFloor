@@ -23,13 +23,16 @@ import javax.net.ssl.SSLEngine;
 
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
+import net.officefloor.plugin.socket.server.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.IdleContext;
 import net.officefloor.plugin.socket.server.ReadContext;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
 import net.officefloor.plugin.socket.server.WriteContext;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * SSL {@link ConnectionHandler}.
@@ -37,7 +40,8 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * @author Daniel Sagenschneider
  */
 public class SslConnectionHandler<CH extends ConnectionHandler> implements
-		ConnectionHandler {
+		ConnectionHandler, TemporaryByteArrayFactory, ReadContext,
+		WriteContext, IdleContext {
 
 	/**
 	 * {@link SslConnection}.
@@ -48,6 +52,28 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 * Wrapped {@link ConnectionHandler}.
 	 */
 	private final CH wrappedConnectionHandler;
+
+	/**
+	 * <p>
+	 * {@link SslContextObject}.
+	 * <p>
+	 * <code>volatile</code> as {@link TemporaryByteArrayFactory} will require
+	 * to use it from another thread. As set only once on first read, it will
+	 * always be available.
+	 */
+	private volatile SslContextObject contextObject;
+
+	/**
+	 * To enable wrapped {@link ConnectionHandler} to use context object, need
+	 * to intercept this and delegate to the {@link SslContextObject} to
+	 * provide.
+	 */
+	private ConnectionHandlerContext connectionHandlerContext;
+
+	/**
+	 * {@link ReadContext} for additional read methods.
+	 */
+	private ReadContext readContext;
 
 	/**
 	 * Initiate.
@@ -73,7 +99,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 				connection.getInetAddress(), connection.getPort(), connection
 						.getInputBufferStream(), connection
 						.getOutputBufferStream(), engine, bufferSquirtFactory,
-				null, taskExecutor);
+				this, taskExecutor);
 
 		// Create the connection handler to wrap
 		this.wrappedConnectionHandler = wrappedServerSocketHandler
@@ -96,23 +122,154 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	@Override
 	public void handleRead(ReadContext context) throws IOException {
 
+		// Ensure have SSL context object
+		if (this.contextObject == null) {
+			// Attempt to obtain shared context object (via double check lock)
+			this.contextObject = (SslContextObject) context.getContextObject();
+			if (this.contextObject == null) {
+				synchronized (context) {
+					this.contextObject = (SslContextObject) context
+							.getContextObject();
+					if (this.contextObject == null) {
+						// Create as first handle read for context
+						this.contextObject = new SslContextObject();
+						context.setContextObject(this.contextObject);
+					}
+				}
+			}
+		}
+
 		// Process the data from peer
 		this.connection.processDataFromPeer();
 
 		// Always handle read even if no application data (stop timeouts)
-		this.wrappedConnectionHandler.handleRead(context);
+		this.connectionHandlerContext = context;
+		this.readContext = context;
+		this.wrappedConnectionHandler.handleRead(this);
 	}
 
 	@Override
 	public void handleWrite(WriteContext context) throws IOException {
 		// Delegate to wrapped handler
-		this.wrappedConnectionHandler.handleWrite(context);
+		this.connectionHandlerContext = context;
+		this.wrappedConnectionHandler.handleWrite(this);
 	}
 
 	@Override
 	public void handleIdleConnection(IdleContext context) throws IOException {
 		// Delegate to wrapped handler
-		this.wrappedConnectionHandler.handleIdleConnection(context);
+		this.connectionHandlerContext = context;
+		this.wrappedConnectionHandler.handleIdleConnection(this);
+	}
+
+	/*
+	 * ================= TemporaryByteArrayFactory =============================
+	 */
+
+	@Override
+	public byte[] createDestinationByteArray(int minimumSize) {
+
+		// TODO remove once stress testing working
+		if (true) return new byte[minimumSize];
+
+		// Obtain existing array (context will always be available)
+		byte[] array = this.contextObject.destinationBytes;
+
+		// Ensure have array and is big enough
+		if ((array == null) || (array.length < minimumSize)) {
+			// Increase array size to minimum size required
+			array = new byte[minimumSize];
+
+			// Make larger array available for further processing
+			this.contextObject.destinationBytes = array;
+		}
+
+		// Return the array
+		return array;
+	}
+
+	@Override
+	public byte[] createSourceByteArray(int minimumSize) {
+
+		// TODO remove once stress testing working
+		if (true) return new byte[minimumSize];
+
+		// Obtain existing array (context will always be available)
+		byte[] array = this.contextObject.sourceBytes;
+
+		// Ensure have array and is big enough
+		if ((array == null) || (array.length < minimumSize)) {
+			// Increase array size to minimum size required
+			array = new byte[minimumSize];
+
+			// Make larger array available for further processing
+			this.contextObject.sourceBytes = array;
+		}
+
+		// Return the array
+		return array;
+	}
+
+	/*
+	 * ===================== ConnectionHandlerContext =========================
+	 */
+
+	@Override
+	public long getTime() {
+		return this.connectionHandlerContext.getTime();
+	}
+
+	@Override
+	public void setCloseConnection(boolean isClose) {
+		this.connectionHandlerContext.setCloseConnection(isClose);
+	}
+
+	@Override
+	public Object getContextObject() {
+		// Use context object wrapped object
+		return this.contextObject.wrappedContextObject;
+	}
+
+	@Override
+	public void setContextObject(Object contextObject) {
+		// Use context object wrapped object
+		this.contextObject.wrappedContextObject = contextObject;
+	}
+
+	/*
+	 * ==================== ReadContext =====================================
+	 */
+
+	@Override
+	public InputBufferStream getInputBufferStream() {
+		return this.readContext.getInputBufferStream();
+	}
+
+	@Override
+	public void processRequest(Object attachment) throws IOException {
+		this.readContext.processRequest(attachment);
+	}
+
+	/**
+	 * {@link ConnectionHandlerContext} context object for SSL.
+	 */
+	private class SslContextObject {
+
+		/**
+		 * Sources bytes for {@link TemporaryByteArrayFactory}.
+		 */
+		public volatile byte[] sourceBytes = null;
+
+		/**
+		 * Destination bytes for {@link TemporaryByteArrayFactory}.
+		 */
+		public volatile byte[] destinationBytes = null;
+
+		/**
+		 * Wrapped context object.
+		 */
+		public Object wrappedContextObject = null;
+
 	}
 
 }

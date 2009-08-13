@@ -27,6 +27,9 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
@@ -34,7 +37,9 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.Server;
 import net.officefloor.plugin.socket.server.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.ssl.SslEngineConfigurator;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.socket.server.ssl.protocol.SslTaskWork.SslTaskDependencies;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
@@ -46,7 +51,24 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		CommunicationProtocol<SslConnectionHandler<CH>>,
 		ServerSocketHandler<SslConnectionHandler<CH>>,
-		Server<SslConnectionHandler<CH>>, SslTaskExecutor {
+		Server<SslConnectionHandler<CH>>, SslTaskExecutor,
+		SslEngineConfigurator {
+
+	/**
+	 * Property to specify the SSL protocol to use.
+	 */
+	public static final String PROPERTY_SSL_PROTOCOL = "ssl.protocol";
+
+	/**
+	 * Property to specify the SSL provider to use.
+	 */
+	public static final String PROPERTY_SSL_PROVIDER = "ssl.provider";
+
+	/**
+	 * Property to obtain the optional {@link SslEngineConfigurator} to
+	 * configure the {@link SSLEngine} instances for use.
+	 */
+	public static final String PROPERTY_SSL_ENGINE_CONFIGURATOR = "ssl.engine.configurator.class";
 
 	/**
 	 * Wrapped {@link CommunicationProtocol}.
@@ -67,6 +89,11 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	 * {@link SSLContext}.
 	 */
 	private SSLContext sslContext;
+
+	/**
+	 * {@link SslEngineConfigurator}.
+	 */
+	private SslEngineConfigurator sslEngineConfigurator;
 
 	/**
 	 * {@link BufferSquirtFactory}.
@@ -101,8 +128,6 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 
 	@Override
 	public void loadSpecification(SpecificationContext context) {
-		// TODO load SSL specification
-
 		// Load wrapped communication specification
 		this.wrappedCommunicationProtocol.loadSpecification(context);
 	}
@@ -111,14 +136,47 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	public ServerSocketHandler<SslConnectionHandler<CH>> createServerSocketHandler(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = context
+				.getManagedObjectSourceContext();
 
 		// Create the server socket handler to wrap
 		this.wrappedServerSocketHandler = this.wrappedCommunicationProtocol
 				.createServerSocketHandler(context, bufferSquirtFactory);
 
 		// Create the SSL context
-		// TODO consider allowing specifying specific SSL context
-		this.sslContext = SSLContext.getDefault();
+		String sslProtocol = mosContext
+				.getProperty(PROPERTY_SSL_PROTOCOL, null);
+		if (sslProtocol == null) {
+			// Use default SSL context
+			this.sslContext = SSLContext.getDefault();
+		} else {
+			String sslProvider = mosContext.getProperty(PROPERTY_SSL_PROVIDER,
+					null);
+			if (sslProvider == null) {
+				// Use default SSL provider for protocol
+				this.sslContext = SSLContext.getInstance(sslProtocol);
+			} else {
+				// Use specific SSL protocol and provider
+				this.sslContext = SSLContext.getInstance(sslProtocol,
+						sslProvider);
+			}
+		}
+
+		// Obtain the SSL Engine Configurator
+		String sslEngineConfiguratorClassName = mosContext.getProperty(
+				PROPERTY_SSL_ENGINE_CONFIGURATOR, null);
+		if (sslEngineConfiguratorClassName == null) {
+			// Use this as default
+			this.sslEngineConfigurator = this;
+		} else {
+			// Instantiate specified
+			this.sslEngineConfigurator = (SslEngineConfigurator) mosContext
+					.getClassLoader().loadClass(sslEngineConfiguratorClassName)
+					.newInstance();
+		}
+
+		// Initialise the SSL Engine Configurator
+		this.sslEngineConfigurator.init(this.sslContext);
 
 		// Store the buffer squirt factory for creating SSL connections
 		this.bufferSquirtFactory = bufferSquirtFactory;
@@ -126,6 +184,15 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		// Create the flow to execute the SSL tasks
 		this.sslTaskFlowIndex = context.addFlow(Runnable.class).setLabel(
 				"SSL_TASKS").getIndex();
+		SslTaskWork sslTaskExecution = new SslTaskWork();
+		ManagedObjectWorkBuilder<SslTaskWork> work = mosContext.addWork(
+				"SSL_TASK_EXECUTOR", sslTaskExecution);
+		ManagedObjectTaskBuilder<SslTaskDependencies, None> task = work
+				.addTask("SSL_TASK_EXECUTOR", sslTaskExecution);
+		task.linkParameter(SslTaskDependencies.TASK, Runnable.class);
+		task.setTeam("SSL_TASKS");
+		mosContext.linkProcess(this.sslTaskFlowIndex, "SSL_TASK_EXECUTOR",
+				"SSL_TASK_EXECUTOR");
 
 		// Return this wrapping the server socket handler
 		return this;
@@ -156,7 +223,8 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		// Create the server SSL engine
 		SSLEngine engine = this.sslContext.createSSLEngine(remoteInetAddress
 				.getHostAddress(), remotePort);
-		engine.setUseClientMode(false);
+		this.sslEngineConfigurator.configureSslEngine(engine);
+		engine.setUseClientMode(false); // Always in server mode
 
 		// Create the SSL connection wrapping the connection
 		SslConnectionHandler<CH> connectionHandler = new SslConnectionHandler<CH>(
@@ -174,6 +242,10 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	@Override
 	public void setManagedObjectExecuteContext(
 			ManagedObjectExecuteContext<Indexed> executeContext) {
+
+		// Store execution context for executing SSL tasks
+		this.executeContext = executeContext;
+
 		// Provide execution context to wrapped server
 		this.wrappedServer.setManagedObjectExecuteContext(executeContext);
 	}
@@ -199,4 +271,19 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		// Invoke process to execute the task
 		this.executeContext.invokeProcess(this.sslTaskFlowIndex, task, null);
 	}
+
+	/*
+	 * ===================== SslEngineConfigurator ============================
+	 */
+
+	@Override
+	public void init(SSLContext context) throws Exception {
+		// Default implementation that leaves context in default state
+	}
+
+	@Override
+	public void configureSslEngine(SSLEngine engine) {
+		// Default implementation that leaves engine in default state
+	}
+
 }
