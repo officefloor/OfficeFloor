@@ -18,6 +18,8 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -25,7 +27,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.impl.NonblockingSocketChannel;
 
 /**
  * Mock {@link NonblockingSocketChannel} that provides mock data.
@@ -207,6 +208,21 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 		// Return the selection key
 		return this.selectionKey;
+	}
+
+	@Override
+	public InetAddress getInetAddress() {
+		try {
+			return InetAddress.getLocalHost();
+		} catch (UnknownHostException ex) {
+			TestCase.fail("Should always be able to obtain localhost");
+			return null;
+		}
+	}
+
+	@Override
+	public int getPort() {
+		return 10000;
 	}
 
 	@Override

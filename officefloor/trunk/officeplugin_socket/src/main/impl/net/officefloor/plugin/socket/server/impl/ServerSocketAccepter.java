@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
@@ -205,6 +206,16 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		public SelectionKey register(Selector selector, int ops,
 				Object attachment) throws IOException {
 			return this.socketChannel.register(selector, ops, attachment);
+		}
+
+		@Override
+		public InetAddress getInetAddress() {
+			return this.socketChannel.socket().getInetAddress();
+		}
+
+		@Override
+		public int getPort() {
+			return this.socketChannel.socket().getPort();
 		}
 
 		@Override

@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -302,6 +303,16 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	@Override
 	public Object getLock() {
 		return this;
+	}
+
+	@Override
+	public InetAddress getInetAddress() {
+		return this.socketChannel.getInetAddress();
+	}
+
+	@Override
+	public int getPort() {
+		return this.socketChannel.getPort();
 	}
 
 	@Override

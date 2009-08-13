@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -43,8 +44,9 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
  * @author Daniel Sagenschneider
  */
 public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
-		CommunicationProtocol<CH>, ServerSocketHandler<CH>, Server<CH>,
-		SslTaskExecutor {
+		CommunicationProtocol<SslConnectionHandler<CH>>,
+		ServerSocketHandler<SslConnectionHandler<CH>>,
+		Server<SslConnectionHandler<CH>>, SslTaskExecutor {
 
 	/**
 	 * Wrapped {@link CommunicationProtocol}.
@@ -106,7 +108,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	public ServerSocketHandler<CH> createServerSocketHandler(
+	public ServerSocketHandler<SslConnectionHandler<CH>> createServerSocketHandler(
 			MetaDataContext<None, Indexed> context,
 			BufferSquirtFactory bufferSquirtFactory) throws Exception {
 
@@ -134,7 +136,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	 */
 
 	@Override
-	public Server<CH> createServer() {
+	public Server<SslConnectionHandler<CH>> createServer() {
 
 		// Create the server to wrap
 		this.wrappedServer = this.wrappedServerSocketHandler.createServer();
@@ -144,12 +146,16 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public CH createConnectionHandler(Connection connection) {
+	public SslConnectionHandler<CH> createConnectionHandler(
+			Connection connection) {
+
+		// Obtain the remote connection details
+		InetAddress remoteInetAddress = connection.getInetAddress();
+		int remotePort = connection.getPort();
 
 		// Create the server SSL engine
-		// TODO provide client host and port on connection
-		SSLEngine engine = this.sslContext.createSSLEngine();
+		SSLEngine engine = this.sslContext.createSSLEngine(remoteInetAddress
+				.getHostAddress(), remotePort);
 		engine.setUseClientMode(false);
 
 		// Create the SSL connection wrapping the connection
@@ -158,7 +164,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 				this.wrappedServerSocketHandler);
 
 		// Return the SSL connection handler
-		return (CH) connectionHandler;
+		return connectionHandler;
 	}
 
 	/*
@@ -173,15 +179,11 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void processRequest(CH connectionHandler, Object attachment)
-			throws IOException {
-
-		// Downcast connection handler to SSL connection handler
-		SslConnectionHandler<CH> sslConnectionHandler = (SslConnectionHandler<CH>) connectionHandler;
+	public void processRequest(SslConnectionHandler<CH> connectionHandler,
+			Object attachment) throws IOException {
 
 		// Obtain the wrapped connection handler
-		CH wrappedConnectionHandler = sslConnectionHandler
+		CH wrappedConnectionHandler = connectionHandler
 				.getWrappedConnectionHandler();
 
 		// Have wrapped server process the request
