@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
@@ -451,6 +452,18 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		@Override
 		public Object getLock() {
 			return HttpConversationTest.this.wire;
+		}
+
+		@Override
+		public InetAddress getInetAddress() {
+			fail("Remote InetAddress should not be required for HTTP conversation");
+			return null;
+		}
+
+		@Override
+		public int getPort() {
+			fail("Remote port should not be required for HTTP conversation");
+			return -1;
 		}
 
 		@Override

@@ -20,6 +20,7 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
@@ -231,6 +232,18 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		@Override
 		public Object getLock() {
 			return HttpResponseTest.this.wire;
+		}
+
+		@Override
+		public InetAddress getInetAddress() {
+			fail("Remote InetAddress should not be required for writing HTTP response");
+			return null;
+		}
+
+		@Override
+		public int getPort() {
+			fail("Remote port should not be required for writing HTTP response");
+			return -1;
 		}
 
 		@Override

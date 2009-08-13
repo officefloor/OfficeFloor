@@ -70,7 +70,8 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 		// Creates the SSL connection
 		this.connection = new SslConnectionImpl(connection.getLock(),
-				connection.getInputBufferStream(), connection
+				connection.getInetAddress(), connection.getPort(), connection
+						.getInputBufferStream(), connection
 						.getOutputBufferStream(), engine, bufferSquirtFactory,
 				null, taskExecutor);
 

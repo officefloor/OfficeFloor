@@ -67,7 +67,7 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		serverEngine.setUseClientMode(false);
 		serverEngine.setEnabledCipherSuites(serverEngine
 				.getSupportedCipherSuites());
-		this.server = new SslConnectionImpl(new Object(),
+		this.server = new SslConnectionImpl(new Object(), null, 10000,
 				this.clientToServerStream.getInputBufferStream(),
 				this.serverToClientStream.getOutputBufferStream(),
 				serverEngine, squirtFactory, this, this);
@@ -77,7 +77,7 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		clientEngine.setUseClientMode(true);
 		clientEngine.setEnabledCipherSuites(clientEngine
 				.getSupportedCipherSuites());
-		this.client = new SslConnectionImpl(new Object(),
+		this.client = new SslConnectionImpl(new Object(), null, 443,
 				this.serverToClientStream.getInputBufferStream(),
 				this.clientToServerStream.getOutputBufferStream(),
 				clientEngine, squirtFactory, this, this);

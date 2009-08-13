@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server;
 
+import java.net.InetAddress;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -36,6 +37,20 @@ public interface Connection {
 	 * @return Lock for this {@link Connection}.
 	 */
 	Object getLock();
+
+	/**
+	 * Obtains the remote address to which this {@link Connection} is connected.
+	 *
+	 * @return Remote address to which this {@link Connection} is connected.
+	 */
+	InetAddress getInetAddress();
+
+	/**
+	 * Obtains the remote port to which this {@link Connection} is connected.
+	 *
+	 * @return Remote port to which this {@link Connection} is connected.
+	 */
+	int getPort();
 
 	/**
 	 * Obtains the {@link InputBufferStream} to obtain data from the client.
