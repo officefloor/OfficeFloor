@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.plugin.socket.server.Connection;
@@ -142,15 +143,6 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	}
 
 	/**
-	 * Flags that this {@link Connection} is being checked by the
-	 * {@link SocketListener}.
-	 */
-	void flagCheckingConnection() {
-		// Flag no longer notified of write as written
-		this.isNotifiedOfWrite = false;
-	}
-
-	/**
 	 * Obtains the {@link ConnectionHandler} for this {@link Connection}.
 	 *
 	 * @return {@link ConnectionHandler} for this {@link Connection}.
@@ -160,12 +152,28 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	}
 
 	/**
-	 * Obtains the {@link NonblockingSocketChannel} for this {@link Connection}.
+	 * Registers this {@link Connection} with the {@link Selector}.
 	 *
-	 * @return {@link NonblockingSocketChannel} for this {@link Connection}.
+	 * @param selector
+	 *            {@link Selector}.
+	 * @param operation
+	 *            Operation to register under.
+	 * @throws IOException
+	 *             If fails to register the {@link Connection} with the
+	 *             {@link Selector}.
 	 */
-	NonblockingSocketChannel getSocketChannel() {
-		return this.socketChannel;
+	void registerWithSelector(Selector selector, int operation)
+			throws IOException {
+		this.socketChannel.register(selector, operation, this);
+	}
+
+	/**
+	 * Flags that this {@link Connection} is being checked by the
+	 * {@link SocketListener}.
+	 */
+	void flagCheckingConnection() {
+		// Flag no longer notified of write as written
+		this.isNotifiedOfWrite = false;
 	}
 
 	/**
@@ -278,6 +286,24 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 		return this.isCancelled;
 	}
 
+	/**
+	 * Terminates this {@link Connection} releasing resources.
+	 *
+	 * @throws IOException
+	 *             If fails to terminate the {@link Connection}.
+	 */
+	void terminate() throws IOException {
+
+		// Clean up resources
+		this.fromClientStream.closeInput();
+		this.fromClientStream.closeOutput();
+		this.toClientStream.closeInput();
+		this.toClientStream.closeOutput();
+
+		// Close the socket channel
+		this.socketChannel.close();
+	}
+
 	/*
 	 * ================== BufferPopulator ===================================
 	 */
@@ -388,7 +414,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 		@Override
 		public void close() throws IOException {
-			this.backingStream.close();
+			// Cancel connection and terminate will clean up
 			ConnectionImpl.this.cancel();
 		}
 	}
@@ -443,7 +469,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 		@Override
 		public void close() throws IOException {
-			this.backingStream.close();
+			// Cancel connection and terminate will clean up
 			ConnectionImpl.this.cancel();
 		}
 	}

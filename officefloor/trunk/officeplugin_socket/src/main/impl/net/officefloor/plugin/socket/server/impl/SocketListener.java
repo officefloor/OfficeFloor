@@ -114,8 +114,8 @@ public class SocketListener<CH extends ConnectionHandler>
 	 *            Maximum number of {@link Connection} instances that can be
 	 *            registered with this {@link SocketListener}.
 	 */
-	public SocketListener(SelectorFactory selectorFactory,
-			Server<CH> server, int maxCommunications) {
+	public SocketListener(SelectorFactory selectorFactory, Server<CH> server,
+			int maxCommunications) {
 		this.selectorFactory = selectorFactory;
 		this.server = server;
 		this.maxConnections = maxCommunications;
@@ -418,9 +418,9 @@ public class SocketListener<CH extends ConnectionHandler>
 		// Connection unregistered
 		this.registeredConnections--;
 
-		// Cancel the key and close connection
+		// Cancel the key and terminate connection
 		key.cancel();
-		connection.getSocketChannel().close();
+		connection.terminate();
 	}
 
 	/**
@@ -450,9 +450,8 @@ public class SocketListener<CH extends ConnectionHandler>
 			}
 		}
 
-		// Register the socket to listen on the communication
-		connection.getSocketChannel().register(this.selector, operation,
-				connection);
+		// Register the connection with the selector
+		connection.registerWithSelector(this.selector, operation);
 	}
 
 	/**

@@ -24,6 +24,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
 import net.officefloor.plugin.socket.server.ssl.SslTaskExecutor;
+import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -71,6 +72,15 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 		// Ensure server received the message
 		this.transferDataFromClientToServer();
 		assertReceivedData("TEST", this.server.getInputBufferStream());
+
+		// Ensure graceful shutdown of connection (triggered by server)
+		this.server.getOutputBufferStream().close();
+		this.transferDataFromServerToClient();
+		this.transferDataFromClientToServer();
+		assertEquals("Client should now be closed", BufferStream.END_OF_STREAM,
+				this.client.getInputBufferStream().available());
+		assertEquals("Server should now be closed", BufferStream.END_OF_STREAM,
+				this.server.getInputBufferStream().available());
 	}
 
 	/**
@@ -92,6 +102,15 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 		this.server.getOutputBufferStream().write("RESPONSE".getBytes());
 		this.transferDataFromServerToClient();
 		assertReceivedData("RESPONSE", this.client.getInputBufferStream());
+
+		// Ensure graceful shutdown of connection (triggered by client)
+		this.client.getOutputBufferStream().close();
+		this.transferDataFromClientToServer();
+		this.transferDataFromServerToClient();
+		assertEquals("Client should now be closed", BufferStream.END_OF_STREAM,
+				this.client.getInputBufferStream().available());
+		assertEquals("Server should now be closed", BufferStream.END_OF_STREAM,
+				this.server.getInputBufferStream().available());
 	}
 
 	/**
@@ -134,6 +153,15 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 			assertReceivedData("RESPONSE-" + String.valueOf(i), this.client
 					.getInputBufferStream());
 		}
+
+		// Ensure graceful shutdown of connection (triggered by server)
+		this.server.getOutputBufferStream().close();
+		this.transferDataFromServerToClient();
+		this.transferDataFromClientToServer();
+		assertEquals("Client should now be closed", BufferStream.END_OF_STREAM,
+				this.client.getInputBufferStream().available());
+		assertEquals("Server should now be closed", BufferStream.END_OF_STREAM,
+				this.server.getInputBufferStream().available());
 	}
 
 	/*
