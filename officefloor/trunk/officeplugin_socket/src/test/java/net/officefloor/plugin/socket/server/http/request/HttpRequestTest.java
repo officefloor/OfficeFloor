@@ -78,10 +78,8 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					.getInstance().createUnmarshaller(
 							new FileInputStream(unmarshallerConfigFile));
 
-			// All tests are loaded, so start up the HTTP server
-			final MockHttpServer server = new MockHttpServer() {
-			};
-			server.startup(new HttpServicerBuilder() {
+			// Create the HTTP servicer builder
+			HttpServicerBuilder httpServicerBuilder = new HttpServicerBuilder() {
 				@Override
 				public HttpServicerTask buildServicer(String managedObjectName,
 						MockHttpServer server) throws Exception {
@@ -99,17 +97,36 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					// Return the reference to the service task
 					return new HttpServicerTask("servicer", "service");
 				}
-			});
+			};
 
-			// Load the tests
-			loadTests("", unmarshallerConfigFile.getParentFile(), unmarshaller,
-					server, suite);
+			// Start up the HTTP server
+			final MockHttpServer httpServer = new MockHttpServer() {
+			};
+			httpServer.startup(httpServicerBuilder);
+			assertFalse("Server should not be secure", httpServer
+					.isServerSecure());
 
-			// Add a task to shutdown the HTTP server
+			// Load the non-secure tests
+			loadTests("http", unmarshallerConfigFile.getParentFile(),
+					unmarshaller, httpServer, suite);
+
+			// Start up the HTTPS server
+			final MockHttpServer httpsServer = new MockHttpServer() {
+			};
+			httpsServer.setupSecure();
+			httpsServer.startup(httpServicerBuilder);
+			assertTrue("Server should be secure", httpsServer.isServerSecure());
+
+			// Load the secure tests
+			loadTests("https", unmarshallerConfigFile.getParentFile(),
+					unmarshaller, httpsServer, suite);
+
+			// Add a task to shutdown the servers
 			suite.addTest(new TestCase("Shutdown HTTP Server") {
 				@Override
 				protected void runTest() throws Throwable {
-					server.shutdown();
+					httpServer.shutdown();
+					httpsServer.shutdown();
 				}
 			});
 
