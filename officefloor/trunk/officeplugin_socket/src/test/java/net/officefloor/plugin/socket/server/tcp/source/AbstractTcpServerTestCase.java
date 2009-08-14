@@ -165,11 +165,17 @@ public abstract class AbstractTcpServerTestCase extends
 	}
 
 	/**
+	 * Number of threads to use for heavy load testing. Allows for sub tests to
+	 * override.
+	 */
+	protected int heavyLoadCallers = 100;
+
+	/**
 	 * Ensures can handle heavy load of requests.
 	 */
 	@StressTest
 	public void testHeavyLoad() throws Throwable {
-		final int CALLERS = 100;
+		final int CALLERS = this.heavyLoadCallers;
 		final int REQUESTS = 100;
 		long startTime = System.currentTimeMillis();
 		this.doParallelRequests(CALLERS, REQUESTS, true);
@@ -337,6 +343,9 @@ public abstract class AbstractTcpServerTestCase extends
 			long startTime = System.currentTimeMillis();
 			outputStream.write(new byte[] { (byte) requestIndex });
 			outputStream.flush();
+
+			// Allow other processing
+			Thread.yield();
 
 			// Read a response (ends with 0 byte)
 			ByteArrayOutputStream response = new ByteArrayOutputStream();

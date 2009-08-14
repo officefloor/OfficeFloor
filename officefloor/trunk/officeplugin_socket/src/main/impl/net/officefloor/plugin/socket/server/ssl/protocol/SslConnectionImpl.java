@@ -514,6 +514,19 @@ public class SslConnectionImpl implements SslConnection {
 	}
 
 	@Override
+	public void validate() throws IOException {
+		synchronized (this.lock) {
+			// Ensure no failures
+			this.ensureNoFailure();
+
+			// Determine if data available from peer to process
+			if (this.inputDelegate.available() > 0) {
+				this.process();
+			}
+		}
+	}
+
+	@Override
 	public Object getLock() {
 		return this.lock;
 	}

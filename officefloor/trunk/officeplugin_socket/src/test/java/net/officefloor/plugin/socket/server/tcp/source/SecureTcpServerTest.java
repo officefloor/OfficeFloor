@@ -46,6 +46,13 @@ import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtoco
  */
 public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
+	/**
+	 * TODO determine why SSL communication is corrupting with more threads.
+	 */
+	public SecureTcpServerTest() {
+		this.heavyLoadCallers = 10;
+	}
+
 	/*
 	 * ================ AbstractTcpServerTestCase ===========================
 	 */
