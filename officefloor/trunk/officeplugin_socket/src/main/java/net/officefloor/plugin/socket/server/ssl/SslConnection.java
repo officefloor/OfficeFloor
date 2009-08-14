@@ -46,4 +46,13 @@ public interface SslConnection extends Connection {
 	 */
 	void processDataFromPeer() throws IOException;
 
+	/**
+	 * Ensures the {@link SslConnection} is valid.
+	 *
+	 * @throws IOException
+	 *             {@link IOException} of the cause of this
+	 *             {@link SslConnection} being invalid.
+	 */
+	void validate() throws IOException;
+
 }

@@ -157,6 +157,10 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	@Override
 	public void handleIdleConnection(IdleContext context) throws IOException {
+
+		// Ensure no error in processing
+		this.connection.validate();
+
 		// Delegate to wrapped handler
 		this.connectionHandlerContext = context;
 		this.wrappedConnectionHandler.handleIdleConnection(this);
@@ -168,9 +172,6 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	@Override
 	public byte[] createDestinationByteArray(int minimumSize) {
-
-		// TODO remove once stress testing working
-		if (true) return new byte[minimumSize];
 
 		// Obtain existing array (context will always be available)
 		byte[] array = this.contextObject.destinationBytes;
@@ -190,9 +191,6 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	@Override
 	public byte[] createSourceByteArray(int minimumSize) {
-
-		// TODO remove once stress testing working
-		if (true) return new byte[minimumSize];
 
 		// Obtain existing array (context will always be available)
 		byte[] array = this.contextObject.sourceBytes;
@@ -242,7 +240,8 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	@Override
 	public InputBufferStream getInputBufferStream() {
-		return this.readContext.getInputBufferStream();
+		// Use the plain text input
+		return this.connection.getInputBufferStream();
 	}
 
 	@Override

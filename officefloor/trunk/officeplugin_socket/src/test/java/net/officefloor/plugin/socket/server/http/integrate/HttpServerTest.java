@@ -21,11 +21,12 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -34,28 +35,33 @@ import org.apache.commons.httpclient.methods.PostMethod;
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServerTest extends HttpServerStartup {
+public class HttpServerTest extends MockHttpServer {
 
 	/*
-	 * ================== HttpServerStartup ===============================
+	 * ================== HttpServicerBuilder ===============================
 	 */
 
 	@Override
-	protected TaskReference registerHttpServiceTask() throws Exception {
+	public HttpServicerTask buildServicer(String managedObjectName,
+			MockHttpServer server) throws Exception {
 
 		// Register team to do the work
-		this.constructTeam("WORKER", new OnePersonTeam(100));
+		server.constructTeam("WORKER", new OnePersonTeam(100));
 
 		// Register the work to process messages
-		ReflectiveWorkBuilder workBuilder = this.constructWork(new HttpWork(),
-				"servicer", "service");
+		ReflectiveWorkBuilder workBuilder = server.constructWork(
+				new HttpWork(), "servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
-		taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
+		taskBuilder.buildObject(managedObjectName, ManagedObjectScope.PROCESS);
 
 		// Return the reference to the service task
-		return new TaskReference("servicer", "service");
+		return new HttpServicerTask("servicer", "service");
 	}
+
+	/*
+	 * ================== Tests ===============================
+	 */
 
 	/**
 	 * Ensures can handle a GET request.
@@ -79,9 +85,7 @@ public class HttpServerTest extends HttpServerStartup {
 	public void testMultipleGetRequests() throws Exception {
 
 		// Create the HTTP client (keeping the connection open between requests)
-		HttpClient client = new HttpClient();
-		client.getParams().setParameter("http.connection-manager.class",
-				new SimpleHttpConnectionManager());
+		HttpClient client = this.createHttpClient();
 
 		// Validate multiple tests
 		for (int i = 0; i < 100; i++) {
@@ -117,7 +121,7 @@ public class HttpServerTest extends HttpServerStartup {
 	 */
 	private String doRequest(HttpMethod method) throws Exception {
 		// Do the request
-		return this.doRequest(new HttpClient(), method);
+		return this.doRequest(this.createHttpClient(), method);
 	}
 
 	/**

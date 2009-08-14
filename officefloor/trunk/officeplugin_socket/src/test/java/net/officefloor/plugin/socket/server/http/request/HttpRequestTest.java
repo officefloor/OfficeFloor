@@ -28,13 +28,15 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.http.integrate.HttpServerStartup;
 import net.officefloor.plugin.socket.server.http.request.config.CommunicationConfig;
 import net.officefloor.plugin.socket.server.http.request.config.HeaderConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ProcessConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RequestConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ResponseConfig;
 import net.officefloor.plugin.socket.server.http.request.config.RunConfig;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerBuilder;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
@@ -76,36 +78,38 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 					.getInstance().createUnmarshaller(
 							new FileInputStream(unmarshallerConfigFile));
 
-			// All tests are loaded, so start up the HTTP service
-			final HttpServerStartup startup = new HttpServerStartup() {
+			// All tests are loaded, so start up the HTTP server
+			final MockHttpServer server = new MockHttpServer() {
+			};
+			server.startup(new HttpServicerBuilder() {
 				@Override
-				protected TaskReference registerHttpServiceTask()
-						throws Exception {
+				public HttpServicerTask buildServicer(String managedObjectName,
+						MockHttpServer server) throws Exception {
 					// Register team to do the work
-					this.constructTeam("WORKER", new OnePersonTeam(100));
+					server.constructTeam("WORKER", new OnePersonTeam(100));
 
 					// Register the work to process messages
-					ReflectiveWorkBuilder workBuilder = this.constructWork(
+					ReflectiveWorkBuilder workBuilder = server.constructWork(
 							new RequestWork(), "servicer", "service");
 					ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
 							"service", "WORKER");
-					taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
+					taskBuilder.buildObject(managedObjectName,
+							ManagedObjectScope.PROCESS);
 
 					// Return the reference to the service task
-					return new TaskReference("servicer", "service");
+					return new HttpServicerTask("servicer", "service");
 				}
-			};
-			startup.setUp();
+			});
 
 			// Load the tests
 			loadTests("", unmarshallerConfigFile.getParentFile(), unmarshaller,
-					startup, suite);
+					server, suite);
 
-			// Add a task to shutdown the HTTP service
+			// Add a task to shutdown the HTTP server
 			suite.addTest(new TestCase("Shutdown HTTP Server") {
 				@Override
 				protected void runTest() throws Throwable {
-					startup.tearDown();
+					server.shutdown();
 				}
 			});
 
@@ -126,14 +130,14 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            Directory to search for tests.
 	 * @param unmarshaller
 	 *            {@link XmlUnmarshaller} to unmarshal the test.
-	 * @param startup
-	 *            {@link HttpServerStartup}.
+	 * @param server
+	 *            {@link MockHttpServer}.
 	 * @param suite
 	 *            {@link TestSuite} to add the tests.
 	 */
 	private static void loadTests(String testNamePrefix, File directory,
-			XmlUnmarshaller unmarshaller, HttpServerStartup startup,
-			TestSuite suite) throws Exception {
+			XmlUnmarshaller unmarshaller, MockHttpServer server, TestSuite suite)
+			throws Exception {
 
 		// Obtain the tests
 		for (File file : directory.listFiles()) {
@@ -146,7 +150,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			// Determine if child directory
 			if (file.isDirectory()) {
 				// Child directory, so find tests recursively
-				loadTests(testName, file, unmarshaller, startup, suite);
+				loadTests(testName, file, unmarshaller, server, suite);
 
 			} else {
 				// File and ensure is a test file
@@ -162,7 +166,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 				// Create the test
 				suite.addTest(new HttpRequestTest(testName, configuration,
-						startup));
+						server));
 			}
 		}
 	}
@@ -173,9 +177,9 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	private final RunConfig configuration;
 
 	/**
-	 * Allows for validating exceptions of processing request.
+	 * {@link MockHttpServer}.
 	 */
-	private final HttpServerStartup startup;
+	private final MockHttpServer server;
 
 	/**
 	 * Instantiate.
@@ -184,14 +188,14 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	 *            Name of the test.
 	 * @param configuration
 	 *            {@link RunConfig}.
-	 * @param startup
-	 *            {@link HttpServerStartup}.
+	 * @param server
+	 *            {@link MockHttpServer}.
 	 */
 	public HttpRequestTest(String testName, RunConfig configuration,
-			HttpServerStartup startup) {
+			MockHttpServer server) {
 		this.setName(testName);
 		this.configuration = configuration;
-		this.startup = startup;
+		this.server = server;
 	}
 
 	/*
@@ -215,7 +219,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Create the HTTP Client to send requests
-		HttpClient client = new HttpClient();
+		HttpClient client = this.server.createHttpClient();
 
 		System.out.println("====== " + this.getName() + " ======");
 
@@ -236,7 +240,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			RequestWork.setConfiguration(communication);
 
 			// Create the method
-			String requestUrl = this.startup.getServerUrl() + request.path;
+			String requestUrl = this.server.getServerUrl() + request.path;
 			HttpMethod method;
 			if ("GET".equals(request.method)) {
 				method = new GetMethod(requestUrl);
@@ -270,7 +274,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 				String actualResponseBody = method.getResponseBodyAsString();
 
 				// Validate no failure in processing
-				this.startup.validateNoTopLevelEscalation();
+				this.server.validateNoTopLevelEscalation();
 
 				// Indicate the expected response
 				ResponseConfig response = communication.response;
