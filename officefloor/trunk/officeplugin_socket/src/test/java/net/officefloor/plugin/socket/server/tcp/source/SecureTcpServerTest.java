@@ -46,13 +46,6 @@ import net.officefloor.plugin.socket.server.tcp.protocol.TcpCommunicationProtoco
  */
 public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
-	/**
-	 * TODO determine why SSL communication is corrupting with more threads.
-	 */
-	public SecureTcpServerTest() {
-		this.heavyLoadCallers = 10;
-	}
-
 	/*
 	 * ================ AbstractTcpServerTestCase ===========================
 	 */
@@ -73,7 +66,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 						.valueOf(port));
 		serverSocketBuilder.addProperty(
 				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String
-						.valueOf(1000));
+						.valueOf(10000));
 		serverSocketBuilder.addProperty(
 				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
 				MockSslEngineConfigurator.class.getName());
