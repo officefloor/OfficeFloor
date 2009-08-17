@@ -19,18 +19,18 @@ package net.officefloor.frame.spi.managedobject;
 
 /**
  * Root interface of a Managed Object.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObject {
 
 	/**
 	 * Obtains the object being managed.
-	 * 
+	 *
 	 * @return Object being managed.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             Indicating failed to obtain the object for use.
 	 */
-	Object getObject() throws Exception;
+	Object getObject() throws Throwable;
 
 }

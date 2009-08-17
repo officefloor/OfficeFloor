@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectFlowMeta
 
 /**
  * Mock {@link ManagedObjectSourceMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H>>
@@ -59,7 +59,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 	/**
 	 * Initiate from the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 */
@@ -67,7 +67,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		this.managedObjectClass = managedObject.getClass();
 		try {
 			this.objectClass = managedObject.getObject().getClass();
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			TestCase.fail("Failed to obtain object type from managed object "
 					+ ex.getMessage());
 			throw new Error("Only for compiling as fail above will throw");
@@ -78,7 +78,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectClass
 	 *            Class of the {@link ManagedObject}.
 	 * @param objectClass
