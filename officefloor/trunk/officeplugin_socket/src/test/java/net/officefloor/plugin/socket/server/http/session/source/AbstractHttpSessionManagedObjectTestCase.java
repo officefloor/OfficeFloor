@@ -308,6 +308,16 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 		private boolean isCollision = false;
 
 		/**
+		 * Flag indicating if Session available on retrieval.
+		 */
+		private boolean isSessionAvailable = true;
+
+		/**
+		 * Flag indicating to store immediately.
+		 */
+		private boolean isStoreImmediately = true;
+
+		/**
 		 * Attributes.
 		 */
 		private Map<String, Object> attributes = null;
@@ -326,6 +336,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 		 * {@link StoreHttpSessionOperation}.
 		 */
 		private StoreHttpSessionOperation store;
+
 		/**
 		 * {@link InvalidateHttpSessionOperation}.
 		 */
@@ -369,6 +380,12 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 				this.create.sessionCreated(this.creationTime, attributes);
 				return;
 			}
+
+			// Handle if retrieve
+			if (this.retrieve != null) {
+				this.retrieve.sessionRetrieved(this.creationTime, attributes);
+				return;
+			}
 		}
 
 		/**
@@ -383,6 +400,18 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 			// Handle if creation
 			if (this.create != null) {
 				this.create.failedToCreateSession(cause);
+				return;
+			}
+
+			// Handle if retrieval
+			if (this.retrieve != null) {
+				this.retrieve.failedToRetreiveSession(cause);
+				return;
+			}
+
+			// Handle if storing
+			if (this.store != null) {
+				this.store.failedToStoreSession(cause);
 				return;
 			}
 		}
@@ -401,6 +430,39 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 			}
 		}
 
+		/**
+		 * Flags Session not available.
+		 */
+		public void flagSessionNotAvailable() {
+			this.isSessionAvailable = false;
+
+			// Handle if being retrieved
+			if (this.retrieve != null) {
+				this.isSessionAvailable = true; // not available only once
+				this.retrieve.sessionNotAvailable();
+				return;
+			}
+		}
+
+		/**
+		 * Obtains the {@link StoreHttpSessionOperation}.
+		 *
+		 * @return {@link StoreHttpSessionOperation}.
+		 */
+		public StoreHttpSessionOperation getStoreHttpSessionOperation() {
+			return this.store;
+		}
+
+		/**
+		 * Flags whether to store immediately.
+		 *
+		 * @param isStoreImmediately
+		 *            Indicate if store immediately.
+		 */
+		public void setStoreImmediately(boolean isStoreImmediately) {
+			this.isStoreImmediately = isStoreImmediately;
+		}
+
 		/*
 		 * ================= HttpSessionStore ==========================
 		 */
@@ -408,6 +470,9 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 		@Override
 		public void createHttpSession(CreateHttpSessionOperation operation) {
 			this.create = operation;
+			this.retrieve = null;
+			this.store = null;
+			this.invalidate = null;
 
 			// Handle if failure
 			if (this.failure != null) {
@@ -433,17 +498,62 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 		@Override
 		public void retrieveHttpSession(RetrieveHttpSessionOperation operation) {
+			this.create = null;
 			this.retrieve = operation;
+			this.store = null;
+			this.invalidate = null;
+
+			// Handle if failure
+			if (this.failure != null) {
+				this.retrieve.failedToRetreiveSession(this.failure);
+				return;
+			}
+
+			// Handle if Session not available
+			if (!this.isSessionAvailable) {
+				this.isSessionAvailable = true; // not available only once
+				this.retrieve.sessionNotAvailable();
+				return;
+			}
+
+			// Handle if successful
+			if (this.attributes != null) {
+				this.retrieve.sessionRetrieved(this.creationTime,
+						this.attributes);
+				return;
+			}
+
+			// Otherwise asynchronous retrieval
 		}
 
 		@Override
 		public void storeHttpSession(StoreHttpSessionOperation operation) {
+			this.create = null;
+			this.retrieve = null;
 			this.store = operation;
+			this.invalidate = null;
+
+			// Handle if failure
+			if (this.failure != null) {
+				this.store.failedToStoreSession(this.failure);
+				return;
+			}
+
+			// Determine if store immediately
+			if (this.isStoreImmediately) {
+				operation.sessionStored();
+				return;
+			}
+
+			// Otherwise asynchronous storage
 		}
 
 		@Override
 		public void invalidateHttpSession(
 				InvalidateHttpSessionOperation operation) {
+			this.create = null;
+			this.retrieve = null;
+			this.store = null;
 			this.invalidate = operation;
 		}
 	}
