@@ -31,10 +31,12 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.socket.server.http.session.HttpSessionAdministration;
 import net.officefloor.plugin.socket.server.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.socket.server.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionIdGenerator;
 import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionStore;
+import net.officefloor.plugin.socket.server.http.session.spi.RetrieveHttpSessionOperation;
 
 /**
  * {@link ManagedObject} for a {@link HttpSession}.
@@ -194,10 +196,17 @@ public class HttpSessionManagedObject implements
 			this.httpSessionStore
 					.createHttpSession(new CreateHttpSessionOperationImpl(
 							this.sessionId));
-			if (!this.isSessionLoaded) {
-				// Wait until the session is loaded
-				this.flagWaiting();
-			}
+		} else {
+			// Retrieve the session from the store
+			this.httpSessionStore
+					.retrieveHttpSession(new RetrieveHttpSessionOperationImpl(
+							this.sessionId));
+		}
+
+		// Determine if the session loaded
+		if (!this.isSessionLoaded) {
+			// Wait until the session is loaded
+			this.flagWaiting();
 		}
 	}
 
@@ -291,15 +300,19 @@ public class HttpSessionManagedObject implements
 					.getObject(this.httpSessionStoreIndex);
 		}
 
-		// Obtain the session Id cookie
+		// Obtain the Session Id from the Session cookie
 		HttpCookie sessionIdCookie = HttpCookieUtil.extractHttpCookie(
 				this.sessionIdCookieName, request);
-		if (sessionIdCookie == null) {
+		String sessionId = (sessionIdCookie == null ? null : sessionIdCookie
+				.getValue());
+
+		// Handle based on Session Id being available
+		if ((sessionId == null) || (sessionId.trim().length() == 0)) {
 			// No established session so create a new session
 			this.generateSessionId();
 		} else {
 			// Retrieve the existing session
-			this.loadSessionId(sessionIdCookie.getValue(), false);
+			this.loadSessionId(sessionId, false);
 		}
 	}
 
@@ -320,9 +333,10 @@ public class HttpSessionManagedObject implements
 	}
 
 	/**
-	 * {@link HttpSession} implementation.
+	 * {@link HttpSession} and {@link HttpSessionAdministration} implementation.
 	 */
-	private class HttpSessionImpl implements HttpSession {
+	private class HttpSessionImpl implements HttpSession,
+			HttpSessionAdministration {
 
 		/**
 		 * Session Id.
@@ -370,43 +384,76 @@ public class HttpSessionManagedObject implements
 
 		@Override
 		public String getSessionId() {
-			return this.sessionId;
+			synchronized (HttpSessionManagedObject.this) {
+				return this.sessionId;
+			}
 		}
 
 		@Override
 		public long getCreationTime() {
-			return this.creationTime;
+			synchronized (HttpSessionManagedObject.this) {
+				return this.creationTime;
+			}
 		}
 
 		@Override
 		public boolean isNew() {
-			return this.isNew;
-		}
-
-		@Override
-		public void invalidate() {
-			// TODO Implement HttpSession.invalidate
-			throw new UnsupportedOperationException("HttpSession.invalidate");
+			synchronized (HttpSessionManagedObject.this) {
+				return this.isNew;
+			}
 		}
 
 		@Override
 		public Object getAttribute(String name) {
-			return this.attributes.get(name);
+			synchronized (HttpSessionManagedObject.this) {
+				return this.attributes.get(name);
+			}
 		}
 
 		@Override
 		public Iterator<String> getAttributeNames() {
-			return this.attributes.keySet().iterator();
+			synchronized (HttpSessionManagedObject.this) {
+				return this.attributes.keySet().iterator();
+			}
 		}
 
 		@Override
 		public void setAttribute(String name, Object object) {
-			this.attributes.put(name, object);
+			synchronized (HttpSessionManagedObject.this) {
+				this.attributes.put(name, object);
+			}
 		}
 
 		@Override
 		public void removeAttribute(String name) {
-			this.attributes.remove(name);
+			synchronized (HttpSessionManagedObject.this) {
+				this.attributes.remove(name);
+			}
+		}
+
+		/*
+		 * ================== HttpSessionAdministration =======================
+		 */
+
+		@Override
+		public void invalidate(boolean isRequireNewSession) throws Throwable {
+			// TODO Implement HttpSessionAdministration.invalidate
+			throw new UnsupportedOperationException(
+					"HttpSessionAdministration.invalidate");
+		}
+
+		@Override
+		public void store() throws Throwable {
+			// TODO Implement HttpSessionAdministration.store
+			throw new UnsupportedOperationException(
+					"HttpSessionAdministration.store");
+		}
+
+		@Override
+		public boolean isOperationComplete() throws Throwable {
+			// TODO Implement HttpSessionAdministration.isOperationComplete
+			throw new UnsupportedOperationException(
+					"HttpSessionAdministration.isOperationComplete");
 		}
 	}
 
@@ -494,6 +541,54 @@ public class HttpSessionManagedObject implements
 
 		@Override
 		public void failedToCreateSession(Throwable cause) {
+			HttpSessionManagedObject.this.loadFailure(cause);
+		}
+	}
+
+	/**
+	 * {@link RetrieveHttpSessionOperation} implementation.
+	 */
+	private class RetrieveHttpSessionOperationImpl implements
+			RetrieveHttpSessionOperation {
+
+		/**
+		 * Session Id.
+		 */
+		private final String sessionId;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param sessionId
+		 *            Session Id.
+		 */
+		public RetrieveHttpSessionOperationImpl(String sessionId) {
+			this.sessionId = sessionId;
+		}
+
+		/*
+		 * ================ RetrieveHttpSessionOperation ===================
+		 */
+
+		@Override
+		public String getSessionId() {
+			return this.sessionId;
+		}
+
+		@Override
+		public void sessionRetrieved(long creationTime,
+				Map<String, Object> attributes) {
+			HttpSessionManagedObject.this.loadSession(creationTime, attributes);
+		}
+
+		@Override
+		public void sessionNotAvailable() {
+			// Session not available so generate new Session
+			HttpSessionManagedObject.this.generateSessionId();
+		}
+
+		@Override
+		public void failedToRetreiveSession(Throwable cause) {
 			HttpSessionManagedObject.this.loadFailure(cause);
 		}
 	}

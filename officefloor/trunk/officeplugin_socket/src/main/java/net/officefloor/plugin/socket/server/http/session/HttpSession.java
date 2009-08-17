@@ -48,11 +48,6 @@ public interface HttpSession {
 	long getCreationTime();
 
 	/**
-	 * Invalidates this {@link HttpSession}.
-	 */
-	void invalidate();
-
-	/**
 	 * Obtains the {@link Object} that is bound to the name for this
 	 * {@link HttpSession}.
 	 *
