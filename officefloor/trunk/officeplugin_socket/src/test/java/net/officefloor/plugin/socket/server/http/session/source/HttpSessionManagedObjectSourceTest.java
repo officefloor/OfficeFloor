@@ -15,38 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.session.spi;
+package net.officefloor.plugin.socket.server.http.session.source;
 
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 /**
- * Operation to obtain details of invalidating a {@link HttpSession} within the
- * {@link HttpSessionStore}.
+ * Tests the {@link HttpSessionManagedObjectSource}.
  *
  * @author Daniel Sagenschneider
  */
-public interface InvalidateHttpSessionOperation {
+public class HttpSessionManagedObjectSourceTest extends
+		AbstractOfficeConstructTestCase {
 
 	/**
-	 * Obtains the session Id of the {@link HttpSession} to invalidate.
-	 *
-	 * @return Session Id of the {@link HttpSession} to invalidate.
+	 * Ensure state is maintained by the {@link HttpSession} across multiple
+	 * {@link HttpRequest} calls made by a user.
 	 */
-	String getSessionId();
-
-	/**
-	 * Flags the {@link HttpSession} was invalidated successfully within the
-	 * {@link HttpSessionStore}.
-	 */
-	void sessionInvalidated();
-
-	/**
-	 * Flags failed to invalidate the {@link HttpSession} within the
-	 * {@link HttpSessionStore}.
-	 *
-	 * @param cause
-	 *            Cause of the failure.
-	 */
-	void failedToInvalidateSession(Throwable cause);
-
+	public void testHttpSessionStateAcrossCalls() {
+		// TODO test HttpSession across HttpRequests
+		fail("TODO test HttpSession across HttpRequests");
+	}
 }

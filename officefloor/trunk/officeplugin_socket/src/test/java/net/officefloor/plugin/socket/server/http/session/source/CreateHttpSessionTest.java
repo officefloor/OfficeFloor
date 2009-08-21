@@ -23,6 +23,8 @@ import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionStore;
 /**
  * Tests the creation of a {@link HttpSession}.
  *
+ * TODO test adding cookie on creating new Session Id.
+ *
  * @author Daniel Sagenschneider
  */
 public class CreateHttpSessionTest extends
@@ -43,20 +45,15 @@ public class CreateHttpSessionTest extends
 	 */
 	public void testImmediateCreation() throws Throwable {
 
-		// Create objects
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID),
-				new MockHttpSessionStore(CREATION_TIME, newAttributes()));
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-
-		// Verify functionality
 		this.verifyFunctionality(mo);
 	}
 
@@ -66,24 +63,18 @@ public class CreateHttpSessionTest extends
 	 */
 	public void testDelayInSessionIdGeneration() throws Throwable {
 
-		// Create objects
-		MockHttpSessionIdGenerator generator = new MockHttpSessionIdGenerator();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				generator, new MockHttpSessionStore(CREATION_TIME,
-						newAttributes()));
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_delay(); // creating session id
 		this.asynchronousListener.notifyStarted();
+		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		generator.setSessionId(SESSION_ID);
-
-		// Verify functionality
+		this.freshHttpSession.setSessionId(SESSION_ID);
 		this.verifyFunctionality(mo);
 	}
 
@@ -93,23 +84,18 @@ public class CreateHttpSessionTest extends
 	 */
 	public void testDeplayInCreationWithinStore() throws Throwable {
 
-		// Create objects
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID), store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_delay(); // creating within store
 		this.asynchronousListener.notifyStarted();
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		store.loadAttributes(newAttributes());
-
-		// Verify functionality
+		this.createOperation.sessionCreated(CREATION_TIME, newAttributes());
 		this.verifyFunctionality(mo);
 	}
 
@@ -121,25 +107,19 @@ public class CreateHttpSessionTest extends
 	public void testDeplayInBothSessionIdGenerationAndCreationWithinStore()
 			throws Throwable {
 
-		// Create objects
-		MockHttpSessionIdGenerator generator = new MockHttpSessionIdGenerator();
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				generator, store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_delay(); // creating session id
 		this.asynchronousListener.notifyStarted();
+		this.record_delay(); // creating within store
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		generator.setSessionId(SESSION_ID);
-		store.loadAttributes(newAttributes());
-
-		// Verify functionality
+		this.freshHttpSession.setSessionId(SESSION_ID);
+		this.createOperation.sessionCreated(CREATION_TIME, newAttributes());
 		this.verifyFunctionality(mo);
 	}
 
@@ -150,21 +130,14 @@ public class CreateHttpSessionTest extends
 
 		final Exception failure = new Exception("Generate Session Id failure");
 
-		// Create objects
-		MockHttpSessionIdGenerator generator = new MockHttpSessionIdGenerator();
-		generator.setFailure(failure);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				generator, new MockHttpSessionStore(CREATION_TIME));
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_failedToGenerateSessionId(failure);
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-
-		// Verify failure
 		this.verifyFailure(mo, failure);
 	}
 
@@ -175,23 +148,17 @@ public class CreateHttpSessionTest extends
 
 		final Exception failure = new Exception("Generate Session Id failure");
 
-		// Create objects
-		MockHttpSessionIdGenerator generator = new MockHttpSessionIdGenerator();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				generator, new MockHttpSessionStore(CREATION_TIME));
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_delay(); // creating session id
 		this.asynchronousListener.notifyStarted();
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		generator.setFailure(failure);
-
-		// Verify failure
+		this.freshHttpSession.failedToGenerateSessionId(failure);
 		this.verifyFailure(mo, failure);
 	}
 
@@ -204,21 +171,15 @@ public class CreateHttpSessionTest extends
 
 		final Exception failure = new Exception("Create Session failure");
 
-		// Create objects
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME);
-		store.loadFailure(failure);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID), store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_create_failedToCreateSession(failure);
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-
-		// Verify failure
 		this.verifyFailure(mo, failure);
 	}
 
@@ -230,23 +191,18 @@ public class CreateHttpSessionTest extends
 
 		final Exception failure = new Exception("Create Session failure");
 
-		// Create objects
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID), store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_delay(); // creating within store
 		this.asynchronousListener.notifyStarted();
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		store.loadFailure(failure);
-
-		// Verify failure
+		this.createOperation.failedToCreateSession(failure);
 		this.verifyFailure(mo, failure);
 	}
 
@@ -255,22 +211,17 @@ public class CreateHttpSessionTest extends
 	 */
 	public void testImmediateSessionIdCollision() throws Throwable {
 
-		// Create objects
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME,
-				newAttributes());
-		store.flagSessionIdCollision();
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID), store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId("SESSION_ID_COLLISION");
+		this.record_create_sessionIdCollision();
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-
-		// Verify functionality
 		this.verifyFunctionality(mo);
 	}
 
@@ -279,24 +230,20 @@ public class CreateHttpSessionTest extends
 	 */
 	public void testDelayInSessionIdCollision() throws Throwable {
 
-		// Create objects
-		MockHttpSessionStore store = new MockHttpSessionStore(CREATION_TIME);
-		HttpSessionManagedObject mo = this.createHttpSessionManagedObject(
-				new MockHttpSessionIdGenerator(SESSION_ID), store);
-
 		// Record creating HTTP session
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(null);
+		this.record_sessionIdCookie(null);
+		this.record_generate_setSessionId("SESSION_ID_COLLISION");
+		this.record_delay(); // detecting collision
 		this.asynchronousListener.notifyStarted();
+		this.record_generate_setSessionId(SESSION_ID);
+		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		store.flagSessionIdCollision();
-		store.loadAttributes(newAttributes());
-
-		// Verify functionality
+		this.createOperation.sessionIdCollision();
 		this.verifyFunctionality(mo);
 	}
 
@@ -309,8 +256,8 @@ public class CreateHttpSessionTest extends
 	private void verifyFunctionality(HttpSessionManagedObject mo)
 			throws Throwable {
 
-		// Verify the mocks
-		this.verifyMockObjects();
+		// Verify the operations
+		this.verifyOperations();
 
 		// Verify new Http Session
 		HttpSession session = (HttpSession) mo.getObject();
@@ -327,8 +274,8 @@ public class CreateHttpSessionTest extends
 	 */
 	private void verifyFailure(HttpSessionManagedObject mo, Throwable failure) {
 
-		// Verify the mocks
-		this.verifyMockObjects();
+		// Verify the operations
+		this.verifyOperations();
 
 		// Verify failure
 		try {

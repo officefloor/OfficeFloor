@@ -17,11 +17,9 @@
  */
 package net.officefloor.plugin.socket.server.http.session.source;
 
-import java.util.Map;
-
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.HttpSessionAdministration;
-import net.officefloor.plugin.socket.server.http.session.spi.StoreHttpSessionOperation;
+import net.officefloor.plugin.socket.server.http.session.StoringHttpSessionException;
 
 /**
  * Tests storing the {@link HttpSession} via the
@@ -43,47 +41,25 @@ public class StoreHttpSessionTest extends
 	private static final long CREATION_TIME = 100;
 
 	/**
-	 * {@link MockHttpSessionIdGenerator}.
+	 * {@link HttpSession}.
 	 */
-	private final MockHttpSessionIdGenerator generator = new MockHttpSessionIdGenerator(
-			SESSION_ID);
-
-	/**
-	 * Attributes of the {@link HttpSession}.
-	 */
-	private final Map<String, Object> attributes = newAttributes();
-
-	/**
-	 * {@link MockHttpSessionStore}.
-	 */
-	private final MockHttpSessionStore store = new MockHttpSessionStore(
-			CREATION_TIME, this.attributes);
-
-	/**
-	 * {@link HttpSessionManagedObject}.
-	 */
-	private final HttpSessionManagedObject mo = this
-			.createHttpSessionManagedObject(this.generator, this.store);;
+	private HttpSession httpSession;
 
 	/**
 	 * Ensure can immediately store the {@link HttpSession}.
 	 */
 	public void testImmediateStore() throws Throwable {
 
-		// Setup to immediately store
-		this.store.setStoreImmediately(true);
+		// Record storing
+		this.record_instantiate();
+		this.record_store_sessionStored();
 
-		// Record
-		this.record_Create();
-
-		// Run test
+		// Store
 		this.replayMockObjects();
 		HttpSessionAdministration admin = this
 				.createHttpSessionAdministration();
 		admin.store();
 		assertTrue("Should be immediately stored", admin.isOperationComplete());
-
-		// Verify
 		this.verifyFunctionality();
 	}
 
@@ -92,24 +68,21 @@ public class StoreHttpSessionTest extends
 	 */
 	public void testDelayStore() throws Throwable {
 
-		// Setup to delay storage
-		this.store.setStoreImmediately(false);
-
-		// Record
-		this.record_Create();
+		// Record storing
+		this.record_instantiate();
+		this.record_delay(); // storing
 		this.asynchronousListener.notifyStarted();
 		this.asynchronousListener.notifyComplete();
 
-		// Run test
+		// Store
 		this.replayMockObjects();
 		HttpSessionAdministration admin = this
 				.createHttpSessionAdministration();
 		admin.store();
 		assertFalse("Should delay storing", admin.isOperationComplete());
-		this.store.getStoreHttpSessionOperation().sessionStored();
+		this.ensureHttpSessionNotAlterable(this.httpSession);
+		this.storeOperation.sessionStored();
 		assertTrue("Should store after delay", admin.isOperationComplete());
-
-		// Verify
 		this.verifyFunctionality();
 	}
 
@@ -120,13 +93,11 @@ public class StoreHttpSessionTest extends
 
 		final Exception failure = new Exception("Failure to store");
 
-		// Setup to fail immediately
-		this.store.loadFailure(failure);
+		// Record storing
+		this.record_instantiate();
+		this.record_store_failedToStoreSession(failure);
 
-		// Record
-		this.record_Create();
-
-		// Run test
+		// Store
 		this.replayMockObjects();
 		HttpSessionAdministration admin = this
 				.createHttpSessionAdministration();
@@ -136,17 +107,7 @@ public class StoreHttpSessionTest extends
 		} catch (Throwable ex) {
 			assertSame("Incorrect cause of failure to store", failure, ex);
 		}
-
-		// Ensure also propagates the failure
-		try {
-			admin.isOperationComplete();
-			fail("Should propagate the failure");
-		} catch (Throwable ex) {
-			assertSame("Incorrect failure propagated", failure, ex);
-		}
-
-		// Verify
-		this.verifyFunctionality();
+		this.verifyFailure(admin, failure);
 	}
 
 	/**
@@ -156,40 +117,29 @@ public class StoreHttpSessionTest extends
 
 		final Exception failure = new Exception("Failure to store");
 
-		// Setup to delay storage
-		this.store.setStoreImmediately(false);
-
-		// Record
-		this.record_Create();
+		// Record storing
+		this.record_instantiate();
+		this.record_delay(); // storing
 		this.asynchronousListener.notifyStarted();
 		this.asynchronousListener.notifyComplete();
 
-		// Run test
+		// Store
 		this.replayMockObjects();
 		HttpSessionAdministration admin = this
 				.createHttpSessionAdministration();
 		admin.store();
 		assertFalse("Should delay storing", admin.isOperationComplete());
-		this.store.loadFailure(failure);
-
-		// Ensure propagate the failure
-		try {
-			admin.isOperationComplete();
-			fail("Should propagate the failure");
-		} catch (Throwable ex) {
-			assertSame("Incorrect failure propagated", failure, ex);
-		}
-
-		// Verify
-		this.verifyFunctionality();
+		this.ensureHttpSessionNotAlterable(this.httpSession);
+		this.storeOperation.failedToStoreSession(failure);
+		this.verifyFailure(admin, failure);
 	}
 
 	/**
-	 * Records creating the {@link HttpSession}.
+	 * Records instantiating the {@link HttpSession}.
 	 */
-	private void record_Create() {
-		this.record_obtainHttpRequest();
-		this.record_obtainSessionIdCookie(SESSION_ID);
+	private void record_instantiate() {
+		this.record_sessionIdCookie(SESSION_ID);
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, newAttributes());
 	}
 
 	/**
@@ -199,29 +149,110 @@ public class StoreHttpSessionTest extends
 	 */
 	private HttpSessionAdministration createHttpSessionAdministration()
 			throws Throwable {
-		this.startCoordination(this.mo);
-		HttpSession session = (HttpSession) this.mo.getObject();
-		assertHttpSession(SESSION_ID, CREATION_TIME, false, session);
-		return (HttpSessionAdministration) session;
+		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
+		this.startCoordination(mo);
+		this.httpSession = (HttpSession) mo.getObject();
+		assertHttpSession(SESSION_ID, CREATION_TIME, false, this.httpSession);
+		return this.httpSession.getHttpSessionAdministration();
 	}
 
 	/**
 	 * Verifies the functionality.
 	 */
 	private void verifyFunctionality() {
+		// Verify the mocks and operations
+		this.verifyOperations();
 
-		// Verify the mocks
-		this.verifyMockObjects();
+		// Ensure can now alter session
+		this.httpSession.setAttribute("TEST", "ALTERED");
+		this.httpSession.removeAttribute("TEST");
+	}
 
-		// Ensure stored object
-		StoreHttpSessionOperation operation = this.store
-				.getStoreHttpSessionOperation();
-		assertEquals("Incorrect session id", SESSION_ID, operation
-				.getSessionId());
-		assertEquals("Incorrect creation time", CREATION_TIME, operation
-				.getCreationTime());
-		assertSame("Incorrect store attributes", this.attributes, operation
-				.getAttributes());
+	/**
+	 * Verifies the failure.
+	 *
+	 * @param admin
+	 *            {@link HttpSessionAdministration}.
+	 * @param failure
+	 *            Expected failure.
+	 */
+	private void verifyFailure(HttpSessionAdministration admin,
+			Throwable failure) {
+		// Verify the mocks and operations
+		this.verifyOperations();
+
+		// Ensure propagate the failure
+		try {
+			admin.isOperationComplete();
+			fail("Should propagate the failure");
+		} catch (Throwable ex) {
+			assertSame("Incorrect failure propagated", failure, ex);
+		}
+	}
+
+	/**
+	 * Ensures the {@link HttpSession} is not alterable.
+	 *
+	 * @param session
+	 *            {@link HttpSession}.
+	 */
+	private void ensureHttpSessionNotAlterable(HttpSession session) {
+
+		// Ensure can obtain details of session while it is being stored
+		session.getSessionId();
+		session.isNew();
+		session.getCreationTime();
+		session.getAttribute("TEST");
+		session.getAttributeNames();
+		session.getHttpSessionAdministration();
+
+		// Should not be able to alter session however while being stored
+		this.ensureHttpSessionNotAlterable(session,
+				new HttpSessionInvocation() {
+					@Override
+					public void invoke(HttpSession session) {
+						session.setAttribute("TEST", "VALUE");
+					}
+				});
+		this.ensureHttpSessionNotAlterable(session,
+				new HttpSessionInvocation() {
+					@Override
+					public void invoke(HttpSession session) {
+						session.removeAttribute("TEST");
+					}
+				});
+	}
+
+	/**
+	 * Ensures the {@link HttpSession} is not alterable.
+	 *
+	 * @param session
+	 *            {@link HttpSession}.
+	 * @param invocation
+	 *            {@link HttpSessionInvocation}.
+	 */
+	private void ensureHttpSessionNotAlterable(HttpSession session,
+			HttpSessionInvocation invocation) {
+		try {
+			invocation.invoke(session);
+			fail("Should not be able to alter HTTP session");
+		} catch (StoringHttpSessionException ex) {
+			assertNull("Should never be cause of not alterable", ex.getCause());
+		}
+	}
+
+	/**
+	 * Invocation of a method on the {@link HttpSession}.
+	 */
+	private interface HttpSessionInvocation {
+
+		/**
+		 * Invokes the method on the {@link HttpSession}.
+		 *
+		 * @param session
+		 *            {@link HttpSession}.
+		 */
+		void invoke(HttpSession session);
 	}
 
 }
