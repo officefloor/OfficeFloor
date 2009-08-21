@@ -30,22 +30,28 @@ public interface HttpSession {
 	 * Obtains the session Id.
 	 *
 	 * @return Session Id.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	String getSessionId();
+	String getSessionId() throws InvalidatedHttpSessionException;
 
 	/**
 	 * Indicates if this is a new {@link HttpSession}.
 	 *
 	 * @return <code>true</code> if this is a new {@link HttpSession}.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	boolean isNew();
+	boolean isNew() throws InvalidatedHttpSessionException;
 
 	/**
 	 * Obtains the time this {@link HttpSession} was created.
 	 *
 	 * @return Time this {@link HttpSession} was created.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	long getCreationTime();
+	long getCreationTime() throws InvalidatedHttpSessionException;
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name for this
@@ -55,8 +61,10 @@ public interface HttpSession {
 	 *            Name.
 	 * @return {@link Object} bound to the name or <code>null</code> if no
 	 *         {@link Object} bound by the name.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	Object getAttribute(String name);
+	Object getAttribute(String name) throws InvalidatedHttpSessionException;
 
 	/**
 	 * Obtains an {@link Iterator} to the names of the bound {@link Object}
@@ -64,8 +72,10 @@ public interface HttpSession {
 	 *
 	 * @return {@link Iterator} to the names of the bound {@link Object}
 	 *         instances.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	Iterator<String> getAttributeNames();
+	Iterator<String> getAttributeNames() throws InvalidatedHttpSessionException;
 
 	/**
 	 * Binds the {@link Object} to the name within this {@link HttpSession}.
@@ -74,8 +84,14 @@ public interface HttpSession {
 	 *            Name.
 	 * @param object
 	 *            {@link Object}.
+	 * @throws StoringHttpSessionException
+	 *             Indicating the {@link HttpSession} is currently being stored
+	 *             and can not be altered.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	void setAttribute(String name, Object object);
+	void setAttribute(String name, Object object)
+			throws StoringHttpSessionException, InvalidatedHttpSessionException;
 
 	/**
 	 * Removes the bound {@link Object} by the name from this
@@ -83,7 +99,22 @@ public interface HttpSession {
 	 *
 	 * @param name
 	 *            Name of bound {@link Object} to remove.
+	 * @throws StoringHttpSessionException
+	 *             Indicating the {@link HttpSession} is currently being stored
+	 *             and can not be altered.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
-	void removeAttribute(String name);
+	void removeAttribute(String name) throws StoringHttpSessionException,
+			InvalidatedHttpSessionException;
+
+	/**
+	 * Obtains the {@link HttpSessionAdministration} to administer this
+	 * {@link HttpSession}.
+	 *
+	 * @return {@link HttpSessionAdministration} to administer this
+	 *         {@link HttpSession}.
+	 */
+	HttpSessionAdministration getHttpSessionAdministration();
 
 }

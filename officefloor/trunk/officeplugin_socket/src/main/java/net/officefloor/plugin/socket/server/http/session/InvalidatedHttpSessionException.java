@@ -15,38 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.session.spi;
-
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+package net.officefloor.plugin.socket.server.http.session;
 
 /**
- * Operation to obtain details of invalidating a {@link HttpSession} within the
- * {@link HttpSessionStore}.
+ * Indicates the {@link HttpSession} is currently invalidated and can not be
+ * used. This can occur:
+ * <ol>
+ * <li>after the {@link HttpSession} has been invalidated with no further
+ * {@link HttpSession} required (in other words not creating another
+ * {@link HttpSession})</li>
+ * <li>during {@link HttpSession} invalidation as another {@link HttpSession} is
+ * being created</li>
+ * <li>failure in invalidating the {@link HttpSession}</li>
+ * </ol>
  *
  * @author Daniel Sagenschneider
  */
-public interface InvalidateHttpSessionOperation {
+public class InvalidatedHttpSessionException extends IllegalStateException {
 
 	/**
-	 * Obtains the session Id of the {@link HttpSession} to invalidate.
-	 *
-	 * @return Session Id of the {@link HttpSession} to invalidate.
+	 * Initiate.
 	 */
-	String getSessionId();
+	public InvalidatedHttpSessionException() {
+	}
 
 	/**
-	 * Flags the {@link HttpSession} was invalidated successfully within the
-	 * {@link HttpSessionStore}.
-	 */
-	void sessionInvalidated();
-
-	/**
-	 * Flags failed to invalidate the {@link HttpSession} within the
-	 * {@link HttpSessionStore}.
+	 * Initiate with cause.
 	 *
 	 * @param cause
-	 *            Cause of the failure.
+	 *            Cause of {@link HttpSession} being invalid.
 	 */
-	void failedToInvalidateSession(Throwable cause);
+	public InvalidatedHttpSessionException(Throwable cause) {
+		super(cause);
+	}
 
 }

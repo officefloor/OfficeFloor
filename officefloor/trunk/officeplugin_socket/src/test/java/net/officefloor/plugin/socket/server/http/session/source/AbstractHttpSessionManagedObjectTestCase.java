@@ -19,7 +19,9 @@ package net.officefloor.plugin.socket.server.http.session.source;
 
 import java.net.HttpCookie;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,16 +61,6 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	private final int serverHttpConnectionIndex = 0;
 
 	/**
-	 * Index of the {@link HttpSessionIdGenerator}.
-	 */
-	private final int sessionIdGeneratorIndex = 1;
-
-	/**
-	 * Index of the {@link HttpSessionStore}.
-	 */
-	private final int sessionStoreIndex = 2;
-
-	/**
 	 * Mock {@link AsynchronousListener}.
 	 */
 	protected final AsynchronousListener asynchronousListener = this
@@ -93,20 +85,35 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
-	 * Creates the {@link HttpSessionManagedObject}.
-	 *
-	 * @param generator
-	 *            {@link HttpSessionIdGenerator}.
-	 * @param store
-	 *            {@link HttpSessionStore}.
-	 * @return New {@link HttpSessionManagedObject}.
+	 * Mock operations for the {@link MockHttpSessionIdGenerator} and
+	 * {@link MockHttpSessionStore}.
 	 */
-	protected HttpSessionManagedObject createHttpSessionManagedObject(
-			HttpSessionIdGenerator generator, HttpSessionStore store) {
-		return new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME,
-				this.serverHttpConnectionIndex, this.sessionIdGeneratorIndex,
-				generator, this.sessionStoreIndex, store);
-	}
+	private final Deque<MockOperation> mockOperations = new LinkedList<MockOperation>();
+
+	/**
+	 * {@link FreshHttpSession}.
+	 */
+	protected FreshHttpSession freshHttpSession = null;
+
+	/**
+	 * {@link CreateHttpSessionOperation}.
+	 */
+	protected CreateHttpSessionOperation createOperation = null;
+
+	/**
+	 * {@link RetrieveHttpSessionOperation}.
+	 */
+	protected RetrieveHttpSessionOperation retrieveOperation = null;
+
+	/**
+	 * {@link StoreHttpSessionOperation}.
+	 */
+	protected StoreHttpSessionOperation storeOperation = null;
+
+	/**
+	 * {@link InvalidateHttpSessionOperation}.
+	 */
+	protected InvalidateHttpSessionOperation invalidateOperation = null;
 
 	/**
 	 * Creates the attributes.
@@ -135,36 +142,26 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 				.getAttribute("_TEST"));
 	}
 
-	/**
-	 * Records obtaining the {@link HttpRequest}.
+	/*
+	 * =================== Record methods ===================================
 	 */
-	protected void record_obtainHttpRequest() {
-		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(this.serverHttpConnectionIndex), this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-	}
 
 	/**
-	 * Records obtaining the {@link HttpSessionIdGenerator}.
-	 *
-	 * @param generator
-	 *            {@link HttpSessionIdGenerator} to return.
-	 */
-	protected void record_obtainHttpSessionIdGenerator(
-			HttpSessionIdGenerator generator) {
-		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(this.sessionIdGeneratorIndex), generator);
-	}
-
-	/**
-	 * Records obtaining the Session Id {@link HttpCookie}.
+	 * Records obtaining the {@link HttpRequest} and subsequently the Session Id
+	 * {@link HttpCookie}.
 	 *
 	 * @param sessionId
 	 *            <code>null</code> indicates no Session Id {@link HttpCookie},
 	 *            while a value will have the {@link HttpCookie} available.
 	 */
-	protected void record_obtainSessionIdCookie(String sessionId) {
+	protected void record_sessionIdCookie(String sessionId) {
+		// Record obtaining the Http Request
+		this.recordReturn(this.objectRegistry, this.objectRegistry
+				.getObject(this.serverHttpConnectionIndex), this.connection);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(),
+				this.request);
+
+		// Record obtaining the Session Id
 		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
 		if (sessionId != null) {
 			headers.add(new HttpHeaderImpl("cookie", SESSION_ID_COOKIE_NAME
@@ -174,18 +171,212 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	}
 
 	/**
-	 * Records obtaining the {@link HttpSessionStore}.
-	 *
-	 * @param store
-	 *            {@link HttpSessionStore}.
+	 * Records delay in operation.
 	 */
-	protected void record_obtainHttpSessionStore(HttpSessionStore store) {
-		this.recordReturn(this.objectRegistry, this.objectRegistry
-				.getObject(this.sessionStoreIndex), store);
+	protected void record_delay() {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				// Do nothing
+			}
+		});
 	}
 
 	/**
-	 * Triggers starting the coordination.
+	 * Records specifying the Session Id.
+	 *
+	 * @param sessionId
+	 *            Session Id.
+	 */
+	protected void record_generate_setSessionId(final String sessionId) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.freshHttpSession.setSessionId(sessionId);
+			}
+		});
+	}
+
+	/**
+	 * Records failing to generate the Session Id.
+	 *
+	 * @param cause
+	 *            Cause of the failure.
+	 */
+	protected void record_generate_failedToGenerateSessionId(
+			final Throwable cause) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.freshHttpSession.failedToGenerateSessionId(cause);
+			}
+		});
+	}
+
+	/**
+	 * Records creating the {@link HttpSession}.
+	 *
+	 * @param creationTime
+	 *            Creation time.
+	 * @param attributes
+	 *            Attributes.
+	 */
+	protected void record_create_sessionCreated(final long creationTime,
+			final Map<String, Object> attributes) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.createOperation.sessionCreated(creationTime, attributes);
+			}
+		});
+	}
+
+	/**
+	 * Records collision of Session Id.
+	 */
+	protected void record_create_sessionIdCollision() {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.createOperation.sessionIdCollision();
+			}
+		});
+	}
+
+	/**
+	 * Records failing to create the {@link HttpSession}.
+	 *
+	 * @param cause
+	 *            Cause of the failure.
+	 */
+	protected void record_create_failedToCreateSession(final Throwable cause) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.createOperation.failedToCreateSession(cause);
+			}
+		});
+	}
+
+	/**
+	 * Records retrieving the {@link HttpSession}.
+	 *
+	 * @param creationTime
+	 *            Creation time.
+	 * @param attributes
+	 *            Attributes.
+	 */
+	protected void record_retrieve_sessionRetrieved(final long creationTime,
+			final Map<String, Object> attributes) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.retrieveOperation.sessionRetrieved(creationTime,
+						attributes);
+			}
+		});
+	}
+
+	/**
+	 * Records the {@link HttpSession} not being available.
+	 */
+	protected void record_retrieve_sessionNotAvailable() {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.retrieveOperation.sessionNotAvailable();
+			}
+		});
+	}
+
+	/**
+	 * Records failing to retrieve the {@link HttpSession}.
+	 *
+	 * @param cause
+	 *            Cause of the failure.
+	 */
+	protected void record_retrieve_failedToRetrieveSession(final Throwable cause) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.retrieveOperation.failedToRetreiveSession(cause);
+			}
+		});
+	}
+
+	/**
+	 * Records {@link HttpSession} being stored.
+	 */
+	protected void record_store_sessionStored() {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.storeOperation.sessionStored();
+			}
+		});
+	}
+
+	/**
+	 * Records failing to store the {@link HttpSession}.
+	 *
+	 * @param cause
+	 *            Cause of the failure.
+	 */
+	protected void record_store_failedToStoreSession(final Throwable cause) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.storeOperation.failedToStoreSession(cause);
+			}
+		});
+	}
+
+	/**
+	 * Records {@link HttpSession} being invalidated.
+	 */
+	protected void record_invalidate_sessionInvalidated() {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.invalidateOperation.sessionInvalidated();
+			}
+		});
+	}
+
+	/**
+	 * Records failing to invalidate the {@link HttpSession}.
+	 *
+	 * @param cause
+	 *            Cause of failure.
+	 */
+	protected void record_invalidate_failedToInvalidateSession(
+			final Throwable cause) {
+		this.mockOperations.add(new MockOperation() {
+			@Override
+			public void run() {
+				this.invalidateOperation.failedToInvalidateSession(cause);
+			}
+		});
+	}
+
+	/*
+	 * ==================== Test run methods ============================
+	 */
+
+	/**
+	 * Creates the {@link HttpSessionManagedObject}.
+	 *
+	 * @return New {@link HttpSessionManagedObject}.
+	 */
+	protected HttpSessionManagedObject createHttpSessionManagedObject() {
+		return new HttpSessionManagedObject(SESSION_ID_COOKIE_NAME,
+				this.serverHttpConnectionIndex, -1,
+				new MockHttpSessionIdGenerator(), -1,
+				new MockHttpSessionStore());
+	}
+
+	/**
+	 * Triggers running the coordination.
 	 *
 	 * @param mo
 	 *            {@link HttpSessionManagedObject}.
@@ -201,67 +392,58 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	}
 
 	/**
+	 * Verifies the mock objects and all operations were completed.
+	 */
+	protected void verifyOperations() {
+		this.verifyMockObjects();
+		assertEquals("Operations still outstanding", 0, this.mockOperations
+				.size());
+	}
+
+	/**
+	 * Runs the next {@link MockOperation}.
+	 *
+	 * @param session
+	 *            {@link FreshHttpSession}.
+	 * @param create
+	 *            {@link CreateHttpSessionOperation}.
+	 * @param retrieve
+	 *            {@link RetrieveHttpSessionOperation}.
+	 * @param store
+	 *            {@link StoreHttpSessionOperation}.
+	 * @param invalidate
+	 *            {@link InvalidateHttpSessionOperation}.
+	 */
+	private void runNextMockOperation(FreshHttpSession session,
+			CreateHttpSessionOperation create,
+			RetrieveHttpSessionOperation retrieve,
+			StoreHttpSessionOperation store,
+			InvalidateHttpSessionOperation invalidate) {
+		// Obtain the next operation
+		MockOperation operation = this.mockOperations.remove();
+
+		// Load items for delay execution
+		this.freshHttpSession = session;
+		this.createOperation = create;
+		this.retrieveOperation = retrieve;
+		this.storeOperation = store;
+		this.invalidateOperation = invalidate;
+
+		// Load items for operation
+		operation.freshHttpSession = session;
+		operation.createOperation = create;
+		operation.retrieveOperation = retrieve;
+		operation.storeOperation = store;
+		operation.invalidateOperation = invalidate;
+
+		// Run the operation
+		operation.run();
+	}
+
+	/**
 	 * Mock {@link HttpSessionIdGenerator}.
 	 */
-	protected class MockHttpSessionIdGenerator implements
-			HttpSessionIdGenerator {
-
-		/**
-		 * Session Id.
-		 */
-		private String sessionId;
-
-		/**
-		 * Failure.
-		 */
-		private Throwable failure;
-
-		/**
-		 * {@link FreshHttpSession}.
-		 */
-		private FreshHttpSession session = null;
-
-		/**
-		 * Initiate for asynchronous generation.
-		 */
-		public MockHttpSessionIdGenerator() {
-		}
-
-		/**
-		 * Convenience constructor returning session Id immediately.
-		 *
-		 * @param sessionId
-		 *            Session Id to be generated.
-		 */
-		public MockHttpSessionIdGenerator(String sessionId) {
-			this.sessionId = sessionId;
-		}
-
-		/**
-		 * Specifies the session Id.
-		 *
-		 * @param sessionId
-		 *            Session Id.
-		 */
-		public void setSessionId(String sessionId) {
-			this.sessionId = sessionId;
-			if (this.session != null) {
-				this.session.setSessionId(this.sessionId);
-			}
-		}
-
-		/**
-		 * Specifies failure in generating.
-		 *
-		 * @param failure
-		 *            Failure.
-		 */
-		public void setFailure(Throwable failure) {
-			this.failure = failure;
-			if (this.session != null) {
-				this.session.failedToGenerateSessionId(this.failure);
-			}
-		}
+	private class MockHttpSessionIdGenerator implements HttpSessionIdGenerator {
 
 		/*
 		 * ============ HttpSessionIdGenerator ========================
@@ -269,199 +451,15 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 		@Override
 		public void generateSessionId(FreshHttpSession session) {
-			this.session = session;
-
-			// Handle failure
-			if (this.failure != null) {
-				session.failedToGenerateSessionId(this.failure);
-				return;
-			}
-
-			// Handle generate session id
-			if (this.sessionId != null) {
-				session.setSessionId(this.sessionId);
-				return;
-			}
-
-			// Otherwise taking time to generate
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
+					session, null, null, null, null);
 		}
 	}
 
 	/**
 	 * Mock {@link HttpSessionStore}.
 	 */
-	protected class MockHttpSessionStore implements HttpSessionStore {
-
-		/**
-		 * Creation time.
-		 */
-		private final long creationTime;
-
-		/**
-		 * Failure.
-		 */
-		private Throwable failure = null;
-
-		/**
-		 * Flag indicating if collision of session Id.
-		 */
-		private boolean isCollision = false;
-
-		/**
-		 * Flag indicating if Session available on retrieval.
-		 */
-		private boolean isSessionAvailable = true;
-
-		/**
-		 * Flag indicating to store immediately.
-		 */
-		private boolean isStoreImmediately = true;
-
-		/**
-		 * Attributes.
-		 */
-		private Map<String, Object> attributes = null;
-
-		/**
-		 * {@link CreateHttpSessionOperation}.
-		 */
-		private CreateHttpSessionOperation create;
-
-		/**
-		 * {@link RetrieveHttpSessionOperation}.
-		 */
-		private RetrieveHttpSessionOperation retrieve;
-
-		/**
-		 * {@link StoreHttpSessionOperation}.
-		 */
-		private StoreHttpSessionOperation store;
-
-		/**
-		 * {@link InvalidateHttpSessionOperation}.
-		 */
-		private InvalidateHttpSessionOperation invalidate;
-
-		/**
-		 * Initiate.
-		 *
-		 * @param creationTime
-		 *            Creation time.
-		 */
-		public MockHttpSessionStore(long creationTime) {
-			this.creationTime = creationTime;
-		}
-
-		/**
-		 * Convenience constructor creating/retrieving session immediately.
-		 *
-		 * @param creationTime
-		 *            Creation time.
-		 * @param attributes
-		 *            Attributes.
-		 */
-		public MockHttpSessionStore(long creationTime,
-				Map<String, Object> attributes) {
-			this(creationTime);
-			this.attributes = attributes;
-		}
-
-		/**
-		 * Loads the attributes.
-		 *
-		 * @param attributes
-		 *            Loaded the attributes
-		 */
-		public void loadAttributes(Map<String, Object> attributes) {
-			this.attributes = attributes;
-
-			// Handle if creation
-			if (this.create != null) {
-				this.create.sessionCreated(this.creationTime, attributes);
-				return;
-			}
-
-			// Handle if retrieve
-			if (this.retrieve != null) {
-				this.retrieve.sessionRetrieved(this.creationTime, attributes);
-				return;
-			}
-		}
-
-		/**
-		 * Loads a failure.
-		 *
-		 * @param cause
-		 *            Cause of the failure.
-		 */
-		public void loadFailure(Throwable cause) {
-			this.failure = cause;
-
-			// Handle if creation
-			if (this.create != null) {
-				this.create.failedToCreateSession(cause);
-				return;
-			}
-
-			// Handle if retrieval
-			if (this.retrieve != null) {
-				this.retrieve.failedToRetreiveSession(cause);
-				return;
-			}
-
-			// Handle if storing
-			if (this.store != null) {
-				this.store.failedToStoreSession(cause);
-				return;
-			}
-		}
-
-		/**
-		 * Flags for Session Id collision.
-		 */
-		public void flagSessionIdCollision() {
-			this.isCollision = true;
-
-			// Handle if being created
-			if (this.create != null) {
-				this.isCollision = false; // collide only once
-				this.create.sessionIdCollision();
-				return;
-			}
-		}
-
-		/**
-		 * Flags Session not available.
-		 */
-		public void flagSessionNotAvailable() {
-			this.isSessionAvailable = false;
-
-			// Handle if being retrieved
-			if (this.retrieve != null) {
-				this.isSessionAvailable = true; // not available only once
-				this.retrieve.sessionNotAvailable();
-				return;
-			}
-		}
-
-		/**
-		 * Obtains the {@link StoreHttpSessionOperation}.
-		 *
-		 * @return {@link StoreHttpSessionOperation}.
-		 */
-		public StoreHttpSessionOperation getStoreHttpSessionOperation() {
-			return this.store;
-		}
-
-		/**
-		 * Flags whether to store immediately.
-		 *
-		 * @param isStoreImmediately
-		 *            Indicate if store immediately.
-		 */
-		public void setStoreImmediately(boolean isStoreImmediately) {
-			this.isStoreImmediately = isStoreImmediately;
-		}
+	private class MockHttpSessionStore implements HttpSessionStore {
 
 		/*
 		 * ================= HttpSessionStore ==========================
@@ -469,93 +467,59 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 
 		@Override
 		public void createHttpSession(CreateHttpSessionOperation operation) {
-			this.create = operation;
-			this.retrieve = null;
-			this.store = null;
-			this.invalidate = null;
-
-			// Handle if failure
-			if (this.failure != null) {
-				this.create.failedToCreateSession(this.failure);
-				return;
-			}
-
-			// Handle if collision
-			if (this.isCollision) {
-				this.isCollision = false; // collide only once
-				this.create.sessionIdCollision();
-				return;
-			}
-
-			// Handle if successful
-			if (this.attributes != null) {
-				this.create.sessionCreated(this.creationTime, this.attributes);
-				return;
-			}
-
-			// Otherwise asynchronous creation
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
+					null, operation, null, null, null);
 		}
 
 		@Override
 		public void retrieveHttpSession(RetrieveHttpSessionOperation operation) {
-			this.create = null;
-			this.retrieve = operation;
-			this.store = null;
-			this.invalidate = null;
-
-			// Handle if failure
-			if (this.failure != null) {
-				this.retrieve.failedToRetreiveSession(this.failure);
-				return;
-			}
-
-			// Handle if Session not available
-			if (!this.isSessionAvailable) {
-				this.isSessionAvailable = true; // not available only once
-				this.retrieve.sessionNotAvailable();
-				return;
-			}
-
-			// Handle if successful
-			if (this.attributes != null) {
-				this.retrieve.sessionRetrieved(this.creationTime,
-						this.attributes);
-				return;
-			}
-
-			// Otherwise asynchronous retrieval
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
+					null, null, operation, null, null);
 		}
 
 		@Override
 		public void storeHttpSession(StoreHttpSessionOperation operation) {
-			this.create = null;
-			this.retrieve = null;
-			this.store = operation;
-			this.invalidate = null;
-
-			// Handle if failure
-			if (this.failure != null) {
-				this.store.failedToStoreSession(this.failure);
-				return;
-			}
-
-			// Determine if store immediately
-			if (this.isStoreImmediately) {
-				operation.sessionStored();
-				return;
-			}
-
-			// Otherwise asynchronous storage
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
+					null, null, null, operation, null);
 		}
 
 		@Override
 		public void invalidateHttpSession(
 				InvalidateHttpSessionOperation operation) {
-			this.create = null;
-			this.retrieve = null;
-			this.store = null;
-			this.invalidate = operation;
+			AbstractHttpSessionManagedObjectTestCase.this.runNextMockOperation(
+					null, null, null, null, operation);
 		}
+	}
+
+	/**
+	 * Operation on the mock object.
+	 */
+	private abstract class MockOperation implements Runnable {
+
+		/**
+		 * {@link FreshHttpSession}.
+		 */
+		public FreshHttpSession freshHttpSession = null;
+
+		/**
+		 * {@link CreateHttpSessionOperation}.
+		 */
+		public CreateHttpSessionOperation createOperation = null;
+
+		/**
+		 * {@link RetrieveHttpSessionOperation}.
+		 */
+		public RetrieveHttpSessionOperation retrieveOperation = null;
+
+		/**
+		 * {@link StoreHttpSessionOperation}.
+		 */
+		public StoreHttpSessionOperation storeOperation = null;
+
+		/**
+		 * {@link InvalidateHttpSessionOperation}.
+		 */
+		public InvalidateHttpSessionOperation invalidateOperation = null;
 	}
 
 }
