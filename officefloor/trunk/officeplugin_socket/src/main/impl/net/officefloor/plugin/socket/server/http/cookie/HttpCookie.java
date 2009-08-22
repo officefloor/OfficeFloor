@@ -17,10 +17,15 @@
  */
 package net.officefloor.plugin.socket.server.http.cookie;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
  * HTTP Cookie.
@@ -28,6 +33,38 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
  * @author Daniel Sagenschneider
  */
 public class HttpCookie {
+
+	/**
+	 * Format of the expire time for the {@link HttpHeader}.
+	 */
+	private final static String EXPIRE_FORMAT = "EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'";
+
+	/**
+	 * {@link DateFormat} to format the expire time for the {@link HttpHeader}.
+	 */
+	private volatile static DateFormat expireFormatter;
+
+	/**
+	 * Obtains the {@link DateFormat} to format the expire time for the
+	 * {@link HttpHeader}.
+	 *
+	 * @return {@link DateFormat} to format the expire time for the
+	 *         {@link HttpHeader}.
+	 */
+	private static DateFormat getExpireFormatter() {
+		DateFormat formatter = expireFormatter;
+		if (formatter == null) {
+			// Create the formatter
+			formatter = new SimpleDateFormat(EXPIRE_FORMAT);
+			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+			// Make formatter available for further use
+			expireFormatter = formatter;
+		}
+
+		// Return the formatter
+		return formatter;
+	}
 
 	/**
 	 * Parses the {@link HttpCookie} instances from the {@link HttpHeader}
@@ -148,6 +185,22 @@ public class HttpCookie {
 	private final String value;
 
 	/**
+	 * Time this {@link HttpCookie} expires. -1 indicates not to provide expire
+	 * time.
+	 */
+	private long expireTime = -1;
+
+	/**
+	 * Path.
+	 */
+	private String path = null;
+
+	/**
+	 * Domain.
+	 */
+	private String domain = null;
+
+	/**
 	 * Initiate.
 	 *
 	 * @param name
@@ -177,4 +230,78 @@ public class HttpCookie {
 	public String getValue() {
 		return this.value;
 	}
+
+	/**
+	 * Specifies the time this {@link HttpCookie} expires.
+	 *
+	 * @param expireTime
+	 *            Time this {@link HttpCookie} expires.
+	 */
+	public void setExpires(long expireTime) {
+		this.expireTime = expireTime;
+	}
+
+	/**
+	 * Specifies the path.
+	 *
+	 * @param path
+	 *            Path.
+	 */
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	/**
+	 * Specifies the domain.
+	 *
+	 * @param domain
+	 *            Domain.
+	 */
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	/**
+	 * Obtains the {@link HttpResponse} {@link HttpHeader} value for this
+	 * {@link HttpCookie}.
+	 *
+	 * @return {@link HttpResponse} {@link HttpHeader} value for this
+	 *         {@link HttpCookie}.
+	 */
+	public String toHttpResponseHeaderValue() {
+
+		// Construct details of the cookie
+		StringBuilder headerValue = new StringBuilder();
+		headerValue.append(this.name);
+		headerValue.append("=\"");
+		headerValue.append(this.value);
+		headerValue.append("\"");
+		if (this.expireTime > 0) {
+			headerValue.append("; expires=");
+			String expireText = getExpireFormatter().format(
+					new Date(this.expireTime));
+			headerValue.append(expireText);
+		}
+		if (this.path != null) {
+			headerValue.append("; path=");
+			headerValue.append(this.path);
+		}
+		if (this.domain != null) {
+			headerValue.append("; domain=");
+			headerValue.append(this.domain);
+		}
+
+		// Return details of the cookie
+		return headerValue.toString();
+	}
+
+	/*
+	 * ============================ Object ================================
+	 */
+
+	@Override
+	public String toString() {
+		return this.toHttpResponseHeaderValue();
+	}
+
 }

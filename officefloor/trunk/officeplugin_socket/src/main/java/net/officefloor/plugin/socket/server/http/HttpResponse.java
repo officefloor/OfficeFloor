@@ -65,16 +65,42 @@ public interface HttpResponse {
 
 	/**
 	 * <p>
-	 * Specifies a header on the response.
+	 * Adds a {@link HttpHeader} for the response.
 	 * <p>
-	 * Headers are provided on the response in the order they are added.
+	 * {@link HttpHeader} instances are provided on the response in the order
+	 * they are added.
 	 *
 	 * @param name
-	 *            Name of header.
+	 *            Name of {@link HttpHeader}.
 	 * @param value
-	 *            Value of header.
+	 *            Value of {@link HttpHeader}.
+	 * @return {@link HttpHeader} instance added.
 	 */
-	void addHeader(String name, String value);
+	HttpHeader addHeader(String name, String value);
+
+	/**
+	 * Obtains the first {@link HttpHeader} by the name.
+	 *
+	 * @param name
+	 *            Name of the {@link HttpHeader}.
+	 * @return First {@link HttpHeader} by the name.
+	 */
+	HttpHeader getHeader(String name);
+
+	/**
+	 * Obtains all the {@link HttpHeader} instances for the response.
+	 *
+	 * @return All the {@link HttpHeader} instances for the response.
+	 */
+	HttpHeader[] getHeaders();
+
+	/**
+	 * Removes the particular {@link HttpHeader} from the response.
+	 *
+	 * @param header
+	 *            {@link HttpHeader} to be removed from the response.
+	 */
+	void removeHeader(HttpHeader header);
 
 	/**
 	 * <p>

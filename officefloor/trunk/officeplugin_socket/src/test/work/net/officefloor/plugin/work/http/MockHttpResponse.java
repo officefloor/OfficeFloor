@@ -18,10 +18,14 @@
 package net.officefloor.plugin.work.http;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
@@ -154,8 +158,35 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void addHeader(String name, String value) {
-		headers.setProperty(name, value);
+	public HttpHeader addHeader(String name, String value) {
+		TestCase.assertFalse("Response already contains header '" + name + "'",
+				this.headers.containsKey(name));
+		this.headers.setProperty(name, value);
+		return new HttpHeaderImpl(name, value);
+	}
+
+	@Override
+	public HttpHeader getHeader(String name) {
+		String value = this.headers.getProperty(name);
+		return (value == null ? null : new HttpHeaderImpl(name, value));
+	}
+
+	@Override
+	public HttpHeader[] getHeaders() {
+		// Create the listing of headers
+		List<HttpHeader> list = new LinkedList<HttpHeader>();
+		for (String name : this.headers.stringPropertyNames()) {
+			String value = this.headers.getProperty(name);
+			list.add(new HttpHeaderImpl(name, value));
+		}
+
+		// Return the listing of headers
+		return list.toArray(new HttpHeader[0]);
+	}
+
+	@Override
+	public void removeHeader(HttpHeader header) {
+		this.headers.remove(header.getName());
 	}
 
 	@Override

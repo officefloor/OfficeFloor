@@ -95,6 +95,40 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 				.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
 	}
 
+	/**
+	 * Tests manipulating the {@link HttpHeader} instances.
+	 */
+	public void testHeaderManipulation() {
+
+		// Create the response
+		HttpResponse response = this.createHttpResponse();
+
+		// Ensure can add header
+		HttpHeader headerOne = response.addHeader("test", "one");
+		assertHttpHeader("test", "one", headerOne);
+
+		// Add another header
+		HttpHeader headerTwo = response.addHeader("test", "two");
+		assertHttpHeader("test", "two", headerTwo);
+
+		// Ensure get first header
+		HttpHeader firstHeader = response.getHeader("test");
+		assertHttpHeader("test", "one", firstHeader);
+
+		// Ensure listing of headers returned is correct
+		HttpHeader[] headers = response.getHeaders();
+		assertEquals("Incorrect number of headers", 2, headers.length);
+		assertHttpHeader("test", "one", headers[0]);
+		assertHttpHeader("test", "two", headers[1]);
+
+		// Remove header one
+		response.removeHeader(headerOne);
+
+		// Ensure find new first header
+		HttpHeader newFirstHeader = response.getHeader("test");
+		assertHttpHeader("test", "two", newFirstHeader);
+	}
+
 	/*
 	 * ===================== Helper methods ==============================
 	 */
@@ -169,6 +203,22 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		// Validate the response on the wire
 		String wireText = UsAsciiUtil.convertToString(wireContent);
 		assertEquals("Incorrect wire content", expectedHttpContent, wireText);
+	}
+
+	/**
+	 * Asserts the {@link HttpHeader} is correct.
+	 *
+	 * @param name
+	 *            Expected name.
+	 * @param value
+	 *            Expected value.
+	 * @param header
+	 *            {@link HttpHeader} to be validate.
+	 */
+	private static void assertHttpHeader(String name, String value,
+			HttpHeader header) {
+		assertEquals("Incorrect header name", name, header.getName());
+		assertEquals("Incorrect header value", value, header.getValue());
 	}
 
 	/*

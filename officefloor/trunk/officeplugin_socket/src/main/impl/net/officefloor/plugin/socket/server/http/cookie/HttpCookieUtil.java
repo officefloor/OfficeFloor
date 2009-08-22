@@ -33,9 +33,14 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 public class HttpCookieUtil {
 
 	/**
-	 * Header name of a cookie.
+	 * Header name of a {@link HttpCookie} on the {@link HttpRequest}.
 	 */
 	private static final String HEADER_NAME_COOKIE = "cookie";
+
+	/**
+	 * Header name specifying a {@link HttpCookie} on the {@link HttpResponse}.
+	 */
+	private static final String HEADER_NAME_SET_COOKIE = "set-cookie";
 
 	/**
 	 * Extracts all the {@link HttpCookie} instances from the
@@ -84,6 +89,44 @@ public class HttpCookieUtil {
 
 		// As here, cookie not found
 		return null;
+	}
+
+	/**
+	 * Adds the {@link HttpCookie} to the {@link HttpResponse}.
+	 *
+	 * @param cookie
+	 *            {@link HttpCookie} to be added.
+	 * @param response
+	 *            {@link HttpResponse} to have the {@link HttpCookie} added to
+	 *            it as a {@link HttpHeader}.
+	 * @return {@link HttpHeader} added to the {@link HttpResponse} containing
+	 *         the {@link HttpCookie}.
+	 */
+	public static HttpHeader addHttpCookie(HttpCookie cookie,
+			HttpResponse response) {
+
+		// Obtain the value prefix of the cookie
+		String cookieValuePrefix = cookie.getName().toLowerCase() + "=";
+
+		// Remove any cookies by the name
+		for (HttpHeader header : response.getHeaders()) {
+			// Determine if header specifying a cookie
+			if (HEADER_NAME_SET_COOKIE.equalsIgnoreCase(header.getName())) {
+				// Determine if cookie by name
+				if (header.getValue().toLowerCase().startsWith(
+						cookieValuePrefix)) {
+					// Remove the header containing cookie by same name
+					response.removeHeader(header);
+				}
+			}
+		}
+
+		// Add the header for the cookie
+		HttpHeader header = response.addHeader("set-cookie", cookie
+				.toHttpResponseHeaderValue());
+
+		// Return the header
+		return header;
 	}
 
 	/**

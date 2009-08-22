@@ -359,15 +359,60 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public void addHeader(String name, String value) {
-		synchronized (this.connection.getLock()) {
-			// Ignore specifying content length
-			if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
-				return;
-			}
+	public HttpHeader addHeader(String name, String value) {
 
-			// Add the header
-			this.headers.add(new HttpHeaderImpl(name, value));
+		// Create the HTTP header
+		HttpHeader header = new HttpHeaderImpl(name, value);
+
+		// Ignore specifying content length
+		if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return header;
+		}
+
+		// Add the header
+		synchronized (this.connection.getLock()) {
+			this.headers.add(header);
+		}
+
+		// Return the added header
+		return header;
+	}
+
+	@Override
+	public HttpHeader getHeader(String name) {
+
+		// Search for the first header by the name
+		synchronized (this.connection.getLock()) {
+			for (HttpHeader header : this.headers) {
+				if (name.equalsIgnoreCase(header.getName())) {
+					// Found first header so return it
+					return header;
+				}
+			}
+		}
+
+		// As here did not find header by name
+		return null;
+	}
+
+	@Override
+	public HttpHeader[] getHeaders() {
+
+		// Create the array of headers
+		HttpHeader[] headers;
+		synchronized (this.connection.getLock()) {
+			headers = this.headers.toArray(new HttpHeader[0]);
+		}
+
+		// Return the headers
+		return headers;
+	}
+
+	@Override
+	public void removeHeader(HttpHeader header) {
+		// Remove the header
+		synchronized (this.connection.getLock()) {
+			this.headers.remove(header);
 		}
 	}
 
