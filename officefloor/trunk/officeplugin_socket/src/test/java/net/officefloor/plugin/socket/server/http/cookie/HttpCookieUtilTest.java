@@ -17,12 +17,16 @@
  */
 package net.officefloor.plugin.socket.server.http.cookie;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 
 /**
@@ -36,6 +40,12 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpRequest}.
 	 */
 	private final HttpRequest httpRequest = this.createMock(HttpRequest.class);
+
+	/**
+	 * Mock {@link HttpResponse}.
+	 */
+	private final HttpResponse httpResponse = this
+			.createMock(HttpResponse.class);
 
 	/**
 	 * Ensure extracts the first {@link HttpCookie} by name.
@@ -165,6 +175,79 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correctly adds {@link HttpCookie} to response {@link HttpHeader}.
+	 */
+	public void testAddCookieToResponse() throws Exception {
+
+		final long currentTime = System.currentTimeMillis();
+		String expireText = this.getExpireText(currentTime);
+		HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Create the HTTP cookie
+		HttpCookie cookie = new HttpCookie("test", "value");
+		cookie.setExpires(currentTime);
+		cookie.setPath("/");
+		cookie.setDomain(".officefloor.net");
+
+		// Record adding cookie
+		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
+				new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
+				"set-cookie", "test=\"value\"; expires=" + expireText
+						+ "; path=/; domain=.officefloor.net"), header);
+
+		// Add the cookie to HTTP response
+		this.replayMockObjects();
+		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie,
+				this.httpResponse);
+		this.verifyMockObjects();
+		assertSame("Incorrect HTTP header", header, returnedHeader);
+	}
+
+	/**
+	 * Ensure correctly adds {@link HttpCookie} that replaces an existing
+	 * {@link HttpCookie} on the {@link HttpResponse}.
+	 */
+	public void testAddCookieReplacingExistingHeaderValue() throws Exception {
+
+		final long currentTime = System.currentTimeMillis();
+		String expireText = this.getExpireText(currentTime);
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Create the existing cookie header
+		HttpCookie existingCookie = new HttpCookie("test", "existing");
+		existingCookie.setExpires(currentTime + 1000);
+		existingCookie.setPath("/existing");
+		existingCookie.setDomain(".existing.officefloor.net");
+		HttpHeader existingHeader = new HttpHeaderImpl("set-cookie",
+				existingCookie.toHttpResponseHeaderValue());
+		HttpHeader anotherHeader = new HttpHeaderImpl("set-cookie",
+				"another=cookie");
+
+		// Create the HTTP cookie
+		HttpCookie cookie = new HttpCookie("test", "replace");
+		cookie.setExpires(currentTime);
+		cookie.setPath("/replace");
+		cookie.setDomain(".replace.officefloor.net");
+
+		// Record adding cookie (removing existing cookie header)
+		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
+				new HttpHeader[] { existingHeader, anotherHeader });
+		this.httpResponse.removeHeader(existingHeader);
+		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
+				"set-cookie", "test=\"replace\"; expires=" + expireText
+						+ "; path=/replace; domain=.replace.officefloor.net"),
+				header);
+
+		// Add the cookie to HTTP response
+		this.replayMockObjects();
+		HttpHeader returnedHeader = HttpCookieUtil.addHttpCookie(cookie,
+				this.httpResponse);
+		this.verifyMockObjects();
+		assertSame("Incorrect HTTP header", header, returnedHeader);
+	}
+
+	/**
 	 * Creates the {@link HttpHeader} containing the {@link HttpCookie}.
 	 *
 	 * @param nameValuePairs
@@ -181,4 +264,19 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 		}
 		return new HttpHeaderImpl("cookie", headerValue.toString());
 	}
+
+	/**
+	 * Obtains the expire text for the expire time.
+	 *
+	 * @param expireTime
+	 *            Expire time.
+	 * @return Expire text.
+	 */
+	private String getExpireText(long expireTime) {
+		SimpleDateFormat formatter = new SimpleDateFormat(
+				"EEE',' dd-MMM-yyyy HH:mm:ss 'GMT'");
+		formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return formatter.format(new Date(expireTime));
+	}
+
 }
