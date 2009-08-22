@@ -17,8 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.cookie;
 
-import java.net.HttpCookie;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -39,13 +38,18 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	private final HttpRequest httpRequest = this.createMock(HttpRequest.class);
 
 	/**
-	 * Ensure able to extract the {@link HttpCookie}.
+	 * Ensure extracts the first {@link HttpCookie} by name.
 	 */
-	public void testExtractHttpCookie() {
+	public void testExtractFirst() {
+
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
+		headers.add(this.createCookieHttpHeader("test", "value"));
+		headers.add(this.createCookieHttpHeader("test",
+				"should only return first found cookie"));
 
 		// Record
-		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(), this
-				.createHttpHeaders("test", "value"));
+		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+				headers);
 
 		// Extract the http cookie
 		this.replayMockObjects();
@@ -58,20 +62,123 @@ public class HttpCookieUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link HttpHeader} instances.
+	 * Ensure able to extract the {@link HttpCookie} with a quoted value.
+	 */
+	public void testExtractQuotedValue() {
+
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
+		headers.add(this.createCookieHttpHeader("test", "\"value\""));
+
+		// Record
+		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+				headers);
+
+		// Extract the http cookie
+		this.replayMockObjects();
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
+				this.httpRequest);
+		this.verifyMockObjects();
+
+		// Ensure correct cookie
+		assertEquals("Incorrect cookie", "value", cookie.getValue());
+	}
+
+	/**
+	 * Ensure able to extract the {@link HttpCookie} with an empty quoted value.
+	 */
+	public void testExtractEmptyQuotedValue() {
+
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
+		headers.add(this.createCookieHttpHeader("test", "\"\""));
+
+		// Record
+		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+				headers);
+
+		// Extract the http cookie
+		this.replayMockObjects();
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
+				this.httpRequest);
+		this.verifyMockObjects();
+
+		// Ensure correct cookie
+		assertEquals("Incorrect cookie", "", cookie.getValue());
+	}
+
+	/**
+	 * Ensure able to extract the {@link HttpCookie} from multiple in same
+	 * {@link HttpHeader}.
+	 */
+	public void testExtractFromMuliple() {
+
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
+		HttpHeader one = this.createCookieHttpHeader("another", "value");
+		HttpHeader two = this.createCookieHttpHeader("test", "value");
+		HttpHeader header = new HttpHeaderImpl(one.getName(), one.getValue()
+				+ "," + two.getValue());
+		headers.add(header);
+
+		// Record
+		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+				headers);
+
+		// Extract the http cookie
+		this.replayMockObjects();
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
+				this.httpRequest);
+		this.verifyMockObjects();
+
+		// Ensure correct cookie
+		assertEquals("Incorrect cookie", "value", cookie.getValue());
+	}
+
+	/**
+	 * Ensure able to extract the {@link HttpCookie} from multiple in same
+	 * {@link HttpHeader} that contains quoted separators.
+	 */
+	public void testIgnoreQuotedSeparators() {
+
+		List<HttpHeader> headers = new ArrayList<HttpHeader>(1);
+		HttpHeader attributeSeparatorHeader = this.createCookieHttpHeader(
+				"attribute", "\";\"");
+		HttpHeader cookieSeparatorHeader = this.createCookieHttpHeader(
+				"cookie", "\",\"");
+		HttpHeader cookieHeader = this.createCookieHttpHeader("test", "value");
+		HttpHeader header = new HttpHeaderImpl(cookieHeader.getName(),
+				attributeSeparatorHeader.getValue() + ","
+						+ cookieSeparatorHeader.getValue() + ","
+						+ cookieHeader.getValue());
+		headers.add(header);
+
+		// Record
+		this.recordReturn(this.httpRequest, this.httpRequest.getHeaders(),
+				headers);
+
+		// Extract the http cookie
+		this.replayMockObjects();
+		HttpCookie cookie = HttpCookieUtil.extractHttpCookie("test",
+				this.httpRequest);
+		this.verifyMockObjects();
+
+		// Ensure correct cookie
+		assertEquals("Incorrect cookie", "value", cookie.getValue());
+	}
+
+	/**
+	 * Creates the {@link HttpHeader} containing the {@link HttpCookie}.
 	 *
 	 * @param nameValuePairs
-	 *            Name value pairs for the {@link HttpHeader} instances.
-	 * @return {@link HttpHeader} instances.
+	 *            Name value pairs of the {@link HttpCookie} attributes.
+	 * @return {@link HttpHeader} containing the {@link HttpCookie}.
 	 */
-	private List<HttpHeader> createHttpHeaders(String... nameValuePairs) {
-		List<HttpHeader> headers = new LinkedList<HttpHeader>();
+	private HttpHeader createCookieHttpHeader(String... nameValuePairs) {
+		// Create text of header value
+		StringBuilder headerValue = new StringBuilder();
 		for (int i = 0; i < nameValuePairs.length; i += 2) {
 			String name = nameValuePairs[i];
 			String value = nameValuePairs[i + 1];
-			headers.add(new HttpHeaderImpl("cookie", name + "=\"" + value
-					+ "\""));
+			headerValue.append(name + "=" + value + ";");
 		}
-		return headers;
+		return new HttpHeaderImpl("cookie", headerValue.toString());
 	}
 }

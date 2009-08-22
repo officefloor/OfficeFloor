@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.cookie;
 
-import java.net.HttpCookie;
 import java.util.LinkedList;
 import java.util.List;
 

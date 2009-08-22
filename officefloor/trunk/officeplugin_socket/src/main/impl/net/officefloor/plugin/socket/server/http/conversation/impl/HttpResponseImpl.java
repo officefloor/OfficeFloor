@@ -185,9 +185,14 @@ public class HttpResponseImpl implements HttpResponse {
 			this.addHeader("Content-Type", "text/html");
 			this.addHeader("Content-Encoding",
 					PARSE_FAILURE_CONTENT_ENCODING_NAME);
+			String failMessage = failure.getMessage();
+			if (failMessage == null) {
+				// No message so provide type of error
+				failMessage = failure.getClass().getSimpleName();
+			}
 			this.getBody().write(
-					failure.getMessage().getBytes(
-							PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+					failMessage
+							.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
 
 			// Complete the response (triggers sending the failure)
 			this.getBody().close();

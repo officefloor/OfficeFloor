@@ -17,24 +17,127 @@
  */
 package net.officefloor.plugin.socket.server.http.session.source;
 
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
  *
  * @author Daniel Sagenschneider
  */
-public class HttpSessionManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
+
+	/*
+	 * =================== HttpServicerBuilder ==========================
+	 */
+
+	@Override
+	public HttpServicerTask buildServicer(String managedObjectName,
+			MockHttpServer server) throws Exception {
+
+		// TODO remove once InputManagedObject fix in place
+		this.getOfficeBuilder().addProcessManagedObject(managedObjectName,
+				managedObjectName);
+
+		// Register the Http Session
+		ManagedObjectBuilder<Indexed> session = server.constructManagedObject(
+				"HTTP_SESSION", HttpSessionManagedObjectSource.class, this
+						.getOfficeName());
+		session.setDefaultTimeout(1000);
+
+		// Register the servicer
+		ReflectiveWorkBuilder work = server.constructWork(new Servicer(),
+				"Servicer", null);
+		ReflectiveTaskBuilder task = work.buildTask("service", "SERVICER");
+		task.buildObject(managedObjectName);
+		DependencyMappingBuilder sessionDependencies = task.buildObject(
+				"HTTP_SESSION", ManagedObjectScope.PROCESS);
+		sessionDependencies.mapDependency(0, managedObjectName);
+
+		// Register team for servicer
+		server.constructTeam("SERVICER", new OnePersonTeam(100));
+
+		// Return the servicer task
+		return new HttpServicerTask("Servicer", "service");
+	}
+
+	/*
+	 * ======================== Tests ==================================
+	 */
 
 	/**
 	 * Ensure state is maintained by the {@link HttpSession} across multiple
 	 * {@link HttpRequest} calls made by a user.
 	 */
-	public void testHttpSessionStateAcrossCalls() {
-		// TODO test HttpSession across HttpRequests
-		fail("TODO test HttpSession across HttpRequests");
+	public void testHttpSessionStateAcrossCalls() throws Exception {
+
+		// Loop calling server (HttpClient should send back Session Id)
+		HttpClient client = new HttpClient();
+		for (int i = 0; i < 10; i++) {
+
+			// Call the server
+			GetMethod method = new GetMethod(this.getServerUrl());
+			int status = client.executeMethod(method);
+
+			// Ensure results match and call index remembered by Session
+			String callIndex = method.getResponseBodyAsString();
+			assertEquals("Call should be successful", 200, status);
+			assertEquals("Incorrect call index", String.valueOf(i), callIndex);
+
+			// Release connection for next call
+			method.releaseConnection();
+		}
 	}
+
+	/**
+	 * Services the {@link HttpRequest}.
+	 */
+	public static class Servicer {
+
+		/**
+		 * Services the {@link HttpRequest}.
+		 *
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 * @param session
+		 *            {@link HttpSession}.
+		 */
+		public void service(ServerHttpConnection connection, HttpSession session)
+				throws IOException {
+
+			// Obtain the current call index
+			Integer callIndex = (Integer) session.getAttribute("CALL_INDEX");
+
+			// Increment the call index and store for next call
+			callIndex = new Integer(callIndex == null ? 0 : (callIndex
+					.intValue() + 1));
+			session.setAttribute("CALL_INDEX", callIndex);
+
+			// Return the call index
+			OutputStream response = connection.getHttpResponse().getBody()
+					.getOutputStream();
+			response.write(String.valueOf(callIndex.intValue()).getBytes());
+
+			// TODO have HttpSession provide Session Id cookie
+			connection.getHttpResponse().addHeader("set-cookie",
+					"jsessionid=" + session.getSessionId());
+		}
+	}
+
 }
