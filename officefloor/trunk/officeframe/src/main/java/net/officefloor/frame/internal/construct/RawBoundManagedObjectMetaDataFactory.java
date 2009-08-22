@@ -33,14 +33,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Factory for the creation of {@link RawBoundManagedObjectMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawBoundManagedObjectMetaDataFactory {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
-	 * 
+	 *
 	 * @param boundManagedObjectConfiguration
 	 *            {@link ManagedObjectConfiguration} of the
 	 *            {@link RawBoundManagedObjectMetaData} instances.
@@ -77,6 +77,12 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects);
 
 	/**
+	 * TODO add to constructBoundManagedObjectMetaData before dependencies.
+	 * DETAILS: a Process Bound Managed Object can not depend on an
+	 * {@link Office} managed {@link ManagedObject} instance. Use of
+	 * <code>InputManagedObject</code> may remove this need and be a better
+	 * solution.
+	 *
 	 * <p>
 	 * For the input list of {@link ProcessState} bound
 	 * {@link RawBoundManagedObjectMetaData} instances, this method returns the
@@ -87,7 +93,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 * {@link ProcessState} of the {@link Office} for
 	 * {@link ManagedObjectSource} instances that invoke {@link Task} instances
 	 * within the {@link Office} but are not used by the {@link Office}.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office} for raising issues.
 	 * @param processBoundManagedObjectMetaData

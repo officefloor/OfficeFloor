@@ -258,7 +258,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
-	protected <W extends Work> WorkBuilder<W> constructWork(String workName,
+	public <W extends Work> WorkBuilder<W> constructWork(String workName,
 			WorkFactory<W> workFactory) {
 
 		// Construct the work
@@ -277,7 +277,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
-	protected <W extends Work> WorkBuilder<W> constructWork(String workName,
+	public <W extends Work> WorkBuilder<W> constructWork(String workName,
 			final W work, String initialTaskName) {
 
 		// Create the Work Factory
@@ -333,7 +333,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            <code>true</code> to record the {@link Task} instances
 	 *            invoked.
 	 */
-	protected void setRecordReflectiveTaskMethodsInvoked(boolean isRecord) {
+	public void setRecordReflectiveTaskMethodsInvoked(boolean isRecord) {
 		synchronized (this.reflectiveTaskInvokedMethods) {
 			this.isRecordReflectiveTaskMethodsInvoked = isRecord;
 		}
@@ -345,7 +345,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param methodName
 	 *            Name of method being invoked.
 	 */
-	protected void recordReflectiveTaskMethodInvoked(String methodName) {
+	public void recordReflectiveTaskMethodInvoked(String methodName) {
 		synchronized (this.reflectiveTaskInvokedMethods) {
 			if (this.isRecordReflectiveTaskMethodsInvoked) {
 				this.reflectiveTaskInvokedMethods.add(methodName);
@@ -361,7 +361,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Order that the reflective methods should be invoked.
 	 * @see #setRecordReflectiveTaskMethodInvoked(boolean)
 	 */
-	protected void validateReflectiveMethodOrder(String... methodNames) {
+	public void validateReflectiveMethodOrder(String... methodNames) {
 		synchronized (this.reflectiveTaskInvokedMethods) {
 
 			// Create expected method calls
@@ -389,7 +389,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
 			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
 			String moName, Class<?> moType, String nextTaskName,
 			Class<?> nextTaskArgumentType) {
@@ -417,7 +417,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
 			String taskName, final Task<W, D, F> task, String teamName,
 			String nextTaskName, Class<?> nextTaskArgumentType) {
 
@@ -436,7 +436,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass) {
 
 		// Obtain the managed object source name
@@ -458,7 +458,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass,
 			String managingOffice) {
 
@@ -485,7 +485,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected <D extends Enum<D>, H extends Enum<H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, H extends Enum<H>> ManagedObjectBuilder<H> constructManagedObject(
 			String managedObjectName,
 			ManagedObjectSourceMetaData<D, H> metaData,
 			ManagedObject managedObject, String managingOffice) {
@@ -514,7 +514,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected ManagedObjectBuilder<?> constructManagedObject(
+	public ManagedObjectBuilder<?> constructManagedObject(
 			String managedObjectName, ManagedObject managedObject,
 			String managingOffice) {
 
@@ -530,7 +530,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected ManagedObjectBuilder<?> constructManagedObject(
+	public ManagedObjectBuilder<?> constructManagedObject(
 			final Object object, String managedObjectName, String managingOffice) {
 
 		// Create the wrapping Managed Object
@@ -579,7 +579,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link TeamSource} class.
 	 * @return {@link TeamBuilder}.
 	 */
-	protected <TS extends TeamSource> TeamBuilder<?> constructTeam(
+	public <TS extends TeamSource> TeamBuilder<?> constructTeam(
 			String teamName, Class<TS> teamSourceClass) {
 
 		// Obtain the office floor team name
@@ -610,7 +610,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	protected <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
+	public <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Administrator<I, A> administrator,
 			AdministratorSourceMetaData<I, A> administratorMetaData,
 			String teamName) {
@@ -639,7 +639,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	protected <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
+	public <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Class<AS> adminSource, String teamName) {
 
 		// Create the Administrator Builder
