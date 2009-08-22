@@ -43,10 +43,13 @@ public interface CreateHttpSessionOperation {
 	 * @param creationTime
 	 *            Time the {@link HttpSession} was created within the
 	 *            {@link HttpSessionStore}.
+	 * @param expireTime
+	 *            Time to expire the {@link HttpSession} should it be idle.
 	 * @param attributes
 	 *            {@link Map} to contain the {@link HttpSession} attributes.
 	 */
-	void sessionCreated(long creationTime, Map<String, Object> attributes);
+	void sessionCreated(long creationTime, long expireTime,
+			Map<String, Object> attributes);
 
 	/**
 	 * Flags that the session Id is the same as another {@link HttpSession}

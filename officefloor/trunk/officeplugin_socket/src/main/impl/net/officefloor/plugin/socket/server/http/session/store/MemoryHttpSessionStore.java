@@ -142,12 +142,16 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 			operation.sessionIdCollision();
 		} else {
 			// Session created and registered
-			operation.sessionCreated(session.creationTime, session.attributes);
+			operation.sessionCreated(session.creationTime, session.expireTime,
+					session.attributes);
 		}
 	}
 
 	@Override
 	public void retrieveHttpSession(RetrieveHttpSessionOperation operation) {
+
+		// Determine extended expiry time as Session active
+		long extendedExpiryTime = System.currentTimeMillis() + this.maxIdleTime;
 
 		// Obtain the Session State
 		String sessionId = operation.getSessionId();
@@ -156,6 +160,14 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		SessionState session;
 		synchronized (this.sessions) {
 			session = this.sessions.get(sessionId);
+
+			// Determine if extend expiry time
+			if ((session != null) && (extendedExpiryTime > session.expireTime)) {
+				// Extend the expiry time (as active)
+				session = new SessionState(session.creationTime,
+						session.attributes, extendedExpiryTime);
+				this.sessions.put(sessionId, session);
+			}
 		}
 
 		// Determine if available
@@ -164,8 +176,8 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 			operation.sessionNotAvailable();
 		} else {
 			// Have Session State so return for Session
-			operation
-					.sessionRetrieved(session.creationTime, session.attributes);
+			operation.sessionRetrieved(session.creationTime,
+					session.expireTime, session.attributes);
 		}
 	}
 
@@ -176,8 +188,8 @@ public class MemoryHttpSessionStore implements HttpSessionStore {
 		// (Handles if expired while using Session)
 		String sessionId = operation.getSessionId();
 		long creationTime = operation.getCreationTime();
+		long expireTime = operation.getExpireTime();
 		Map<String, Object> attributes = operation.getAttributes();
-		long expireTime = System.currentTimeMillis() + this.maxIdleTime;
 		SessionState session = new SessionState(creationTime, attributes,
 				expireTime);
 

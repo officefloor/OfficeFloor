@@ -71,25 +71,30 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 		// Values for testing
 		final String SESSION_ID = "SESSION_ID";
 		final long CREATION_TIME = 100;
+		final long EXPIRE_TIME = Long.MAX_VALUE;
 		final Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("TEST", "VALUE");
 
 		// Record
 		this.recordReturn(this.createOperation, this.createOperation
 				.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(CREATION_TIME, attributes);
+		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
+				attributes);
 		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Map.class));
+				new TypeMatcher(Long.class, Long.class, Map.class));
 		this.recordReturn(this.storeOperation, this.storeOperation
 				.getSessionId(), SESSION_ID);
 		this.recordReturn(this.storeOperation, this.storeOperation
 				.getCreationTime(), CREATION_TIME);
 		this.recordReturn(this.storeOperation, this.storeOperation
+				.getExpireTime(), EXPIRE_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation
 				.getAttributes(), attributes);
 		this.storeOperation.sessionStored();
 		this.recordReturn(this.retrieveOperation, this.retrieveOperation
 				.getSessionId(), SESSION_ID);
-		this.retrieveOperation.sessionRetrieved(CREATION_TIME, attributes);
+		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
+				attributes);
 
 		// Test create, store, retrieve
 		this.replayMockObjects();
@@ -113,19 +118,23 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 		// Values for testing
 		final String SESSION_ID = "SESSION_ID";
 		final long CREATION_TIME = 100;
+		final long EXPIRE_TIME = Long.MAX_VALUE;
 		final Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put("TEST", "VALUE");
 
 		// Record
 		this.recordReturn(this.createOperation, this.createOperation
 				.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(CREATION_TIME, attributes);
+		this.createOperation.sessionCreated(CREATION_TIME, EXPIRE_TIME,
+				attributes);
 		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Map.class));
+				new TypeMatcher(Long.class, Long.class, Map.class));
 		this.recordReturn(this.storeOperation, this.storeOperation
 				.getSessionId(), SESSION_ID);
 		this.recordReturn(this.storeOperation, this.storeOperation
 				.getCreationTime(), CREATION_TIME);
+		this.recordReturn(this.storeOperation, this.storeOperation
+				.getExpireTime(), EXPIRE_TIME);
 		this.recordReturn(this.storeOperation, this.storeOperation
 				.getAttributes(), attributes);
 		this.storeOperation.sessionStored();
@@ -160,12 +169,12 @@ public class MemoryHttpSessionStateTest extends OfficeFrameTestCase {
 		// Record
 		this.recordReturn(this.createOperation, this.createOperation
 				.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(-1, null);
+		this.createOperation.sessionCreated(-1, -1, null);
 		this.control(this.createOperation).setMatcher(
-				new TypeMatcher(Long.class, Map.class));
+				new TypeMatcher(Long.class, Long.class, Map.class));
 		this.recordReturn(this.createOperation, this.createOperation
 				.getSessionId(), SESSION_ID);
-		this.createOperation.sessionCreated(-1, null);
+		this.createOperation.sessionCreated(-1, -1, null); // same matcher
 		this.recordReturn(this.retrieveOperation, this.retrieveOperation
 				.getSessionId(), "ANOTHER_SESSION");
 		this.retrieveOperation.sessionNotAvailable();

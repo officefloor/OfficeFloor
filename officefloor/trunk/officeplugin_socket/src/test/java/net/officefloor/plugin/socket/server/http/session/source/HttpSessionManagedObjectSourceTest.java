@@ -133,10 +133,6 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 			OutputStream response = connection.getHttpResponse().getBody()
 					.getOutputStream();
 			response.write(String.valueOf(callIndex.intValue()).getBytes());
-
-			// TODO have HttpSession provide Session Id cookie
-			connection.getHttpResponse().addHeader("set-cookie",
-					"jsessionid=" + session.getSessionId());
 		}
 	}
 

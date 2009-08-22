@@ -107,7 +107,8 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(1000, new HashMap<String, Object>(0));
+				operation.sessionCreated(1000, 2000,
+						new HashMap<String, Object>(0));
 				return true;
 			}
 		});
@@ -156,7 +157,8 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				CreateHttpSessionOperation operation = (CreateHttpSessionOperation) actual[0];
-				operation.sessionCreated(1000, new HashMap<String, Object>(0));
+				operation.sessionCreated(1000, 2000,
+						new HashMap<String, Object>(0));
 				return true;
 			}
 		});
