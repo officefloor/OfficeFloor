@@ -39,13 +39,20 @@ public class RetrieveHttpSessionTest extends
 	private static final long CREATION_TIME = 100;
 
 	/**
+	 * Time to expire the {@link HttpSession}.
+	 */
+	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+
+	/**
 	 * Ensure able to create a {@link HttpSession} immediately.
 	 */
 	public void testImmediateRetrieval() throws Throwable {
 
 		// Record retrieving HTTP session
 		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, newAttributes());
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -64,13 +71,15 @@ public class RetrieveHttpSessionTest extends
 		this.record_sessionIdCookie(SESSION_ID);
 		this.record_delay(); // retrieving from store
 		this.asynchronousListener.notifyStarted();
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = this.createHttpSessionManagedObject();
 		this.startCoordination(mo);
-		this.retrieveOperation.sessionRetrieved(CREATION_TIME, newAttributes());
+		this.retrieveOperation.sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
 		this.verifyFunctionality(mo, false);
 	}
 
@@ -125,7 +134,9 @@ public class RetrieveHttpSessionTest extends
 		this.record_sessionIdCookie("Not available Session Id");
 		this.record_retrieve_sessionNotAvailable();
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 
 		// Load the managed object
 		this.replayMockObjects();
@@ -144,7 +155,9 @@ public class RetrieveHttpSessionTest extends
 		this.record_delay(); // session not available
 		this.asynchronousListener.notifyStarted();
 		this.record_generate_setSessionId(SESSION_ID);
-		this.record_create_sessionCreated(CREATION_TIME, newAttributes());
+		this.record_create_sessionCreated(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 		this.asynchronousListener.notifyComplete();
 
 		// Load the managed object

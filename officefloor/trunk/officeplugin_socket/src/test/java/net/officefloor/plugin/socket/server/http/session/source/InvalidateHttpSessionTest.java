@@ -24,8 +24,6 @@ import net.officefloor.plugin.socket.server.http.session.InvalidatedHttpSessionE
 /**
  * Tests invalidating the {@link HttpSession}.
  *
- * TODO test adding cookie about new Session Id from invalidation.
- *
  * @author Daniel Sagenschneider
  */
 public class InvalidateHttpSessionTest extends
@@ -47,6 +45,11 @@ public class InvalidateHttpSessionTest extends
 	private static final long CREATION_TIME = 100;
 
 	/**
+	 * Time to expire the {@link HttpSession}.
+	 */
+	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+
+	/**
 	 * Creation time of new {@link HttpSession}.
 	 */
 	private static final long NEW_CREATION_TIME = 200;
@@ -64,6 +67,7 @@ public class InvalidateHttpSessionTest extends
 		// Record
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
+		this.record_cookie_addSessionId(true, SESSION_ID, 0);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -83,7 +87,9 @@ public class InvalidateHttpSessionTest extends
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
 		this.record_generate_setSessionId(NEW_SESSION_ID);
-		this.record_create_sessionCreated(NEW_CREATION_TIME, newAttributes());
+		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(true, SESSION_ID, EXPIRE_TIME);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -103,7 +109,9 @@ public class InvalidateHttpSessionTest extends
 		this.record_delay(); // invalidating session
 		this.asynchronousListener.notifyStarted();
 		this.record_generate_setSessionId(NEW_SESSION_ID);
-		this.record_create_sessionCreated(NEW_CREATION_TIME, newAttributes());
+		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(true, SESSION_ID, EXPIRE_TIME);
 		this.asynchronousListener.notifyComplete();
 
 		// Invalidate
@@ -169,7 +177,9 @@ public class InvalidateHttpSessionTest extends
 	 */
 	private void record_instantiate() {
 		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, newAttributes());
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**

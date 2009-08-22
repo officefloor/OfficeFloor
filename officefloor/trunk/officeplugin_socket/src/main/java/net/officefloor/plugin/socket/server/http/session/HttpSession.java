@@ -19,6 +19,8 @@ package net.officefloor.plugin.socket.server.http.session;
 
 import java.util.Iterator;
 
+import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionStore;
+
 /**
  * HTTP session.
  *
@@ -52,6 +54,34 @@ public interface HttpSession {
 	 *             Indicating the {@link HttpSession} is invalidated.
 	 */
 	long getCreationTime() throws InvalidatedHttpSessionException;
+
+	/**
+	 * Obtains the time this {@link HttpSession} will be expired should it be
+	 * idle.
+	 *
+	 * @return Time this {@link HttpSession} will be expired.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
+	 */
+	long getExpireTime() throws InvalidatedHttpSessionException;
+
+	/**
+	 * <p>
+	 * Specifies the time this {@link HttpSession} will expire if idle.
+	 * <p>
+	 * The {@link HttpSessionStore} may increment this time on further requests
+	 * to keep the {@link HttpSession} active over a long conversation.
+	 *
+	 * @param expireTime
+	 *            Time to expire this {@link HttpSession}.
+	 * @throws StoringHttpSessionException
+	 *             Indicating the {@link HttpSession} is currently being stored
+	 *             and can not be altered.
+	 * @throws InvalidatedHttpSessionException
+	 *             Indicating the {@link HttpSession} is invalidated.
+	 */
+	void setExpireTime(long expireTime) throws StoringHttpSessionException,
+			InvalidatedHttpSessionException;
 
 	/**
 	 * Obtains the {@link Object} that is bound to the name for this

@@ -43,10 +43,13 @@ public interface RetrieveHttpSessionOperation {
 	 * @param creationTime
 	 *            Time the {@link HttpSession} was created in the
 	 *            {@link HttpSessionStore}.
+	 * @param expireTime
+	 *            Time to expire the {@link HttpSession} should it be idle.
 	 * @param attributes
 	 *            Attributes for the retrieved {@link HttpSession}.
 	 */
-	void sessionRetrieved(long creationTime, Map<String, Object> attributes);
+	void sessionRetrieved(long creationTime, long expireTime,
+			Map<String, Object> attributes);
 
 	/**
 	 * <p>

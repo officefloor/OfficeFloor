@@ -41,6 +41,11 @@ public class StoreHttpSessionTest extends
 	private static final long CREATION_TIME = 100;
 
 	/**
+	 * Time to expire the {@link HttpSession}.
+	 */
+	private static final long EXPIRE_TIME = Long.MAX_VALUE;
+
+	/**
 	 * {@link HttpSession}.
 	 */
 	private HttpSession httpSession;
@@ -135,11 +140,35 @@ public class StoreHttpSessionTest extends
 	}
 
 	/**
+	 * Ensure can change the expire time for the {@link HttpSession}.
+	 */
+	public void testChangeExpireTime() throws Throwable {
+
+		final long NEW_EXPIRE_TIME = System.currentTimeMillis() + 10000;
+
+		// Record changing expire time and storing
+		this.record_instantiate();
+		this.record_cookie_addSessionId(true, SESSION_ID, NEW_EXPIRE_TIME);
+		this.record_store_sessionStored();
+
+		// Change expire time and store
+		this.replayMockObjects();
+		HttpSessionAdministration admin = this
+				.createHttpSessionAdministration();
+		this.httpSession.setExpireTime(NEW_EXPIRE_TIME);
+		admin.store();
+		assertTrue("Should be immediately stored", admin.isOperationComplete());
+		this.verifyFunctionality();
+	}
+
+	/**
 	 * Records instantiating the {@link HttpSession}.
 	 */
 	private void record_instantiate() {
 		this.record_sessionIdCookie(SESSION_ID);
-		this.record_retrieve_sessionRetrieved(CREATION_TIME, newAttributes());
+		this.record_retrieve_sessionRetrieved(CREATION_TIME, EXPIRE_TIME,
+				newAttributes());
+		this.record_cookie_addSessionId(false, SESSION_ID, EXPIRE_TIME);
 	}
 
 	/**

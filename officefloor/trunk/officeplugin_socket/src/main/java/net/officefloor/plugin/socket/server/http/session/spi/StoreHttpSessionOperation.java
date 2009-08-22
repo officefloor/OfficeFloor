@@ -44,6 +44,13 @@ public interface StoreHttpSessionOperation {
 	long getCreationTime();
 
 	/**
+	 * Obtains the time to expire the {@link HttpSession} should it be idle.
+	 *
+	 * @return Time to expire the {@link HttpSession} should it be idle.
+	 */
+	long getExpireTime();
+
+	/**
 	 * Obtains the attributes of the {@link HttpSession}.
 	 *
 	 * @return Attributes of the {@link HttpSession}.

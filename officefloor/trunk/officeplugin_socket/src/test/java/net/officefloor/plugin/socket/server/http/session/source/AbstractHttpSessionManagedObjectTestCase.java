@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.session.source;
 
-import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
@@ -31,7 +30,9 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.spi.CreateHttpSessionOperation;
@@ -83,6 +84,11 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 * Mock {@link HttpRequest}.
 	 */
 	private final HttpRequest request = this.createMock(HttpRequest.class);
+
+	/**
+	 * Mock {@link HttpResponse}.
+	 */
+	private final HttpResponse response = this.createMock(HttpResponse.class);
 
 	/**
 	 * Mock operations for the {@link MockHttpSessionIdGenerator} and
@@ -218,15 +224,18 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 *
 	 * @param creationTime
 	 *            Creation time.
+	 * @param expireTime
+	 *            Time the {@link HttpSession} will expire if idle.
 	 * @param attributes
 	 *            Attributes.
 	 */
 	protected void record_create_sessionCreated(final long creationTime,
-			final Map<String, Object> attributes) {
+			final long expireTime, final Map<String, Object> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
-				this.createOperation.sessionCreated(creationTime, attributes);
+				this.createOperation.sessionCreated(creationTime, expireTime,
+						attributes);
 			}
 		});
 	}
@@ -263,16 +272,18 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	 *
 	 * @param creationTime
 	 *            Creation time.
+	 * @param expireTime
+	 *            Time the {@link HttpSession} will expire if idle.
 	 * @param attributes
 	 *            Attributes.
 	 */
 	protected void record_retrieve_sessionRetrieved(final long creationTime,
-			final Map<String, Object> attributes) {
+			final long expireTime, final Map<String, Object> attributes) {
 		this.mockOperations.add(new MockOperation() {
 			@Override
 			public void run() {
 				this.retrieveOperation.sessionRetrieved(creationTime,
-						attributes);
+						expireTime, attributes);
 			}
 		});
 	}
@@ -357,6 +368,44 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 				this.invalidateOperation.failedToInvalidateSession(cause);
 			}
 		});
+	}
+
+	/**
+	 * Records adding a {@link HttpCookie} to the {@link HttpResponse}.
+	 *
+	 * @param isExistingSessionCookie
+	 *            Is the {@link HttpCookie} already on the response.
+	 * @param sessionId
+	 *            Session Id.
+	 * @param expireTime
+	 *            Time to expire the added {@link HttpCookie}.
+	 */
+	protected void record_cookie_addSessionId(boolean isExistingSessionCookie,
+			String sessionId, long expireTime) {
+
+		// Record checking for existing Session Id cookie
+		this.recordReturn(this.connection, this.connection.getHttpResponse(),
+				this.response);
+		if (isExistingSessionCookie) {
+			// Record existing Session cookie
+			HttpHeader existingCookieHeader = new HttpHeaderImpl("set-cookie",
+					SESSION_ID_COOKIE_NAME + "=\"Existing Session Id\"");
+			this.recordReturn(this.response, this.response.getHeaders(),
+					new HttpHeader[] { existingCookieHeader });
+			this.response.removeHeader(existingCookieHeader);
+		} else {
+			// Record no existing Session cookie
+			this.recordReturn(this.response, this.response.getHeaders(),
+					new HttpHeader[0]);
+		}
+
+		// Record adding the Session Id cookie
+		HttpCookie cookie = new HttpCookie(SESSION_ID_COOKIE_NAME, sessionId);
+		cookie.setExpires(expireTime);
+		cookie.setPath("/");
+		this.recordReturn(this.response, this.response.addHeader("set-cookie",
+				cookie.toHttpResponseHeaderValue()), this
+				.createMock(HttpHeader.class));
 	}
 
 	/*

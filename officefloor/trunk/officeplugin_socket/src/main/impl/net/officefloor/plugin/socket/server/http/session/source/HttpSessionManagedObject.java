@@ -232,16 +232,18 @@ public class HttpSessionManagedObject implements
 	 *
 	 * @param creationTime
 	 *            Creation Time.
+	 * @param expireTime
+	 *            Time to expire the {@link HttpSession} should it be idle.
 	 * @param attributes
 	 *            {@link HttpSession} Attributes.
 	 */
-	private synchronized void loadSession(long creationTime,
+	private synchronized void loadSession(long creationTime, long expireTime,
 			Map<String, Object> attributes) {
 		this.isSessionLoaded = true;
 
 		// Load state of session
-		this.session.loadState(this.sessionId, creationTime, this.isNewSession,
-				attributes);
+		this.session.loadState(this.sessionId, creationTime, expireTime,
+				this.isNewSession, attributes);
 
 		// Flag completed load of the Session
 		this.flagComplete();
@@ -254,19 +256,21 @@ public class HttpSessionManagedObject implements
 	 *            Session Id.
 	 * @param creationTime
 	 *            Creation time.
+	 * @param expireTime
+	 *            Time to expire the {@link HttpSession} should it be idle.
 	 * @param attributes
 	 *            Attributes.
 	 * @throws Throwable
 	 *             If immediate failure in storing Session.
 	 */
 	private synchronized void storeSession(String sessionId, long creationTime,
-			Map<String, Object> attributes) throws Throwable {
+			long expireTime, Map<String, Object> attributes) throws Throwable {
 
 		// Trigger storing the session
 		this.isStoring = true;
 		this.httpSessionStore
 				.storeHttpSession(new StoreHttpSessionOperationImpl(sessionId,
-						creationTime, attributes));
+						creationTime, expireTime, attributes));
 
 		// Determine if stored immediately
 		if (this.isStoring) {
@@ -476,6 +480,11 @@ public class HttpSessionManagedObject implements
 		private long creationTime;
 
 		/**
+		 * Time to expire the {@link HttpSession} should it be idle.
+		 */
+		private long expireTime;
+
+		/**
 		 * Indicates if this {@link HttpSession} is new.
 		 */
 		private boolean isNew;
@@ -502,16 +511,19 @@ public class HttpSessionManagedObject implements
 		 *            Session Id.
 		 * @param creationTime
 		 *            Creation time.
+		 * @param expireTime
+		 *            Time to expire the {@link HttpSession} should it be idle.
 		 * @param isNew
 		 *            If a new {@link HttpSession}.
 		 * @param attributes
 		 *            Attributes.
 		 */
-		void loadState(String sessionId, long creationTime, boolean isNew,
-				Map<String, Object> attributes) {
+		void loadState(String sessionId, long creationTime, long expireTime,
+				boolean isNew, Map<String, Object> attributes) {
 			// Load state
 			this.sessionId = sessionId;
 			this.creationTime = creationTime;
+			this.expireTime = expireTime;
 			this.isNew = isNew;
 			this.attributes = attributes;
 
@@ -580,6 +592,25 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
+		public long getExpireTime() throws InvalidatedHttpSessionException {
+			synchronized (HttpSessionManagedObject.this) {
+				this.ensureValid();
+				return this.expireTime;
+			}
+		}
+
+		@Override
+		public void setExpireTime(long expireTime)
+				throws StoringHttpSessionException,
+				InvalidatedHttpSessionException {
+			synchronized (HttpSessionManagedObject.this) {
+				this.ensureValid();
+				this.ensureCanAlter();
+				this.expireTime = expireTime;
+			}
+		}
+
+		@Override
 		public boolean isNew() {
 			synchronized (HttpSessionManagedObject.this) {
 				this.ensureValid();
@@ -639,7 +670,7 @@ public class HttpSessionManagedObject implements
 		@Override
 		public void store() throws Throwable {
 			HttpSessionManagedObject.this.storeSession(this.sessionId,
-					this.creationTime, this.attributes);
+					this.creationTime, this.expireTime, this.attributes);
 		}
 
 		@Override
@@ -719,9 +750,10 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
-		public void sessionCreated(long creationTime,
+		public void sessionCreated(long creationTime, long expireTime,
 				Map<String, Object> attributes) {
-			HttpSessionManagedObject.this.loadSession(creationTime, attributes);
+			HttpSessionManagedObject.this.loadSession(creationTime, expireTime,
+					attributes);
 		}
 
 		@Override
@@ -767,9 +799,10 @@ public class HttpSessionManagedObject implements
 		}
 
 		@Override
-		public void sessionRetrieved(long creationTime,
+		public void sessionRetrieved(long creationTime, long expireTime,
 				Map<String, Object> attributes) {
-			HttpSessionManagedObject.this.loadSession(creationTime, attributes);
+			HttpSessionManagedObject.this.loadSession(creationTime, expireTime,
+					attributes);
 		}
 
 		@Override
@@ -801,6 +834,11 @@ public class HttpSessionManagedObject implements
 		private final long creationTime;
 
 		/**
+		 * Expire time.
+		 */
+		private final long expireTime;
+
+		/**
 		 * Attributes.
 		 */
 		private final Map<String, Object> attributes;
@@ -812,13 +850,17 @@ public class HttpSessionManagedObject implements
 		 *            Session Id.
 		 * @param creationTime
 		 *            Creation time.
+		 * @param expireTime
+		 *            Time to expire the {@link HttpSession} should it be idle.
 		 * @param attributes
 		 *            Attributes.
 		 */
 		public StoreHttpSessionOperationImpl(String sessionId,
-				long creationTime, Map<String, Object> attributes) {
+				long creationTime, long expireTime,
+				Map<String, Object> attributes) {
 			this.sessionId = sessionId;
 			this.creationTime = creationTime;
+			this.expireTime = expireTime;
 			this.attributes = attributes;
 		}
 
@@ -834,6 +876,11 @@ public class HttpSessionManagedObject implements
 		@Override
 		public long getCreationTime() {
 			return this.creationTime;
+		}
+
+		@Override
+		public long getExpireTime() {
+			return this.expireTime;
 		}
 
 		@Override
