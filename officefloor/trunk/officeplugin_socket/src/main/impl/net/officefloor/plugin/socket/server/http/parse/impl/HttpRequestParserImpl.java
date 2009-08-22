@@ -56,11 +56,19 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	private static final byte A = UsAscii('A');
 
+	private static final byte F = UsAscii('F');
+
 	private static final byte Z = UsAscii('Z');
 
 	private static final byte a = UsAscii('a');
 
+	private static final byte f = UsAscii('f');
+
 	private static final byte z = UsAscii('z');
+
+	private static final byte _0 = UsAscii('0');
+
+	private static final byte _9 = UsAscii('9');
 
 	private static final byte SP = UsAscii(' ');
 
@@ -71,6 +79,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	private static final byte LF = UsAscii('\n');
 
 	private static final byte COLON = UsAscii(':');
+
+	private static final byte PERCENTAGE = UsAscii('%');
 
 	/**
 	 * Header name for the Content-Length.
@@ -112,6 +122,61 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	}
 
 	/**
+	 * Translates the escaped character to its non-escaped character value.
+	 *
+	 * @param highBitsCharacter
+	 *            High bits of the escaped character.
+	 * @param lowBitsCharacter
+	 *            Low bits of the escaped character.
+	 * @return Non escaped character value.
+	 * @throws ParseException
+	 *             If invalid hexidecimal character.
+	 */
+	private static byte translateEscapedCharacter(byte highBitsCharacter,
+			byte lowBitsCharacter) throws ParseException {
+
+		// Translate to bits values
+		byte highBits = translateEscapedHexCharacterToBits(highBitsCharacter);
+		byte lowBits = translateEscapedHexCharacterToBits(lowBitsCharacter);
+
+		// Return the byte character value
+		byte character = (byte) ((highBits << 4) | lowBits);
+		return character;
+	}
+
+	/**
+	 * Translates the escaped character to its corresponding its corresponding
+	 * hexidecimal bit value.
+	 *
+	 * @param character
+	 *            Hexidecimal character value to translate to bits.
+	 * @return Bits for the hexidecimal character.
+	 * @throws ParseException
+	 *             If invalid hexidecimal character.
+	 */
+	private static byte translateEscapedHexCharacterToBits(byte character)
+			throws ParseException {
+
+		// Translate hexidecimal value
+		int bits;
+		if ((character >= _0) && (character <= _9)) {
+			bits = character - _0;
+		} else if ((character >= A) && (character <= F)) {
+			bits = character - A + 0xA;
+		} else if ((character >= a) && (character <= f)) {
+			bits = character - a + 0xA;
+		} else {
+			// Unknown hexidecimal character
+			throw new ParseException(HttpStatus._400,
+					"Invalid escaped hexidecimal character '"
+							+ ((char) character) + "'");
+		}
+
+		// Return the bits
+		return (byte) bits;
+	}
+
+	/**
 	 * Indicates the state of parsing.
 	 */
 	private static enum ParseState {
@@ -121,6 +186,13 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		BODY_CR, BODY
 	};
+
+	/**
+	 * Indicates state of escaped character from percentage.
+	 */
+	private static enum EscapedCharacterState {
+		NOT_ESCAPED, HIGH_BITS, LOW_BITS
+	}
 
 	/**
 	 * Maximum number of {@link HttpHeader} instances for a {@link HttpRequest}.
@@ -216,8 +288,6 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			char[] tempBuffer, int httpErrorStatus, String httpErrorMessage)
 			throws IOException, ParseException {
 
-		// TODO taking into account %HH
-
 		// Ensure text is too long
 		if (this.textLength > tempBuffer.length) {
 			throw new ParseException(httpErrorStatus, httpErrorMessage);
@@ -225,13 +295,45 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		// Load the character values into the temporary buffer
 		InputStream inputStream = inputBufferStream.getInputStream();
-		for (int i = 0; i < this.textLength; i++) {
-			char character = (char) inputStream.read();
-			tempBuffer[i] = character;
+		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+		byte escapedCharacterHighBits = 0;
+		int characterIndex = 0;
+		NEXT_CHARACTER: for (int i = 0; i < this.textLength; i++) {
+			byte character = (byte) inputStream.read();
+
+			// Determine if escaping
+			switch (escapedCharacterState) {
+			case NOT_ESCAPED:
+				// Determine if escape character
+				if (character == PERCENTAGE) {
+					// Escaping
+					escapedCharacterState = EscapedCharacterState.HIGH_BITS;
+					continue NEXT_CHARACTER; // loop to next character
+				}
+				break;
+			case HIGH_BITS:
+				// Record the high bits of escaped character
+				escapedCharacterHighBits = character;
+				escapedCharacterState = EscapedCharacterState.LOW_BITS;
+				continue NEXT_CHARACTER; // loop for low bits
+			case LOW_BITS:
+				// Translate to non-escaped character (no longer escaped)
+				character = translateEscapedCharacter(escapedCharacterHighBits,
+						character);
+				escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+				break;
+			default:
+				throw new IllegalStateException(
+						"Unknown escaped character state: "
+								+ escapedCharacterState);
+			}
+
+			// Load the character
+			tempBuffer[characterIndex++] = (char) character;
 		}
 
 		// Create the string containing the text
-		String text = new String(tempBuffer, 0, this.textLength);
+		String text = new String(tempBuffer, 0, characterIndex);
 
 		// Reset text length
 		this.textLength = 0;
@@ -261,16 +363,49 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	public boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
 			throws IOException, ParseException {
 
-		// TODO take into account %HH
+		// Provide state of escaping characters
+		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+		byte escapedCharacterHighBits = 0;
 
 		// Determine if parsing head
 		if (this.parseState != ParseState.BODY) {
 
 			// Loop parsing available content up to body
 			InputStream browse = inputBufferStream.getBrowseStream();
-			LOOP: for (int value = browse.read(); value != -1; value = browse
+			NEXT_CHARACTER: for (int value = browse.read(); value != -1; value = browse
 					.read()) {
 				byte character = (byte) value;
+
+				// Determine if escaping
+				boolean isEscaped = false;
+				switch (escapedCharacterState) {
+				case NOT_ESCAPED:
+					// Determine if escape character
+					if (character == PERCENTAGE) {
+						// Escaping
+						escapedCharacterState = EscapedCharacterState.HIGH_BITS;
+						this.textLength++; // include escape
+						continue NEXT_CHARACTER; // loop to next character
+					}
+					break;
+				case HIGH_BITS:
+					// Record the high bits of escaped character
+					escapedCharacterHighBits = character;
+					this.textLength++; // include high bits character
+					escapedCharacterState = EscapedCharacterState.LOW_BITS;
+					continue NEXT_CHARACTER; // loop for low bits
+				case LOW_BITS:
+					// Translate to non-escaped character (no longer escaped)
+					character = translateEscapedCharacter(
+							escapedCharacterHighBits, character);
+					escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
+					isEscaped = true; // character is escaped
+					break;
+				default:
+					throw new IllegalStateException(
+							"Unknown escaped character state: "
+									+ escapedCharacterState);
+				}
 
 				// Parse the character of the HTTP request
 				switch (this.parseState) {
@@ -315,7 +450,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					this.parseState = ParseState.PATH;
 
 				case PATH:
-					if (isWs(character)) {
+					if (isWs(character) && (!isEscaped)) {
 						// Path read in (consumes bytes)
 						this.text_path = this.transformToString(
 								inputBufferStream, tempBuffer, HttpStatus._414,
@@ -498,7 +633,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 					// Have LF and headers valid, so continue onto body
 					this.parseState = ParseState.BODY;
-					break LOOP;
+					break NEXT_CHARACTER; // break loop to start body
 				}
 			}
 		}

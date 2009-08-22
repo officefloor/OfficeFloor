@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.session.source;
 
-import java.net.HttpCookie;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,6 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.HttpSessionAdministration;

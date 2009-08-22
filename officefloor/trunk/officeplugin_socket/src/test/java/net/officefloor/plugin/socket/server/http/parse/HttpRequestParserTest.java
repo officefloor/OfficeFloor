@@ -396,7 +396,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testPercentageEscape() {
 		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", true, "GET",
-				"/space byte", "HTTP/1.1", null);
+				"/space byte", "HTTP/1.1", "");
 	}
 
 	/**
@@ -404,7 +404,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testPercentageInvalidValue() {
 		this.doInvalidMethodTest("GET /invalid%WRONG", HttpStatus._400,
-				"Invalid hexidecimal value 'W'");
+				"Invalid escaped hexidecimal character 'W'");
 	}
 
 	/**
@@ -428,9 +428,15 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				String character = this.getCharacterValue((byte) highBits,
 						(byte) lowBits);
 
+				// Do not run for control characters
+				byte value = (byte) ((highBits << 4) | lowBits);
+				if ((value <= 31) || (value == 127)) {
+					continue; // control character
+				}
+
 				// Validate the percentage value
-				this.doMethodTest("GET %" + high + low + " HTTP/1.1\n\n", true,
-						"GET", character, "HTTP/1.1", null);
+				this.doMethodTest("GET /%" + high + low + " HTTP/1.1\n\n",
+						true, "GET", "/" + character, "HTTP/1.1", "");
 				this.httpRequestParser.reset();
 			}
 		}
