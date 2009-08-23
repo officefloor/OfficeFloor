@@ -18,11 +18,10 @@
 package net.officefloor.model.generate;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 /**
  * Generates the OfficeFloor model.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class GenerateOfficeFloorModel {
@@ -33,32 +32,21 @@ public class GenerateOfficeFloorModel {
 	public static void main(String[] args) throws Exception {
 
 		// Model Project directory should be the only argument
-		if (args.length == 0) {
-			throw new IllegalArgumentException(
-					"Must provide location of model project directory as first argument");
+		if (args.length != 2) {
+			throw new IllegalArgumentException("USAGE: java ... "
+					+ GenerateOfficeFloorModel.class.getName()
+					+ " <raw file directory> <output directory>");
 		}
 
-		// Obtain model project directory file
-		File modelProjectDir = new File(args[0]);
-
-		// Ensure the model project directory exists
-		if (!(modelProjectDir.exists())) {
-			throw new FileNotFoundException(
-					"Model project directory not exist - " + modelProjectDir);
-		}
-
-		// Obtain the raw directory
-		File rawDir = new File(modelProjectDir, "src/raw");
-
-		// Ensure the raw directory exists
+		// Obtain the raw directory (ensuring it exists)
+		File rawDir = new File(args[0]);
 		if (!(rawDir.exists())) {
-			throw new IllegalStateException(
-					"Raw directory not found within model project directory - "
-							+ modelProjectDir.getAbsolutePath());
+			throw new IllegalArgumentException("Raw directory not found  - "
+					+ rawDir.getAbsolutePath());
 		}
 
 		// Obtain the output directory
-		File outputDir = new File(modelProjectDir, "src/auto");
+		File outputDir = new File(args[1]);
 
 		// Notify of changes
 		System.out.println("Generating all objects");
