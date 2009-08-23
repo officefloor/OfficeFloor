@@ -12,10 +12,9 @@
 
 		<!-- Core functionality -->
 		<module>officeframe</module>
-		<module>officemodel</module>
 		<module>officexml</module>
+        <module>officemodelgen</module>
 		<module>officecompiler</module>
-		<module>officemodelgen</module>
 
 		<!-- Plug-in functionality -->
 		<module>officeplugin_jdbc</module>
