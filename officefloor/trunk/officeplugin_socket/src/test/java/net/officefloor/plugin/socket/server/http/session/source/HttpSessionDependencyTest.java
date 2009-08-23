@@ -26,7 +26,9 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.session.spi.CreateHttpSessionOperation;
 import net.officefloor.plugin.socket.server.http.session.spi.FreshHttpSession;
 import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionIdGenerator;
@@ -67,6 +69,12 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 	private final HttpRequest httpRequest = this.createMock(HttpRequest.class);
 
 	/**
+	 * Mock {@link HttpResponse}.
+	 */
+	private final HttpResponse httpResponse = this
+			.createMock(HttpResponse.class);
+
+	/**
 	 * Mock {@link HttpSessionIdGenerator}.
 	 */
 	private final HttpSessionIdGenerator generator = this
@@ -102,6 +110,14 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
+		this.recordReturn(this.connection, this.connection.getHttpResponse(),
+				this.httpResponse);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
+				new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
+				"set-cookie", new HttpCookie("JSESSIONID", "SESSION_ID", 2000,
+						null, "/").toHttpResponseHeaderValue()), this
+				.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override
@@ -152,6 +168,14 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
+		this.recordReturn(this.connection, this.connection.getHttpResponse(),
+				this.httpResponse);
+		this.recordReturn(this.httpResponse, this.httpResponse.getHeaders(),
+				new HttpHeader[0]);
+		this.recordReturn(this.httpResponse, this.httpResponse.addHeader(
+				"set-cookie", new HttpCookie("JSESSIONID", "SESSION_ID", 2000,
+						null, "/").toHttpResponseHeaderValue()), this
+				.createMock(HttpHeader.class));
 		this.store.createHttpSession(null);
 		this.control(this.store).setMatcher(new AbstractMatcher() {
 			@Override

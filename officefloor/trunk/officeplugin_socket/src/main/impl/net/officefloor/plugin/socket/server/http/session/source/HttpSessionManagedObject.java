@@ -27,6 +27,7 @@ import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
@@ -245,6 +246,9 @@ public class HttpSessionManagedObject implements
 		this.session.loadState(this.sessionId, creationTime, expireTime,
 				this.isNewSession, attributes);
 
+		// Add cookie to maintain Session Id by client
+		this.addSessionIdCookieToHttpResponse(this.sessionId, expireTime);
+
 		// Flag completed load of the Session
 		this.flagComplete();
 	}
@@ -306,7 +310,12 @@ public class HttpSessionManagedObject implements
 
 		// Flag invalid if not creating another session
 		if (!isRequireNewSession) {
+			// Invalidate the Session
 			this.session.invalidate(null);
+
+			// Add expired cookie to remove Session Id.
+			// (If creating new Sesion will add appropriate Cookie)
+			this.addSessionIdCookieToHttpResponse("", 0);
 		}
 
 		// Trigger invalidating the session
@@ -394,6 +403,22 @@ public class HttpSessionManagedObject implements
 
 		// Not complete if waiting
 		return (!this.isWaiting);
+	}
+
+	/**
+	 * Adds the Session Id {@link HttpCookie} to the {@link HttpResponse}.
+	 *
+	 * @param sessionId
+	 *            Session Id.
+	 * @param expireTime
+	 *            Time that the {@link HttpCookie} is to expire.
+	 */
+	private void addSessionIdCookieToHttpResponse(String sessionId,
+			long expireTime) {
+		HttpCookie sessionIdCookie = new HttpCookie(this.sessionIdCookieName,
+				sessionId, expireTime, null, "/");
+		HttpCookieUtil.addHttpCookie(sessionIdCookie, this.connection
+				.getHttpResponse());
 	}
 
 	/*
@@ -606,7 +631,11 @@ public class HttpSessionManagedObject implements
 			synchronized (HttpSessionManagedObject.this) {
 				this.ensureValid();
 				this.ensureCanAlter();
+
+				// Update expiring of Session Id (and its cookie)
 				this.expireTime = expireTime;
+				HttpSessionManagedObject.this.addSessionIdCookieToHttpResponse(
+						this.sessionId, this.expireTime);
 			}
 		}
 
