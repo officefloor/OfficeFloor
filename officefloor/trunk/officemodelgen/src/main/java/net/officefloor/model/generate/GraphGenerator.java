@@ -20,8 +20,6 @@ package net.officefloor.model.generate;
 import java.io.File;
 
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Generates all the models.
@@ -55,15 +53,14 @@ public class GraphGenerator {
 		}
 
 		// Generate the objects
-		ConfigurationContext context = new FileSystemConfigurationContext(
-				outputDir);
+		ModelContext context = new FileSystemModelContext(outputDir);
 		this.generate(rawDir, context, graphMetaData);
 	}
 
 	/**
 	 * Generates the models by recursing over files.
 	 */
-	private void generate(File rawDir, ConfigurationContext context,
+	private void generate(File rawDir, ModelContext context,
 			GraphNodeMetaData graphMetaData) throws Exception {
 
 		// Recurse generating the objects
@@ -86,9 +83,8 @@ public class GraphGenerator {
 	/**
 	 * Generates the Model.
 	 */
-	private void generateModel(File configurationFile,
-			ConfigurationContext context, GraphNodeMetaData graphMetaData)
-			throws Exception {
+	private void generateModel(File configurationFile, ModelContext context,
+			GraphNodeMetaData graphMetaData) throws Exception {
 
 		// Obtain the model meta-data
 		ModelMetaData model = graphMetaData.getModelMetaData(configurationFile);

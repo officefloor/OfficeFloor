@@ -18,21 +18,23 @@
 package net.officefloor.model.generate;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
+import net.officefloor.plugin.xml.XmlUnmarshaller;
+import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
 /**
  * Provides generic meta-data for generating a Model.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class GraphNodeMetaData {
 
 	/**
 	 * Returns the input text capitalised.
-	 * 
+	 *
 	 * @param text
 	 *            Text.
 	 * @return Capitalised text.
@@ -47,7 +49,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Returns the input text in camel case.
-	 * 
+	 *
 	 * @return Camel case text.
 	 */
 	public static String camelCase(String text) {
@@ -61,7 +63,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Returns the input text in case ready for properties.
-	 * 
+	 *
 	 * @param text
 	 *            Text.
 	 * @return Property text.
@@ -74,7 +76,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Returns the input text in sentence case.
-	 * 
+	 *
 	 * @param text
 	 *            Text.
 	 * @return Sentence case text.
@@ -86,7 +88,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Transforms the text.
-	 * 
+	 *
 	 * @param text
 	 *            Text to transform.
 	 * @param splitReg
@@ -133,7 +135,7 @@ public class GraphNodeMetaData {
 
 		/**
 		 * Transforms the token.
-		 * 
+		 *
 		 * @param token
 		 *            Token to be transformed.
 		 * @return Transform token.
@@ -147,9 +149,45 @@ public class GraphNodeMetaData {
 	private static final String MODEL_EXTENSION = ".model.xml";
 
 	/**
-	 * {@link ModelRepositoryImpl}.
+	 * {@link XmlUnmarshaller} of the {@link ModelMetaData}.
 	 */
-	private static final ModelRepositoryImpl repository = new ModelRepositoryImpl();
+	private static XmlUnmarshaller modelMetaDataXmlUnmarshaller;
+
+	/**
+	 * Lazily obtains the {@link XmlUnmarshaller} for the {@link ModelMetaData}.
+	 *
+	 * @param modelClass
+	 *            Class of the model.
+	 * @return {@link XmlUnmarshaller} for the Model.
+	 * @throws Exception
+	 *             If fails to obtain the {@link XmlUnmarshaller}.
+	 */
+	public static XmlUnmarshaller getModelMetaDataXmlUnmarshaller()
+			throws Exception {
+
+		// Lazily create the model meta data unmarshaller
+		if (modelMetaDataXmlUnmarshaller == null) {
+
+			// Obtain the model meta data class
+			Class<ModelMetaData> modelMetaDataClass = ModelMetaData.class;
+
+			// Obtain input stream to configuration of unmarshaller
+			InputStream unmarshallConfig = modelMetaDataClass
+					.getResourceAsStream("UnmarshallConfiguration.xml");
+			if (unmarshallConfig == null) {
+				throw new IllegalStateException(
+						"Unable to configure retrieving the model type "
+								+ modelMetaDataClass.getName());
+			}
+
+			// Create the unmarshaller
+			modelMetaDataXmlUnmarshaller = TreeXmlUnmarshallerFactory
+					.getInstance().createUnmarshaller(unmarshallConfig);
+		}
+
+		// Return the unmarshaller
+		return modelMetaDataXmlUnmarshaller;
+	}
 
 	/**
 	 * License text.
@@ -168,7 +206,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Top level constructor.
-	 * 
+	 *
 	 * @param license
 	 *            License.
 	 * @param rawRootDir
@@ -182,7 +220,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Child constructor for relative path.
-	 * 
+	 *
 	 * @param parent
 	 *            Parent {@link GraphNodeMetaData}.
 	 * @param childPath
@@ -197,7 +235,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Obtains the license text.
-	 * 
+	 *
 	 * @return License text.
 	 */
 	public String getLicense() {
@@ -206,7 +244,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Obtains the package name for this {@link GraphNodeMetaData} instance.
-	 * 
+	 *
 	 * @return Package name for this {@link GraphNodeMetaData} instance.
 	 */
 	public String getPackageName() {
@@ -221,7 +259,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Obtains the {@link ModelMetaData} for the input type.
-	 * 
+	 *
 	 * @param typeName
 	 *            Name of the type.
 	 * @return {@link ModelMetaData} for the type or <code>null</code> if not
@@ -261,7 +299,7 @@ public class GraphNodeMetaData {
 
 	/**
 	 * Obtains the {@link ModelMetaData} from the input file.
-	 * 
+	 *
 	 * @param modelFile
 	 *            {@link File} containing the configuration of the
 	 *            {@link ModelMetaData}.
@@ -279,9 +317,12 @@ public class GraphNodeMetaData {
 		String name = modelFile.getName();
 		name = name.replace(MODEL_EXTENSION, "");
 
+		// Obtain access to the configuration of the model
+		InputStream modelFileContents = new FileInputStream(modelFile);
+
 		// Unmarshal the model
-		ModelMetaData model = repository.retrieve(new ModelMetaData(),
-				new FileSystemConfigurationItem(modelFile, null));
+		ModelMetaData model = new ModelMetaData();
+		getModelMetaDataXmlUnmarshaller().unmarshall(modelFileContents, model);
 		model.setName(name);
 		model.setPackageName(this.getPackageName());
 

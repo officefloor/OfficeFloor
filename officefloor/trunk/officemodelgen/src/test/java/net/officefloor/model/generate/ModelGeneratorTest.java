@@ -28,12 +28,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.generate.model.FieldMetaData;
 import net.officefloor.model.generate.model.ListMetaData;
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests the {@link net.officefloor.model.generate.ModelGenerator}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ModelGeneratorTest extends OfficeFrameTestCase {
@@ -62,14 +60,14 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect events", "ClassEvent", metaData.getEventName());
 
 		// Generate the model
-		MockConfigurationContext context = new MockConfigurationContext();
+		MockModelContext context = new MockModelContext();
 		ModelGenerator generator = new ModelGenerator(metaData, general);
-		ConfigurationItem item = generator.generateModel(context);
+		ModelFile modelFile = generator.generateModel(context);
 
 		// Validate file name
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				item.getLocation());
-		
+				modelFile.getLocation());
+
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
 				"Model_ModelExpectedContent.txt"));
@@ -95,13 +93,13 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 				new ListMetaData[] {});
 
 		// Generate the model
-		MockConfigurationContext context = new MockConfigurationContext();
+		MockModelContext context = new MockModelContext();
 		ModelGenerator generator = new ModelGenerator(metaData, general);
-		ConfigurationItem item = generator.generateModel(context);
+		ModelFile modelFile = generator.generateModel(context);
 
 		// Validate file name
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				item.getLocation());
+				modelFile.getLocation());
 
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
@@ -119,102 +117,53 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		}
 	}
 
-}
-
-class MockConfigurationContext implements ConfigurationContext,
-		ConfigurationItem {
-
 	/**
-	 * Id of the model.
+	 * Mock {@link ModelContext} implementation for testing.
 	 */
-	protected String id;
+	private class MockModelContext implements ModelContext, ModelFile {
 
-	/**
-	 * Text of the model.
-	 */
-	protected String modelText;
+		/**
+		 * Location of the {@link ModelFile}.
+		 */
+		protected String location;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getId()
-	 */
-	public String getLocation() {
-		return this.id;
-	}
+		/**
+		 * Text of the model.
+		 */
+		protected String modelText;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getClasspath()
-	 */
-	public String[] getClasspath() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
+		/*
+		 * ================= ModelContext ============================
+		 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getConfigurationItem(java.lang.String)
-	 */
-	public ConfigurationItem getConfigurationItem(String id) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
+		@Override
+		public ModelFile createModelFile(String location, InputStream contents)
+				throws Exception {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#createConfigurationItem(java.lang.String,
-	 *      java.io.InputStream)
-	 */
-	public ConfigurationItem createConfigurationItem(String id,
-			InputStream configuration) throws Exception {
+			// Record the location
+			this.location = location;
 
-		// Record the id
-		this.id = id;
+			// Record the text of configuration
+			StringWriter writer = new StringWriter();
+			Reader reader = new InputStreamReader(contents);
+			int data;
+			while ((data = reader.read()) != -1) {
+				writer.write(data);
+			}
+			this.modelText = writer.toString();
 
-		// Record the text of configuration
-		StringWriter writer = new StringWriter();
-		Reader reader = new InputStreamReader(configuration);
-		int data;
-		while ((data = reader.read()) != -1) {
-			writer.write(data);
+			// Return this as the Model File
+			return this;
 		}
-		this.modelText = writer.toString();
 
-		return this;
-	}
+		/*
+		 * ================= ModelFile ================================
+		 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#getConfiguration()
-	 */
-	public InputStream getConfiguration() throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#setConfiguration(java.io.InputStream)
-	 */
-	public void setConfiguration(InputStream configuration) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#getContext()
-	 */
-	public ConfigurationContext getContext() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		@Override
+		public String getLocation() {
+			return this.location;
+		}
 	}
 
 }

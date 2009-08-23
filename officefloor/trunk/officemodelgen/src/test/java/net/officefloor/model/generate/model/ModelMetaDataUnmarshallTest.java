@@ -20,14 +20,12 @@ package net.officefloor.model.generate.model;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.generate.GraphNodeMetaData;
+import net.officefloor.plugin.xml.XmlUnmarshaller;
 
 /**
- * Ensures able to unmarshall
- * {@link net.officefloor.model.generate.model.ModelMetaData}.
- * 
+ * Ensures able to unmarshall {@link ModelMetaData}.
+ *
  * @author Daniel Sagenschneider
  */
 public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
@@ -40,34 +38,12 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 		// Obtain the configuration
 		final InputStream input = this.findInputStream(this.getClass(),
 				"Test.model.xml");
-		ConfigurationItem configuration = new ConfigurationItem() {
-
-			public String getLocation() {
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException("TODO implement");
-			}
-
-			public InputStream getConfiguration() throws Exception {
-				return input;
-			}
-
-			public void setConfiguration(InputStream configuration)
-					throws Exception {
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException("TODO implement");
-			}
-
-			public ConfigurationContext getContext() {
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException("TODO implement");
-			}
-
-		};
 
 		// Unmarshal the model
-		ModelRepositoryImpl repository = new ModelRepositoryImpl();
-		ModelMetaData model = repository.retrieve(new ModelMetaData(),
-				configuration);
+		XmlUnmarshaller unmarshaller = GraphNodeMetaData
+				.getModelMetaDataXmlUnmarshaller();
+		ModelMetaData model = new ModelMetaData();
+		unmarshaller.unmarshall(input, model);
 
 		// Validate the model
 		assertEquals("Incorrect name", "test", model.getName());
@@ -93,4 +69,5 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect list description", "Test list", list
 				.getDescription());
 	}
+
 }

@@ -15,19 +15,14 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeframe</artifactId>
-			<version>${pom.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officecompiler</artifactId>
-			<version>${pom.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
 			<artifactId>officexml</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>officeframe</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

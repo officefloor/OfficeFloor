@@ -28,12 +28,10 @@ import net.officefloor.model.generate.model.AbstractPropertyMetaData;
 import net.officefloor.model.generate.model.FieldMetaData;
 import net.officefloor.model.generate.model.ListMetaData;
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Generates the Model.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ModelGenerator {
@@ -55,7 +53,7 @@ public class ModelGenerator {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param metaData
 	 *            Meta-data of the Model.
 	 * @param graphNode
@@ -68,15 +66,15 @@ public class ModelGenerator {
 
 	/**
 	 * Generates the Model.
-	 * 
+	 *
 	 * @param context
 	 *            Context to create the Model.
-	 * @return {@link ConfigurationItem} for the Model.
+	 * @return {@link ModelFile} for the Model.
 	 * @throws Exception
 	 *             If fail.
 	 */
-	public synchronized ConfigurationItem generateModel(
-			ConfigurationContext context) throws Exception {
+	public synchronized ModelFile generateModel(ModelContext context)
+			throws Exception {
 
 		// Create the writer to output contents
 		ByteArrayOutputStream marshalledModel = new ByteArrayOutputStream();
@@ -93,7 +91,7 @@ public class ModelGenerator {
 		this.writer.flush();
 
 		// Create the configuration item
-		return context.createConfigurationItem(this.metaData.getPackageName()
+		return context.createModelFile(this.metaData.getPackageName()
 				.replace('.', '/')
 				+ "/" + this.metaData.getClassName() + ".java",
 				new ByteArrayInputStream(marshalledModel.toByteArray()));
@@ -223,7 +221,7 @@ public class ModelGenerator {
 
 	/**
 	 * Convenience constructor for a new non-linked instance.
-	 * 
+	 *
 	 * @return <code>true</code> if constructor written.
 	 */
 	@SuppressWarnings("unchecked")
@@ -666,7 +664,7 @@ public class ModelGenerator {
 
 		/**
 		 * Override to write the property.
-		 * 
+		 *
 		 * @param property
 		 *            Property.
 		 * @throws Exception
@@ -686,7 +684,7 @@ public class ModelGenerator {
 
 		/**
 		 * Override to write the field.
-		 * 
+		 *
 		 * @param field
 		 *            Field.
 		 * @throws Exception
@@ -697,7 +695,7 @@ public class ModelGenerator {
 
 		/**
 		 * Override to write the list.
-		 * 
+		 *
 		 * @param list
 		 *            List.
 		 * @throws Exception
@@ -716,7 +714,7 @@ public class ModelGenerator {
 
 	/**
 	 * Writes the text followed by a end of line.
-	 * 
+	 *
 	 * @param text
 	 *            Text.
 	 */
@@ -726,7 +724,7 @@ public class ModelGenerator {
 
 	/**
 	 * Writes the text only.
-	 * 
+	 *
 	 * @param text
 	 *            Text.
 	 */
