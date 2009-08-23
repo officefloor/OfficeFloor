@@ -16,8 +16,6 @@
 
      * officexml.jar
 
-     * officemodel.jar
-
      * officecompiler.jar
 
      * any plug-in jars that your application may be using
