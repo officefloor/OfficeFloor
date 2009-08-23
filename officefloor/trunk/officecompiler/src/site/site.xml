@@ -6,9 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-        <breadcrumbs>
-            <item name="OfficeCompiler" href="index.html" />
-        </breadcrumbs>
+		<breadcrumbs>
+			<item name="OfficeCompiler" href="index.html" />
+		</breadcrumbs>
 		<menu name="OfficeCompiler">
 			<item name="Overview" href="index.html" />
 		</menu>
@@ -25,6 +25,7 @@
 			<item name="SectionSource" href="section-source.html" />
 			<item name="OfficeSource" href="office-source.html" />
 			<item name="OfficeFloorSource" href="office-floor-source.html" />
+			<item name="Models" href="models.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>
