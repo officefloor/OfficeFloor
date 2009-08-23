@@ -67,7 +67,7 @@ public class InvalidateHttpSessionTest extends
 		// Record
 		this.record_instantiate();
 		this.record_invalidate_sessionInvalidated();
-		this.record_cookie_addSessionId(true, SESSION_ID, 0);
+		this.record_cookie_addSessionId(true, "", 0);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -89,7 +89,7 @@ public class InvalidateHttpSessionTest extends
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
 				newAttributes());
-		this.record_cookie_addSessionId(true, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
 
 		// Invalidate
 		this.replayMockObjects();
@@ -111,7 +111,7 @@ public class InvalidateHttpSessionTest extends
 		this.record_generate_setSessionId(NEW_SESSION_ID);
 		this.record_create_sessionCreated(NEW_CREATION_TIME, EXPIRE_TIME,
 				newAttributes());
-		this.record_cookie_addSessionId(true, SESSION_ID, EXPIRE_TIME);
+		this.record_cookie_addSessionId(true, NEW_SESSION_ID, EXPIRE_TIME);
 		this.asynchronousListener.notifyComplete();
 
 		// Invalidate

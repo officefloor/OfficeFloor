@@ -214,6 +214,28 @@ public class HttpCookie {
 	}
 
 	/**
+	 * Initiate.
+	 *
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 * @param expireTime
+	 *            Time that the {@link HttpCookie} will be expired.
+	 * @param domain
+	 *            Domain.
+	 * @param path
+	 *            Path.
+	 */
+	public HttpCookie(String name, String value, long expireTime,
+			String domain, String path) {
+		this(name, value);
+		this.expireTime = expireTime;
+		this.domain = domain;
+		this.path = path;
+	}
+
+	/**
 	 * Obtains the name.
 	 *
 	 * @return Name.
@@ -242,16 +264,6 @@ public class HttpCookie {
 	}
 
 	/**
-	 * Specifies the path.
-	 *
-	 * @param path
-	 *            Path.
-	 */
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	/**
 	 * Specifies the domain.
 	 *
 	 * @param domain
@@ -259,6 +271,16 @@ public class HttpCookie {
 	 */
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+
+	/**
+	 * Specifies the path.
+	 *
+	 * @param path
+	 *            Path.
+	 */
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	/**
@@ -276,7 +298,7 @@ public class HttpCookie {
 		headerValue.append("=\"");
 		headerValue.append(this.value);
 		headerValue.append("\"");
-		if (this.expireTime > 0) {
+		if (this.expireTime >= 0) {
 			headerValue.append("; expires=");
 			String expireText = getExpireFormatter().format(
 					new Date(this.expireTime));
