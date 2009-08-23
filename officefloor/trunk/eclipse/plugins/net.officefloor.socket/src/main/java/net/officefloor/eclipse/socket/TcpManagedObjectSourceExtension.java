@@ -23,9 +23,9 @@ import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.tcp.source.TcpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.tcp.source.TcpServer.TcpServerFlows;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class TcpManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<None, TcpServerFlows, TcpServerSocketManagedObjectSource>,
+		ManagedObjectSourceExtension<None, Indexed, TcpServerSocketManagedObjectSource>,
 		ExtensionClasspathProvider {
 
 	@Override

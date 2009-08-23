@@ -23,9 +23,9 @@ import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.source.HttpServer.HttpServerFlows;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class HttpManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<None, HttpServerFlows, HttpServerSocketManagedObjectSource>,
+		ManagedObjectSourceExtension<None, Indexed, HttpServerSocketManagedObjectSource>,
 		ExtensionClasspathProvider {
 
 	/*
