@@ -31,10 +31,11 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -46,7 +47,6 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
@@ -526,23 +526,20 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
 			ManagedObjectIndex moIndex = moIndexes[i];
 
-			// Record obtaining the managed object
+			// Record obtaining the managed object container
 			this.recordReturn(eiMetaData, eiMetaData.getManagedObjectIndex(),
 					moIndex);
 			ManagedObjectContainer managedObjectContainer = this
 					.record_getManagedObjectContainer(moIndex, false);
-			ManagedObject managedObject = this.createMock(ManagedObject.class);
-			this.recordReturn(managedObjectContainer, managedObjectContainer
-					.getManagedObject(this.threadState), managedObject);
 
-			// Record obtaining the extension interface
-			ExtensionInterfaceFactory<?> eiFactory = this
-					.createMock(ExtensionInterfaceFactory.class);
+			// Record extracting the extension interface
+			ExtensionInterfaceExtractor<?> eiExtractor = this
+					.createMock(ExtensionInterfaceExtractor.class);
 			this.recordReturn(eiMetaData, eiMetaData
-					.getExtensionInterfaceFactory(), eiFactory);
+					.getExtensionInterfaceExtractor(), eiExtractor);
 			extensionInterfaces[i] = String.valueOf(i);
-			this.recordReturn(eiFactory, eiFactory
-					.createExtensionInterface(managedObject),
+			this.recordReturn(managedObjectContainer, managedObjectContainer
+					.extractExtensionInterface(eiExtractor),
 					extensionInterfaces[i]);
 		}
 

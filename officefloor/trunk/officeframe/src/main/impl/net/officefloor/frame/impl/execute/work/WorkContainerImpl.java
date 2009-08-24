@@ -340,13 +340,13 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 									+ moIndex.getManagedObjectScope());
 				}
 
-				// Obtain the managed object
-				ManagedObject managedObject = container
-						.getManagedObject(threadState);
+				// Extract the extension interface
+				Object extensionInterface = container
+						.extractExtensionInterface(eiMetaData
+								.getExtensionInterfaceExtractor());
 
-				// Obtain and load the extension interface
-				ei.add(eiMetaData.getExtensionInterfaceFactory()
-						.createExtensionInterface(managedObject));
+				// Load the extension interface for administration
+				ei.add(extensionInterface);
 			}
 		}
 

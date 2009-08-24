@@ -17,34 +17,36 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
+import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
  * Implementation of the {@link ExtensionInterfaceMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
-		ExtensionInterfaceMetaData<I> {
+		ExtensionInterfaceMetaData<I>, ExtensionInterfaceExtractor<I> {
 
 	/**
 	 * {@link ManagedObjectIndex} identifying the {@link ManagedObject}
 	 * implementing the extension interface.
 	 */
-	protected final ManagedObjectIndex managedObjectIndex;
+	private final ManagedObjectIndex managedObjectIndex;
 
 	/**
 	 * {@link ExtensionInterfaceFactory} to create the extension interface from
 	 * the {@link ManagedObject}.
 	 */
-	protected final ExtensionInterfaceFactory<I> extensionInterfaceFactory;
+	private final ExtensionInterfaceFactory<I> extensionInterfaceFactory;
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} identifying the
 	 *            {@link ManagedObject} implementing the extension interface.
@@ -69,8 +71,23 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	}
 
 	@Override
-	public ExtensionInterfaceFactory<I> getExtensionInterfaceFactory() {
-		return this.extensionInterfaceFactory;
+	public ExtensionInterfaceExtractor<I> getExtensionInterfaceExtractor() {
+		return this;
+	}
+
+	/*
+	 * ====================== ExtensionInterfaceExtractor =====================
+	 */
+
+	@Override
+	public I extractExtensionInterface(ManagedObject managedObject,
+			ManagedObjectMetaData<?> managedObjectMetaData) {
+
+		// TODO use the MO meta-data to determine extension interface factory
+
+		// Return the extension interface
+		return this.extensionInterfaceFactory
+				.createExtensionInterface(managedObject);
 	}
 
 }
