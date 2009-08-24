@@ -150,34 +150,40 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	/**
-	 * Allows loading the {@link ManagedObject} directly when creating a
-	 * {@link ProcessState}.
+	 * Initiate the container with a provided {@link ManagedObject}.
 	 *
 	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 *            {@link ManagedObject} triggering the {@link ProcessState}.
+	 * @param metaData
+	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
+	 * @param processState
+	 *            {@link ProcessState} that this {@link ManagedObjectContainer}
+	 *            resides within.
 	 */
-	public void loadManagedObject(ManagedObject managedObject) {
-		synchronized (this.lock) {
-			// Flag managed object loaded
-			this.managedObject = managedObject;
-			this.containerState = ManagedObjectContainerState.LOADED;
+	public <D extends Enum<D>> ManagedObjectContainerImpl(
+			ManagedObject managedObject, ManagedObjectMetaData<D> metaData,
+			ProcessState processState) {
+		this(metaData, processState);
 
-			try {
-				// Provide listener if asynchronous managed object
-				if (this.metaData.isManagedObjectAsynchronous()) {
-					((AsynchronousManagedObject) this.managedObject)
-							.registerAsynchronousCompletionListener(this);
-				}
-			} catch (Throwable ex) {
-				// Flag failure to handle later when Job attempts to use it
-				this.setFailedState(new FailedToSourceManagedObjectEscalation(
-						this.metaData.getObjectType(), ex), null);
+		// Flag managed object loaded
+		this.managedObject = managedObject;
+		this.containerState = ManagedObjectContainerState.LOADED;
+
+		try {
+			// Provide listener if asynchronous managed object
+			if (this.metaData.isManagedObjectAsynchronous()) {
+				((AsynchronousManagedObject) this.managedObject)
+						.registerAsynchronousCompletionListener(this);
 			}
-
-			// Create the recycle job node
-			this.recycleJobNode = this.metaData
-					.createRecycleJobNode(this.managedObject);
+		} catch (Throwable ex) {
+			// Flag failure to handle later when Job attempts to use it
+			this.setFailedState(new FailedToSourceManagedObjectEscalation(
+					this.metaData.getObjectType(), ex), null);
 		}
+
+		// Create the recycle job node
+		this.recycleJobNode = this.metaData
+				.createRecycleJobNode(this.managedObject);
 	}
 
 	/**

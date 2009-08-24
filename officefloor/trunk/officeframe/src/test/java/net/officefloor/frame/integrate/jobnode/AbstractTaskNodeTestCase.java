@@ -54,7 +54,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Abstract functionality to test execution of {@link AbstractJobContainer}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
@@ -130,7 +130,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the initial {@link ExecutionNode}.
-	 * 
+	 *
 	 * @return Initial {@link ExecutionNode}.
 	 */
 	protected ExecutionNode<W> getInitialNode() {
@@ -139,7 +139,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the {@link ProcessState} bound {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ProcessState} bound {@link ManagedObjectSource}.
 	 */
 	protected ManagedObjectSource<?, ?> getProcessManagedObjectSource() {
@@ -148,7 +148,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the {@link ThreadState} bound {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ThreadState} bound {@link ManagedObjectSource}.
 	 */
 	protected ManagedObjectSource<?, ?> getThreadManagedObjectSource() {
@@ -157,7 +157,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the {@link Work} bound {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link Work} bound {@link ManagedObjectSource}.
 	 */
 	protected ManagedObjectSource<?, ?> getWorkManagedObjectSource() {
@@ -167,7 +167,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Binds the next {@link ExecutionNode} to be executed after the input
 	 * {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
 	 * @return Next {@link ExecutionNode} to be executed after the input
@@ -194,7 +194,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Binds a {@link ExecutionNode} to be sequentially executed after the input
 	 * {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
 	 * @return {@link ExecutionNode} to be sequentially executed after the input
@@ -208,7 +208,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Binds a {@link ExecutionNode} to be executed in parallel to the input
 	 * {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
 	 * @return {@link ExecutionNode} to be executed in parallel to the input
@@ -221,7 +221,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Binds a {@link ExecutionNode} to be executed asynchronously to the input
 	 * {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param currentNode
 	 *            {@link ExecutionNode}.
 	 * @return {@link ExecutionNode} to be executed asynchronously to the input
@@ -234,7 +234,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Binds an {@link ExecutionNode} to instigated as a {@link Flow}.
-	 * 
+	 *
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param currentNode
@@ -259,7 +259,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Binds an {@link ExecutionNode} to wait on an executing
 	 * {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param waitNode
 	 *            {@link ExecutionNode} to wait.
 	 * @param futureNode
@@ -301,7 +301,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData, null,
-				null, null);
+				null);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		Flow flow = processState.createThread(flowMetaData);
@@ -324,7 +324,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Validates the order of execution.
-	 * 
+	 *
 	 * @param nodes
 	 *            Listing of {@link ExecutionNode} instances to validate are in
 	 *            order of execution.
@@ -356,7 +356,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Adds an {@link ExecutionNode} that is being executed.
-	 * 
+	 *
 	 * @param node
 	 *            {@link ExecutionNode} that is being executed.
 	 */
@@ -366,7 +366,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Indicates if the input {@link ExecutionNode} was executed.
-	 * 
+	 *
 	 * @param node
 	 *            {@link ExecutionNode}.
 	 * @return <code>true</code> if input {@link ExecutionNode} was executed.
@@ -390,7 +390,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Specifies the latest {@link ExecutionNode} to be created.
-	 * 
+	 *
 	 * @param node
 	 *            Latest {@link ExecutionNode} to be created.
 	 */
@@ -400,7 +400,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the latest {@link ExecutionNode} to be created.
-	 * 
+	 *
 	 * @return Latest {@link ExecutionNode} to be created.
 	 */
 	ExecutionNode<?> getLatestTaskNode() {
@@ -414,7 +414,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Registers the {@link FlowFuture} for the {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param node
 	 *            {@link ExecutionNode}.
 	 * @param future
@@ -426,7 +426,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the {@link FlowFuture} for a {@link ExecutionNode}.
-	 * 
+	 *
 	 * @param node
 	 *            {@link ExecutionNode}.
 	 * @return {@link FlowFuture}.
@@ -442,7 +442,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * Obtains the next Id for a new {@link ExecutionNode}.
-	 * 
+	 *
 	 * @return Next Id for a new {@link ExecutionNode}.
 	 */
 	private int nextExecutionNodeId() {
