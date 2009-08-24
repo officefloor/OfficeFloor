@@ -91,7 +91,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 				.getManagedObjectMetaData();
 		this.managedObjects = new ManagedObjectContainer[moMetaDatas.length];
 
-		// Create array to referent the administrators
+		// Create array to reference the administrators
 		AdministratorMetaData adminMetaDatas[] = workMetaData
 				.getAdministratorMetaData();
 		this.administrators = new AdministratorContainer[adminMetaDatas.length];

@@ -51,7 +51,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ThreadState}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ThreadStateTest extends OfficeFrameTestCase {
@@ -74,19 +74,39 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadMetaData, this.threadMetaData
 				.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[] { moMetaData });
+		this.recordReturn(this.threadMetaData, this.threadMetaData
+				.getAdministratorMetaData(),
+				new AdministratorMetaData[] { adminMetaData });
+		this.recordReturn(this.flowMetaData,
+				this.flowMetaData.getFlowManager(), this.threadManager);
+
+		// Record obtaining the Managed Object Container
+		this.recordReturn(this.threadMetaData, this.threadMetaData
+				.getManagedObjectMetaData(),
+				new ManagedObjectMetaData[] { moMetaData });
 		this.recordReturn(moMetaData, moMetaData
 				.createManagedObjectContainer(this.processState), moContainer);
+
+		// Record obtaining the Administrator Container
 		this.recordReturn(this.threadMetaData, this.threadMetaData
 				.getAdministratorMetaData(),
 				new AdministratorMetaData[] { adminMetaData });
 		this.recordReturn(adminMetaData, adminMetaData
 				.createAdministratorContainer(), adminContainer);
-		this.recordReturn(this.flowMetaData,
-				this.flowMetaData.getFlowManager(), this.threadManager);
 
 		// Test
 		this.replayMockObjects();
 		ThreadState thread = this.createThreadState();
+
+		// Lazy load managed object container
+		assertEquals("Incorrect managed object container", moContainer, thread
+				.getManagedObjectContainer(0));
+
+		// Lazy load administrator container
+		assertEquals("Incorrect administrator container", adminContainer,
+				thread.getAdministratorContainer(0));
+
+		// Verify
 		this.verifyMockObjects();
 
 		// Verify state of thread
@@ -112,11 +132,11 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect change in escalation level",
 				EscalationLevel.OFFICE, thread.getEscalationLevel());
 
-		// Ensure can get managed object container
+		// Ensure can get same managed object container
 		assertEquals("Incorrect managed object container", moContainer, thread
 				.getManagedObjectContainer(0));
 
-		// Ensure can get administrator container
+		// Ensure can get same administrator container
 		assertEquals("Incorrect administrator container", adminContainer,
 				thread.getAdministratorContainer(0));
 	}
@@ -457,7 +477,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the {@link JobNode} joining on the {@link ThreadState}.
-	 * 
+	 *
 	 * @param jobNode
 	 *            {@link JobNode}.
 	 * @return {@link AssetMonitor} monitoring the join.
@@ -514,7 +534,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link ThreadStateImpl}.
-	 * 
+	 *
 	 * @return {@link ThreadStateImpl}.
 	 */
 	private ThreadStateImpl createThreadState() {
