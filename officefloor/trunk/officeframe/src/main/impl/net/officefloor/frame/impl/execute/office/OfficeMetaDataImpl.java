@@ -21,13 +21,13 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
@@ -39,7 +39,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link OfficeMetaData} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
@@ -83,7 +83,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @param officeManager
@@ -160,19 +160,21 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			Object parameter, ManagedObject managedObject, int processMoIndex,
 			EscalationHandler managedObjectEscalationHandler) {
 
-		// Create the Process State
-		ProcessState processState = new ProcessStateImpl(this.processMetaData,
-				this, managedObjectEscalationHandler,
-				this.officeFloorEscalation);
+		// Create the Process State (based on whether have managed object)
+		ProcessState processState;
+		if (managedObject == null) {
+			// Create Process without an Input Managed Object
+			processState = new ProcessStateImpl(this.processMetaData, this,
+					this.officeFloorEscalation);
+		} else {
+			// Obtain the meta-data for the Input Managed Object
+			ManagedObjectMetaData<?> inputMoMetaData = this.processMetaData
+					.getManagedObjectMetaData()[processMoIndex];
 
-		// Determine if require loading the managed object
-		if (managedObject != null) {
-			// Obtain the container for the managed object
-			ManagedObjectContainerImpl moc = (ManagedObjectContainerImpl) processState
-					.getManagedObjectContainer(processMoIndex);
-
-			// Load the managed object
-			moc.loadManagedObject(managedObject);
+			// Create Process with the Input Managed Object
+			processState = new ProcessStateImpl(this.processMetaData, this,
+					this.officeFloorEscalation, managedObject, inputMoMetaData,
+					processMoIndex, managedObjectEscalationHandler);
 		}
 
 		// Create the Flow

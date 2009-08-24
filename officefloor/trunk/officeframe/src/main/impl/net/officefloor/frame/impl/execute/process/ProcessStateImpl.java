@@ -26,6 +26,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -126,24 +127,59 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
-	 * @param managedObjectEscalationHandler
-	 *            {@link EscalationHandler} provided by the
-	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
-	 * @param officeFloorEscalaion
+	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData,
+			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation) {
+		this(processMetaData, officeMetaData, officeFloorEscalation, null,
+				null, -1, null);
+	}
+
+	/**
+	 * Initiate for a {@link ProcessState} initiated by a {@link ManagedObject}.
+	 *
+	 * @param processMetaData
+	 *            {@link ProcessMetaData} for this {@link ProcessState}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
+	 * @param officeFloorEscalation
+	 *            {@link OfficeFloor} {@link EscalationFlow}.
+	 * @param inputManagedObject
+	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
+	 *            May be <code>null</code>.
+	 * @param inputManagedObjectMetaData
+	 *            {@link ManagedObjectMetaData} of the input
+	 *            {@link ManagedObject}. Should the input {@link ManagedObject}
+	 *            be provided this must be also provided.
+	 * @param inputManagedObjectIndex
+	 *            Index of the input {@link ManagedObject} within this
+	 *            {@link ProcessState}.
+	 * @param inputManagedObjectEscalationHandler
+	 *            {@link EscalationHandler} provided by the
+	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
+	 */
+	public ProcessStateImpl(ProcessMetaData processMetaData,
 			OfficeMetaData officeMetaData,
-			EscalationHandler managedObjectEscalationHandler,
-			EscalationFlow officeFloorEscalaion) {
+			EscalationFlow officeFloorEscalation,
+			ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int inputManagedObjectIndex,
+			EscalationHandler inputManagedObjectEscalationHandler) {
 		this.processMetaData = processMetaData;
 		this.officeMetaData = officeMetaData;
-		this.officeFloorEscalation = officeFloorEscalaion;
+		this.officeFloorEscalation = officeFloorEscalation;
 
 		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
+
+		// Load the Container for the Input Managed Object if provided
+		if (inputManagedObject != null) {
+			this.managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(
+					inputManagedObject, inputManagedObjectMetaData, this);
+		}
 
 		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData
@@ -154,9 +190,9 @@ public class ProcessStateImpl implements ProcessState {
 		Team team = new PassiveTeam();
 
 		// Escalation handled by managed object source
-		this.managedObjectSourceEscalation = (managedObjectEscalationHandler == null ? null
+		this.managedObjectSourceEscalation = (inputManagedObjectEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(
-						managedObjectEscalationHandler, team));
+						inputManagedObjectEscalationHandler, team));
 	}
 
 	/*
