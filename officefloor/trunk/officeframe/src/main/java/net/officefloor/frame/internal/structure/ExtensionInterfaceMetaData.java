@@ -18,31 +18,30 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
  * Meta-data of the Extension Interface.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExtensionInterfaceMetaData<I extends Object> {
 
 	/**
 	 * Obtains the {@link ManagedObjectIndex} to identify the
-	 * {@link ManagedObject} to create the extension interface from.
-	 * 
+	 * {@link ManagedObject} to extract the extension interface from.
+	 *
 	 * @return {@link ManagedObjectIndex} to identify the {@link ManagedObject}
-	 *         to create the extension interface from.
+	 *         to extract the extension interface from.
 	 */
 	ManagedObjectIndex getManagedObjectIndex();
 
 	/**
-	 * Obtains the factory to create the Extension Interface for the
-	 * {@link ManagedObject}.
-	 * 
-	 * @return Factory to create the Extension Interface for the
-	 *         {@link ManagedObject}.
+	 * Obtains the {@link ExtensionInterfaceExtractor} to extract the Extension
+	 * Interface from the {@link ManagedObject}.
+	 *
+	 * @return {@link ExtensionInterfaceExtractor} to extract the Extension
+	 *         Interface from the {@link ManagedObject}.
 	 */
-	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
+	ExtensionInterfaceExtractor<I> getExtensionInterfaceExtractor();
 
 }

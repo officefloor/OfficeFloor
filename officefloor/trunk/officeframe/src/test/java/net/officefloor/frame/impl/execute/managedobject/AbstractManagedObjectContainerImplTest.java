@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
@@ -950,9 +951,19 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected Object getObject(ManagedObjectContainer mo) {
 		Object object = mo.getObject(this.threadState);
 		if (object != null) {
-			// If have object, must also have managed object
+			// Extract the Managed Object
 			ManagedObject actualManagedObject = mo
-					.getManagedObject(this.threadState);
+					.extractExtensionInterface(new ExtensionInterfaceExtractor<ManagedObject>() {
+						@Override
+						public ManagedObject extractExtensionInterface(
+								ManagedObject managedObject,
+								ManagedObjectMetaData<?> managedObjectMetaData) {
+							// Return the actual Managed Object
+							return managedObject;
+						}
+					});
+
+			// If have object, must also have managed object
 			assertEquals("Incorrect managed object", this.managedObject,
 					actualManagedObject);
 		}

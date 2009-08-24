@@ -24,6 +24,7 @@ import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -549,10 +550,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	@Override
-	public ManagedObject getManagedObject(ThreadState threadState) {
+	public <I> I extractExtensionInterface(
+			ExtensionInterfaceExtractor<I> extractor) {
 
-		// Access Point: JobContainer via WorkContainer
-		// Locks: Unknown (managed object treated as final)
+		// Access Point: WorkContainer (via DutyJob)
+		// Locks: ThreadState -> ProcessState
 
 		// Ensure have Managed Object
 		if (this.managedObject == null) {
@@ -562,8 +564,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 							"ManagedObject not loaded")));
 		}
 
-		// Return the Managed Object
-		return this.managedObject;
+		// Return the extracted extension interface
+		return extractor.extractExtensionInterface(this.managedObject,
+				this.metaData);
 	}
 
 	@Override

@@ -62,7 +62,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link RawBoundAdministratorMetaDataImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
@@ -179,7 +179,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -554,6 +554,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
+		final ManagedObject managedObject = this
+				.createMock(ManagedObject.class);
+		final Object extensionInterface = "EXTENSION_INTERFACE";
 
 		// Record successfully create bound administrator
 		this.record_init();
@@ -566,13 +569,33 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.name());
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
-		// Construct the administrators
+		// Record ei extraction to verify the extension interface factory
+		this.recordReturn(this.extensionInterfaceFactory,
+				this.extensionInterfaceFactory
+						.createExtensionInterface(managedObject),
+				extensionInterface);
+
+		// Test
 		this.replayMockObjects();
+
+		// Construct the administrators
 		RawBoundAdministratorMetaData<?, ?>[] rawAdminMetaDatas = this
 				.constructRawAdministrator(1, this.configuration);
 		RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = rawAdminMetaDatas[0];
 		AdministratorMetaData<?, ?> adminMetaData = rawAdminMetaData
 				.getAdministratorMetaData();
+
+		// Verify extension interface factory by extracting ei
+		assertEquals("Incorrect number of administered managed objects", 1,
+				adminMetaData.getExtensionInterfaceMetaData().length);
+		ExtensionInterfaceMetaData<?> moEiMetaData = adminMetaData
+				.getExtensionInterfaceMetaData()[0];
+		assertEquals("Incorrect extracted extension interface",
+				extensionInterface, moEiMetaData
+						.getExtensionInterfaceExtractor()
+						.extractExtensionInterface(managedObject, null));
+
+		// Verify mocks
 		this.verifyMockObjects();
 
 		// Verify bound administrator meta-data
@@ -588,19 +611,12 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertNull("Should only have one duty", rawAdminMetaData
 				.getDutyKey(DutyKey.TWO));
 
-		// Verify administrator meta-data
+		// Verify remaining administrator meta-data
 		assertNotNull("Must have admin source", adminMetaData
 				.getAdministratorSource());
 		assertEquals("Incorrect team", this.team, adminMetaData.getTeam());
-		assertEquals("Incorrect number of administered managed objects", 1,
-				adminMetaData.getExtensionInterfaceMetaData().length);
-		ExtensionInterfaceMetaData<?> moEiMetaData = adminMetaData
-				.getExtensionInterfaceMetaData()[0];
 		assertEquals("Incorrect administered managed object",
 				this.managedObjectIndex, moEiMetaData.getManagedObjectIndex());
-		assertEquals("Incorrect extension interface factory",
-				this.extensionInterfaceFactory, moEiMetaData
-						.getExtensionInterfaceFactory());
 
 		// Verify the administrator meta-data
 		assertNotNull("Must have admin source", adminMetaData
@@ -965,7 +981,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue regarding the {@link Administrator}.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
@@ -1005,7 +1021,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Resets the state for next test.
-		 * 
+		 *
 		 * @param metaData
 		 *            {@link AdministratorSourceMetaData}.
 		 */
@@ -1058,7 +1074,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawBoundAdministratorMetaDataImpl}.
-	 * 
+	 *
 	 * @param expectedCreateCount
 	 *            Expected number to be created.
 	 * @param configuration
@@ -1087,7 +1103,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawBoundAdministratorMetaData} including linking
 	 * its {@link Task} instances.
-	 * 
+	 *
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
 	 */
 	@SuppressWarnings("unchecked")

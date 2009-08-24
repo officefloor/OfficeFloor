@@ -99,15 +99,16 @@ public interface ManagedObjectContainer {
 	Object getObject(ThreadState threadState);
 
 	/**
-	 * Obtains the {@link ManagedObject} or <code>null</code> if it is not
-	 * loaded. This allows for access to the extension interfaces of the
-	 * {@link ManagedObject}.
+	 * Extracts the extension interface from the {@link ManagedObject} within
+	 * this {@link ManagedObjectContainer}.
 	 *
-	 * @param threadState
-	 *            {@link ThreadState} requiring the {@link ManagedObject}.
-	 * @return {@link ManagedObject} or <code>null</code> if it is not loaded.
+	 * @param extractor
+	 *            {@link ExtensionInterfaceExtractor} to extract the extension
+	 *            interface from the {@link ManagedObject}.
+	 * @return Extracted extension interface.
 	 */
-	ManagedObject getManagedObject(ThreadState threadState);
+	<I extends Object> I extractExtensionInterface(
+			ExtensionInterfaceExtractor<I> extractor);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
