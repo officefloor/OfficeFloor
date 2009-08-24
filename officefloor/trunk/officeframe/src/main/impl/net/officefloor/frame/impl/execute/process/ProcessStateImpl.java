@@ -49,7 +49,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of the {@link ProcessState}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ProcessStateImpl implements ProcessState {
@@ -121,7 +121,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
 	 * @param officeMetaData
@@ -140,23 +140,15 @@ public class ProcessStateImpl implements ProcessState {
 		this.officeMetaData = officeMetaData;
 		this.officeFloorEscalation = officeFloorEscalaion;
 
-		// Managed Objects
+		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
-		for (int i = 0; i < this.managedObjectContainers.length; i++) {
-			this.managedObjectContainers[i] = managedObjectMetaData[i]
-					.createManagedObjectContainer(this);
-		}
 
-		// Administrators
+		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
-		for (int i = 0; i < this.administratorContainers.length; i++) {
-			this.administratorContainers[i] = administratorMetaData[i]
-					.createAdministratorContainer();
-		}
 
 		// TODO allow configuring the team responsible for MO handling
 		Team team = new PassiveTeam();
@@ -212,10 +204,12 @@ public class ProcessStateImpl implements ProcessState {
 					listener.processComplete();
 				}
 
-				// Unload managed objects
+				// Unload managed objects (some may not have been used)
 				for (int i = 0; i < this.managedObjectContainers.length; i++) {
-					this.managedObjectContainers[i]
-							.unloadManagedObject(activateSet);
+					ManagedObjectContainer container = this.managedObjectContainers[i];
+					if (container != null) {
+						container.unloadManagedObject(activateSet);
+					}
 				}
 
 				// Flag the process now complete
@@ -226,12 +220,30 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-		return this.managedObjectContainers[index];
+		// Lazy load the Managed Object Container
+		// (This should be thread safe as should always be called within the
+		// Process lock of the Thread before the Job uses it).
+		ManagedObjectContainer container = this.managedObjectContainers[index];
+		if (container == null) {
+			container = this.processMetaData.getManagedObjectMetaData()[index]
+					.createManagedObjectContainer(this);
+			this.managedObjectContainers[index] = container;
+		}
+		return container;
 	}
 
 	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
-		return this.administratorContainers[index];
+		// Lazy load the Administrator Container
+		// (This should be thread safe as should always called within the
+		// Process lock by the WorkContainer)
+		AdministratorContainer<?, ?> container = this.administratorContainers[index];
+		if (container == null) {
+			container = this.processMetaData.getAdministratorMetaData()[index]
+					.createAdministratorContainer();
+			this.administratorContainers[index] = container;
+		}
+		return container;
 	}
 
 	@Override

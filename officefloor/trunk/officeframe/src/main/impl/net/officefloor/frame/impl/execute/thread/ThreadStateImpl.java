@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link ThreadState}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ThreadStateImpl extends
@@ -127,7 +127,7 @@ public class ThreadStateImpl extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
 	 * @param processState
@@ -140,23 +140,15 @@ public class ThreadStateImpl extends
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 
-		// Create the managed object containers
+		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] moMetaData = this.threadMetaData
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[moMetaData.length];
-		for (int i = 0; i < this.managedObjectContainers.length; i++) {
-			this.managedObjectContainers[i] = moMetaData[i]
-					.createManagedObjectContainer(this.processState);
-		}
 
-		// Create the administrator containers
+		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
-		for (int i = 0; i < this.administratorContainers.length; i++) {
-			this.administratorContainers[i] = adminMetaData[i]
-					.createAdministratorContainer();
-		}
 
 		// Obtain the thread manager
 		this.threadManager = flowMetaData.getFlowManager();
@@ -173,7 +165,7 @@ public class ThreadStateImpl extends
 
 	/*
 	 * ===================== ThreadState ==================================
-	 * 
+	 *
 	 * Methods do not requiring synchronising as will all be called within the
 	 * ThreadState lock taken by the JobContainer.
 	 */
@@ -222,10 +214,12 @@ public class ThreadStateImpl extends
 			// No more active flows so thread is complete
 			this.isFlowComplete = true;
 
-			// Unload managed objects
+			// Unload managed objects (some may not have been used)
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
-				this.managedObjectContainers[i]
-						.unloadManagedObject(activateSet);
+				ManagedObjectContainer container = this.managedObjectContainers[i];
+				if (container != null) {
+					container.unloadManagedObject(activateSet);
+				}
 			}
 
 			// Activate all jobs waiting on this thread permanently
@@ -247,12 +241,30 @@ public class ThreadStateImpl extends
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-		return this.managedObjectContainers[index];
+		// Lazy load the Managed Object Container
+		// (This should be thread safe as should always be called within the
+		// Process lock of the Thread before the Job uses it).
+		ManagedObjectContainer container = this.managedObjectContainers[index];
+		if (container == null) {
+			container = this.threadMetaData.getManagedObjectMetaData()[index]
+					.createManagedObjectContainer(this.processState);
+			this.managedObjectContainers[index] = container;
+		}
+		return container;
 	}
 
 	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
-		return this.administratorContainers[index];
+		// Lazy load the Administrator Container
+		// (This should be thread safe as should always called within the
+		// Process lock by the WorkContainer)
+		AdministratorContainer<?, ?> container = this.administratorContainers[index];
+		if (container == null) {
+			container = this.threadMetaData.getAdministratorMetaData()[index]
+					.createAdministratorContainer();
+			this.administratorContainers[index] = container;
+		}
+		return container;
 	}
 
 	@Override
@@ -355,7 +367,7 @@ public class ThreadStateImpl extends
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param jobNode
 		 *            {@link JobNode} waiting for this {@link ThreadState} to
 		 *            complete.
