@@ -18,51 +18,49 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Meta-data of a bound {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
+public interface RawBoundManagedObjectMetaData {
 
 	/**
 	 * Obtains the name the {@link ManagedObject} is bound under.
-	 * 
+	 *
 	 * @return Name the {@link ManagedObject} is bound under.
 	 */
 	String getBoundManagedObjectName();
 
 	/**
 	 * Obtains the {@link ManagedObjectIndex}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectIndex}.
 	 */
 	ManagedObjectIndex getManagedObjectIndex();
 
 	/**
-	 * Obtains the {@link RawBoundManagedObjectMetaData} for the dependencies of
-	 * this {@link ManagedObject}.
-	 * 
-	 * @return {@link RawBoundManagedObjectMetaData} for the dependencies of
-	 *         this {@link ManagedObject}
+	 * Obtains the index of the default
+	 * {@link RawBoundManagedObjectInstanceMetaData} for this
+	 * {@link RawBoundManagedObjectMetaData}.
+	 *
+	 * @return Index of the default
+	 *         {@link RawBoundManagedObjectInstanceMetaData} for this
+	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	RawBoundManagedObjectMetaData<?>[] getDependencies();
+	int getDefaultInstanceIndex();
 
 	/**
-	 * Obtains the {@link RawManagedObjectMetaData}.
-	 * 
-	 * @return {@link RawManagedObjectMetaData}.
+	 * Obtains the {@link RawBoundManagedObjectInstanceMetaData} instances for
+	 * the {@link ManagedObjectSource} instances that may provide a
+	 * {@link ManagedObject} for this {@link RawBoundManagedObjectMetaData}.
+	 *
+	 * @return {@link RawBoundManagedObjectMetaData} instances for this
+	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData();
-
-	/**
-	 * Obtains the {@link ManagedObjectMetaData}.
-	 * 
-	 * @return {@link ManagedObjectMetaData}.
-	 */
-	ManagedObjectMetaData<D> getManagedObjectMetaData();
+	RawBoundManagedObjectInstanceMetaData<?>[] getRawBoundManagedObjectInstanceMetaData();
 
 }

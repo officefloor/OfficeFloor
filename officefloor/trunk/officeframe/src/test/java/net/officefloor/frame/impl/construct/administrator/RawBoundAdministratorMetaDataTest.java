@@ -33,6 +33,7 @@ import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -44,6 +45,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -108,13 +110,19 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 * Scope bound {@link RawBoundManagedObjectMetaData} instances by their
 	 * scope name.
 	 */
-	private final Map<String, RawBoundManagedObjectMetaData<?>> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+	private final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
 
 	/**
 	 * {@link RawBoundManagedObjectMetaData}.
 	 */
-	private final RawBoundManagedObjectMetaData<?> rawBoundMoMetaData = this
+	private final RawBoundManagedObjectMetaData rawBoundMoMetaData = this
 			.createMock(RawBoundManagedObjectMetaData.class);
+
+	/**
+	 * {@link RawBoundManagedObjectInstanceMetaData}.
+	 */
+	private final RawBoundManagedObjectInstanceMetaData<?> rawBoundMoInstanceMetaData = this
+			.createMock(RawBoundManagedObjectInstanceMetaData.class);
 
 	/**
 	 * {@link RawManagedObjectMetaData}.
@@ -409,18 +417,33 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getAdministeredManagedObjectNames(), new String[] { "MO" });
 		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData
-				.getRawManagedObjectMetaData(), this.rawMoMetaData);
+		this
+				.recordReturn(
+						this.rawBoundMoMetaData,
+						this.rawBoundMoMetaData
+								.getRawBoundManagedObjectInstanceMetaData(),
+						new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
+		this.recordReturn(this.rawBoundMoInstanceMetaData,
+				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(),
+				this.rawMoMetaData);
 		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData
 				.getManagedObjectSourceMetaData(),
 				this.managedObjectSourceMetaData);
 		this.recordReturn(this.managedObjectSourceMetaData,
 				this.managedObjectSourceMetaData
 						.getExtensionInterfacesMetaData(), null);
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Managed Object 'MO' does not support extension interface "
-						+ Object.class.getName()
-						+ " required by Administrator ADMIN");
+		this.recordReturn(this.rawBoundMoInstanceMetaData,
+				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(),
+				this.rawMoMetaData);
+		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData
+				.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
+		this.issues
+				.addIssue(
+						this.assetType,
+						this.assetName,
+						"Managed Object 'MO' does not support extension interface "
+								+ Object.class.getName()
+								+ " required by Administrator ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -442,8 +465,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getAdministeredManagedObjectNames(), new String[] { "MO" });
 		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData
-				.getRawManagedObjectMetaData(), this.rawMoMetaData);
+		this
+				.recordReturn(
+						this.rawBoundMoMetaData,
+						this.rawBoundMoMetaData
+								.getRawBoundManagedObjectInstanceMetaData(),
+						new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
+		this.recordReturn(this.rawBoundMoInstanceMetaData,
+				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(),
+				this.rawMoMetaData);
 		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData
 				.getManagedObjectSourceMetaData(),
 				this.managedObjectSourceMetaData);
@@ -456,10 +486,18 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.extensionInterfaceMetaData,
 				this.extensionInterfaceMetaData.getExtensionInterfaceType(),
 				Integer.class);
-		this.issues.addIssue(this.assetType, this.assetName,
-				"Managed Object 'MO' does not support extension interface "
-						+ String.class.getName()
-						+ " required by Administrator ADMIN");
+		this.recordReturn(this.rawBoundMoInstanceMetaData,
+				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(),
+				this.rawMoMetaData);
+		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData
+				.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
+		this.issues
+				.addIssue(
+						this.assetType,
+						this.assetName,
+						"Managed Object 'MO' does not support extension interface "
+								+ String.class.getName()
+								+ " required by Administrator ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -556,6 +594,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(AdministratorDutyMetaData.class);
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
+		final ManagedObjectMetaData<?> moMetaData = this
+				.createMock(ManagedObjectMetaData.class);
 		final Object extensionInterface = "EXTENSION_INTERFACE";
 
 		// Record successfully create bound administrator
@@ -570,6 +610,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(dutyMetaData, dutyMetaData.getKey(), DutyKey.ONE);
 
 		// Record ei extraction to verify the extension interface factory
+		this.recordReturn(moMetaData, moMetaData.getInstanceIndex(), 0);
 		this.recordReturn(this.extensionInterfaceFactory,
 				this.extensionInterfaceFactory
 						.createExtensionInterface(managedObject),
@@ -593,7 +634,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect extracted extension interface",
 				extensionInterface, moEiMetaData
 						.getExtensionInterfaceExtractor()
-						.extractExtensionInterface(managedObject, null));
+						.extractExtensionInterface(managedObject, moMetaData));
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -958,8 +999,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getAdministeredManagedObjectNames(), new String[] { "MO" });
 		this.scopeMo.put("MO", this.rawBoundMoMetaData);
-		this.recordReturn(this.rawBoundMoMetaData, this.rawBoundMoMetaData
-				.getRawManagedObjectMetaData(), this.rawMoMetaData);
+		this
+				.recordReturn(
+						this.rawBoundMoMetaData,
+						this.rawBoundMoMetaData
+								.getRawBoundManagedObjectInstanceMetaData(),
+						new RawBoundManagedObjectInstanceMetaData[] { this.rawBoundMoInstanceMetaData });
+		this.recordReturn(this.rawBoundMoInstanceMetaData,
+				this.rawBoundMoInstanceMetaData.getRawManagedObjectMetaData(),
+				this.rawMoMetaData);
 		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData
 				.getManagedObjectSourceMetaData(),
 				this.managedObjectSourceMetaData);

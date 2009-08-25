@@ -31,50 +31,51 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
 
 /**
  * Meta-data for a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
-	 * 
+	 *
 	 * @return Name of the {@link ManagedObject}.
 	 */
 	String getManagedObjectName();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceConfiguration}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectSourceConfiguration}.
 	 */
 	ManagedObjectSourceConfiguration<F, ?> getManagedObjectSourceConfiguration();
 
 	/**
 	 * Obtains the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectSource}.
 	 */
 	ManagedObjectSource<D, F> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceMetaData}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectSourceMetaData}.
 	 */
 	ManagedObjectSourceMetaData<D, F> getManagedObjectSourceMetaData();
 
 	/**
 	 * Obtains the default timeout for the {@link ManagedObject}.
-	 * 
+	 *
 	 * @return Default timeout for the {@link ManagedObject}.
 	 */
+	// TODO remove getDefaultTimeout as deprecated
 	@Deprecated
 	long getDefaultTimeout();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectPool} or <code>null</code> if not pooled.
 	 */
 	ManagedObjectPool getManagedObjectPool();
@@ -82,7 +83,7 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	/**
 	 * Obtains the type of {@link Object} returned from the
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @return Obtains the type of {@link Object} returned from the
 	 *         {@link ManagedObject}.
 	 */
@@ -90,24 +91,26 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 
 	/**
 	 * Indicates if {@link AsynchronousManagedObject}.
-	 * 
+	 *
 	 * @return <code>true</code> if {@link AsynchronousManagedObject}.
 	 */
+	// TODO remove isAsynchronous as deprecated
 	@Deprecated
 	boolean isAsynchronous();
 
 	/**
 	 * Indicates if {@link CoordinatingManagedObject}.
-	 * 
+	 *
 	 * @return <code>true</code> if {@link CoordinatingManagedObject}.
 	 */
+	// TODO remove isCoordinating as deprecated
 	@Deprecated
 	boolean isCoordinating();
 
 	/**
 	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}
 	 * managing this {@link ManagedObject}.
-	 * 
+	 *
 	 * @return {@link RawManagingOfficeMetaData} of the {@link Office} managing
 	 *         this {@link ManagedObject}.
 	 */
@@ -115,9 +118,14 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 
 	/**
 	 * Creates the {@link ManagedObjectMetaData}.
-	 * 
+	 *
 	 * @param boundMetaData
 	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param instanceIndex
+	 *            Index of the {@link RawBoundManagedObjectInstanceMetaData} on
+	 *            the {@link RawBoundManagedObjectMetaData}.
+	 * @param boundInstanceMetaData
+	 *            {@link RawBoundManagedObjectInstanceMetaData}.
 	 * @param dependencyMappings
 	 *            {@link ManagedObjectIndex} instances identifying the dependent
 	 *            {@link ManagedObject} instances in dependency index order
@@ -130,7 +138,8 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	 * @return {@link ManagedObjectMetaData}.
 	 */
 	ManagedObjectMetaData<D> createManagedObjectMetaData(
-			RawBoundManagedObjectMetaData<D> boundMetaData,
+			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData,
 			ManagedObjectIndex[] dependencyMappings,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 

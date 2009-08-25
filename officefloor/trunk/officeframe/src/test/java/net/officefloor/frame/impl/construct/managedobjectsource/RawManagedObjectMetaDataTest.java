@@ -38,6 +38,7 @@ import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -64,7 +65,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the creation of a {@link RawManagedObjectMetaDataImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
@@ -166,7 +167,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -579,8 +580,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testPlainManagedObject() {
 
-		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+		final RawBoundManagedObjectMetaData boundMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final int INSTANCE_INDEX = 0;
+		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final String BOUND_NAME = "BOUND_NAME";
 		final ManagedObjectIndex moIndex = this
 				.createMock(ManagedObjectIndex.class);
@@ -605,9 +609,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
-				.createManagedObjectMetaData(boundMetaData,
-						new ManagedObjectIndex[0], this.assetManagerFactory,
-						this.issues);
+				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
+						boundInstanceMetaData, new ManagedObjectIndex[0],
+						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -633,6 +637,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSource() instanceof MockManagedObjectSource));
 		assertEquals("Incorrect object type", Object.class, moMetaData
 				.getObjectType());
+		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData
+				.getInstanceIndex());
 		assertEquals("Incorrect timeout", 0, moMetaData.getTimeout());
 		assertFalse("Should not be asynchronous", moMetaData
 				.isManagedObjectAsynchronous());
@@ -650,8 +656,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testAsynchronousManagedObject() {
 
-		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+		final RawBoundManagedObjectMetaData boundMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final int INSTANCE_INDEX = 3;
+		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final String BOUND_NAME = "BOUND_NAME";
 		final ManagedObjectIndex moIndex = this
 				.createMock(ManagedObjectIndex.class);
@@ -684,10 +693,14 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
-				.createManagedObjectMetaData(boundMetaData,
-						new ManagedObjectIndex[0], this.assetManagerFactory,
-						this.issues);
+				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
+						boundInstanceMetaData, new ManagedObjectIndex[0],
+						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
+
+		// Verify different index
+		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData
+				.getInstanceIndex());
 
 		// Verify is asynchronous with operations manager
 		assertTrue("Should be asynchronous", moMetaData
@@ -703,8 +716,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testCoordinatingManagedObject() {
 
-		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+		final RawBoundManagedObjectMetaData boundMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final int INSTANCE_INDEX = 0;
+		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final String BOUND_NAME = "BOUND_NAME";
 		final ManagedObjectIndex moIndex = this
 				.createMock(ManagedObjectIndex.class);
@@ -730,9 +746,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
-				.createManagedObjectMetaData(boundMetaData,
-						new ManagedObjectIndex[0], this.assetManagerFactory,
-						this.issues);
+				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
+						boundInstanceMetaData, new ManagedObjectIndex[0],
+						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify flagged as coordinating
@@ -777,7 +793,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records creating the {@link RawManagedObjectMetaData} after initialising.
-	 * 
+	 *
 	 * @param managedObjectClass
 	 *            {@link ManagedObject} class.
 	 * @param timeout
@@ -812,7 +828,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue for the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Issue description.
 	 */
@@ -823,7 +839,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue for the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Issue description.
 	 * @param cause
@@ -920,7 +936,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Resets state of {@link MockManagedObjectSource} for testing.
-		 * 
+		 *
 		 * @param taskFactory
 		 *            {@link TaskFactory}.
 		 * @param metaData
@@ -946,7 +962,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Instantiate.
-		 * 
+		 *
 		 * @throws Exception
 		 *             Possible instantiate failure.
 		 */
@@ -1044,7 +1060,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawManagedObjectMetaDataImpl} with the mock
 	 * objects.
-	 * 
+	 *
 	 * @return {@link RawManagedObjectMetaData}.
 	 */
 	@SuppressWarnings("unchecked")

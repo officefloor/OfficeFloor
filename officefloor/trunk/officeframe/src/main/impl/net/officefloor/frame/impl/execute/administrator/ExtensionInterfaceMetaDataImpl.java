@@ -42,7 +42,7 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 * {@link ExtensionInterfaceFactory} to create the extension interface from
 	 * the {@link ManagedObject}.
 	 */
-	private final ExtensionInterfaceFactory<I> extensionInterfaceFactory;
+	private final ExtensionInterfaceFactory<I>[] extensionInterfaceFactories;
 
 	/**
 	 * Initiate.
@@ -50,15 +50,17 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} identifying the
 	 *            {@link ManagedObject} implementing the extension interface.
-	 * @param extensionInterfaceFactory
-	 *            {@link ExtensionInterfaceFactory} to create the extension
-	 *            interface from the {@link ManagedObject}.
+	 * @param extensionInterfaceFactories
+	 *            {@link ExtensionInterfaceFactory} instances in the order of
+	 *            the {@link ManagedObjectMetaData} instances corresponding to
+	 *            the {@link ManagedObject} instances for the
+	 *            {@link ManagedObjectIndex}.
 	 */
 	public ExtensionInterfaceMetaDataImpl(
 			ManagedObjectIndex managedObjectIndex,
-			ExtensionInterfaceFactory<I> extensionInterfaceFactory) {
+			ExtensionInterfaceFactory<I>[] extensionInterfaceFactories) {
 		this.managedObjectIndex = managedObjectIndex;
-		this.extensionInterfaceFactory = extensionInterfaceFactory;
+		this.extensionInterfaceFactories = extensionInterfaceFactories;
 	}
 
 	/*
@@ -83,11 +85,14 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	public I extractExtensionInterface(ManagedObject managedObject,
 			ManagedObjectMetaData<?> managedObjectMetaData) {
 
-		// TODO use the MO meta-data to determine extension interface factory
+		// Obtain the instance index of the Managed Object
+		int instanceIndex = managedObjectMetaData.getInstanceIndex();
+
+		// Obtain the corresponding factory for the instance
+		ExtensionInterfaceFactory<I> factory = this.extensionInterfaceFactories[instanceIndex];
 
 		// Return the extension interface
-		return this.extensionInterfaceFactory
-				.createExtensionInterface(managedObject);
+		return factory.createExtensionInterface(managedObject);
 	}
 
 }

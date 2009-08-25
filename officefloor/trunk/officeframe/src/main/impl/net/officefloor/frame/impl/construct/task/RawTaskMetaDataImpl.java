@@ -47,6 +47,7 @@ import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
@@ -167,7 +168,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Keep track of all the required managed objects
-		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>>();
+		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 
 		// Obtain the managed objects used directly by this task.
 		// Also obtain the parameter type for the task if specified.
@@ -175,7 +176,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				.getObjectConfiguration();
 		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
-		for (int i = 0; i < objectConfigurations.length; i++) {
+		NEXT_OBJECT: for (int i = 0; i < objectConfigurations.length; i++) {
 			TaskObjectConfiguration<d> objectConfiguration = objectConfigurations[i];
 
 			// Obtain the type of object required
@@ -183,7 +184,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			if (objectType == null) {
 				issues.addIssue(AssetType.TASK, taskName,
 						"No type for object at index " + i);
-				continue; // must have object type
+				continue NEXT_OBJECT; // must have object type
 			}
 
 			// Determine if a parameter
@@ -214,7 +215,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				}
 
 				// Specified as parameter
-				continue;
+				continue NEXT_OBJECT;
 			}
 
 			// Obtain the scope managed object name
@@ -223,29 +224,42 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			if (ConstructUtil.isBlank(scopeMoName)) {
 				issues.addIssue(AssetType.TASK, taskName,
 						"No name for managed object at index " + i);
-				continue; // no managed object name
+				continue NEXT_OBJECT; // no managed object name
 			}
 
 			// Obtain the scope managed object
-			RawBoundManagedObjectMetaData<?> scopeMo = rawWorkMetaData
+			RawBoundManagedObjectMetaData scopeMo = rawWorkMetaData
 					.getScopeManagedObjectMetaData(scopeMoName);
 			if (scopeMo == null) {
 				issues.addIssue(AssetType.TASK, taskName,
 						"Can not find scope managed object '" + scopeMoName
 								+ "'");
-				continue; // no scope managed object
+				continue NEXT_OBJECT; // no scope managed object
 			}
 
-			// Ensure the object from managed object is compatible
-			Class<?> moObjectType = scopeMo.getRawManagedObjectMetaData()
-					.getObjectType();
-			if (!objectType.isAssignableFrom(moObjectType)) {
-				issues.addIssue(AssetType.TASK, taskName, "Managed object "
-						+ scopeMoName + " is incompatible (require="
-						+ objectType.getName()
-						+ ", object of managed object type="
-						+ moObjectType.getName() + ")");
-				continue; // incompatible managed object
+			// Ensure the objects of all the managed objects are compatible
+			boolean isCompatibleIssue = false;
+			for (RawBoundManagedObjectInstanceMetaData<?> scopeMoInstance : scopeMo
+					.getRawBoundManagedObjectInstanceMetaData()) {
+				Class<?> moObjectType = scopeMoInstance
+						.getRawManagedObjectMetaData().getObjectType();
+				if (!objectType.isAssignableFrom(moObjectType)) {
+					// Incompatible managed object
+					isCompatibleIssue = true;
+					issues.addIssue(AssetType.TASK, taskName, "Managed object "
+							+ scopeMoName
+							+ " is incompatible (require="
+							+ objectType.getName()
+							+ ", object of managed object type="
+							+ moObjectType.getName()
+							+ ", ManagedObjectSource="
+							+ scopeMoInstance.getRawManagedObjectMetaData()
+									.getManagedObjectName() + ")");
+				}
+			}
+			if (isCompatibleIssue) {
+				// Incompatible managed object
+				continue NEXT_OBJECT;
 			}
 
 			// Specify index for task translation and load required indexes
@@ -305,9 +319,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @return {@link ManagedObjectIndex} of the input
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	private <d extends Enum<d>> ManagedObjectIndex loadRequiredManagedObjects(
-			RawBoundManagedObjectMetaData<d> boundMo,
-			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects) {
+	private ManagedObjectIndex loadRequiredManagedObjects(
+			RawBoundManagedObjectMetaData boundMo,
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Obtain the bound managed object index
 		ManagedObjectIndex boundMoIndex = boundMo.getManagedObjectIndex();
@@ -315,12 +329,15 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 			// Not yet required, so add and include all its dependencies
 			requiredManagedObjects.put(boundMoIndex, boundMo);
-			RawBoundManagedObjectMetaData<?>[] dependencies = boundMo
-					.getDependencies();
-			if (dependencies != null) {
-				for (RawBoundManagedObjectMetaData<?> dependency : dependencies) {
-					this.loadRequiredManagedObjects(dependency,
-							requiredManagedObjects);
+			for (RawBoundManagedObjectInstanceMetaData<?> boundMoInstance : boundMo
+					.getRawBoundManagedObjectInstanceMetaData()) {
+				RawBoundManagedObjectMetaData[] dependencies = boundMoInstance
+						.getDependencies();
+				if (dependencies != null) {
+					for (RawBoundManagedObjectMetaData dependency : dependencies) {
+						this.loadRequiredManagedObjects(dependency,
+								requiredManagedObjects);
+					}
 				}
 			}
 		}
@@ -353,7 +370,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			OfficeFloorIssues issues,
 			String taskName,
 			boolean isPreNotPost,
-			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects) {
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
 		List<TaskDutyAssociation<?>> taskDuties = new LinkedList<TaskDutyAssociation<?>>();
@@ -416,7 +433,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Load the required managed object indexes for the administrator
-			for (RawBoundManagedObjectMetaData<?> administeredManagedObject : scopeAdmin
+			for (RawBoundManagedObjectMetaData administeredManagedObject : scopeAdmin
 					.getAdministeredRawBoundManagedObjects()) {
 				this.loadRequiredManagedObjects(administeredManagedObject,
 						requiredManagedObjects);
@@ -458,7 +475,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 */
 	private boolean sortRequiredManagedObjects(
 			ManagedObjectIndex[] requiredManagedObjectIndexes,
-			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> requiredManagedObjects,
+			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects,
 			String taskName, OfficeFloorIssues issues) {
 
 		// Initially sort by scope and index
@@ -482,11 +499,11 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
 
 			// Obtain the managed object for index
-			RawBoundManagedObjectMetaData<?> managedObject = requiredManagedObjects
+			RawBoundManagedObjectMetaData managedObject = requiredManagedObjects
 					.get(index);
 
 			// Load the dependencies
-			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData<?>>();
+			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 			RawTaskMetaDataImpl.this.loadRequiredManagedObjects(managedObject,
 					moDependencies);
 

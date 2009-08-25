@@ -55,7 +55,7 @@ import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Tests the {@link RawManagingOfficeMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
@@ -657,7 +657,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records creating the recycle {@link JobNode}.
-	 * 
+	 *
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycle {@link JobNode}.
 	 * @param managedObject
@@ -703,7 +703,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining the {@link ProcessState} bound index for the
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @param flowConfigurations
 	 *            {@link ManagedObjectFlowConfiguration} instances.
 	 */
@@ -733,7 +733,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
@@ -744,7 +744,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link RawManagingOfficeMetaDataImpl} for testing.
-	 * 
+	 *
 	 * @param recycleWorkName
 	 *            Recycle {@link Work} name.
 	 * @param flowMetaData
@@ -765,18 +765,18 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates a {@link ManagedObjectMetaDataImpl} for use in testing.
-	 * 
+	 *
 	 * @return {@link ManagedObjectMetaDataImpl}.
 	 */
 	private ManagedObjectMetaDataImpl<?> createMoMetaData() {
-		return new ManagedObjectMetaDataImpl<None>("BOUND", null, null, null,
-				null, false, null, false, null, 0);
+		return new ManagedObjectMetaDataImpl<None>("BOUND", null, -1, null,
+				null, null, false, null, false, null, 0);
 	}
 
 	/**
 	 * Creates a {@link RawManagingOfficeMetaDataImpl} and runs the manage by
 	 * office.
-	 * 
+	 *
 	 * @param isCreateExecuteContext
 	 *            <code>true</code> if {@link ManagedObjectExecuteContext}
 	 *            should be available.
