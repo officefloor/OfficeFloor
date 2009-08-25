@@ -30,14 +30,14 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory to create {@link RawBoundAdministratorMetaData}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawBoundAdministratorMetaDataFactory {
 
 	/**
 	 * Creates the {@link RawBoundAdministratorMetaData} instances.
-	 * 
+	 *
 	 * @param configuration
 	 *            {@link AdministratorSourceConfiguration} instances.
 	 * @param issues
@@ -63,6 +63,6 @@ public interface RawBoundAdministratorMetaDataFactory {
 			OfficeFloorIssues issues, AdministratorScope administratorScope,
 			AssetType assetType, String assetName,
 			Map<String, Team> officeTeams,
-			Map<String, RawBoundManagedObjectMetaData<?>> scopeMo);
+			Map<String, RawBoundManagedObjectMetaData> scopeMo);
 
 }

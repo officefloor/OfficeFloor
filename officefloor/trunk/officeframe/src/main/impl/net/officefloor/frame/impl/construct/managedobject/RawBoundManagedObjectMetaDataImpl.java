@@ -31,6 +31,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
@@ -44,15 +45,18 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMet
 
 /**
  * Raw meta-data for a bound {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
+
+// TODO allow to have multiple instances per bound ManagedObject
 public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
-		RawBoundManagedObjectMetaDataFactory, RawBoundManagedObjectMetaData<D> {
+		RawBoundManagedObjectMetaDataFactory, RawBoundManagedObjectMetaData,
+		RawBoundManagedObjectInstanceMetaData<D> {
 
 	/**
 	 * Obtains the {@link RawBoundManagedObjectMetaDataFactory}.
-	 * 
+	 *
 	 * @return {@link RawBoundManagedObjectMetaDataFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -83,7 +87,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Dependencies.
 	 */
-	private RawBoundManagedObjectMetaData<?>[] dependencies;
+	private RawBoundManagedObjectMetaData[] dependencies;
 
 	/**
 	 * {@link ManagedObjectMetaData}.
@@ -92,7 +96,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param boundManagedObjectName
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param index
@@ -117,7 +121,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	public RawBoundManagedObjectMetaData<?>[] constructBoundManagedObjectMetaData(
+	public RawBoundManagedObjectMetaData[] constructBoundManagedObjectMetaData(
 			ManagedObjectConfiguration<?>[] boundManagedObjectConfiguration,
 			OfficeFloorIssues issues,
 			ManagedObjectScope scope,
@@ -125,7 +129,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			String assetName,
 			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
-			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects) {
+			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects) {
 
 		// Handle if null scope managed objects
 		if (scopeManagedObjects == null) {
@@ -133,7 +137,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		}
 
 		// Obtain the bound managed object instances
-		Map<String, RawBoundManagedObjectMetaData<?>> boundMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+		Map<String, RawBoundManagedObjectMetaData> boundMo = new HashMap<String, RawBoundManagedObjectMetaData>();
 		List<RawBoundManagedObjectMetaDataImpl<?>> boundMoList = new LinkedList<RawBoundManagedObjectMetaDataImpl<?>>();
 		int boundMoIndex = 0;
 		for (ManagedObjectConfiguration<?> mo : boundManagedObjectConfiguration) {
@@ -181,7 +185,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		for (RawBoundManagedObjectMetaDataImpl<?> moMetaData : boundMoList) {
 
 			// Create the mapping of scope managed objects
-			Map<String, RawBoundManagedObjectMetaData<?>> dependencyMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+			Map<String, RawBoundManagedObjectMetaData> dependencyMo = new HashMap<String, RawBoundManagedObjectMetaData>();
 			dependencyMo.putAll(scopeManagedObjects); // scope first
 			dependencyMo.putAll(boundMo); // bound possibly overwrite scope
 
@@ -197,17 +201,17 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
+	public RawBoundManagedObjectMetaData[] affixOfficeManagingManagedObjects(
 			String officeName,
-			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the map of process bound managed objects.
 		// At same time also determine the maximum process bound index.
-		Map<String, RawBoundManagedObjectMetaData<?>> processBoundMos = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+		Map<String, RawBoundManagedObjectMetaData> processBoundMos = new HashMap<String, RawBoundManagedObjectMetaData>();
 		int nextProcessBoundIndex = 0;
-		for (RawBoundManagedObjectMetaData<?> processBoundMo : processBoundManagedObjectMetaData) {
+		for (RawBoundManagedObjectMetaData processBoundMo : processBoundManagedObjectMetaData) {
 
 			// Register the process bound managed object
 			processBoundMos.put(processBoundMo.getBoundManagedObjectName(),
@@ -231,7 +235,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		}
 
 		// Create the list to append additional managed objects
-		List<RawBoundManagedObjectMetaData<?>> managedObjects = new LinkedList<RawBoundManagedObjectMetaData<?>>();
+		List<RawBoundManagedObjectMetaData> managedObjects = new LinkedList<RawBoundManagedObjectMetaData>();
 		managedObjects.addAll(Arrays.asList(processBoundManagedObjectMetaData));
 
 		// Append additional process bound managed objects
@@ -259,11 +263,16 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			}
 
 			// Determine if managed by the office already
-			RawBoundManagedObjectMetaData<?> rawBoundMo = processBoundMos
+			RawBoundManagedObjectMetaData rawBoundMo = processBoundMos
 					.get(processBoundName);
 			if (rawBoundMo != null) {
+
+				// TODO allow multiple instances per ManagedObjectIndex
+				RawBoundManagedObjectInstanceMetaData<?> rawBoundInstanceMo = rawBoundMo
+						.getRawBoundManagedObjectInstanceMetaData()[0];
+
 				// Already bound, so confirm the same managed object
-				RawManagedObjectMetaData<?, ?> rawMo = rawBoundMo
+				RawManagedObjectMetaData<?, ?> rawMo = rawBoundInstanceMo
 						.getRawManagedObjectMetaData();
 				if (rawMoMetaData != rawMo) {
 					issues
@@ -321,7 +330,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Wraps construction of {@link RawBoundManagedObjectMetaDataImpl} to avoid
 	 * generic type safe issues.
-	 * 
+	 *
 	 * @param boundManagedObjectName
 	 *            Bound {@link ManagedObject} name.
 	 * @param index
@@ -343,7 +352,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 	/**
 	 * Loads the dependencies onto {@link RawBoundManagedObjectMetaDataImpl}.
-	 * 
+	 *
 	 * @param moMetaData
 	 *            {@link RawBoundManagedObjectMetaDataImpl}.
 	 * @param issues
@@ -359,7 +368,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private <d extends Enum<d>> void loadDependencies(
 			RawBoundManagedObjectMetaDataImpl<d> moMetaData,
 			OfficeFloorIssues issues,
-			Map<String, RawBoundManagedObjectMetaData<?>> boundMo) {
+			Map<String, RawBoundManagedObjectMetaData> boundMo) {
 
 		// Obtain the dependency meta-data
 		ManagedObjectDependencyMetaData<d>[] dependencyMetaDatas = moMetaData
@@ -400,7 +409,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		}
 
 		// Load the dependencies
-		Map<Integer, RawBoundManagedObjectMetaData<?>> dependencies = new HashMap<Integer, RawBoundManagedObjectMetaData<?>>();
+		Map<Integer, RawBoundManagedObjectMetaData> dependencies = new HashMap<Integer, RawBoundManagedObjectMetaData>();
 		for (int i = 0; i < dependencyMetaDatas.length; i++) {
 			ManagedObjectDependencyMetaData<d> dependencyMetaData = dependencyMetaDatas[i];
 
@@ -440,7 +449,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 						"No dependency name configured for " + dependencyLabel);
 				return; // no dependency specified
 			}
-			RawBoundManagedObjectMetaData<?> dependency = boundMo
+			RawBoundManagedObjectMetaData dependency = boundMo
 					.get(dependentMoName);
 			if (dependency == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT,
@@ -451,10 +460,14 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 				return; // no dependency
 			}
 
+			// TODO allow providing multiple instances per ManagedObjectIndex
+			RawBoundManagedObjectInstanceMetaData<?> dependencyInstanceMetaData = dependency
+					.getRawBoundManagedObjectInstanceMetaData()[0];
+
 			// Ensure the dependency object is of correct type
 			Class<?> requiredType = dependencyMetaData.getType();
-			Class<?> dependencyType = dependency.getRawManagedObjectMetaData()
-					.getObjectType();
+			Class<?> dependencyType = dependencyInstanceMetaData
+					.getRawManagedObjectMetaData().getObjectType();
 			if (!requiredType.isAssignableFrom(dependencyType)) {
 				issues.addIssue(AssetType.MANAGED_OBJECT,
 						moMetaData.boundManagedObjectName,
@@ -501,7 +514,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			// Have dependencies so load them
 			dependencyMappings = new ManagedObjectIndex[this.dependencies.length];
 			for (int i = 0; i < dependencyMappings.length; i++) {
-				RawBoundManagedObjectMetaData<?> dependency = this.dependencies[i];
+				RawBoundManagedObjectMetaData dependency = this.dependencies[i];
 
 				// Do not map if not have dependency
 				if (dependency == null) {
@@ -513,14 +526,19 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			}
 		}
 
+		// TODO allow providing multiple instances per ManagedObjectIndex
+		int instanceIndex = 0;
+		RawBoundManagedObjectInstanceMetaData<D> instanceMetaData = this;
+
 		// Create and specify the managed object meta-data
 		this.managedObjectMetaData = this.rawMoMetaData
-				.createManagedObjectMetaData(this, dependencyMappings,
+				.createManagedObjectMetaData(this, instanceIndex,
+						instanceMetaData, dependencyMappings,
 						assetManagerFactory, issues);
 	}
 
 	/*
-	 * ============== RawBoundManagedObjectMetaData ====================
+	 * ================= RawBoundManagedObjectMetaData =======================
 	 */
 
 	@Override
@@ -534,12 +552,28 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
+	public int getDefaultInstanceIndex() {
+		// TODO provide default index based on configuration (or not input MO)
+		return 0;
+	}
+
+	@Override
+	public RawBoundManagedObjectInstanceMetaData<?>[] getRawBoundManagedObjectInstanceMetaData() {
+		// TODO provide listing of instances
+		return new RawBoundManagedObjectInstanceMetaData[] { this };
+	}
+
+	/*
+	 * ============== RawBoundManagedObjectInstanceMetaData ====================
+	 */
+
+	@Override
 	public RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData() {
 		return this.rawMoMetaData;
 	}
 
 	@Override
-	public RawBoundManagedObjectMetaData<?>[] getDependencies() {
+	public RawBoundManagedObjectMetaData[] getDependencies() {
 		return this.dependencies;
 	}
 

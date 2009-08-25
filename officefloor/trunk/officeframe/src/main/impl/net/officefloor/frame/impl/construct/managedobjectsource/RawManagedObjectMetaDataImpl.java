@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
@@ -412,7 +413,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 	@Override
 	public ManagedObjectMetaData<D> createManagedObjectMetaData(
-			RawBoundManagedObjectMetaData<D> boundMetaData,
+			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData,
 			ManagedObjectIndex[] dependencyMappings,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
@@ -460,10 +462,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(
-				boundName, this.objectType, this.managedObjectSource,
-				this.managedObjectPool, sourcingAssetManager,
-				this.isAsynchronous, operationsAssetManager,
-				this.isCoordinating, dependencyMappings, this.defaultTimeout);
+				boundName, this.objectType, instanceIndex,
+				this.managedObjectSource, this.managedObjectPool,
+				sourcingAssetManager, this.isAsynchronous,
+				operationsAssetManager, this.isCoordinating,
+				dependencyMappings, this.defaultTimeout);
 
 		// Have the managed object managed by its managing office
 		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);

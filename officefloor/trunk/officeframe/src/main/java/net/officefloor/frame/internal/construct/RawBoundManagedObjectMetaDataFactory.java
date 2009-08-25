@@ -66,7 +66,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
 	 */
-	RawBoundManagedObjectMetaData<?>[] constructBoundManagedObjectMetaData(
+	RawBoundManagedObjectMetaData[] constructBoundManagedObjectMetaData(
 			ManagedObjectConfiguration<?>[] boundManagedObjectConfiguration,
 			OfficeFloorIssues issues,
 			ManagedObjectScope managedObjectScope,
@@ -74,7 +74,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			String assetName,
 			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
-			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects);
+			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects);
 
 	/**
 	 * TODO add to constructBoundManagedObjectMetaData before dependencies.
@@ -110,9 +110,9 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *         instances to the original {@link RawBoundManagedObjectMetaData}
 	 *         list.
 	 */
-	RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
+	RawBoundManagedObjectMetaData[] affixOfficeManagingManagedObjects(
 			String officeName,
-			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 

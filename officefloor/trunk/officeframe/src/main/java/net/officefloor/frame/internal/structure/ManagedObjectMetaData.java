@@ -25,6 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
@@ -51,6 +52,21 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *         {@link ManagedObject}.
 	 */
 	Class<?> getObjectType();
+
+	/**
+	 * <p>
+	 * Obtains the instance index of the {@link ManagedObject} bound to the
+	 * {@link ManagedObjectIndex}.
+	 * <p>
+	 * {@link ManagedObjectSource} instances that invoke {@link ProcessState}
+	 * instances with the same type of Object may all be bound to the same
+	 * {@link ManagedObjectIndex}. Allows similar {@link Job} processing of the
+	 * {@link ManagedObject} instances.
+	 *
+	 * @return Instance index of the {@link ManagedObject} bound to the
+	 *         {@link ManagedObjectIndex}.
+	 */
+	int getInstanceIndex();
 
 	/**
 	 * Creates a new {@link ManagedObjectContainer}.

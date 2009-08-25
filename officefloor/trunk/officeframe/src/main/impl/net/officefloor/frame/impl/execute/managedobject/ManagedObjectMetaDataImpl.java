@@ -62,6 +62,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final Class<?> objectType;
 
 	/**
+	 * Instance index.
+	 */
+	private final int instanceIndex;
+
+	/**
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectSource<?, ?> source;
@@ -131,6 +136,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @param objectType
 	 *            Type of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
+	 * @param instanceIndex
+	 *            Instance index.
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 * @param pool
@@ -155,14 +162,15 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link ManagedObject} being managed.
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
-			Class<?> objectType, ManagedObjectSource<?, ?> source,
-			ManagedObjectPool pool, AssetManager sourcingManager,
-			boolean isManagedObjectAsynchronous,
+			Class<?> objectType, int instanceIndex,
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool,
+			AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
 			ManagedObjectIndex[] dependencyMapping, long timeout) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
+		this.instanceIndex = instanceIndex;
 		this.source = source;
 		this.timeout = timeout;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
@@ -201,6 +209,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public Class<?> getObjectType() {
 		return this.objectType;
+	}
+
+	@Override
+	public int getInstanceIndex() {
+		return this.instanceIndex;
 	}
 
 	@Override

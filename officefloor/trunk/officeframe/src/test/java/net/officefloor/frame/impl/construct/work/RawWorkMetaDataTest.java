@@ -34,6 +34,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
@@ -59,7 +60,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link RawWorkMetaDataImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
@@ -111,7 +112,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * {@link Office} scoped {@link RawBoundManagedObjectMetaData} instances by
 	 * their scoped names.
 	 */
-	private final Map<String, RawBoundManagedObjectMetaData<?>> officeScopeManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+	private final Map<String, RawBoundManagedObjectMetaData> officeScopeManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData>();
 
 	/**
 	 * {@link Office} scoped {@link RawBoundAdministratorMetaData} instances by
@@ -203,8 +204,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testSingleWorkBoundManagedObject() {
 
-		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
+		final RawBoundManagedObjectMetaData rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final ManagedObjectMetaData<?> moMetaData = this
 				.createMock(ManagedObjectMetaData.class);
 
@@ -223,6 +226,14 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators();
 		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getDefaultInstanceIndex(), 0);
+		this
+				.recordReturn(
+						rawMoMetaData,
+						rawMoMetaData
+								.getRawBoundManagedObjectInstanceMetaData(),
+						new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
 				.getManagedObjectMetaData(), moMetaData);
 		this.record_tasks(task);
 
@@ -248,7 +259,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testSingleOfficeScopedManagedObject() {
 
-		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
+		final RawBoundManagedObjectMetaData rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		this.officeScopeManagedObjects.put("MO", rawMoMetaData);
 
@@ -288,15 +299,23 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNoManagedObjectMetaData() {
 
-		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
+		final RawBoundManagedObjectMetaData rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 
-		// Record no managed object meta-data
+		// Record no managed object meta-data (has multiple instances)
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators();
 		this.record_tasks();
 		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getDefaultInstanceIndex(), 2);
+		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { null, null,
+						rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
 				.getManagedObjectMetaData(), null);
 		this.recordReturn(rawMoMetaData, rawMoMetaData
 				.getBoundManagedObjectName(), "MO");
@@ -518,8 +537,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testLinkTasks() {
 
-		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
+		final RawBoundManagedObjectMetaData rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final ManagedObjectMetaData<?> moMetaData = this
 				.createMock(ManagedObjectMetaData.class);
 		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
@@ -535,6 +556,14 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
 		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getDefaultInstanceIndex(), 0);
+		this
+				.recordReturn(
+						rawMoMetaData,
+						rawMoMetaData
+								.getRawBoundManagedObjectInstanceMetaData(),
+						new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
 				.getManagedObjectMetaData(), moMetaData);
 		this.recordReturn(rawAdminMetaData, rawAdminMetaData
 				.getAdministratorMetaData(), adminMetaData);
@@ -576,7 +605,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records bounding {@link ManagedObject} instances to the {@link Work}.
-	 * 
+	 *
 	 * @param nameMoPairs
 	 *            Name and {@link RawBoundManagedObjectMetaData} pairs.
 	 */
@@ -585,11 +614,11 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Obtain the listing of work bound names and managed objects
 		int moCount = nameMoPairs.length / 2;
 		String[] boundMoNames = new String[moCount];
-		RawBoundManagedObjectMetaData<?>[] workBoundMo = new RawBoundManagedObjectMetaData<?>[moCount];
+		RawBoundManagedObjectMetaData[] workBoundMo = new RawBoundManagedObjectMetaData[moCount];
 		for (int i = 0; i < nameMoPairs.length; i += 2) {
 			int loadIndex = i / 2;
 			boundMoNames[loadIndex] = (String) nameMoPairs[i];
-			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData<?>) nameMoPairs[i + 1];
+			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData) nameMoPairs[i + 1];
 		}
 
 		// Record bounding managed objects to work
@@ -625,7 +654,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records bounding {@link Administrator} instances to the {@link Work}.
-	 * 
+	 *
 	 * @param nameAdminPairs
 	 *            Name and {@link RawBoundAdministratorMetaData} pairs.
 	 */
@@ -683,7 +712,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to record {@link Task} construction without an initial
 	 * {@link Task}.
-	 * 
+	 *
 	 * @param tasks
 	 *            {@link RecordedTask} instances for each {@link Task}.
 	 */
@@ -693,7 +722,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records creation of {@link Task} instances on the {@link Work}.
-	 * 
+	 *
 	 * @param initialTaskName
 	 *            Name of the initial {@link Task} on the {@link Work}. May be
 	 *            <code>null</code> if no initial {@link Task}.
@@ -805,7 +834,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param taskName
 		 *            Name of the {@link Task}.
 		 * @param taskConstruction
@@ -818,7 +847,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param taskName
 		 *            Name of the {@link Task}.
 		 */
@@ -834,7 +863,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Constructs the {@link TaskMetaData}.
-		 * 
+		 *
 		 * @param rawWorkMetaData
 		 *            {@link RawWorkMetaData}.
 		 * @param issues
@@ -846,7 +875,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records a {@link Work} construction issue.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Issue description.
 	 */
@@ -856,7 +885,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Construct the {@link RawWorkMetaData}.
-	 * 
+	 *
 	 * @param isExpectConstruct
 	 *            Is expect to construct.
 	 * @return {@link RawWorkMetaData}.
@@ -885,7 +914,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * Fully constructs the {@link RawWorkMetaData} including making the
 	 * {@link WorkMetaData} available. Will always expect to construct the
 	 * {@link RawWorkMetaData}.
-	 * 
+	 *
 	 * @return {@link RawWorkMetaData}.
 	 */
 	private RawWorkMetaData<W> fullyConstructRawWorkMetaData() {

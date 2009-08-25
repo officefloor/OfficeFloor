@@ -30,21 +30,21 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Raw meta-data of a bound {@link Administrator}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 
 	/**
 	 * Obtains the name the {@link Administrator} is bound under.
-	 * 
+	 *
 	 * @return Name the {@link Administrator} is bound under.
 	 */
 	String getBoundAdministratorName();
 
 	/**
 	 * Obtains the {@link AdministratorIndex}.
-	 * 
+	 *
 	 * @return {@link AdministratorIndex}.
 	 */
 	AdministratorIndex getAdministratorIndex();
@@ -52,22 +52,22 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	/**
 	 * Obtains the listing of the {@link RawBoundManagedObjectMetaData} of the
 	 * {@link ManagedObject} instances being administered.
-	 * 
+	 *
 	 * @return Listing of the {@link RawBoundManagedObjectMetaData} of the
 	 *         {@link ManagedObject} instances being administered.
 	 */
-	RawBoundManagedObjectMetaData<?>[] getAdministeredRawBoundManagedObjects();
+	RawBoundManagedObjectMetaData[] getAdministeredRawBoundManagedObjects();
 
 	/**
 	 * Obtains the {@link AdministratorMetaData} for this {@link Administrator}.
-	 * 
+	 *
 	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
 	 */
 	AdministratorMetaData<I, A> getAdministratorMetaData();
 
 	/**
 	 * Obtains the {@link DutyKey} for the key identifying a {@link Duty}.
-	 * 
+	 *
 	 * @param key
 	 *            Key identifying a {@link Duty} as per
 	 *            {@link AdministratorDutyMetaData}.
@@ -78,7 +78,7 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 
 	/**
 	 * Obtains the {@link DutyKey} for the name identifying the {@link Duty}.
-	 * 
+	 *
 	 * @param dutyName
 	 *            Name identifying a {@link Duty} as per
 	 *            {@link AdministratorDutyMetaData}.
@@ -90,7 +90,7 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	/**
 	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
 	 * execution.
-	 * 
+	 *
 	 * @param taskMetaDataLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory

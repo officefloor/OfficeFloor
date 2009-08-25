@@ -30,14 +30,14 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Raw meta-data of {@link Work}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawWorkMetaData<W extends Work> {
 
 	/**
 	 * Obtains the name of the {@link Work}.
-	 * 
+	 *
 	 * @return Name of the {@link Work}.
 	 */
 	String getWorkName();
@@ -45,7 +45,7 @@ public interface RawWorkMetaData<W extends Work> {
 	/**
 	 * Obtains the {@link RawOfficeMetaData} of the {@link Office} containing
 	 * this {@link Work}.
-	 * 
+	 *
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	RawOfficeMetaData getRawOfficeMetaData();
@@ -53,20 +53,20 @@ public interface RawWorkMetaData<W extends Work> {
 	/**
 	 * Constructs the {@link RawWorkManagedObjectMetaData} for the
 	 * {@link ManagedObject} of the {@link Work}.
-	 * 
+	 *
 	 * @param scopeManagedObjectName
 	 *            Name of the {@link ManagedObject} within the
 	 *            {@link ManagedObjectScope}.
 	 * @return {@link RawBoundManagedObjectMetaData} or <code>null</code> not
 	 *         found.
 	 */
-	RawBoundManagedObjectMetaData<?> getScopeManagedObjectMetaData(
+	RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(
 			String scopeManagedObjectName);
 
 	/**
 	 * Obtains the {@link AdministratorIndex} for the {@link Work}
 	 * {@link Administrator} name.
-	 * 
+	 *
 	 * @param scopeAdministratorName
 	 *            Name of the {@link Administrator} within the
 	 *            {@link ManagedObjectScope}.
@@ -79,7 +79,7 @@ public interface RawWorkMetaData<W extends Work> {
 	/**
 	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
 	 * execution.
-	 * 
+	 *
 	 * @param taskLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
@@ -92,7 +92,7 @@ public interface RawWorkMetaData<W extends Work> {
 
 	/**
 	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
-	 * 
+	 *
 	 * @return {@link WorkMetaData}.
 	 */
 	WorkMetaData<W> getWorkMetaData();

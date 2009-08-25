@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -70,7 +71,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for the bound {@link Administrator}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
@@ -79,7 +80,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 	/**
 	 * Obtains the {@link RawBoundAdministratorMetaDataFactory}.
-	 * 
+	 *
 	 * @return {@link RawBoundAdministratorMetaDataFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -106,7 +107,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	/**
 	 * Administered {@link RawBoundManagedObjectMetaData}.
 	 */
-	private final RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects;
+	private final RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects;
 
 	/**
 	 * {@link AdministratorMetaData}.
@@ -131,7 +132,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param boundAdministratorName
 	 *            Name the {@link Administrator} is bound under.
 	 * @param administratorIndex
@@ -151,7 +152,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			String boundAdministratorName,
 			AdministratorIndex administratorIndex,
 			AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration,
-			RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects,
+			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects,
 			Map<String, DutyKey<A>> dutyKeysByName,
 			Map<A, DutyKey<A>> dutyKeysByKey,
 			AdministratorMetaDataImpl<I, A> adminMetaData) {
@@ -175,7 +176,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			OfficeFloorIssues issues, AdministratorScope administratorScope,
 			AssetType assetType, String assetName,
 			Map<String, Team> officeTeams,
-			Map<String, RawBoundManagedObjectMetaData<?>> scopeMo) {
+			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Register the bound administrators
 		List<RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new LinkedList<RawBoundAdministratorMetaData<?, ?>>();
@@ -202,7 +203,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 	/**
 	 * Provides typed construction of a {@link RawBoundAdministratorMetaData}.
-	 * 
+	 *
 	 * @param configuration
 	 *            {@link AdministratorSourceConfiguration} instances.
 	 * @param issues
@@ -228,7 +229,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			OfficeFloorIssues issues, AdministratorIndex administratorIndex,
 			AssetType assetType, String assetName,
 			Map<String, Team> officeTeams,
-			Map<String, RawBoundManagedObjectMetaData<?>> scopeMo) {
+			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
 
 		// Obtain the administrator name
 		String adminName = configuration.getAdministratorName();
@@ -311,7 +312,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		}
 
 		// Obtain the managed objects being administered
-		List<RawBoundManagedObjectMetaData<?>> administeredManagedObjects = new LinkedList<RawBoundManagedObjectMetaData<?>>();
+		List<RawBoundManagedObjectMetaData> administeredManagedObjects = new LinkedList<RawBoundManagedObjectMetaData>();
 		List<ExtensionInterfaceMetaData<i>> eiMetaDatas = new LinkedList<ExtensionInterfaceMetaData<i>>();
 		for (String moName : configuration.getAdministeredManagedObjectNames()) {
 
@@ -323,7 +324,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			}
 
 			// Obtain the managed object
-			RawBoundManagedObjectMetaData<?> mo = scopeMo.get(moName);
+			RawBoundManagedObjectMetaData mo = scopeMo.get(moName);
 			if (mo == null) {
 				issues.addIssue(assetType, assetName, "Managed Object '"
 						+ moName + "' not available to Administrator "
@@ -331,46 +332,76 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				return null; // unknown managed object
 			}
 
-			// Obtain the extension factory for the managed object
-			ExtensionInterfaceFactory<i> extensionInterfaceFactory = null;
-			ManagedObjectExtensionInterfaceMetaData<?>[] moEiMetaDatas = mo
-					.getRawManagedObjectMetaData()
-					.getManagedObjectSourceMetaData()
-					.getExtensionInterfacesMetaData();
-			if (moEiMetaDatas != null) {
-				for (ManagedObjectExtensionInterfaceMetaData<?> moEiMetaData : moEiMetaDatas) {
+			// Obtain the extension factories for the managed object instances.
+			// (Keeping order of factories as order of managed object instances)
+			RawBoundManagedObjectInstanceMetaData<?>[] moInstances = mo
+					.getRawBoundManagedObjectInstanceMetaData();
+			ExtensionInterfaceFactory<i>[] extensionInterfaceFactories = new ExtensionInterfaceFactory[moInstances.length];
+			boolean isExtensionInterfaceFactoryIssue = false;
+			NEXT_INSTANCE: for (int i = 0; i < moInstances.length; i++) {
+				RawBoundManagedObjectInstanceMetaData<?> moInstance = moInstances[i];
 
-					// Obtain the extension interface
-					Class<?> moEiType = moEiMetaData
-							.getExtensionInterfaceType();
-					if ((moEiType != null)
-							&& (extensionInterfaceType
-									.isAssignableFrom(moEiType))) {
+				// Obtain the extension factory for the managed object instance
+				ExtensionInterfaceFactory<i> extensionInterfaceFactory = null;
+				ManagedObjectExtensionInterfaceMetaData<?>[] moEiMetaDatas = moInstance
+						.getRawManagedObjectMetaData()
+						.getManagedObjectSourceMetaData()
+						.getExtensionInterfacesMetaData();
+				if (moEiMetaDatas != null) {
+					for (ManagedObjectExtensionInterfaceMetaData<?> moEiMetaData : moEiMetaDatas) {
 
-						// Specify the extension interface factory
-						extensionInterfaceFactory = (ExtensionInterfaceFactory<i>) moEiMetaData
-								.getExtensionInterfaceFactory();
-						if (extensionInterfaceFactory == null) {
-							issues
-									.addIssue(
-											assetType,
-											assetName,
-											"Managed Object did not provide "
-													+ ExtensionInterfaceFactory.class
-															.getSimpleName()
-													+ " for Administrator "
-													+ adminName);
-							return null; // managed object invalid
+						// Obtain the extension interface
+						Class<?> moEiType = moEiMetaData
+								.getExtensionInterfaceType();
+						if ((moEiType != null)
+								&& (extensionInterfaceType
+										.isAssignableFrom(moEiType))) {
+
+							// Specify the extension interface factory
+							extensionInterfaceFactory = (ExtensionInterfaceFactory<i>) moEiMetaData
+									.getExtensionInterfaceFactory();
+							if (extensionInterfaceFactory == null) {
+								// Managed Object invalid
+								isExtensionInterfaceFactoryIssue = true;
+								issues
+										.addIssue(
+												assetType,
+												assetName,
+												"Managed Object did not provide "
+														+ ExtensionInterfaceFactory.class
+																.getSimpleName()
+														+ " for Administrator "
+														+ adminName
+														+ " (ManagedObjectSource="
+														+ moInstance
+																.getRawManagedObjectMetaData()
+																.getManagedObjectName()
+														+ ")");
+								continue NEXT_INSTANCE; // invalid
+							}
+
+							// Have extension interface factory for instance
+							extensionInterfaceFactories[i] = extensionInterfaceFactory;
+							continue NEXT_INSTANCE;
 						}
-						break; // have extension interface factory
 					}
 				}
+				if (extensionInterfaceFactory == null) {
+					// Managed Object invalid
+					isExtensionInterfaceFactoryIssue = true;
+					issues.addIssue(assetType, assetName, "Managed Object '"
+							+ moName
+							+ "' does not support extension interface "
+							+ extensionInterfaceType.getName()
+							+ " required by Administrator "
+							+ adminName
+							+ " (ManagedObjectSource="
+							+ moInstance.getRawManagedObjectMetaData()
+									.getManagedObjectName() + ")");
+					continue NEXT_INSTANCE; // invalid
+				}
 			}
-			if (extensionInterfaceFactory == null) {
-				issues.addIssue(assetType, assetName, "Managed Object '"
-						+ moName + "' does not support extension interface "
-						+ extensionInterfaceType.getName()
-						+ " required by Administrator " + adminName);
+			if (isExtensionInterfaceFactoryIssue) {
 				return null; // managed object invalid
 			}
 
@@ -382,7 +413,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 			// Add the extension interface meta-data
 			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<i>(moIndex,
-					extensionInterfaceFactory));
+					extensionInterfaceFactories));
 		}
 
 		// Obtain the duties meta-data
@@ -601,7 +632,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	}
 
 	@Override
-	public RawBoundManagedObjectMetaData<?>[] getAdministeredRawBoundManagedObjects() {
+	public RawBoundManagedObjectMetaData[] getAdministeredRawBoundManagedObjects() {
 		return this.administeredRawBoundManagedObjects;
 	}
 
