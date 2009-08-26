@@ -197,7 +197,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 					.constructBoundManagedObjectMetaData(moConfiguration,
 							issues, ManagedObjectScope.WORK, AssetType.WORK,
 							workName, assetManagerFactory, rawOfficeMetaData
-									.getManagedObjectMetaData(), officeScopeMo);
+									.getManagedObjectMetaData(), officeScopeMo,
+							null);
 		}
 
 		// Create the work scope managed objects available to tasks

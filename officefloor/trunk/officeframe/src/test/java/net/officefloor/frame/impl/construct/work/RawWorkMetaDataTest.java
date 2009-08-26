@@ -643,7 +643,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 									ManagedObjectScope.WORK, AssetType.WORK,
 									WORK_NAME, this.assetManagerFactory,
 									officeRegisteredManagedObjects,
-									this.officeScopeManagedObjects),
+									this.officeScopeManagedObjects, null),
 					workBoundMo);
 			for (int i = 0; i < moCount; i++) {
 				this.recordReturn(workBoundMo[i], workBoundMo[i]

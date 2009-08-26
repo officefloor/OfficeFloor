@@ -98,7 +98,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 				.constructManagedObject("DEPENDENCY",
 						DependencyManagedObjectSource.class);
 		dependencyBuilder.setManagingOffice(officeName)
-				.setProcessBoundManagedObjectName("PROCESS_BOUND");
+				.setInputManagedObjectName("PROCESS_BOUND");
 		dependencyBuilder.setDefaultTimeout(1000);
 		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(100));
 

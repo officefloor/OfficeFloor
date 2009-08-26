@@ -472,7 +472,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Flag managing office
 		managedObjectBuilder.setManagingOffice(managingOffice)
-				.setProcessBoundManagedObjectName(managedObjectName);
+				.setInputManagedObjectName(managedObjectName);
 
 		// Link into the Office
 		this.officeBuilder.registerManagedObjectSource(managedObjectName,
@@ -500,7 +500,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Flag managing office
 		managedObjectBuilder.setManagingOffice(managingOffice)
-				.setProcessBoundManagedObjectName(managedObjectName);
+				.setInputManagedObjectName(managedObjectName);
 
 		// Link into the Office
 		this.officeBuilder.registerManagedObjectSource(managedObjectName,
@@ -530,8 +530,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	public ManagedObjectBuilder<?> constructManagedObject(
-			final Object object, String managedObjectName, String managingOffice) {
+	public ManagedObjectBuilder<?> constructManagedObject(final Object object,
+			String managedObjectName, String managingOffice) {
 
 		// Create the wrapping Managed Object
 		ManagedObject managedObject = new ManagedObject() {

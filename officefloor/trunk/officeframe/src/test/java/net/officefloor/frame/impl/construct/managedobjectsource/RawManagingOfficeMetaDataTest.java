@@ -24,6 +24,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -71,9 +72,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	private static final String MANAGING_OFFICE_NAME = "MANAGING_OFFICE";
 
 	/**
-	 * Process bound name for the {@link ManagedObjectSource}.
+	 * Input name of the {@link ManagedObject}.
 	 */
-	private static final String PROCESS_BOUND_NAME = "PROCESS_BOUND_NAME";
+	private static final String INPUT_MANAGED_OBJECT_NAME = "INPUT_MANAGED_OBJECT_NAME";
 
 	/**
 	 * {@link RawManagedObjectMetaData}.
@@ -87,6 +88,12 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final ManagingOfficeConfiguration<?> configuration = this
 			.createMock(ManagingOfficeConfiguration.class);
+
+	/**
+	 * {@link InputManagedObjectConfiguration}.
+	 */
+	private final InputManagedObjectConfiguration<?> inputConfiguration = this
+			.createMock(InputManagedObjectConfiguration.class);
 
 	/**
 	 * {@link OfficeMetaDataLocator}.
@@ -356,10 +363,12 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getProcessMetaData(), this.processMetaData);
 		this.recordReturn(this.processMetaData, this.processMetaData
 				.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(this.officeMetaData, this.officeMetaData
 				.getOfficeName(), MANAGING_OFFICE_NAME);
-		this.record_issue("ManagedObjectSource by process bound name '"
-				+ PROCESS_BOUND_NAME + "' not managed by Office "
+		this.record_issue("ManagedObjectSource by input name '"
+				+ INPUT_MANAGED_OBJECT_NAME + "' not managed by Office "
 				+ MANAGING_OFFICE_NAME);
 
 		// Manage by office
@@ -406,6 +415,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
 		this.record_bindToProcess(flowConfiguration);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
 				Flows.WRONG_KEY);
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), Flows.KEY);
@@ -435,6 +446,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
 		this.record_bindToProcess(flowConfiguration);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
 				Flows.KEY);
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), Flows.KEY);
@@ -474,6 +487,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
 		this.record_bindToProcess(flowConfiguration);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
 				null);
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), null);
@@ -522,6 +537,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
 		this.record_bindToProcess(flowConfigurationOne, flowConfigurationTwo);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(flowConfigurationOne, flowConfigurationOne
 				.getFlowKey(), Flows.KEY);
 		this.recordReturn(flowConfigurationTwo, flowConfigurationTwo
@@ -572,6 +589,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_managedObjectSourceName();
 		this.record_noRecycleTask();
 		this.record_bindToProcess(flowConfiguration);
+		this.recordReturn(this.inputConfiguration, this.inputConfiguration
+				.getBoundManagedObjectName(), INPUT_MANAGED_OBJECT_NAME);
 		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
 				null);
 		this.recordReturn(flowMetaData, flowMetaData.getKey(), null);
@@ -728,7 +747,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectMetaData(),
 				new ManagedObjectMetaData[] { moMetaData });
 		this.recordReturn(moMetaData, moMetaData.getBoundManagedObjectName(),
-				PROCESS_BOUND_NAME);
+				INPUT_MANAGED_OBJECT_NAME);
 	}
 
 	/**
@@ -757,7 +776,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			ManagedObjectFlowMetaData<?>... flowMetaData) {
 		// Create and return the raw managing office meta-data
 		RawManagingOfficeMetaDataImpl<?> rawManagingOffice = new RawManagingOfficeMetaDataImpl(
-				MANAGING_OFFICE_NAME, PROCESS_BOUND_NAME, recycleWorkName,
+				MANAGING_OFFICE_NAME, recycleWorkName, this.inputConfiguration,
 				flowMetaData, this.configuration);
 		rawManagingOffice.setRawManagedObjectMetaData(this.rawMoMetaData);
 		return rawManagingOffice;

@@ -30,6 +30,7 @@ import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextImpl;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -54,7 +55,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
 
 /**
  * {@link RawManagingOfficeMetaData} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
@@ -63,7 +64,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	/**
 	 * Determines if the {@link ManagedObjectSource} instigates {@link Flow}
 	 * instances.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} instances of the
 	 *            {@link ManagedObjectSource}.
@@ -81,15 +82,15 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	private final String managingOfficeName;
 
 	/**
-	 * {@link ProcessState} bound name for the {@link ManagedObject} within the
-	 * {@link Office}.
-	 */
-	private final String processBoundName;
-
-	/**
 	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
 	 */
 	private final String recycleWorkName;
+
+	/**
+	 * {@link InputManagedObjectConfiguration} to configure binding the input
+	 * {@link ManagedObject} to the {@link ProcessState}.
+	 */
+	private final InputManagedObjectConfiguration<?> inputConfiguration;
 
 	/**
 	 * {@link ManagedObjectFlowMetaData} instances for the
@@ -130,14 +131,14 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 	/**
 	 * Initialise.
-	 * 
+	 *
 	 * @param managingOfficeName
 	 *            Name of the managing {@link Office}.
-	 * @param processBoundName
-	 *            {@link ProcessState} bound name for the {@link ManagedObject}
-	 *            within the {@link Office}.
 	 * @param recycleWorkName
 	 *            Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * @param inputConfiguration
+	 *            {@link InputManagedObjectConfiguration} to configure binding
+	 *            the input {@link ManagedObject} to the {@link ProcessState}.
 	 * @param flowMetaDatas
 	 *            {@link ManagedObjectFlowMetaData} instances for the
 	 *            {@link ManagedObjectSource}.
@@ -145,19 +146,20 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	 *            {@link ManagingOfficeConfiguration}.
 	 */
 	public RawManagingOfficeMetaDataImpl(String managingOfficeName,
-			String processBoundName, String recycleWorkName,
+			String recycleWorkName,
+			InputManagedObjectConfiguration<?> inputConfiguration,
 			ManagedObjectFlowMetaData<F>[] flowMetaDatas,
 			ManagingOfficeConfiguration<F> managingOfficeConfiguration) {
 		this.managingOfficeName = managingOfficeName;
-		this.processBoundName = processBoundName;
 		this.recycleWorkName = recycleWorkName;
+		this.inputConfiguration = inputConfiguration;
 		this.flowMetaDatas = flowMetaDatas;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
 	}
 
 	/**
 	 * Specifies the {@link RawManagedObjectMetaData}.
-	 * 
+	 *
 	 * @param rawManagedObjectMetaData
 	 *            {@link RawManagedObjectMetaData}.
 	 */
@@ -169,7 +171,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	/**
 	 * Adds a {@link ManagedObjectMetaData} to be managed by the managing
 	 * {@link Office}.
-	 * 
+	 *
 	 * @param moMetaData
 	 *            {@link ManagedObjectMetaData} to be managed by the managing
 	 *            {@link Office}.
@@ -199,8 +201,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public String getProcessBoundName() {
-		return this.processBoundName;
+	public InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration() {
+		return this.inputConfiguration;
 	}
 
 	@Override
@@ -321,14 +323,18 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 					moMetaDatas[i].getBoundManagedObjectName(), new Integer(i));
 		}
 
-		// Obtain the index of the managed object in the office
-		Integer processBoundIndex = processMoNameToIndex
-				.get(this.processBoundName);
+		// Obtain the process bound index of the input ManagedObject
+		Integer processBoundIndex = null;
+		String processBoundName = this.inputConfiguration
+				.getBoundManagedObjectName();
+		if (!ConstructUtil.isBlank(processBoundName)) {
+			// Have name so obtain the index
+			processBoundIndex = processMoNameToIndex.get(processBoundName);
+		}
 		if (processBoundIndex == null) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					ManagedObjectSource.class.getSimpleName()
-							+ " by process bound name '"
-							+ this.processBoundName
+							+ " by input name '" + processBoundName
 							+ "' not managed by Office "
 							+ officeMetaData.getOfficeName());
 

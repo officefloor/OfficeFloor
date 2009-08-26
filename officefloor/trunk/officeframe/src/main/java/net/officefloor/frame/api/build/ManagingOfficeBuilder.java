@@ -28,25 +28,28 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 /**
  * Builds details of a {@link ManagedObjectSource} being managed by an
  * {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagingOfficeBuilder<F extends Enum<F>> {
 
 	/**
-	 * Specifies the name to bind the {@link ManagedObject} within the
-	 * {@link ProcessState} within the {@link Office}.
-	 * 
-	 * @param processBoundManagedObjectName
-	 *            Name to bind the {@link ManagedObject} within the
-	 *            {@link ProcessState} within the {@link Office}.
+	 * Specifies the name to bind the input {@link ManagedObject} within the
+	 * {@link ProcessState} of the {@link Office}.
+	 *
+	 * @param inputManagedObjectName
+	 *            Name to bind the input {@link ManagedObject} within the
+	 *            {@link ProcessState} of the {@link Office}.
+	 * @return {@link DependencyMappingBuilder} to map the dependencies of the
+	 *         {@link ManagedObject}.
 	 */
-	void setProcessBoundManagedObjectName(String processBoundManagedObjectName);
+	DependencyMappingBuilder setInputManagedObjectName(
+			String inputManagedObjectName);
 
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
 	 * {@link Task} within the managing {@link Office}.
-	 * 
+	 *
 	 * @param key
 	 *            Key identifying the {@link Flow} instigated by the
 	 *            {@link ManagedObjectSource}.
@@ -60,7 +63,7 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
 	 * {@link Task} within the managing {@link Office}.
-	 * 
+	 *
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} instigated by the
 	 *            {@link ManagedObjectSource}.

@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -27,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Meta-data of a {@link ManagedObject} that is managed by the {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface RawManagingOfficeMetaData<F extends Enum<F>> {
@@ -35,7 +36,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * Obtains the name for the {@link Office} managing the
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @return Name for the {@link Office} managing the {@link ManagedObject}.
 	 */
 	String getManagingOfficeName();
@@ -47,7 +48,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * <p>
 	 * If <code>true</code> it means the {@link ManagedObjectSource} must be
 	 * bound to the {@link ProcessState} of the {@link Office}.
-	 * 
+	 *
 	 * @return <code>true</code> if the {@link ManagedObjectSource} requires
 	 *         instigating {@link Flow} instances.
 	 */
@@ -55,23 +56,26 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Obtains the {@link ProcessState} bound name for the {@link ManagedObject}
-	 * within the {@link Office}.
+	 * Obtains the {@link InputManagedObjectConfiguration} configuring the bind
+	 * of the {@link ManagedObject} within the {@link ProcessState} of the
+	 * {@link Office}.
 	 * <p>
 	 * Should the {@link ManagedObjectSource} instigate a {@link Flow}, a
 	 * {@link ManagedObject} from the {@link ManagedObjectSource} is to be made
 	 * available to the {@link ProcessState}. Whether the {@link Office} wants
 	 * to make use of the {@link ManagedObject} is its choice but is available
 	 * to do so.
-	 * 
-	 * @return {@link ProcessState} bound name for the {@link ManagedObject}.
+	 *
+	 * @return {@link InputManagedObjectConfiguration} configuring the bind of
+	 *         the {@link ManagedObject} within the {@link ProcessState} of the
+	 *         {@link Office}.
 	 */
-	String getProcessBoundName();
+	InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} for the
 	 * {@link ManagedObject} to be managed by the {@link Office}.
-	 * 
+	 *
 	 * @return {@link RawManagedObjectMetaData} for the {@link ManagedObject} to
 	 *         be managed by the {@link Office}.
 	 */
@@ -80,7 +84,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
 	 * {@link Office} of the input {@link OfficeMetaDataLocator}.
-	 * 
+	 *
 	 * @param metaDataLocator
 	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
 	 *            the {@link ManagedObjectSource}.
@@ -95,7 +99,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * Obtains the {@link ManagedObjectExecuteContext} for the
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectExecuteContext} for the
 	 *         {@link ManagedObjectSource}.
 	 */

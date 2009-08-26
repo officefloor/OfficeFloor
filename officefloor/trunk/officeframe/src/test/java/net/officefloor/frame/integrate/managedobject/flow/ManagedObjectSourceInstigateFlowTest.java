@@ -33,7 +33,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * Tests {@link ManagedObjectSource} invoking a {@link Flow}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceInstigateFlowTest extends
@@ -51,13 +51,10 @@ public class ManagedObjectSourceInstigateFlowTest extends
 		ManagedObjectBuilder<InputManagedObjectSource.Flows> moBuilder = this
 				.constructManagedObject("INPUT", InputManagedObjectSource.class);
 
-		// Make process bound managed object
-		this.getOfficeBuilder().addProcessManagedObject("INPUT", "INPUT");
-
 		// Provide flow for input managed object
 		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
-		managingOfficeBuilder.setProcessBoundManagedObjectName("INPUT");
+		managingOfficeBuilder.setInputManagedObjectName("INPUT");
 		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT,
 				"WORK", "TASK");
 
