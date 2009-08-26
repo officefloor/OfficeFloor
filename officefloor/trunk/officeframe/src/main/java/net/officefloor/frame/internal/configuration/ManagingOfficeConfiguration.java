@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 /**
  * Configuration of the {@link ManagedObjectSource} being managed by an
  * {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagingOfficeConfiguration<F extends Enum<F>> {
@@ -34,20 +34,20 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	/**
 	 * Obtains the name of the {@link Office} managing this
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return Name of the {@link Office} managing this
 	 *         {@link ManagedObjectSource}.
 	 */
 	String getOfficeName();
 
 	/**
-	 * Obtains the name to bind the {@link ManagedObject} within the
-	 * {@link ProcessState} of the managing {@link Office}.
-	 * 
-	 * @return Name to bind the {@link ManagedObject} within the
-	 *         {@link ProcessState} of the managing {@link Office}.
+	 * Obtains the {@link InputManagedObjectConfiguration} to bind the input
+	 * {@link ManagedObject} to the {@link ProcessState}.
+	 *
+	 * @return {@link InputManagedObjectConfiguration} to bind the input
+	 *         {@link ManagedObject} to the {@link ProcessState}.
 	 */
-	String getProcessBoundManagedObjectName();
+	InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration();
 
 	/**
 	 * <p>
@@ -56,7 +56,7 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	 * <p>
 	 * This is to enable the {@link ManagedObjectSource} to provide additional
 	 * configuration for itself.
-	 * 
+	 *
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
 	ManagingOfficeBuilder<F> getBuilder();
@@ -64,7 +64,7 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	/**
 	 * Obtains the {@link ManagedObjectFlowConfiguration} for the
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectFlowConfiguration} for the
 	 *         {@link ManagedObjectSource}.
 	 */

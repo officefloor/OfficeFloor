@@ -23,17 +23,19 @@ import java.util.Map;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link DependencyMappingBuilder} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
-		DependencyMappingBuilder, ManagedObjectConfiguration<D> {
+		DependencyMappingBuilder, ManagedObjectConfiguration<D>,
+		InputManagedObjectConfiguration<D> {
 
 	/**
 	 * Name of the {@link ManagedObject} is being bound.
@@ -51,8 +53,8 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	private final Map<Integer, ManagedObjectDependencyConfiguration<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyConfiguration<D>>();
 
 	/**
-	 * Initiate.
-	 * 
+	 * Initiate as a {@link ManagedObjectConfiguration}.
+	 *
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} is being bound.
 	 * @param officeManagedObjectName
@@ -62,6 +64,16 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 			String officeManagedObjectName) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.officeManagedObjectName = officeManagedObjectName;
+	}
+
+	/**
+	 * Initiate as an {@link InputManagedObjectConfiguration}.
+	 *
+	 * @param boundManagedObjectName
+	 *            Name of the {@link ManagedObject} is being bound.
+	 */
+	public DependencyMappingBuilderImpl(String boundManagedObjectName) {
+		this(boundManagedObjectName, null);
 	}
 
 	/*
@@ -82,7 +94,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 
 	/**
 	 * Maps in the dependency.
-	 * 
+	 *
 	 * @param index
 	 *            Index to map the dependency under.
 	 * @param key
@@ -106,7 +118,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	}
 
 	/*
-	 * ================ WorkManagedObjectConfiguration ====================
+	 * ==== ManagedObjectConfiguration & InputManagedObjectConfiguration ====
 	 */
 
 	@Override
@@ -143,7 +155,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param dependencyKey
 		 *            Dependency key.
 		 * @param managedObjectName

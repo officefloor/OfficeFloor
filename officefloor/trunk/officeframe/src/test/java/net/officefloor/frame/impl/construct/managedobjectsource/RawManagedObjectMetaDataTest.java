@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -118,6 +119,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final ManagingOfficeConfiguration<?> managingOfficeConfiguration = this
 			.createMock(ManagingOfficeConfiguration.class);
+
+	/**
+	 * {@link InputManagedObjectConfiguration}.
+	 */
+	private final InputManagedObjectConfiguration<?> inputConfiguration = this
+			.createMock(InputManagedObjectConfiguration.class);
 
 	/**
 	 * {@link ManagingOfficeBuilder}.
@@ -439,9 +446,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no process bound name when required.
+	 * Ensures issue if no {@link InputManagedObjectConfiguration}.
 	 */
-	public void testNoProcessBoundName() {
+	public void testNoInputConfiguration() {
 
 		ManagedObjectFlowMetaData<?> flowMetaData = this
 				.createMock(ManagedObjectFlowMetaData.class);
@@ -458,9 +465,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				new ManagedObjectFlowMetaData[] { flowMetaData });
 		this.recordReturn(this.managingOfficeConfiguration,
 				this.managingOfficeConfiguration
-						.getProcessBoundManagedObjectName(), null);
+						.getInputManagedObjectConfiguration(), null);
 		this
-				.record_issue("Must specify the process bound name as Managed Object Source requires flows");
+				.record_issue("Must provide Input configuration as Managed Object Source requires flows");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -819,8 +826,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		if (moFlowMetaData.length > 0) {
 			this.recordReturn(this.managingOfficeConfiguration,
 					this.managingOfficeConfiguration
-							.getProcessBoundManagedObjectName(),
-					processBoundName);
+							.getInputManagedObjectConfiguration(),
+					this.inputConfiguration);
 		}
 		this.recordReturn(this.configuration, this.configuration
 				.getManagedObjectPool(), this.managedObjectPool);

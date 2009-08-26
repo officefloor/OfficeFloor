@@ -125,7 +125,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Flag managing office and invocation of flow
 		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
-		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+		managingOfficeBuilder.setInputManagedObjectName("MO");
 		managingOfficeBuilder.linkProcess(
 				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
 				"task");
@@ -186,7 +186,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Flag managing office and invocation of flow
 		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
-		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+		managingOfficeBuilder.setInputManagedObjectName("MO");
 		managingOfficeBuilder.linkProcess(
 				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
 				"task");

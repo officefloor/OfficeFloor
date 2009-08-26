@@ -167,6 +167,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			processState = new ProcessStateImpl(this.processMetaData, this,
 					this.officeFloorEscalation);
 		} else {
+			/*
+			 * TODO take into account instance index to obtain meta-data
+			 *
+			 * DETAILS: currently while phasing in Input ManagedObject there is
+			 * only one ManagedObjectSource per bound ManagedObject. Input
+			 * ManagedObject changes this to allow multiple and as such the
+			 * ManagedObjectExecuteContext must specify which particular
+			 * instance of ManagedObjectSource is being passed in.
+			 */
 			// Obtain the meta-data for the Input Managed Object
 			ManagedObjectMetaData<?> inputMoMetaData = this.processMetaData
 					.getManagedObjectMetaData()[processMoIndex];

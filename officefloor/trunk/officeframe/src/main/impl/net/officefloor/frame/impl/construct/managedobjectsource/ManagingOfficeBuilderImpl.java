@@ -20,12 +20,15 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -35,7 +38,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagingOfficeBuilder} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
@@ -47,10 +50,10 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	private final String officeName;
 
 	/**
-	 * Name to bind the {@link ManagedObject} within the {@link ProcessState} of
-	 * the managing {@link Office}.
+	 * {@link InputManagedObjectConfiguration} configuring binding the input
+	 * {@link ManagedObject} to the {@link ProcessState}.
 	 */
-	private String processBoundManagedObjectName = null;
+	private InputManagedObjectConfiguration<?> inputManagedObjectConfiguration = null;
 
 	/**
 	 * {@link ManagedObjectFlowConfiguration} instances by their index.
@@ -59,7 +62,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office} managing the {@link ManagedObject}.
 	 */
@@ -72,9 +75,13 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void setProcessBoundManagedObjectName(
-			String processBoundManagedObjectName) {
-		this.processBoundManagedObjectName = processBoundManagedObjectName;
+	@SuppressWarnings("unchecked")
+	public DependencyMappingBuilder setInputManagedObjectName(
+			String inputManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
+				inputManagedObjectName);
+		this.inputManagedObjectConfiguration = builder;
+		return builder;
 	}
 
 	@Override
@@ -89,7 +96,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 
 	/**
 	 * Links in a {@link Flow}.
-	 * 
+	 *
 	 * @param index
 	 *            Index for the {@link Flow}.
 	 * @param key
@@ -119,8 +126,8 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public String getProcessBoundManagedObjectName() {
-		return this.processBoundManagedObjectName;
+	public InputManagedObjectConfiguration<?> getInputManagedObjectConfiguration() {
+		return this.inputManagedObjectConfiguration;
 	}
 
 	@Override
@@ -157,7 +164,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 
 		/**
 		 * Initiate with flow key.
-		 * 
+		 *
 		 * @param flowKey
 		 *            Flow key.
 		 * @param flowName

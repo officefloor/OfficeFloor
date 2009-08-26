@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -316,17 +317,17 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ManagedObjectFlowMetaData<h>[] flowMetaDatas = metaData
 				.getFlowMetaData();
 
-		// Required process bound name if requires flows
-		String processBoundManagedObjectName = null;
+		// Requires input configuration if requires flows
+		InputManagedObjectConfiguration<?> inputConfiguration = null;
 		if (RawManagingOfficeMetaDataImpl.isRequireFlows(flowMetaDatas)) {
-			// Requires flows, so must be bound to process of office
-			processBoundManagedObjectName = managingOfficeConfiguration
-					.getProcessBoundManagedObjectName();
-			if (ConstructUtil.isBlank(processBoundManagedObjectName)) {
+			// Requires flows, so must have input configuration
+			inputConfiguration = managingOfficeConfiguration
+					.getInputManagedObjectConfiguration();
+			if (inputConfiguration == null) {
 				issues
 						.addIssue(AssetType.MANAGED_OBJECT,
 								managedObjectSourceName,
-								"Must specify the process bound name as Managed Object Source requires flows");
+								"Must provide Input configuration as Managed Object Source requires flows");
 				return null; // can not carry on
 			}
 		}
@@ -340,8 +341,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the raw managing office meta-data
 		RawManagingOfficeMetaDataImpl<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaDataImpl<h>(
-				officeName, processBoundManagedObjectName, recycleWorkName,
-				flowMetaDatas, managingOfficeConfiguration);
+				officeName, recycleWorkName, inputConfiguration, flowMetaDatas,
+				managingOfficeConfiguration);
 
 		// Created raw managed object meta-data
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(

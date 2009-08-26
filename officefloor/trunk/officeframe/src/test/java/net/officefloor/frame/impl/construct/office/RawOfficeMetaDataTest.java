@@ -590,13 +590,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to affix {@link ProcessState} bound {@link ManagedObject}.
+	 * Ensure able construct Input {@link ManagedObject}.
 	 */
-	public void testAffixProcessManagedObject() {
+	public void testConstructInputManagedObject() {
 
-		final RawManagingOfficeMetaData<?> affixManagedObject = this
+		final RawManagingOfficeMetaData<?> inputManagedObject = this
 				.createMock(RawManagingOfficeMetaData.class);
-		this.officeManagingManagedObjects.add(affixManagedObject);
+		this.officeManagingManagedObjects.add(inputManagedObject);
 
 		// Record affixing a process managed object
 		this.record_enhanceOffice();
@@ -612,8 +612,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"OFFICE_MO_0");
-		affixManagedObject.manageByOffice(null, null, this.issues);
-		this.control(affixManagedObject).setMatcher(new AbstractMatcher() {
+		inputManagedObject.manageByOffice(null, null, this.issues);
+		this.control(inputManagedObject).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[0];
@@ -1234,75 +1234,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records affixing {@link RawManagingOfficeMetaData} instances.
-	 */
-	private void record_affixOfficeManagingManagedObjects(
-			final String expectedOfficeName,
-			final RawBoundManagedObjectMetaData[] expectedBoundMo,
-			final RawManagingOfficeMetaData<?>[] expectedOfficeMo,
-			RawBoundManagedObjectMetaData[] returnBoundManagedObjectMetaData) {
-		this.recordReturn(this.rawBoundManagedObjectFactory,
-				this.rawBoundManagedObjectFactory
-						.affixOfficeManagingManagedObjects(expectedOfficeName,
-								expectedBoundMo, expectedOfficeMo, null,
-								this.issues), returnBoundManagedObjectMetaData,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-
-						// Ensure correct office name
-						assertEquals("Incorrect office name",
-								expectedOfficeName, actual[0]);
-
-						// Ensure correct process bound managed objects
-						RawBoundManagedObjectMetaData[] actualBoundMo = (RawBoundManagedObjectMetaData[]) actual[1];
-						if (expectedBoundMo == null) {
-							// null is simple no managed objects
-							assertEquals("No bound managed objects expected",
-									0, actualBoundMo.length);
-						} else {
-							// Validate bound managed objects
-							assertEquals(
-									"Incorrect number of bound managed objects",
-									expectedBoundMo.length,
-									actualBoundMo.length);
-							for (int i = 0; i < expectedBoundMo.length; i++) {
-								assertEquals("Incorrect bound managed object "
-										+ i, expectedBoundMo[i],
-										actualBoundMo[i]);
-							}
-						}
-
-						// Ensure correct office managed objects
-						RawManagingOfficeMetaData<?>[] actualOfficeMo = (RawManagingOfficeMetaData[]) actual[2];
-						if (expectedOfficeMo == null) {
-							// null is simple no managed objects
-							assertEquals("No office managed objects expected",
-									0, actualOfficeMo.length);
-						} else {
-							// Validate office managed objects
-							assertEquals(
-									"Incorrect number of office managed objects",
-									expectedOfficeMo.length,
-									actualOfficeMo.length);
-							for (int i = 0; i < expectedOfficeMo.length; i++) {
-								assertEquals("Incorrect office managed object "
-										+ i, expectedOfficeMo[i],
-										actualOfficeMo[i]);
-							}
-						}
-
-						// Ensure correct asset manager factory and issues
-						assertTrue("Should be an asset manager factory",
-								actual[3] instanceof AssetManagerFactory);
-						assertEquals("Incorrect issues",
-								RawOfficeMetaDataTest.this.issues, actual[4]);
-						return true; // matches if here
-					}
-				});
-	}
-
-	/**
 	 * Records constructing {@link ProcessState} bound {@link ManagedObject}
 	 * instances.
 	 *
@@ -1315,7 +1246,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 *         name.
 	 */
 	private Map<String, RawBoundManagedObjectMetaData> record_processBoundManagedObjects(
-			final Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources,
+			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources,
 			String... processBoundNames) {
 
 		final String OFFICE_MANAGING_PREFIX = "OFFICE_MO_";
@@ -1323,50 +1254,48 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Create the mock objects to register the process bound managed objects
 		final RawManagingOfficeMetaData<?>[] officeManagedObjects = this.officeManagingManagedObjects
 				.toArray(new RawManagingOfficeMetaData[0]);
-		final ManagedObjectConfiguration<?>[] moConfigurations = new ManagedObjectConfiguration[processBoundNames.length];
-		final RawBoundManagedObjectMetaData[] rawBoundMoMetaDatas = new RawBoundManagedObjectMetaData[processBoundNames.length];
 		final RawBoundManagedObjectMetaData[] officeBoundMoMetaDatas = new RawBoundManagedObjectMetaData[officeManagedObjects.length];
+		final ManagedObjectConfiguration<?>[] moConfigurations = new ManagedObjectConfiguration[processBoundNames.length];
+		final RawBoundManagedObjectMetaData[] rawBoundMoMetaDatas = new RawBoundManagedObjectMetaData[processBoundNames.length
+				+ officeManagedObjects.length];
 		final RawBoundManagedObjectMetaData[] processBoundMoMetaDatas = new RawBoundManagedObjectMetaData[rawBoundMoMetaDatas.length
 				+ officeBoundMoMetaDatas.length];
 		final Map<String, RawBoundManagedObjectMetaData> boundManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData>();
 		for (int i = 0; i < processBoundNames.length; i++) {
 			moConfigurations[i] = this
 					.createMock(ManagedObjectConfiguration.class);
-			rawBoundMoMetaDatas[i] = this
+			processBoundMoMetaDatas[i] = this
 					.createMock(RawBoundManagedObjectMetaData.class);
-			processBoundMoMetaDatas[i] = rawBoundMoMetaDatas[i];
+			rawBoundMoMetaDatas[i] = processBoundMoMetaDatas[i];
 			boundManagedObjects.put(processBoundNames[i],
 					rawBoundMoMetaDatas[i]);
 		}
 		for (int i = 0; i < officeBoundMoMetaDatas.length; i++) {
 			officeBoundMoMetaDatas[i] = this
 					.createMock(RawBoundManagedObjectMetaData.class);
-			processBoundMoMetaDatas[rawBoundMoMetaDatas.length + i] = officeBoundMoMetaDatas[i];
+			rawBoundMoMetaDatas[processBoundNames.length + i] = officeBoundMoMetaDatas[i];
 			boundManagedObjects.put(OFFICE_MANAGING_PREFIX + i,
-					officeBoundMoMetaDatas[i]);
+					rawBoundMoMetaDatas[i]);
+		}
+
+		// Provide default empty map if null registered
+		if (registeredManagedObjectSources == null) {
+			registeredManagedObjectSources = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
 		}
 
 		// Record constructing process bound managed objects
 		this.recordReturn(this.configuration, this.configuration
 				.getProcessManagedObjectConfiguration(), moConfigurations);
-		if (processBoundNames.length > 0) {
-			this.recordReturn(this.rawBoundManagedObjectFactory,
-					this.rawBoundManagedObjectFactory
-							.constructBoundManagedObjectMetaData(
-									moConfigurations, this.issues,
-									ManagedObjectScope.PROCESS,
-									AssetType.OFFICE, OFFICE_NAME, null,
-									registeredManagedObjectSources, null),
-					rawBoundMoMetaDatas);
-			this.constructBoundObjectsMatcher.addMatch(moConfigurations,
-					ManagedObjectScope.PROCESS, registeredManagedObjectSources,
-					null);
-		}
-
-		// Record affixing the office managing managed objects
-		this.record_affixOfficeManagingManagedObjects(OFFICE_NAME,
-				rawBoundMoMetaDatas, officeManagedObjects,
-				processBoundMoMetaDatas);
+		this.recordReturn(this.rawBoundManagedObjectFactory,
+				this.rawBoundManagedObjectFactory
+						.constructBoundManagedObjectMetaData(moConfigurations,
+								this.issues, ManagedObjectScope.PROCESS,
+								AssetType.OFFICE, OFFICE_NAME, null,
+								registeredManagedObjectSources, null,
+								officeManagedObjects), rawBoundMoMetaDatas);
+		this.constructBoundObjectsMatcher.addMatch(moConfigurations,
+				ManagedObjectScope.PROCESS, registeredManagedObjectSources,
+				null);
 
 		// Record creating map of the process bound managed objects
 		for (int i = 0; i < processBoundNames.length; i++) {
@@ -1420,17 +1349,15 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getThreadManagedObjectConfiguration(), moConfigurations);
 		if (threadBoundNames.length > 0) {
-			this
-					.recordReturn(this.rawBoundManagedObjectFactory,
-							this.rawBoundManagedObjectFactory
-									.constructBoundManagedObjectMetaData(
-											moConfigurations, this.issues,
-											ManagedObjectScope.THREAD,
-											AssetType.OFFICE, OFFICE_NAME,
-											null,
-											registeredManagedObjectSources,
-											processManagedObjects),
-							rawBoundMoMetaDatas);
+			this.recordReturn(this.rawBoundManagedObjectFactory,
+					this.rawBoundManagedObjectFactory
+							.constructBoundManagedObjectMetaData(
+									moConfigurations, this.issues,
+									ManagedObjectScope.THREAD,
+									AssetType.OFFICE, OFFICE_NAME, null,
+									registeredManagedObjectSources,
+									processManagedObjects, null),
+					rawBoundMoMetaDatas);
 			this.constructBoundObjectsMatcher.addMatch(moConfigurations,
 					ManagedObjectScope.THREAD, registeredManagedObjectSources,
 					processManagedObjects);
@@ -1831,11 +1758,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		private boolean isMatcherSet = false;
 
 		/**
-		 * Index of next match.
-		 */
-		private int matchIndex = 0;
-
-		/**
 		 * Listing of expected {@link ManagedObjectConfiguration} array matches.
 		 */
 		private List<ManagedObjectConfiguration<?>[]> moConfigurationsList = new LinkedList<ManagedObjectConfiguration<?>[]>();
@@ -1894,16 +1816,28 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		@Override
 		public boolean matches(Object[] expected, Object[] actual) {
 
+			// Find the matching scope invocation
+			ManagedObjectScope actualScope = (ManagedObjectScope) actual[2];
+			int matchIndex = -1;
+			for (int i = 0; i < this.managedObjectScopeList.size(); i++) {
+				ManagedObjectScope expectedScope = this.managedObjectScopeList
+						.get(i);
+				if (actualScope.equals(expectedScope)) {
+					matchIndex = i;
+				}
+			}
+			assertTrue("Unexpected method call for scope: " + actualScope,
+					(matchIndex >= 0));
+
 			// Obtain the details for matching
 			ManagedObjectConfiguration<?>[] moConfigurations = this.moConfigurationsList
-					.get(this.matchIndex);
+					.get(matchIndex);
 			ManagedObjectScope managedObjectScope = this.managedObjectScopeList
-					.get(this.matchIndex);
+					.get(matchIndex);
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this.registeredManagedObjectSourcesList
-					.get(this.matchIndex);
+					.get(matchIndex);
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = this.scopeManagedObjectsList
-					.get(this.matchIndex);
-			this.matchIndex++; // increment for next match
+					.get(matchIndex);
 
 			// Validate the match
 			assertEquals("Incorrect managed object configurations",

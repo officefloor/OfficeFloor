@@ -320,7 +320,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		ManagingOfficeBuilder<Flows> managingOfficeBuilder = managedObjectBuilder
 				.setManagingOffice(officeName);
 		if (isManagedObjectOutside) {
-			managingOfficeBuilder.setProcessBoundManagedObjectName("OFFICE_MO");
+			managingOfficeBuilder.setInputManagedObjectName("OFFICE_MO");
 		}
 
 		// Specify whether asynchronous
@@ -357,7 +357,13 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			taskBuilder.buildParameter();
 			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO",
 					"MO");
-			taskBuilder.buildObject("OFFICE_MO", scope);
+			if (isManagedObjectOutside) {
+				// Already registered via Input ManagedObject
+				taskBuilder.buildObject("OFFICE_MO");
+			} else {
+				// Not registered, so must add to scope
+				taskBuilder.buildObject("OFFICE_MO", scope);
+			}
 		}
 		this.constructTeam("TEAM", new PassiveTeam());
 

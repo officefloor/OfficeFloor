@@ -324,25 +324,16 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Obtain the process bound managed object instances
 		ManagedObjectConfiguration<?>[] processManagedObjectConfiguration = configuration
 				.getProcessManagedObjectConfiguration();
-		final RawBoundManagedObjectMetaData[] initialProcessBoundManagedObjects;
-		if ((processManagedObjectConfiguration == null)
-				|| (processManagedObjectConfiguration.length == 0)) {
-			initialProcessBoundManagedObjects = new RawBoundManagedObjectMetaData[0];
-		} else {
-			initialProcessBoundManagedObjects = rawBoundManagedObjectFactory
-					.constructBoundManagedObjectMetaData(
-							processManagedObjectConfiguration, issues,
-							ManagedObjectScope.PROCESS, AssetType.OFFICE,
-							officeName, officeAssetManagerFactory,
-							registeredMo, null);
+		if (processManagedObjectConfiguration == null) {
+			// Provide no process Managed Object configurations
+			processManagedObjectConfiguration = new ManagedObjectConfiguration[0];
 		}
-
-		// Add the Managed Objects that are managed by the Office
 		final RawBoundManagedObjectMetaData[] processBoundManagedObjects = rawBoundManagedObjectFactory
-				.affixOfficeManagingManagedObjects(officeName,
-						initialProcessBoundManagedObjects,
-						officeManagingManagedObjects,
-						officeAssetManagerFactory, issues);
+				.constructBoundManagedObjectMetaData(
+						processManagedObjectConfiguration, issues,
+						ManagedObjectScope.PROCESS, AssetType.OFFICE,
+						officeName, officeAssetManagerFactory, registeredMo,
+						null, officeManagingManagedObjects);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
@@ -384,7 +375,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 							threadManagedObjectConfiguration, issues,
 							ManagedObjectScope.THREAD, AssetType.OFFICE,
 							officeName, officeAssetManagerFactory,
-							registeredMo, scopeMo);
+							registeredMo, scopeMo, null);
 		}
 
 		// Load the thread bound managed objects to scope managed objects
