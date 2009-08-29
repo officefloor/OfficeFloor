@@ -25,6 +25,7 @@
 
 		<!-- Tool functionality -->
 		<module>officetool_filingcabinet</module>
+		<module>officetool_demo</module>
 
 		<!-- Ensure eclipse plug-ins are built before features -->
 		<module>eclipse/plugins/eclipse.plugins
