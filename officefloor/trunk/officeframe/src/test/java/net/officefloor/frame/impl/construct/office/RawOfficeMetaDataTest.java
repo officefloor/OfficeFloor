@@ -34,6 +34,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
@@ -155,6 +156,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link RawManagingOfficeMetaData} instances.
 	 */
 	private final List<RawManagingOfficeMetaData<?>> officeManagingManagedObjects = new LinkedList<RawManagingOfficeMetaData<?>>();
+
+	/**
+	 * Bound input {@link ManagedObject} mapping.
+	 */
+	private final Map<String, String> boundInputManagedObjects = new HashMap<String, String>();
 
 	/**
 	 * {@link RawWorkMetaDataFactory}.
@@ -475,6 +481,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.linkedMosConfiguration,
 				this.linkedMosConfiguration.getOfficeManagedObjectName(), null);
 		this.record_issue("Managed Object registered to Office without name");
+		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
 		this.record_threadBoundManagedObjects(null, null);
@@ -509,6 +516,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 						.getOfficeFloorManagedObjectSourceName(), null);
 		this
 				.record_issue("No Managed Object Source name for Office Managed Object 'MO'");
+		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
 		this.record_threadBoundManagedObjects(null, null);
@@ -546,6 +554,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				null);
 		this
 				.record_issue("Unknown Managed Object Source 'MOS' not available to register to Office");
+		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
 		this.record_threadBoundManagedObjects(null, null);
@@ -553,6 +562,114 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure no Input {@link ManagedObject} name.
+	 */
+	public void testNoInputManagedObjectName() {
+
+		BoundInputManagedObjectConfiguration boundInputConfiguration = this
+				.createMock(BoundInputManagedObjectConfiguration.class);
+
+		// Record no Input Managed Object Name
+		this.record_enhanceOffice();
+		this.record_teams();
+		this.record_registerManagedObjectSources();
+		this
+				.recordReturn(
+						this.configuration,
+						this.configuration
+								.getBoundInputManagedObjectConfiguration(),
+						new BoundInputManagedObjectConfiguration[] { boundInputConfiguration });
+		this.recordReturn(boundInputConfiguration, boundInputConfiguration
+				.getInputManagedObjectName(), null);
+		this.record_issue("No input Managed Object name for binding");
+		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+				.record_processBoundManagedObjects(null);
+		this.record_processBoundAdministrators(null, null);
+		this.record_threadBoundManagedObjects(null, null);
+		this.record_threadBoundAdministrators(null, null);
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_constructManagedObjectMetaData(processManagedObjects);
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure no bound {@link ManagedObjectSource} name for Input
+	 * {@link ManagedObject}.
+	 */
+	public void testNoBoundInputManagedObjectSourceName() {
+
+		BoundInputManagedObjectConfiguration boundInputConfiguration = this
+				.createMock(BoundInputManagedObjectConfiguration.class);
+
+		// Record no bound Managed Object Source name
+		this.record_enhanceOffice();
+		this.record_teams();
+		this.record_registerManagedObjectSources();
+		this
+				.recordReturn(
+						this.configuration,
+						this.configuration
+								.getBoundInputManagedObjectConfiguration(),
+						new BoundInputManagedObjectConfiguration[] { boundInputConfiguration });
+		this.recordReturn(boundInputConfiguration, boundInputConfiguration
+				.getInputManagedObjectName(), "INPUT");
+		this.recordReturn(boundInputConfiguration, boundInputConfiguration
+				.getBoundManagedObjectSourceName(), null);
+		this
+				.record_issue("No bound Managed Object Source name for input Managed Object 'INPUT'");
+		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+				.record_processBoundManagedObjects(null);
+		this.record_processBoundAdministrators(null, null);
+		this.record_threadBoundManagedObjects(null, null);
+		this.record_threadBoundAdministrators(null, null);
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_constructManagedObjectMetaData(processManagedObjects);
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure no bound {@link ManagedObjectSource} name for Input
+	 * {@link ManagedObject}.
+	 */
+	public void testInputManagedObjectNameRegisteredMoreThanOnce() {
+
+		// Record input Managed Object name registered more than once
+		this.record_enhanceOffice();
+		this.record_teams();
+		this.record_registerManagedObjectSources();
+		this.record_boundInputManagedObjects("SAME_INPUT", "FIRST",
+				"SAME_INPUT", "SECOND");
+		this
+				.record_issue("Input Managed Object 'SAME_INPUT' bound more than once");
+		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+				.record_processBoundManagedObjects(null);
+		this.record_processBoundAdministrators(null, null);
+		this.record_threadBoundManagedObjects(null, null);
+		this.record_threadBoundAdministrators(null, null);
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_constructManagedObjectMetaData(processManagedObjects);
 
 		// Construct the office
 		this.replayMockObjects();
@@ -571,6 +688,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_teams();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(
 						registeredManagedObjectSources, "BOUND_MO");
@@ -602,6 +720,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_enhanceOffice();
 		this.record_teams();
 		this.record_registerManagedObjectSources();
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
@@ -644,6 +763,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, Team> teams = this.record_teams();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(registeredManagedObjectSources);
 		this.record_processBoundAdministrators(teams, processManagedObjects);
@@ -675,6 +795,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, Team> teams = this.record_teams();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(
 						registeredManagedObjectSources, "PROCESS");
@@ -709,6 +830,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, Team> teams = this.record_teams("TEAM");
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(
 						registeredManagedObjectSources, "BOUND_MO");
@@ -744,6 +866,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, Team> teams = this.record_teams("TEAM");
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(
 						registeredManagedObjectSources, "PROCESS_MO");
@@ -1234,6 +1357,43 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records obtaining {@link BoundInputManagedObjectConfiguration}.
+	 *
+	 * @param inputSourceNamePairs
+	 *            Input {@link ManagedObject} to {@link ManagedObjectSource}
+	 *            name pairs.
+	 */
+	private void record_boundInputManagedObjects(String... inputSourceNamePairs) {
+
+		// Create the mock configurations
+		BoundInputManagedObjectConfiguration[] configurations = new BoundInputManagedObjectConfiguration[inputSourceNamePairs.length / 2];
+		for (int i = 0; i < configurations.length; i++) {
+			configurations[i] = this
+					.createMock(BoundInputManagedObjectConfiguration.class);
+		}
+
+		// Record binding configuration of input managed objects
+		this.recordReturn(this.configuration, this.configuration
+				.getBoundInputManagedObjectConfiguration(), configurations);
+		for (int i = 0; i < inputSourceNamePairs.length; i += 2) {
+			String inputManagedObjectName = inputSourceNamePairs[i];
+			String managedObjectSourceName = inputSourceNamePairs[i + 1];
+			if (!this.boundInputManagedObjects
+					.containsKey(inputManagedObjectName)) {
+				this.boundInputManagedObjects.put(inputManagedObjectName,
+						managedObjectSourceName);
+			}
+			BoundInputManagedObjectConfiguration configuration = configurations[i / 2];
+			this.recordReturn(configuration, configuration
+					.getInputManagedObjectName(), inputManagedObjectName);
+			this
+					.recordReturn(configuration, configuration
+							.getBoundManagedObjectSourceName(),
+							managedObjectSourceName);
+		}
+	}
+
+	/**
 	 * Records constructing {@link ProcessState} bound {@link ManagedObject}
 	 * instances.
 	 *
@@ -1292,10 +1452,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 								this.issues, ManagedObjectScope.PROCESS,
 								AssetType.OFFICE, OFFICE_NAME, null,
 								registeredManagedObjectSources, null,
-								officeManagedObjects), rawBoundMoMetaDatas);
+								officeManagedObjects,
+								this.boundInputManagedObjects),
+				rawBoundMoMetaDatas);
 		this.constructBoundObjectsMatcher.addMatch(moConfigurations,
 				ManagedObjectScope.PROCESS, registeredManagedObjectSources,
-				null);
+				null, officeManagedObjects);
 
 		// Record creating map of the process bound managed objects
 		for (int i = 0; i < processBoundNames.length; i++) {
@@ -1356,11 +1518,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 									ManagedObjectScope.THREAD,
 									AssetType.OFFICE, OFFICE_NAME, null,
 									registeredManagedObjectSources,
-									processManagedObjects, null),
+									processManagedObjects, null, null),
 					rawBoundMoMetaDatas);
 			this.constructBoundObjectsMatcher.addMatch(moConfigurations,
 					ManagedObjectScope.THREAD, registeredManagedObjectSources,
-					processManagedObjects);
+					processManagedObjects, null);
 		}
 		for (int i = 0; i < threadBoundNames.length; i++) {
 			this.recordReturn(rawBoundMoMetaDatas[i], rawBoundMoMetaDatas[i]
@@ -1488,6 +1650,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_noManagedObjectsAndAdministrators() {
 		this.record_registerManagedObjectSources();
+		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
 		this.record_threadBoundManagedObjects(null, null);
@@ -1778,6 +1941,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		private List<Map<String, RawBoundManagedObjectMetaData>> scopeManagedObjectsList = new LinkedList<Map<String, RawBoundManagedObjectMetaData>>();
 
 		/**
+		 * Listing of input {@link ManagedObject} matches.
+		 */
+		private List<RawManagingOfficeMetaData<?>[]> inputManagedObjectsList = new LinkedList<RawManagingOfficeMetaData<?>[]>();
+
+		/**
 		 * Adds details for an expected match.
 		 *
 		 * @param moConfigurations
@@ -1789,12 +1957,15 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		 *            {@link Office} bound names.
 		 * @param scopeMangedObjects
 		 *            {@link RawBoundManagedObjectMetaData} in scope.
+		 * @param inputManagedObjects
+		 *            Input {@link ManagedObject} matches.
 		 */
 		public void addMatch(
 				ManagedObjectConfiguration<?>[] moConfigurations,
 				ManagedObjectScope managedObjectScope,
 				Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources,
-				Map<String, RawBoundManagedObjectMetaData> scopeMangedObjects) {
+				Map<String, RawBoundManagedObjectMetaData> scopeMangedObjects,
+				RawManagingOfficeMetaData<?>[] inputManagedObjects) {
 
 			// Ensure the matcher is set
 			if (!this.isMatcherSet) {
@@ -1811,9 +1982,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.registeredManagedObjectSourcesList
 					.add(registeredManagedObjectSources);
 			this.scopeManagedObjectsList.add(scopeMangedObjects);
+			this.inputManagedObjectsList.add(inputManagedObjects);
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public boolean matches(Object[] expected, Object[] actual) {
 
 			// Find the matching scope invocation
@@ -1838,6 +2011,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 					.get(matchIndex);
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = this.scopeManagedObjectsList
 					.get(matchIndex);
+			RawManagingOfficeMetaData<?>[] inputManagedObjects = this.inputManagedObjectsList
+					.get(matchIndex);
 
 			// Validate the match
 			assertEquals("Incorrect managed object configurations",
@@ -1854,6 +2029,32 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 					registeredManagedObjectSources, actual[6]);
 			assertEquals("Incorrect have scope managed objects",
 					scopeManagedObjects, actual[7]);
+			RawManagingOfficeMetaData<?>[] actualInputManagedObjects = (RawManagingOfficeMetaData<?>[]) actual[8];
+			Map<String, String> actualInputSourceMappings = (Map<String, String>) actual[9];
+			switch (managedObjectScope) {
+			case PROCESS:
+				assertEquals("Incorrect number of input Managed Objects",
+						inputManagedObjects.length,
+						actualInputManagedObjects.length);
+				for (int i = 0; i < inputManagedObjects.length; i++) {
+					assertEquals("Incorrect input managed object " + i,
+							inputManagedObjects[i],
+							actualInputManagedObjects[i]);
+				}
+				assertEquals("Incorrect input -> source mappings",
+						RawOfficeMetaDataTest.this.boundInputManagedObjects,
+						actualInputSourceMappings);
+				break;
+			default:
+				assertNull(
+						"Should not have input configuration for non-process binding",
+						actualInputManagedObjects);
+				assertNull(
+						"Should only have input bindings for non-process binding",
+						actualInputSourceMappings);
+				break;
+			}
+
 			return true;
 		}
 	}

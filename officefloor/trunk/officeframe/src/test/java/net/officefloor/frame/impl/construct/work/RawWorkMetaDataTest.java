@@ -636,15 +636,17 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 					.recordReturn(this.rawOfficeMetaData,
 							this.rawOfficeMetaData.getManagedObjectMetaData(),
 							officeRegisteredManagedObjects);
-			this.recordReturn(this.rawBoundManagedObjectFactory,
-					this.rawBoundManagedObjectFactory
-							.constructBoundManagedObjectMetaData(
-									moConfiguration, this.issues,
-									ManagedObjectScope.WORK, AssetType.WORK,
-									WORK_NAME, this.assetManagerFactory,
-									officeRegisteredManagedObjects,
-									this.officeScopeManagedObjects, null),
-					workBoundMo);
+			this
+					.recordReturn(this.rawBoundManagedObjectFactory,
+							this.rawBoundManagedObjectFactory
+									.constructBoundManagedObjectMetaData(
+											moConfiguration, this.issues,
+											ManagedObjectScope.WORK,
+											AssetType.WORK, WORK_NAME,
+											this.assetManagerFactory,
+											officeRegisteredManagedObjects,
+											this.officeScopeManagedObjects,
+											null, null), workBoundMo);
 			for (int i = 0; i < moCount; i++) {
 				this.recordReturn(workBoundMo[i], workBoundMo[i]
 						.getBoundManagedObjectName(), boundMoNames[i]);
