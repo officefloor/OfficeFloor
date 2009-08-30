@@ -37,6 +37,7 @@ import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
@@ -52,14 +53,14 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * Implements the {@link OfficeBuilder}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
 	 * Obtains the name with the added namespace.
-	 * 
+	 *
 	 * @param namespace
 	 *            Namespace.
 	 * @param name
@@ -91,6 +92,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of {@link LinkedManagedObjectSourceConfiguration}.
 	 */
 	private final List<LinkedManagedObjectSourceConfiguration> managedObjectSources = new LinkedList<LinkedManagedObjectSourceConfiguration>();
+
+	/**
+	 * Listing of {@link BoundInputManagedObjectConfiguration}.
+	 */
+	private final List<BoundInputManagedObjectConfiguration> boundInputManagedObjects = new LinkedList<BoundInputManagedObjectConfiguration>();
 
 	/**
 	 * Listing of {@link ProcessState} bound {@link ManagedObjectConfiguration}.
@@ -140,7 +146,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of this {@link Office}.
 	 */
@@ -170,6 +176,14 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 				.add(new LinkedManagedObjectSourceConfigurationImpl(
 						officeManagedObjectName,
 						officeFloorManagedObjectSourceName));
+	}
+
+	@Override
+	public void setBoundInputManagedObject(String inputManagedObjectName,
+			String managedObjectSourceName) {
+		this.boundInputManagedObjects
+				.add(new BoundInputManagedObjectConfigurationImpl(
+						inputManagedObjectName, managedObjectSourceName));
 	}
 
 	@Override
@@ -266,6 +280,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public LinkedManagedObjectSourceConfiguration[] getRegisteredManagedObjectSources() {
 		return this.managedObjectSources
 				.toArray(new LinkedManagedObjectSourceConfiguration[0]);
+	}
+
+	@Override
+	public BoundInputManagedObjectConfiguration[] getBoundInputManagedObjectConfiguration() {
+		return this.boundInputManagedObjects
+				.toArray(new BoundInputManagedObjectConfiguration[0]);
 	}
 
 	@Override

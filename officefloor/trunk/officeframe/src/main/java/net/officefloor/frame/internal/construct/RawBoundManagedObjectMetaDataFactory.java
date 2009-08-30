@@ -62,6 +62,11 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 * @param inputManagedObjects
 	 *            Meta-data about input {@link ManagedObject} instances by
 	 *            {@link ManagedObjectSource} instances.
+	 * @param boundInputManagedObjects
+	 *            Default {@link ManagedObjectSource} names for multiple input
+	 *            {@link ManagedObject} instances bound to the same name.
+	 *            Mapping is of input {@link ManagedObject} name to the default
+	 *            {@link ManagedObjectSource} name.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
 	 */
@@ -74,6 +79,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
-			RawManagingOfficeMetaData<?>[] inputManagedObjects);
+			RawManagingOfficeMetaData<?>[] inputManagedObjects,
+			Map<String, String> boundInputManagedObjects);
 
 }

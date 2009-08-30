@@ -78,7 +78,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		// Create the team and start it working
 		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
 		this.team.startWorking();
-		System.out.println("Team started");
 
 		// Wait some time before assigning tasks
 		try {
@@ -92,7 +91,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		for (int i = 0; i < taskCount; i++) {
 			tasks[i] = new MockTaskContainer();
 			tasks[i].assignJobToTeam(this.team, 10);
-			System.out.println("Task " + i + " running");
 		}
 
 		// Obtain the team members
@@ -108,7 +106,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 
 		// Stop processing (should have all teams finished)
 		this.team.stopWorking();
-		System.out.println("Team stopped");
 
 		// Ensure each team member has stopped working
 		for (int i = 0; i < teamMembers.length; i++) {

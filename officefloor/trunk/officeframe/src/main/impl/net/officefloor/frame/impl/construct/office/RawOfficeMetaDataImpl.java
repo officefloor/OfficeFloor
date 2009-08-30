@@ -36,6 +36,7 @@ import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
@@ -321,6 +322,47 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			registeredMo.put(moName, rawMoMetaData);
 		}
 
+		// Create the bound input managed object mapping
+		Map<String, String> boundInputManagedObjects = new HashMap<String, String>();
+		BoundInputManagedObjectConfiguration[] boundInputConfigurations = configuration
+				.getBoundInputManagedObjectConfiguration();
+		if (boundInputConfigurations != null) {
+			for (BoundInputManagedObjectConfiguration boundInputConfiguration : boundInputConfigurations) {
+
+				// Obtain the input managed object name
+				String inputManagedObjectName = boundInputConfiguration
+						.getInputManagedObjectName();
+				if (ConstructUtil.isBlank(inputManagedObjectName)) {
+					issues.addIssue(AssetType.OFFICE, officeName,
+							"No input Managed Object name for binding");
+					continue; // can not provide input
+				}
+
+				// Obtain the bound managed object source name
+				String boundManagedObjectSourceName = boundInputConfiguration
+						.getBoundManagedObjectSourceName();
+				if (ConstructUtil.isBlank(boundManagedObjectSourceName)) {
+					issues.addIssue(AssetType.OFFICE, officeName,
+							"No bound Managed Object Source name for input Managed Object '"
+									+ inputManagedObjectName + "'");
+					continue; // can not provide binding
+				}
+
+				// Ensure not already bound input managed object
+				if (boundInputManagedObjects
+						.containsKey(inputManagedObjectName)) {
+					issues.addIssue(AssetType.OFFICE, officeName,
+							"Input Managed Object '" + inputManagedObjectName
+									+ "' bound more than once");
+					continue; // already bound
+				}
+
+				// Add the input managed object binding
+				boundInputManagedObjects.put(inputManagedObjectName,
+						boundManagedObjectSourceName);
+			}
+		}
+
 		// Obtain the process bound managed object instances
 		ManagedObjectConfiguration<?>[] processManagedObjectConfiguration = configuration
 				.getProcessManagedObjectConfiguration();
@@ -333,7 +375,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 						processManagedObjectConfiguration, issues,
 						ManagedObjectScope.PROCESS, AssetType.OFFICE,
 						officeName, officeAssetManagerFactory, registeredMo,
-						null, officeManagingManagedObjects);
+						null, officeManagingManagedObjects,
+						boundInputManagedObjects);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
@@ -375,7 +418,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 							threadManagedObjectConfiguration, issues,
 							ManagedObjectScope.THREAD, AssetType.OFFICE,
 							officeName, officeAssetManagerFactory,
-							registeredMo, scopeMo, null);
+							registeredMo, scopeMo, null, null);
 		}
 
 		// Load the thread bound managed objects to scope managed objects

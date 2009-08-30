@@ -54,7 +54,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 * @return {@link RawBoundManagedObjectMetaDataFactory}.
 	 */
 	public static RawBoundManagedObjectMetaDataFactory getFactory() {
-		return new RawBoundManagedObjectMetaDataImpl(null, null);
+		return new RawBoundManagedObjectMetaDataImpl(null, null, false);
 	}
 
 	/**
@@ -66,6 +66,16 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 * Bound {@link ManagedObjectIndex} for the {@link ManagedObject}.
 	 */
 	private final ManagedObjectIndex index;
+
+	/**
+	 * Indicates if an Input {@link ManagedObject}.
+	 */
+	private final boolean isInput;
+
+	/**
+	 * Default instance index.
+	 */
+	private int defaultInstanceIndex = -1;
 
 	/**
 	 * Listing of {@link RawBoundManagedObjectInstanceMetaData} instances for
@@ -80,16 +90,14 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param index
 	 *            {@link ManagedObjectIndex}.
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @param dependenciesConfiguration
-	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param isInput
+	 *            Indicates if an Input {@link ManagedObject}.
 	 */
 	private RawBoundManagedObjectMetaDataImpl(String boundManagedObjectName,
-			ManagedObjectIndex index) {
+			ManagedObjectIndex index, boolean isInput) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.index = index;
+		this.isInput = isInput;
 	}
 
 	/**
@@ -133,17 +141,20 @@ public class RawBoundManagedObjectMetaDataImpl implements
 			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
-			RawManagingOfficeMetaData<?>[] inputManagedObjects) {
+			RawManagingOfficeMetaData<?>[] inputManagedObjects,
+			Map<String, String> boundInputManagedObjects) {
 
 		// Handle if null scope managed objects
 		if (scopeManagedObjects == null) {
 			scopeManagedObjects = Collections.emptyMap();
 		}
 
-		// Obtain the bound managed object instances
+		// Create details for obtaining the managed object instances
 		Map<String, RawBoundManagedObjectMetaDataImpl> boundMo = new HashMap<String, RawBoundManagedObjectMetaDataImpl>();
 		List<RawBoundManagedObjectMetaDataImpl> boundMoList = new LinkedList<RawBoundManagedObjectMetaDataImpl>();
 		int boundMoIndex = 0;
+
+		// Obtain the bound managed object instances
 		if (boundManagedObjectConfiguration != null) {
 			NEXT_MO: for (ManagedObjectConfiguration<?> mo : boundManagedObjectConfiguration) {
 
@@ -153,6 +164,14 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					issues.addIssue(assetType, assetName,
 							"No bound name for managed object");
 					continue NEXT_MO; // no bound managed object
+				}
+
+				// Ensure no name clash with another bound ManagedObject
+				if (boundMo.containsKey(boundMoName)) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
+							"Name clash between bound Managed Objects (name="
+									+ boundMoName + ")");
+					continue NEXT_MO; // name clash
 				}
 
 				// Obtain the registered office managed object name
@@ -184,7 +203,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Create the bound ManagedObject meta-data (with instance)
 				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
-						boundMoName, index);
+						boundMoName, index, false);
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
 						dependenciesConfiguration);
 
@@ -215,32 +234,90 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					continue NEXT_MO; // no bound managed object
 				}
 
+				// Ensure no name clash with bound ManagedObject
+				RawBoundManagedObjectMetaDataImpl possibleClash = boundMo
+						.get(boundMoName);
+				if ((possibleClash != null) && (!possibleClash.isInput)) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
+							"Name clash between bound and input Managed Objects (name="
+									+ boundMoName + ")");
+					continue NEXT_MO; // name clash
+				}
+
 				// Obtain the input ManagedObject meta-data
 				RawManagedObjectMetaData<?, ?> rawMoMetaData = inputManagedObject
 						.getRawManagedObjectMetaData();
-
-				// Create the index of this managed object
-				ManagedObjectIndex index = new ManagedObjectIndexImpl(scope,
-						boundMoIndex++);
 
 				// Obtain the dependencies configuration
 				ManagedObjectDependencyConfiguration<?>[] dependenciesConfiguration = inputConfiguration
 						.getDependencyConfiguration();
 
-				// Create the bound ManagedObject meta-data (with instance)
-				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
-						boundMoName, index);
+				// Obtain the bound ManagedObject meta-data
+				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData;
+				if (possibleClash != null) {
+					// Inputs bound to same name
+					rawBoundMoMetaData = possibleClash;
+				} else {
+					// Create the bound ManagedObject meta-data
+					ManagedObjectIndex index = new ManagedObjectIndexImpl(
+							scope, boundMoIndex++);
+					rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
+							boundMoName, index, true);
+
+					// Register the input managed object
+					boundMo.put(boundMoName, rawBoundMoMetaData);
+					boundMoList.add(rawBoundMoMetaData);
+				}
+
+				// Add the Input ManagedObject instance
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
 						dependenciesConfiguration);
-
-				// Register the bound managed object
-				boundMo.put(boundMoName, rawBoundMoMetaData);
-				boundMoList.add(rawBoundMoMetaData);
 			}
 		}
 
-		// Load dependencies and meta-data of bound managed object instances
+		// Load default instance indexes, dependencies, meta-data
 		for (RawBoundManagedObjectMetaDataImpl moMetaData : boundMoList) {
+
+			// If only one instance than is the default instance
+			if (moMetaData.instancesMetaData.size() == 1) {
+				// Only the single instance
+				moMetaData.defaultInstanceIndex = 0;
+			} else {
+				// Multiple instances, obtain default managed object source name
+				String boundMoName = moMetaData.boundManagedObjectName;
+				String defaultManagedObjectSourceName = null;
+				if (boundInputManagedObjects != null) {
+					defaultManagedObjectSourceName = boundInputManagedObjects
+							.get(boundMoName);
+				}
+				if (ConstructUtil.isBlank(defaultManagedObjectSourceName)) {
+					// Must have the name of the bound Managed Object Source
+					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
+							"Bound Managed Object Source must be specified for Input Managed Object '"
+									+ boundMoName + "'");
+
+				} else {
+					// Search for the instance containing managed object source
+					NEXT_MOS: for (int i = 0; i < moMetaData.instancesMetaData
+							.size(); i++) {
+						RawBoundManagedObjectInstanceMetaDataImpl<?> instanceMetaData = moMetaData.instancesMetaData
+								.get(i);
+
+						// Determine if instance
+						String managedObjectSourceName = instanceMetaData
+								.getRawManagedObjectMetaData()
+								.getManagedObjectName();
+						if (defaultManagedObjectSourceName
+								.equals(managedObjectSourceName)) {
+							// Have the instance, so specify it as default
+							moMetaData.defaultInstanceIndex = i;
+							break NEXT_MOS; // default instance found
+						}
+					}
+				}
+			}
+
+			// Load dependencies and meta-data for each instance
 			for (RawBoundManagedObjectInstanceMetaDataImpl<?> instanceMetaData : moMetaData.instancesMetaData) {
 
 				// Create the mapping of scope managed objects
@@ -277,8 +354,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 	@Override
 	public int getDefaultInstanceIndex() {
-		// TODO provide default index based on configuration (or not input MO)
-		return 0;
+		return this.defaultInstanceIndex;
 	}
 
 	@Override

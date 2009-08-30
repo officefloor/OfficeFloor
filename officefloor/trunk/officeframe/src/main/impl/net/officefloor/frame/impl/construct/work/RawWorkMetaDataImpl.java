@@ -198,7 +198,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 							issues, ManagedObjectScope.WORK, AssetType.WORK,
 							workName, assetManagerFactory, rawOfficeMetaData
 									.getManagedObjectMetaData(), officeScopeMo,
-							null);
+							null, null);
 		}
 
 		// Create the work scope managed objects available to tasks
