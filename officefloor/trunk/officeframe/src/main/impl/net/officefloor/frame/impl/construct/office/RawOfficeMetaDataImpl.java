@@ -618,6 +618,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 			// Obtain the default managed object meta-data
 			int defaultInstanceIndex = boundMetaData.getDefaultInstanceIndex();
+			if (defaultInstanceIndex < 0) {
+				continue; // issue obtaining bound instance
+			}
+
+			// Obtain the bound instance meta-data
 			RawBoundManagedObjectInstanceMetaData<?> boundMetaDataInstance = boundMetaData
 					.getRawBoundManagedObjectInstanceMetaData()[defaultInstanceIndex];
 

@@ -39,6 +39,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -741,13 +742,73 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				rawTwoMetaData);
 		this.recordReturn(twoConfiguration, twoConfiguration
 				.getDependencyConfiguration(), null);
-		this.record_getDependencyMetaData(rawOneMetaData);
-		this.record_loadManagedObjectMetaData(rawOneMetaData, "MO", 0);
-		this.record_getDependencyMetaData(rawTwoMetaData);
-		this.record_loadManagedObjectMetaData(rawTwoMetaData, "MO", 1);
 		this.issues
 				.addIssue(AssetType.MANAGED_OBJECT, "MO",
 						"Bound Managed Object Source must be specified for Input Managed Object 'MO'");
+
+		// Construct
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData metaData = this
+				.constructRawBoundManagedObjectMetaData(1, oneMo, twoMo)[0];
+		this.verifyMockObjects();
+
+		// Verify instances
+		RawBoundManagedObjectInstanceMetaData<?>[] instanceMetaData = metaData
+				.getRawBoundManagedObjectInstanceMetaData();
+		assertEquals("Incorrect number of instances", 2,
+				instanceMetaData.length);
+	}
+
+	/**
+	 * Ensure issue if binding Input {@link ManagedObject} instances to same
+	 * name without a default instance of not bound {@link ManagedObjectSource}.
+	 */
+	public void testBindInputManagedObjectInstancesWithUnknownBoundManagedObjectSource() {
+
+		// Specify second managed object source as default
+		this.inputManagedObjectDefaults.put("MO",
+				"UNKNOWN_MANAGED_OBJECT_SOURCE");
+
+		final RawManagingOfficeMetaData<?> oneMo = this
+				.createMock(RawManagingOfficeMetaData.class);
+		final InputManagedObjectConfiguration<?> oneConfiguration = this
+				.createMock(InputManagedObjectConfiguration.class);
+		final RawManagedObjectMetaData<?, ?> rawOneMetaData = this
+				.registerRawManagedObjectMetaData("ONE_MO");
+
+		final RawManagingOfficeMetaData<?> twoMo = this
+				.createMock(RawManagingOfficeMetaData.class);
+		final InputManagedObjectConfiguration<?> twoConfiguration = this
+				.createMock(InputManagedObjectConfiguration.class);
+		final RawManagedObjectMetaData<?, ?> rawTwoMetaData = this
+				.registerRawManagedObjectMetaData("ONE_MO");
+
+		// Record bind Input ManagedObject instances
+		this.recordReturn(oneMo, oneMo.getInputManagedObjectConfiguration(),
+				oneConfiguration);
+		this.recordReturn(oneConfiguration, oneConfiguration
+				.getBoundManagedObjectName(), "MO");
+		this.recordReturn(oneMo, oneMo.getRawManagedObjectMetaData(),
+				rawOneMetaData);
+		this.recordReturn(oneConfiguration, oneConfiguration
+				.getDependencyConfiguration(), null);
+		this.recordReturn(twoMo, twoMo.getInputManagedObjectConfiguration(),
+				twoConfiguration);
+		this.recordReturn(twoConfiguration, twoConfiguration
+				.getBoundManagedObjectName(), "MO");
+		this.recordReturn(twoMo, twoMo.getRawManagedObjectMetaData(),
+				rawTwoMetaData);
+		this.recordReturn(twoConfiguration, twoConfiguration
+				.getDependencyConfiguration(), null);
+		this.recordReturn(rawOneMetaData,
+				rawOneMetaData.getManagedObjectName(), "ONE_MO");
+		this.recordReturn(rawTwoMetaData,
+				rawTwoMetaData.getManagedObjectName(), "TWO_MO");
+		this.issues
+				.addIssue(
+						AssetType.MANAGED_OBJECT,
+						"MO",
+						"Managed Object Source 'UNKNOWN_MANAGED_OBJECT_SOURCE' not linked to Input Managed Object 'MO' for being the bound instance");
 
 		// Construct
 		this.replayMockObjects();

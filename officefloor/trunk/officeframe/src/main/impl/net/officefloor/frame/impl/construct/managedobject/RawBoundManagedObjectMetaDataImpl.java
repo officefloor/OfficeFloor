@@ -276,7 +276,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 		}
 
 		// Load default instance indexes, dependencies, meta-data
-		for (RawBoundManagedObjectMetaDataImpl moMetaData : boundMoList) {
+		NEXT_MO: for (RawBoundManagedObjectMetaDataImpl moMetaData : boundMoList) {
 
 			// If only one instance than is the default instance
 			if (moMetaData.instancesMetaData.size() == 1) {
@@ -295,6 +295,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
 							"Bound Managed Object Source must be specified for Input Managed Object '"
 									+ boundMoName + "'");
+					continue NEXT_MO; // must have bound name
 
 				} else {
 					// Search for the instance containing managed object source
@@ -313,6 +314,18 @@ public class RawBoundManagedObjectMetaDataImpl implements
 							moMetaData.defaultInstanceIndex = i;
 							break NEXT_MOS; // default instance found
 						}
+					}
+					if (moMetaData.defaultInstanceIndex < 0) {
+						issues
+								.addIssue(
+										AssetType.MANAGED_OBJECT,
+										boundMoName,
+										"Managed Object Source '"
+												+ defaultManagedObjectSourceName
+												+ "' not linked to Input Managed Object '"
+												+ boundMoName
+												+ "' for being the bound instance");
+						continue NEXT_MO; // must have bound instance index
 					}
 				}
 			}

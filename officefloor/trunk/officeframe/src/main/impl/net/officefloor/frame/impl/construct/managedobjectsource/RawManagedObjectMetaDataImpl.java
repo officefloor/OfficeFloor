@@ -424,18 +424,22 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ManagedObjectScope scope = boundMetaData.getManagedObjectIndex()
 				.getManagedObjectScope();
 
+		// Create the bound reference name
+		String boundReferenceName = scope + ":" + instanceIndex + ":"
+				+ boundName;
+
 		// Create the source managed object asset manager
 		AssetManager sourcingAssetManager = assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT, scope + ":"
-						+ boundName, "source", issues);
+				.createAssetManager(AssetType.MANAGED_OBJECT,
+						boundReferenceName, "source", issues);
 
 		// Create operations asset manager only if asynchronous
 		AssetManager operationsAssetManager = null;
 		if (this.isAsynchronous) {
 			// Asynchronous so provide operations manager
 			operationsAssetManager = assetManagerFactory.createAssetManager(
-					AssetType.MANAGED_OBJECT, scope + ":" + boundName,
-					"operations", issues);
+					AssetType.MANAGED_OBJECT, boundReferenceName, "operations",
+					issues);
 		}
 
 		/*
