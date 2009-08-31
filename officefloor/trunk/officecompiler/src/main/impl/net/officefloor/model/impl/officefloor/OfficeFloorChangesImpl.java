@@ -50,6 +50,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -59,6 +60,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -1280,31 +1282,99 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> setProcessBoundManagedObjectName(
-			final OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice,
-			final String newProcessBoundManagedObjectName) {
+	public Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(
+			String inputManagedObjectName, String objectType) {
 
-		// TODO test (setProcessBoundManagedObjectName)
+		// TODO test (addOfficeFloorInputManagedObject)
 
-		// Obtain the old process bound name
-		final String oldProcessBoundManagedObjectName = officeFloorManagedObjectSourceToDeployedOffice
-				.getProcessBoundManagedObjectName();
+		// Create the input managed object
+		final OfficeFloorInputManagedObjectModel inputManagedObject = new OfficeFloorInputManagedObjectModel(
+				inputManagedObjectName, objectType);
 
-		// Returns the change of process bound name
-		return new AbstractChange<OfficeFloorManagedObjectSourceToDeployedOfficeModel>(
-				officeFloorManagedObjectSourceToDeployedOffice,
-				"Rename process bound name to "
-						+ newProcessBoundManagedObjectName) {
+		// Return change to add the input managed object
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
+				inputManagedObject, "Add Input Managed Object") {
 			@Override
 			public void apply() {
-				officeFloorManagedObjectSourceToDeployedOffice
-						.setProcessBoundManagedObjectName(newProcessBoundManagedObjectName);
+				OfficeFloorChangesImpl.this.officeFloor
+						.addOfficeFloorInputManagedObject(inputManagedObject);
 			}
 
 			@Override
 			public void revert() {
-				officeFloorManagedObjectSourceToDeployedOffice
-						.setProcessBoundManagedObjectName(oldProcessBoundManagedObjectName);
+				OfficeFloorChangesImpl.this.officeFloor
+						.removeOfficeFloorInputManagedObject(inputManagedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorInputManagedObjectModel> removeOfficeFloorInputManagedObject(
+			final OfficeFloorInputManagedObjectModel inputManagedObject) {
+
+		// TODO test (removeOfficeFloorInputManagedObject)
+
+		// Return change to remove the input managed object
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
+				inputManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				OfficeFloorChangesImpl.this.officeFloor
+						.addOfficeFloorInputManagedObject(inputManagedObject);
+			}
+
+			@Override
+			public void revert() {
+				OfficeFloorChangesImpl.this.officeFloor
+						.removeOfficeFloorInputManagedObject(inputManagedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+			OfficeFloorManagedObjectSourceModel managedObjectSource,
+			OfficeFloorInputManagedObjectModel inputManagedObject) {
+
+		// TODO test (linkOfficeFloorManagedObjectSourceToOfficeFloorInput...)
+
+		// Create the link
+		final OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel conn = new OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel();
+		conn.setOfficeFloorManagedObjectSource(managedObjectSource);
+		conn.setOfficeFloorInputManagedObject(inputManagedObject);
+
+		// Return change to add the link
+		return new AbstractChange<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> removeOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+			final OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel managedObjectSourceToInputManagedObject) {
+
+		// TODO test (removeOfficeFloorManagedObjectSourceToOfficeFloorInput...)
+
+		// Return change to remove the link
+		return new AbstractChange<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>(
+				managedObjectSourceToInputManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceToInputManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceToInputManagedObject.connect();
 			}
 		};
 	}

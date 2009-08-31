@@ -62,7 +62,7 @@ import org.easymock.AbstractMatcher;
 /**
  * Provides abstract functionality for testing integration of the
  * {@link OfficeFloorCompiler}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
@@ -91,7 +91,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * with a {@link StderrCompilerIssuesWrapper}.
 	 * <p>
 	 * This is available for {@link TestCase} instances to override.
-	 * 
+	 *
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @return By default returns input {@link CompilerIssues}.
@@ -102,7 +102,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records adding a {@link Team} to the {@link OfficeFloorBuilder}.
-	 * 
+	 *
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
@@ -133,9 +133,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	private ManagedObjectBuilder managedObjectBuilder = null;
 
 	/**
+	 * Current {@link ManagingOfficeBuilder}.
+	 */
+	private ManagingOfficeBuilder<?> managingOfficeBuilder = null;
+
+	/**
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
-	 * 
+	 *
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
@@ -163,18 +168,37 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records specifying the {@link ManagingOffice}.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link ManagingOffice}.
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
 	protected ManagingOfficeBuilder<?> record_managedObjectBuilder_setManagingOffice(
 			String officeName) {
-		ManagingOfficeBuilder<?> builder = this
+		this.managingOfficeBuilder = this
 				.createMock(ManagingOfficeBuilder.class);
 		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder
-				.setManagingOffice(officeName), builder);
-		return builder;
+				.setManagingOffice(officeName), this.managingOfficeBuilder);
+		return this.managingOfficeBuilder;
+	}
+
+	/**
+	 * Records specifying the Input {@link ManagedObject} name.
+	 *
+	 * @param inputManagedObjectName
+	 *            Input {@link ManagedObject} name.
+	 * @return {@link DependencyMappingBuilder} for the Input
+	 *         {@link ManagedObject}.
+	 */
+	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
+			String inputManagedObjectName) {
+		DependencyMappingBuilder dependencyMapper = this
+				.createMock(DependencyMappingBuilder.class);
+		this.recordReturn(this.managingOfficeBuilder,
+				this.managingOfficeBuilder
+						.setInputManagedObjectName(inputManagedObjectName),
+				dependencyMapper);
+		return dependencyMapper;
 	}
 
 	/**
@@ -184,7 +208,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records adding a {@link OfficeBuilder}.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @return Added {@link OfficeBuilder}.
@@ -207,7 +231,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Records adding a {@link ProcessState} {@link ManagedObject} to the
 	 * {@link Office}.
-	 * 
+	 *
 	 * @param processManagedObjectName
 	 *            {@link ThreadState} bound name.
 	 * @param officeManagedObjectName
@@ -226,7 +250,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Records adding a {@link ThreadState} {@link ManagedObject} to the
 	 * {@link Office}.
-	 * 
+	 *
 	 * @param threadManagedObjectName
 	 *            {@link ThreadState} bound name.
 	 * @param officeManagedObjectName
@@ -244,7 +268,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records adding a {@link ThreadState} bound {@link Administrator}.
-	 * 
+	 *
 	 * @param administratorName
 	 *            Name of the {@link Administrator}.
 	 * @param administratorSourceClass
@@ -274,7 +298,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * Convenience method to record adding a {@link ThreadState} bound
 	 * {@link Administrator} and specifying {@link Team} responsible for the
 	 * administration.
-	 * 
+	 *
 	 * @param administratorName
 	 *            Name of the {@link Administrator}.
 	 * @param officeTeamName
@@ -298,7 +322,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records registering the {@link Team}.
-	 * 
+	 *
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name.
 	 * @param officeFloorTeamName
@@ -312,7 +336,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to both add the {@link Office} and register a
 	 * {@link Team} to it.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @param officeTeamName
@@ -341,7 +365,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records adding a {@link WorkBuilder}.
-	 * 
+	 *
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @return Added {@link WorkBuilder}.
@@ -380,7 +404,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Records adding a {@link TaskBuilder}.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @return Added {@link TaskBuilder}.
@@ -397,7 +421,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Convenience method for recording adding a {@link TaskBuilder} and
 	 * specifying the {@link Team} for the {@link Task}.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param officeTeamName
@@ -436,7 +460,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Specifies the {@link Team} for the {@link Task}.
-	 * 
+	 *
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name.
 	 */
@@ -446,7 +470,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the {@link ConfigurationContext} for test being run.
-	 * 
+	 *
 	 * @return {@link ConfigurationContext} for test being run.
 	 */
 	protected ConfigurationContext getConfigurationContext() {
@@ -487,7 +511,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Compiles the {@link OfficeFloor} verifying correctly built into the
 	 * {@link OfficeFloorBuilder}.
-	 * 
+	 *
 	 * @param isExpectBuild
 	 *            If the {@link OfficeFloor} is expected to be built.
 	 * @param propertyNameValues

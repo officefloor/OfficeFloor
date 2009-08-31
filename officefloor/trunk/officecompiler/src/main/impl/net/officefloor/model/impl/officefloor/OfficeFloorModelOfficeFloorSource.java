@@ -46,6 +46,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -55,6 +56,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
@@ -64,7 +66,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeFloorModel} {@link OfficeFloorSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorModelOfficeFloorSource extends
@@ -331,10 +333,23 @@ public class OfficeFloorModelOfficeFloorSource extends
 				}
 			}
 			if (managingOffice != null) {
+
+				// TODO provide input managed object and dependencies
+				String inputManagedObjectName = null;
+				OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel mosToInput = managedObjectSourceModel
+						.getOfficeFloorInputManagedObject();
+				if (mosToInput != null) {
+					OfficeFloorInputManagedObjectModel inputMo = mosToInput
+							.getOfficeFloorInputManagedObject();
+					if (inputMo != null) {
+						inputManagedObjectName = inputMo
+								.getOfficeFloorInputManagedObjectName();
+					}
+				}
+
 				// Have the office manage the managed object
 				deployer.link(managedObjectSource.getManagingOffice(),
-						managingOffice, moToOffice
-								.getProcessBoundManagedObjectName());
+						managingOffice, inputManagedObjectName);
 			}
 
 			// Add the office floor managed object source flows
@@ -403,7 +418,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 	/**
 	 * Obtains {@link DeployedOfficeModel} for the
 	 * {@link DeployedOfficeInputModel}.
-	 * 
+	 *
 	 * @param officeInputModel
 	 *            {@link DeployedOfficeInputModel}.
 	 * @param officeFloor
@@ -432,7 +447,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 	/**
 	 * Obtains the {@link ManagedObjectScope} from the managed object scope
 	 * name.
-	 * 
+	 *
 	 * @param managedObjectScope
 	 *            Name of the {@link ManagedObjectScope}.
 	 * @param deployer

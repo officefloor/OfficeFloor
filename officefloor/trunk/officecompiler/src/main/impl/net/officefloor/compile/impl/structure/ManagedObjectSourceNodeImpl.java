@@ -49,6 +49,7 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -67,7 +68,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectSourceNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
@@ -166,7 +167,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectSourceName
 	 *            Name of this {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClassName
@@ -199,7 +200,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	/**
 	 * Adds a {@link ManagedObjectNode}.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObjectNode}.
 	 * @param managedObjectScope
@@ -383,6 +384,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 		// Provide process bound name if have flows
 		if (flowTypes.length > 0) {
+
+			// TODO obtain Input ManagedObject name
+
 			// Ensure have a process bound managed object name
 			String processBoundManagedObjectName = this.managingOffice
 					.getProcessBoundManagedObjectName();
@@ -397,8 +401,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 								"Must provide process bound name as managed object source has flows");
 			} else {
 				// Bind the managed object to process state of managing office
-				managingOfficeBuilder
-						.setProcessBoundManagedObjectName(processBoundManagedObjectName);
+				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
+						.setInputManagedObjectName(processBoundManagedObjectName);
+
+				// TODO load input dependencies
 			}
 		}
 
