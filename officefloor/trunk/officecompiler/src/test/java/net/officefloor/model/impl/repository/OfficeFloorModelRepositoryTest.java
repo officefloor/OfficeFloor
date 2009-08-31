@@ -30,15 +30,19 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -49,7 +53,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshaling/unmarshaling of the {@link OfficeFloorModel} via the
  * {@link ModelRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
@@ -61,7 +65,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -91,8 +95,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new OfficeFloorManagedObjectSourceModel(
 						"MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, null, null, 100,
-						101));
+						"net.orm.Session", null, null, null, null, null, null,
+						null, 100, 101));
 		OfficeFloorManagedObjectSourceModel moSource = officeFloor
 				.getOfficeFloorManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, moSource
@@ -102,8 +106,28 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Managing office
 		assertProperties(
 				new OfficeFloorManagedObjectSourceToDeployedOfficeModel(
-						"OFFICE", "PROCESS_MO"), moSource.getManagingOffice(),
-				"getManagingOfficeName", "getProcessBoundManagedObjectName");
+						"OFFICE"), moSource.getManagingOffice(),
+				"getManagingOfficeName");
+
+		// Input managed object and dependencies
+		assertProperties(
+				new OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel(
+						"INPUT_MANAGED_OBJECT"), moSource
+						.getOfficeFloorInputManagedObject(),
+				"getOfficeFloorInputManagedObjectName");
+		assertList(new String[] {
+				"getOfficeFloorManagedObjectSourceInputDependencyName",
+				"getDependencyType" }, moSource
+				.getOfficeFloorManagedObjectSourceInputDependencies(),
+				new OfficeFloorManagedObjectSourceInputDependencyModel(
+						"INPUT_DEPENDENCY", "java.sql.Connection"));
+		OfficeFloorManagedObjectSourceInputDependencyModel inputDependency = moSource
+				.getOfficeFloorManagedObjectSourceInputDependencies().get(0);
+		assertProperties(
+				new OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel(
+						"MANAGED_OBJECT_TWO"), inputDependency
+						.getOfficeFloorManagedObject(),
+				"getOfficeFloorManagedObjectName");
 
 		// Flows
 		assertList(new String[] { "getOfficeFloorManagedObjectSourceFlowName",
@@ -132,15 +156,24 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getOfficeFloorTeamName");
 
 		// ----------------------------------------
+		// Validate the office floor input managed objects
+		// ----------------------------------------
+		assertList(new String[] { "getOfficeFloorInputManagedObjectName",
+				"getObjectType", "getX", "getY" }, officeFloor
+				.getOfficeFloorInputManagedObjects(),
+				new OfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT",
+						"net.orm.Session", null, 200, 201));
+
+		// ----------------------------------------
 		// Validate the office floor managed objects
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorManagedObjectName",
 				"getManagedObjectScope", "getX", "getY" }, officeFloor
 				.getOfficeFloorManagedObjects(),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE",
-						"THREAD", null, null, null, null, 200, 201),
+						"THREAD", null, null, null, null, null, 300, 301),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO",
-						"PROCESS", null, null, null, null, 210, 211));
+						"PROCESS", null, null, null, null, null, 310, 311));
 		OfficeFloorManagedObjectModel mo = officeFloor
 				.getOfficeFloorManagedObjects().get(0);
 
@@ -171,7 +204,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorTeamName",
 				"getTeamSourceClassName", "getX", "getY" }, officeFloor
 				.getOfficeFloorTeams(), new OfficeFloorTeamModel("TEAM",
-				"net.example.ExampleTeamSource", null, null, null, 300, 301));
+				"net.example.ExampleTeamSource", null, null, null, 400, 401));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				team.getProperties(),

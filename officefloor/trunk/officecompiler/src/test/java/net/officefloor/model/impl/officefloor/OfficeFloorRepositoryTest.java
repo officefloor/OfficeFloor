@@ -27,15 +27,19 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
@@ -47,7 +51,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link OfficeFloorRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
@@ -84,6 +88,10 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 						.getName());
 		officeFloor
 				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(
+				"INPUT_MANAGED_OBJECT", Connection.class.getName());
+		officeFloor
+				.addOfficeFloorInputManagedObject(officeFloorInputManagedObject);
 		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
 				"MANAGED_OBJECT", "THREAD");
 		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
@@ -122,8 +130,26 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// office floor managed object source -> office
 		OfficeFloorManagedObjectSourceToDeployedOfficeModel moSourceToOffice = new OfficeFloorManagedObjectSourceToDeployedOfficeModel(
-				"OFFICE", null);
+				"OFFICE");
 		officeFloorManagedObjectSource.setManagingOffice(moSourceToOffice);
+
+		// office floor managed object source -> input managed object
+		OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel moSourceToInputMo = new OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel(
+				"INPUT_MANAGED_OBJECT");
+		officeFloorManagedObjectSource
+				.setOfficeFloorInputManagedObject(moSourceToInputMo);
+
+		// managed object source input dependency -> managed object
+		OfficeFloorManagedObjectSourceInputDependencyModel inputDependency = new OfficeFloorManagedObjectSourceInputDependencyModel(
+				"INPUT_DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObjectSource
+				.addOfficeFloorManagedObjectSourceInputDependency(inputDependency);
+		OfficeFloorManagedObjectModel input_dependency = new OfficeFloorManagedObjectModel(
+				"INPUT_MO_DEPENDENCY", "PROCESS");
+		officeFloor.addOfficeFloorManagedObject(input_dependency);
+		OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel inputDependencyToMo = new OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel(
+				"INPUT_MO_DEPENDENCY");
+		inputDependency.setOfficeFloorManagedObject(inputDependencyToMo);
 
 		// office floor managed object source flow -> office input
 		OfficeFloorManagedObjectSourceFlowModel flow = new OfficeFloorManagedObjectSourceFlowModel(
@@ -199,6 +225,22 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("office floor managed object source -> office", office,
 				moSourceToOffice.getManagingOffice());
 
+		// Ensure managed object source connected to input managed object
+		assertEquals(
+				"office floor managed object source <- input managed object",
+				officeFloorManagedObjectSource, moSourceToInputMo
+						.getOfficeFloorManagedObjectSource());
+		assertEquals(
+				"office floor managed object source -> input managed object",
+				officeFloorInputManagedObject, moSourceToInputMo
+						.getOfficeFloorInputManagedObject());
+
+		// Ensure input dependency connected to managed object
+		assertEquals("input dependency <- managed object", inputDependency,
+				inputDependencyToMo.getOfficeFloorManagedObjectDependency());
+		assertEquals("input dependency -> managed object", input_dependency,
+				inputDependencyToMo.getOfficeFloorManagedObject());
+
 		// Ensure managed object source flow connected to office input
 		assertEquals("office floor managed object source flow <- office input",
 				flow, flowToInput.getOfficeFloorManagedObjectSoruceFlow());
@@ -242,6 +284,10 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 						.getName());
 		officeFloor
 				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(
+				"INPUT_MANAGED_OBJECT", Connection.class.getName());
+		officeFloor
+				.addOfficeFloorInputManagedObject(officeFloorInputManagedObject);
 		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
 				"MANAGED_OBJECT", "THREAD");
 		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
@@ -287,6 +333,28 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		moSourceToOffice.setManagingOffice(office);
 		moSourceToOffice.connect();
+
+		// office floor managed object source -> input managed object
+		OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel moSourceToInputMo = new OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel();
+		moSourceToInputMo
+				.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		moSourceToInputMo
+				.setOfficeFloorInputManagedObject(officeFloorInputManagedObject);
+		moSourceToInputMo.connect();
+
+		// managed object source input dependency -> managed object
+		OfficeFloorManagedObjectSourceInputDependencyModel inputDependency = new OfficeFloorManagedObjectSourceInputDependencyModel(
+				"INPUT_DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObjectSource
+				.addOfficeFloorManagedObjectSourceInputDependency(inputDependency);
+		OfficeFloorManagedObjectModel input_dependency = new OfficeFloorManagedObjectModel(
+				"INPUT_MO_DEPENDENCY", "PROCESS");
+		officeFloor.addOfficeFloorManagedObject(input_dependency);
+		OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel inputDependencyToMo = new OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel();
+		inputDependencyToMo
+				.setOfficeFloorManagedObjectDependency(inputDependency);
+		inputDependencyToMo.setOfficeFloorManagedObject(input_dependency);
+		inputDependencyToMo.connect();
 
 		// office floor managed object source flow -> office input
 		OfficeFloorManagedObjectSourceFlowModel flow = new OfficeFloorManagedObjectSourceFlowModel(
@@ -339,6 +407,13 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				dependencyToMo.getOfficeFloorManagedObjectName());
 		assertEquals("office floor managed object source - office", "OFFICE",
 				moSourceToOffice.getManagingOfficeName());
+		assertEquals(
+				"office floor managed object source - input managed object",
+				"INPUT_MANAGED_OBJECT", moSourceToInputMo
+						.getOfficeFloorInputManagedObjectName());
+		assertEquals("managed object source input dependency - managed object",
+				"INPUT_MO_DEPENDENCY", inputDependencyToMo
+						.getOfficeFloorManagedObjectName());
 		assertEquals(
 				"office floor managed object source flow - office input (office)",
 				"OFFICE", flowToInput.getDeployedOfficeName());
