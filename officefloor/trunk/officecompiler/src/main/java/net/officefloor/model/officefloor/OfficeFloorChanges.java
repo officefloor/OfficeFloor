@@ -29,8 +29,6 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.change.Change;
@@ -314,19 +312,59 @@ public interface OfficeFloorChanges {
 			OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice);
 
 	/**
-	 * Specifies the {@link ProcessState} bound {@link ManagedObject} name for
-	 * the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
+	 * Adds the {@link OfficeFloorInputManagedObjectModel}.
 	 *
-	 * @param officeFloorManagedObjectSourceToDeployedOffice
-	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
-	 * @param newProcessBoundManagedObjectName
-	 *            New {@link ProcessState} bound {@link ManagedObject} name.
-	 * @return {@link Change} to rename {@link ProcessState} bound
-	 *         {@link ManagedObject} name.
+	 * @param inputManagedObjectName
+	 *            Name of the {@link OfficeFloorInputManagedObjectModel}.
+	 * @param objectType
+	 *            Object type of the {@link OfficeFloorInputManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorInputManagedObjectModel}.
 	 */
-	Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> setProcessBoundManagedObjectName(
-			OfficeFloorManagedObjectSourceToDeployedOfficeModel officeFloorManagedObjectSourceToDeployedOffice,
-			String newProcessBoundManagedObjectName);
+	Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(
+			String inputManagedObjectName, String objectType);
+
+	/**
+	 * Removes the {@link OfficeFloorInputManagedObjectModel}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link OfficeFloorInputManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorInputManagedObjectModel}.
+	 */
+	Change<OfficeFloorInputManagedObjectModel> removeOfficeFloorInputManagedObject(
+			OfficeFloorInputManagedObjectModel inputManagedObject);
+
+	/**
+	 * Links the {@link OfficeFloorManagedObjectSourceModel} to the
+	 * {@link OfficeFloorInputManagedObjectModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param inputManagedObject
+	 *            {@link OfficeFloorInputManagedObjectModel}.
+	 * @return {@link Change} to link the
+	 *         {@link OfficeFloorManagedObjectSourceModel} to the
+	 *         {@link OfficeFloorInputManagedObjectModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+			OfficeFloorManagedObjectSourceModel managedObjectSource,
+			OfficeFloorInputManagedObjectModel inputManagedObject);
+
+	/**
+	 * Removes the
+	 * {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
+	 * .
+	 *
+	 * @param managedObjectSourceToInputManagedObject
+	 *            {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
+	 *         .
+	 */
+	Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> removeOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel managedObjectSourceToInputManagedObject);
 
 	/**
 	 * Links the {@link OfficeFloorManagedObjectSourceFlowModel} to the

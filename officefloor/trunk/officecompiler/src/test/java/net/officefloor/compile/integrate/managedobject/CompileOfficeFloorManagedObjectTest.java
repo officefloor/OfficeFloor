@@ -50,7 +50,7 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests compiling a {@link OfficeFloor} {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class CompileOfficeFloorManagedObjectTest extends
@@ -201,9 +201,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> managingOffice = this
-				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
 				"Managed object flow doProcess is not linked to a TaskNode");
@@ -263,7 +262,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor
@@ -293,9 +292,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> managingOffice = this
-				.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
-		managingOffice.setProcessBoundManagedObjectName("PROCESS_MO");
+		this.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
