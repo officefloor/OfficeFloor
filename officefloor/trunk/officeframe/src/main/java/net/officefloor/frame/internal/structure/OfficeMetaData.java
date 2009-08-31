@@ -24,21 +24,21 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeMetaData {
 
 	/**
 	 * Obtains the name of the {@link Office}.
-	 * 
+	 *
 	 * @return Name of the {@link Office}.
 	 */
 	String getOfficeName();
 
 	/**
 	 * Obtains the {@link OfficeManager} of the {@link Office}.
-	 * 
+	 *
 	 * @return {@link OfficeManager} of the {@link Office}.
 	 */
 	OfficeManager getOfficeManager();
@@ -46,7 +46,7 @@ public interface OfficeMetaData {
 	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
 	 * {@link Office}.
-	 * 
+	 *
 	 * @return {@link ProcessMetaData} for processes within this {@link Office}.
 	 */
 	ProcessMetaData getProcessMetaData();
@@ -54,7 +54,7 @@ public interface OfficeMetaData {
 	/**
 	 * Obtains the {@link WorkMetaData} of the {@link Work} that may be done
 	 * within this {@link Office}.
-	 * 
+	 *
 	 * @return {@link WorkMetaData} instances of this {@link Office}.
 	 */
 	WorkMetaData<?>[] getWorkMetaData();
@@ -63,14 +63,14 @@ public interface OfficeMetaData {
 	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
 	 * used when the {@link EscalationProcedure} instances on the {@link Flow}
 	 * does not handle the escalation.
-	 * 
+	 *
 	 * @return {@link EscalationProcedure} for this {@link Office}.
 	 */
 	EscalationProcedure getEscalationProcedure();
 
 	/**
 	 * Obtains the {@link OfficeStartupTask} instances for this {@link Office}.
-	 * 
+	 *
 	 * @return {@link OfficeStartupTask} instances for this {@link Office}.
 	 */
 	OfficeStartupTask[] getStartupTasks();
@@ -78,20 +78,26 @@ public interface OfficeMetaData {
 	/**
 	 * Creates a new {@link ProcessState} within the {@link Office} returning
 	 * the starting {@link JobNode} to be executed.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link JobNode}.
-	 * @param managedObject
+	 * @param inputManagedObject
 	 *            {@link ManagedObject} that possibly invoked the new
-	 *            {@link ProcessState}. This may be <code>null</code>.
-	 * @param processMoIndex
+	 *            {@link ProcessState}. This may be <code>null</code> and if so
+	 *            the remaining parameters will be ignored.
+	 * @param inputManagedObjectMetaData
+	 *            {@link ManagedObjectMetaData} for the {@link ManagedObject}
+	 *            that invoked the new {@link ProcessState}. Should the
+	 *            {@link ManagedObject} be provided this must then also be
+	 *            provided.
+	 * @param processBoundIndexForInputManagedObject
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
 	 *            in is <code>null</code>.
-	 * @param managedObjectEscalationHandler
+	 * @param inputManagedObjectEscalationHandler
 	 *            Potential {@link EscalationHandler} provided by the
 	 *            {@link ManagedObject}. May be <code>null</code> to just use
 	 *            the default {@link Office} {@link EscalationProcedure}.
@@ -100,13 +106,15 @@ public interface OfficeMetaData {
 	 * @return {@link JobNode} to start processing the {@link ProcessState}.
 	 */
 	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, ManagedObject managedObject, int processMoIndex,
-			EscalationHandler managedObjectEscalationHandler);
+			Object parameter, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int processBoundIndexForInputManagedObject,
+			EscalationHandler inputManagedObjectEscalationHandler);
 
 	/**
 	 * Creates a new {@link ProcessState} that is not triggered by a
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.

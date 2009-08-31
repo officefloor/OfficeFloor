@@ -152,38 +152,31 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter) {
-		return this.createProcess(flowMetaData, parameter, null, -1, null);
+		return this
+				.createProcess(flowMetaData, parameter, null, null, -1, null);
 	}
 
 	@Override
 	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, ManagedObject managedObject, int processMoIndex,
-			EscalationHandler managedObjectEscalationHandler) {
+			Object parameter, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int processBoundIndexForInputManagedObject,
+			EscalationHandler inputManagedObjectEscalationHandler) {
 
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
-		if (managedObject == null) {
+		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this,
 					this.officeFloorEscalation);
-		} else {
-			/*
-			 * TODO take into account instance index to obtain meta-data
-			 *
-			 * DETAILS: currently while phasing in Input ManagedObject there is
-			 * only one ManagedObjectSource per bound ManagedObject. Input
-			 * ManagedObject changes this to allow multiple and as such the
-			 * ManagedObjectExecuteContext must specify which particular
-			 * instance of ManagedObjectSource is being passed in.
-			 */
-			// Obtain the meta-data for the Input Managed Object
-			ManagedObjectMetaData<?> inputMoMetaData = this.processMetaData
-					.getManagedObjectMetaData()[processMoIndex];
 
+		} else {
 			// Create Process with the Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this,
-					this.officeFloorEscalation, managedObject, inputMoMetaData,
-					processMoIndex, managedObjectEscalationHandler);
+					this.officeFloorEscalation, inputManagedObject,
+					inputManagedObjectMetaData,
+					processBoundIndexForInputManagedObject,
+					inputManagedObjectEscalationHandler);
 		}
 
 		// Create the Flow

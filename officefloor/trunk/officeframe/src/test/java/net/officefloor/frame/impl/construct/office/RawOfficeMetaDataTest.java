@@ -721,7 +721,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_teams();
 		this.record_registerManagedObjectSources();
 		this.record_boundInputManagedObjects();
-		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+		final Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(null);
 		this.record_processBoundAdministrators(null, null);
 		this.record_threadBoundManagedObjects(null, null);
@@ -731,17 +731,24 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"OFFICE_MO_0");
-		inputManagedObject.manageByOffice(null, null, this.issues);
+		inputManagedObject.manageByOffice(null, null, null, this.issues);
 		this.control(inputManagedObject).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[0];
+				RawBoundManagedObjectMetaData[] boundMetaData = (RawBoundManagedObjectMetaData[]) actual[0];
+				assertEquals("Incorrect number of bound meta-data", 1,
+						boundMetaData.length);
+				RawBoundManagedObjectMetaData expectedBoundMetaData = processManagedObjects
+						.get("OFFICE_MO_0");
+				assertEquals("Incorrect bound meta-data",
+						expectedBoundMetaData, boundMetaData[0]);
+				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[1];
 				assertEquals("Incorrect meta-data locator", OFFICE_NAME,
 						metaDataLocator.getOfficeMetaData().getOfficeName());
 				assertTrue("Should be asset manager factory",
-						actual[1] instanceof AssetManagerFactory);
+						actual[2] instanceof AssetManagerFactory);
 				assertEquals("Incorrect issues",
-						RawOfficeMetaDataTest.this.issues, actual[2]);
+						RawOfficeMetaDataTest.this.issues, actual[3]);
 				return true;
 			}
 		});

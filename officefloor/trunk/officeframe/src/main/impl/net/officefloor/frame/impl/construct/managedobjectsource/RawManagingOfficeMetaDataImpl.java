@@ -36,6 +36,8 @@ import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -217,6 +219,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 	@Override
 	public synchronized void manageByOffice(
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			OfficeMetaDataLocator metaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
@@ -310,36 +313,57 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// No flows, so provide empty execution context
 			this.managedObjectExecuteContext = new ManagedObjectExecuteContextImpl<F>(
-					-1, null, officeMetaData);
+					null, -1, null, officeMetaData);
 			return;
 		}
 
-		// Obtain map of process managed object name to process bound index
-		ManagedObjectMetaData<?>[] moMetaDatas = officeMetaData
-				.getProcessMetaData().getManagedObjectMetaData();
-		Map<String, Integer> processMoNameToIndex = new HashMap<String, Integer>();
-		for (int i = 0; i < moMetaDatas.length; i++) {
-			processMoNameToIndex.put(
-					moMetaDatas[i].getBoundManagedObjectName(), new Integer(i));
-		}
-
-		// Obtain the process bound index of the input ManagedObject
-		Integer processBoundIndex = null;
+		// Obtain the bound input name for this managed object source
 		String processBoundName = this.inputConfiguration
 				.getBoundManagedObjectName();
-		if (!ConstructUtil.isBlank(processBoundName)) {
-			// Have name so obtain the index
-			processBoundIndex = processMoNameToIndex.get(processBoundName);
+		if (ConstructUtil.isBlank(processBoundName)) {
+			issues
+					.addIssue(
+							AssetType.MANAGED_OBJECT,
+							managedObjectSourceName,
+							ManagedObjectSource.class.getSimpleName()
+									+ " invokes flows but does not provide input Managed Object binding name");
+			return;
 		}
-		if (processBoundIndex == null) {
+
+		// Obtain the process bound index and Managed Object meta-data
+		int processBoundIndex = -1;
+		ManagedObjectMetaData<?> managedObjectMetaData = null;
+		if (processBoundManagedObjectMetaData != null) {
+			NEXT_BOUND_MO: for (int i = 0; i < processBoundManagedObjectMetaData.length; i++) {
+				RawBoundManagedObjectMetaData boundMetaData = processBoundManagedObjectMetaData[i];
+				if (processBoundName.equals(boundMetaData
+						.getBoundManagedObjectName())) {
+					// Found the bound configuration for this managed object
+					processBoundIndex = i;
+
+					// Find the particular instance
+					for (RawBoundManagedObjectInstanceMetaData<?> instanceMetaData : boundMetaData
+							.getRawBoundManagedObjectInstanceMetaData()) {
+						if (managedObjectSourceName.equals(instanceMetaData
+								.getRawManagedObjectMetaData()
+								.getManagedObjectName())) {
+							// Found the instance meta-data
+							managedObjectMetaData = instanceMetaData
+									.getManagedObjectMetaData();
+							break NEXT_BOUND_MO; // index and meta-data obtained
+						}
+					}
+				}
+			}
+		}
+		if ((processBoundIndex < 0) || (managedObjectMetaData == null)) {
+			// Managed Object Source not in Office
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					ManagedObjectSource.class.getSimpleName()
 							+ " by input name '" + processBoundName
 							+ "' not managed by Office "
 							+ officeMetaData.getOfficeName());
-
-			// No flows
-			return; // managed object not in office
+			return;
 		}
 
 		// Create the flow mappings for the configuration
@@ -425,7 +449,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Specify the managed object execute context
 		this.managedObjectExecuteContext = new ManagedObjectExecuteContextImpl<F>(
-				processBoundIndex.intValue(), flows, officeMetaData);
+				managedObjectMetaData, processBoundIndex, flows, officeMetaData);
 	}
 
 	@Override

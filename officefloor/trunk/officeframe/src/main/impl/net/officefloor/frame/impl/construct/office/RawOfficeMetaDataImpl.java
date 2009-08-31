@@ -593,7 +593,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
-			officeManagingManagedObject.manageByOffice(metaDataLocator,
+			officeManagingManagedObject.manageByOffice(
+					processBoundManagedObjects, metaDataLocator,
 					officeAssetManagerFactory, issues);
 		}
 

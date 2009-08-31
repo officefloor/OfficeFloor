@@ -85,6 +85,10 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
 	 * {@link Office} of the input {@link OfficeMetaDataLocator}.
 	 *
+	 * @param processBoundManagedObjectMetaData
+	 *            {@link RawBoundManagedObjectMetaData} of the
+	 *            {@link ProcessState} bound {@link ManagedObject} instances of
+	 *            the managing {@link Office}.
 	 * @param metaDataLocator
 	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
 	 *            the {@link ManagedObjectSource}.
@@ -93,7 +97,9 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(OfficeMetaDataLocator metaDataLocator,
+	void manageByOffice(
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
+			OfficeMetaDataLocator metaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**

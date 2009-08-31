@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -28,11 +29,16 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectExecuteContext} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 		ManagedObjectExecuteContext<F> {
+
+	/**
+	 * {@link ManagedObjectMetaData} of the {@link ManagedObject}.
+	 */
+	private final ManagedObjectMetaData<?> managedObjectMetaData;
 
 	/**
 	 * Index of the {@link ManagedObject} within the {@link ProcessState}.
@@ -51,7 +57,9 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
+	 * @param managedObjectMetaData
+	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
 	 * @param processMoIndex
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}.
@@ -62,8 +70,10 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 *            {@link OfficeMetaData} to create {@link ProcessState}
 	 *            instances.
 	 */
-	public ManagedObjectExecuteContextImpl(int processMoIndex,
+	public ManagedObjectExecuteContextImpl(
+			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData) {
+		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
@@ -108,8 +118,8 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 
 		// Create the job in a new process
 		JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
-				parameter, managedObject, this.processMoIndex,
-				escalationHandler);
+				parameter, managedObject, this.managedObjectMetaData,
+				this.processMoIndex, escalationHandler);
 
 		// Activate the Job
 		jobNode.activateJob();
