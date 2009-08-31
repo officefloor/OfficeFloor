@@ -21,23 +21,17 @@ import java.beans.PropertyChangeEvent;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
-import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext;
-import net.officefloor.model.change.Change;
-import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel.OfficeFloorManagedObjectSourceToDeployedOfficeEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the
  * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorManagedObjectSourceToDeployedOfficeEditPart
@@ -45,50 +39,15 @@ public class OfficeFloorManagedObjectSourceToDeployedOfficeEditPart
 		AbstractOfficeFloorConnectionEditPart<OfficeFloorManagedObjectSourceToDeployedOfficeModel, OfficeFloorManagedObjectSourceToDeployedOfficeEvent>
 		implements OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext {
 
-	/**
-	 * {@link OfficeFloorManagedObjectSourceToDeployedOfficeFigure}.
-	 */
-	private OfficeFloorManagedObjectSourceToDeployedOfficeFigure decoratedFigure;
-
 	/*
 	 * =============== AbstractOfficeFloorConnectionEditPart ===================
 	 */
 
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
-		this.decoratedFigure = OfficeFloorPlugin.getSkin()
-				.getOfficeFloorFigureFactory()
+		OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 						figure, this);
-	}
-
-	@Override
-	protected void populateOfficeFloorDirectEditPolicy(
-			OfficeFloorDirectEditPolicy<OfficeFloorManagedObjectSourceToDeployedOfficeModel> policy) {
-		policy
-				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorManagedObjectSourceToDeployedOfficeModel>() {
-					@Override
-					public String getInitialValue() {
-						return OfficeFloorManagedObjectSourceToDeployedOfficeEditPart.this
-								.getCastedModel()
-								.getProcessBoundManagedObjectName();
-					}
-
-					@Override
-					public IFigure getLocationFigure() {
-						return OfficeFloorManagedObjectSourceToDeployedOfficeEditPart.this.decoratedFigure
-								.getProcessBoundManagedObjectNameFigure();
-					}
-
-					@Override
-					public Change<OfficeFloorManagedObjectSourceToDeployedOfficeModel> createChange(
-							OfficeFloorChanges changes,
-							OfficeFloorManagedObjectSourceToDeployedOfficeModel target,
-							String newValue) {
-						return changes.setProcessBoundManagedObjectName(target,
-								newValue);
-					}
-				});
 	}
 
 	@Override
@@ -101,20 +60,8 @@ public class OfficeFloorManagedObjectSourceToDeployedOfficeEditPart
 			OfficeFloorManagedObjectSourceToDeployedOfficeEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_PROCESS_BOUND_MANAGED_OBJECT_NAME:
-			this.decoratedFigure.setProcessBoundManagedObjectName(this
-					.getCastedModel().getProcessBoundManagedObjectName());
-			break;
+		// No property changes
 		}
-	}
-
-	/*
-	 * ===== OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext =====
-	 */
-
-	@Override
-	public String getProcessBoundManagedObjectName() {
-		return this.getCastedModel().getProcessBoundManagedObjectName();
 	}
 
 }

@@ -36,7 +36,7 @@ import org.eclipse.draw2d.PolylineConnection;
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
  * {@link OfficeFloorModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorFigureFactory {
@@ -44,7 +44,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectSourceModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -55,7 +55,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectTaskFlowModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -66,7 +66,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectTeamModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -77,7 +77,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeFloorManagedObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorManagedObjectFigure}.
@@ -88,7 +88,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectDependencyModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -98,7 +98,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -109,7 +109,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeManagedObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -119,7 +119,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeInputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -129,7 +129,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link }.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DeployedOfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -139,7 +139,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link TeamModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeFloorTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -151,7 +151,7 @@ public interface OfficeFloorFigureFactory {
 	 * Decorates the
 	 * {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -164,7 +164,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Decorates the {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -176,7 +176,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Decorates the {@link DeployedOfficeTeamToOfficeFloorTeamModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -190,7 +190,7 @@ public interface OfficeFloorFigureFactory {
 	 * Decorates the
 	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -203,14 +203,13 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Decorates the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceToDeployedOffice}.
-	 * @return {@link OfficeFloorManagedObjectSourceToDeployedOfficeFigure}.
 	 */
-	OfficeFloorManagedObjectSourceToDeployedOfficeFigure decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context);
 
@@ -218,7 +217,7 @@ public interface OfficeFloorFigureFactory {
 	 * Decorates the
 	 * {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -231,7 +230,7 @@ public interface OfficeFloorFigureFactory {
 	/**
 	 * Decorates the
 	 * {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
