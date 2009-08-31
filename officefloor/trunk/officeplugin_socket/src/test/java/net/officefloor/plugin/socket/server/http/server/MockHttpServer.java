@@ -138,7 +138,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder
 				.setManagingOffice(officeName);
-		managingOfficeBuilder.setProcessBoundManagedObjectName(MO_NAME);
+		managingOfficeBuilder.setInputManagedObjectName(MO_NAME);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(MO_NAME, "accepter",

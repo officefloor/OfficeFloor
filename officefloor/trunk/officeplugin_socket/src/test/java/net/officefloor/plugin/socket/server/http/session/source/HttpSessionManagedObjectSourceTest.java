@@ -51,10 +51,6 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	public HttpServicerTask buildServicer(String managedObjectName,
 			MockHttpServer server) throws Exception {
 
-		// TODO remove once InputManagedObject fix in place
-		this.getOfficeBuilder().addProcessManagedObject(managedObjectName,
-				managedObjectName);
-
 		// Register the Http Session
 		ManagedObjectBuilder<Indexed> session = server.constructManagedObject(
 				"HTTP_SESSION", HttpSessionManagedObjectSource.class, this

@@ -87,8 +87,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 				.setManagingOffice(officeName);
 
 		// Hook in work of test
-		managingOfficeBuilder
-				.setProcessBoundManagedObjectName(managedObjectName);
+		managingOfficeBuilder.setInputManagedObjectName(managedObjectName);
 		managingOfficeBuilder.linkProcess(0, workName, taskName);
 	}
 
