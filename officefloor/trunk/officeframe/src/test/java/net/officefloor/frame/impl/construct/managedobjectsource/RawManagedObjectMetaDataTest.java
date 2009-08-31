@@ -608,8 +608,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObjectScope.WORK);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
 				.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.WORK + ":" + BOUND_NAME, "source",
-						this.issues), assetManager);
+						ManagedObjectScope.WORK + ":" + INSTANCE_INDEX + ":"
+								+ BOUND_NAME, "source", this.issues),
+				assetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -688,12 +689,14 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObjectScope.THREAD);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
 				.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.THREAD + ":" + BOUND_NAME, "source",
-						this.issues), sourceAssetManager);
+						ManagedObjectScope.THREAD + ":" + INSTANCE_INDEX + ":"
+								+ BOUND_NAME, "source", this.issues),
+				sourceAssetManager);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
 				.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.THREAD + ":" + BOUND_NAME,
-						"operations", this.issues), operationsAssetManager);
+						ManagedObjectScope.THREAD + ":" + INSTANCE_INDEX + ":"
+								+ BOUND_NAME, "operations", this.issues),
+				operationsAssetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -725,7 +728,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		final RawBoundManagedObjectMetaData boundMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
-		final int INSTANCE_INDEX = 0;
+		final int INSTANCE_INDEX = 2;
 		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final String BOUND_NAME = "BOUND_NAME";
@@ -745,8 +748,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObjectScope.PROCESS);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
 				.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.PROCESS + ":" + BOUND_NAME,
-						"source", this.issues), sourceAssetManager);
+						ManagedObjectScope.PROCESS + ":" + INSTANCE_INDEX + ":"
+								+ BOUND_NAME, "source", this.issues),
+				sourceAssetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();

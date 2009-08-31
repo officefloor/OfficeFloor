@@ -299,7 +299,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		// Determine if flows for the managed object source
 		if (!this.isRequireFlows()) {
 
-			// No flows but issue if flows configured
+			// No flows but issue if flows or input configuration
 			if ((flowConfigurations != null) && (flowConfigurations.length > 0)) {
 				issues
 						.addIssue(
