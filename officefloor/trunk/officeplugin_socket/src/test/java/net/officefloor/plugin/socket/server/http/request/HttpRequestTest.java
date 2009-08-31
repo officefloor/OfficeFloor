@@ -24,7 +24,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -91,8 +90,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 							new RequestWork(), "servicer", "service");
 					ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
 							"service", "WORKER");
-					taskBuilder.buildObject(managedObjectName,
-							ManagedObjectScope.PROCESS);
+					taskBuilder.buildObject(managedObjectName);
 
 					// Return the reference to the service task
 					return new HttpServicerTask("servicer", "service");
@@ -131,7 +129,11 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			});
 
 		} catch (Throwable ex) {
-			ex.printStackTrace();
+			// Add warning that failed to setup
+			suite.addTest(TestSuite
+					.warning("Failed setting up suite of tests: "
+							+ ex.getMessage() + " ["
+							+ ex.getClass().getSimpleName() + "]"));
 		}
 
 		// Return the test suite
