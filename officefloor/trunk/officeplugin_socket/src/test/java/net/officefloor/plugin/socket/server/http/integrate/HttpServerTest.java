@@ -18,7 +18,6 @@
 package net.officefloor.plugin.socket.server.http.integrate;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
@@ -53,7 +52,7 @@ public class HttpServerTest extends MockHttpServer {
 				new HttpWork(), "servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
-		taskBuilder.buildObject(managedObjectName, ManagedObjectScope.PROCESS);
+		taskBuilder.buildObject(managedObjectName);
 
 		// Return the reference to the service task
 		return new HttpServicerTask("servicer", "service");

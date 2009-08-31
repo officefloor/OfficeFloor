@@ -27,7 +27,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -130,7 +129,7 @@ public abstract class AbstractTcpServerTestCase extends
 				new MessageWork(), WORK_NAME, null);
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(TASK_NAME,
 				"WORKER");
-		taskBuilder.buildObject(MO_NAME, ManagedObjectScope.PROCESS);
+		taskBuilder.buildObject(MO_NAME);
 		taskBuilder.buildTaskContext();
 		this.constructTeam("WORKER", new OnePersonTeam(100));
 
