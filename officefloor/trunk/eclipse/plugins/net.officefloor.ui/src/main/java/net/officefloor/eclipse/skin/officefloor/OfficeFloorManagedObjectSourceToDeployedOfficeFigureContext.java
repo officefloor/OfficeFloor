@@ -17,23 +17,13 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 
 /**
  * Context to decorate the
  * {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} connection.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext {
-
-	/**
-	 * Obtains the {@link ProcessState} bound {@link ManagedObject} name.
-	 * 
-	 * @return {@link ProcessState} bound {@link ManagedObject} name.
-	 */
-	String getProcessBoundManagedObjectName();
-
 }

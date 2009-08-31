@@ -40,7 +40,6 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFl
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext;
-import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
@@ -162,11 +161,10 @@ public class StandardOfficeFloorFigureFactory implements
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSourceToDeployedOfficeFigure decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
+	public void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context) {
-		return new StandardOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
-				figure, context);
+		// Leave as default
 	}
 
 }
