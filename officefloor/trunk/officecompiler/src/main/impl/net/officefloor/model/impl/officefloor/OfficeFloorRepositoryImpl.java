@@ -27,15 +27,19 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
@@ -45,7 +49,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link OfficeFloorRepository} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
@@ -57,7 +61,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -124,6 +128,32 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Create the set of input managed objects
+		Map<String, OfficeFloorInputManagedObjectModel> inputManagedObjects = new HashMap<String, OfficeFloorInputManagedObjectModel>();
+		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+			inputManagedObjects
+					.put(inputManagedObject
+							.getOfficeFloorInputManagedObjectName(),
+							inputManagedObject);
+		}
+
+		// Connect the managed object source to its input managed object
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel conn = moSource
+					.getOfficeFloorInputManagedObject();
+			if (conn != null) {
+				OfficeFloorInputManagedObjectModel inputMo = inputManagedObjects
+						.get(conn.getOfficeFloorInputManagedObjectName());
+				if (inputMo != null) {
+					conn.setOfficeFloorManagedObjectSource(moSource);
+					conn.setOfficeFloorInputManagedObject(inputMo);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of office inputs
 		TripleKeyMap<String, String, String, DeployedOfficeInputModel> officeInputs = new TripleKeyMap<String, String, String, DeployedOfficeInputModel>();
 		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
@@ -161,6 +191,26 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				.getOfficeFloorManagedObjects()) {
 			managedObjects.put(managedObject.getOfficeFloorManagedObjectName(),
 					managedObject);
+		}
+
+		// Connect the input dependencies to the office floor managed objects
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceInputDependencyModel inputDependency : moSource
+					.getOfficeFloorManagedObjectSourceInputDependencies()) {
+				OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel conn = inputDependency
+						.getOfficeFloorManagedObject();
+				if (conn != null) {
+					OfficeFloorManagedObjectModel managedObject = managedObjects
+							.get(conn.getOfficeFloorManagedObjectName());
+					if (managedObject != null) {
+						conn
+								.setOfficeFloorManagedObjectDependency(inputDependency);
+						conn.setOfficeFloorManagedObject(managedObject);
+						conn.connect();
+					}
+				}
+			}
 		}
 
 		// Connect the office objects to the office floor managed objects
@@ -267,6 +317,26 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			for (OfficeFloorManagedObjectSourceToDeployedOfficeModel conn : office
 					.getOfficeFloorManagedObjectSources()) {
 				conn.setManagingOfficeName(office.getDeployedOfficeName());
+			}
+		}
+
+		// Specify input managed objects for office floor managed object sources
+		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+			for (OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel conn : inputManagedObject
+					.getOfficeFloorManagedObjectSources()) {
+				conn.setOfficeFloorInputManagedObjectName(inputManagedObject
+						.getOfficeFloorInputManagedObjectName());
+			}
+		}
+
+		// Specify input dependencies for office floor managed object sources
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel conn : managedObject
+					.getDependentOfficeFloorManagedObjectSourceInputs()) {
+				conn.setOfficeFloorManagedObjectName(managedObject
+						.getOfficeFloorManagedObjectName());
 			}
 		}
 
