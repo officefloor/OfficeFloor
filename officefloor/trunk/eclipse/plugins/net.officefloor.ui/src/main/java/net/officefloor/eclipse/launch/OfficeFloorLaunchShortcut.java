@@ -31,6 +31,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -79,17 +80,22 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 				return;
 			}
 
-			// Obtain the java package fragment
+			// Obtain the office floor launch path
+			String officeFloorLaunchPath;
 			IJavaElement javaElement = JavaCore.create(resource.getParent());
-			if (!(javaElement instanceof IPackageFragment)) {
+			if (javaElement instanceof IPackageFragment) {
+				// Contained within a package
+				IPackageFragment packageFragment = (IPackageFragment) javaElement;
+				officeFloorLaunchPath = packageFragment.getElementName()
+						.replace('.', '/')
+						+ "/" + resource.getName();
+			} else if (javaElement instanceof IPackageFragmentRoot) {
+				// Contained in the default package (no package)
+				officeFloorLaunchPath = resource.getName();
+			} else {
+				// Unknown container of resource
 				return;
 			}
-			IPackageFragment packageFragment = (IPackageFragment) javaElement;
-
-			// Obtain the office floor launch path
-			String officeFloorLaunchPath = packageFragment.getElementName()
-					.replace('.', '/')
-					+ "/" + resource.getName();
 
 			// Obtain the Launch Manager
 			ILaunchManager launchManager = DebugPlugin.getDefault()

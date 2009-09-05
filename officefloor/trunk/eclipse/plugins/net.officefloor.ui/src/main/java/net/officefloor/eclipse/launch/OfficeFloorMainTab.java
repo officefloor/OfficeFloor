@@ -22,11 +22,13 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.model.office.OfficeModel;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,6 +44,11 @@ import org.eclipse.swt.widgets.Text;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
+
+	/**
+	 * {@link IProject} containing the configuration file.
+	 */
+	private Text project;
 
 	/**
 	 * Configuration file.
@@ -84,7 +91,14 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 		};
 
 		// Specifies the configuration file
-		new Label(composite, SWT.NONE).setText("Office Floor");
+		new Label(composite, SWT.NONE).setText("Project");
+		this.project = new Text(composite, SWT.NONE);
+		this.project.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
+		this.project.addModifyListener(dirtyListener);
+
+		// Specifies the configuration file
+		new Label(composite, SWT.NONE).setText("OfficeFloor");
 		this.configurationFile = new Text(composite, SWT.NONE);
 		this.configurationFile.setLayoutData(new GridData(
 				GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -112,6 +126,8 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
 			// Obtain the values
+			this.project.setText(configuration.getAttribute(
+					IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""));
 			this.configurationFile.setText(configuration.getAttribute(
 					OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE, ""));
 			this.officeName.setText(configuration.getAttribute(
@@ -123,9 +139,11 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 		}
 	}
 
-
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		configuration.setAttribute(
+				IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+				this.project.getText());
 		configuration.setAttribute(OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
 				this.configurationFile.getText());
 		configuration.setAttribute(OfficeFloorLauncher.ATTR_OFFICE_NAME,

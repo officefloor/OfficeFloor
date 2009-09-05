@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
@@ -28,7 +29,6 @@ import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.main.OfficeFloorMain;
-import net.officefloor.model.Model;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 
 import org.eclipse.core.runtime.IPath;
@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 /**
  * {@link IClasspathContainer} for the {@link OfficeFloor}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorClasspathContainer implements IClasspathContainer {
@@ -55,14 +55,14 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	 * Listing of {@link Class} instances with one per framework jar.
 	 */
 	private static final Class<?>[] frameworkClasses = new Class<?>[] {
-			OfficeFrame.class, OfficeFloorMain.class, XmlUnmarshaller.class,
-			Model.class };
+			OfficeFrame.class, OfficeFloorCompiler.class,
+			XmlUnmarshaller.class, OfficeFloorMain.class };
 
 	/**
 	 * Ensures the {@link OfficeFloor} {@link IClasspathEntry} entries are
 	 * available on the {@link IJavaProject} including the
 	 * {@link IClasspathEntry} instances of the extensions.
-	 * 
+	 *
 	 * @param javaProject
 	 *            {@link IJavaProject}.
 	 * @param monitor
@@ -177,7 +177,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param path
 	 *            {@link IPath}.
 	 * @param javaProject
@@ -220,7 +220,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	 * Note: that this method looks up extensions and extracts the class paths
 	 * from them. Should the extension not be found, then its class paths will
 	 * not be added.
-	 * 
+	 *
 	 * @param extensionClassNames
 	 *            Names of the classes for which there may be extensions.
 	 * @throws Exception
@@ -262,7 +262,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	/**
 	 * Adds the {@link IClasspathEntry} if necessary so as to not create
 	 * duplicate {@link IClasspathEntry} instances.
-	 * 
+	 *
 	 * @param classpathEntry
 	 *            {@link IClasspathEntry}.
 	 */
@@ -286,7 +286,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 
 	@Override
 	public String getDescription() {
-		return "Office Floor";
+		return "OfficeFloor";
 	}
 
 	@Override
