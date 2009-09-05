@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Node representing a {@link ManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
@@ -48,7 +48,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 
 	/**
 	 * Obtains {@link ManagedObjectType} for the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
@@ -57,7 +57,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	/**
 	 * Adds the context of the {@link Office} containing this
 	 * {@link SectionManagedObject}.
-	 * 
+	 *
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
@@ -66,7 +66,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	/**
 	 * Adds the context of the {@link OfficeFloor} containing this
 	 * {@link OfficeFloorManagedObject}.
-	 * 
+	 *
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 */
@@ -75,7 +75,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the
 	 * {@link OfficeFloor}.
-	 * 
+	 *
 	 * @return Name that this {@link ManagedObjectSource} was added to the
 	 *         {@link OfficeFloor}.
 	 */
@@ -84,7 +84,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	/**
 	 * Obtains the {@link OfficeNode} of the {@link ManagingOffice} for this
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link OfficeNode} of the {@link ManagingOffice} for this
 	 *         {@link ManagedObjectSource} or <code>null</code> if can not
 	 *         obtain it.
@@ -92,8 +92,28 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	OfficeNode getManagingOfficeNode();
 
 	/**
+	 * Links the {@link InputManagedObjectNode} for this
+	 * {@link ManagedObjectSource}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link InputManagedObjectNode}.
+	 * @return <code>true</code> if linked.
+	 */
+	boolean linkInputManagedObjectNode(InputManagedObjectNode inputManagedObject);
+
+	/**
+	 * Obtains the {@link InputManagedObjectNode} for this
+	 * {@link ManagedObjectSource}.
+	 *
+	 * @return {@link InputManagedObjectNode} for this
+	 *         {@link ManagedObjectSource} or <code>null</code> if can not
+	 *         obtain it.
+	 */
+	InputManagedObjectNode getInputManagedObjectNode();
+
+	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
-	 * 
+	 *
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
 	 * @param managingOffice

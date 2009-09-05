@@ -26,8 +26,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Node representing an instance use of a {@link ManagedObject}..
- * 
+ * Node representing an instance use of a {@link ManagedObject}.
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectNode extends SectionManagedObject,
@@ -37,7 +37,7 @@ public interface ManagedObjectNode extends SectionManagedObject,
 	/**
 	 * Obtains the name under which this {@link ManagedObject} is made available
 	 * to the {@link Office}.
-	 * 
+	 *
 	 * @return Name under which this {@link ManagedObject} is made available to
 	 *         the {@link Office}.
 	 */
@@ -51,7 +51,7 @@ public interface ManagedObjectNode extends SectionManagedObject,
 	 * management. Only the first invocation should build this
 	 * {@link ManagedObject} into the {@link Office} and all further invocations
 	 * are to be ignored.
-	 * 
+	 *
 	 * @param office
 	 *            {@link OfficeNode} of the {@link Office} that this
 	 *            {@link ManagedObject} is to build itself into.

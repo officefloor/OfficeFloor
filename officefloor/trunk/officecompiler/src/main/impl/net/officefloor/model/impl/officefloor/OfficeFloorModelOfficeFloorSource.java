@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -28,6 +29,7 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -46,6 +48,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
@@ -59,7 +62,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeploye
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -164,6 +166,20 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.addOfficeFloorManagedObject(managedObjectName,
 							managedObjectScope);
 			officeFloorManagedObjects.put(managedObjectName, managedObject);
+		}
+
+		// Add the office floor input managed objects, keeping registry of them
+		Map<String, OfficeFloorInputManagedObject> officeFloorInputManagedObjects = new HashMap<String, OfficeFloorInputManagedObject>();
+		for (OfficeFloorInputManagedObjectModel inputManagedObjectModel : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+
+			// Add the input managed object and also register it
+			String inputManagedObjectName = inputManagedObjectModel
+					.getOfficeFloorInputManagedObjectName();
+			OfficeFloorInputManagedObject inputManagedObject = deployer
+					.addInputManagedObject(inputManagedObjectName);
+			officeFloorInputManagedObjects.put(inputManagedObjectName,
+					inputManagedObject);
 		}
 
 		// Link the dependencies for the managed objects
@@ -333,23 +349,30 @@ public class OfficeFloorModelOfficeFloorSource extends
 				}
 			}
 			if (managingOffice != null) {
-
-				// TODO provide input managed object and dependencies
-				String inputManagedObjectName = null;
-				OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel mosToInput = managedObjectSourceModel
-						.getOfficeFloorInputManagedObject();
-				if (mosToInput != null) {
-					OfficeFloorInputManagedObjectModel inputMo = mosToInput
-							.getOfficeFloorInputManagedObject();
-					if (inputMo != null) {
-						inputManagedObjectName = inputMo
-								.getOfficeFloorInputManagedObjectName();
-					}
-				}
-
 				// Have the office manage the managed object
 				deployer.link(managedObjectSource.getManagingOffice(),
-						managingOffice, inputManagedObjectName);
+						managingOffice);
+			}
+
+			// Obtain the input managed object
+			OfficeFloorInputManagedObject inputManagedObject = null;
+			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel mosToInput = managedObjectSourceModel
+					.getOfficeFloorInputManagedObject();
+			if (mosToInput != null) {
+				OfficeFloorInputManagedObjectModel inputMo = mosToInput
+						.getOfficeFloorInputManagedObject();
+				if (inputMo != null) {
+					String inputManagedObjectName = inputMo
+							.getOfficeFloorInputManagedObjectName();
+					if (!CompileUtil.isBlank(inputManagedObjectName)) {
+						inputManagedObject = officeFloorInputManagedObjects
+								.get(inputManagedObjectName);
+					}
+				}
+			}
+			if (inputManagedObject != null) {
+				// Have input managed object for managed object source
+				deployer.link(managedObjectSource, inputManagedObject);
 			}
 
 			// Add the office floor managed object source flows

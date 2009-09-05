@@ -23,13 +23,11 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagingOfficeNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
@@ -51,14 +49,8 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	private final NodeContext context;
 
 	/**
-	 * {@link ProcessState} bound {@link ManagedObject} name for the
-	 * {@link ManagedObjectSource}.
-	 */
-	private String processBoundManagedObjectName;
-
-	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource} for which this is the
 	 *            {@link ManagingOffice}.
@@ -72,21 +64,6 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;
-	}
-
-	/*
-	 * ================== ManagingOfficeNode ===========================
-	 */
-
-	@Override
-	public String getProcessBoundManagedObjectName() {
-		return this.processBoundManagedObjectName;
-	}
-
-	@Override
-	public void setProcessBoundManagedObjectName(
-			String processBoundManagedObjectName) {
-		this.processBoundManagedObjectName = processBoundManagedObjectName;
 	}
 
 	/*

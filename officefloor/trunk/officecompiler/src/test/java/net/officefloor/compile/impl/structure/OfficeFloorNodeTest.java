@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -35,12 +36,10 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests the {@link OfficeFloorNode}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorNodeTest extends AbstractStructureTestCase {
@@ -163,6 +162,44 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Should be the same managed object source
 		assertEquals("Should be same managed object source on adding twice",
 				moSourceFirst, moSourceSecond);
+	}
+
+	/**
+	 * Tests adding an {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testAddOfficeFloorInputManagedObject() {
+		// Add two different input managed objects verifying details
+		this.replayMockObjects();
+		OfficeFloorInputManagedObject inputMo = this.node
+				.addInputManagedObject("INPUT");
+		assertNotNull("Must have input managed object", inputMo);
+		assertEquals("Incorrect input managed object name", "INPUT", inputMo
+				.getOfficeFloorInputManagedObjectName());
+		assertNotSame("Should obtain another input managed object", inputMo,
+				this.node.addInputManagedObject("ANOTHER"));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if adding the {@link OfficeFloorInputManagedObject} twice.
+	 */
+	public void testAddOfficeFloorInputManagedObjectTwice() {
+
+		// Record issue in adding twice
+		this
+				.record_issue("Office floor input managed object INPUT already added");
+
+		// Add the input managed object twice
+		this.replayMockObjects();
+		OfficeFloorInputManagedObject moFirst = this.node
+				.addInputManagedObject("INPUT");
+		OfficeFloorInputManagedObject moSecond = this.node
+				.addInputManagedObject("INPUT");
+		this.verifyMockObjects();
+
+		// Should be the same input managed object
+		assertEquals("Should be same input managed object on adding twice",
+				moFirst, moSecond);
 	}
 
 	/**
@@ -293,35 +330,43 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		ManagingOffice managingOffice = moSource.getManagingOffice();
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
 				null);
-		this.node.link(managingOffice, office, null);
+		this.node.link(managingOffice, office);
 		assertOfficeLink("managing office -> deployed office", managingOffice,
 				office);
 
 		// Ensure only can link once
 		this.node.link(managingOffice, this.addDeployedOffice(this.node,
-				"ANOTHER", null), null);
+				"ANOTHER", null));
 		assertOfficeLink("Can only link once", managingOffice, office);
 
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure can link {@link ManagingOffice} to the {@link DeployedOffice} with
-	 * a {@link ProcessState} bound {@link ManagedObject} name.
+	 * Ensure can link {@link OfficeFloorManagedObjectSource} to an
+	 * {@link OfficeFloorInputManagedObject}.
 	 */
-	public void testLinkManagingOfficeToDeployedOfficeWithProcessBoundManagedObjectName() {
+	public void testLinkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object source MO_SOURCE already linked to an input managed object");
 
 		this.replayMockObjects();
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(
-				this.node, "MO", null);
-		ManagingOffice managingOffice = moSource.getManagingOffice();
-		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
-				null);
-		this.node.link(managingOffice, office, "MANAGED_OBJECT");
-		assertOfficeLink("managing office -> deployed office", managingOffice,
-				office);
+				this.node, "MO_SOURCE", null);
+		OfficeFloorInputManagedObject inputMo = this.node
+				.addInputManagedObject("INPUT");
+		this.node.link(moSource, inputMo);
+		assertSourceInput(
+				"office floor managed object source -> office floor input managed object",
+				moSource, inputMo);
+
+		// Ensure can link only once
+		this.node.link(moSource, this.node.addInputManagedObject("ANOTHER"));
+		assertSourceInput("Can only link once", moSource, inputMo);
 
 		this.verifyMockObjects();
 	}
@@ -387,6 +432,40 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.node.link(dependency, moSourceTarget.addOfficeFloorManagedObject(
 				"ANOTHER", ManagedObjectScope.PROCESS));
 		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link OfficeFloorManagedObject}
+	 * {@link ManagedObjectDependency} to the
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testLinkManagedObjectDependencyToOfficeFloorInputManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO_SOURCE", null);
+		OfficeFloorManagedObject mo = moSource.addOfficeFloorManagedObject(
+				"MO", ManagedObjectScope.PROCESS);
+		ManagedObjectDependency dependency = mo
+				.getManagedObjectDependency("DEPENDENCY");
+		OfficeFloorInputManagedObject inputMoTarget = this.node
+				.addInputManagedObject("INPUT_TARGET");
+		this.node.link(dependency, inputMoTarget);
+		assertObjectLink(
+				"managed object dependency -> office floor input managed object",
+				dependency, inputMoTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, this.node.addInputManagedObject("ANOTHER"));
+		assertObjectLink("Can only link once", dependency, inputMoTarget);
 
 		this.verifyMockObjects();
 	}
@@ -482,8 +561,37 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure can link {@link OfficeObject} to the
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testLinkOfficeObjectToOfficeFloorInputManagedObject() {
+
+		// Record already being linked
+		this.record_issue("Office object OBJECT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
+				null);
+		OfficeObject object = office.getDeployedOfficeObject("OBJECT");
+		OfficeFloorInputManagedObject inputMo = this.node
+				.addInputManagedObject("INPUT_TARGET");
+		this.node.link(object, inputMo);
+		assertObjectLink(
+				"office required object -> office floor input managed object",
+				object, inputMo);
+
+		// Ensure only can link once
+		this.node.link(object, this.node.addInputManagedObject("ANOTHER"));
+		assertObjectLink("Can only link once", object, inputMo);
+
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Records adding an issue.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */

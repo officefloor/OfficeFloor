@@ -22,10 +22,12 @@ import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -94,7 +96,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Abstract functionality for testing loading the {@link OfficeSection}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
@@ -140,7 +142,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -157,7 +159,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link LinkFlowNode} source is linked to the target
 	 * {@link LinkFlowNode}.
-	 * 
+	 *
 	 * @param msg
 	 *            Message.
 	 * @param linkSource
@@ -177,7 +179,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link LinkObjectNode} source is linked to the target
 	 * {@link LinkObjectNode}.
-	 * 
+	 *
 	 * @param msg
 	 *            Message.
 	 * @param linkSource
@@ -197,7 +199,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link LinkTeamNode} source is linked to the target
 	 * {@link LinkTeamNode}.
-	 * 
+	 *
 	 * @param msg
 	 *            Message.
 	 * @param linkSource
@@ -217,7 +219,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link LinkOfficeNode} source is linked to the target
 	 * {@link LinkOfficeNode}.
-	 * 
+	 *
 	 * @param msg
 	 *            Message.
 	 * @param linkSource
@@ -235,8 +237,28 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Asserts the {@link ManagedObjectSourceNode} is linked to the
+	 * {@link InputManagedObjectNode}.
+	 *
+	 * @param msg
+	 *            Message.
+	 * @param managedObjectSourceNode
+	 *            {@link ManagedObjectSourceNode}.
+	 * @param inputManagedObjectNode
+	 *            Linked {@link InputManagedObjectNode}.
+	 */
+	protected static void assertSourceInput(String msg,
+			Object managedObjectSourceNode, Object inputManagedObjectNode) {
+		assertTrue(msg + ": source must be "
+				+ ManagedObjectSourceNode.class.getSimpleName(),
+				managedObjectSourceNode instanceof ManagedObjectSourceNode);
+		assertEquals(msg, ((ManagedObjectSourceNode) managedObjectSourceNode)
+				.getInputManagedObjectNode(), inputManagedObjectNode);
+	}
+
+	/**
 	 * Creates a mock {@link WorkFactory}.
-	 * 
+	 *
 	 * @return Mock {@link WorkFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -246,7 +268,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Creates a mock {@link TaskFactory}.
-	 * 
+	 *
 	 * @return Mock {@link TaskFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -256,7 +278,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Loads the {@link OfficeSection}.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param maker
@@ -270,7 +292,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Loads the {@link OfficeSection}.
-	 * 
+	 *
 	 * @param isHandleMockState
 	 *            <code>true</code> for method to handle mock states.
 	 * @param sectionName
@@ -311,7 +333,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Adds the {@link OfficeSection} to the {@link OfficeArchitect}.
-	 * 
+	 *
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param sectionName
@@ -333,7 +355,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Adds an {@link OfficeManagedObjectSource} to the {@link OfficeArchitect}.
-	 * 
+	 *
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param managedObjectSourceName
@@ -361,7 +383,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Adds an {@link OfficeAdministrator} to the {@link OfficeArchitect}.
-	 * 
+	 *
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param administratorName
@@ -390,7 +412,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Adds a simple {@link OfficeAdministrator} to the
 	 * {@link OfficeAdministrator} with the supplied extension interface and a
 	 * single {@link Duty}.
-	 * 
+	 *
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
 	 * @param administratorName
@@ -432,7 +454,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Adds an {@link OfficeFloorTeam} to the {@link OfficeFloorDeployer}.
-	 * 
+	 *
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
 	 * @param teamName
@@ -459,7 +481,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource} to the
 	 * {@link OfficeFloorDeployer}.
-	 * 
+	 *
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
 	 * @param managedObjectSourceName
@@ -487,7 +509,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Adds a {@link DeployedOffice}.
-	 * 
+	 *
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
 	 * @param officeName
@@ -520,7 +542,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Test logic to make the {@link SubSection}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link SectionMakerContext}.
 		 */
@@ -534,21 +556,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link SectionDesigner}.
-		 * 
+		 *
 		 * @return {@link SectionDesigner}.
 		 */
 		SectionDesigner getBuilder();
 
 		/**
 		 * Obtains the {@link SectionSourceContext}.
-		 * 
+		 *
 		 * @return {@link SectionSourceContext}.
 		 */
 		SectionSourceContext getContext();
 
 		/**
 		 * Adds a {@link SubSection}.
-		 * 
+		 *
 		 * @param subSectionName
 		 *            Name of the {@link SubSection} which is also used as the
 		 *            {@link SubSection} location.
@@ -560,7 +582,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link SectionManagedObjectSource}.
-		 * 
+		 *
 		 * @param managedObjectSourceName
 		 *            Name of the {@link SectionManagedObjectSource}.
 		 * @param maker
@@ -572,7 +594,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link SectionWork}.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link SectionWork}.
 		 * @param workFactory
@@ -586,7 +608,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link SectionTask}.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link SectionWork} for the
 		 *            {@link SectionTask}.
@@ -606,7 +628,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskFlow}.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link SectionWork} for the
 		 *            {@link SectionTask}.
@@ -629,7 +651,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskObject}.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link SectionWork} for the
 		 *            {@link SectionTask}.
@@ -652,7 +674,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskFlow} for a {@link TaskEscalationType}.
-		 * 
+		 *
 		 * @param workName
 		 *            Name of the {@link SectionWork} for the
 		 *            {@link SectionTask}.
@@ -700,7 +722,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link SectionMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link SectionMaker}.
 		 * @return {@link PropertyList} to use to load the
@@ -921,7 +943,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link SectionManagedObject}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link ManagedObjectMakerContext}.
 		 */
@@ -935,14 +957,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link MetaDataContext}.
-		 * 
+		 *
 		 * @return {@link MetaDataContext}.
 		 */
 		MetaDataContext<Indexed, Indexed> getContext();
 
 		/**
 		 * Adds an extension interface supported by the {@link ManagedObject}.
-		 * 
+		 *
 		 * @param extensionInterface
 		 *            Extension interface supported.
 		 */
@@ -977,7 +999,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link ManagedObjectMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link ManagedObjectMaker}.
 		 * @return {@link PropertyList}.
@@ -1075,7 +1097,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link SectionWork}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link WorkMakerContext}.
 		 */
@@ -1089,28 +1111,28 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link WorkTypeBuilder}.
-		 * 
+		 *
 		 * @return {@link WorkTypeBuilder}.
 		 */
 		WorkTypeBuilder<Work> getBuilder();
 
 		/**
 		 * Obtains the {@link WorkSourceContext}.
-		 * 
+		 *
 		 * @return {@link WorkSourceContext}.
 		 */
 		WorkSourceContext getContext();
 
 		/**
 		 * Obtains the {@link WorkFactory} used for the {@link SectionWork}.
-		 * 
+		 *
 		 * @return {@link WorkFactory} used for the {@link SectionWork}.
 		 */
 		WorkFactory<Work> getWorkFactory();
 
 		/**
 		 * Adds a {@link TaskType}.
-		 * 
+		 *
 		 * @param taskTypeName
 		 *            Name of the {@link TaskType}.
 		 * @param taskFactory
@@ -1128,7 +1150,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link TaskType}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link TaskTypeMaker}.
 		 */
@@ -1142,7 +1164,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskFlowType}.
-		 * 
+		 *
 		 * @param flowName
 		 *            Name of the {@link TaskFlowType}.
 		 * @param argumentType
@@ -1153,7 +1175,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskObjectType}.
-		 * 
+		 *
 		 * @param objectName
 		 *            Name of the {@link TaskObjectType}.
 		 * @param objectType
@@ -1165,7 +1187,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link TaskEscalationTypeBuilder}.
-		 * 
+		 *
 		 * @param escalationName
 		 *            Name of the {@link TaskEscalationType}.
 		 * @param escalationType
@@ -1208,7 +1230,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link WorkMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link WorkMaker}.
 		 * @param workFactory
@@ -1332,7 +1354,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			/**
 			 * Initiate.
-			 * 
+			 *
 			 * @param taskName
 			 *            Name of the {@link SectionTask}.
 			 * @param taskFactory
@@ -1394,7 +1416,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link Administrator}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link AdministratorMakerContext}.
 		 */
@@ -1408,7 +1430,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Specifies the extension interface.
-		 * 
+		 *
 		 * @param extensionInterface
 		 *            Extension interface.
 		 */
@@ -1416,7 +1438,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds a {@link Duty} for the {@link Administrator}.
-		 * 
+		 *
 		 * @param dutyKey
 		 *            Key identifying the {@link Duty}.
 		 */
@@ -1451,7 +1473,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link AdministratorMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link AdministratorMaker}.
 		 * @return {@link PropertyList}.
@@ -1538,7 +1560,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link Team}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link TeamMakerContext}.
 		 */
@@ -1576,7 +1598,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link TeamMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link TeamMaker}.
 		 * @return {@link PropertyList}.
@@ -1638,7 +1660,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes an {@link Office}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link OfficeMakerContext}.
 		 */
@@ -1652,14 +1674,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link OfficeArchitect}.
-		 * 
+		 *
 		 * @return {@link OfficeArchitect}.
 		 */
 		OfficeArchitect getArchitect();
 
 		/**
 		 * Adds a {@link OfficeSection} to the {@link Office}.
-		 * 
+		 *
 		 * @param sectionName
 		 *            Name of the {@link OfficeSection}.
 		 * @param sectionMaker
@@ -1693,7 +1715,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Resets for the next test.
-		 * 
+		 *
 		 * @param testCase
 		 *            {@link AbstractStructureTestCase}.
 		 */
@@ -1704,7 +1726,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link OfficeMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link OfficeMaker}.
 		 * @return {@link PropertyList}.
@@ -1785,7 +1807,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Makes the {@link OfficeFloor}.
-		 * 
+		 *
 		 * @param context
 		 *            {@link OfficeFloor}.
 		 * @throws Exception
@@ -1801,21 +1823,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link OfficeFloorDeployer}.
-		 * 
+		 *
 		 * @return {@link OfficeFloorDeployer}.
 		 */
 		OfficeFloorDeployer getDeployer();
 
 		/**
 		 * Obtains the {@link OfficeFloorSourceContext}.
-		 * 
+		 *
 		 * @return {@link OfficeFloorSourceContext}.
 		 */
 		OfficeFloorSourceContext getContext();
 
 		/**
 		 * Adds an {@link Office}.
-		 * 
+		 *
 		 * @param officeName
 		 *            Name of the {@link Office}.
 		 * @param officeMaker
@@ -1826,7 +1848,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Adds an {@link OfficeFloorTeam}.
-		 * 
+		 *
 		 * @param teamName
 		 *            Name of the {@link OfficeFloorTeam}.
 		 * @param teamMaker
@@ -1864,7 +1886,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Resets for the next test.
-		 * 
+		 *
 		 * @param testCase
 		 *            Current {@link AbstractStructureTestCase} running.
 		 */
@@ -1876,7 +1898,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		/**
 		 * Registers a {@link OfficeFloorMaker}.
-		 * 
+		 *
 		 * @param maker
 		 *            {@link OfficeFloorMaker}.
 		 * @return {@link PropertyList}.

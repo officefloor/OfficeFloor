@@ -17,21 +17,23 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 
 /**
  * Abstract functionality for nodes.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractNode {
 
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
-	 * 
+	 *
 	 * @param linkSource
 	 *            Source {@link LinkFlowNode}.
 	 * @param linkTarget
@@ -68,7 +70,7 @@ public abstract class AbstractNode {
 
 	/**
 	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
-	 * 
+	 *
 	 * @param linkSource
 	 *            Source {@link LinkObjectNode}.
 	 * @param linkTarget
@@ -105,7 +107,7 @@ public abstract class AbstractNode {
 
 	/**
 	 * Ensures both inputs are a {@link LinkTeamNode} and if so links them.
-	 * 
+	 *
 	 * @param linkSource
 	 *            Source {@link LinkTeamNode}.
 	 * @param linkTarget
@@ -142,7 +144,7 @@ public abstract class AbstractNode {
 
 	/**
 	 * Ensures both inputs are a {@link LinkOfficeNode} and if so links them.
-	 * 
+	 *
 	 * @param linkSource
 	 *            Source {@link LinkOfficeNode}.
 	 * @param linkTarget
@@ -178,8 +180,48 @@ public abstract class AbstractNode {
 	}
 
 	/**
+	 * Links the {@link ManagedObjectSourceNode} to the
+	 * {@link InputManagedObjectNode}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link InputManagedObjectNode}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSourceNode}.
+	 * @return <code>true</code> if linked.
+	 */
+	protected boolean linkManagedObjectSourceInput(Object managedObjectSource,
+			Object inputManagedObject) {
+
+		// Ensure is a managed object source
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			this.addIssue("Invalid managed object source node: "
+					+ managedObjectSource
+					+ " ["
+					+ (managedObjectSource == null ? null : managedObjectSource
+							.getClass().getName()
+							+ "]"));
+			return false; // can not link
+		}
+
+		// Ensure is an input managed object node
+		if (!(inputManagedObject instanceof InputManagedObjectNode)) {
+			this.addIssue("Invalid input managed object node: "
+					+ inputManagedObject
+					+ " ["
+					+ (inputManagedObject == null ? null : inputManagedObject
+							.getClass().getName()
+							+ "]"));
+			return false; // can not link
+		}
+
+		// Link the managed object source to the input managed object
+		return ((ManagedObjectSourceNode) managedObjectSource)
+				.linkInputManagedObjectNode((InputManagedObjectNode) inputManagedObject);
+	}
+
+	/**
 	 * Adds an issue.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
