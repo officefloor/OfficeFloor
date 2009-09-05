@@ -216,7 +216,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 	 * {@link ManagedObjectSource} is not {@link ProcessState} bound the
 	 * {@link ManagingOffice}.
 	 */
-	public void testManagedObjectSourceFlowNotProcessBoundToManagingOffice() {
+	public void testManagedObjectSourceFlowNotInputBoundToManagingOffice() {
 
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
@@ -235,7 +235,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
-						"Must provide process bound name as managed object source has flows");
+						"Must provide input managed object as managed object source has flows");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor

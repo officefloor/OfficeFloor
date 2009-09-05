@@ -22,9 +22,9 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
-import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -36,6 +36,7 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -50,7 +51,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeFloorNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorNodeImpl extends AbstractNode implements
@@ -73,6 +74,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
+	 * {@link InputManagedObjectNode} instances by their
+	 * {@link OfficeFloorInputManagedObject} name.
+	 */
+	private final Map<String, InputManagedObjectNode> inputManagedObjects = new HashMap<String, InputManagedObjectNode>();
+
+	/**
 	 * {@link ManagedObjectNode} instances by their
 	 * {@link OfficeFloorManagedObject} name.
 	 */
@@ -90,7 +97,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 * @param context
@@ -139,6 +146,26 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
+	public OfficeFloorInputManagedObject addInputManagedObject(
+			String inputManagedObjectName) {
+		// Obtain and return the input managed object for the name
+		InputManagedObjectNode inputMo = this.inputManagedObjects
+				.get(inputManagedObjectName);
+		if (inputMo == null) {
+			// Create the input managed object and have in office floor context
+			inputMo = new InputManagedObjectNodeImpl(inputManagedObjectName);
+
+			// Add the input managed object
+			this.inputManagedObjects.put(inputManagedObjectName, inputMo);
+		} else {
+			// Input managed object already added
+			this.addIssue("Office floor input managed object "
+					+ inputManagedObjectName + " already added");
+		}
+		return inputMo;
+	}
+
+	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
 		// Obtain and return the team for the name
 		TeamNode team = this.teams.get(teamName);
@@ -175,6 +202,13 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
+	public void link(OfficeFloorManagedObjectSource managedObjectSource,
+			OfficeFloorInputManagedObject inputManagedObject) {
+		this.linkManagedObjectSourceInput(managedObjectSource,
+				inputManagedObject);
+	}
+
+	@Override
 	public void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam) {
 		this.linkTeam(team, officeFloorTeam);
 	}
@@ -186,28 +220,19 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
+	public void link(ManagedObjectDependency dependency,
+			OfficeFloorInputManagedObject inputManagedObject) {
+		this.linkObject(dependency, inputManagedObject);
+	}
+
+	@Override
 	public void link(ManagedObjectFlow flow, DeployedOfficeInput input) {
 		this.linkFlow(flow, input);
 	}
 
 	@Override
-	public void link(ManagingOffice managingOffice, DeployedOffice office,
-			String processBoundManagedObjectName) {
+	public void link(ManagingOffice managingOffice, DeployedOffice office) {
 		this.linkOffice(managingOffice, office);
-
-		// Provide the process bound managed object name
-		if (!(managingOffice instanceof ManagingOfficeNode)) {
-			this.addIssue("Invalid managing office: "
-					+ managingOffice
-					+ " ["
-					+ (managingOffice == null ? null : managingOffice
-							.getClass().getName()) + "]");
-			return; // can not load process bound name
-		}
-
-		// Load the process bound name
-		((ManagingOfficeNode) managingOffice)
-				.setProcessBoundManagedObjectName(processBoundManagedObjectName);
 	}
 
 	@Override
@@ -219,6 +244,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	public void link(OfficeObject requiredManagedObject,
 			OfficeFloorManagedObject officeFloorManagedObject) {
 		this.linkObject(requiredManagedObject, officeFloorManagedObject);
+	}
+
+	@Override
+	public void link(OfficeObject officeObject,
+			OfficeFloorInputManagedObject inputManagedObject) {
+		this.linkObject(officeObject, inputManagedObject);
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -142,6 +143,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link ManagingOffice}.
 	 */
 	private ManagingOfficeNode managingOffice;
+
+	/**
+	 * {@link InputManagedObjectNode}.
+	 */
+	private InputManagedObjectNode inputManagedObjectNode = null;
 
 	/**
 	 * Flags whether within the {@link Office} context.
@@ -339,12 +345,40 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Obtain the managing office
 		OfficeNode managingOffice = LinkUtil.retrieveTarget(
 				this.managingOffice, OfficeNode.class, "Managed Object Source "
-						+ managedObjectSourceName, LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, AssetType.MANAGED_OBJECT,
-				this.managedObjectSourceName, this.context.getCompilerIssues());
+						+ this.managedObjectSourceName,
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+				AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
+				this.context.getCompilerIssues());
 
 		// Return the managing office
 		return managingOffice;
+	}
+
+	@Override
+	public boolean linkInputManagedObjectNode(
+			InputManagedObjectNode inputManagedObject) {
+
+		// Determine if already linked
+		if (this.inputManagedObjectNode != null) {
+			// Already linked
+			this.context.getCompilerIssues().addIssue(
+					this.locationType,
+					this.location,
+					null,
+					null,
+					"Managed object source " + this.managedObjectSourceName
+							+ " already linked to an input managed object");
+			return false;
+		}
+
+		// Link
+		this.inputManagedObjectNode = inputManagedObject;
+		return true;
+	}
+
+	@Override
+	public InputManagedObjectNode getInputManagedObjectNode() {
+		return this.inputManagedObjectNode;
 	}
 
 	@Override
@@ -385,24 +419,25 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Provide process bound name if have flows
 		if (flowTypes.length > 0) {
 
-			// TODO obtain Input ManagedObject name
-
-			// Ensure have a process bound managed object name
-			String processBoundManagedObjectName = this.managingOffice
-					.getProcessBoundManagedObjectName();
-			if (CompileUtil.isBlank(processBoundManagedObjectName)) {
-				// Provide issue as should be bound to process state
+			// Ensure have Input ManagedObject name
+			String inputBoundManagedObjectName = null;
+			if (this.inputManagedObjectNode != null) {
+				inputBoundManagedObjectName = this.inputManagedObjectNode
+						.getInputManagedObjectName();
+			}
+			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
+				// Provide issue as should be input
 				this.context
 						.getCompilerIssues()
 						.addIssue(LocationType.OFFICE_FLOOR,
 								this.officeFloorLocation,
 								AssetType.MANAGED_OBJECT,
 								this.managedObjectSourceName,
-								"Must provide process bound name as managed object source has flows");
+								"Must provide input managed object as managed object source has flows");
 			} else {
 				// Bind the managed object to process state of managing office
 				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
-						.setInputManagedObjectName(processBoundManagedObjectName);
+						.setInputManagedObjectName(inputBoundManagedObjectName);
 
 				// TODO load input dependencies
 			}
