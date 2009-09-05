@@ -22,11 +22,14 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamToOfficeFloorTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext;
@@ -41,6 +44,7 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTe
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
@@ -73,6 +77,12 @@ public class StandardOfficeFloorFigureFactory implements
 	public OfficeFloorManagedObjectSourceTeamFigure createOfficeFloorManagedObjectSourceTeamFigure(
 			OfficeFloorManagedObjectSourceTeamFigureContext context) {
 		return new StandardOfficeFloorManagedObjectSourceTeamFigure(context);
+	}
+
+	@Override
+	public OfficeFloorInputManagedObjectFigure createOfficeFloorInputManagedObjectFigure(
+			OfficeFloorInputManagedObjectFigureContext context) {
+		return new StandardOfficeFloorInputManagedObjectFigure(context);
 	}
 
 	@Override
@@ -132,6 +142,13 @@ public class StandardOfficeFloorFigureFactory implements
 	}
 
 	@Override
+	public void decorateDeployedOfficeObjectToOfficeFloorInputManagedObjectFigure(
+			PolylineConnection figure,
+			DeployedOfficeObjectToOfficeFloorInputManagedObjectFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
 	public void decorateDeployedOfficeTeamToOfficeFloorTeamFigure(
 			PolylineConnection figure,
 			DeployedOfficeTeamToOfficeFloorTeamFigureContext context) {
@@ -164,6 +181,13 @@ public class StandardOfficeFloorFigureFactory implements
 	public void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext context) {
 		// Leave as default
 	}
 

@@ -17,8 +17,6 @@
  */
 package net.officefloor.eclipse.officefloor.editparts;
 
-import java.beans.PropertyChangeEvent;
-
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext;
@@ -48,20 +46,6 @@ public class OfficeFloorManagedObjectSourceToDeployedOfficeEditPart
 		OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 						figure, this);
-	}
-
-	@Override
-	protected Class<OfficeFloorManagedObjectSourceToDeployedOfficeEvent> getPropertyChangeEventType() {
-		return OfficeFloorManagedObjectSourceToDeployedOfficeEvent.class;
-	}
-
-	@Override
-	protected void handlePropertyChange(
-			OfficeFloorManagedObjectSourceToDeployedOfficeEvent property,
-			PropertyChangeEvent evt) {
-		switch (property) {
-		// No property changes
-		}
 	}
 
 }

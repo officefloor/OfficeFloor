@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorManagedObjectSourceModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorManagedObjectSourceEditPart
@@ -63,6 +63,8 @@ public class OfficeFloorManagedObjectSourceEditPart
 	protected void populateConnectionSourceModels(List<Object> models) {
 		EclipseUtil
 				.addToList(models, this.getCastedModel().getManagingOffice());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeFloorInputManagedObject());
 	}
 
 	@Override
@@ -116,6 +118,9 @@ public class OfficeFloorManagedObjectSourceEditPart
 							.getOfficeFloorManagedObjectSourceName());
 			break;
 		case CHANGE_MANAGING_OFFICE:
+			this.refreshSourceConnections();
+			break;
+		case CHANGE_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshSourceConnections();
 			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT:

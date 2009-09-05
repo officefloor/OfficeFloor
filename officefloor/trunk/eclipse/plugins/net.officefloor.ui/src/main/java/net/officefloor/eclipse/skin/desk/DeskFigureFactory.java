@@ -43,14 +43,14 @@ import org.eclipse.draw2d.PolylineConnection;
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
  * {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface DeskFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link WorkModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -59,7 +59,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link WorkTaskModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -68,7 +68,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates {@link OfficeFloorFigure} for the {@link WorkTaskObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link WorkTaskObjectFigureContext}.
 	 * @return {@link WorkTaskObjectFigure}.
@@ -78,7 +78,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalFlowModel}.
 	 * @return {@link OfficeFloorFigure}.
@@ -89,7 +89,7 @@ public interface DeskFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -99,7 +99,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link TaskModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link TaskFigureContext}.
 	 * @return {@link TaskFigure}.
@@ -108,7 +108,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link TaskFlowModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link TaskFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -117,7 +117,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Creates {@link OfficeFloorFigure} for the {@link TaskEscalationModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link TaskEscalationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -127,7 +127,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link WorkTaskToTaskModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 */
@@ -137,7 +137,7 @@ public interface DeskFigureFactory {
 	/**
 	 * Decorates the {@link WorkTaskObjectToExternalManagedObjectModel}
 	 * connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -149,7 +149,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskFlowToTaskModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -160,7 +160,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskFlowToExternalFlowModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -171,7 +171,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskToNextTaskModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -182,7 +182,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskToNextExternalFlowModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -193,7 +193,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskEscalationToTaskModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -204,7 +204,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link TaskEscalationToExternalFlowModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -215,7 +215,7 @@ public interface DeskFigureFactory {
 
 	/**
 	 * Decorates the {@link WorkToInitialTaskModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param workToInitialTaskEditPart
