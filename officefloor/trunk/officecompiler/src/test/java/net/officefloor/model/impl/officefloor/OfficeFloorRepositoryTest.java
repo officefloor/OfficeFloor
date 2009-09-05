@@ -24,6 +24,7 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -174,6 +175,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT");
 		officeObject.setOfficeFloorManagedObject(officeObjectToManagedObject);
 
+		// office object -> office floor input managed object
+		DeployedOfficeObjectToOfficeFloorInputManagedObjectModel officeObjectToInputMo = new DeployedOfficeObjectToOfficeFloorInputManagedObjectModel(
+				"INPUT_MANAGED_OBJECT");
+		officeObject.setOfficeFloorInputManagedObject(officeObjectToInputMo);
+
 		// office team -> office floor team
 		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM");
@@ -262,6 +268,13 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("office object -> office floor managed object",
 				officeFloorManagedObject, officeObjectToManagedObject
 						.getOfficeFloorManagedObject());
+
+		// Ensure office object connected to office floor input managed object
+		assertEquals("office object <- office floor input managed object",
+				officeObject, officeObjectToInputMo.getDeployedOfficeObject());
+		assertEquals("office object -> office floor input managed object",
+				officeFloorInputManagedObject, officeObjectToInputMo
+						.getOfficeFloorInputManagedObject());
 
 		// Ensure office team connected to office floor team
 		assertEquals("office team <- office floor team", officeTeam,
@@ -383,6 +396,13 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				.setOfficeFloorManagedObject(officeFloorManagedObject);
 		officeObjectToManagedObject.connect();
 
+		// office object -> office floor input managed object
+		DeployedOfficeObjectToOfficeFloorInputManagedObjectModel officeObjectToInputMo = new DeployedOfficeObjectToOfficeFloorInputManagedObjectModel();
+		officeObjectToInputMo.setDeployedOfficeObject(officeObject);
+		officeObjectToInputMo
+				.setOfficeFloorInputManagedObject(officeFloorInputManagedObject);
+		officeObjectToInputMo.connect();
+
 		// office team -> office floor team
 		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel();
 		officeTeamToFloorTeam.setDeployedOfficeTeam(officeTeam);
@@ -428,6 +448,9 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("office object - office floor managed object",
 				"MANAGED_OBJECT", officeObjectToManagedObject
 						.getOfficeFloorManagedObjectName());
+		assertEquals("office object - office floor input managed object",
+				"INPUT_MANAGED_OBJECT", officeObjectToInputMo
+						.getOfficeFloorInputManagedObjectName());
 		assertEquals("office team - office floor team", "OFFICE_FLOOR_TEAM",
 				officeTeamToFloorTeam.getOfficeFloorTeamName());
 	}

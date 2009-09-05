@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -231,6 +232,24 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Connect the office objects to the office floor input managed objects
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeObjectModel officeObject : office
+					.getDeployedOfficeObjects()) {
+				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel conn = officeObject
+						.getOfficeFloorInputManagedObject();
+				if (conn != null) {
+					OfficeFloorInputManagedObjectModel inputMo = inputManagedObjects
+							.get(conn.getOfficeFloorInputManagedObjectName());
+					if (inputMo != null) {
+						conn.setDeployedOfficeObject(officeObject);
+						conn.setOfficeFloorInputManagedObject(inputMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Connect the dependencies to the office floor managed objects
 		for (OfficeFloorManagedObjectModel managedObject : officeFloor
 				.getOfficeFloorManagedObjects()) {
@@ -360,6 +379,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					.getDeployedOfficeObjects()) {
 				conn.setOfficeFloorManagedObjectName(managedObject
 						.getOfficeFloorManagedObjectName());
+			}
+		}
+
+		// Specify office objects to office floor input managed objects
+		for (OfficeFloorInputManagedObjectModel inputMo : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+			for (DeployedOfficeObjectToOfficeFloorInputManagedObjectModel conn : inputMo
+					.getDeployedOfficeObjects()) {
+				conn.setOfficeFloorInputManagedObjectName(inputMo
+						.getOfficeFloorInputManagedObjectName());
 			}
 		}
 

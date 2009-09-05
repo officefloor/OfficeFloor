@@ -5,4 +5,6 @@
 	<list
 		type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
 		name="office floor managed object source" />
+	<list type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
+		name="deployed office object" />
 </model>

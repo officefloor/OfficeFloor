@@ -46,6 +46,7 @@ import net.officefloor.model.impl.change.DisconnectChange;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -1033,6 +1034,54 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
+	public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
+			DeployedOfficeObjectModel deployedOfficeObject,
+			OfficeFloorInputManagedObjectModel inputManagedObject) {
+
+		// TODO test (linkDeployedOfficeObjectToOfficeFloorInputManagedObject)
+
+		// Create the connection
+		final DeployedOfficeObjectToOfficeFloorInputManagedObjectModel conn = new DeployedOfficeObjectToOfficeFloorInputManagedObjectModel();
+		conn.setDeployedOfficeObject(deployedOfficeObject);
+		conn.setOfficeFloorInputManagedObject(inputManagedObject);
+
+		// Return change to add the connection
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> removeDeployedOfficeObjectToOfficeFloorInputManagedObject(
+			final DeployedOfficeObjectToOfficeFloorInputManagedObjectModel deployedOfficeObjectToInputManagedObject) {
+
+		// TODO test (removeDeployedOfficeObjectToOfficeFloorInputManagedObject)
+
+		// Return change to remove the connection
+		return new AbstractChange<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>(
+				deployedOfficeObjectToInputManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				deployedOfficeObjectToInputManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				deployedOfficeObjectToInputManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
 	public Change<DeployedOfficeTeamToOfficeFloorTeamModel> linkDeployedOfficeTeamToOfficeFloorTeam(
 			DeployedOfficeTeamModel deployedOfficeTeam,
 			OfficeFloorTeamModel officeFloorTeam) {
@@ -1309,6 +1358,34 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
+	public Change<OfficeFloorInputManagedObjectModel> renameOfficeFloorInputManagedObject(
+			final OfficeFloorInputManagedObjectModel inputManagedObject,
+			final String newInputManagedObjectName) {
+
+		// TODO test (renameOfficeFloorInputManagedObject)
+
+		// Obtain the existing input managed object name for reverting
+		final String existingInputManagedObjectName = inputManagedObject
+				.getOfficeFloorInputManagedObjectName();
+
+		// Return change to rename
+		return new AbstractChange<OfficeFloorInputManagedObjectModel>(
+				inputManagedObject, "Rename") {
+			@Override
+			public void apply() {
+				inputManagedObject
+						.setOfficeFloorInputManagedObjectName(newInputManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				inputManagedObject
+						.setOfficeFloorInputManagedObjectName(existingInputManagedObjectName);
+			}
+		};
+	}
+
+	@Override
 	public Change<OfficeFloorInputManagedObjectModel> removeOfficeFloorInputManagedObject(
 			final OfficeFloorInputManagedObjectModel inputManagedObject) {
 
@@ -1320,13 +1397,13 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			@Override
 			public void apply() {
 				OfficeFloorChangesImpl.this.officeFloor
-						.addOfficeFloorInputManagedObject(inputManagedObject);
+						.removeOfficeFloorInputManagedObject(inputManagedObject);
 			}
 
 			@Override
 			public void revert() {
 				OfficeFloorChangesImpl.this.officeFloor
-						.removeOfficeFloorInputManagedObject(inputManagedObject);
+						.addOfficeFloorInputManagedObject(inputManagedObject);
 			}
 		};
 	}
