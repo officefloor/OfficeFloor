@@ -27,6 +27,7 @@ import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -162,7 +163,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getObjectType", "getX", "getY" }, officeFloor
 				.getOfficeFloorInputManagedObjects(),
 				new OfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT",
-						"net.orm.Session", null, 200, 201));
+						"net.orm.Session", null, null, 200, 201));
 
 		// ----------------------------------------
 		// Validate the office floor managed objects
@@ -229,14 +230,22 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Deployed office objects
 		assertList(new String[] { "getDeployedOfficeObjectName",
 				"getObjectType" }, office.getDeployedOfficeObjects(),
-				new DeployedOfficeObjectModel("OBJECT", "net.orm.Session"));
-		DeployedOfficeObjectModel officeObject = office
+				new DeployedOfficeObjectModel("OBJECT_A", "net.orm.Session"),
+				new DeployedOfficeObjectModel("OBJECT_B", "net.orm.Session"));
+		DeployedOfficeObjectModel officeObjectA = office
 				.getDeployedOfficeObjects().get(0);
 		assertProperties(
 				new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
-						"MANAGED_OBJECT"), officeObject
+						"MANAGED_OBJECT"), officeObjectA
 						.getOfficeFloorManagedObject(),
 				"getOfficeFloorManagedObjectName");
+		DeployedOfficeObjectModel officeObjectB = office
+				.getDeployedOfficeObjects().get(1);
+		assertProperties(
+				new DeployedOfficeObjectToOfficeFloorInputManagedObjectModel(
+						"INPUT_MANAGED_OBJECT"), officeObjectB
+						.getOfficeFloorInputManagedObject(),
+				"getOfficeFloorInputManagedObjectName");
 
 		// Deployed office inputs
 		assertList(new String[] { "getSectionName", "getSectionInputName",

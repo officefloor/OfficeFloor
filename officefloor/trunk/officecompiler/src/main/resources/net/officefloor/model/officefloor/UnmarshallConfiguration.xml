@@ -116,6 +116,10 @@
 				class="net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel">
 				<value method="setOfficeFloorManagedObjectName" node="managed-object@name" />
 			</object>
+			<object method="setOfficeFloorInputManagedObject" node="input-managed-object"
+				class="net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel">
+				<value method="setOfficeFloorInputManagedObjectName" node="input-managed-object@name" />
+			</object>
 		</object>
 		<object method="addDeployedOfficeInput" node="input"
 			class="net.officefloor.model.officefloor.DeployedOfficeInputModel">

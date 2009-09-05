@@ -195,6 +195,12 @@
 								attribute="name" />
 						</attributes>
 					</object>
+					<object method="getOfficeFloorInputManagedObject" element="input-managed-object">
+						<attributes>
+							<attribute method="getOfficeFloorInputManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 			<collection method="getDeployedOfficeInputs">

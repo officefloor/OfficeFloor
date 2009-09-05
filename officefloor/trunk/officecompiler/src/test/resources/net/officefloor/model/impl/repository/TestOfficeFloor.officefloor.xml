@@ -54,8 +54,11 @@
 				<property name="OFFICE_ONE" value="VALUE_ONE" />
 				<property name="OFFICE_TWO" value="VALUE_TWO" />
 			</properties>
-			<object name="OBJECT" object-type="net.orm.Session">
+			<object name="OBJECT_A" object-type="net.orm.Session">
 				<managed-object name="MANAGED_OBJECT" />
+			</object>
+			<object name="OBJECT_B" object-type="net.orm.Session">
+				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</object>
 			<input section="SECTION" input="INPUT" parameter-type="java.lang.Integer" />
 			<team name="OFFICE_TEAM">
