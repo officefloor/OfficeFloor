@@ -29,10 +29,12 @@ import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditP
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeInputEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeObjectEditPart;
+import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeObjectToOfficeFloorInputManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeObjectToOfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeTeamToOfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorInputManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectEditPart;
@@ -42,9 +44,11 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSou
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceToDeployedOfficeEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.operations.AddDeployedOfficeOperation;
+import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorInputManagedObjectOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectSourceOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorTeamOperation;
@@ -57,10 +61,12 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -70,6 +76,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -128,6 +135,8 @@ public class OfficeFloorEditor extends
 				OfficeFloorManagedObjectSourceFlowEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceTeamModel.class,
 				OfficeFloorManagedObjectSourceTeamEditPart.class);
+		map.put(OfficeFloorInputManagedObjectModel.class,
+				OfficeFloorInputManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectModel.class,
 				OfficeFloorManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectDependencyModel.class,
@@ -145,6 +154,10 @@ public class OfficeFloorEditor extends
 		// Connections
 		map.put(DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
 				DeployedOfficeObjectToOfficeFloorManagedObjectEditPart.class);
+		map
+				.put(
+						DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
+						DeployedOfficeObjectToOfficeFloorInputManagedObjectEditPart.class);
 		map.put(DeployedOfficeTeamToOfficeFloorTeamModel.class,
 				DeployedOfficeTeamToOfficeFloorTeamEditPart.class);
 		map
@@ -157,6 +170,10 @@ public class OfficeFloorEditor extends
 						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				OfficeFloorManagedObjectSourceToDeployedOfficeEditPart.class);
+		map
+				.put(
+						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectEditPart.class);
 		map
 				.put(
 						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
@@ -203,6 +220,17 @@ public class OfficeFloorEditor extends
 					}
 				});
 
+		// Allow deleting the input managed object
+		policy.addDelete(OfficeFloorInputManagedObjectModel.class,
+				new DeleteChangeFactory<OfficeFloorInputManagedObjectModel>() {
+					@Override
+					public Change<OfficeFloorInputManagedObjectModel> createChange(
+							OfficeFloorInputManagedObjectModel target) {
+						return OfficeFloorEditor.this.getModelChanges()
+								.removeOfficeFloorInputManagedObject(target);
+					}
+				});
+
 		// Allow deleting the managed object
 		policy.addDelete(OfficeFloorManagedObjectModel.class,
 				new DeleteChangeFactory<OfficeFloorManagedObjectModel>() {
@@ -225,6 +253,21 @@ public class OfficeFloorEditor extends
 								return OfficeFloorEditor.this
 										.getModelChanges()
 										.removeDeployedOfficeObjectToOfficeFloorManagedObject(
+												target);
+							}
+						});
+
+		// All deleting deployed office object to input managed object
+		policy
+				.addDelete(
+						DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
+						new DeleteChangeFactory<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel>() {
+							@Override
+							public Change<DeployedOfficeObjectToOfficeFloorInputManagedObjectModel> createChange(
+									DeployedOfficeObjectToOfficeFloorInputManagedObjectModel target) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.removeDeployedOfficeObjectToOfficeFloorInputManagedObject(
 												target);
 							}
 						});
@@ -303,6 +346,21 @@ public class OfficeFloorEditor extends
 												target);
 							}
 						});
+
+		// Allow deleting managed object source to input managed object
+		policy
+				.addDelete(
+						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+						new DeleteChangeFactory<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel>() {
+							@Override
+							public Change<OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel> createChange(
+									OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel target) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.removeOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+												target);
+							}
+						});
 	}
 
 	@Override
@@ -323,6 +381,24 @@ public class OfficeFloorEditor extends
 								return OfficeFloorEditor.this
 										.getModelChanges()
 										.linkDeployedOfficeObjectToOfficeFloorManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect deployed office object to input managed object
+		policy
+				.addConnection(
+						DeployedOfficeObjectModel.class,
+						OfficeFloorInputManagedObjectModel.class,
+						new ConnectionChangeFactory<DeployedOfficeObjectModel, OfficeFloorInputManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									DeployedOfficeObjectModel source,
+									OfficeFloorInputManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.linkDeployedOfficeObjectToOfficeFloorInputManagedObject(
 												source, target);
 							}
 						});
@@ -416,6 +492,24 @@ public class OfficeFloorEditor extends
 												source, target);
 							}
 						});
+
+		// Connect managed object source to input managed object
+		policy
+				.addConnection(
+						OfficeFloorManagedObjectSourceModel.class,
+						OfficeFloorInputManagedObjectModel.class,
+						new ConnectionChangeFactory<OfficeFloorManagedObjectSourceModel, OfficeFloorInputManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									OfficeFloorManagedObjectSourceModel source,
+									OfficeFloorInputManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+												source, target);
+							}
+						});
 	}
 
 	@Override
@@ -429,9 +523,12 @@ public class OfficeFloorEditor extends
 		list.add(new AddOfficeFloorTeamOperation(officeFloorChanges));
 		list.add(new AddOfficeFloorManagedObjectSourceOperation(
 				officeFloorChanges));
+		list.add(new AddOfficeFloorInputManagedObjectOperation(
+				officeFloorChanges));
 
 		// Add office operations
-		list.add(new RefactorDeployedOfficeFloorChangeOperation(officeFloorChanges));
+		list.add(new RefactorDeployedOfficeFloorChangeOperation(
+				officeFloorChanges));
 
 		// Add managed object from managed object source
 		list.add(new AddOfficeFloorManagedObjectOperation(officeFloorChanges));

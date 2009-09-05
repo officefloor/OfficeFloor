@@ -26,7 +26,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorEditPart extends
@@ -38,6 +38,7 @@ public class OfficeFloorEditPart extends
 		childModels.addAll(officeFloor.getDeployedOffices());
 		childModels.addAll(officeFloor.getOfficeFloorTeams());
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjectSources());
+		childModels.addAll(officeFloor.getOfficeFloorInputManagedObjects());
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjects());
 	}
 

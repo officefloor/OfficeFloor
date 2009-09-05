@@ -25,21 +25,21 @@ import org.eclipse.gef.EditPart;
 
 /**
  * Provides details of the {@link IFigure} for an {@link EditPart}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorFigure {
 
 	/**
 	 * Obtains the {@link IFigure} to represent the {@link EditPart}.
-	 * 
+	 *
 	 * @return {@link IFigure} to represent the {@link EditPart}.
 	 */
 	IFigure getFigure();
 
 	/**
 	 * Obtains the {@link IFigure} to add children of this {@link EditPart}.
-	 * 
+	 *
 	 * @return {@link IFigure} to add children of this {@link EditPart}.
 	 */
 	IFigure getContentPane();
@@ -47,7 +47,7 @@ public interface OfficeFloorFigure {
 	/**
 	 * Obtains the source {@link ConnectionAnchor} for the particular
 	 * {@link ConnectionModel} type.
-	 * 
+	 *
 	 * @param connectionModelType
 	 *            {@link ConnectionModel} type.
 	 * @return {@link ConnectionAnchor}.
@@ -57,7 +57,7 @@ public interface OfficeFloorFigure {
 	/**
 	 * Obtains the target {@link ConnectionAnchor} for the particular
 	 * {@link ConnectionModel} type.
-	 * 
+	 *
 	 * @param connectionModelType
 	 *            {@link ConnectionModel} type.
 	 * @return {@link ConnectionAnchor}.
