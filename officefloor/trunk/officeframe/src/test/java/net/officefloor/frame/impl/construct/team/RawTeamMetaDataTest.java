@@ -31,7 +31,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link RawTeamMetaDataImpl}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawTeamMetaDataTest extends OfficeFrameTestCase {
@@ -125,7 +125,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Constructor that will fail instantiation.
-		 * 
+		 *
 		 * @throws Exception
 		 *             Failure to instantiate.
 		 */
@@ -286,6 +286,72 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can obtain the {@link Team} name from the
+	 * {@link TeamSourceContext}.
+	 */
+	public void testTeamNameAvailableFromContext() {
+
+		final Team team = this.createMock(Team.class);
+
+		// Record constructing team
+		this.recordReturn(this.configuration, this.configuration.getTeamName(),
+				TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration
+				.getTeamSourceClass(), NameTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration
+				.getProperties(), new Properties());
+
+		// Attempt to construct team
+		this.replayMockObjects();
+		NameTeamSource.expectedTeamName = TEAM_NAME;
+		NameTeamSource.isInitialised = false;
+		NameTeamSource.team = team;
+		this.constructRawTeamMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure team source initialise
+		assertTrue("Team Source should be initialised",
+				NameTeamSource.isInitialised);
+	}
+
+	/**
+	 * {@link TeamSource} that validates {@link Team} name is available.
+	 *
+	 * @author Daniel Sagenschneider
+	 */
+	@TestSource
+	public static class NameTeamSource extends TeamSourceAdapter {
+
+		/**
+		 * Expected {@link Team} name.
+		 */
+		public static String expectedTeamName;
+
+		/**
+		 * Indicates if initialised.
+		 */
+		public static boolean isInitialised = false;
+
+		/**
+		 * {@link Team} to be returned.
+		 */
+		public static Team team;
+
+		@Override
+		public void init(TeamSourceContext context) throws Exception {
+			assertFalse("Should only be initialised once", isInitialised);
+			isInitialised = true;
+			assertEquals("Incorrect team name", expectedTeamName, context
+					.getTeamName());
+		}
+
+		@Override
+		public Team createTeam() {
+			return team;
+		}
+	}
+
+	/**
 	 * Ensures able to successfully source the {@link Team} and details of
 	 * {@link RawTeamMetaDataImpl} are correct.
 	 */
@@ -293,7 +359,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		final Team team = this.createMock(Team.class);
 
-		// Record team source that fails to initialise
+		// Record constructing team
 		this.recordReturn(this.configuration, this.configuration.getTeamName(),
 				TEAM_NAME);
 		this.recordReturn(this.configuration, this.configuration
@@ -331,7 +397,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawTeamMetaDataImpl} with the mock objects.
-	 * 
+	 *
 	 * @return {@link RawTeamMetaDataImpl}.
 	 */
 	private RawTeamMetaData constructRawTeamMetaData(

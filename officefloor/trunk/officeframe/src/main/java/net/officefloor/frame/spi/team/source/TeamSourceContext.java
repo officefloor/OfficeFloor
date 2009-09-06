@@ -19,16 +19,27 @@ package net.officefloor.frame.spi.team.source;
 
 import java.util.Properties;
 
+import net.officefloor.frame.spi.team.Team;
+
 /**
  * Context for the {@link TeamSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface TeamSourceContext {
 
 	/**
+	 * Obtains the name of the {@link Team} to be created from the
+	 * {@link TeamSource}.
+	 *
+	 * @return Name of the {@link Team} to be created from the
+	 *         {@link TeamSource}.
+	 */
+	String getTeamName();
+
+	/**
 	 * Obtains a required property value.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the property.
 	 * @return Value of the property.
@@ -40,7 +51,7 @@ public interface TeamSourceContext {
 
 	/**
 	 * Obtains the property value or subsequently the default value.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the property.
 	 * @param defaultValue
@@ -51,7 +62,7 @@ public interface TeamSourceContext {
 
 	/**
 	 * Properties to configure the {@link TeamSource}.
-	 * 
+	 *
 	 * @return Properties specific for the {@link TeamSource}.
 	 */
 	Properties getProperties();

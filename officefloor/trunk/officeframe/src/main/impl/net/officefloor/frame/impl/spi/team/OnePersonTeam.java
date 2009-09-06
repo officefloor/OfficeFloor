@@ -23,15 +23,20 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Team having only one {@link Thread}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeam implements Team {
 
 	/**
+	 * Name of this {@link Team}.
+	 */
+	private final String teamName;
+
+	/**
 	 * Time to wait in milliseconds for a {@link Job}.
 	 */
-	protected final long waitTime;
+	private final long waitTime;
 
 	/**
 	 * {@link OnePerson} of this {@link Team}.
@@ -41,15 +46,18 @@ public class OnePersonTeam implements Team {
 	/**
 	 * {@link TaskQueue}.
 	 */
-	protected TaskQueue taskQueue;
+	private TaskQueue taskQueue;
 
 	/**
 	 * Initiate.
-	 * 
+	 *
+	 * @param teamName
+	 *            Name of this {@link Team}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(long waitTime) {
+	public OnePersonTeam(String teamName, long waitTime) {
+		this.teamName = teamName;
 		this.waitTime = waitTime;
 	}
 
@@ -71,7 +79,9 @@ public class OnePersonTeam implements Team {
 		this.person = new OnePerson(this.taskQueue, this.waitTime);
 
 		// Start the person working
-		new Thread(this.person, this.getClass().getSimpleName()).start();
+		String threadName = this.getClass().getSimpleName() + "_"
+				+ this.teamName;
+		new Thread(this.person, threadName).start();
 	}
 
 	@Override
@@ -138,7 +148,7 @@ public class OnePersonTeam implements Team {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param taskQueue
 		 *            {@link TaskQueue}.
 		 * @param waitTime

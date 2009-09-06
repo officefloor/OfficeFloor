@@ -33,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 /**
  * Tests invoking asynchronous {@link Flow} instances and joining on the
  * resulting {@link Flow}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase {
@@ -44,7 +44,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	 */
 	@StressTest
 	public void test_StressAsynchronousJoin_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 	/**
 	 * Does the asynchronous join stress test.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -143,7 +143,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param maxAsynchronousFlows
 		 *            Number of asynchronous {@link Flow} instances to invoke
 		 *            and join on per iteration.
@@ -164,7 +164,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 		/**
 		 * Invokes and joins the asynchronous {@link Flow} instances.
-		 * 
+		 *
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 * @param flow
@@ -249,7 +249,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 		/**
 		 * Asynchronous {@link Task} invoked.
-		 * 
+		 *
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 */

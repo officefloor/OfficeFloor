@@ -30,7 +30,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests invoking a next {@link Task}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -41,7 +41,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the parallel stress test.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -107,7 +107,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param maxNextTasks
 		 *            Maximum number of parallel calls.
 		 */
@@ -117,7 +117,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Allows for moving onto the next {@link Task}.
-		 * 
+		 *
 		 * @param count
 		 *            Count to pass to next {@link Task}.
 		 */
@@ -127,7 +127,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Next {@link Task}.
-		 * 
+		 *
 		 * @param callCount
 		 *            Number of next {@link Task} instances invoked so far.
 		 * @param flow

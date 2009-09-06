@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TeamSourceStandAlone {
@@ -38,7 +38,7 @@ public class TeamSourceStandAlone {
 
 	/**
 	 * Adds a property for initialising the {@link TeamSource}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of property.
 	 * @param value
@@ -50,7 +50,7 @@ public class TeamSourceStandAlone {
 
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
-	 * 
+	 *
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return Initialised {@link TeamSource}.
@@ -64,7 +64,8 @@ public class TeamSourceStandAlone {
 		TS teamSource = teamSourceClass.newInstance();
 
 		// Initialise the team source
-		TeamSourceContext context = new TeamSourceContextImpl(this.properties);
+		TeamSourceContext context = new TeamSourceContextImpl(teamSourceClass
+				.getSimpleName(), this.properties);
 		teamSource.init(context);
 
 		// Return the initialised team source
@@ -73,7 +74,7 @@ public class TeamSourceStandAlone {
 
 	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
-	 * 
+	 *
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return {@link Team} from the loaded {@link TeamSource}.

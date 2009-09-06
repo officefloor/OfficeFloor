@@ -22,7 +22,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OnePersonTeam}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeamTest extends OfficeFrameTestCase {
@@ -30,7 +30,7 @@ public class OnePersonTeamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OnePersonTeam} to test.
 	 */
-	protected OnePersonTeam team = new OnePersonTeam(100);
+	protected OnePersonTeam team = new OnePersonTeam("TEST", 100);
 
 	/**
 	 * Ensures runs the tasks.

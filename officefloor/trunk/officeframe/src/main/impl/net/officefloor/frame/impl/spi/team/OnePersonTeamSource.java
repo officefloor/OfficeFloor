@@ -50,8 +50,11 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 		long waitTime = Long.parseLong(context.getProperty(
 				MAX_WAIT_TIME_PROPERTY_NAME, "100"));
 
+		// Obtain the team name
+		String teamName = context.getTeamName();
+
 		// Return the one person team
-		return new OnePersonTeam(waitTime);
+		return new OnePersonTeam(teamName, waitTime);
 	}
 
 }

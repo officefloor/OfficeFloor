@@ -30,11 +30,6 @@ import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	/**
-	 * Name of property for the {@link Team} name.
-	 */
-	public static final String TEAM_NAME_PROPERTY_NAME = "name";
-
-	/**
 	 * Name of property for the {@link Team} size.
 	 */
 	public static final String TEAM_SIZE_PROPERTY_NAME = "size";
@@ -45,7 +40,6 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(TEAM_NAME_PROPERTY_NAME, "Name of team");
 		context.addProperty(TEAM_SIZE_PROPERTY_NAME,
 				"Number of threads in team");
 	}
@@ -54,7 +48,7 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 	protected Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the required configuration
-		String teamName = context.getProperty(TEAM_NAME_PROPERTY_NAME);
+		String teamName = context.getTeamName();
 		int teamSize = Integer.parseInt(context
 				.getProperty(TEAM_SIZE_PROPERTY_NAME));
 

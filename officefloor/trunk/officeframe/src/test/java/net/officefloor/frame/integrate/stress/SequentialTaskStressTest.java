@@ -29,7 +29,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests invoking {@link FlowInstigationStrategyEnum#SEQUENTIAL} many times.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -39,7 +39,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressSequential_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the sequential call stress test with the {@link Team}.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team}.
 	 */
@@ -101,7 +101,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param maxSequentialCalls
 		 *            Number of times to make a sequential call.
 		 */
@@ -111,7 +111,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Sequential invoke task.
-		 * 
+		 *
 		 * @param callCount
 		 *            Number of sequential calls so far.
 		 * @param flow

@@ -47,7 +47,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests the {@link Administrator}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
@@ -58,7 +58,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressAdministrator_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the {@link Administrator} stress test.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -176,7 +176,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param preTaskValue
 		 *            Pre task value.
 		 * @param postTaskValue
@@ -193,7 +193,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Setup task that runs the administered {@link Task}.
-		 * 
+		 *
 		 * @param flow
 		 *            {@link ReflectiveFlow}.
 		 * @param context
@@ -228,7 +228,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Administered {@link Task}.
-		 * 
+		 *
 		 * @param object
 		 *            {@link AdministeredObject}.
 		 */
@@ -250,7 +250,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Invoked to do the administration by the {@link Administrator}.
-		 * 
+		 *
 		 * @param administeredValue
 		 *            Administered value.
 		 */

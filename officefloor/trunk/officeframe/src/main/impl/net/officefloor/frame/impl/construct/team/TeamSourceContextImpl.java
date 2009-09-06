@@ -19,16 +19,22 @@ package net.officefloor.frame.impl.construct.team;
 
 import java.util.Properties;
 
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * {@link TeamSourceContext} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TeamSourceContextImpl implements TeamSourceContext {
+
+	/**
+	 * Name of the {@link Team} to be created from the {@link TeamSource}.
+	 */
+	private final String teamName;
 
 	/**
 	 * {@link Properties} to initialise the {@link TeamSource}.
@@ -37,17 +43,26 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 
 	/**
 	 * Initialise.
-	 * 
+	 *
+	 * @param teamName
+	 *            Name of the {@link Team} to be created from the
+	 *            {@link TeamSource}.
 	 * @param properties
 	 *            {@link Properties} to initialise the {@link TeamSource}.
 	 */
-	public TeamSourceContextImpl(Properties properties) {
+	public TeamSourceContextImpl(String teamName, Properties properties) {
+		this.teamName = teamName;
 		this.properties = properties;
 	}
 
 	/*
 	 * ===================== TeamSourceContext =========================
 	 */
+
+	@Override
+	public String getTeamName() {
+		return this.teamName;
+	}
 
 	@Override
 	public Properties getProperties() {
