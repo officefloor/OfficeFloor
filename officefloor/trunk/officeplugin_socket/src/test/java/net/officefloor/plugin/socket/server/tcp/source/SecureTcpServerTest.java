@@ -74,13 +74,13 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",
-				new OnePersonTeam(100));
+				new OnePersonTeam("accepter", 100));
 		this.constructManagedObjectSourceTeam(managedObjectName, "listener",
 				new WorkerPerTaskTeam("Listener"));
 		this.constructManagedObjectSourceTeam(managedObjectName, "cleanup",
-				new OnePersonTeam(100));
+				new OnePersonTeam("cleanup", 100));
 		this.constructManagedObjectSourceTeam(managedObjectName, "SSL_TASKS",
-				new OnePersonTeam(100));
+				new OnePersonTeam("SSL_TASKS", 100));
 
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder

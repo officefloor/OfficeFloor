@@ -67,7 +67,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 		sessionDependencies.mapDependency(0, managedObjectName);
 
 		// Register team for servicer
-		server.constructTeam("SERVICER", new OnePersonTeam(100));
+		server.constructTeam("SERVICER", new OnePersonTeam("SERVICER", 100));
 
 		// Return the servicer task
 		return new HttpServicerTask("Servicer", "service");

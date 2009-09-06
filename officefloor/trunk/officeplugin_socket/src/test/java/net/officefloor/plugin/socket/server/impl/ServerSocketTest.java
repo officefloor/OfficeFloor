@@ -99,7 +99,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams
-		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
+		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam("ACCEPTER_TEAM",
+				100));
 		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
 		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");

@@ -60,38 +60,17 @@ public class LeaderFollowerTeamSourceExtension implements
 
 		// Obtain the properties
 		PropertyList properties = context.getPropertyList();
-		final Property nameProperty = properties
-				.getOrAddProperty(LeaderFollowerTeamSource.TEAM_NAME_PROPERTY_NAME);
 		final Property sizeProperty = properties
 				.getOrAddProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME);
 
 		// Obtain the initial values
-		String nameValue = nameProperty.getValue();
-		nameValue = (nameValue == null ? "" : nameValue);
 		String sizeValue = sizeProperty.getValue();
 		sizeValue = (sizeValue == null ? "10" : sizeValue);
 
 		// Add controls to change properties
 		page.setLayout(new GridLayout(2, false));
 
-		// Allow changing the name
-		new Label(page, SWT.NONE).setText("Team name: ");
-		final Text name = new Text(page, SWT.BORDER);
-		name.setText(nameValue);
-		name.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-		name.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				// Specify value for name property
-				String nameValue = name.getText();
-				nameProperty.setValue(nameValue);
-
-				// Notify change in name
-				context.notifyPropertiesChanged();
-			}
-		});
-
-		// Allow changing the name
+		// Allow changing the size
 		new Label(page, SWT.NONE).setText("Team size: ");
 		final Text size = new Text(page, SWT.BORDER);
 		size.setText(sizeValue);
