@@ -126,6 +126,15 @@ public class StandardOfficeFloorColours {
 	}
 
 	/**
+	 * Input Managed Object ({@link #EXTERNAL_OBJECT()}).
+	 *
+	 * @return Input Managed Object.
+	 */
+	public static Color INPUT_MANAGED_OBJECT() {
+		return EXTERNAL_OBJECT();
+	}
+
+	/**
 	 * Managed Object Source (#e5e5e5).
 	 *
 	 * @return Managed Object Source.
