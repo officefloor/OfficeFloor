@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -60,7 +60,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link TaskNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TaskNodeImpl implements TaskNode {
@@ -135,7 +135,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of this {@link SectionTask}.
 	 * @param taskTypeName
@@ -159,7 +159,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
@@ -332,18 +332,18 @@ public class TaskNodeImpl implements TaskNode {
 			}
 
 			// Obtain the managed object for the object
-			ManagedObjectNode linkedManagedObject = LinkUtil.retrieveTarget(
-					objectNode, ManagedObjectNode.class,
-					"Object " + objectName, LocationType.SECTION,
-					this.sectionLocation, AssetType.TASK, this.taskName,
-					this.context.getCompilerIssues());
+			BoundManagedObjectNode linkedManagedObject = LinkUtil
+					.retrieveTarget(objectNode, BoundManagedObjectNode.class,
+							"Object " + objectName, LocationType.SECTION,
+							this.sectionLocation, AssetType.TASK,
+							this.taskName, this.context.getCompilerIssues());
 			if (linkedManagedObject == null) {
 				continue; // must have linked managed object
 			}
 
 			// Link task object to managed object
 			String linkedManagedObjectName = linkedManagedObject
-					.getManagedObjectName();
+					.getBoundManagedObjectName();
 			if (objectKey != null) {
 				taskBuilder.linkManagedObject(objectKey,
 						linkedManagedObjectName, objectClass);

@@ -18,7 +18,6 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -26,16 +25,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public interface InputManagedObjectNode extends OfficeFloorInputManagedObject,
-		LinkObjectNode {
-
-	/**
-	 * Obtains the name under which this input {@link ManagedObject} is made
-	 * available to the {@link Office}.
-	 *
-	 * @return Name under which this input {@link ManagedObject} is made
-	 *         available to the {@link Office}.
-	 */
-	String getInputManagedObjectName();
-
+public interface InputManagedObjectNode extends BoundManagedObjectNode,
+		OfficeFloorInputManagedObject, LinkObjectNode {
 }

@@ -106,9 +106,10 @@ public class CompileOfficeFloorManagedObjectTest extends
 		office.registerManagedObjectSource("DEPENDENT", "DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("DEPENDENT",
 				"DEPENDENT");
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.MANAGED_OBJECT, "DEPENDENT",
-				"Dependency dependency is not linked to a ManagedObjectNode");
+		this.issues
+				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+						AssetType.MANAGED_OBJECT, "DEPENDENT",
+						"Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to office floor
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE",

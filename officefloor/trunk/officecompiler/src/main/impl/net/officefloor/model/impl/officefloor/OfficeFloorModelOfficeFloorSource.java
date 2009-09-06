@@ -45,6 +45,7 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
@@ -273,12 +274,12 @@ public class OfficeFloorModelOfficeFloorSource extends
 						.getDeployedOfficeObject(objectModel
 								.getDeployedOfficeObjectName());
 
-				// Obtain the office floor managed object
+				// Link the office floor managed object
 				OfficeFloorManagedObject managedObject = null;
-				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = objectModel
+				DeployedOfficeObjectToOfficeFloorManagedObjectModel connToMo = objectModel
 						.getOfficeFloorManagedObject();
-				if (conn != null) {
-					OfficeFloorManagedObjectModel managedObjectModel = conn
+				if (connToMo != null) {
+					OfficeFloorManagedObjectModel managedObjectModel = connToMo
 							.getOfficeFloorManagedObject();
 					if (managedObjectModel != null) {
 						managedObject = officeFloorManagedObjects
@@ -286,12 +287,28 @@ public class OfficeFloorModelOfficeFloorSource extends
 										.getOfficeFloorManagedObjectName());
 					}
 				}
-				if (managedObject == null) {
-					continue; // must have managed object for office object
+				if (managedObject != null) {
+					// Have the office object be the managed object
+					deployer.link(officeObject, managedObject);
 				}
 
-				// Have the office object be the managed object
-				deployer.link(officeObject, managedObject);
+				// Link the office floor input managed object
+				OfficeFloorInputManagedObject inputManagedObject = null;
+				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel connToInputMo = objectModel
+						.getOfficeFloorInputManagedObject();
+				if (connToInputMo != null) {
+					OfficeFloorInputManagedObjectModel inputMoModel = connToInputMo
+							.getOfficeFloorInputManagedObject();
+					if (inputMoModel != null) {
+						inputManagedObject = officeFloorInputManagedObjects
+								.get(inputMoModel
+										.getOfficeFloorInputManagedObjectName());
+					}
+				}
+				if (inputManagedObject != null) {
+					// Have the office object by the input managed object
+					deployer.link(officeObject, inputManagedObject);
+				}
 			}
 
 			// Add the office teams

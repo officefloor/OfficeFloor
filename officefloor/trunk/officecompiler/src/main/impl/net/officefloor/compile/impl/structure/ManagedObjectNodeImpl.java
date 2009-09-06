@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -42,7 +43,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectNodeImpl implements ManagedObjectNode {
@@ -87,7 +88,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of this {@link ManagedObject}.
 	 * @param managedObjectScope
@@ -117,11 +118,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	/*
-	 * ===================== ManagedObjectNode ================================
+	 * ===================== BoundManagedObjectNode ===========================
 	 */
 
 	@Override
-	public String getManagedObjectName() {
+	public String getBoundManagedObjectName() {
 		return this.managedObjectName;
 	}
 
@@ -149,12 +150,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			return; // must have managed object type
 		}
 
-		// Register to the office
-		officeBuilder.registerManagedObjectSource(this.getManagedObjectName(),
-				this.managedObjectSourceNode.getManagedObjectSourceName());
-
 		// Obtain the managed object name
-		String managedObjectName = this.getManagedObjectName();
+		String managedObjectName = this.getBoundManagedObjectName();
+
+		// Register to the office
+		officeBuilder.registerManagedObjectSource(managedObjectName,
+				this.managedObjectSourceNode.getManagedObjectSourceName());
 
 		// Add the managed object to the office
 		DependencyMappingBuilder mapper;
@@ -187,8 +188,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			// Obtain the dependency
 			ManagedObjectDependencyNode dependencyNode = this.depedencies
 					.get(dependencyName);
-			ManagedObjectNode dependency = LinkUtil.retrieveTarget(
-					dependencyNode, ManagedObjectNode.class, "Dependency "
+			BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(
+					dependencyNode, BoundManagedObjectNode.class, "Dependency "
 							+ dependencyName, this.locationType, this.location,
 					AssetType.MANAGED_OBJECT, this.managedObjectName,
 					this.context.getCompilerIssues());
@@ -201,7 +202,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 			// Link the dependency
 			String dependentManagedObjectName = dependency
-					.getManagedObjectName();
+					.getBoundManagedObjectName();
 			if (dependencyKey != null) {
 				mapper.mapDependency(dependencyKey, dependentManagedObjectName);
 			} else {
