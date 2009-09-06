@@ -11,6 +11,9 @@
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
 		name="office floor managed object" />
+	<list
+		type="OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel"
+		name="bound office floor input managed object" />
 	<list type="OfficeFloorManagedObjectSourceInputDependencyModel"
 		name="office floor managed object source input dependency" plural="office floor managed object source input dependencies" />
 	<list type="OfficeFloorManagedObjectSourceFlowModel" name="office floor managed object source flow" />

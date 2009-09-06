@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -311,6 +312,37 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Should be the same office
 		assertEquals("Should be same office on adding twice", officeFirst,
 				officeSecond);
+	}
+
+	/**
+	 * Ensure can bind the {@link OfficeFloorManagedObjectSource} for the
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testBoundManagedObjectSourceForInputManagedObject() {
+
+		// Record issue if trying to bind twice
+		this
+				.record_issue("Managed Object Source already bound for Input Managed Object 'INPUT_MO'");
+
+		this.replayMockObjects();
+
+		// Bind the managed object source for input managed object
+		OfficeFloorInputManagedObject inputMo = this.node
+				.addInputManagedObject("INPUT_MO");
+		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO", null);
+		inputMo.setBoundOfficeFloorManagedObjectSource(moSource);
+		InputManagedObjectNode inputMoNode = (InputManagedObjectNode) inputMo;
+		assertEquals("Ensure correct bound managed object source", moSource,
+				inputMoNode.getBoundManagedObjectSourceNode());
+
+		// Ensure can only bind once
+		inputMo.setBoundOfficeFloorManagedObjectSource(this
+				.addManagedObjectSource(this.node, "ANOTHER", null));
+		assertEquals("Should be only bound to first", moSource, inputMoNode
+				.getBoundManagedObjectSourceNode());
+
+		this.verifyMockObjects();
 	}
 
 	/**

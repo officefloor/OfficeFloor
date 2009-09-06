@@ -170,11 +170,10 @@ public interface OfficeFloorDeployer {
 	 *
 	 * @param officeObject
 	 *            {@link OfficeObject}.
-	 * @param inputManagedObject
+	 * @param managedObject
 	 *            {@link OfficeFloorManagedObject}.
 	 */
-	void link(OfficeObject officeObject,
-			OfficeFloorManagedObject inputManagedObject);
+	void link(OfficeObject officeObject, OfficeFloorManagedObject managedObject);
 
 	/**
 	 * Links the {@link OfficeObject} to be the

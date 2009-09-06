@@ -32,6 +32,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -97,7 +98,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 						"MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
 						"net.orm.Session", null, null, null, null, null, null,
-						null, 100, 101));
+						null, null, 100, 101));
 		OfficeFloorManagedObjectSourceModel moSource = officeFloor
 				.getOfficeFloorManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, moSource
@@ -163,7 +164,14 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getObjectType", "getX", "getY" }, officeFloor
 				.getOfficeFloorInputManagedObjects(),
 				new OfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT",
-						"net.orm.Session", null, null, 200, 201));
+						"net.orm.Session", null, null, null, 200, 201));
+		OfficeFloorInputManagedObjectModel inputMo = officeFloor
+				.getOfficeFloorInputManagedObjects().get(0);
+		assertProperties(
+				new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel(
+						"MANAGED_OBJECT_SOURCE"), inputMo
+						.getBoundOfficeFloorManagedObjectSource(),
+				"getOfficeFloorManagedObjectSourceName");
 
 		// ----------------------------------------
 		// Validate the office floor managed objects

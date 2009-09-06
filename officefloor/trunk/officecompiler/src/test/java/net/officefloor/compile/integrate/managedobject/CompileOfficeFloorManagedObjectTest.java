@@ -43,6 +43,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
@@ -339,6 +341,44 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_registerTeam(
 				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure able to link {@link OfficeFloorInputManagedObjectModel} to
+	 * multiple {@link OfficeFloorManagedObjectSourceModel} instances along with
+	 * specifying the bound {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	public void testInputManagedObjectLinkedToMultipleManagedObjectSources() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE_A", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> mosA = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
+		mosA.linkProcess(0, "SECTION.WORK", "INPUT");
+		office
+				.setBoundInputManagedObject("INPUT_MO",
+						"MANAGED_OBJECT_SOURCE_A");
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> mosB = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
+		mosB.linkProcess(0, "SECTION.WORK", "INPUT");
 
 		// Compile the office floor
 		this.compile(true);

@@ -60,6 +60,10 @@
 		<value method="setObjectType" node="input-managed-object@object-type" />
 		<value method="setX" node="input-managed-object@x" />
 		<value method="setY" node="input-managed-object@y" />
+		<object method="setBoundOfficeFloorManagedObjectSource" node="bound-managed-object-source"
+			class="net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel">
+			<value method="setOfficeFloorManagedObjectSourceName" node="bound-managed-object-source@name" />
+		</object>
 	</object>
 	<!-- MANAGED OBJECTS -->
 	<object method="addOfficeFloorManagedObject" node="managed-object"
