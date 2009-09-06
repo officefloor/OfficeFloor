@@ -37,6 +37,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -171,6 +172,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		this.containerState = ManagedObjectContainerState.LOADED;
 
 		try {
+			// Provide bound name if name aware
+			if (this.metaData.isNameAwareManagedObject()) {
+				((NameAwareManagedObject) this.managedObject)
+						.setBoundManagedObjectName(this.metaData
+								.getBoundManagedObjectName());
+			}
+
 			// Provide listener if asynchronous managed object
 			if (this.metaData.isManagedObjectAsynchronous()) {
 				((AsynchronousManagedObject) this.managedObject)
@@ -708,6 +716,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				this.asynchronousStartTime = NO_ASYNC_OPERATION;
 
 				try {
+					// Provide bound name if name aware
+					if (this.metaData.isNameAwareManagedObject()) {
+						((NameAwareManagedObject) this.managedObject)
+								.setBoundManagedObjectName(this.metaData
+										.getBoundManagedObjectName());
+					}
+
 					// Provide listener if asynchronous managed object
 					if (this.metaData.isManagedObjectAsynchronous()) {
 						((AsynchronousManagedObject) this.managedObject)

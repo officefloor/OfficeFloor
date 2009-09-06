@@ -46,9 +46,9 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 				AsyncOperationTimedOutManagedObjectContainerTest.class,
 				new MetaDataScenarioFilter() {
 					@Override
-					public boolean isFilter(boolean isAsynchronous,
-							boolean isCoordinating, boolean isPooled,
-							boolean isRecycled) {
+					public boolean isFilter(boolean isNameAware,
+							boolean isAsynchronous, boolean isCoordinating,
+							boolean isPooled, boolean isRecycled) {
 						// Only asynchronous managed object
 						return !isAsynchronous;
 					}

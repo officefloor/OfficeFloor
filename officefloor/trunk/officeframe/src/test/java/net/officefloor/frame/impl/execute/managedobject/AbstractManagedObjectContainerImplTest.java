@@ -43,6 +43,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -78,75 +79,84 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Create the test suite of all meta-data combinations
 		TestSuite suite = new TestSuite(testCaseClass.getName());
-		for (int asynchronous = 0; asynchronous < 2; asynchronous++) {
-			for (int coordinating = 0; coordinating < 2; coordinating++) {
-				for (int pooled = 0; pooled < 2; pooled++) {
-					NEXT_SCENARIO: for (int recycled = 0; recycled < 2; recycled++) {
+		for (int nameAware = 0; nameAware < 2; nameAware++) {
+			for (int asynchronous = 0; asynchronous < 2; asynchronous++) {
+				for (int coordinating = 0; coordinating < 2; coordinating++) {
+					for (int pooled = 0; pooled < 2; pooled++) {
+						NEXT_SCENARIO: for (int recycled = 0; recycled < 2; recycled++) {
 
-						// Determine meta-data
-						boolean isAsynchronous = (asynchronous == 1);
-						boolean isCoordinating = (coordinating == 1);
-						boolean isPooled = (pooled == 1);
-						boolean isRecycled = (recycled == 1);
+							// Determine meta-data
+							boolean isNameAware = (nameAware == 1);
+							boolean isAsynchronous = (asynchronous == 1);
+							boolean isCoordinating = (coordinating == 1);
+							boolean isPooled = (pooled == 1);
+							boolean isRecycled = (recycled == 1);
 
-						// Determine if filter the scenario
-						for (MetaDataScenarioFilter filter : filters) {
-							if (filter.isFilter(isAsynchronous, isCoordinating,
-									isPooled, isRecycled)) {
-								// Do not include scenario
-								continue NEXT_SCENARIO;
+							// Determine if filter the scenario
+							for (MetaDataScenarioFilter filter : filters) {
+								if (filter.isFilter(isNameAware,
+										isAsynchronous, isCoordinating,
+										isPooled, isRecycled)) {
+									// Do not include scenario
+									continue NEXT_SCENARIO;
+								}
 							}
-						}
 
-						// Create the test case
-						AbstractManagedObjectContainerImplTest testCase;
-						try {
-							testCase = testCaseClass.newInstance();
-						} catch (Throwable ex) {
-							suite
-									.addTest(new TestCase(testCaseClass
-											.getName()) {
-										@Override
-										protected void runTest() {
-											fail("Must provide public default constructor");
-										}
-									});
-							return suite;
-						}
+							// Create the test case
+							AbstractManagedObjectContainerImplTest testCase;
+							try {
+								testCase = testCaseClass.newInstance();
+							} catch (Throwable ex) {
+								suite.addTest(new TestCase(testCaseClass
+										.getName()) {
+									@Override
+									protected void runTest() {
+										fail("Must provide public default constructor");
+									}
+								});
+								return suite;
+							}
 
-						// Obtain test prefix from class (stripping off suffix)
-						String testNamePrefix = testCaseClass.getSimpleName();
-						String testNameSuffix = ManagedObjectContainer.class
-								.getSimpleName()
-								+ "Test";
-						testNamePrefix = testNamePrefix.replace(testNameSuffix,
-								"");
+							// Obtain test prefix from class (stripping off
+							// suffix)
+							String testNamePrefix = testCaseClass
+									.getSimpleName();
+							String testNameSuffix = ManagedObjectContainer.class
+									.getSimpleName()
+									+ "Test";
+							testNamePrefix = testNamePrefix.replace(
+									testNameSuffix, "");
 
-						// Specify state and indicate name
-						StringBuilder testName = new StringBuilder();
-						testName.append(testNamePrefix);
-						if (isAsynchronous) {
-							testCase.setAsynchronous();
-							testName.append("-asynchronous");
-						}
-						if (isCoordinating) {
-							testCase.setCoordinating();
-							testName.append("-coordinating");
-						}
-						if (isPooled) {
-							testCase.setPooled();
-							testName.append("-pooled");
-						}
-						if (isRecycled) {
-							testCase.setRecycled();
-							testName.append("-recycled");
-						}
+							// Specify state and indicate name
+							StringBuilder testName = new StringBuilder();
+							testName.append(testNamePrefix);
+							if (isNameAware) {
+								testCase.setNameAware();
+								testName.append("-nameAware");
+							}
+							if (isAsynchronous) {
+								testCase.setAsynchronous();
+								testName.append("-asynchronous");
+							}
+							if (isCoordinating) {
+								testCase.setCoordinating();
+								testName.append("-coordinating");
+							}
+							if (isPooled) {
+								testCase.setPooled();
+								testName.append("-pooled");
+							}
+							if (isRecycled) {
+								testCase.setRecycled();
+								testName.append("-recycled");
+							}
 
-						// Specify the name of the test case
-						testCase.setName(testName.toString());
+							// Specify the name of the test case
+							testCase.setName(testName.toString());
 
-						// Add the test case
-						suite.addTest(testCase);
+							// Add the test case
+							suite.addTest(testCase);
+						}
 					}
 				}
 			}
@@ -164,6 +174,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		/**
 		 * Indicates if to filter out the scenario.
 		 *
+		 * @param isNameAware
+		 *            Is {@link NameAwareManagedObject}.
 		 * @param isAsynchronous
 		 *            Is {@link AsynchronousManagedObject}.
 		 * @param isCoordinating
@@ -174,9 +186,14 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		 *            Is using a recycle {@link JobNode}.
 		 * @return <code>true</code> to filter out scenario.
 		 */
-		boolean isFilter(boolean isAsynchronous, boolean isCoordinating,
-				boolean isPooled, boolean isRecycled);
+		boolean isFilter(boolean isNameAware, boolean isAsynchronous,
+				boolean isCoordinating, boolean isPooled, boolean isRecycled);
 	}
+
+	/**
+	 * Flag indicating if {@link NameAwareManagedObject}.
+	 */
+	private boolean isNameAware = false;
 
 	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
@@ -315,6 +332,14 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		if (this.isInitialised) {
 			fail("May not change ManagedObject meta-data after initialising");
 		}
+	}
+
+	/**
+	 * Flag as a {@link NameAwareManagedObject}.
+	 */
+	protected void setNameAware() {
+		this.checkNotInitialised();
+		this.isNameAware = true;
 	}
 
 	/**
@@ -470,6 +495,18 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            other words not at a later time).
 	 */
 	protected void record_MoUser_setManagedObject(boolean isInLoadScope) {
+
+		// Indicate if name aware
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.isNameAwareManagedObject(),
+				this.isNameAware);
+		if (this.isNameAware) {
+			final String BOUND_MO_NAME = "BOUND_MO_NAME";
+			this.recordReturn(this.managedObjectMetaData,
+					this.managedObjectMetaData.getBoundManagedObjectName(),
+					BOUND_MO_NAME);
+			this.managedObject.setBoundManagedObjectName(BOUND_MO_NAME);
+		}
 
 		// Indicate if asynchronous
 		this.recordReturn(this.managedObjectMetaData,
@@ -1076,7 +1113,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * {@link ManagedObject}.
 	 */
-	private static interface MockManagedObject extends
+	private static interface MockManagedObject extends NameAwareManagedObject,
 			AsynchronousManagedObject, CoordinatingManagedObject<Indexed> {
 	}
+
 }
