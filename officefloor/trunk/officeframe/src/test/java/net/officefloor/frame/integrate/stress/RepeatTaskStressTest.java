@@ -27,7 +27,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
  * Tests running the same {@link Task} many times.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
@@ -38,7 +38,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressRepeat_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the repeat stress test.
-	 * 
+	 *
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -95,7 +95,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param maxRepeatCalls
 		 *            Number of times to repeat.
 		 */
@@ -112,7 +112,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Repeating task.
-		 * 
+		 *
 		 * @param context
 		 *            {@link TaskContext}.
 		 */

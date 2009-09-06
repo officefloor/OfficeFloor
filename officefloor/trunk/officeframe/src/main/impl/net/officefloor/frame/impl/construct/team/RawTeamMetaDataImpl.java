@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * Raw {@link Team} meta-data implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
@@ -41,7 +41,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 
 	/**
 	 * Obtains the {@link RawTeamMetaDataFactory}.
-	 * 
+	 *
 	 * @return {@link RawTeamMetaDataFactory}.
 	 */
 	public static RawTeamMetaDataFactory getFactory() {
@@ -60,7 +60,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param teamName
 	 *            Name of {@link Team}.
 	 * @param team
@@ -106,7 +106,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 		try {
 			// Initialise the team source
 			Properties properties = configuration.getProperties();
-			TeamSourceContext context = new TeamSourceContextImpl(properties);
+			TeamSourceContext context = new TeamSourceContextImpl(teamName,
+					properties);
 			teamSource.init(context);
 
 		} catch (TeamSourceUnknownPropertyError ex) {

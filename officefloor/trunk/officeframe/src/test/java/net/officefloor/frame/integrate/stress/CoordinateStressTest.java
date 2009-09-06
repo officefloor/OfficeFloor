@@ -58,7 +58,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -100,7 +100,8 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		dependencyBuilder.setManagingOffice(officeName)
 				.setInputManagedObjectName("PROCESS_BOUND");
 		dependencyBuilder.setDefaultTimeout(1000);
-		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(100));
+		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(
+				"MO_TEAM", 100));
 
 		// Construct the work
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);

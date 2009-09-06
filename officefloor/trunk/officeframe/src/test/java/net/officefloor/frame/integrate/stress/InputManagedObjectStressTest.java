@@ -66,7 +66,7 @@ public class InputManagedObjectStressTest extends
 	 */
 	@StressTest
 	public void test_StressInputManagedObject_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**

@@ -25,12 +25,10 @@ import net.officefloor.frame.spi.team.Team;
  * <p>
  * Passive {@link Team} which uses the invoking {@link Thread} to execute the
  * {@link Job}.
- * </p>
  * <p>
  * Note that using this team will block the invoking {@link Thread} until the
  * {@link Job} is complete.
- * </p>
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class PassiveTeam implements Team, JobContext {

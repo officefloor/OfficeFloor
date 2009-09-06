@@ -29,25 +29,20 @@ import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
  */
 public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 
-	/**
-	 * Name of property for the {@link Team} name.
-	 */
-	public static final String TEAM_NAME_PROPERTY_NAME = "name";
-
 	/*
 	 * ==================== AbstractTeamSource ===============================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(TEAM_NAME_PROPERTY_NAME, "Team name");
+		// No specification
 	}
 
 	@Override
 	protected Team createTeam(TeamSourceContext context) throws Exception {
+
 		// Obtain the team name
-		String teamName = context.getProperty(TEAM_NAME_PROPERTY_NAME,
-				WorkerPerTaskTeam.class.getSimpleName());
+		String teamName = context.getTeamName();
 
 		// Create and return the team
 		return new WorkerPerTaskTeam(teamName);

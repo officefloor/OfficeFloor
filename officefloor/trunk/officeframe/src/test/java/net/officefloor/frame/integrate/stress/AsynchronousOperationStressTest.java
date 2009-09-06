@@ -47,7 +47,7 @@ public class AsynchronousOperationStressTest extends
 	@StressTest
 	public void test_StressAsynchronousOperation_OnePersonTeam()
 			throws Exception {
-		this.doTest(new OnePersonTeam(100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -244,8 +244,7 @@ public class AsynchronousOperationStressTest extends
 
 			// Output progress
 			if (this.isPrintOutput) {
-				if ((this.repeatCount > 0)
-						& ((this.repeatCount % 100000) == 0)) {
+				if ((this.repeatCount > 0) & ((this.repeatCount % 100000) == 0)) {
 					AsynchronousOperationStressTest.this
 							.printMessage("Asynchronous operation "
 									+ this.repeatCount);

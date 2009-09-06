@@ -17,14 +17,16 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
+import java.util.concurrent.atomic.AtomicLong;
+
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link Team} that uses a specific new worker dedicated to each new
  * {@link Job}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkerPerTaskTeam extends ThreadGroup implements Team {
@@ -32,11 +34,16 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	/**
 	 * Indicates to continue working.
 	 */
-	protected volatile boolean continueWorking = true;
+	private volatile boolean continueWorking = true;
+
+	/**
+	 * Count of the {@link Thread} instances created to obtain next index.
+	 */
+	private AtomicLong threadIndex = new AtomicLong(0);
 
 	/**
 	 * Initiate team.
-	 * 
+	 *
 	 * @param teamName
 	 *            Name of this team.
 	 */
@@ -56,7 +63,10 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	@Override
 	public void assignJob(Job task) {
 		// Hire worker to execute the task
-		new Thread(this, new DedicatedWorker(task)).start();
+		long threadIndex = this.threadIndex.getAndIncrement();
+		String threadName = this.getClass().getSimpleName() + "_"
+				+ this.getName() + "_" + String.valueOf(threadIndex);
+		new Thread(this, new DedicatedWorker(task), threadName).start();
 	}
 
 	@Override
@@ -87,7 +97,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Initiate worker.
-		 * 
+		 *
 		 * @param taskContainer
 		 *            {@link Job} to execute.
 		 */
