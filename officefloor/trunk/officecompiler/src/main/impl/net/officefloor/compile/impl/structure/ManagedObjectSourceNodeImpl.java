@@ -423,7 +423,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			String inputBoundManagedObjectName = null;
 			if (this.inputManagedObjectNode != null) {
 				inputBoundManagedObjectName = this.inputManagedObjectNode
-						.getInputManagedObjectName();
+						.getBoundManagedObjectName();
 			}
 			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
 				// Provide issue as should be input

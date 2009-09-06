@@ -20,11 +20,13 @@ package net.officefloor.compile.integrate.task;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -36,12 +38,13 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link Task}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class CompileTaskTest extends AbstractCompileTestCase {
@@ -253,7 +256,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		this.issues
 				.addIssue(LocationType.SECTION, "desk", AssetType.TASK, "TASK",
-						"Object CompileManagedObject is not linked to a ManagedObjectNode");
+						"Object CompileManagedObject is not linked to a BoundManagedObjectNode");
 
 		// Compile the office floor
 		this.compile(true);
@@ -302,6 +305,35 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to an
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testLinkTaskObjectToOfficeFloorInputManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkManagedObject(0, "INPUT_MANAGED_OBJECT",
+				InputManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", InputManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this
+				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
 
 		// Compile the office floor
 		this.compile(true);
@@ -425,6 +457,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 			fail("Should not be invoked in compiling");
 		}
 
+		public void inputObjectTask(InputManagedObject object) {
+			fail("Should not be invoked in compiling");
+		}
+
 		public void escalationTask() throws Exception {
 			fail("Should not be invoked in compiling");
 		}
@@ -435,6 +471,19 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public static class CompileManagedObject {
 		// No dependencies as focused on testing task
+	}
+
+	/**
+	 * Class for {@link ClassManagedObjectSource}.
+	 */
+	public static class InputManagedObject {
+
+		public static interface InputProcesses {
+			void doProcess(Integer parameter);
+		}
+
+		@ProcessInterface
+		InputProcesses processes;
 	}
 
 }

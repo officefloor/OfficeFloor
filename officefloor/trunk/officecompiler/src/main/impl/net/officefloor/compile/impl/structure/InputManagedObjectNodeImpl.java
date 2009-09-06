@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.frame.api.build.OfficeBuilder;
 
 /**
  * {@link InputManagedObjectNode} implementation.
@@ -43,12 +45,18 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	/*
-	 * ======================= InputManagedObjectNode =========================
+	 * ======================= BoundManagedObjectNode =========================
 	 */
 
 	@Override
-	public String getInputManagedObjectName() {
+	public String getBoundManagedObjectName() {
 		return this.inputManagedObjectName;
+	}
+
+	@Override
+	public void buildOfficeManagedObject(OfficeNode office,
+			OfficeBuilder officeBuilder) {
+		// Nothing to build for input managed object
 	}
 
 	/*

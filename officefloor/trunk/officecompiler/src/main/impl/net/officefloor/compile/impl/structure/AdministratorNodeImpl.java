@@ -30,10 +30,10 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
-import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -52,7 +52,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link AdministratorNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AdministratorNodeImpl implements AdministratorNode {
@@ -95,7 +95,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param administratorName
 	 *            Name of this {@link OfficeAdministrator}.
 	 * @param administratorSourceClassName
@@ -228,8 +228,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			LinkObjectNode linkObject = (LinkObjectNode) administerableManagedObject;
 
 			// Obtain the managed object
-			ManagedObjectNode managedObject = LinkUtil.retrieveTarget(
-					linkObject, ManagedObjectNode.class, "Managed Object "
+			BoundManagedObjectNode managedObject = LinkUtil.retrieveTarget(
+					linkObject, BoundManagedObjectNode.class, "Managed Object "
 							+ administerableManagedObject
 									.getAdministerableManagedObjectName(),
 					LocationType.OFFICE, this.officeLocation,
@@ -241,7 +241,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 			// Build administration of the managed object
 			adminBuilder.administerManagedObject(managedObject
-					.getManagedObjectName());
+					.getBoundManagedObjectName());
 		}
 
 		// Build the duties (in deterministic order)

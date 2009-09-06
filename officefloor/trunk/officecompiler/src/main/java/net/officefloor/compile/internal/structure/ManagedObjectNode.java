@@ -21,8 +21,6 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -30,34 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectNode extends SectionManagedObject,
+public interface ManagedObjectNode extends BoundManagedObjectNode, SectionManagedObject,
 		OfficeSectionManagedObject, OfficeManagedObject,
 		OfficeFloorManagedObject, LinkObjectNode {
-
-	/**
-	 * Obtains the name under which this {@link ManagedObject} is made available
-	 * to the {@link Office}.
-	 *
-	 * @return Name under which this {@link ManagedObject} is made available to
-	 *         the {@link Office}.
-	 */
-	String getManagedObjectName();
-
-	/**
-	 * <p>
-	 * Builds the {@link ManagedObject} into the {@link Office}.
-	 * <p>
-	 * This may be called more than once for an {@link Office} due to dependency
-	 * management. Only the first invocation should build this
-	 * {@link ManagedObject} into the {@link Office} and all further invocations
-	 * are to be ignored.
-	 *
-	 * @param office
-	 *            {@link OfficeNode} of the {@link Office} that this
-	 *            {@link ManagedObject} is to build itself into.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder} for the {@link Office}.
-	 */
-	void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder);
-
 }

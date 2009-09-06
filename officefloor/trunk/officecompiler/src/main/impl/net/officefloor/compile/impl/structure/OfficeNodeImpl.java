@@ -32,6 +32,7 @@ import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -76,7 +77,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link OfficeNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
@@ -151,7 +152,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Allows loading the {@link OfficeType}.
-	 * 
+	 *
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 * @param context
@@ -166,7 +167,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Allow adding the {@link DeployedOffice}.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of this {@link DeployedOffice}.
 	 * @param officeSourceClassName
@@ -190,7 +191,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Adds an issue.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
@@ -394,7 +395,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		// Build the office floor managed objects for the office.
 		// Ensure the managed objects are only built into the office once.
-		Set<ManagedObjectNode> builtManagedObjects = new HashSet<ManagedObjectNode>();
+		Set<BoundManagedObjectNode> builtManagedObjects = new HashSet<BoundManagedObjectNode>();
 		for (OfficeObjectStruct struct : this.objects.values()) {
 
 			// Obtain the office object name
@@ -402,8 +403,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String officeObjectName = objectNode.getOfficeObjectName();
 
 			// Obtain the office floor managed object node
-			ManagedObjectNode managedObjectNode = LinkUtil.retrieveTarget(
-					objectNode, ManagedObjectNode.class, "Office object "
+			BoundManagedObjectNode managedObjectNode = LinkUtil.retrieveTarget(
+					objectNode, BoundManagedObjectNode.class, "Office object "
 							+ officeObjectName, LocationType.OFFICE,
 					this.officeLocation, AssetType.MANAGED_OBJECT,
 					officeObjectName, this.context.getCompilerIssues());
@@ -784,7 +785,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param officeObject
 		 *            {@link OfficeObjectNode}.
 		 * @param isAdded
@@ -814,7 +815,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param team
 		 *            {@link OfficeTeamNode}.
 		 * @param isAdded
