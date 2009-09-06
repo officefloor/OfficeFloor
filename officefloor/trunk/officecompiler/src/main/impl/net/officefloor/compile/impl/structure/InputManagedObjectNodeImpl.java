@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -53,6 +56,12 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * Bound {@link ManagedObjectSourceNode}.
 	 */
 	private ManagedObjectSourceNode boundManagedObjectSource = null;
+
+	/**
+	 * {@link OfficeNode} instances that this {@link InputManagedObjectNode} has
+	 * been built into.
+	 */
+	private final Set<OfficeNode> builtOffices = new HashSet<OfficeNode>();
 
 	/**
 	 * Initiate.
@@ -93,12 +102,20 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
 
+		// Determine if already built into the office
+		if (this.builtOffices.contains(office)) {
+			return; // already built into the office
+		}
+
 		// Provide binding to managed object source if specified
 		if (this.boundManagedObjectSource != null) {
 			officeBuilder.setBoundInputManagedObject(this
 					.getBoundManagedObjectName(), this.boundManagedObjectSource
 					.getManagedObjectSourceName());
 		}
+
+		// Flag that built into the office
+		this.builtOffices.add(office);
 	}
 
 	/*

@@ -35,6 +35,7 @@ import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeTeamToOfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorInputManagedObjectEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectEditPart;
@@ -67,6 +68,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -174,6 +176,10 @@ public class OfficeFloorEditor extends
 				.put(
 						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
 						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectEditPart.class);
+		map
+				.put(
+						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceEditPart.class);
 		map
 				.put(
 						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
@@ -361,6 +367,21 @@ public class OfficeFloorEditor extends
 												target);
 							}
 						});
+
+		// Allow deleting input managed object to bound managed object source
+		policy
+				.addDelete(
+						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+						new DeleteChangeFactory<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>() {
+							@Override
+							public Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> createChange(
+									OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel target) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.removeOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+												target);
+							}
+						});
 	}
 
 	@Override
@@ -507,6 +528,24 @@ public class OfficeFloorEditor extends
 								return OfficeFloorEditor.this
 										.getModelChanges()
 										.linkOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect input managed object to bound managed object source
+		policy
+				.addConnection(
+						OfficeFloorInputManagedObjectModel.class,
+						OfficeFloorManagedObjectSourceModel.class,
+						new ConnectionChangeFactory<OfficeFloorInputManagedObjectModel, OfficeFloorManagedObjectSourceModel>() {
+							@Override
+							public Change<?> createChange(
+									OfficeFloorInputManagedObjectModel source,
+									OfficeFloorManagedObjectSourceModel target,
+									CreateConnectionRequest request) {
+								return OfficeFloorEditor.this
+										.getModelChanges()
+										.linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
 												source, target);
 							}
 						});

@@ -26,6 +26,7 @@ import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
@@ -76,7 +77,16 @@ public class OfficeFloorInputManagedObjectEditPart
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
 			this.refreshTargetConnections();
 			break;
+		case CHANGE_BOUND_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+			this.refreshSourceConnections();
+			break;
 		}
+	}
+
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getBoundOfficeFloorManagedObjectSource());
 	}
 
 	@Override

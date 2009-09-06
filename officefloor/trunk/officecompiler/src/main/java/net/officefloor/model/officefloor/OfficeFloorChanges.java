@@ -381,6 +381,37 @@ public interface OfficeFloorChanges {
 			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel managedObjectSourceToInputManagedObject);
 
 	/**
+	 * Links the {@link OfficeFloorInputManagedObjectModel} to its bound
+	 * {@link OfficeFloorManagedObjectSourceModel}.
+	 *
+	 * @param inputManagedObject
+	 *            {@link OfficeFloorInputManagedObjectModel}.
+	 * @param boundManagedObjectSource
+	 *            Bound {@link OfficeFloorManagedObjectSourceModel}.
+	 * @return {@link Change} to link the
+	 *         {@link OfficeFloorInputManagedObjectModel} to its bound
+	 *         {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+			OfficeFloorInputManagedObjectModel inputManagedObject,
+			OfficeFloorManagedObjectSourceModel boundManagedObjectSource);
+
+	/**
+	 * Removes the
+	 * {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
+	 * .
+	 *
+	 * @param inputManagedObjectToBoundManagedObjectSource
+	 *            {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
+	 *            to be removed.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
+	 *         .
+	 */
+	Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> removeOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputManagedObjectToBoundManagedObjectSource);
+
+	/**
 	 * Links the {@link OfficeFloorManagedObjectSourceFlowModel} to the
 	 * {@link DeployedOfficeInputModel}.
 	 *

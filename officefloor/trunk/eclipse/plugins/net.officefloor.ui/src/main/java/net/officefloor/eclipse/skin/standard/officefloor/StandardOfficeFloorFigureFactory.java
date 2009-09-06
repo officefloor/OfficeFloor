@@ -30,6 +30,7 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamToOfficeFloorT
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectFigureContext;
@@ -188,6 +189,13 @@ public class StandardOfficeFloorFigureFactory implements
 	public void decorateOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext context) {
 		// Leave as default
 	}
 
