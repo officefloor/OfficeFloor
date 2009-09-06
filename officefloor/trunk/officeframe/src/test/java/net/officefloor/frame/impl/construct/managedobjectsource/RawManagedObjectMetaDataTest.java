@@ -52,6 +52,7 @@ import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
@@ -656,6 +657,53 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getSourcingManager());
 		assertNull("Not asynchronous so no operations asset manager",
 				moMetaData.getOperationsManager());
+	}
+
+	/**
+	 * Ensures flag name aware for {@link NameAwareManagedObject}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testNameAwareManagedObject() {
+
+		final RawBoundManagedObjectMetaData boundMetaData = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final int INSTANCE_INDEX = 0;
+		final RawBoundManagedObjectInstanceMetaData<?> boundInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final String BOUND_NAME = "BOUND_NAME";
+		final ManagedObjectIndex moIndex = this
+				.createMock(ManagedObjectIndex.class);
+		final AssetManager sourceAssetManager = this
+				.createMock(AssetManager.class);
+
+		// Record name aware managed object
+		this.record_initManagedObject();
+		this.record_createRawMetaData(NameAwareManagedObject.class, 0, null);
+		this.recordReturn(boundMetaData, boundMetaData
+				.getBoundManagedObjectName(), BOUND_NAME);
+		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(),
+				moIndex);
+		this.recordReturn(moIndex, moIndex.getManagedObjectScope(),
+				ManagedObjectScope.WORK);
+		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
+				.createAssetManager(AssetType.MANAGED_OBJECT,
+						ManagedObjectScope.WORK + ":" + INSTANCE_INDEX + ":"
+								+ BOUND_NAME, "source", this.issues),
+				sourceAssetManager);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		RawManagedObjectMetaData rawMetaData = this
+				.constructRawManagedObjectMetaData(true);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
+						boundInstanceMetaData, new ManagedObjectIndex[0],
+						this.assetManagerFactory, this.issues);
+		this.verifyMockObjects();
+
+		// Verify is name aware
+		assertTrue("Should be name aware", moMetaData
+				.isNameAwareManagedObject());
 	}
 
 	/**

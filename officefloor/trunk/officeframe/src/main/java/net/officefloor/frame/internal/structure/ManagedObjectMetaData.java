@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -109,6 +110,15 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * @return Time out in milliseconds.
 	 */
 	long getTimeout();
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link NameAwareManagedObject}.
+	 *
+	 * @return <code>true</code> if the {@link ManagedObject} implements
+	 *         {@link NameAwareManagedObject}.
+	 */
+	boolean isNameAwareManagedObject();
 
 	/**
 	 * <p>

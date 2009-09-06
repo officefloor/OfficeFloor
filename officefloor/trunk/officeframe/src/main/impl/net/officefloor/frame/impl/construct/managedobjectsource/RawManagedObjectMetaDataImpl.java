@@ -45,6 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -68,7 +69,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, false, false, null);
+				null, null, false, false, false, null);
 	}
 
 	/**
@@ -108,6 +109,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	private final Class<?> objectType;
 
 	/**
+	 * Flag indicating if {@link NameAwareManagedObject}.
+	 */
+	private final boolean isNameAware;
+
+	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
 	 */
 	private final boolean isAsynchronous;
@@ -141,6 +147,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 * @param objectType
 	 *            Type of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
+	 * @param isNameAware
+	 *            Flag indicating if {@link NameAwareManagedObject}.
 	 * @param isAsynchronous
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
@@ -154,7 +162,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			ManagedObjectSource<D, F> managedObjectSource,
 			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData,
 			long defaultTimeout, ManagedObjectPool managedObjectPool,
-			Class<?> objectType, boolean isAsynchronous,
+			Class<?> objectType, boolean isNameAware, boolean isAsynchronous,
 			boolean isCoordinating,
 			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
@@ -164,6 +172,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		this.defaultTimeout = defaultTimeout;
 		this.managedObjectPool = managedObjectPool;
 		this.objectType = objectType;
+		this.isNameAware = isNameAware;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
 		this.rawManagingOfficeMetaData = rawManagingOfficeMetaData;
@@ -293,7 +302,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			return null; // can not carry on
 		}
 
-		// Determine if asynchronous and/or coordinating
+		// Determine if name aware, asynchronous, coordinating
+		boolean isManagedObjectNameAware = NameAwareManagedObject.class
+				.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectAsynchronous = AsynchronousManagedObject.class
 				.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class
@@ -348,8 +359,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
 				managedObjectSourceName, configuration, managedObjectSource,
 				metaData, defaultTimeout, managedObjectPool, objectType,
-				isManagedObjectAsynchronous, isManagedObjectCoordinating,
-				rawManagingOfficeMetaData);
+				isManagedObjectNameAware, isManagedObjectAsynchronous,
+				isManagedObjectCoordinating, rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);
@@ -469,7 +480,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(
 				boundName, this.objectType, instanceIndex,
 				this.managedObjectSource, this.managedObjectPool,
-				sourcingAssetManager, this.isAsynchronous,
+				this.isNameAware, sourcingAssetManager, this.isAsynchronous,
 				operationsAssetManager, this.isCoordinating,
 				dependencyMappings, this.defaultTimeout);
 

@@ -35,6 +35,7 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
@@ -70,6 +71,12 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectSource<?, ?> source;
+
+	/**
+	 * Indicates if the {@link ManagedObject} implements
+	 * {@link NameAwareManagedObject}.
+	 */
+	private final boolean isNameAwareManagedObject;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -140,6 +147,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            Instance index.
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
+	 * @param isNameAwareManagedObject
+	 *            <code>true</code> if the {@link ManagedObject} is
+	 *            {@link NameAwareManagedObject}.
 	 * @param pool
 	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
 	 * @param sourcingManager
@@ -164,7 +174,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
 			Class<?> objectType, int instanceIndex,
 			ManagedObjectSource<?, ?> source, ManagedObjectPool pool,
-			AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
+			boolean isNameAwareManagedObject, AssetManager sourcingManager,
+			boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
 			ManagedObjectIndex[] dependencyMapping, long timeout) {
@@ -173,6 +184,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		this.instanceIndex = instanceIndex;
 		this.source = source;
 		this.timeout = timeout;
+		this.isNameAwareManagedObject = isNameAwareManagedObject;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
 		this.dependencyMapping = dependencyMapping;
 		this.pool = pool;
@@ -240,6 +252,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public long getTimeout() {
 		return this.timeout;
+	}
+
+	@Override
+	public boolean isNameAwareManagedObject() {
+		return this.isNameAwareManagedObject;
 	}
 
 	@Override
