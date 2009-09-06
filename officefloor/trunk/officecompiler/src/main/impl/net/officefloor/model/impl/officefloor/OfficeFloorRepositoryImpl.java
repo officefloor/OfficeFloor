@@ -29,6 +29,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -150,6 +151,22 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				if (inputMo != null) {
 					conn.setOfficeFloorManagedObjectSource(moSource);
 					conn.setOfficeFloorInputManagedObject(inputMo);
+					conn.connect();
+				}
+			}
+		}
+
+		// Connect the input managed object to its bound managed object source
+		for (OfficeFloorInputManagedObjectModel inputMo : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel conn = inputMo
+					.getBoundOfficeFloorManagedObjectSource();
+			if (conn != null) {
+				OfficeFloorManagedObjectSourceModel boundMoSource = managedObjectSources
+						.get(conn.getOfficeFloorManagedObjectSourceName());
+				if (boundMoSource != null) {
+					conn.setBoundOfficeFloorInputManagedObject(inputMo);
+					conn.setBoundOfficeFloorManagedObjectSource(boundMoSource);
 					conn.connect();
 				}
 			}
@@ -346,6 +363,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					.getOfficeFloorManagedObjectSources()) {
 				conn.setOfficeFloorInputManagedObjectName(inputManagedObject
 						.getOfficeFloorInputManagedObjectName());
+			}
+		}
+
+		// Specify bound managed object source for input managed objects
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel conn : moSource
+					.getBoundOfficeFloorInputManagedObjects()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource
+						.getOfficeFloorManagedObjectSourceName());
 			}
 		}
 

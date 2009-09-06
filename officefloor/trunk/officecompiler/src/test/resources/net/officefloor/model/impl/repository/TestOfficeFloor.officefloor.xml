@@ -23,7 +23,9 @@
 	</managed-object-sources>
 	<input-managed-objects>
 		<input-managed-object name="INPUT_MANAGED_OBJECT"
-			object-type="net.orm.Session" x="200" y="201" />
+			object-type="net.orm.Session" x="200" y="201">
+			<bound-managed-object-source name="MANAGED_OBJECT_SOURCE" />
+		</input-managed-object>
 	</input-managed-objects>
 	<managed-objects>
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"

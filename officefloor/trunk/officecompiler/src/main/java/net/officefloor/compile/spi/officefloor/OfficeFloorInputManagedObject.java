@@ -34,4 +34,15 @@ public interface OfficeFloorInputManagedObject {
 	 */
 	String getOfficeFloorInputManagedObjectName();
 
+	/**
+	 * Specifies the bound {@link OfficeFloorManagedObjectSource} for this
+	 * {@link OfficeFloorInputManagedObject}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSource} to be bound should this
+	 *            not be input but required.
+	 */
+	void setBoundOfficeFloorManagedObjectSource(
+			OfficeFloorManagedObjectSource managedObjectSource);
+
 }

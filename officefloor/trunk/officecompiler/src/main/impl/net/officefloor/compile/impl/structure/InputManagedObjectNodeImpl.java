@@ -19,8 +19,13 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link InputManagedObjectNode} implementation.
@@ -30,18 +35,49 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	/**
+	 * Location of the {@link OfficeFloor}.
+	 */
+	private final String officeFloorLocation;
+
+	/**
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext context;
+
+	/**
 	 * Name of this {@link InputManagedObjectNode}.
 	 */
 	private final String inputManagedObjectName;
+
+	/**
+	 * Bound {@link ManagedObjectSourceNode}.
+	 */
+	private ManagedObjectSourceNode boundManagedObjectSource = null;
 
 	/**
 	 * Initiate.
 	 *
 	 * @param inputManagedObjectName
 	 *            Name of this {@link InputManagedObjectNode}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public InputManagedObjectNodeImpl(String inputManagedObjectName) {
+	public InputManagedObjectNodeImpl(String inputManagedObjectName,
+			String officeFloorLocation, NodeContext context) {
 		this.inputManagedObjectName = inputManagedObjectName;
+		this.officeFloorLocation = officeFloorLocation;
+		this.context = context;
+	}
+
+	/*
+	 * ======================= InputManagedObjectNode =========================
+	 */
+
+	@Override
+	public ManagedObjectSourceNode getBoundManagedObjectSourceNode() {
+		return this.boundManagedObjectSource;
 	}
 
 	/*
@@ -56,7 +92,13 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
-		// Nothing to build for input managed object
+
+		// Provide binding to managed object source if specified
+		if (this.boundManagedObjectSource != null) {
+			officeBuilder.setBoundInputManagedObject(this
+					.getBoundManagedObjectName(), this.boundManagedObjectSource
+					.getManagedObjectSourceName());
+		}
 	}
 
 	/*
@@ -66,6 +108,43 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	@Override
 	public String getOfficeFloorInputManagedObjectName() {
 		return this.inputManagedObjectName;
+	}
+
+	@Override
+	public void setBoundOfficeFloorManagedObjectSource(
+			OfficeFloorManagedObjectSource managedObjectSource) {
+
+		// Ensure is a Managed Object Source Node
+		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
+			this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation,
+					null,
+					null,
+					"Invalid managed object source node: "
+							+ managedObjectSource
+							+ " ["
+							+ (managedObjectSource == null ? null
+									: managedObjectSource.getClass().getName())
+							+ ", required "
+							+ ManagedObjectSourceNode.class.getName() + "]");
+			return; // can not bind
+		}
+
+		// Ensure not already bound
+		if (this.boundManagedObjectSource != null) {
+			this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation,
+					null,
+					null,
+					"Managed Object Source already bound for Input Managed Object '"
+							+ this.inputManagedObjectName + "'");
+			return; // already bound
+		}
+
+		// Bind the managed object source
+		this.boundManagedObjectSource = (ManagedObjectSourceNode) managedObjectSource;
 	}
 
 	/*

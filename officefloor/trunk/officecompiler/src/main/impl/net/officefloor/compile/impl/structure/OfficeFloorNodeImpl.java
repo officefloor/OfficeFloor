@@ -153,7 +153,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.get(inputManagedObjectName);
 		if (inputMo == null) {
 			// Create the input managed object and have in office floor context
-			inputMo = new InputManagedObjectNodeImpl(inputManagedObjectName);
+			inputMo = new InputManagedObjectNodeImpl(inputManagedObjectName,
+					this.officeFloorLocation, this.context);
 
 			// Add the input managed object
 			this.inputManagedObjects.put(inputManagedObjectName, inputMo);
@@ -329,6 +330,17 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			officeBuilders.put(office, officeBuilder);
 		}
 
+		// Build the input managed objects (in deterministic order)
+		InputManagedObjectNode[] inputMos = CompileUtil.toSortedArray(
+				this.inputManagedObjects.values(),
+				new InputManagedObjectNode[0],
+				new StringExtractor<InputManagedObjectNode>() {
+					@Override
+					public String toString(InputManagedObjectNode object) {
+						return object.getOfficeFloorInputManagedObjectName();
+					}
+				});
+
 		// Build the managed object sources (in deterministic order)
 		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
 
@@ -343,6 +355,16 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Build the managed object source
 			managedObjectSource.buildManagedObject(builder, managingOffice,
 					officeBuilder);
+
+			// Bind the input managed objects (for this managed object source)
+			for (InputManagedObjectNode inputMo : inputMos) {
+				if (managedObjectSource == inputMo
+						.getBoundManagedObjectSourceNode()) {
+					// Bind managed object source for the input managed object
+					inputMo.buildOfficeManagedObject(managingOffice,
+							officeBuilder);
+				}
+			}
 		}
 
 		// Return the built office floor

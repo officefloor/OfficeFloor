@@ -51,6 +51,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -181,6 +182,25 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.addInputManagedObject(inputManagedObjectName);
 			officeFloorInputManagedObjects.put(inputManagedObjectName,
 					inputManagedObject);
+
+			// Provide the binding to managed object source (if available)
+			OfficeFloorManagedObjectSource boundManagedObjectSource = null;
+			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel conn = inputManagedObjectModel
+					.getBoundOfficeFloorManagedObjectSource();
+			if (conn != null) {
+				OfficeFloorManagedObjectSourceModel boundMoSourceModel = conn
+						.getBoundOfficeFloorManagedObjectSource();
+				if (boundMoSourceModel != null) {
+					boundManagedObjectSource = officeFloorManagedObjectSources
+							.get(boundMoSourceModel
+									.getOfficeFloorManagedObjectSourceName());
+				}
+			}
+			if (boundManagedObjectSource != null) {
+				// Have bound managed object source so bind it
+				inputManagedObject
+						.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
+			}
 		}
 
 		// Link the dependencies for the managed objects

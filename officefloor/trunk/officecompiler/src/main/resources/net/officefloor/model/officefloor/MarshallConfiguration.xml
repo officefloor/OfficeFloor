@@ -101,6 +101,13 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<object method="getBoundOfficeFloorManagedObjectSource"
+				element="bound-managed-object-source">
+				<attributes>
+					<attribute method="getOfficeFloorManagedObjectSourceName"
+						attribute="name" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 	<!-- MANAGED OBJECTS -->
