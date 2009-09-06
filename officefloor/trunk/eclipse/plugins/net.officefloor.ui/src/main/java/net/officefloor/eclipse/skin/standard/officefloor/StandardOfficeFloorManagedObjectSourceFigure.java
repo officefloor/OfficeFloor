@@ -25,10 +25,13 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.RectangleContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
@@ -74,10 +77,16 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 		figure.add(managedObject);
 
 		// Register the connections to managed objects
+		ConnectionAnchor managedObjectAnchor = managedObject
+				.getConnectionAnchor();
 		this
 				.registerConnectionAnchor(
 						OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
-						managedObject.getConnectionAnchor());
+						managedObjectAnchor);
+		this
+				.registerConnectionAnchor(
+						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+						managedObjectAnchor);
 
 		// Figure to contain office connector and source container
 		Figure officeAndMos = new Figure();
@@ -93,10 +102,15 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 		officeAndMosLayout.setConstraint(office, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, false, false));
 
-		// Register the connection to managing office
+		// Register the connection to managing office and input managed object
+		ConnectionAnchor officeInputMoAnchor = office.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
-				office.getConnectionAnchor());
+				officeInputMoAnchor);
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+						officeInputMoAnchor);
 
 		// Create the managed object source
 		RectangleContainerFigure mos = new RectangleContainerFigure(context

@@ -20,9 +20,21 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorInputManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.swt.SWT;
 
 /**
  * Standard {@link OfficeFloorInputManagedObjectFigure}.
@@ -32,11 +44,6 @@ import org.eclipse.draw2d.Label;
 public class StandardOfficeFloorInputManagedObjectFigure extends
 		AbstractOfficeFloorFigure implements
 		OfficeFloorInputManagedObjectFigure {
-
-	/**
-	 * {@link OfficeFloorInputManagedObjectFigureContext}.
-	 */
-	private final OfficeFloorInputManagedObjectFigureContext context;
 
 	/**
 	 * {@link IFigure} containing the name.
@@ -51,14 +58,72 @@ public class StandardOfficeFloorInputManagedObjectFigure extends
 	 */
 	public StandardOfficeFloorInputManagedObjectFigure(
 			OfficeFloorInputManagedObjectFigureContext context) {
-		this.context = context;
 
-		// TODO provide figure
-		this.name = new Label(this.context
-				.getOfficeFloorInputManagedObjectName());
+		// Create the figure
+		Figure figure = new Figure();
+		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(1);
+		figure.setLayoutManager(figureLayout);
+
+		// Figure to contain office object, container, managed object source
+		Figure objectContainerMos = new Figure();
+		NoSpacingGridLayout objectContainerMosLayout = new NoSpacingGridLayout(
+				3);
+		objectContainerMos.setLayoutManager(objectContainerMosLayout);
+		figure.add(objectContainerMos);
+
+		// Add the office object anchor
+		ConnectorFigure dependency = new ConnectorFigure(
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+		dependency.setBorder(new MarginBorder(5, 0, 0, 0));
+		objectContainerMosLayout.setConstraint(dependency, new GridData(
+				SWT.BEGINNING, SWT.BEGINNING, false, false));
+		objectContainerMos.add(dependency);
+
+		// Register connection to office object
+		this.registerConnectionAnchor(
+				DeployedOfficeObjectToOfficeFloorInputManagedObjectModel.class,
+				dependency.getConnectionAnchor());
+
+		// Add the container for input managed object name
+		RectangleFigure container = new RectangleFigure();
+		container.setLayoutManager(new NoSpacingGridLayout(1));
+		container.setBackgroundColor(StandardOfficeFloorColours
+				.INPUT_MANAGED_OBJECT());
+		this.name = new Label(context.getOfficeFloorInputManagedObjectName());
+		this.name.setBorder(new MarginBorder(3, 3, 3, 3));
+		container.add(this.name);
+		objectContainerMos.add(container);
+
+		// Add the managed object source anchor
+		ConnectorFigure mos = new ConnectorFigure(ConnectorDirection.EAST,
+				StandardOfficeFloorColours.BLACK());
+		mos.setBorder(new MarginBorder(5, 0, 0, 0));
+		objectContainerMosLayout.setConstraint(mos, new GridData(SWT.BEGINNING,
+				SWT.BEGINNING, false, false));
+		objectContainerMos.add(mos);
+
+		// Register connection to managed object source
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel.class,
+						mos.getConnectionAnchor());
+
+		// Add the bound managed object source anchor
+		ConnectorFigure boundMos = new ConnectorFigure(
+				ConnectorDirection.SOUTH, StandardOfficeFloorColours.BLACK());
+		figureLayout.setConstraint(boundMos, new GridData(SWT.CENTER,
+				SWT.BEGINNING, true, false));
+		figure.add(boundMos);
+
+		// Register connection to bound managed object source
+		this
+				.registerConnectionAnchor(
+						OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel.class,
+						boundMos.getConnectionAnchor());
 
 		// Specify the figures
-		this.setFigure(this.name);
+		this.setFigure(figure);
+		this.setContentPane(container);
 	}
 
 	/*
