@@ -45,7 +45,7 @@ public class HttpServerTest extends MockHttpServer {
 			MockHttpServer server) throws Exception {
 
 		// Register team to do the work
-		server.constructTeam("WORKER", new OnePersonTeam(100));
+		server.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
 
 		// Register the work to process messages
 		ReflectiveWorkBuilder workBuilder = server.constructWork(

@@ -115,7 +115,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			serverSocketBuilder = this.constructManagedObject(MO_NAME,
 					HttpsServerSocketManagedObjectSource.class);
 			this.constructManagedObjectSourceTeam(MO_NAME, "SSL_TASKS",
-					new OnePersonTeam(100));
+					new OnePersonTeam("SSL_TASKS", 100));
 			serverSocketBuilder.addProperty(
 					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
 					TestSslEngineConfigurator.class.getName());
@@ -142,11 +142,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(MO_NAME, "accepter",
-				new OnePersonTeam(100));
+				new OnePersonTeam("accepter", 100));
 		this.constructManagedObjectSourceTeam(MO_NAME, "listener",
 				new WorkerPerTaskTeam("Listener"));
 		this.constructManagedObjectSourceTeam(MO_NAME, "cleanup",
-				new OnePersonTeam(100));
+				new OnePersonTeam("cleanup", 100));
 
 		// Register the task to service the HTTP requests
 		HttpServicerTask task = servicerBuilder.buildServicer(MO_NAME, this);

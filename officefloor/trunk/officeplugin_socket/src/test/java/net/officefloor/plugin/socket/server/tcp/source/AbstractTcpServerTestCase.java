@@ -131,7 +131,7 @@ public abstract class AbstractTcpServerTestCase extends
 				"WORKER");
 		taskBuilder.buildObject(MO_NAME);
 		taskBuilder.buildTaskContext();
-		this.constructTeam("WORKER", new OnePersonTeam(100));
+		this.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
 
 		// Register the managed object source to handle TCP connection
 		this.registerManagedObjectSource(PORT, MO_NAME, WORK_NAME, TASK_NAME);
