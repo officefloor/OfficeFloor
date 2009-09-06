@@ -70,6 +70,8 @@ public class OfficeFloorManagedObjectSourceEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeFloorManagedObjects());
+		models.addAll(this.getCastedModel()
+				.getBoundOfficeFloorInputManagedObjects());
 	}
 
 	@Override
@@ -125,6 +127,10 @@ public class OfficeFloorManagedObjectSourceEditPart
 			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT:
+			this.refreshTargetConnections();
+			break;
+		case ADD_BOUND_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
+		case REMOVE_BOUND_OFFICE_FLOOR_INPUT_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:

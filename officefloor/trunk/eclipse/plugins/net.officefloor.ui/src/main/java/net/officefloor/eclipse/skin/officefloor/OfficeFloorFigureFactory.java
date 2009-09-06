@@ -24,6 +24,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputM
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
@@ -255,6 +256,21 @@ public interface OfficeFloorFigureFactory {
 	void decorateOfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigure(
 			PolylineConnection figure,
 			OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext}
+	 *            .
+	 */
+	void decorateOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceFigureContext context);
 
 	/**
 	 * Decorates the

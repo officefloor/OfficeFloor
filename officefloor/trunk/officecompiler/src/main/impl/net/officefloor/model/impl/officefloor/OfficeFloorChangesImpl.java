@@ -52,6 +52,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -1452,6 +1453,54 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 			@Override
 			public void revert() {
 				managedObjectSourceToInputManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+			OfficeFloorInputManagedObjectModel inputManagedObject,
+			OfficeFloorManagedObjectSourceModel boundManagedObjectSource) {
+
+		// TODO test (link...InputManagedObjectToBound..ManagedObjectSource)
+
+		// Create the connection
+		final OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel conn = new OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel();
+		conn.setBoundOfficeFloorInputManagedObject(inputManagedObject);
+		conn.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> removeOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
+			final OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel inputManagedObjectToBoundManagedObjectSource) {
+
+		// TODO test (remove...InputManagedObjectToBound...ManagedObjectSource)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel>(
+				inputManagedObjectToBoundManagedObjectSource, "Remove") {
+			@Override
+			public void apply() {
+				inputManagedObjectToBoundManagedObjectSource.remove();
+			}
+
+			@Override
+			public void revert() {
+				inputManagedObjectToBoundManagedObjectSource.connect();
 			}
 		};
 	}
