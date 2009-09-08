@@ -22,7 +22,7 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
 /**
  * Tests the {@link TreeXmlUnmarshallerManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TreeXmlUnmarshallerManagedObjectSourceTest extends
@@ -46,7 +46,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 
 	/**
 	 * Creates the {@link TreeXmlUnmarshaller} from the input configuration.
-	 * 
+	 *
 	 * @param configurationFileName
 	 *            Name of file containing the mapping configuration.
 	 * @return {@link TreeXmlUnmarshaller}.
@@ -75,7 +75,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 				.loadManagedObjectSource(TreeXmlUnmarshallerManagedObjectSource.class);
 
 		// Return the TreeXmlUnmarshaller
-		return (TreeXmlUnmarshaller) ManagedObjectUserStandAlone
+		return (TreeXmlUnmarshaller) new ManagedObjectUserStandAlone()
 				.sourceManagedObject(source).getObject();
 	}
 

@@ -37,7 +37,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ClassManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -154,14 +154,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				.loadManagedObjectSource(ClassManagedObjectSource.class);
 
 		// Source the managed object
-		ManagedObject managedObject = ManagedObjectUserStandAlone
-				.sourceManagedObject(source);
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setObjectRegistry(objectRegistry);
+		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertTrue("Managed object must be coordinating",
 				managedObject instanceof CoordinatingManagedObject);
-		CoordinatingManagedObject<Indexed> coordinatingManagedObject = (CoordinatingManagedObject<Indexed>) managedObject;
-
-		// Coordinate the managed object
-		coordinatingManagedObject.loadObjects(objectRegistry);
 
 		// Obtain the object and validate correct type
 		Object object = managedObject.getObject();
@@ -233,14 +230,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		source.start(executeContext);
 
 		// Source the managed object
-		ManagedObject managedObject = ManagedObjectUserStandAlone
-				.sourceManagedObject(source);
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setObjectRegistry(objectRegistry);
+		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertTrue("Managed object must be coordinating",
 				managedObject instanceof CoordinatingManagedObject);
-		CoordinatingManagedObject<Indexed> coordinatingManagedObject = (CoordinatingManagedObject<Indexed>) managedObject;
-
-		// Coordinate the managed object
-		coordinatingManagedObject.loadObjects(objectRegistry);
 
 		// Obtain the object and validate correct type
 		Object object = managedObject.getObject();
@@ -302,7 +296,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Method to invoke a {@link ProcessState} with a parameter.
-		 * 
+		 *
 		 * @param parameter
 		 *            Parameter to the {@link ProcessState}.
 		 */
@@ -322,7 +316,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the dependencies.
-		 * 
+		 *
 		 * @param sqlQuery
 		 *            Expected SQL query.
 		 * @param connection
@@ -364,7 +358,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the dependencies injected.
-		 * 
+		 *
 		 * @param connection
 		 *            Expected {@link Connection}.
 		 */
@@ -376,7 +370,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the processes injected.
-		 * 
+		 *
 		 * @param processParameter
 		 *            Parameter for the invoked processes.
 		 */

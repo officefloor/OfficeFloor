@@ -33,7 +33,7 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Tests the {@link BeanManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -97,9 +97,10 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 						.getBeanFactoryConfigurationPath());
 		BeanManagedObjectSource managedObjectSource = standAlone
 				.loadManagedObjectSource(BeanManagedObjectSource.class);
-		CoordinatingManagedObject<BeanDependency> managedObject = (CoordinatingManagedObject<BeanDependency>) ManagedObjectUserStandAlone
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setObjectRegistry(objectRegistry);
+		CoordinatingManagedObject<BeanDependency> managedObject = (CoordinatingManagedObject<BeanDependency>) user
 				.sourceManagedObject(managedObjectSource);
-		managedObject.loadObjects(objectRegistry);
 		Object object = managedObject.getObject();
 		assertEquals("Incorrect bean", BEAN, object);
 		this.verifyMockObjects();
@@ -107,7 +108,7 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the path to the configuration for the {@link BeanFactory}.
-	 * 
+	 *
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {

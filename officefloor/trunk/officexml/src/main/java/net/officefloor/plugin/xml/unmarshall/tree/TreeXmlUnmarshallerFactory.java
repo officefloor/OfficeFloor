@@ -31,7 +31,7 @@ import net.officefloor.plugin.xml.XmlMarshallException;
  * office floor framework should plug-in via
  * {@link TreeXmlUnmarshallerManagedObjectSource}.
  * </p>
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TreeXmlUnmarshallerFactory {
@@ -49,7 +49,7 @@ public class TreeXmlUnmarshallerFactory {
 
 	/**
 	 * Obtains the singleton {@link TreeXmlUnmarshaller}.
-	 * 
+	 *
 	 * @return Singleton {@link TreeXmlUnmarshaller}.
 	 */
 	public static TreeXmlUnmarshallerFactory getInstance() {
@@ -58,7 +58,7 @@ public class TreeXmlUnmarshallerFactory {
 
 	/**
 	 * Creates the {@link TreeXmlUnmarshaller} from the input configuration.
-	 * 
+	 *
 	 * @param configuration
 	 *            Configuration of the {@link TreeXmlUnmarshaller}.
 	 * @return {@link TreeXmlUnmarshaller} from the configuration.
@@ -74,7 +74,7 @@ public class TreeXmlUnmarshallerFactory {
 
 	/**
 	 * Creates the {@link TreeXmlUnmarshaller} from the input configuration.
-	 * 
+	 *
 	 * @param configuration
 	 *            Configuration of the {@link TreeXmlUnmarshaller}.
 	 * @return {@link TreeXmlUnmarshaller} from the configuration.
@@ -91,7 +91,7 @@ public class TreeXmlUnmarshallerFactory {
 	/**
 	 * Creates the {@link TreeXmlUnmarshaller} from the input
 	 * {@link TreeXmlUnmarshallerManagedObjectSource}.
-	 * 
+	 *
 	 * @param source
 	 *            {@link TreeXmlUnmarshallerManagedObjectSource}.
 	 * @return {@link TreeXmlUnmarshaller}.
@@ -102,7 +102,7 @@ public class TreeXmlUnmarshallerFactory {
 			TreeXmlUnmarshallerManagedObjectSource source)
 			throws XmlMarshallException {
 		try {
-			return (TreeXmlUnmarshaller) ManagedObjectUserStandAlone
+			return (TreeXmlUnmarshaller) new ManagedObjectUserStandAlone()
 					.sourceManagedObject(source).getObject();
 		} catch (Throwable ex) {
 			throw new XmlMarshallException(ex.getMessage(), ex);

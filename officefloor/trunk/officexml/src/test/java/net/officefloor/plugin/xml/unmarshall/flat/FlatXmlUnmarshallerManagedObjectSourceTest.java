@@ -28,7 +28,7 @@ import net.officefloor.plugin.xml.XmlUnmarshaller;
 
 /**
  * Tests the {@link FlatXmlUnmarshallerManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class FlatXmlUnmarshallerManagedObjectSourceTest extends
@@ -101,7 +101,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 	public void testSimpleLoad() throws Throwable {
 
 		// Create the XML unmarshaller managed object
-		ManagedObject managedObject = ManagedObjectUserStandAlone
+		ManagedObject managedObject = new ManagedObjectUserStandAlone()
 				.sourceManagedObject(this.resourceSource);
 
 		// Obtain the XML unmarshaller
@@ -125,7 +125,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 	public void testNullLoad() throws Throwable {
 
 		// Create the XML unmarshaller managed object
-		ManagedObject managedObject = ManagedObjectUserStandAlone
+		ManagedObject managedObject = new ManagedObjectUserStandAlone()
 				.sourceManagedObject(this.resourceSource);
 
 		// Obtain the XML unmarshaller

@@ -26,7 +26,7 @@ import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 
 /**
  * Tests sending text messages.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
@@ -46,7 +46,7 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 				.loadManagedObjectSource(JmsManagedObjectSource.class);
 
 		// Create the JMS managed object
-		ManagedObject mo = ManagedObjectUserStandAlone
+		ManagedObject mo = new ManagedObjectUserStandAlone()
 				.sourceManagedObject(moSource);
 
 		// Obtain the producer

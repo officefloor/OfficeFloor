@@ -29,7 +29,7 @@ import net.officefloor.plugin.xml.XmlMarshallException;
  * This is to ease obtaining a {@link TreeXmlMarshaller} but if utilising office
  * floor framework should plug-in via
  * {@link TreeXmlMarshallerManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TreeXmlMarshallerFactory {
@@ -47,7 +47,7 @@ public class TreeXmlMarshallerFactory {
 
 	/**
 	 * Obtains the singleton {@link TreeXmlMarshallerFactory}.
-	 * 
+	 *
 	 * @return Singleton {@link TreeXmlMarshallerFactory}.
 	 */
 	public static TreeXmlMarshallerFactory getInstance() {
@@ -56,7 +56,7 @@ public class TreeXmlMarshallerFactory {
 
 	/**
 	 * Creates the {@link TreeXmlMarshaller} from the input configuration.
-	 * 
+	 *
 	 * @param configuration
 	 *            Configuration of the {@link TreeXmlMarshaller}.
 	 * @return Configured {@link TreeXmlMarshaller}.
@@ -72,7 +72,7 @@ public class TreeXmlMarshallerFactory {
 
 		// Source the marshaller
 		try {
-			return (TreeXmlMarshaller) ManagedObjectUserStandAlone
+			return (TreeXmlMarshaller) new ManagedObjectUserStandAlone()
 					.sourceManagedObject(source).getObject();
 		} catch (Throwable ex) {
 			throw new XmlMarshallException(ex.getMessage(), ex);

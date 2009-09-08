@@ -35,7 +35,7 @@ import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Tests the {@link BeanFactoryManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -83,7 +83,7 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 				configurationPath);
 		BeanFactoryManagedObjectSource managedObjectSource = standAlone
 				.loadManagedObjectSource(BeanFactoryManagedObjectSource.class);
-		ManagedObject managedObject = ManagedObjectUserStandAlone
+		ManagedObject managedObject = new ManagedObjectUserStandAlone()
 				.sourceManagedObject(managedObjectSource);
 		Object object = managedObject.getObject();
 		assertTrue("Must be bean factory", (object instanceof BeanFactory));
@@ -107,12 +107,9 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Record obtaining the dependency
 		this.recordReturn(objectRegistry, objectRegistry.getObject(0),
 				DEPENDENCY);
-		this.recordReturn(objectRegistry, objectRegistry.getObject(0),
-				DEPENDENCY);
 
 		// Record delegating functionality
 		this.recordReturn(DEPENDENCY, DEPENDENCY.getClientInfo("ONE"), "A");
-		this.recordReturn(DEPENDENCY, DEPENDENCY.getClientInfo("TWO"), "B");
 
 		this.replayMockObjects();
 
@@ -126,33 +123,25 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 				configurationPath);
 		BeanFactoryManagedObjectSource managedObjectSource = standAlone
 				.loadManagedObjectSource(BeanFactoryManagedObjectSource.class);
-		CoordinatingManagedObject<Indexed> managedObject = (CoordinatingManagedObject<Indexed>) ManagedObjectUserStandAlone
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setObjectRegistry(objectRegistry);
+		CoordinatingManagedObject<Indexed> managedObject = (CoordinatingManagedObject<Indexed>) user
 				.sourceManagedObject(managedObjectSource);
 		BeanFactory beanFactory = (BeanFactory) managedObject.getObject();
 
-		// Ensure able to obtain dependency before coordinating
-		Connection beforeDependency = (Connection) beanFactory
-				.getBean("testFactory");
-
-		// Provide registry
-		managedObject.loadObjects(objectRegistry);
-
-		// Ensure able to obtain dependency after coordinating
-		Connection afterDependency = (Connection) beanFactory
-				.getBean("testFactory");
+		// Ensure able to obtain dependency
+		Connection dependency = (Connection) beanFactory.getBean("testFactory");
 
 		// Ensure delegate to actual dependency
-		assertEquals("Incorrect before delegation", "A", beforeDependency
+		assertEquals("Incorrect after delegation", "A", dependency
 				.getClientInfo("ONE"));
-		assertEquals("Incorrect after delegation", "B", afterDependency
-				.getClientInfo("TWO"));
 
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Obtains the path to the configuration for the {@link BeanFactory}.
-	 * 
+	 *
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {

@@ -43,7 +43,7 @@ import org.springframework.context.ApplicationContext;
  * dependency).
  * <p>
  * Example configuration:
- * 
+ *
  * <pre>
  * &lt;bean id=&quot;[name]&quot; class=&quot;net.officefloor.plugin.spring.beanfactory.DependencyFactoryBean&quot; &gt;
  *     &lt;property name=&quot;type&quot; value=&quot;[fully qualified interface name]&quot; /&gt;
@@ -52,10 +52,13 @@ import org.springframework.context.ApplicationContext;
  * <p>
  * Due to the necessity to create a {@link Proxy} to handle ordering of loading
  * {@link ManagedObject} instances, the <code>type</code> must be an interface.
- * 
+ *
  * @author Daniel Sagenschneider
- * 
+ *
  * @see BeanFactoryManagedObjectSource
+ */
+/*
+ * TODO as dependencies must be loaded first, no longer need InvocationHandler
  */
 public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 
@@ -97,7 +100,7 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	 * {@link BeanFactory#getBean(String)} use the correct
 	 * {@link ObjectRegistry}. This somewhat provides a
 	 * {@link ApplicationContext} in terms of &quot;context&quot;.
-	 * 
+	 *
 	 * @param objectRegistry
 	 *            {@link ObjectRegistry}.
 	 */
@@ -120,7 +123,7 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 
 	/**
 	 * Loads the dependency for the {@link DependencyFactoryBean}.
-	 * 
+	 *
 	 * @param factory
 	 *            {@link DependencyFactoryBean}.
 	 * @param objectRegistry
@@ -139,7 +142,7 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	 * <p>
 	 * Due to the necessity to create a {@link Proxy} to handle ordering of
 	 * loading {@link ManagedObject} instances, the type must be an interface.
-	 * 
+	 *
 	 * @param type
 	 *            Type of object that this {@link FactoryBean} is to return.
 	 */
@@ -169,7 +172,7 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	 * <p>
 	 * This <b>must</b> not be configured into Spring configuration as it is
 	 * added to Spring meta-data via the {@link BeanFactoryManagedObjectSource}.
-	 * 
+	 *
 	 * @param dependencyIndex
 	 *            Index of the dependency from the {@link ObjectRegistry}.
 	 */
@@ -183,7 +186,7 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	 * <p>
 	 * This <b>must</b> not be configured into Spring configuration as it is
 	 * added to Spring meta-data via the {@link BeanFactoryManagedObjectSource}.
-	 * 
+	 *
 	 * @param constructor
 	 *            {@link Constructor}.
 	 */
