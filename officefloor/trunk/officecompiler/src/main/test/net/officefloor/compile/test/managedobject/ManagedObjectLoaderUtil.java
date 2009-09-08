@@ -39,7 +39,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 
 /**
  * Utility class for testing the {@link ManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectLoaderUtil {
@@ -47,7 +47,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels
@@ -74,7 +74,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Creates the {@link ManagedObjectTypeBuilder} to create the expected
 	 * {@link ManagedObjectType}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectTypeBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -86,7 +86,7 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectType} contained in the
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
 	 * loaded from the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -184,7 +184,7 @@ public class ManagedObjectLoaderUtil {
 	 * Convenience method to load the {@link ManagedObjectType} from the
 	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the
 	 * input {@link ManagedObjectSource} class.
-	 * 
+	 *
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameValues
@@ -204,7 +204,7 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param classLoader
@@ -225,7 +225,7 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Obtains the {@link OfficeFloorCompiler} setup for use.
-	 * 
+	 *
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
@@ -322,11 +322,23 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
+		public void addDependency(Enum<?> key, Class<?> type) {
+			this.addDependency(key.name(), type, key.ordinal(), key);
+		}
+
+		@Override
 		@SuppressWarnings("unchecked")
 		public void addFlow(String name, Class<?> argumentType, int index,
 				Enum<?> key, String workName, String taskName) {
 			this.flows.add(new ManagedObjectFlowTypeImpl(workName, taskName,
 					index, argumentType, key, name));
+		}
+
+		@Override
+		public void addFlow(Enum<?> key, Class<?> argumentType,
+				String workName, String taskName) {
+			this.addFlow(key.name(), argumentType, key.ordinal(), key,
+					workName, taskName);
 		}
 
 		@Override
