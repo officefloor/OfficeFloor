@@ -17,39 +17,33 @@
  */
 package net.officefloor.frame.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
  * Implementation of a {@link ManagedObjectUser} to source an object from a
  * {@link ManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectUserStandAlone implements ManagedObjectUser {
+@SuppressWarnings("unchecked")
+public class ManagedObjectUserStandAlone implements ManagedObjectUser,
+		AsynchronousListener, ObjectRegistry {
 
 	/**
-	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 * 
-	 * @param source
-	 *            {@link ManagedObjectSource}.
-	 * @return Object from the {@link ManagedObjectSource}.
-	 * @throws Throwable
-	 *             If fails to source the {@link ManagedObject}.
+	 * Object to synchronise sourcing the {@link ManagedObject}.
 	 */
-	public static ManagedObject sourceManagedObject(
-			ManagedObjectSource<?, ?> source) throws Throwable {
-
-		// Create a new user
-		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-
-		// Source the object
-		source.sourceManagedObject(user);
-
-		// Obtain the managed object
-		return user.getManagedObject();
-	}
+	private final Object lock = new Object();
 
 	/**
 	 * Sourced {@link ManagedObject}.
@@ -62,27 +56,175 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 	private Throwable failure;
 
 	/**
-	 * Only via static methods.
+	 * Timeout in waiting to source the {@link ManagedObject}. Default of
+	 * retrieve immediately.
 	 */
-	private ManagedObjectUserStandAlone() {
+	private long sourceTimeout = -1;
+
+	/**
+	 * Bound name for a {@link NameAwareManagedObject}.
+	 */
+	private String boundManagedObjectName = "STAND_ALONE";
+
+	/**
+	 * {@link AsynchronousListener} for an {@link AsynchronousManagedObject}.
+	 */
+	private AsynchronousListener asynchronousListener = this;
+
+	/**
+	 * {@link ObjectRegistry} for a {@link CoordinatingManagedObject}.
+	 */
+	private ObjectRegistry objectRegistry = this;
+
+	/**
+	 * Dependencies for the {@link CoordinatingManagedObject}.
+	 */
+	private final Map<Integer, Object> dependencies = new HashMap<Integer, Object>();
+
+	/**
+	 * Specifies the timeout to source the {@link ManagedObject}.
+	 *
+	 * @param sourceTimeout
+	 *            Timeout to source the {@link ManagedObject}.
+	 */
+	public void setSourceTimeout(long sourceTimeout) {
+		this.sourceTimeout = sourceTimeout;
 	}
 
 	/**
-	 * Obtain the {@link ManagedObject}.
-	 * 
-	 * @return {@link ManagedObject}.
-	 * @throws Throwable
-	 *             If fails to source {@link ManagedObject}.
+	 * Specifies the bound name for a {@link NameAwareManagedObject}.
+	 *
+	 * @param boundManagedObjectName
+	 *            Bound name for a {@link NameAwareManagedObject}.
 	 */
-	private ManagedObject getManagedObject() throws Throwable {
+	public void setBoundManagedObjectName(String boundManagedObjectName) {
+		this.boundManagedObjectName = boundManagedObjectName;
+	}
 
-		// Propagate if failure
-		if (this.failure != null) {
-			throw this.failure;
+	/**
+	 * Allows overriding the {@link AsynchronousListener} to initialise an
+	 * {@link AsynchronousManagedObject}.
+	 *
+	 * @param listener
+	 *            {@link AsynchronousListener}.
+	 */
+	public void setAsynchronousListener(AsynchronousListener listener) {
+		this.asynchronousListener = listener;
+	}
+
+	/**
+	 * Allows overriding the {@link ObjectRegistry} to initialise a
+	 * {@link CoordinatingManagedObject}.
+	 *
+	 * @param objectRegistry
+	 *            {@link ObjectRegistry}.
+	 */
+	public void setObjectRegistry(ObjectRegistry<?> objectRegistry) {
+		this.objectRegistry = objectRegistry;
+	}
+
+	/**
+	 * Maps the dependency for the {@link CoordinatingManagedObject}.
+	 *
+	 * @param index
+	 *            Index of the dependency.
+	 * @param dependency
+	 *            Dependency.
+	 */
+	public void mapDependency(int index, Object dependency) {
+		this.mapDependency(new Integer(index), dependency);
+	}
+
+	/**
+	 * Maps the dependency for the {@link CoordinatingManagedObject}.
+	 *
+	 * @param key
+	 *            Key of the dependency.
+	 * @param dependency
+	 *            Dependency.
+	 */
+	public void mapDependency(Enum<?> key, Object dependency) {
+		this.mapDependency(key.ordinal(), dependency);
+	}
+
+	/**
+	 * Sources the {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 *
+	 * @param source
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * @throws Throwable
+	 *             If fails to source the {@link ManagedObject}.
+	 */
+	public synchronized ManagedObject sourceManagedObject(
+			ManagedObjectSource<?, ?> source) throws Throwable {
+
+		// Method synchronised so can only load one at time.
+		try {
+
+			// Source the object
+			long sourceStartTime = System.currentTimeMillis();
+			source.sourceManagedObject(this);
+
+			// Wait until the managed object is sourced
+			ManagedObject mo = null;
+			do {
+
+				// Obtain managed object
+				synchronized (this.lock) {
+
+					// Propagate if failure
+					if (this.failure != null) {
+						throw this.failure;
+					}
+
+					// Obtain the managed object
+					mo = this.managedObject;
+				}
+
+				// Determine if have managed object
+				if (mo == null) {
+					// Determine if timed out
+					long currentTime = System.currentTimeMillis();
+					if ((currentTime - sourceStartTime) > this.sourceTimeout) {
+						// Taken too long to source
+						throw new SourceManagedObjectTimedOutEscalation(
+								Object.class);
+					}
+
+					// Not timed out, so wait some time for sourcing
+					Thread.sleep(100);
+				}
+
+			} while (mo == null);
+
+			// Have managed object so determine if name aware
+			if (mo instanceof NameAwareManagedObject) {
+				// Provide the bound name
+				((NameAwareManagedObject) mo)
+						.setBoundManagedObjectName(this.boundManagedObjectName);
+			}
+
+			// Provide asynchronous listener
+			if (mo instanceof AsynchronousManagedObject) {
+				((AsynchronousManagedObject) mo)
+						.registerAsynchronousCompletionListener(this.asynchronousListener);
+			}
+
+			// Coordinate if required
+			if (mo instanceof CoordinatingManagedObject) {
+				((CoordinatingManagedObject) mo)
+						.loadObjects(this.objectRegistry);
+			}
+
+			// Return the managed object
+			return mo;
+
+		} finally {
+			// Reset
+			this.managedObject = null;
+			this.failure = null;
 		}
-
-		// Otherwise return managed object
-		return this.managedObject;
 	}
 
 	/*
@@ -91,12 +233,56 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 
 	@Override
 	public void setManagedObject(ManagedObject managedObject) {
-		this.managedObject = managedObject;
+		synchronized (this.lock) {
+			this.managedObject = managedObject;
+		}
 	}
 
 	@Override
 	public void setFailure(Throwable cause) {
-		this.failure = cause;
+		synchronized (this.lock) {
+			this.failure = cause;
+		}
+	}
+
+	/*
+	 * ===================== AsynchronousListener =========================
+	 */
+
+	@Override
+	public void notifyStarted() {
+		// Provide output to hint nothing happens
+		System.out.println(this.getClass().getSimpleName() + ": notifyStarted");
+	}
+
+	@Override
+	public void notifyComplete() {
+		// Provide output to hint nothing happens
+		System.out
+				.println(this.getClass().getSimpleName() + ": notifyComplete");
+	}
+
+	/*
+	 * ===================== ObjectRegistry ===============================
+	 */
+
+	@Override
+	public Object getObject(Enum key) {
+		return this.getObject(key.ordinal());
+	}
+
+	@Override
+	public Object getObject(int index) {
+
+		// Obtain the dependency
+		Object dependency = this.dependencies.get(new Integer(index));
+		if (dependency == null) {
+			throw new IllegalStateException(
+					"No dependency configured for index " + index);
+		}
+
+		// Return the dependency
+		return dependency;
 	}
 
 }
