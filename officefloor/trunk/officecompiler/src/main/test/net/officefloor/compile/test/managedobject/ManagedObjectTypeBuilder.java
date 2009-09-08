@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 /**
  * Builder for the {@link ManagedObjectType} to validate the loaded
  * {@link ManagedObjectType} from the {@link ManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectTypeBuilder {
@@ -41,7 +41,7 @@ public interface ManagedObjectTypeBuilder {
 	/**
 	 * Specifies the {@link Object} class returned from the
 	 * {@link ManagedObject}.
-	 * 
+	 *
 	 * @param objectClass
 	 *            Class of the {@link Object} returned from the
 	 *            {@link ManagedObject}.
@@ -50,7 +50,7 @@ public interface ManagedObjectTypeBuilder {
 
 	/**
 	 * Adds a {@link ManagedObjectDependencyType}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link ManagedObjectDependency}.
 	 * @param type
@@ -63,8 +63,23 @@ public interface ManagedObjectTypeBuilder {
 	void addDependency(String name, Class<?> type, int index, Enum<?> key);
 
 	/**
+	 * <p>
+	 * Convenience method to add a {@link ManagedObjectDependencyType} based on
+	 * the key.
+	 * <p>
+	 * Both the <code>name</code> and <code>index</code> are extracted from the
+	 * key.
+	 *
+	 * @param key
+	 *            Key identifying the {@link ManagedObjectDependency}.
+	 * @param type
+	 *            Type of the {@link ManagedObjectDependency}.
+	 */
+	void addDependency(Enum<?> key, Class<?> type);
+
+	/**
 	 * Adds a {@link ManagedObjectFlowType}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link ManagedObjectFlow}.
 	 * @param argumentType
@@ -86,8 +101,32 @@ public interface ManagedObjectTypeBuilder {
 			String workName, String taskName);
 
 	/**
+	 * <p>
+	 * Convenience method to add a {@link ManagedObjectFlowType} based on the
+	 * key.
+	 * <p>
+	 * Both the <code>name</code> and <code>index</code> are extracted from the
+	 * key.
+	 *
+	 * @param key
+	 *            Key identifying the {@link ManagedObjectFlow}.
+	 * @param argumentType
+	 *            Type of argument passed from the {@link ManagedObjectFlow}.
+	 * @param workName
+	 *            Name of {@link Work} instigating the {@link Flow} or
+	 *            <code>null</code> if done directly by
+	 *            {@link ManagedObjectSource}.
+	 * @param taskName
+	 *            Name of {@link Task} instigating the {@link Flow} or
+	 *            <code>null</code> if done directly by
+	 *            {@link ManagedObjectSource}.
+	 */
+	void addFlow(Enum<?> key, Class<?> argumentType, String workName,
+			String taskName);
+
+	/**
 	 * Adds a {@link ManagedObjectTeamType}.
-	 * 
+	 *
 	 * @param teamName
 	 *            Name of the {@link ManagedObjectTeam}.
 	 */
@@ -95,7 +134,7 @@ public interface ManagedObjectTypeBuilder {
 
 	/**
 	 * Adds an extension interface.
-	 * 
+	 *
 	 * @param extensionInterface
 	 *            Extension interface.
 	 */

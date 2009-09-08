@@ -41,9 +41,6 @@ import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoader
  *
  * @author Daniel Sagenschneider
  */
-/*
- * TODO provide testing (HttpParametersLoaderWorkSource)
- */
 public class HttpParametersLoaderWorkSource
 		extends
 		AbstractWorkSource<HttpParametersLoaderWorkSource.HttpParametersLoaderTask> {
@@ -59,6 +56,11 @@ public class HttpParametersLoaderWorkSource
 	 * sensitive in matching parameter names.
 	 */
 	public static final String PROPERTY_CASE_SENSITIVE = "case.sensitive";
+
+	/**
+	 * Property prefix for an alias.
+	 */
+	public static final String PROPERTY_PREFIX_ALIAS = "alias.";
 
 	/**
 	 * {@link HttpParametersLoader}.
@@ -87,11 +89,24 @@ public class HttpParametersLoaderWorkSource
 
 		// Obtain whether case sensitive (true by default)
 		boolean isCaseSensitive = Boolean.parseBoolean(context.getProperty(
-				PROPERTY_CASE_SENSITIVE, Boolean.toString(true)));
+				PROPERTY_CASE_SENSITIVE, Boolean.toString(false)));
 
 		// Create the alias mappings
 		Map<String, String> aliasMappings = new HashMap<String, String>();
-		// TODO load alias mappings from properties
+		for (String name : context.getPropertyNames()) {
+
+			// Determine if alias property
+			if (!name.startsWith(PROPERTY_PREFIX_ALIAS)) {
+				continue;
+			}
+
+			// Obtain the alias and corresponding parameter name
+			String alias = name.substring(PROPERTY_PREFIX_ALIAS.length());
+			String parameterName = context.getProperty(name);
+
+			// Add the alias mapping
+			aliasMappings.put(alias, parameterName);
+		}
 
 		// Initialise the loader
 		this.loader.init(type, aliasMappings, isCaseSensitive);

@@ -132,7 +132,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 	 *            Dependency.
 	 */
 	public void mapDependency(int index, Object dependency) {
-		this.mapDependency(new Integer(index), dependency);
+		this.dependencies.put(new Integer(index), dependency);
 	}
 
 	/**
