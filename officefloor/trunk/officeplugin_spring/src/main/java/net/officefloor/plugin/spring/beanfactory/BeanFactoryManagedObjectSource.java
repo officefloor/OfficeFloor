@@ -17,10 +17,6 @@
  */
 package net.officefloor.plugin.spring.beanfactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -41,9 +37,9 @@ import org.springframework.core.io.Resource;
 
 /**
  * {@link ManagedObjectSource} to obtain the {@link BeanFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
- * 
+ *
  * @see DependencyFactoryBean
  */
 public class BeanFactoryManagedObjectSource extends
@@ -56,7 +52,7 @@ public class BeanFactoryManagedObjectSource extends
 
 	/**
 	 * Convenience method to obtain the {@link BeanFactory}.
-	 * 
+	 *
 	 * @param beanFactoryPath
 	 *            Path to the configuration of the {@link BeanFactory}.
 	 * @param classLoader
@@ -107,11 +103,11 @@ public class BeanFactoryManagedObjectSource extends
 		this.beanFactory
 				.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 
-		// Indicate the object type
+		// Indicate the meta-data
+		context.setManagedObjectClass(BeanFactoryManagedObject.class);
 		context.setObjectClass(BeanFactory.class);
 
 		// Load the dependencies
-		int dependencyIndex = 0;
 		ClassLoader classLoader = mosContext.getClassLoader();
 		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDefinition = this.beanFactory
@@ -140,30 +136,16 @@ public class BeanFactoryManagedObjectSource extends
 			Class<?> requiredType = classLoader.loadClass(requiredTypeName
 					.getValue());
 
-			// Ensure the type is an interface
-			if (!requiredType.isInterface()) {
-				throw new Exception("Required type for "
-						+ DependencyFactoryBean.class.getSimpleName() + " "
-						+ beanName + " must be an interface (type="
-						+ requiredType.getName() + ")");
-			}
-
-			// Create the constructor for the type proxy
-			Constructor<?> proxyConstructor = Proxy.getProxyClass(classLoader,
-					requiredType).getConstructor(InvocationHandler.class);
-
 			// Add the dependency
-			context.addDependency(requiredType).setLabel(beanName);
+			int dependencyIndex = context.addDependency(requiredType).setLabel(
+					beanName).getIndex();
 
-			// Provide the dependency index and proxy constructor to bean
+			// Provide the dependency index for bean
 			MutablePropertyValues propertyValues = beanDefinition
 					.getPropertyValues();
 			propertyValues.addPropertyValue(
 					DependencyFactoryBean.DEPENDENCY_INDEX_SPRING_PROPERTY,
-					new Integer(dependencyIndex++));
-			propertyValues.addPropertyValue(
-					DependencyFactoryBean.PROXY_CONSTRUCTOR_SPRING_PROPERTY,
-					proxyConstructor);
+					new Integer(dependencyIndex));
 		}
 	}
 

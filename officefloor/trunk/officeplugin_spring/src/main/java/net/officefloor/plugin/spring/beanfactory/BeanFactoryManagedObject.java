@@ -28,7 +28,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * {@link ManagedObject} {@link BeanFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class BeanFactoryManagedObject implements
@@ -46,7 +46,7 @@ public class BeanFactoryManagedObject implements
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param delegate
 	 *            {@link BeanFactory} to delegate functionality.
 	 */
@@ -60,11 +60,7 @@ public class BeanFactoryManagedObject implements
 
 	@Override
 	public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
-
-		// Provide registry to any previous created beans
-		DependencyFactoryBean.setObjectRegistry(registry);
-
-		// Keep hold of registry for creation of further beans
+		// Keep hold of registry for creation of beans
 		this.objectRegistry = registry;
 	}
 

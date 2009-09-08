@@ -17,18 +17,9 @@
  */
 package net.officefloor.plugin.spring.beanfactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -46,21 +37,15 @@ import org.springframework.context.ApplicationContext;
  *
  * <pre>
  * &lt;bean id=&quot;[name]&quot; class=&quot;net.officefloor.plugin.spring.beanfactory.DependencyFactoryBean&quot; &gt;
- *     &lt;property name=&quot;type&quot; value=&quot;[fully qualified interface name]&quot; /&gt;
+ *     &lt;property name=&quot;type&quot; value=&quot;[fully qualified type name]&quot; /&gt;
  * &lt;/bean&gt;
  * </pre>
- * <p>
- * Due to the necessity to create a {@link Proxy} to handle ordering of loading
- * {@link ManagedObject} instances, the <code>type</code> must be an interface.
  *
  * @author Daniel Sagenschneider
  *
  * @see BeanFactoryManagedObjectSource
  */
-/*
- * TODO as dependencies must be loaded first, no longer need InvocationHandler
- */
-public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
+public class DependencyFactoryBean implements FactoryBean {
 
 	/**
 	 * Name of the Spring property to obtain the required type returned from
@@ -72,12 +57,6 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	 * Name of the Spring property to provide the dependency index.
 	 */
 	public static final String DEPENDENCY_INDEX_SPRING_PROPERTY = "dependencyIndex";
-
-	/**
-	 * Name of the Spring property to provide the {@link Proxy}
-	 * {@link Constructor}.
-	 */
-	public static final String PROXY_CONSTRUCTOR_SPRING_PROPERTY = "proxyConstructor";
 
 	/**
 	 * {@link ThreadLocal} containing the {@link DependencyState} of this
@@ -111,45 +90,12 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 
 		// Provide the object registry to state
 		state.objectRegistry = objectRegistry;
-
-		// Load dependencies for already instantiated factories
-		for (DependencyFactoryBean factory : state.factories) {
-			loadDependency(factory, objectRegistry);
-		}
-
-		// Clear list of factories as now setup (allows them to be gc'ed)
-		state.factories.clear();
 	}
 
 	/**
-	 * Loads the dependency for the {@link DependencyFactoryBean}.
-	 *
-	 * @param factory
-	 *            {@link DependencyFactoryBean}.
-	 * @param objectRegistry
-	 *            {@link ObjectRegistry}.
+	 * Type of the dependency.
 	 */
-	private static void loadDependency(DependencyFactoryBean factory,
-			ObjectRegistry<Indexed> objectRegistry) {
-		factory.dependency = objectRegistry.getObject(factory.dependencyIndex);
-	}
-
-	/**
-	 * <p>
-	 * Requires the type expected from the {@link FactoryBean} to be specified
-	 * in Spring configuration. This enables providing type for the
-	 * {@link ManagedObjectDependencyType}.
-	 * <p>
-	 * Due to the necessity to create a {@link Proxy} to handle ordering of
-	 * loading {@link ManagedObject} instances, the type must be an interface.
-	 *
-	 * @param type
-	 *            Type of object that this {@link FactoryBean} is to return.
-	 */
-	@Required
-	public void setType(Class<?> type) {
-		// Ignored as used by managed object source
-	}
+	private Class<?> type;
 
 	/**
 	 * Index of the dependency from the {@link ObjectRegistry}.
@@ -157,14 +103,17 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	private int dependencyIndex = -1;
 
 	/**
-	 * {@link Constructor} to create the {@link Proxy}.
+	 * The type expected from the {@link FactoryBean} must be specified in
+	 * Spring configuration. This enables providing type for the
+	 * {@link ManagedObjectDependencyType}.
+	 *
+	 * @param type
+	 *            Type of object that this {@link FactoryBean} is to return.
 	 */
-	private Constructor<?> constructor;
-
-	/**
-	 * Dependency to delegate {@link Proxy} functionality.
-	 */
-	private Object dependency;
+	@Required
+	public void setType(Class<?> type) {
+		this.type = type;
+	}
 
 	/**
 	 * <p>
@@ -180,20 +129,6 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 		this.dependencyIndex = dependencyIndex;
 	}
 
-	/**
-	 * <p>
-	 * Specifies the {@link Constructor} to create the {@link Proxy}.
-	 * <p>
-	 * This <b>must</b> not be configured into Spring configuration as it is
-	 * added to Spring meta-data via the {@link BeanFactoryManagedObjectSource}.
-	 *
-	 * @param constructor
-	 *            {@link Constructor}.
-	 */
-	public void setProxyConstructor(Constructor<?> constructor) {
-		this.constructor = constructor;
-	}
-
 	/*
 	 * ================== FactoryBean ================================
 	 */
@@ -206,54 +141,17 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 	@Override
 	public Object getObject() throws Exception {
 
-		// Obtain the dependency if object registry available
+		// Obtain the dependency
 		DependencyState state = threadLocalObjectRegistry.get();
-		if (state.objectRegistry != null) {
-			// Obtain the dependency
-			loadDependency(this, state.objectRegistry);
+		Object object = state.objectRegistry.getObject(this.dependencyIndex);
 
-		} else {
-			// Register this to receive object registry when available
-			state.factories.add(this);
-		}
-
-		// Always return a proxy for consistency
-		return this.constructor.newInstance(this);
+		// Return the dependency
+		return object;
 	}
 
 	@Override
 	public Class<?> getObjectType() {
-		return null;
-	}
-
-	/*
-	 * =================== InvocationHandler ===========================
-	 */
-
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
-
-		// Ensure have the dependency
-		if (this.dependency == null) {
-			throw new IllegalStateException(
-					"Can not use functionality on a bean from "
-							+ DependencyFactoryBean.class.getSimpleName()
-							+ " before setup is complete");
-		}
-
-		// Obtain the method to invoke on the dependency
-		Method dependencyMethod = this.dependency.getClass().getMethod(
-				method.getName(), method.getParameterTypes());
-
-		try {
-			// Return the results of invoking the method on the dependency
-			return dependencyMethod.invoke(this.dependency, args);
-
-		} catch (InvocationTargetException ex) {
-			// Propagate cause
-			throw ex.getCause();
-		}
+		return this.type;
 	}
 
 	/**
@@ -266,12 +164,6 @@ public class DependencyFactoryBean implements FactoryBean, InvocationHandler {
 		 * {@link ObjectRegistry}.
 		 */
 		public ObjectRegistry<Indexed> objectRegistry = null;
-
-		/**
-		 * {@link DependencyFactoryBean} instances that were instantiated before
-		 * the {@link ObjectRegistry} became available.
-		 */
-		public List<DependencyFactoryBean> factories = new LinkedList<DependencyFactoryBean>();
 	}
 
 }
