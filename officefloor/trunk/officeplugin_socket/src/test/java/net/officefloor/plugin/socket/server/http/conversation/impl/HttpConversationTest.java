@@ -211,17 +211,13 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * Ensure {@link ParseException} response is sent immediately.
 	 */
 	public void testParseFailure() throws IOException {
-		final ParseException failure = new ParseException(HttpStatus._400,
-				"Body of parse failure response");
+		final ParseException failure = new ParseException(
+				HttpStatus.SC_BAD_REQUEST, "Body of parse failure response");
 		this.conversation.parseFailure(failure, true);
 		String message = failure.getMessage();
 		this
-				.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html\nContent-Encoding: "
-						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
-						+ "\nContent-Length: "
-						+ message.length()
-						+ "\n\n"
-						+ message);
+				.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
+						+ message.length() + "\n\n" + message);
 
 		// Ensure the connection is closed
 		assertEquals("Connection should be closed", BufferStream.END_OF_STREAM,
@@ -234,7 +230,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * is then sent immediately.
 	 */
 	public void testStopProcessingOnParseFailure() throws IOException {
-		final ParseException failure = new ParseException(HttpStatus._414,
+		final ParseException failure = new ParseException(
+				HttpStatus.SC_REQUEST_URI_TOO_LARGE,
 				"Body of parse failure response");
 
 		// Add request and then parse failure
@@ -253,10 +250,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		String message = failure.getMessage();
 		this
 				.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST"
-						+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html\nContent-Encoding: "
-						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
-						+ "\nContent-Length: " + message.length() + "\n\n"
-						+ message);
+						+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
+						+ message.length() + "\n\n" + message);
 
 		// Ensure the connection is closed
 		assertEquals("Connection should be closed", BufferStream.END_OF_STREAM,
@@ -284,12 +279,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Ensure failure written as response
 		String message = failure.getMessage();
 		this
-				.assertWireData("HTTP/1.1 500 Internal Server Error\nContent-Type: text/html\nContent-Encoding: "
-						+ HttpResponseImpl.PARSE_FAILURE_CONTENT_ENCODING_NAME
-						+ "\nContent-Length: "
-						+ message.length()
-						+ "\n\n"
-						+ message);
+				.assertWireData("HTTP/1.1 500 Internal Server Error\nContent-Type: text/html; charset=UTF-8\nContent-Length: "
+						+ message.length() + "\n\n" + message);
 	}
 
 	/*

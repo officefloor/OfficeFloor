@@ -220,9 +220,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_PartialMethod() {
 		this.tempBuffer = new char[1];
-		this
-				.doInvalidMethodTest("TooLarge", HttpStatus._400,
-						"Method too long");
+		this.doInvalidMethodTest("TooLarge", HttpStatus.SC_BAD_REQUEST,
+				"Method too long");
 	}
 
 	/**
@@ -230,7 +229,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_CompleteMethod() {
 		this.tempBuffer = new char[1];
-		this.doInvalidMethodTest("TooLarge ", HttpStatus._400,
+		this.doInvalidMethodTest("TooLarge ", HttpStatus.SC_BAD_REQUEST,
 				"Method too long");
 	}
 
@@ -239,8 +238,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_PartialRequestURI() {
 		this.tempBuffer = new char[3];
-		this.doInvalidMethodTest("GET /TooLong", HttpStatus._414,
-				"Request-URI Too Long");
+		this.doInvalidMethodTest("GET /TooLong",
+				HttpStatus.SC_REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
 	}
 
 	/**
@@ -248,8 +247,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_CompleteRequestURI() {
 		this.tempBuffer = new char[3];
-		this.doInvalidMethodTest("GET /TooLong ", HttpStatus._414,
-				"Request-URI Too Long");
+		this.doInvalidMethodTest("GET /TooLong ",
+				HttpStatus.SC_REQUEST_URI_TOO_LARGE, "Request-URI Too Long");
 	}
 
 	/**
@@ -257,8 +256,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_PartialVersion() {
 		this.tempBuffer = new char[5];
-		this.doInvalidMethodTest("GET /path TooLong", HttpStatus._400,
-				"Version too long");
+		this.doInvalidMethodTest("GET /path TooLong",
+				HttpStatus.SC_BAD_REQUEST, "Version too long");
 	}
 
 	/**
@@ -266,8 +265,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testTooLong_CompleteVersion() {
 		this.tempBuffer = new char[5];
-		this.doInvalidMethodTest("GET /path TooLong\n", HttpStatus._400,
-				"Version too long");
+		this.doInvalidMethodTest("GET /path TooLong\n",
+				HttpStatus.SC_BAD_REQUEST, "Version too long");
 	}
 
 	/**
@@ -276,7 +275,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testTooLong_PartialHeaderName() {
 		this.tempBuffer = new char[8];
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName",
-				HttpStatus._400, "Header name too long");
+				HttpStatus.SC_BAD_REQUEST, "Header name too long");
 	}
 
 	/**
@@ -285,7 +284,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testTooLong_CompleteHeaderName() {
 		this.tempBuffer = new char[8];
 		this.doInvalidMethodTest("GET /path HTTP/1.1\nTooLongHeaderName:",
-				HttpStatus._400, "Header name too long");
+				HttpStatus.SC_BAD_REQUEST, "Header name too long");
 	}
 
 	/**
@@ -295,7 +294,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.tempBuffer = new char[8];
 		this.doInvalidMethodTest(
 				"GET /path HTTP/1.1\nName: HeaderValueTooLong",
-				HttpStatus._400, "Header value too long");
+				HttpStatus.SC_BAD_REQUEST, "Header value too long");
 	}
 
 	/**
@@ -305,7 +304,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		this.tempBuffer = new char[8];
 		this.doInvalidMethodTest(
 				"GET /path HTTP/1.1\nName: HeaderValueTooLong\n",
-				HttpStatus._400, "Header value too long");
+				HttpStatus.SC_BAD_REQUEST, "Header value too long");
 	}
 
 	/**
@@ -319,7 +318,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			request.append("Header" + i + ": Value" + i + "\n");
 		}
 		request.append("\n");
-		this.doInvalidMethodTest(request.toString(), HttpStatus._400,
+		this.doInvalidMethodTest(request.toString(), HttpStatus.SC_BAD_REQUEST,
 				"Too Many Headers");
 	}
 
@@ -330,7 +329,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 		// Create body that is too large
 		long tooLargeBodySize = MAX_BODY_LENGTH + 1;
 		this.doInvalidMethodTest("POST /path HTTP/1.1\nContent-Length: "
-				+ tooLargeBodySize + "\n\n", HttpStatus._413,
+				+ tooLargeBodySize + "\n\n",
+				HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE,
 				"Request entity must be less than maximum of "
 						+ MAX_BODY_LENGTH + " bytes");
 	}
@@ -340,14 +340,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testNoContentLengthForPost() {
 		this.doInvalidMethodTest("POST /path HTTP/1.1\n\nTEST",
-				HttpStatus._411, "Must provide Content-Length header for POST");
+				HttpStatus.SC_LENGTH_REQUIRED,
+				"Must provide Content-Length header for POST");
 	}
 
 	/**
 	 * Validates that Content-Length is required for PUT.
 	 */
 	public void testNoContentLengthForPut() {
-		this.doInvalidMethodTest("PUT /path HTTP/1.1\n\nTEST", HttpStatus._411,
+		this.doInvalidMethodTest("PUT /path HTTP/1.1\n\nTEST",
+				HttpStatus.SC_LENGTH_REQUIRED,
 				"Must provide Content-Length header for PUT");
 	}
 
@@ -357,7 +359,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testBlankContentLengthValue() {
 		this.doInvalidMethodTest(
 				"POST /path HTTP/1.1\nContent-Length:\n\nTEST",
-				HttpStatus._411,
+				HttpStatus.SC_LENGTH_REQUIRED,
 				"Content-Length header value must be an integer");
 	}
 
@@ -367,7 +369,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testNonIntegerContentLengthValue() {
 		this.doInvalidMethodTest(
 				"POST /path HTTP/1.1\nContent-Length: INVALID\n\nTEST",
-				HttpStatus._411,
+				HttpStatus.SC_LENGTH_REQUIRED,
 				"Content-Length header value must be an integer");
 	}
 
@@ -403,7 +405,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * Ensure bad parse with invalid value for <code>%HH</code>.
 	 */
 	public void testPercentageInvalidValue() {
-		this.doInvalidMethodTest("GET /invalid%WRONG", HttpStatus._400,
+		this.doInvalidMethodTest("GET /invalid%WRONG",
+				HttpStatus.SC_BAD_REQUEST,
 				"Invalid escaped hexidecimal character 'W'");
 	}
 

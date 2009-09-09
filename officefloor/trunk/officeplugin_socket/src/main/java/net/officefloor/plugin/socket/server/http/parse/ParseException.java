@@ -54,7 +54,7 @@ public class ParseException extends Exception {
 		super(cause);
 
 		// Server failure
-		this.httpStatus = HttpStatus._500;
+		this.httpStatus = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 	}
 
 	/**

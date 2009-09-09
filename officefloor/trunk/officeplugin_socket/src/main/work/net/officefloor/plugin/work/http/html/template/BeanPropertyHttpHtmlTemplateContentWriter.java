@@ -92,7 +92,7 @@ public class BeanPropertyHttpHtmlTemplateContentWriter implements
 
 		} catch (Throwable ex) {
 			// Propagate failure
-			throw new HttpException(HttpStatus._500, ex);
+			throw new HttpException(HttpStatus.SC_INTERNAL_SERVER_ERROR, ex);
 		}
 
 		// Write the text

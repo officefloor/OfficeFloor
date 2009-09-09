@@ -128,7 +128,7 @@ public class HttpFileTask
 		// Handle if not find file
 		if (content == null) {
 			// Item not found
-			response.setStatus(HttpStatus._404); // not found
+			response.setStatus(HttpStatus.SC_NOT_FOUND); // not found
 			new OutputStreamWriter(response.getBody().getOutputStream())
 					.append("Can not find resource " + requestPath).flush();
 		} else {
