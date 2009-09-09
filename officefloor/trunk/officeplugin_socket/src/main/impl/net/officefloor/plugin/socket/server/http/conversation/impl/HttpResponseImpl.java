@@ -48,16 +48,22 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 public class HttpResponseImpl implements HttpResponse {
 
 	/**
-	 * Content-Encoding name for {@link ParseException} {@link HttpResponse}.
+	 * {@link Charset} name for {@link ParseException} {@link HttpResponse}.
 	 */
-	public static final String PARSE_FAILURE_CONTENT_ENCODING_NAME = "UTF-8";
+	private static final String PARSE_FAILURE_CONTENT_CHARSET_NAME = "UTF-8";
 
 	/**
-	 * Content-Encoding {@link Charset} for {@link ParseException}
+	 * <code>Content-Type</code> for the {@link ParseException}
 	 * {@link HttpResponse}.
 	 */
+	private static final String PARSE_FAILURE_CONTENT_TYPE = "text/html; charset="
+			+ PARSE_FAILURE_CONTENT_CHARSET_NAME;
+
+	/**
+	 * {@link Charset} for {@link ParseException} {@link HttpResponse}.
+	 */
 	private static final Charset PARSE_FAILURE_CONTENT_ENCODING_CHARSET = Charset
-			.forName(PARSE_FAILURE_CONTENT_ENCODING_NAME);
+			.forName(PARSE_FAILURE_CONTENT_CHARSET_NAME);
 
 	/**
 	 * HTTP end of line sequence (CR, LF).
@@ -151,7 +157,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 		// Specify initial values
 		this.version = httpVersion;
-		this.status = HttpStatus._200;
+		this.status = HttpStatus.SC_OK;
 		this.statusMessage = HttpStatus.getStatusMessage(this.status);
 	}
 
@@ -180,11 +186,9 @@ public class HttpResponseImpl implements HttpResponse {
 				this.setStatus(parseFailure.getHttpStatus());
 			} else {
 				// Handling request failure
-				this.setStatus(HttpStatus._500);
+				this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			}
-			this.addHeader("Content-Type", "text/html");
-			this.addHeader("Content-Encoding",
-					PARSE_FAILURE_CONTENT_ENCODING_NAME);
+			this.addHeader("Content-Type", PARSE_FAILURE_CONTENT_TYPE);
 			String failMessage = failure.getMessage();
 			if (failMessage == null) {
 				// No message so provide type of error
@@ -259,8 +263,8 @@ public class HttpResponseImpl implements HttpResponse {
 				.valueOf(contentLength)));
 
 		// Ensure appropriate successful status
-		if ((contentLength == 0) && (this.status == HttpStatus._200)) {
-			this.setStatus(HttpStatus._204);
+		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
+			this.setStatus(HttpStatus.SC_NO_CONTENT);
 		}
 
 		// Write the status line

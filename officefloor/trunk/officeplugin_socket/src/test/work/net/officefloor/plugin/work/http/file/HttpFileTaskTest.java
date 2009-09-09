@@ -129,7 +129,7 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 				this.httpResponse);
 		if (!isFileAvailable) {
 			// Indicate file not available
-			this.httpResponse.setStatus(HttpStatus._404);
+			this.httpResponse.setStatus(HttpStatus.SC_NOT_FOUND);
 		}
 		this.recordReturn(this.httpResponse, this.httpResponse.getBody(),
 				bodyOutputBufferStream);

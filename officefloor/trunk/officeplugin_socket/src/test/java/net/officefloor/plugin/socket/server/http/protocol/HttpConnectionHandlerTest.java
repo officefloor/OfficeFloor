@@ -139,8 +139,8 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 		// Additional test objects
 		final char[] tempBuffer = new char[255];
-		final ParseException failure = new ParseException(HttpStatus._400,
-				"Parse Failure");
+		final ParseException failure = new ParseException(
+				HttpStatus.SC_BAD_REQUEST, "Parse Failure");
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
