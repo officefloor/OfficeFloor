@@ -26,7 +26,7 @@ import java.util.List;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -129,11 +129,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * @param lowBitsCharacter
 	 *            Low bits of the escaped character.
 	 * @return Non escaped character value.
-	 * @throws ParseException
+	 * @throws HttpRequestParseException
 	 *             If invalid hexidecimal character.
 	 */
 	private static byte translateEscapedCharacter(byte highBitsCharacter,
-			byte lowBitsCharacter) throws ParseException {
+			byte lowBitsCharacter) throws HttpRequestParseException {
 
 		// Translate to bits values
 		byte highBits = translateEscapedHexCharacterToBits(highBitsCharacter);
@@ -151,11 +151,11 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * @param character
 	 *            Hexidecimal character value to translate to bits.
 	 * @return Bits for the hexidecimal character.
-	 * @throws ParseException
+	 * @throws HttpRequestParseException
 	 *             If invalid hexidecimal character.
 	 */
 	private static byte translateEscapedHexCharacterToBits(byte character)
-			throws ParseException {
+			throws HttpRequestParseException {
 
 		// Translate hexidecimal value
 		int bits;
@@ -167,7 +167,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			bits = character - a + 0xA;
 		} else {
 			// Unknown hexidecimal character
-			throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+			throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 					"Invalid escaped hexidecimal character '"
 							+ ((char) character) + "'");
 		}
@@ -281,16 +281,16 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	 * @return Transformed {@link String}.
 	 * @throws IOException
 	 *             If fails to transform.
-	 * @throws ParseException
+	 * @throws HttpRequestParseException
 	 *             If text is too long.
 	 */
 	private String transformToString(InputBufferStream inputBufferStream,
 			char[] tempBuffer, int httpErrorStatus, String httpErrorMessage)
-			throws IOException, ParseException {
+			throws IOException, HttpRequestParseException {
 
 		// Ensure text is too long
 		if (this.textLength > tempBuffer.length) {
-			throw new ParseException(httpErrorStatus, httpErrorMessage);
+			throw new HttpRequestParseException(httpErrorStatus, httpErrorMessage);
 		}
 
 		// Load the character values into the temporary buffer
@@ -361,7 +361,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	@Override
 	public boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
-			throws IOException, ParseException {
+			throws IOException, HttpRequestParseException {
 
 		// Provide state of escaping characters
 		EscapedCharacterState escapedCharacterState = EscapedCharacterState.NOT_ESCAPED;
@@ -434,7 +434,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.METHOD_PATH_SEPARATION;
 					} else {
 						// Unexpected character
-						throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 								"Unexpected character in method '" + character
 										+ "'");
 					}
@@ -465,7 +465,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.textLength++;
 					} else {
 						// Unexpected character
-						throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 								"Unexpected character in path '" + character
 										+ "'");
 					}
@@ -505,7 +505,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.HEADER_CR_NAME_SEPARATION;
 						break;
 					}
-					throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 							"Should expect LF after a CR for status line");
 
 				case HEADER_CR_NAME_SEPARATION:
@@ -521,7 +521,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					} else {
 						// New header, determine if too many headers
 						if (this.headers.size() >= this.maxHeaderCount) {
-							throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+							throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 									"Too Many Headers");
 						}
 						this.parseState = ParseState.HEADER_NAME;
@@ -543,7 +543,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.textLength++;
 					} else {
 						// Unknown header name character
-						throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 								"Unknown header name character '" + character
 										+ "'");
 					}
@@ -577,7 +577,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.textLength++;
 					} else {
 						// Unknown header value character
-						throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 								"Unknown header value character '" + character
 										+ "'");
 					}
@@ -586,7 +586,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				case BODY_CR:
 					// Must have LF after CR for body
 					if (character != LF) {
-						throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 								"Should expect LR after a CR after header");
 					} else {
 						// Skip the LF
@@ -610,7 +610,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 							this.contentLength = Long
 									.parseLong(contentLengthValue);
 						} catch (NumberFormatException ex) {
-							throw new ParseException(
+							throw new HttpRequestParseException(
 									HttpStatus.SC_LENGTH_REQUIRED,
 									"Content-Length header value must be an integer");
 						}
@@ -619,7 +619,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					// Ensure the Content-Length within limits
 					if (this.contentLength > 0) {
 						if (this.contentLength > this.maxBodyLength) {
-							throw new ParseException(
+							throw new HttpRequestParseException(
 									HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE,
 									"Request entity must be less than maximum of "
 											+ this.maxBodyLength + " bytes");
@@ -630,7 +630,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					if (("POST".equalsIgnoreCase(this.text_method))
 							|| ("PUT".equalsIgnoreCase(this.text_method))) {
 						if (this.contentLength < 0) {
-							throw new ParseException(
+							throw new HttpRequestParseException(
 									HttpStatus.SC_LENGTH_REQUIRED,
 									"Must provide Content-Length header for "
 											+ this.text_method);
@@ -651,20 +651,20 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			if (this.textLength > tempBuffer.length) {
 				switch (this.parseState) {
 				case METHOD:
-					throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 							"Method too long");
 				case PATH:
-					throw new ParseException(
+					throw new HttpRequestParseException(
 							HttpStatus.SC_REQUEST_URI_TOO_LARGE,
 							"Request-URI Too Long");
 				case VERSION:
-					throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 							"Version too long");
 				case HEADER_NAME:
-					throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 							"Header name too long");
 				case HEADER_VALUE:
-					throw new ParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
 							"Header value too long");
 				}
 			}

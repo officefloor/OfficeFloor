@@ -17,19 +17,15 @@
  */
 package net.officefloor.plugin.socket.server.http.parse;
 
-import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.InvalidHttpRequestException;
 
 /**
- * Indicates that failed to parse.
+ * Indicates that failed to parse the {@link HttpRequest}.
  *
  * @author Daniel Sagenschneider
  */
-public class ParseException extends Exception {
-
-	/**
-	 * HTTP status indicating failure.
-	 */
-	private final int httpStatus;
+public class HttpRequestParseException extends InvalidHttpRequestException {
 
 	/**
 	 * Initiate.
@@ -39,31 +35,20 @@ public class ParseException extends Exception {
 	 * @param message
 	 *            Reason for parsing failure.
 	 */
-	public ParseException(int httpStatus, String message) {
-		super(message);
-		this.httpStatus = httpStatus;
+	public HttpRequestParseException(int httpStatus, String message) {
+		super(httpStatus, message);
 	}
 
 	/**
 	 * Initiate.
 	 *
+	 * @param httpStatus
+	 *            HTTP status indicating failure.
 	 * @param cause
 	 *            Cause of parsing failure.
 	 */
-	public ParseException(Throwable cause) {
-		super(cause);
-
-		// Server failure
-		this.httpStatus = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-	}
-
-	/**
-	 * Obtains the HTTP status indicating failure.
-	 *
-	 * @return HTTP status indicating failure.
-	 */
-	public int getHttpStatus() {
-		return this.httpStatus;
+	public HttpRequestParseException(int httpStatus, Throwable cause) {
+		super(httpStatus, cause);
 	}
 
 }

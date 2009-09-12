@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.InputBufferStream;
 
@@ -118,7 +118,7 @@ public class HttpConversationImpl implements HttpConversation {
 	}
 
 	@Override
-	public void parseFailure(ParseException failure, boolean isCloseConnection)
+	public void parseFailure(HttpRequestParseException failure, boolean isCloseConnection)
 			throws IOException {
 
 		// Create response for parse failure

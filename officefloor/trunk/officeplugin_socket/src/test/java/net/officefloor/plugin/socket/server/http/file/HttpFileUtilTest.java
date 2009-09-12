@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.file;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 
 /**
  * Test the {@link HttpFileUtil}.
@@ -27,51 +28,82 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class HttpFileUtilTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure empty path is not canonical.
+	 * Ensure null path is invalid.
 	 */
-	public void testEmptyPath() {
-		assertNull("Null path", HttpFileUtil.transformToCanonicalPath(null));
-		assertNull("Empty path", HttpFileUtil.transformToCanonicalPath(""));
-		assertNull("Blank path", HttpFileUtil.transformToCanonicalPath(" "));
+	public void testNullPath() throws Exception {
+		try {
+			HttpFileUtil.transformToCanonicalPath(null);
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertCause(HttpStatus.SC_BAD_REQUEST, null, ex);
+		}
+	}
+
+	/**
+	 * Ensure empty path is invalid.
+	 */
+	public void testEmptyPath() throws Exception {
+		try {
+			HttpFileUtil.transformToCanonicalPath("");
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertCause(HttpStatus.SC_BAD_REQUEST, "", ex);
+		}
+	}
+
+	/**
+	 * Ensure blank path is invalid.
+	 */
+	public void testBlankPath() throws Exception {
+		try {
+			HttpFileUtil.transformToCanonicalPath(" ");
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertCause(HttpStatus.SC_BAD_REQUEST, "", ex);
+		}
 	}
 
 	/**
 	 * Ensure leading/trailing white space is stripped off.
 	 */
-	public void testLeadingTrailingWhiteSpace() {
+	public void testTrimWhiteSpace() throws Exception {
 		assertEquals("Leading white space", "/path", HttpFileUtil
-				.transformToCanonicalPath(" /path"));
+				.transformToCanonicalPath("\t /path"));
 		assertEquals("Trailing white space", "/path", HttpFileUtil
-				.transformToCanonicalPath("/path "));
+				.transformToCanonicalPath("/path \n"));
 	}
 
 	/**
 	 * Ensure the same path is returned if already canonical.
 	 */
-	public void testSameCanonicalPath() {
+	public void testSameCanonicalPath() throws Exception {
 		assertSame("/path", HttpFileUtil.transformToCanonicalPath("/path"));
 	}
 
 	/**
 	 * Ensure transforms to canonical path.
 	 */
-	public void testCanonicalPath() {
+	public void testCanonicalPath() throws Exception {
 		assertEquals("/path", HttpFileUtil
 				.transformToCanonicalPath("//./path/../path"));
 	}
 
 	/**
-	 * Ensure returns <code>null</code> if canonical path returns parent path.
+	 * Ensure invalid if parent path.
 	 */
-	public void testParentCanonicalPath() {
-		assertNull("Should not return canonical path if is parent path",
-				HttpFileUtil.transformToCanonicalPath("/.."));
+	public void testParentCanonicalPath() throws Exception {
+		try {
+			HttpFileUtil.transformToCanonicalPath("/..");
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertCause(HttpStatus.SC_BAD_REQUEST, "/..", ex);
+		}
 	}
 
 	/**
 	 * Ensure no segments canonical path results in root path.
 	 */
-	public void testRootCanonicalPath() {
+	public void testRootCanonicalPath() throws Exception {
 		assertEquals("Without trailing /", "/", HttpFileUtil
 				.transformToCanonicalPath("/path/.."));
 		assertEquals("With trailing /", "/", HttpFileUtil
@@ -81,7 +113,7 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure with only protocol/domain that the root path is returned.
 	 */
-	public void testRootPathWithOnlyProtocolAndDomainName() {
+	public void testRootPathWithOnlyProtocolAndDomainName() throws Exception {
 		assertEquals("/", HttpFileUtil
 				.transformToCanonicalPath("http://www.officefloor.net"));
 	}
@@ -89,7 +121,7 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure returns canonical path if starts with Protocol and Domain name.
 	 */
-	public void testPathWithProtocolAndDomainName() {
+	public void testPathWithProtocolAndDomainName() throws Exception {
 		assertEquals("/path", HttpFileUtil
 				.transformToCanonicalPath("http://www.officefloor.net/path"));
 	}
@@ -97,7 +129,7 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures parameters are not included with the path.
 	 */
-	public void testPathWithParameters() {
+	public void testPathWithParameters() throws Exception {
 		assertEquals("/path", HttpFileUtil
 				.transformToCanonicalPath("/path?name=value"));
 	}
@@ -105,14 +137,14 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures that with only parameters that returns root path.
 	 */
-	public void testRootPathWithParametersOnly() {
+	public void testRootPathWithParametersOnly() throws Exception {
 		assertEquals("/", HttpFileUtil.transformToCanonicalPath("?name=value"));
 	}
 
 	/**
 	 * Ensures fragment is not included with the path.
 	 */
-	public void testPathWithFragment() {
+	public void testPathWithFragment() throws Exception {
 		assertEquals("/path", HttpFileUtil
 				.transformToCanonicalPath("/path#fragment"));
 	}
@@ -120,14 +152,14 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures that with only fragment that returns root path.
 	 */
-	public void testRootPathWithFragmentOnly() {
+	public void testRootPathWithFragmentOnly() throws Exception {
 		assertEquals("/", HttpFileUtil.transformToCanonicalPath("#fragment"));
 	}
 
 	/**
 	 * Ensures that can handle path ending with a '/'.
 	 */
-	public void testDirectoryPathWithParameters() {
+	public void testDirectoryPathWithParameters() throws Exception {
 		assertEquals("/path", HttpFileUtil
 				.transformToCanonicalPath("/path/?name=value"));
 	}
@@ -135,8 +167,26 @@ public class HttpFileUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure root path returned in root path followed by a fragment.
 	 */
-	public void testRootPathWithFragment() {
+	public void testRootPathWithFragment() throws Exception {
 		assertEquals("/", HttpFileUtil.transformToCanonicalPath("/#fragment"));
+	}
+
+	/**
+	 * Asserts the cause is correct.
+	 *
+	 * @param expectedHttpStatus
+	 *            Expected HTTP status.
+	 * @param expectedPath
+	 *            Expected path.
+	 * @param actual
+	 *            Actual {@link InvalidHttpRequestUriException}.
+	 */
+	private static void assertCause(int expectedHttpStatus,
+			String expectedPath, InvalidHttpRequestUriException actual) {
+		assertEquals("Incorrect HTTP status", expectedHttpStatus, actual
+				.getHttpStatus());
+		assertEquals("Incorrect message", "Invalid request URI path ["
+				+ expectedPath + "]", actual.getMessage());
 	}
 
 }

@@ -565,7 +565,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			// Validate if complete
 			assertEquals("Incorrect completion", expectedIsComplete, isComplete);
 
-		} catch (ParseException ex) {
+		} catch (HttpRequestParseException ex) {
 			// Parse exception not expected
 			fail("Request should be parsed successfully [failure "
 					+ ex.getHttpStatus() + ": " + ex.getMessage() + "]");
@@ -610,7 +610,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			fail("Should not parse invalid HTTP request:\n"
 					+ invalidHttpRequest);
 
-		} catch (ParseException ex) {
+		} catch (HttpRequestParseException ex) {
 			// Validate details of parse failure
 			assertEquals("Incorrect http status", expectedHttpStatus, ex
 					.getHttpStatus());

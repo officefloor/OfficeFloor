@@ -20,6 +20,9 @@ package net.officefloor.plugin.socket.server.http.file;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+
 /**
  * <p>
  * HTTP file.
@@ -38,9 +41,24 @@ public interface HttpFile extends Serializable {
 	 * The path is canonical to allow using it as a key for caching this
 	 * {@link HttpFile}.
 	 *
-	 * @return Request URI path to this {@link HttpFile}.
+	 * @return Canonical request URI path to this {@link HttpFile}.
 	 */
 	String getPath();
+
+	/**
+	 * <p>
+	 * Indicates if this {@link HttpFile} exists. Should this {@link HttpFile}
+	 * not exist, only the path will be available.
+	 * <p>
+	 * This allows for caching of {@link HttpFile} instances not existing.
+	 * <p>
+	 * It also enables implementations of {@link ManagedObjectSource} instances
+	 * to provide the {@link HttpFile} from a {@link HttpRequest} dependency -
+	 * can always provide an instance with this indicating if exists.
+	 *
+	 * @return <code>true</code> if this {@link HttpFile} exists.
+	 */
+	boolean isExist();
 
 	/**
 	 * Obtains the <code>Content-Encoding</code> for this {@link HttpFile}.

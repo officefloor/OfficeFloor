@@ -23,7 +23,7 @@ import java.util.List;
 import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -59,12 +59,12 @@ public interface HttpConversation {
 	 *            Failure in parsing a {@link HttpRequest}.
 	 * @param isCloseConnection
 	 *            Flags to close the {@link Connection} once the
-	 *            {@link ParseException} has been processed.
+	 *            {@link HttpRequestParseException} has been processed.
 	 * @throws IOException
 	 *             If fails to write response regarding the
-	 *             {@link ParseException}.
+	 *             {@link HttpRequestParseException}.
 	 */
-	void parseFailure(ParseException failure, boolean isCloseConnection)
+	void parseFailure(HttpRequestParseException failure, boolean isCloseConnection)
 			throws IOException;
 
 }

@@ -21,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Locates a {@link HttpFile} from a {@link ClassLoader}.
@@ -51,6 +53,17 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 	private final String defaultDirectoryFileName;
 
 	/**
+	 * Extension of the {@link #defaultDirectoryFileName}.
+	 */
+	private final String defaultDirectoryFileExtension;
+
+	/**
+	 * Listing of {@link HttpFileDescriber} instances to describe the located
+	 * {@link HttpFile} instances.
+	 */
+	private final List<HttpFileDescriber> describers = new LinkedList<HttpFileDescriber>();
+
+	/**
 	 * Initiate.
 	 *
 	 * @param classLoader
@@ -61,11 +74,24 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 	 * @param defaultDirectoryFileName
 	 *            Name of file within the directory to default to use if the
 	 *            directory is specified.
+	 * @throws IllegalArgumentException
+	 *             If the default directory file name does not have an
+	 *             extension.
 	 */
 	public ClasspathHttpFileLocator(ClassLoader classLoader,
-			String classpathPrefix, String defaultDirectoryFileName) {
+			String classpathPrefix, String defaultDirectoryFileName)
+			throws IllegalArgumentException {
 		this.classLoader = classLoader;
 		this.defaultDirectoryFileName = defaultDirectoryFileName;
+
+		// Obtain the default directory file extension
+		int extensionBegin = this.defaultDirectoryFileName.lastIndexOf('.');
+		if (extensionBegin < 0) {
+			throw new IllegalArgumentException(
+					"Default directory file name must have an extension");
+		}
+		this.defaultDirectoryFileExtension = this.defaultDirectoryFileName
+				.substring(extensionBegin + 1); // +1 to not include '.'
 
 		// Initiate prefix ready for use (trim and no trailing '/')
 		classpathPrefix = classpathPrefix.trim();
@@ -78,7 +104,14 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 	 */
 
 	@Override
-	public HttpFile locateHttpFile(String path) throws IOException {
+	public void addHttpFileDescriber(HttpFileDescriber httpFileDescriber) {
+		this.describers.add(httpFileDescriber);
+	}
+
+	@Override
+	public HttpFile locateHttpFile(String path,
+			HttpFileDescriber... httpFileDescribers) throws IOException,
+			InvalidHttpRequestUriException {
 
 		// Transform to canonical path
 		String canonicalPath = HttpFileUtil.transformToCanonicalPath(path);
@@ -87,15 +120,21 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 			return null;
 		}
 
-		// Determine if a directory
+		// Obtain the file extension (or if none consider it a directory)
+		String extension;
 		int fileNameBegin = canonicalPath.lastIndexOf('/');
 		String fileName = (fileNameBegin < 0 ? canonicalPath : canonicalPath
 				.substring(fileNameBegin));
-		if (fileName.indexOf('.') < 0) {
-			// Directory (as no extension), so add default file name
+		int extensionBegin = fileName.lastIndexOf('.');
+		if (extensionBegin < 0) {
+			// Directory (as no extension), so use default file name
 			String separator = canonicalPath.endsWith("/") ? "" : "/";
 			canonicalPath = canonicalPath + separator
 					+ this.defaultDirectoryFileName;
+			extension = this.defaultDirectoryFileExtension;
+		} else {
+			// File, so obtain the extension (+1 to not include '.')
+			extension = fileName.substring(extensionBegin + 1);
 		}
 
 		// Create the path to locate the file (canonical always starts with '/')
@@ -105,23 +144,125 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 		InputStream inputStream = this.classLoader
 				.getResourceAsStream(resourcePath);
 		if (inputStream == null) {
-			// Can not locate the file
-			return null;
+			// Can not locate the file, return not existing file
+			return new HttpFileImpl(canonicalPath);
 		}
 
 		// Obtain the contents of the file
-		ByteArrayOutputStream contents = new ByteArrayOutputStream();
+		ByteArrayOutputStream data = new ByteArrayOutputStream();
 		for (int value = inputStream.read(); value != -1; value = inputStream
 				.read()) {
-			contents.write(value);
+			data.write(value);
 		}
 		inputStream.close();
+		ByteBuffer contents = ByteBuffer.wrap(data.toByteArray())
+				.asReadOnlyBuffer();
+
+		// Describe the file (duplicate contents to not alter markers)
+		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(
+				extension, contents.duplicate());
+		boolean isDescribed = false;
+		DESCRIBED: for (HttpFileDescriber describer : httpFileDescribers) {
+			describer.describe(description);
+			if (description.isDescribed()) {
+				isDescribed = true;
+				break DESCRIBED; // have description
+			}
+		}
+		if (!isDescribed) {
+			// Not yet described so try with added describers
+			DESCRIBED: for (HttpFileDescriber describer : this.describers) {
+				describer.describe(description);
+				if (description.isDescribed()) {
+					break DESCRIBED; // have description
+				}
+			}
+		}
+
+		// Obtain the content description
+		String contentEncoding = (description.contentEncoding == null ? ""
+				: description.contentEncoding);
+		String contentType = (description.contentType == null ? ""
+				: description.contentType);
 
 		// Create the HTTP File
-		HttpFile httpFile = new HttpFileImpl(canonicalPath, null, null,
-				ByteBuffer.wrap(contents.toByteArray()).asReadOnlyBuffer());
+		HttpFile httpFile = new HttpFileImpl(canonicalPath, contentEncoding,
+				contentType, contents);
 
 		// Return the HTTP File
 		return httpFile;
 	}
+
+	/**
+	 * {@link HttpFileDescription} implementation.
+	 */
+	private static class HttpFileDescriptionImpl implements HttpFileDescription {
+
+		/**
+		 * {@link HttpFile} extension.
+		 */
+		private final String extension;
+
+		/**
+		 * Contents of the {@link HttpFile}.
+		 */
+		private final ByteBuffer contents;
+
+		/**
+		 * <code>Content-Encoding</code> for the {@link HttpFile}.
+		 */
+		public String contentEncoding = null;
+
+		/**
+		 * <code>Content-Type</code> for the {@link HttpFile}.
+		 */
+		public String contentType = null;
+
+		/**
+		 * Initiate.
+		 *
+		 * @param extension
+		 *            {@link HttpFile} extension.
+		 * @param contents
+		 *            Contents of the {@link HttpFile}.
+		 */
+		public HttpFileDescriptionImpl(String extension, ByteBuffer contents) {
+			this.extension = extension;
+			this.contents = contents;
+		}
+
+		/**
+		 * Indicates if the {@link HttpFile} is described.
+		 *
+		 * @return <code>true</code> if the {@link HttpFile} is described.
+		 */
+		public boolean isDescribed() {
+			return ((this.contentEncoding != null) && (this.contentType != null));
+		}
+
+		/*
+		 * ================== HttpFileDescription ============================
+		 */
+
+		@Override
+		public String getExtension() {
+			return this.extension;
+		}
+
+		@Override
+		public ByteBuffer getContents() {
+			return this.contents;
+		}
+
+		@Override
+		public void setContentEncoding(String encoding) {
+			this.contentEncoding = encoding;
+		}
+
+		@Override
+		public void setContentType(String type) {
+			this.contentType = type;
+		}
+	}
+
 }
