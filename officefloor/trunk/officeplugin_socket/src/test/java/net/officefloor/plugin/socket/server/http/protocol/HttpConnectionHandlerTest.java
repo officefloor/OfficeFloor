@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -133,13 +133,13 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures correctly handles {@link ParseException}.
+	 * Ensures correctly handles {@link HttpRequestParseException}.
 	 */
 	public void testParseFailure() throws Exception {
 
 		// Additional test objects
 		final char[] tempBuffer = new char[255];
-		final ParseException failure = new ParseException(
+		final HttpRequestParseException failure = new HttpRequestParseException(
 				HttpStatus.SC_BAD_REQUEST, "Parse Failure");
 
 		// Record actions

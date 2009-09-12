@@ -47,9 +47,10 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		// Create Http File (with mock details)
 		HttpFile httpFile = new HttpFileImpl("/path", "zip",
 				"text/html; charset=UTF-8", heapBuffer);
+		assertTrue("Should exist for valid test", httpFile.isExist());
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", "zip",
+		this.doSerialiseTest(httpFile, "/path", true, "zip",
 				"text/html; charset=UTF-8", contents);
 	}
 
@@ -79,8 +80,8 @@ public class HttpFileTest extends OfficeFrameTestCase {
 				"application/octet-stream", offsetHeapBuffer);
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", "", "application/octet-stream",
-				contents);
+		this.doSerialiseTest(httpFile, "/path", true, "",
+				"application/octet-stream", contents);
 	}
 
 	/**
@@ -99,7 +100,57 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		HttpFile httpFile = new HttpFileImpl("/path", null, null, heapBuffer);
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", "", "", contents);
+		this.doSerialiseTest(httpFile, "/path", true, "", "", contents);
+	}
+
+	/**
+	 * Ensure can serialise a {@link HttpFile} that does not exist.
+	 */
+	public void testSerialiseNotExistingHttpFile() throws Exception {
+
+		// Create the Http File (not existing)
+		HttpFile httpFile = new HttpFileImpl("/path");
+		assertFalse("Should not exist for valid test", httpFile.isExist());
+
+		// Ensure can serialise
+		this.doSerialiseTest(httpFile, "/path", false, "", "", new byte[0]);
+	}
+
+	/**
+	 * Ensure equals is based on details of {@link HttpFile}.
+	 */
+	public void testEquals() {
+		HttpFile one = new HttpFileImpl("/path", "encoding", "type", null);
+		HttpFile two = new HttpFileImpl("/path", "encoding", "type", null);
+		assertEquals("Should equal", one, two);
+		assertEquals("Same hash", one.hashCode(), two.hashCode());
+	}
+
+	/**
+	 * Ensures not equals should details differ.
+	 */
+	public void testNotEquals() {
+		final String PATH = "/path";
+		final String ENCODING = "encoding";
+		final String TYPE = "type";
+		HttpFile file = new HttpFileImpl(PATH, ENCODING, TYPE, null);
+		assertFalse("Should not match if different path", file
+				.equals(new HttpFileImpl("/wrong/path", ENCODING, TYPE, null)));
+		assertFalse("Should not match if different encoding", file
+				.equals(new HttpFileImpl(PATH, "wrong", TYPE, null)));
+		assertFalse("Should not match if different type", file
+				.equals(new HttpFileImpl(PATH, ENCODING, "wrong", null)));
+	}
+
+	/**
+	 * Ensure obtain details from <code>toString</code> method.
+	 */
+	public void testToString() {
+		HttpFile file = new HttpFileImpl("/path", "encoding", "type", null);
+		assertEquals(
+				"Incorrect toString",
+				"HttpFileImpl: /path (Exist: true, Content-Encoding: encoding, Content-Type: type)",
+				file.toString());
 	}
 
 	/**
@@ -126,6 +177,8 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	 *            {@link HttpFile} to serialise test.
 	 * @param path
 	 *            Expected path.
+	 * @param isExist
+	 *            Flag indicating if expected to exist.
 	 * @param contentEncoding
 	 *            Expected content encoding.
 	 * @param contentType
@@ -134,8 +187,9 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	 *            Expected contents.
 	 */
 	private void doSerialiseTest(HttpFile httpFile, String path,
-			String contentEncoding, String contentType, byte[] contents)
-			throws Exception {
+			boolean isExist, String contentEncoding, String contentType,
+			byte[] contents) throws Exception {
+
 		// Serialise the http file
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
 		ObjectOutputStream outputStream = new ObjectOutputStream(data);
@@ -152,6 +206,7 @@ public class HttpFileTest extends OfficeFrameTestCase {
 
 		// Validate the retrieved file
 		assertEquals("Incorrect path", path, retrievedFile.getPath());
+		assertEquals("Incorrect existence", isExist, retrievedFile.isExist());
 		assertEquals("Incorrect content-encoding", contentEncoding,
 				retrievedFile.getContentEncoding());
 		assertEquals("Incorrect content-type", contentType, retrievedFile

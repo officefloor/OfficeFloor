@@ -48,11 +48,11 @@ public interface HttpRequestParser {
 	 *         {@link InputBufferStream} to obtain the full {@link HttpRequest}.
 	 * @throws IOException
 	 *             If fails to read bytes.
-	 * @throws ParseException
+	 * @throws HttpRequestParseException
 	 *             If failure to parse {@link HttpRequest}.
 	 */
 	boolean parse(InputBufferStream inputBufferStream, char[] tempBuffer)
-			throws IOException, ParseException;
+			throws IOException, HttpRequestParseException;
 
 	/**
 	 * Resets for parsing another {@link HttpRequest}.

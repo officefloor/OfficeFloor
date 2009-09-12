@@ -20,6 +20,8 @@ package net.officefloor.plugin.socket.server.http.file;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+
 /**
  * Utility functions for a {@link HttpFile}.
  *
@@ -33,16 +35,21 @@ public class HttpFileUtil {
 	 * @param path
 	 *            Path to transform.
 	 * @return Canonical path.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the Request URI path be invalid.
 	 */
-	public static String transformToCanonicalPath(String path) {
+	public static String transformToCanonicalPath(String path)
+			throws InvalidHttpRequestUriException {
 
-		// Determine if empty path
+		// Ensure not empty path
 		if (path == null) {
-			return null; // empty path so not canonical
+			throw createInvalidHttpRequestUriException(path);
 		}
-		path = path.trim(); // remove leading/trailing white space
+
+		// Trim path and ensure not empty/blank
+		path = path.trim();
 		if (path.length() == 0) {
-			return null; // empty path so not canonical
+			throw createInvalidHttpRequestUriException(path);
 		}
 
 		// Determine if starting with protocol and/or domain
@@ -85,8 +92,8 @@ public class HttpFileUtil {
 		// Create list to determine canonical path
 		Deque<String> canonicalSegments = new LinkedList<String>();
 
-		// Flag to determine if path is canonical (pass by ref)
-		boolean[] isPathCanonical = new boolean[] { true };
+		// Flag to determine if path is canonical (by default canonical)
+		boolean isPathCanonical = true;
 
 		// Iterate over the path creating canonical path
 		int segmentBegin = -1;
@@ -97,12 +104,9 @@ public class HttpFileUtil {
 			case '/':
 				// Determine if previous segment
 				if (segmentBegin >= 0) {
-					// Process the segment
-					if (!processSegment(path, segmentBegin, i,
-							canonicalSegments, isPathCanonical)) {
-						// Not valid canonical path
-						return null;
-					}
+					// Process the segment (keeping track if canonical)
+					isPathCanonical &= processSegment(path, segmentBegin, i,
+							canonicalSegments);
 				}
 
 				// Flag start of next segment
@@ -125,16 +129,13 @@ public class HttpFileUtil {
 
 		// Determine if last segment
 		if (segmentBegin <= path.length()) {
-			// Process the last segment
-			if (!processSegment(path, segmentBegin, path.length(),
-					canonicalSegments, isPathCanonical)) {
-				// Not valid canonical path
-				return null;
-			}
+			// Process the last segment (keeping track if canonical)
+			isPathCanonical &= processSegment(path, segmentBegin,
+					path.length(), canonicalSegments);
 		}
 
 		// Determine if path is already canonical
-		if (isPathCanonical[0]) {
+		if (isPathCanonical) {
 			// Already canonical so return path as is
 			return path;
 
@@ -169,11 +170,16 @@ public class HttpFileUtil {
 	 *            Index of end of segment within the path.
 	 * @param canonicalSegments
 	 *            List of segments making up the canonical path.
-	 * @return <code>true</code> if segment results in valid canonical path.
+	 * @return Flag indicating if the path continues to be canonical for the
+	 *         segment. <code>false</code> indicates the path is not canonical
+	 *         and must be constructed from the resulting segments to be
+	 *         canonical.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the segment result in an invalid path.
 	 */
 	private static boolean processSegment(String path, int beginIndex,
-			int endIndex, Deque<String> canonicalSegments,
-			boolean[] isPathCanonical) {
+			int endIndex, Deque<String> canonicalSegments)
+			throws InvalidHttpRequestUriException {
 
 		// Obtain the segment
 		String segment = path.substring(beginIndex, endIndex);
@@ -181,27 +187,40 @@ public class HttpFileUtil {
 		// Handle segment
 		if ((segment.length() == 0) || (".".equals(segment))) {
 			// Do not include and path is not canonical
-			isPathCanonical[0] = false;
+			return false;
 
 		} else if ("..".equals(segment)) {
-			// Determine if tail segment to remove
+			// Must have tail segment to remove
 			if (canonicalSegments.size() == 0) {
-				return false; // invalid canonical path
+				throw createInvalidHttpRequestUriException(path);
 			}
 
-			// Valid so equate result
+			// Valid so equate result (remove tail segment)
 			canonicalSegments.removeLast();
 
 			// Path not canonical
-			isPathCanonical[0] = false;
+			return false;
 
 		} else {
 			// Canonical path segment
 			canonicalSegments.add(segment);
 		}
 
-		// Valid segment if here
+		// Path continues to be canonical for the segment
 		return true;
+	}
+
+	/**
+	 * Creates an {@link InvalidHttpRequestUriException}.
+	 *
+	 * @param path
+	 *            Path that is invalid.
+	 * @return {@link InvalidHttpRequestUriException}.
+	 */
+	private static InvalidHttpRequestUriException createInvalidHttpRequestUriException(
+			String path) {
+		return new InvalidHttpRequestUriException(HttpStatus.SC_BAD_REQUEST,
+				"Invalid request URI path [" + path + "]");
 	}
 
 	/**

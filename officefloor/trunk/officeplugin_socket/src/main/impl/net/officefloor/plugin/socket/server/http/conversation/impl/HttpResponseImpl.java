@@ -28,7 +28,7 @@ import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferPopulator;
@@ -48,19 +48,19 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 public class HttpResponseImpl implements HttpResponse {
 
 	/**
-	 * {@link Charset} name for {@link ParseException} {@link HttpResponse}.
+	 * {@link Charset} name for {@link HttpRequestParseException} {@link HttpResponse}.
 	 */
 	private static final String PARSE_FAILURE_CONTENT_CHARSET_NAME = "UTF-8";
 
 	/**
-	 * <code>Content-Type</code> for the {@link ParseException}
+	 * <code>Content-Type</code> for the {@link HttpRequestParseException}
 	 * {@link HttpResponse}.
 	 */
 	private static final String PARSE_FAILURE_CONTENT_TYPE = "text/html; charset="
 			+ PARSE_FAILURE_CONTENT_CHARSET_NAME;
 
 	/**
-	 * {@link Charset} for {@link ParseException} {@link HttpResponse}.
+	 * {@link Charset} for {@link HttpRequestParseException} {@link HttpResponse}.
 	 */
 	private static final Charset PARSE_FAILURE_CONTENT_ENCODING_CHARSET = Charset
 			.forName(PARSE_FAILURE_CONTENT_CHARSET_NAME);
@@ -180,9 +180,9 @@ public class HttpResponseImpl implements HttpResponse {
 			bodyInput.skip(bodyInput.available());
 
 			// Write the failure response
-			if (failure instanceof ParseException) {
+			if (failure instanceof HttpRequestParseException) {
 				// Parse request failure
-				ParseException parseFailure = (ParseException) failure;
+				HttpRequestParseException parseFailure = (HttpRequestParseException) failure;
 				this.setStatus(parseFailure.getHttpStatus());
 			} else {
 				// Handling request failure

@@ -17,30 +17,26 @@
  */
 package net.officefloor.plugin.socket.server.http.file;
 
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.InvalidHttpRequestException;
+
 /**
- * Tests the {@link ClasspathHttpFileLocator}.
+ * Indicates the {@link HttpRequest} request URI is invalid.
  *
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileLocatorTest extends
-		AbstractHttpFileLocatorTestCase {
+public class InvalidHttpRequestUriException extends InvalidHttpRequestException {
 
-	/*
-	 * ================= AbstractHttpFileLocatorTestCase =====================
+	/**
+	 * Initiate.
+	 *
+	 * @param httpStatus
+	 *            HTTP status of exception.
+	 * @param message
+	 *            Message.
 	 */
-
-	@Override
-	protected HttpFileLocator createHttpFileLocator() {
-
-		// Create the locator to obtain files from test package
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		HttpFileLocator locator = new ClasspathHttpFileLocator(classLoader,
-				this.getClass().getPackage().getName().replace('.', '/'),
-				"index.html");
-
-		// Return the locator
-		return locator;
+	public InvalidHttpRequestUriException(int httpStatus, String message) {
+		super(httpStatus, message);
 	}
 
 }

@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
@@ -66,8 +66,8 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private long lastInteractionTime;
 
 	/**
-	 * Flag indicating if {@link ParseException} on processing input. Once a
-	 * {@link ParseException} occurs it is unrecoverable and the
+	 * Flag indicating if {@link HttpRequestParseException} on processing input. Once a
+	 * {@link HttpRequestParseException} occurs it is unrecoverable and the
 	 * {@link Connection} should be closed.
 	 */
 	private boolean isParseFailure = false;
@@ -147,7 +147,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 				}
 			}
 
-		} catch (ParseException ex) {
+		} catch (HttpRequestParseException ex) {
 			// Flag that input no longer valid
 			this.isParseFailure = true;
 

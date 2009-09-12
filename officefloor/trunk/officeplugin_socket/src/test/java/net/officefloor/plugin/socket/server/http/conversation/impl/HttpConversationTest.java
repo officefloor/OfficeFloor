@@ -37,7 +37,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
-import net.officefloor.plugin.socket.server.http.parse.ParseException;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -208,10 +208,10 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link ParseException} response is sent immediately.
+	 * Ensure {@link HttpRequestParseException} response is sent immediately.
 	 */
 	public void testParseFailure() throws IOException {
-		final ParseException failure = new ParseException(
+		final HttpRequestParseException failure = new HttpRequestParseException(
 				HttpStatus.SC_BAD_REQUEST, "Body of parse failure response");
 		this.conversation.parseFailure(failure, true);
 		String message = failure.getMessage();
@@ -225,12 +225,12 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures {@link ParseException} response sent to correct request. In other
-	 * words all previous requests are sent response and {@link ParseException}
+	 * Ensures {@link HttpRequestParseException} response sent to correct request. In other
+	 * words all previous requests are sent response and {@link HttpRequestParseException}
 	 * is then sent immediately.
 	 */
 	public void testStopProcessingOnParseFailure() throws IOException {
-		final ParseException failure = new ParseException(
+		final HttpRequestParseException failure = new HttpRequestParseException(
 				HttpStatus.SC_REQUEST_URI_TOO_LARGE,
 				"Body of parse failure response");
 

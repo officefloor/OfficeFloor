@@ -19,6 +19,8 @@ package net.officefloor.plugin.socket.server.http.file;
 
 import java.io.IOException;
 
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+
 /**
  * Locator to locate a {@link HttpFile}.
  *
@@ -28,17 +30,38 @@ public interface HttpFileLocator {
 
 	/**
 	 * <p>
+	 * Adds a {@link HttpFileDescriber} to describe the located {@link HttpFile}
+	 * instances.
+	 * <p>
+	 * The {@link HttpFileDescriber} instances are to be used in the order
+	 * added. Once a {@link HttpFileDescription} is provided, the remaining
+	 * {@link HttpFileDescriber} instances will not be used.
+	 *
+	 * @param httpFileDescriber
+	 *            {@link HttpFileDescriber} to describe the located
+	 *            {@link HttpFile}.
+	 */
+	void addHttpFileDescriber(HttpFileDescriber httpFileDescriber);
+
+	/**
+	 * <p>
 	 * Locates the {@link HttpFile}.
 	 * <p>
 	 * The path on the returned {@link HttpFile} may be different to the input
 	 * path as it is transformed to a canonical path.
 	 *
-	 * @param path
-	 *            Path to the {@link HttpFile}.
-	 * @return {@link HttpFile} or <code>null</code> if not found.
+	 * @param requestUriPath
+	 *            {@link HttpRequest} path to the {@link HttpFile}.
+	 * @param {@link HttpFileDescriber} instances specific to this locate to use
+	 *        before the added {@link HttpFileDescriber} instances.
+	 * @return {@link HttpFile}.
 	 * @throws IOException
-	 *             If fails to find the {@link HttpFile}.
+	 *             If failure in finding the {@link HttpFile}.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the request URI be invalid.
 	 */
-	HttpFile locateHttpFile(String path) throws IOException;
+	HttpFile locateHttpFile(String requestUriPath,
+			HttpFileDescriber... httpFileDescribers) throws IOException,
+			InvalidHttpRequestUriException;
 
 }

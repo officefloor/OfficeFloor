@@ -30,9 +30,19 @@ import java.nio.ByteBuffer;
 public class HttpFileImpl implements HttpFile {
 
 	/**
+	 * {@link ByteBuffer} for empty {@link HttpFile}.
+	 */
+	private static final ByteBuffer EMPTY_CONTENTS = ByteBuffer.allocate(0);
+
+	/**
 	 * Path.
 	 */
 	private String path;
+
+	/**
+	 * Indicates if the {@link HttpFile} exists.
+	 */
+	private boolean isExist;
 
 	/**
 	 * <code>Content-Encoding</code>.
@@ -50,7 +60,7 @@ public class HttpFileImpl implements HttpFile {
 	private transient ByteBuffer contents;
 
 	/**
-	 * Initiate.
+	 * Initiate an existing {@link HttpFile}.
 	 *
 	 * @param path
 	 *            Path.
@@ -64,9 +74,24 @@ public class HttpFileImpl implements HttpFile {
 	public HttpFileImpl(String path, String contentEncoding,
 			String contentType, ByteBuffer contents) {
 		this.path = path;
+		this.isExist = true;
 		this.contentEncoding = (contentEncoding == null ? "" : contentEncoding);
 		this.contentType = (contentType == null ? "" : contentType);
-		this.contents = contents;
+		this.contents = (contents == null ? EMPTY_CONTENTS : contents);
+	}
+
+	/**
+	 * Initiate a non-existing {@link HttpFile}.
+	 *
+	 * @param path
+	 *            Path.
+	 */
+	public HttpFileImpl(String path) {
+		this.path = path;
+		this.isExist = false;
+		this.contentEncoding = "";
+		this.contentType = "";
+		this.contents = EMPTY_CONTENTS;
 	}
 
 	/*
@@ -76,6 +101,11 @@ public class HttpFileImpl implements HttpFile {
 	@Override
 	public String getPath() {
 		return this.path;
+	}
+
+	@Override
+	public boolean isExist() {
+		return this.isExist;
 	}
 
 	@Override
@@ -94,6 +124,55 @@ public class HttpFileImpl implements HttpFile {
 	}
 
 	/*
+	 * ===================== Object ===================================
+	 */
+
+	@Override
+	public boolean equals(Object obj) {
+
+		// Check if same object
+		if (this == obj) {
+			return true;
+		}
+
+		// Ensure same type
+		if (!(obj instanceof HttpFile)) {
+			return false;
+		}
+		HttpFile that = (HttpFile) obj;
+
+		// Return whether details same
+		return (this.path.equals(that.getPath()))
+				&& (this.contentEncoding.equals(that.getContentEncoding()))
+				&& (this.contentType.equals(that.getContentType()));
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = this.getClass().hashCode();
+		hash = (hash * 31) + this.path.hashCode();
+		hash = (hash * 31) + this.contentEncoding.hashCode();
+		hash = (hash * 31) + this.contentType.hashCode();
+		return hash;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder text = new StringBuilder();
+		text.append(this.getClass().getSimpleName());
+		text.append(": ");
+		text.append(this.path);
+		text.append(" (Exist: ");
+		text.append(this.isExist);
+		text.append(", Content-Encoding: ");
+		text.append(this.contentEncoding);
+		text.append(", Content-Type: ");
+		text.append(this.contentType);
+		text.append(")");
+		return text.toString();
+	}
+
+	/*
 	 * ===================== Serializable =============================
 	 */
 
@@ -108,8 +187,16 @@ public class HttpFileImpl implements HttpFile {
 	 */
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 
-		// Write details of file
+		// Write path and whether exists
 		stream.writeObject(this.path);
+		stream.writeBoolean(this.isExist);
+
+		// If not exist, write no further details
+		if (!this.isExist) {
+			return;
+		}
+
+		// Write details of the file
 		stream.writeObject(this.contentEncoding);
 		stream.writeObject(this.contentType);
 
@@ -136,18 +223,30 @@ public class HttpFileImpl implements HttpFile {
 	private void readObject(ObjectInputStream stream) throws IOException,
 			ClassNotFoundException {
 
-		// Obtain details of file
+		// Obtain path and whether file exists
 		this.path = (String) stream.readObject();
-		this.contentEncoding = (String) stream.readObject();
-		this.contentType = (String) stream.readObject();
+		this.isExist = stream.readBoolean();
 
-		// Obtain contents of file
-		int contentLength = stream.readInt();
-		byte[] contents = new byte[contentLength];
-		stream.readFully(contents);
+		// Handle based on whether exists
+		if (!this.isExist) {
+			// Not exist, so set not exist details of file
+			this.contentEncoding = "";
+			this.contentType = "";
+			this.contents = EMPTY_CONTENTS;
 
-		// Specify the contents
-		this.contents = ByteBuffer.wrap(contents).asReadOnlyBuffer();
+		} else {
+			// Exists, so obtain details of file
+			this.contentEncoding = (String) stream.readObject();
+			this.contentType = (String) stream.readObject();
+
+			// Obtain contents of file
+			int contentLength = stream.readInt();
+			byte[] contents = new byte[contentLength];
+			stream.readFully(contents);
+
+			// Specify the contents
+			this.contents = ByteBuffer.wrap(contents).asReadOnlyBuffer();
+		}
 	}
 
 }
