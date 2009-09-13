@@ -190,6 +190,11 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
+	public void removeHeaders(String name) {
+		this.headers.remove(name);
+	}
+
+	@Override
 	public OutputBufferStream getBody() {
 		return this.body.getOutputBufferStream();
 	}

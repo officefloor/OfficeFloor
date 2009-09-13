@@ -17,20 +17,21 @@
  */
 package net.officefloor.plugin.socket.server.http.file;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
- * Locator to locate a {@link HttpFile}.
+ * Factory to create a {@link HttpFile}.
  *
  * @author Daniel Sagenschneider
  */
-public interface HttpFileLocator {
+public interface HttpFileFactory {
 
 	/**
 	 * <p>
-	 * Adds a {@link HttpFileDescriber} to describe the located {@link HttpFile}
+	 * Adds a {@link HttpFileDescriber} to describe the {@link HttpFile}
 	 * instances.
 	 * <p>
 	 * The {@link HttpFileDescriber} instances are to be used in the order
@@ -38,29 +39,31 @@ public interface HttpFileLocator {
 	 * {@link HttpFileDescriber} instances will not be used.
 	 *
 	 * @param httpFileDescriber
-	 *            {@link HttpFileDescriber} to describe the located
-	 *            {@link HttpFile}.
+	 *            {@link HttpFileDescriber} to describe the {@link HttpFile}.
 	 */
 	void addHttpFileDescriber(HttpFileDescriber httpFileDescriber);
 
 	/**
 	 * <p>
-	 * Locates the {@link HttpFile}.
+	 * Creates the {@link HttpFile}.
 	 * <p>
 	 * The path on the returned {@link HttpFile} may be different to the input
 	 * path as it is transformed to a canonical path.
 	 *
+	 * @param contextDirectory
+	 *            Directory containing the {@link HttpFile} instances.
 	 * @param requestUriPath
 	 *            {@link HttpRequest} path to the {@link HttpFile}.
-	 * @param {@link HttpFileDescriber} instances specific to this locate to use
-	 *        before the added {@link HttpFileDescriber} instances.
+	 * @param {@link HttpFileDescriber} instances specific to creating this
+	 *        {@link HttpFile} to use before the added {@link HttpFileDescriber}
+	 *        instances.
 	 * @return {@link HttpFile}.
 	 * @throws IOException
 	 *             If failure in finding the {@link HttpFile}.
 	 * @throws InvalidHttpRequestUriException
 	 *             Should the request URI be invalid.
 	 */
-	HttpFile locateHttpFile(String requestUriPath,
+	HttpFile createHttpFile(File contextDirectory, String requestUriPath,
 			HttpFileDescriber... httpFileDescribers) throws IOException,
 			InvalidHttpRequestUriException;
 

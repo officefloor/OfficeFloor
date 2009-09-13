@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.socket.server.http.file.source;
 
+import java.io.File;
+import java.io.IOException;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -24,37 +27,49 @@ import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
-import net.officefloor.plugin.socket.server.http.file.HttpFileLocator;
+import net.officefloor.plugin.socket.server.http.file.HttpFileDescriber;
+import net.officefloor.plugin.socket.server.http.file.HttpFileFactory;
+import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
 
 /**
- * {@link Task} to locate a {@link HttpFile} via a {@link HttpFileLocator}.
+ * {@link Task} to locate a {@link HttpFile} via a {@link HttpFileFactory}.
  *
  * @author Daniel Sagenschneider
  */
-public class HttpFileLocatorTask
+public class HttpFileFactoryTask
 		extends
-		AbstractSingleTask<HttpFileLocatorTask, Indexed, HttpFileLocatorTask.HttpFileLocatorTaskFlows> {
+		AbstractSingleTask<HttpFileFactoryTask, Indexed, HttpFileFactoryTask.HttpFileFactoryTaskFlows> {
 
 	/**
-	 * Enum of flows for the {@link HttpFileLocatorTask}.
+	 * Enum of flows for the {@link HttpFileFactoryTask}.
 	 */
-	public static enum HttpFileLocatorTaskFlows {
+	public static enum HttpFileFactoryTaskFlows {
 		HTTP_FILE_NOT_FOUND
 	}
 
 	/**
-	 * {@link HttpFileLocator}.
+	 * {@link HttpFileFactory}.
 	 */
-	private final HttpFileLocator httpFileLocator;
+	private final HttpFileFactory httpFileFactory;
+
+	/**
+	 * Index to obtain the context directory from the {@link TaskContext}.
+	 */
+	private final int contextDirectoryIndex;
 
 	/**
 	 * Initiate.
 	 *
-	 * @param httpFileLocator
-	 *            {@link HttpFileLocator}.
+	 * @param httpFileFactory
+	 *            {@link HttpFileFactory}.
+	 * @param contextDirectoryIndex
+	 *            Index to obtain the context directory from the
+	 *            {@link TaskContext}.
 	 */
-	private HttpFileLocatorTask(HttpFileLocator httpFileLocator) {
-		this.httpFileLocator = httpFileLocator;
+	public HttpFileFactoryTask(HttpFileFactory httpFileFactory,
+			int contextDirectoryIndex) {
+		this.httpFileFactory = httpFileFactory;
+		this.contextDirectoryIndex = contextDirectoryIndex;
 	}
 
 	/*
@@ -63,22 +78,33 @@ public class HttpFileLocatorTask
 
 	@Override
 	public Object doTask(
-			TaskContext<HttpFileLocatorTask, Indexed, HttpFileLocatorTaskFlows> context)
-			throws Throwable {
+			TaskContext<HttpFileFactoryTask, Indexed, HttpFileFactoryTaskFlows> context)
+			throws IOException, InvalidHttpRequestUriException {
 
 		// Obtain the HTTP request
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(0);
 		HttpRequest request = connection.getHttpRequest();
 
-		// Locate the HTTP file
+		// TODO obtain creation specific describers
+		HttpFileDescriber[] describers = null;
+
+		// Obtain context directory
+		File contextDirectory = null;
+		if (this.contextDirectoryIndex >= 0) {
+			contextDirectory = (File) context
+					.getObject(this.contextDirectoryIndex);
+		}
+
+		// Create the HTTP file
 		String requestUriPath = request.getRequestURI();
-		HttpFile httpFile = this.httpFileLocator.locateHttpFile(requestUriPath);
+		HttpFile httpFile = this.httpFileFactory.createHttpFile(
+				contextDirectory, requestUriPath, describers);
 
 		// Handle based on whether exists
 		if (!httpFile.isExist()) {
 			// Not exists, so invoke flow to handle
-			context.doFlow(HttpFileLocatorTaskFlows.HTTP_FILE_NOT_FOUND,
+			context.doFlow(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND,
 					httpFile);
 		}
 

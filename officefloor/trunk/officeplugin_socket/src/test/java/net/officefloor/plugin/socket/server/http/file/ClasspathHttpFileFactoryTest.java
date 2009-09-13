@@ -18,26 +18,25 @@
 package net.officefloor.plugin.socket.server.http.file;
 
 /**
- * Tests the {@link ClasspathHttpFileLocator}.
+ * Tests the {@link ClasspathHttpFileFactory}.
  *
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileLocatorTest extends
-		AbstractHttpFileLocatorTestCase {
+public class ClasspathHttpFileFactoryTest extends
+		AbstractHttpFileFactoryTestCase {
 
 	/*
-	 * ================= AbstractHttpFileLocatorTestCase =====================
+	 * ================= AbstractHttpFileFactoryTestCase =====================
 	 */
 
 	@Override
-	protected HttpFileLocator createHttpFileLocator() {
+	protected HttpFileFactory createHttpFileFactory() {
 
 		// Create the locator to obtain files from test package
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
-		HttpFileLocator locator = new ClasspathHttpFileLocator(classLoader,
-				this.getClass().getPackage().getName().replace('.', '/'),
-				"index.html");
+		HttpFileFactory locator = new ClasspathHttpFileFactory(classLoader,
+				this.getClass().getPackage().getName(), "index.html");
 
 		// Return the locator
 		return locator;

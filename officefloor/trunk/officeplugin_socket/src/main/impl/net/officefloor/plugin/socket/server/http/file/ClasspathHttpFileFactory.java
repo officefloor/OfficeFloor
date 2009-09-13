@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.file;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -29,7 +30,7 @@ import java.util.List;
  *
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileLocator implements HttpFileLocator {
+public class ClasspathHttpFileFactory implements HttpFileFactory {
 
 	/**
 	 * {@link ClassLoader} to load the resource for the {@link HttpFile}.
@@ -78,7 +79,7 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 	 *             If the default directory file name does not have an
 	 *             extension.
 	 */
-	public ClasspathHttpFileLocator(ClassLoader classLoader,
+	public ClasspathHttpFileFactory(ClassLoader classLoader,
 			String classpathPrefix, String defaultDirectoryFileName)
 			throws IllegalArgumentException {
 		this.classLoader = classLoader;
@@ -93,14 +94,14 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 		this.defaultDirectoryFileExtension = this.defaultDirectoryFileName
 				.substring(extensionBegin + 1); // +1 to not include '.'
 
-		// Initiate prefix ready for use (trim and no trailing '/')
-		classpathPrefix = classpathPrefix.trim();
+		// Initiate prefix for use (trim, resource path and no trailing '/')
+		classpathPrefix = classpathPrefix.trim().replace('.', '/');
 		this.classpathPrefix = (classpathPrefix.endsWith("/") ? classpathPrefix
 				.substring(0, (classpathPrefix.length() - 1)) : classpathPrefix);
 	}
 
 	/*
-	 * ===================== HttpFileLocator ===============================
+	 * ===================== HttpFileFactory ===============================
 	 */
 
 	@Override
@@ -109,12 +110,13 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 	}
 
 	@Override
-	public HttpFile locateHttpFile(String path,
-			HttpFileDescriber... httpFileDescribers) throws IOException,
-			InvalidHttpRequestUriException {
+	public HttpFile createHttpFile(File contextDirectory,
+			String requestUriPath, HttpFileDescriber... httpFileDescribers)
+			throws IOException, InvalidHttpRequestUriException {
 
 		// Transform to canonical path
-		String canonicalPath = HttpFileUtil.transformToCanonicalPath(path);
+		String canonicalPath = HttpFileUtil
+				.transformToCanonicalPath(requestUriPath);
 		if (canonicalPath == null) {
 			// Invalid path, so can not locate file
 			return null;
@@ -162,11 +164,13 @@ public class ClasspathHttpFileLocator implements HttpFileLocator {
 		HttpFileDescriptionImpl description = new HttpFileDescriptionImpl(
 				extension, contents.duplicate());
 		boolean isDescribed = false;
-		DESCRIBED: for (HttpFileDescriber describer : httpFileDescribers) {
-			describer.describe(description);
-			if (description.isDescribed()) {
-				isDescribed = true;
-				break DESCRIBED; // have description
+		if (httpFileDescribers != null) {
+			DESCRIBED: for (HttpFileDescriber describer : httpFileDescribers) {
+				describer.describe(description);
+				if (description.isDescribed()) {
+					isDescribed = true;
+					break DESCRIBED; // have description
+				}
 			}
 		}
 		if (!isDescribed) {

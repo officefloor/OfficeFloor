@@ -15,50 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.file.source;
+package net.officefloor.plugin.socket.server.http.response.source;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.plugin.socket.server.http.file.HttpFile;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
- * {@link WorkSource} to locate a {@link HttpFile} on the class path.
+ * {@link WorkSource} to trigger sending the {@link HttpResponse}.
  *
  * @author Daniel Sagenschneider
  */
-public class ClasspathHttpFileLocatorWorkSource extends
-		AbstractWorkSource<HttpFileLocatorTask> {
+public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 
 	/**
-	 * Property to obtain the class path prefix on the request URI path to
-	 * locate the {@link HttpFile}.
+	 * Property to obtain the HTTP status for the {@link HttpResponse}.
 	 */
-	public static final String PROPERTY_CLASSPATH_PREFIX = "classpath.prefix";
-
-	/**
-	 * Property to obtain the default file name should the request URI path
-	 * resolve to a directory.
-	 */
-	public static final String PROPERTY_DEFAULT_FILE_NAME = "default.file.name";
+	public static final String PROPERTY_HTTP_STATUS = "http.status";
 
 	/*
-	 * ==================== AbstractWorkSource =============================
+	 * ======================= AbstractWorkSource ========================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_CLASSPATH_PREFIX);
-		context.addProperty(PROPERTY_DEFAULT_FILE_NAME);
+		// No specification
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpFileLocatorTask> workTypeBuilder,
+	public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
-		// TODO Implement WorkSource<Work>.sourceWork
-		throw new UnsupportedOperationException("WorkSource<Work>.sourceWork");
+
+		// Obtain the HTTP status (default negative to not set)
+		int httpStatus = Integer.parseInt(context.getProperty(
+				PROPERTY_HTTP_STATUS, String.valueOf(-1)));
+
+		// Create the send task
+		HttpResponseSendTask task = new HttpResponseSendTask(httpStatus);
+
+		// Load the work type information
+		workTypeBuilder.setWorkFactory(task);
+
+		// Load the send task type information
+		HttpResponseSendTask.addTaskType("SEND", task, workTypeBuilder);
 	}
 
 }
