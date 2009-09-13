@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.http.route;
+package net.officefloor.plugin.socket.server.http.route.source;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +27,10 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
+import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * Tests the {@link HttpRouteTask}.
@@ -88,10 +91,44 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures able to route {@link HttpRequest} with fragment on path.
+	 */
+	public void testRouteWithFragment() throws Throwable {
+		this.doRouteTest("/path#fragment", 0, "/path");
+	}
+
+	/**
+	 * Ensure able to route {@link HttpRequest} with protocol and domain on
+	 * path.
+	 */
+	public void testRouteWithProtocolDomain() throws Throwable {
+		this.doRouteTest("http://www.officefloor.net/path/", 0, "/path");
+	}
+
+	/**
 	 * Ensures to able route {@link HttpRequest} with no path.
 	 */
 	public void testRouteNoPath() throws Throwable {
-		this.doRouteTest("", 0, "");
+		try {
+			this.doRouteTest("", -1);
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST, ex
+					.getHttpStatus());
+		}
+	}
+
+	/**
+	 * Ensures able to route {@link HttpRequest} with <code>null</code> path.
+	 */
+	public void testRouteNullPath() throws Throwable {
+		try {
+			this.doRouteTest(null, -1);
+			fail("Should not be successful");
+		} catch (InvalidHttpRequestUriException ex) {
+			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST, ex
+					.getHttpStatus());
+		}
 	}
 
 	/**
@@ -102,10 +139,25 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to route {@link HttpRequest} with <code>null</code> path.
+	 * Ensure able to route {@link HttpRequest} by extension.
 	 */
-	public void testRouteNullPath() throws Throwable {
-		this.doRouteTest(null, 0, "");
+	public void testRouteByExtension() throws Throwable {
+		this.doRouteTest("/path.do", 0, ".*\\.do");
+	}
+
+	/**
+	 * Ensure able to route by regular expression.
+	 */
+	public void testRouteByRegularExpression() throws Throwable {
+		// Should not match on first but then on second
+		this.doRouteTest("/path.do", 1, "/path", "/path.+");
+	}
+
+	/**
+	 * Ensure routes on canonical paths.
+	 */
+	public void testRouteByCanonicalPath() throws Throwable {
+		this.doRouteTest("/./path/../route/", 0, "/route");
 	}
 
 	/**
@@ -138,8 +190,10 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 				.getHttpRequest(), this.httpRequest);
 		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
 				path);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(flowIndex,
-				null), this.flowFuture);
+		if (flowIndex >= 0) {
+			this.recordReturn(this.taskContext, this.taskContext.doFlow(
+					flowIndex, null), this.flowFuture);
+		}
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -150,4 +204,5 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		// Verify mocks
 		this.verifyMockObjects();
 	}
+
 }
