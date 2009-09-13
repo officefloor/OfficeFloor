@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.http.route;
+package net.officefloor.plugin.socket.server.http.route.source;
 
 import java.util.regex.Pattern;
 
@@ -26,7 +26,10 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
+import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * Tests the {@link HttpRouteWorkSource}.
@@ -93,7 +96,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify work is correct
 		WorkLoaderUtil.validateWorkType(expectedWork,
-				HttpRouteWorkSource.class, route(properties));
+				HttpRouteWorkSource.class, this.route(properties));
 	}
 
 	/**
@@ -123,6 +126,9 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		// Add the default flow
 		task.addFlow().setLabel("default");
 
+		// Invalid HTTP request URI
+		task.addEscalation(InvalidHttpRequestUriException.class);
+
 		// Return the work
 		return work;
 	}
@@ -140,7 +146,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		// Prefix the property names if necessary
 		String[] transformedProperties = new String[properties.length];
 		for (int i = 0; i < properties.length; i += 2) {
-			transformedProperties[i] = HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX
+			transformedProperties[i] = HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX
 					+ properties[i];
 			transformedProperties[i + 1] = properties[i + 1];
 		}

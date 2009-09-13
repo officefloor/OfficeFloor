@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.http.route;
+package net.officefloor.plugin.socket.server.http.route.source;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -28,7 +29,8 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
+import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * {@link WorkSource} to provide routing of HTTP requests.
@@ -40,7 +42,7 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 	/**
 	 * Property prefix for a routing entry.
 	 */
-	public static final String ROUTE_PROPERTY_PREFIX = "route.";
+	public static final String PROPERTY_ROUTE_PREFIX = "route.";
 
 	/*
 	 * ================== AbstractWorkSource ======================
@@ -61,16 +63,22 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 		for (String name : context.getPropertyNames()) {
 
 			// Ignore if not starts with routing prefix
-			if (!name.startsWith(ROUTE_PROPERTY_PREFIX)) {
+			if (!name.startsWith(PROPERTY_ROUTE_PREFIX)) {
 				continue;
 			}
 
 			// Obtain the route name, by stripping off the prefix
-			String routeName = name.substring(ROUTE_PROPERTY_PREFIX.length());
+			String routeName = name.substring(PROPERTY_ROUTE_PREFIX.length());
 
 			// Obtain the pattern for the route
 			String patternText = context.getProperty(name);
-			Pattern pattern = Pattern.compile(patternText);
+			Pattern pattern;
+			try {
+				pattern = Pattern.compile(patternText);
+			} catch (PatternSyntaxException ex) {
+				throw new Exception("Invalid routing pattern for route "
+						+ routeName + ": " + ex.getMessage());
+			}
 
 			// Add details
 			routeNames.add(routeName);
@@ -102,6 +110,9 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 
 		// Create the default flow (if not match any routes)
 		taskBuilder.addFlow().setLabel("default");
+
+		// Provide exception if invalid path
+		taskBuilder.addEscalation(InvalidHttpRequestUriException.class);
 	}
 
 }

@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.work.http.route;
+package net.officefloor.plugin.socket.server.http.route.source;
 
 import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.file.HttpFileUtil;
+import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
 
 /**
- * {@link Work} and {@link Task} for routing HTTP requests.
+ * {@link Task} for routing a {@link HttpRequest}.
  *
  * @author Daniel Sagenschneider
  */
@@ -66,24 +67,16 @@ public class HttpRouteTask
 	@Override
 	public Object doTask(
 			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, Indexed> context)
-			throws Throwable {
+			throws InvalidHttpRequestUriException {
 
 		// Obtain the request to route it
 		ServerHttpConnection connection = (ServerHttpConnection) context
 				.getObject(0);
 		HttpRequest request = connection.getHttpRequest();
 
-		// Obtain the path from the request
+		// Obtain the canonical path from request
 		String path = request.getRequestURI();
-		if (path == null) {
-			// Ensure path not null
-			path = "";
-		}
-		int parameterStart = path.indexOf('?');
-		if (parameterStart > 0) {
-			// Obtain the path minus the parameters
-			path = path.substring(0, parameterStart);
-		}
+		path = HttpFileUtil.transformToCanonicalPath(path);
 
 		// Route to appropriate path
 		for (int i = 0; i < this.routings.length; i++) {
