@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.file;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -25,19 +26,19 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 
 /**
- * Abstract testing of the {@link HttpFileLocator}.
+ * Abstract testing of the {@link HttpFileFactory}.
  *
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractHttpFileLocatorTestCase extends
+public abstract class AbstractHttpFileFactoryTestCase extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Creates the {@link HttpFileLocator} to test.
+	 * Creates the {@link HttpFileFactory} to test.
 	 *
-	 * @return {@link HttpFileLocator} to test.
+	 * @return {@link HttpFileFactory} to test.
 	 */
-	protected abstract HttpFileLocator createHttpFileLocator();
+	protected abstract HttpFileFactory createHttpFileFactory();
 
 	/**
 	 * Ensure can locate a {@link HttpFile} by exact path.
@@ -122,8 +123,12 @@ public abstract class AbstractHttpFileLocatorTestCase extends
 	private void doTest(String requestUriPath, String expectedPath,
 			String fileName, final String fileExtension) throws Exception {
 
-		// Create the locator to obtain the files
-		HttpFileLocator locator = this.createHttpFileLocator();
+		// Obtain the context directory (ensuring index file exists)
+		File contextDirectory = this.findFile(this.getClass(), "index.html")
+				.getParentFile();
+
+		// Create the factory to create the files
+		HttpFileFactory locator = this.createHttpFileFactory();
 
 		// Add HTTP file describer for testing
 		final String CONTENT_ENCODING = "test-encoding";
@@ -144,8 +149,8 @@ public abstract class AbstractHttpFileLocatorTestCase extends
 		});
 
 		// Locate the file (with specific describer)
-		HttpFile httpFile = locator.locateHttpFile(requestUriPath,
-				new HttpFileDescriber() {
+		HttpFile httpFile = locator.createHttpFile(contextDirectory,
+				requestUriPath, new HttpFileDescriber() {
 					@Override
 					public void describe(HttpFileDescription description) {
 						description.setContentEncoding(CONTENT_ENCODING);

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,7 +49,8 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 public class HttpResponseImpl implements HttpResponse {
 
 	/**
-	 * {@link Charset} name for {@link HttpRequestParseException} {@link HttpResponse}.
+	 * {@link Charset} name for {@link HttpRequestParseException}
+	 * {@link HttpResponse}.
 	 */
 	private static final String PARSE_FAILURE_CONTENT_CHARSET_NAME = "UTF-8";
 
@@ -60,7 +62,8 @@ public class HttpResponseImpl implements HttpResponse {
 			+ PARSE_FAILURE_CONTENT_CHARSET_NAME;
 
 	/**
-	 * {@link Charset} for {@link HttpRequestParseException} {@link HttpResponse}.
+	 * {@link Charset} for {@link HttpRequestParseException}
+	 * {@link HttpResponse}.
 	 */
 	private static final Charset PARSE_FAILURE_CONTENT_ENCODING_CHARSET = Charset
 			.forName(PARSE_FAILURE_CONTENT_CHARSET_NAME);
@@ -417,6 +420,21 @@ public class HttpResponseImpl implements HttpResponse {
 		// Remove the header
 		synchronized (this.connection.getLock()) {
 			this.headers.remove(header);
+		}
+	}
+
+	@Override
+	public void removeHeaders(String name) {
+		// Remove all headers by name
+		synchronized (this.connection.getLock()) {
+			for (Iterator<HttpHeader> iterator = this.headers.iterator(); iterator
+					.hasNext();) {
+				HttpHeader header = iterator.next();
+				if (name.equalsIgnoreCase(header.getName())) {
+					// Remove the header
+					iterator.remove();
+				}
+			}
 		}
 	}
 

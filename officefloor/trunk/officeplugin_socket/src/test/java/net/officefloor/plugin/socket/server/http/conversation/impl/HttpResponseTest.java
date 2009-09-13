@@ -127,6 +127,13 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		// Ensure find new first header
 		HttpHeader newFirstHeader = response.getHeader("test");
 		assertHttpHeader("test", "two", newFirstHeader);
+
+		// Add further headers by name and remove ensuring no headers
+		response.addHeader("test", "three");
+		response.addHeader("test", "four");
+		response.removeHeaders("test");
+		assertNull("Should be no headers by name on removing", response
+				.getHeader("test"));
 	}
 
 	/*

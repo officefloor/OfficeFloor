@@ -104,6 +104,18 @@ public interface HttpResponse {
 
 	/**
 	 * <p>
+	 * Removes all {@link HttpHeader} instances by the name.
+	 * <p>
+	 * This method compliments {@link #addHeader(String, String)} to allow
+	 * adding a new single {@link HttpHeader} instance by name.
+	 *
+	 * @param name
+	 *            Name of the {@link HttpHeader} instances to remove.
+	 */
+	void removeHeaders(String name);
+
+	/**
+	 * <p>
 	 * Obtains the {@link OutputBufferStream} to write the body of the response.
 	 * <p>
 	 * Closing the returned {@link OutputBufferStream} is similar to calling
