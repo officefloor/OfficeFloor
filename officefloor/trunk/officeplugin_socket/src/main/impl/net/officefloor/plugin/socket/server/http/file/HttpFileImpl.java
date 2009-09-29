@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * {@link HttpFile} implementation.
@@ -55,6 +56,11 @@ public class HttpFileImpl implements HttpFile {
 	private String contentType;
 
 	/**
+	 * {@link Charset}.
+	 */
+	private transient Charset charset;
+
+	/**
 	 * Contents.
 	 */
 	private transient ByteBuffer contents;
@@ -68,15 +74,18 @@ public class HttpFileImpl implements HttpFile {
 	 *            <code>Content-Encoding</code>.
 	 * @param contentType
 	 *            <code>Content-Type</code>.
+	 * @param charset
+	 *            {@link Charset}.
 	 * @param contents
 	 *            Contents.
 	 */
 	public HttpFileImpl(String path, String contentEncoding,
-			String contentType, ByteBuffer contents) {
+			String contentType, Charset charset, ByteBuffer contents) {
 		this.path = path;
 		this.isExist = true;
 		this.contentEncoding = (contentEncoding == null ? "" : contentEncoding);
 		this.contentType = (contentType == null ? "" : contentType);
+		this.charset = charset;
 		this.contents = (contents == null ? EMPTY_CONTENTS : contents);
 	}
 
@@ -91,6 +100,7 @@ public class HttpFileImpl implements HttpFile {
 		this.isExist = false;
 		this.contentEncoding = "";
 		this.contentType = "";
+		this.charset = null;
 		this.contents = EMPTY_CONTENTS;
 	}
 
@@ -119,6 +129,11 @@ public class HttpFileImpl implements HttpFile {
 	}
 
 	@Override
+	public Charset getCharset() {
+		return this.charset;
+	}
+
+	@Override
 	public ByteBuffer getContents() {
 		return this.contents;
 	}
@@ -144,7 +159,27 @@ public class HttpFileImpl implements HttpFile {
 		// Return whether details same
 		return (this.path.equals(that.getPath()))
 				&& (this.contentEncoding.equals(that.getContentEncoding()))
-				&& (this.contentType.equals(that.getContentType()));
+				&& (this.contentType.equals(that.getContentType()) && isCharsetMatch(
+						this.charset, that.getCharset()));
+	}
+
+	/**
+	 * Returns whether the {@link Charset} matches the other {@link Charset}.
+	 *
+	 * @param a
+	 *            {@link Charset}.
+	 * @param b
+	 *            {@link Charset}.
+	 * @return <code>true</code> if match.
+	 */
+	private static boolean isCharsetMatch(Charset a, Charset b) {
+		if (a != null) {
+			// Have a, so match if equal
+			return a.equals(b);
+		} else {
+			// Only match if b also null
+			return (b == null);
+		}
 	}
 
 	@Override
@@ -153,6 +188,9 @@ public class HttpFileImpl implements HttpFile {
 		hash = (hash * 31) + this.path.hashCode();
 		hash = (hash * 31) + this.contentEncoding.hashCode();
 		hash = (hash * 31) + this.contentType.hashCode();
+		if (this.charset != null) {
+			hash = (hash * 31) + this.charset.hashCode();
+		}
 		return hash;
 	}
 
@@ -168,6 +206,10 @@ public class HttpFileImpl implements HttpFile {
 		text.append(this.contentEncoding);
 		text.append(", Content-Type: ");
 		text.append(this.contentType);
+		if (this.charset != null) {
+			text.append("; charset=");
+			text.append(this.charset.name());
+		}
 		text.append(")");
 		return text.toString();
 	}
@@ -199,6 +241,8 @@ public class HttpFileImpl implements HttpFile {
 		// Write details of the file
 		stream.writeObject(this.contentEncoding);
 		stream.writeObject(this.contentType);
+		String charsetName = (this.charset == null ? null : this.charset.name());
+		stream.writeObject(charsetName);
 
 		// Write contents of file
 		int contentLength = this.contents.remaining();
@@ -232,12 +276,16 @@ public class HttpFileImpl implements HttpFile {
 			// Not exist, so set not exist details of file
 			this.contentEncoding = "";
 			this.contentType = "";
+			this.charset = null;
 			this.contents = EMPTY_CONTENTS;
 
 		} else {
 			// Exists, so obtain details of file
 			this.contentEncoding = (String) stream.readObject();
 			this.contentType = (String) stream.readObject();
+			String charsetName = (String) stream.readObject();
+			this.charset = (charsetName == null ? null : Charset
+					.forName(charsetName));
 
 			// Obtain contents of file
 			int contentLength = stream.readInt();

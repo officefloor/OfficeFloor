@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.change.Change;
@@ -57,6 +58,24 @@ public interface OfficeChanges {
 	 * instances.
 	 */
 	String WORK_ADMINISTRATOR_SCOPE = AdministratorScope.WORK.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#PROCESS} on
+	 * {@link OfficeManagedObjectModel} instances.
+	 */
+	String PROCESS_MANAGED_OBJECT_SCOPE = ManagedObjectScope.PROCESS.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#THREAD} on
+	 * {@link OfficeManagedObjectModel} instances.
+	 */
+	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#WORK} on
+	 * {@link OfficeManagedObjectModel} instances.
+	 */
+	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
 
 	/**
 	 * Adds an {@link OfficeSectionModel} to the {@link OfficeModel}.

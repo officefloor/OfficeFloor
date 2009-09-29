@@ -13,6 +13,47 @@
 			</attributes>
 		</item>
 	</collection>
+	<!-- MANAGED OBJECT SOURCES -->
+	<collection method="getDeskManagedObjectSources" element="managed-object-sources">
+		<item type="net.officefloor.model.desk.DeskManagedObjectSourceModel"
+			element="managed-object-source">
+			<attributes>
+				<attribute method="getDeskManagedObjectSourceName"
+					attribute="name" />
+				<attribute method="getManagedObjectSourceClassName"
+					attribute="source" />
+				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.desk.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+	<!-- MANAGED OBJECTS -->
+	<collection method="getDeskManagedObjects" element="managed-objects">
+		<item type="net.officefloor.model.desk.DeskManagedObjectModel"
+			element="managed-object">
+			<attributes>
+				<attribute method="getDeskManagedObjectName" attribute="name" />
+				<attribute method="getManagedObjectScope" attribute="scope" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getDeskManagedObjectSource" element="managed-object-source">
+				<attributes>
+					<attribute method="getDeskManagedObjectSourceName"
+						attribute="name" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
 	<!-- EXTERNAL FLOWS -->
 	<collection method="getExternalFlows" element="external-flows">
 		<item type="net.officefloor.model.desk.ExternalFlowModel"
@@ -64,6 +105,12 @@
 							<object method="getExternalManagedObject" element="external-managed-object">
 								<attributes>
 									<attribute method="getExternalManagedObjectName"
+										attribute="name" />
+								</attributes>
+							</object>
+							<object method="getDeskManagedObject" element="managed-object">
+								<attributes>
+									<attribute method="getDeskManagedObjectName"
 										attribute="name" />
 								</attributes>
 							</object>

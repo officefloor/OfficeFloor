@@ -22,8 +22,11 @@ import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -39,6 +42,8 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -47,7 +52,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshalling/unmarshalling of the {@link DeskModel} via the
  * {@link ModelRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskModelRepositoryTest extends OfficeFrameTestCase {
@@ -59,7 +64,7 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -81,11 +86,55 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		desk = repository.retrieve(desk, this.configurationItem);
 
 		// ----------------------------------------
+		// Validate the External Managed Objects
+		// ----------------------------------------
+		assertList(new String[] { "getExternalManagedObjectName",
+				"getObjectType", "getX", "getY" }, desk
+				.getExternalManagedObjects(), new ExternalManagedObjectModel(
+				"mo", "java.lang.String", null, 100, 101));
+
+		// ----------------------------------------
+		// Validate the Managed Object Sources
+		// ----------------------------------------
+		assertList(new String[] { "getDeskManagedObjectSourceName",
+				"getManagedObjectSourceClassName", "getObjectType", "getX",
+				"getY" }, desk.getDeskManagedObjectSources(),
+				new DeskManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
+						"net.example.ExampleManagedObjectSource",
+						"net.orm.Session", null, null, 200, 201));
+		DeskManagedObjectSourceModel mos = desk.getDeskManagedObjectSources()
+				.get(0);
+		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
+				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
+						"MO_TWO", "VALUE_TWO"));
+
+		// ----------------------------------------
+		// Validate the Managed Objects
+		// ----------------------------------------
+		assertList(new String[] { "getDeskManagedObjectName",
+				"getManagedObjectScope", "getX", "getY" }, desk
+				.getDeskManagedObjects(), new DeskManagedObjectModel(
+				"MANAGED_OBJECT", "THREAD", null, null, 300, 301));
+		DeskManagedObjectModel mo = desk.getDeskManagedObjects().get(0);
+		assertProperties(new DeskManagedObjectToDeskManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE"), mo.getDeskManagedObjectSource(),
+				"getDeskManagedObjectSourceName");
+
+		// ----------------------------------------
+		// Validate the External Flows
+		// ----------------------------------------
+		assertList(new String[] { "getExternalFlowName", "getArgumentType",
+				"getX", "getY" }, desk.getExternalFlows(),
+				new ExternalFlowModel("flow", "java.lang.Object", null, null,
+						null, 400, 401), new ExternalFlowModel("escalation",
+						"java.lang.Throwable", null, null, null, 410, 411));
+
+		// ----------------------------------------
 		// Validate the Work
 		// ----------------------------------------
 		assertList(new String[] { "getWorkName", "getWorkSourceClassName",
 				"getX", "getY" }, desk.getWorks(), new WorkModel("work",
-				"net.example.ExampleWorkSource", null, null, null, 40, 41));
+				"net.example.ExampleWorkSource", null, null, null, 500, 501));
 		WorkModel work = desk.getWorks().get(0);
 
 		// Validate properties of work
@@ -114,26 +163,33 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate objects on tasks
 		String[] objectValidate = new String[] { "getObjectName", "getKey",
 				"getObjectType", "getIsParameter" };
-		assertList(objectValidate, workTaskOne.getTaskObjects(),
-				new WorkTaskObjectModel("ONE", "ONE", "java.lang.String",
-						false, null));
+		assertList(
+				objectValidate,
+				workTaskOne.getTaskObjects(),
+				new WorkTaskObjectModel("ONE", "ONE", "java.lang.String", false));
 		assertList(objectValidate, workTaskTwo.getTaskObjects(),
 				new WorkTaskObjectModel("0", null, "java.lang.Integer", true),
-				new WorkTaskObjectModel("1", null, "java.lang.String", false));
+				new WorkTaskObjectModel("1", null, "java.lang.String", false),
+				new WorkTaskObjectModel("2", null, "net.orm.Session", false));
 		assertList(objectValidate, workTaskThree.getTaskObjects(),
 				new WorkTaskObjectModel("parameter", null,
 						"java.lang.Throwable", true));
 		assertList(objectValidate, workTaskFour.getTaskObjects());
 
 		// Validate task object connections
-		assertEquals("mo", workTaskOne.getTaskObjects().get(0)
-				.getExternalManagedObject().getExternalManagedObjectName());
+		assertProperties(new WorkTaskObjectToExternalManagedObjectModel("mo"),
+				workTaskOne.getTaskObjects().get(0).getExternalManagedObject(),
+				"getExternalManagedObjectName");
 		assertNull(workTaskTwo.getTaskObjects().get(0)
 				.getExternalManagedObject());
-		assertEquals("mo", workTaskTwo.getTaskObjects().get(1)
-				.getExternalManagedObject().getExternalManagedObjectName());
+		assertProperties(new WorkTaskObjectToExternalManagedObjectModel("mo"),
+				workTaskTwo.getTaskObjects().get(1).getExternalManagedObject(),
+				"getExternalManagedObjectName");
 		assertNull(workTaskThree.getTaskObjects().get(0)
 				.getExternalManagedObject());
+		assertProperties(new WorkTaskObjectToDeskManagedObjectModel(
+				"MANAGED_OBJECT"), workTaskTwo.getTaskObjects().get(2)
+				.getDeskManagedObject(), "getDeskManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the Tasks
@@ -141,17 +197,17 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		List<TaskModel> tasks = new LinkedList<TaskModel>();
 		tasks.add(new TaskModel("taskOne", true, "work", "workTaskOne",
 				"java.lang.Integer", null, null, null, null, null, null, null,
-				null, null, 100, 101));
+				null, null, 600, 601));
 		tasks
 				.add(new TaskModel("taskTwo", false, "work", "workTaskTwo",
 						null, null, null, null, null, null, null, null, null,
-						null, 200, 201));
+						null, 610, 611));
 		tasks.add(new TaskModel("taskThree", false, "work", "workTaskThree",
 				"java.lang.Integer", null, null, null, null, null, null, null,
-				null, null, 300, 301));
+				null, null, 620, 621));
 		tasks.add(new TaskModel("taskFour", false, "work", "workTaskFour",
 				null, null, null, null, null, null, null, null, null, null,
-				400, 401));
+				630, 631));
 		assertList(new String[] { "getTaskName", "getWorkName",
 				"getWorkTaskName", "getReturnType", "getX", "getY" }, desk
 				.getTasks(), tasks.toArray(new TaskModel[0]));
@@ -176,9 +232,8 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the flow connections
 		TaskFlowModel taskOneFirst = taskOne.getTaskFlows().get(0);
 		assertProperties(new TaskFlowToExternalFlowModel("flow",
-				DeskChanges.SEQUENTIAL_LINK),
-				taskOneFirst.getExternalFlow(), "getExternalFlowName",
-				"getLinkType");
+				DeskChanges.SEQUENTIAL_LINK), taskOneFirst.getExternalFlow(),
+				"getExternalFlowName", "getLinkType");
 		assertNull(taskOneFirst.getTask());
 		TaskFlowModel taskOneSecond = taskOne.getTaskFlows().get(1);
 		assertNull(taskOneSecond.getExternalFlow());
@@ -215,23 +270,6 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		TaskEscalationModel taskOneNull = taskOne.getTaskEscalations().get(2);
 		assertNull(taskOneNull.getTask());
 		assertNull(taskOneNull.getExternalFlow());
-
-		// ----------------------------------------
-		// Validate the External Managed Objects
-		// ----------------------------------------
-		assertList(new String[] { "getExternalManagedObjectName",
-				"getObjectType", "getX", "getY" }, desk
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"mo", "java.lang.String", null, 10, 11));
-
-		// ----------------------------------------
-		// Validate the External Flows
-		// ----------------------------------------
-		assertList(new String[] { "getExternalFlowName", "getArgumentType",
-				"getX", "getY" }, desk.getExternalFlows(),
-				new ExternalFlowModel("flow", "java.lang.Object", null, null,
-						null, 20, 21), new ExternalFlowModel("escalation",
-						"java.lang.Throwable", null, null, null, 30, 31));
 	}
 
 	/**

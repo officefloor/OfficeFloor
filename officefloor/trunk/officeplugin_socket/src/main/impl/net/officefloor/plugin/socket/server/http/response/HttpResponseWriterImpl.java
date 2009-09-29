@@ -18,7 +18,9 @@
 package net.officefloor.plugin.socket.server.http.response;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -26,21 +28,34 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 /**
  * {@link HttpResponseWriter} implementation.
  *
+ * TODO handle Accept and translating HTTP response for the client.
+ *
  * @author Daniel Sagenschneider
  */
 public class HttpResponseWriterImpl implements HttpResponseWriter {
+
+	/**
+	 * {@link HttpResponse}.
+	 */
+	private final HttpResponse response;
+
+	/**
+	 * Initiate.
+	 *
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 */
+	public HttpResponseWriterImpl(ServerHttpConnection connection) {
+		this.response = connection.getHttpResponse();
+	}
 
 	/*
 	 * =================== HttpResponseWriter =======================
 	 */
 
 	@Override
-	public void writeContent(ServerHttpConnection connection,
-			String contentEncoding, String contentType, ByteBuffer contents)
-			throws IOException {
-
-		// Obtain the response
-		HttpResponse response = connection.getHttpResponse();
+	public void write(String contentEncoding, String contentType,
+			Charset charset, ByteBuffer contents) throws IOException {
 
 		/*
 		 * TODO handle translations should client not accept encoding/type.
@@ -58,18 +73,39 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
 		// Specify the content-encoding if not blank
 		if ((contentEncoding != null) && (contentEncoding.trim().length() > 0)) {
 			final String CONTENT_ENCODING_HEADER_NAME = "Content-Encoding";
-			response.removeHeaders(CONTENT_ENCODING_HEADER_NAME);
-			response.addHeader(CONTENT_ENCODING_HEADER_NAME, contentEncoding);
+			this.response.removeHeaders(CONTENT_ENCODING_HEADER_NAME);
+			this.response.addHeader(CONTENT_ENCODING_HEADER_NAME,
+					contentEncoding);
 		}
 
 		// Specify the content-type if not blank
 		if ((contentType != null) && (contentType.trim().length() > 0)) {
 			final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
-			response.removeHeaders(CONTENT_TYPE_HEADER_NAME);
-			response.addHeader(CONTENT_TYPE_HEADER_NAME, contentType);
+			this.response.removeHeaders(CONTENT_TYPE_HEADER_NAME);
+			contentType = contentType
+					+ (charset == null ? "" : "; charset=" + charset.name());
+			this.response.addHeader(CONTENT_TYPE_HEADER_NAME, contentType);
 		}
 
 		// Write the contents to the response
-		response.getBody().append(contents);
+		this.response.getBody().append(contents);
 	}
+
+	@Override
+	public void write(String contentType, String contents) throws IOException {
+
+		// Specify the content-type if not blank
+		if ((contentType != null) && (contentType.trim().length() > 0)) {
+			final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
+			this.response.removeHeaders(CONTENT_TYPE_HEADER_NAME);
+			this.response.addHeader(CONTENT_TYPE_HEADER_NAME, contentType);
+		}
+
+		// Write the contents to the response
+		OutputStreamWriter writer = new OutputStreamWriter(this.response
+				.getBody().getOutputStream());
+		writer.write(contents);
+		writer.flush();
+	}
+
 }

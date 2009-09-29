@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
@@ -29,8 +30,8 @@ import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
-import net.officefloor.plugin.work.http.route.HttpRouteTask;
-import net.officefloor.plugin.work.http.route.HttpRouteWorkSource;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
+import net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -76,10 +77,10 @@ public class HttpRouteWorkSourceExtension implements
 			String name = property.getName();
 			if ((name == null)
 					|| (!name
-							.startsWith(HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX))) {
+							.startsWith(HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX))) {
 				continue; // not a routing property
 			}
-			name = name.substring(HttpRouteWorkSource.ROUTE_PROPERTY_PREFIX
+			name = name.substring(HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX
 					.length());
 
 			// Add the initial routing entry
@@ -125,6 +126,98 @@ public class HttpRouteWorkSourceExtension implements
 	public ClasspathProvision[] getClasspathProvisions() {
 		return new ClasspathProvision[] { new TypeClasspathProvision(
 				HttpRouteWorkSource.class) };
+	}
+
+	/**
+	 * Entry in routing.
+	 */
+	public static class RoutingEntry {
+
+		/**
+		 * Name identifying this {@link RoutingEntry}.
+		 */
+		private String name;
+
+		/**
+		 * Pattern for matching to use this {@link RoutingEntry}.
+		 */
+		private String pattern;
+
+		/**
+		 * Default construction for use in {@link BeanDialog}.
+		 */
+		public RoutingEntry() {
+		}
+
+		/**
+		 * Initialise.
+		 *
+		 * @param name
+		 *            Name.
+		 * @param pattern
+		 *            Pattern.
+		 */
+		public RoutingEntry(String name, String pattern) {
+			this.name = (name == null ? "" : name);
+			this.pattern = (pattern == null ? "" : pattern);
+		}
+
+		/**
+		 * Obtains the name identifying this {@link RoutingEntry}.
+		 *
+		 * @return Name.
+		 */
+		public String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Specifies the name.
+		 *
+		 * @param name
+		 *            Name.
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		/**
+		 * Obtains the pattern.
+		 *
+		 * @return Pattern.
+		 */
+		public String getPattern() {
+			return this.pattern;
+		}
+
+		/**
+		 * Specifies the pattern.
+		 *
+		 * @param pattern
+		 *            Pattern.
+		 */
+		public void setPattern(String pattern) {
+			this.pattern = pattern;
+		}
+
+		/**
+		 * Loads the {@link Property} for this {@link RoutingEntry} to the
+		 * {@link PropertyList}.
+		 *
+		 * @param {@link PropertyList}.
+		 */
+		public void loadProperty(PropertyList propertyList) {
+
+			// Only provide prefix if name provided
+			String propertyName = ((this.name == null) || this.name.trim()
+					.length() == 0) ? ""
+					: (HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX + this.name);
+
+			// Load the property
+			Property property = propertyList.addProperty(propertyName);
+			property.setValue(this.pattern);
+		}
+
 	}
 
 }

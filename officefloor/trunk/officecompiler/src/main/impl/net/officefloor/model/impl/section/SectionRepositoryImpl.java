@@ -25,19 +25,23 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionRepository} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionRepositoryImpl implements SectionRepository {
@@ -49,7 +53,7 @@ public class SectionRepositoryImpl implements SectionRepository {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -121,6 +125,29 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
+		// Create the map of managed object sources
+		Map<String, SectionManagedObjectSourceModel> managedObjectSources = new HashMap<String, SectionManagedObjectSourceModel>();
+		for (SectionManagedObjectSourceModel mos : section
+				.getSectionManagedObjectSources()) {
+			managedObjectSources.put(mos.getSectionManagedObjectSourceName(),
+					mos);
+		}
+
+		// Connect the managed objects to their managed object sources
+		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
+			SectionManagedObjectToSectionManagedObjectSourceModel conn = mo
+					.getSectionManagedObjectSource();
+			if (conn != null) {
+				SectionManagedObjectSourceModel mos = managedObjectSources
+						.get(conn.getSectionManagedObjectSourceName());
+				if (mos != null) {
+					conn.setSectionManagedObject(mo);
+					conn.setSectionManagedObjectSource(mos);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the map of external managed objects
 		Map<String, ExternalManagedObjectModel> externalMos = new HashMap<String, ExternalManagedObjectModel>();
 		for (ExternalManagedObjectModel externalMo : section
@@ -141,6 +168,30 @@ public class SectionRepositoryImpl implements SectionRepository {
 					if (externalMo != null) {
 						conn.setSubSectionObject(object);
 						conn.setExternalManagedObject(externalMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the map of managed objects
+		Map<String, SectionManagedObjectModel> managedObjects = new HashMap<String, SectionManagedObjectModel>();
+		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
+			managedObjects.put(mo.getSectionManagedObjectName(), mo);
+		}
+
+		// Connect the objects to managed objects
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionObjectModel object : subSection
+					.getSubSectionObjects()) {
+				SubSectionObjectToSectionManagedObjectModel conn = object
+						.getSectionManagedObject();
+				if (conn != null) {
+					SectionManagedObjectModel mo = managedObjects.get(conn
+							.getSectionManagedObjectName());
+					if (mo != null) {
+						conn.setSubSectionObject(object);
+						conn.setSectionManagedObject(mo);
 						conn.connect();
 					}
 				}
@@ -174,6 +225,16 @@ public class SectionRepositoryImpl implements SectionRepository {
 			}
 		}
 
+		// Specify managed objects to their managed object sources
+		for (SectionManagedObjectSourceModel mos : section
+				.getSectionManagedObjectSources()) {
+			for (SectionManagedObjectToSectionManagedObjectSourceModel conn : mos
+					.getSectionManagedObjects()) {
+				conn.setSectionManagedObjectSourceName(mos
+						.getSectionManagedObjectSourceName());
+			}
+		}
+
 		// Specify object to external managed object
 		for (ExternalManagedObjectModel extMo : section
 				.getExternalManagedObjects()) {
@@ -181,6 +242,15 @@ public class SectionRepositoryImpl implements SectionRepository {
 					.getSubSectionObjects()) {
 				conn.setExternalManagedObjectName(extMo
 						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify object to managed object
+		for (SectionManagedObjectModel mo : section.getSectionManagedObjects()) {
+			for (SubSectionObjectToSectionManagedObjectModel conn : mo
+					.getSubSectionObjects()) {
+				conn.setSectionManagedObjectName(mo
+						.getSectionManagedObjectName());
 			}
 		}
 

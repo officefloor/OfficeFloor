@@ -25,19 +25,6 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
-								<source>src/main/work</source>
-							</sources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/test/work</source>
 							</sources>
 						</configuration>
 					</execution>

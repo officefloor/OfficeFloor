@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http.file;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -68,11 +69,22 @@ public interface HttpFile extends Serializable {
 	String getContentEncoding();
 
 	/**
+	 * <p>
 	 * Obtains the <code>Content-Type</code> for this {@link HttpFile}.
+	 * <p>
+	 * The value should omit the <code>charset</code> attribute.
 	 *
 	 * @return <code>Content-Type</code> for this {@link HttpFile}.
 	 */
 	String getContentType();
+
+	/**
+	 * Obtains the {@link Charset} for the contents.
+	 *
+	 * @return {@link Charset} or <code>null</code> if contents are not text or
+	 *         the {@link Charset} is unknown.
+	 */
+	Charset getCharset();
 
 	/**
 	 * <p>

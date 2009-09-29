@@ -17,18 +17,27 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.sql.Connection;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
@@ -37,7 +46,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link SectionRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionRepositoryTest extends OfficeFrameTestCase {
@@ -71,6 +80,35 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		SubSectionModel subSection = new SubSectionModel("SUB_SECTION",
 				"net.example.ExampleSectionSource", "SECTION_LOCATION");
 		section.addSubSection(subSection);
+		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT", Object.class.getName());
+		section.addExternalManagedObject(extMo);
+		SectionManagedObjectModel mo = new SectionManagedObjectModel(
+				"MANAGED_OBJECT", "THREAD");
+		section.addSectionManagedObject(mo);
+		SectionManagedObjectDependencyModel dependency = new SectionManagedObjectDependencyModel(
+				"DEPENDENCY", Object.class.getName());
+		mo.addSectionManagedObjectDependency(dependency);
+		SectionManagedObjectSourceModel mos = new SectionManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Connection.class
+						.getName());
+		section.addSectionManagedObjectSource(mos);
+
+		// managed object -> managed object source
+		SectionManagedObjectToSectionManagedObjectSourceModel moToMos = new SectionManagedObjectToSectionManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE");
+		mo.setSectionManagedObjectSource(moToMos);
+
+		// dependency -> external managed object
+		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT");
+		dependency.setExternalManagedObject(dependencyToExtMo);
+
+		// dependency -> managed object
+		SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToMo = new SectionManagedObjectDependencyToSectionManagedObjectModel(
+				"MANAGED_OBJECT");
+		dependency.setSectionManagedObject(dependencyToMo);
 
 		// output -> input
 		SubSectionOutputModel output_input = new SubSectionOutputModel(
@@ -99,15 +137,20 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		output_extFlow.setExternalFlow(outputToExtFlow);
 
 		// object -> extMo
-		SubSectionObjectModel object = new SubSectionObjectModel("OBJECT",
-				Object.class.getName());
-		subSection.addSubSectionObject(object);
-		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel(
-				"object - extMo", Object.class.getName());
-		section.addExternalManagedObject(extMo);
+		SubSectionObjectModel object_extMo = new SubSectionObjectModel(
+				"OBJECT_EXT", Object.class.getName());
+		subSection.addSubSectionObject(object_extMo);
 		SubSectionObjectToExternalManagedObjectModel objectToExtMo = new SubSectionObjectToExternalManagedObjectModel(
-				"object - extMo");
-		object.setExternalManagedObject(objectToExtMo);
+				"EXTERNAL_MANAGED_OBJECT");
+		object_extMo.setExternalManagedObject(objectToExtMo);
+
+		// object -> managed object
+		SubSectionObjectModel object_mo = new SubSectionObjectModel(
+				"OBJECT_MO", Connection.class.getName());
+		subSection.addSubSectionObject(object_mo);
+		SubSectionObjectToSectionManagedObjectModel objectToMo = new SubSectionObjectToSectionManagedObjectModel(
+				"MANAGED_OBJECT");
+		object_mo.setSectionManagedObject(objectToMo);
 
 		// Record retrieving the section
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -129,6 +172,22 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect section", section, retrievedSection);
 
+		// Ensure managed object connected to its source
+		assertEquals("mo -> mos", mos, moToMos.getSectionManagedObjectSource());
+		assertEquals("mo <- mos", mo, moToMos.getSectionManagedObject());
+
+		// Ensure dependency connected to external managed object
+		assertEquals("dependency <- external mo", dependency, dependencyToExtMo
+				.getSectionManagedObjectDependency());
+		assertEquals("dependency -> managed object", extMo, dependencyToExtMo
+				.getExternalManagedObject());
+
+		// Ensure dependency connected to managed object
+		assertEquals("dependency <- managed object", dependency, dependencyToMo
+				.getSectionManagedObjectDependency());
+		assertEquals("dependency -> managed object", mo, dependencyToMo
+				.getSectionManagedObject());
+
 		// Ensure output to input connected
 		assertEquals("output -> input", input, outputToInput
 				.getSubSectionInput());
@@ -144,7 +203,12 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the external managed object connected
 		assertEquals("object -> extMo", extMo, objectToExtMo
 				.getExternalManagedObject());
-		assertEquals("object <- extMo", object, objectToExtMo
+		assertEquals("object <- extMo", object_extMo, objectToExtMo
+				.getSubSectionObject());
+
+		// Ensure the section managed object connected
+		assertEquals("object -> mo", mo, objectToMo.getSectionManagedObject());
+		assertEquals("object <- mo", object_mo, objectToMo
 				.getSubSectionObject());
 	}
 
@@ -177,6 +241,35 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel("MO",
 				Object.class.getName());
 		section.addExternalManagedObject(extMo);
+		SectionManagedObjectModel mo = new SectionManagedObjectModel(
+				"MANAGED_OBJECT", "THREAD");
+		section.addSectionManagedObject(mo);
+		SectionManagedObjectDependencyModel dependency = new SectionManagedObjectDependencyModel(
+				"DEPENDENCY", Object.class.getName());
+		mo.addSectionManagedObjectDependency(dependency);
+		SectionManagedObjectSourceModel mos = new SectionManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Connection.class
+						.getName());
+		section.addSectionManagedObjectSource(mos);
+
+		// mo -> mos
+		SectionManagedObjectToSectionManagedObjectSourceModel moToMos = new SectionManagedObjectToSectionManagedObjectSourceModel();
+		moToMos.setSectionManagedObject(mo);
+		moToMos.setSectionManagedObjectSource(mos);
+		moToMos.connect();
+
+		// dependency -> extMo
+		SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new SectionManagedObjectDependencyToExternalManagedObjectModel();
+		dependencyToExtMo.setSectionManagedObjectDependency(dependency);
+		dependencyToExtMo.setExternalManagedObject(extMo);
+		dependencyToExtMo.connect();
+
+		// dependency -> mo
+		SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToMo = new SectionManagedObjectDependencyToSectionManagedObjectModel();
+		dependencyToMo.setSectionManagedObjectDependency(dependency);
+		dependencyToMo.setSectionManagedObject(mo);
+		dependencyToMo.connect();
 
 		// output -> input
 		SubSectionOutputToSubSectionInputModel outputToInput = new SubSectionOutputToSubSectionInputModel();
@@ -196,6 +289,12 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		objectToExtMo.setExternalManagedObject(extMo);
 		objectToExtMo.connect();
 
+		// object -> mo
+		SubSectionObjectToSectionManagedObjectModel objectToMo = new SubSectionObjectToSectionManagedObjectModel();
+		objectToMo.setSubSectionObject(object);
+		objectToMo.setSectionManagedObject(mo);
+		objectToMo.connect();
+
 		// Record storing the section
 		this.modelRepository.store(section, this.configurationItem);
 
@@ -205,6 +304,12 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
+		assertEquals("mo - mos", "MANAGED_OBJECT_SOURCE", moToMos
+				.getSectionManagedObjectSourceName());
+		assertEquals("dependency - extMo", "MO", dependencyToExtMo
+				.getExternalManagedObjectName());
+		assertEquals("dependency - mo", "MANAGED_OBJECT", dependencyToMo
+				.getSectionManagedObjectName());
 		assertEquals("output - input (sub section)", "SUB_SECTION",
 				outputToInput.getSubSectionName());
 		assertEquals("output - input", "INPUT", outputToInput
@@ -213,6 +318,8 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 				.getExternalFlowName());
 		assertEquals("object - extMo", "MO", objectToExtMo
 				.getExternalManagedObjectName());
+		assertEquals("object - mo", "MANAGED_OBJECT", objectToMo
+				.getSectionManagedObjectName());
 	}
 
 }

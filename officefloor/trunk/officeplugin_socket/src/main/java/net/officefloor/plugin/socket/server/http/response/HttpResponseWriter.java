@@ -19,10 +19,9 @@ package net.officefloor.plugin.socket.server.http.response;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
-import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * Writes content to the {@link HttpResponse}.
@@ -34,14 +33,31 @@ public interface HttpResponseWriter {
 	/**
 	 * Writes content to the {@link HttpResponse}.
 	 *
-	 * @param connection
-	 *            {@link ServerHttpConnection}. This is provided as the
-	 *            {@link HttpRequest} may need to be interrogated to determine
-	 *            <code>acceptable</code> encoding and type of contents for the
-	 *            client.
 	 * @param contentEncoding
 	 *            <code>Content-Encoding</code> of the contents to write. May be
 	 *            <code>null</code> if <code>Content-Encoding</code> is unknown.
+	 * @param contentType
+	 *            <code>Content-Type</code> of the contents to write. May be
+	 *            <code>null</code> if <code>Content-Type</code> is unknown.
+	 * @param charset
+	 *            {@link Charset} of the contents to write. May be
+	 *            <code>null</code> if the contents is not text or the
+	 *            {@link Charset} is unknown.
+	 * @param contents
+	 *            Contents to write to the {@link HttpResponse}.
+	 * @throws IOException
+	 *             If fails to write contents to {@link HttpResponse}.
+	 */
+	void write(String contentEncoding, String contentType, Charset charset,
+			ByteBuffer contents) throws IOException;
+
+	/**
+	 * <p>
+	 * Writes content to the {@link HttpResponse}.
+	 * <p>
+	 * As the content is {@link String}, there should be no
+	 * <code>Content-Encoding</code> on the contents to write.
+	 *
 	 * @param contentType
 	 *            <code>Content-Type</code> of the contents to write. May be
 	 *            <code>null</code> if <code>Content-Type</code> is unknown.
@@ -50,7 +66,6 @@ public interface HttpResponseWriter {
 	 * @throws IOException
 	 *             If fails to write contents to {@link HttpResponse}.
 	 */
-	void writeContent(ServerHttpConnection connection, String contentEncoding,
-			String contentType, ByteBuffer contents) throws IOException;
+	void write(String contentType, String contents) throws IOException;
 
 }

@@ -132,7 +132,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Create the managed object source and have in office floor context
 			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
 					managedObjectSourceClassName, LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation, this.managedObjects, this.context);
+					this.officeFloorLocation, null, null, this.managedObjects,
+					this.context);
 			mo.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the managed object source

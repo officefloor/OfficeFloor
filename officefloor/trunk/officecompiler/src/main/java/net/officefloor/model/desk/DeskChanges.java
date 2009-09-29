@@ -29,12 +29,13 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 
 /**
  * Changes that can be made to a {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface DeskChanges {
@@ -58,8 +59,26 @@ public interface DeskChanges {
 	String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS.name();
 
 	/**
+	 * Value for {@link ManagedObjectScope#PROCESS} on
+	 * {@link DeskManagedObjectModel} instances.
+	 */
+	String PROCESS_MANAGED_OBJECT_SCOPE = ManagedObjectScope.PROCESS.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#THREAD} on
+	 * {@link DeskManagedObjectModel} instances.
+	 */
+	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#WORK} on
+	 * {@link DeskManagedObjectModel} instances.
+	 */
+	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+
+	/**
 	 * Adds a {@link WorkModel} to the {@link DeskModel}.
-	 * 
+	 *
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param workSourceClassName
@@ -80,7 +99,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes a {@link WorkModel} from the {@link DeskModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel} to be removed.
 	 * @return {@link Change} to remove the {@link WorkModel}.
@@ -89,7 +108,7 @@ public interface DeskChanges {
 
 	/**
 	 * Renames the {@link WorkModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel} to rename.
 	 * @param newWorkName
@@ -100,7 +119,7 @@ public interface DeskChanges {
 
 	/**
 	 * Refactors the {@link WorkModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel} to refactor.
 	 * @param workName
@@ -144,7 +163,7 @@ public interface DeskChanges {
 	/**
 	 * Adds the {@link TaskType} as a {@link WorkTaskModel} to the
 	 * {@link WorkModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel} to have the {@link TaskType} added.
 	 * @param taskType
@@ -157,7 +176,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link WorkTaskModel} from the {@link WorkModel}.
-	 * 
+	 *
 	 * @param workModel
 	 *            {@link WorkModel} to have the {@link WorkTaskModel} removed.
 	 * @param taskModel
@@ -170,7 +189,7 @@ public interface DeskChanges {
 
 	/**
 	 * Adds a {@link TaskType} as a {@link TaskModel} to the {@link DeskModel}.
-	 * 
+	 *
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param workTaskModel
@@ -186,7 +205,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskModel} from the {@link DeskModel}.
-	 * 
+	 *
 	 * @param taskModel
 	 *            {@link TaskModel} to be removed.
 	 * @return {@link Change} to remove the {@link TaskModel} from the
@@ -196,7 +215,7 @@ public interface DeskChanges {
 
 	/**
 	 * Renames the {@link TaskModel}.
-	 * 
+	 *
 	 * @param taskModel
 	 *            {@link TaskModel} to be renamed.
 	 * @param newTaskName
@@ -207,7 +226,7 @@ public interface DeskChanges {
 
 	/**
 	 * Specifies a {@link WorkTaskObjectModel} as a parameter or an object.
-	 * 
+	 *
 	 * @param isParameter
 	 *            <code>true</code> for the {@link WorkTaskObjectModel} to be a
 	 *            parameter. <code>false</code> to be a dependency object.
@@ -221,7 +240,7 @@ public interface DeskChanges {
 
 	/**
 	 * Specifies a {@link TaskModel} as public/private.
-	 * 
+	 *
 	 * @param isPublic
 	 *            <code>true</code> for the {@link TaskModel} to be public.
 	 *            <code>false</code> for the {@link TaskModel} to be private.
@@ -233,7 +252,7 @@ public interface DeskChanges {
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.
-	 * 
+	 *
 	 * @param externalFlowName
 	 *            Name of the {@link ExternalFlowModel}.
 	 * @param argumentType
@@ -245,7 +264,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes an {@link ExternalFlowModel} from the {@link DeskModel}.
-	 * 
+	 *
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel} for removal from the
 	 *            {@link DeskModel}.
@@ -256,7 +275,7 @@ public interface DeskChanges {
 
 	/**
 	 * Renames the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel} to rename.
 	 * @param newExternalFlowName
@@ -268,7 +287,7 @@ public interface DeskChanges {
 
 	/**
 	 * Adds an {@link ExternalManagedObjectModel} to the {@link DeskModel}.
-	 * 
+	 *
 	 * @param externalManagedObjectName
 	 *            Name of the {@link ExternalManagedObjectModel}.
 	 * @param objectType
@@ -280,7 +299,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes an {@link ExternalManagedObjectModel} from the {@link DeskModel}.
-	 * 
+	 *
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to remove from the
 	 *            {@link DeskModel}.
@@ -292,7 +311,7 @@ public interface DeskChanges {
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to rename.
 	 * @param newExternalManagedObjectName
@@ -306,7 +325,7 @@ public interface DeskChanges {
 	/**
 	 * Links the {@link WorkTaskObjectModel} to be the
 	 * {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param workTaskObject
 	 *            {@link WorkTaskObjectModel}.
 	 * @param externalManagedObject
@@ -320,7 +339,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link WorkTaskObjectToExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param objectToExternalManagedObject
 	 *            {@link WorkTaskObjectToExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the
@@ -331,7 +350,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links the {@link TaskFlowModel} to the {@link TaskModel}.
-	 * 
+	 *
 	 * @param taskFlow
 	 *            {@link TaskFlowModel}.
 	 * @param task
@@ -345,7 +364,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskFlowToTaskModel}.
-	 * 
+	 *
 	 * @param taskFlowToTask
 	 *            {@link TaskFlowToTaskModel} to remove.
 	 * @return {@link Change} to remove {@link TaskFlowToTaskModel}.
@@ -355,7 +374,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links the {@link TaskFlowModel} to the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param taskFlow
 	 *            {@link TaskFlowModel}.
 	 * @param externalFlow
@@ -370,7 +389,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskFlowToExternalFlowModel}.
-	 * 
+	 *
 	 * @param taskFlowToExternalFlow
 	 *            {@link TaskFlowToExternalFlowModel} to remove.
 	 * @return {@link Change} to remove {@link TaskFlowToExternalFlowModel}.
@@ -380,7 +399,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links {@link TaskModel} to next {@link TaskModel}.
-	 * 
+	 *
 	 * @param task
 	 *            {@link TaskModel}.
 	 * @param next
@@ -392,7 +411,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskToNextTaskModel}.
-	 * 
+	 *
 	 * @param taskToNextTask
 	 *            {@link TaskToNextTaskModel} to remove.
 	 * @return {@link Change} to remove {@link TaskToNextTaskModel}.
@@ -402,7 +421,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links {@link TaskModel} to next {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param task
 	 *            {@link TaskModel}.
 	 * @param nextExternalFlow
@@ -414,7 +433,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskToNextExternalFlowModel}.
-	 * 
+	 *
 	 * @param taskToNextExternalFlow
 	 *            {@link TaskToNextExternalFlowModel} to remove.
 	 * @return {@link Change} to remove {@link TaskToNextExternalFlowModel}.
@@ -424,7 +443,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links {@link TaskEscalationModel} to the {@link TaskModel}.
-	 * 
+	 *
 	 * @param taskEscalation
 	 *            {@link TaskEscalationModel}.
 	 * @param task
@@ -436,7 +455,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskEscalationToTaskModel}.
-	 * 
+	 *
 	 * @param taskEscalationToTask
 	 *            {@link TaskEscalationToTaskModel} to remove.
 	 * @return {@link Change} to remove {@link TaskEscalationToTaskModel}.
@@ -446,7 +465,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links {@link TaskEscalationModel} to the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param taskEscalation
 	 *            {@link TaskEscalationModel}.
 	 * @param externalFlow
@@ -458,7 +477,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link TaskEscalationToExternalFlowModel}.
-	 * 
+	 *
 	 * @param taskEscalationToExternalFlow
 	 *            {@link TaskEscalationToExternalFlowModel} to remove.
 	 * @return {@link Change} to remove
@@ -469,7 +488,7 @@ public interface DeskChanges {
 
 	/**
 	 * Links the {@link WorkModel} to its initial {@link TaskModel}.
-	 * 
+	 *
 	 * @param work
 	 *            {@link WorkModel}.
 	 * @param initialTask
@@ -481,7 +500,7 @@ public interface DeskChanges {
 
 	/**
 	 * Removes the {@link WorkToInitialTaskModel}.
-	 * 
+	 *
 	 * @param workToInitialTask
 	 *            {@link WorkToInitialTaskModel} to remove.
 	 * @return {@link Change} to remove {@link WorkToInitialTaskModel}.

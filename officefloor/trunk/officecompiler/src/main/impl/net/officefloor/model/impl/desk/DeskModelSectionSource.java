@@ -24,6 +24,8 @@ import java.util.Map;
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -36,8 +38,12 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -53,14 +59,16 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.section.SectionManagedObjectModel;
 
 /**
  * {@link SectionSource} for a {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskModelSectionSource extends AbstractSectionSource implements
@@ -131,6 +139,55 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			SectionObject sectionObject = designer.addSectionObject(
 					sectionObjectName, extMo.getObjectType());
 			sectionObjects.put(sectionObjectName, sectionObject);
+		}
+
+		// Add the managed object sources, keeping registry of them
+		Map<String, SectionManagedObjectSource> managedObjectSources = new HashMap<String, SectionManagedObjectSource>();
+		for (DeskManagedObjectSourceModel mosModel : desk
+				.getDeskManagedObjectSources()) {
+
+			// Add the managed object source
+			String mosName = mosModel.getDeskManagedObjectSourceName();
+			SectionManagedObjectSource mos = designer
+					.addSectionManagedObjectSource(mosName, mosModel
+							.getManagedObjectSourceClassName());
+			for (PropertyModel property : mosModel.getProperties()) {
+				mos.addProperty(property.getName(), property.getValue());
+			}
+			managedObjectSources.put(mosName, mos);
+		}
+
+		// Add the managed objects, keeping registry of them
+		Map<String, SectionManagedObject> managedObjects = new HashMap<String, SectionManagedObject>();
+		for (DeskManagedObjectModel moModel : desk.getDeskManagedObjects()) {
+
+			// Obtain the managed object details
+			String managedObjectName = moModel.getDeskManagedObjectName();
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
+					moModel.getManagedObjectScope(), designer,
+					managedObjectName);
+
+			// Obtain the managed object source for the managed object
+			SectionManagedObjectSource moSource = null;
+			DeskManagedObjectToDeskManagedObjectSourceModel moToSource = moModel
+					.getDeskManagedObjectSource();
+			if (moToSource != null) {
+				DeskManagedObjectSourceModel moSourceModel = moToSource
+						.getDeskManagedObjectSource();
+				if (moSourceModel != null) {
+					moSource = managedObjectSources.get(moSourceModel
+							.getDeskManagedObjectSourceName());
+				}
+			}
+			if (moSource == null) {
+				continue; // must have managed object source
+			}
+
+			// Add the managed object and also register it
+			SectionManagedObject managedObject = moSource
+					.addSectionManagedObject(managedObjectName,
+							managedObjectScope);
+			managedObjects.put(managedObjectName, managedObject);
 		}
 
 		// Add the works, keeping registry of the tasks
@@ -207,6 +264,23 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					if (linkedSectionObject != null) {
 						// Link the object to its section object
 						designer.link(taskObject, linkedSectionObject);
+					}
+
+					// Determine if link object to managed object
+					SectionManagedObject linkedManagedObject = null;
+					WorkTaskObjectToDeskManagedObjectModel objectToMo = taskObjectModel
+							.getDeskManagedObject();
+					if (objectToMo != null) {
+						DeskManagedObjectModel linkedMo = objectToMo
+								.getDeskManagedObject();
+						if (linkedMo != null) {
+							linkedManagedObject = managedObjects.get(linkedMo
+									.getDeskManagedObjectName());
+						}
+					}
+					if (linkedManagedObject != null) {
+						// Link the object to its managed object
+						designer.link(taskObject, linkedManagedObject);
 					}
 				}
 			}
@@ -381,7 +455,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 * 
+	 *
 	 * @param instigationStrategyName
 	 *            Name identifying the {@link FlowInstigationStrategyEnum}.
 	 * @param designer
@@ -412,4 +486,38 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				AssetType.TASK, taskName);
 		return null;
 	}
+
+	/**
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope
+	 * name.
+	 *
+	 * @param managedObjectScope
+	 *            Name of the {@link ManagedObjectScope}.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
+	 *         reported to the {@link SectionDesigner}.
+	 */
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
+			SectionDesigner designer, String managedObjectName) {
+
+		// Obtain the managed object scope
+		if (DeskChanges.PROCESS_MANAGED_OBJECT_SCOPE.equals(managedObjectScope)) {
+			return ManagedObjectScope.PROCESS;
+		} else if (DeskChanges.THREAD_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.THREAD;
+		} else if (DeskChanges.WORK_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.WORK;
+		}
+
+		// Unknown scope if at this point
+		designer.addIssue("Unknown managed object scope " + managedObjectScope,
+				AssetType.MANAGED_OBJECT, managedObjectName);
+		return null;
+	}
+
 }

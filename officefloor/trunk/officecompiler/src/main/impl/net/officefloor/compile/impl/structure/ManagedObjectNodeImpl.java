@@ -30,6 +30,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -37,6 +38,8 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -82,6 +85,18 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final ManagedObjectSourceNode managedObjectSourceNode;
 
 	/**
+	 * Containing {@link SectionNode}. <code>null</code> if contained in the
+	 * {@link Office} or {@link OfficeFloor}.
+	 */
+	private final SectionNode containingSectionNode;
+
+	/**
+	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
+	 * {@link OfficeFloor}.
+	 */
+	private final OfficeNode containingOfficeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -102,18 +117,27 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            {@link ManagedObjectSourceNode} for the
 	 *            {@link ManagedObjectSource} to source this
 	 *            {@link ManagedObject}.
+	 * @param containingSectionNode
+	 *            Containing {@link SectionNode}. <code>null</code> if contained
+	 *            in the {@link Office} or {@link OfficeFloor}.
+	 * @param containingOfficeNode
+	 *            Containing {@link OfficeNode}. <code>null</code> if contained
+	 *            in the {@link OfficeFloor}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
 			ManagedObjectScope managedObjectScope, LocationType locationType,
 			String location, ManagedObjectSourceNode managedObjectSourcNode,
+			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
 			NodeContext context) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectScope = managedObjectScope;
 		this.locationType = locationType;
 		this.location = location;
 		this.managedObjectSourceNode = managedObjectSourcNode;
+		this.containingSectionNode = containingSectionNode;
+		this.containingOfficeNode = containingOfficeNode;
 		this.context = context;
 	}
 
@@ -123,7 +147,27 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getBoundManagedObjectName() {
-		return this.managedObjectName;
+		// Obtain the name based on location
+		switch (this.locationType) {
+		case OFFICE_FLOOR:
+			// Use name unqualified
+			return this.managedObjectName;
+
+		case OFFICE:
+			// Use name qualified with office name
+			return this.containingOfficeNode.getDeployedOfficeName() + "."
+					+ this.managedObjectName;
+
+		case SECTION:
+			// Use name qualified with both office and section
+			return this.containingOfficeNode.getDeployedOfficeName()
+					+ "."
+					+ this.containingSectionNode
+							.getSectionQualifiedName(this.managedObjectName);
+
+		default:
+			throw new IllegalStateException("Unknown location type");
+		}
 	}
 
 	/**

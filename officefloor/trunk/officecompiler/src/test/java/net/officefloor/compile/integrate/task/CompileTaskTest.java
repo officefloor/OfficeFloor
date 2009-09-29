@@ -19,9 +19,11 @@ package net.officefloor.compile.integrate.task;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
@@ -334,6 +336,98 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this
 				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
 		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to an
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testLinkTaskObjectToOfficeManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT",
+				"OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkManagedObject(0, "OFFICE.MANAGED_OBJECT",
+				CompileManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
+	 * {@link SectionManagedObject}.
+	 */
+	public void testLinkTaskObjectToSectionManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("OFFICE.SECTION.MANAGED_OBJECT",
+				"OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE.SECTION.MANAGED_OBJECT",
+				"OFFICE.SECTION.MANAGED_OBJECT");
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, "class.name",
+				CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkManagedObject(0, "OFFICE.SECTION.MANAGED_OBJECT",
+				CompileManagedObject.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
+	 * {@link DeskManagedObject}.
+	 */
+	public void testLinkTaskObjectToDeskManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkManagedObject(0, "OFFICE.SECTION.DESK.MANAGED_OBJECT",
+				CompileManagedObject.class);
+		office.registerManagedObjectSource(
+				"OFFICE.SECTION.DESK.MANAGED_OBJECT",
+				"OFFICE.SECTION.DESK.MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE.SECTION.DESK.MANAGED_OBJECT",
+				"OFFICE.SECTION.DESK.MANAGED_OBJECT");
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.SECTION.DESK.MANAGED_OBJECT_SOURCE",
+				ClassManagedObjectSource.class, "class.name",
+				CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the office floor
 		this.compile(true);

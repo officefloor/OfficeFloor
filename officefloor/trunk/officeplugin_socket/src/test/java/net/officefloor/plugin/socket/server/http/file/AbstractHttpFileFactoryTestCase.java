@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -123,6 +124,9 @@ public abstract class AbstractHttpFileFactoryTestCase extends
 	private void doTest(String requestUriPath, String expectedPath,
 			String fileName, final String fileExtension) throws Exception {
 
+		// Obtain the charset
+		final Charset charset = Charset.defaultCharset();
+
 		// Obtain the context directory (ensuring index file exists)
 		File contextDirectory = this.findFile(this.getClass(), "index.html")
 				.getParentFile();
@@ -144,7 +148,7 @@ public abstract class AbstractHttpFileFactoryTestCase extends
 				assertTrue("Ensure specific describers called first",
 						isSpecificDescriberCalled[0]);
 				descriptionContents[0] = description.getContents();
-				description.setContentType(CONTENT_TYPE);
+				description.setContentType(CONTENT_TYPE, charset);
 			}
 		});
 
@@ -170,6 +174,7 @@ public abstract class AbstractHttpFileFactoryTestCase extends
 					.getContentEncoding());
 			assertEquals("Should be no Content-Type", "", httpFile
 					.getContentType());
+			assertNull("Should be no charset", httpFile.getCharset());
 			assertBufferContents(new byte[0], httpFile.getContents());
 			assertNull("Should not attempt to describe", descriptionContents[0]);
 		} else {
@@ -179,6 +184,7 @@ public abstract class AbstractHttpFileFactoryTestCase extends
 					httpFile.getContentEncoding());
 			assertEquals("Incorrect Content-Type", CONTENT_TYPE, httpFile
 					.getContentType());
+			assertEquals("Incorrect charset", charset, httpFile.getCharset());
 
 			// Read in the expected file content
 			String expectedFilePath = this.getClass().getPackage().getName()

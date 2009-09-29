@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.file;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +43,11 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	public static final String CONTENT_TYPE_PREFIX = "content.type.";
 
 	/**
+	 * Prefix on {@link Properties} name to obtain the {@link Charset}.
+	 */
+	public static final String CHARSET_PREFIX = "charset.";
+
+	/**
 	 * Mapping of file extension to its {@link DescriptionStruct}.
 	 */
 	private final Map<String, DescriptionStruct> descriptions = new HashMap<String, DescriptionStruct>();
@@ -51,61 +57,64 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	 */
 	public void loadDefaultDescriptions() {
 
+		// Obtain the default charset for text files
+		Charset charset = Charset.defaultCharset();
+
 		// Text related extension
-		this.mapDescription("html", null, "text/html");
-		this.mapDescription("htm", null, "text/html");
-		this.mapDescription("js", null, "text/javascript");
-		this.mapDescription("css", null, "text/css");
-		this.mapDescription("xml", null, "text/xml");
-		this.mapDescription("txt", null, "text/plain");
+		this.mapContentType("html", "text/html", charset);
+		this.mapContentType("htm", "text/html", charset);
+		this.mapContentType("css", "text/css", charset);
+		this.mapContentType("xml", "text/xml", charset);
+		this.mapContentType("txt", "text/plain", charset);
 
 		// Image related extensions
-		this.mapDescription("gif", null, "image/gif");
-		this.mapDescription("png", null, "image/x-png");
-		this.mapDescription("jpg", null, "image/jpeg");
-		this.mapDescription("jpeg", null, "image/jpeg");
-		this.mapDescription("jpe", null, "image/jpeg");
+		this.mapContentType("gif", "image/gif", null);
+		this.mapContentType("png", "image/x-png", null);
+		this.mapContentType("jpg", "image/jpeg", null);
+		this.mapContentType("jpeg", "image/jpeg", null);
+		this.mapContentType("jpe", "image/jpeg", null);
 
 		// Audio related extensions
-		this.mapDescription("wav", null, "audio/x-wav");
-		this.mapDescription("mpa", null, "audio/x-mpeg");
-		this.mapDescription("abs", null, "audio/x-mpeg");
-		this.mapDescription("mpega", null, "audio/x-mpeg");
-		this.mapDescription("mp2a", null, "audio/x-mpeg2");
-		this.mapDescription("mpa2", null, "audio/x-mpeg2");
+		this.mapContentType("wav", "audio/x-wav", null);
+		this.mapContentType("mpa", "audio/x-mpeg", null);
+		this.mapContentType("abs", "audio/x-mpeg", null);
+		this.mapContentType("mpega", "audio/x-mpeg", null);
+		this.mapContentType("mp2a", "audio/x-mpeg2", null);
+		this.mapContentType("mpa2", "audio/x-mpeg2", null);
 
 		// Video related extensions
-		this.mapDescription("mpeg", null, "video/mpeg");
-		this.mapDescription("mpg", null, "video/mpeg");
-		this.mapDescription("mpe", null, "video/mpeg");
-		this.mapDescription("mpv2", null, "video/mpeg2");
-		this.mapDescription("mp2v", null, "video/mpeg2");
-		this.mapDescription("qt", null, "video/quicktime");
-		this.mapDescription("mov", null, "video/quicktime");
-		this.mapDescription("avi", null, "video/x-msvideo");
+		this.mapContentType("mpeg", "video/mpeg", null);
+		this.mapContentType("mpg", "video/mpeg", null);
+		this.mapContentType("mpe", "video/mpeg", null);
+		this.mapContentType("mpv2", "video/mpeg2", null);
+		this.mapContentType("mp2v", "video/mpeg2", null);
+		this.mapContentType("qt", "video/quicktime", null);
+		this.mapContentType("mov", "video/quicktime", null);
+		this.mapContentType("avi", "video/x-msvideo", null);
 
 		// Application related extensions
-		this.mapDescription("ps", null, "application/postscript");
-		this.mapDescription("pdf", null, "application/pdf");
-		this.mapDescription("odt", null,
-				"application/vnd.oasis.opendocument.text");
-		this.mapDescription("odg", null,
-				"application/vnd.oasis.opendocument.graphics");
-		this.mapDescription("odp", null,
-				"application/vnd.oasis.opendocument.presentation");
-		this.mapDescription("ods", null,
-				"application/vnd.oasis.opendocument.spreadsheet");
-		this.mapDescription("odc", null,
-				"application/vnd.oasis.opendocument.chart");
-		this.mapDescription("doc", null, "application/msword");
-		this.mapDescription("ppt", null, "application/mspowerpoint");
-		this.mapDescription("xls", null, "application/x-msexcel");
+		this.mapContentType("ps", "application/postscript", null);
+		this.mapContentType("js", "application/javascript", charset);
+		this.mapContentType("pdf", "application/pdf", null);
+		this.mapContentType("odt", "application/vnd.oasis.opendocument.text",
+				null);
+		this.mapContentType("odg",
+				"application/vnd.oasis.opendocument.graphics", null);
+		this.mapContentType("odp",
+				"application/vnd.oasis.opendocument.presentation", null);
+		this.mapContentType("ods",
+				"application/vnd.oasis.opendocument.spreadsheet", null);
+		this.mapContentType("odc", "application/vnd.oasis.opendocument.chart",
+				null);
+		this.mapContentType("doc", "application/msword", null);
+		this.mapContentType("ppt", "application/mspowerpoint", null);
+		this.mapContentType("xls", "application/x-msexcel", null);
 
 		// Archive related extensions
-		this.mapDescription("tar", null, "application/x-tar");
-		this.mapDescription("zip", null, "application/zip");
-		this.mapDescription("jar", null, "application/octet-stream");
-		this.mapDescription("exe", null, "application/octet-stream");
+		this.mapContentType("tar", "application/x-tar", null);
+		this.mapContentType("zip", "application/zip", null);
+		this.mapContentType("jar", "application/octet-stream", null);
+		this.mapContentType("exe", "application/octet-stream", null);
 	}
 
 	/**
@@ -134,7 +143,15 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 				String fileExtension = name.substring(CONTENT_TYPE_PREFIX
 						.length());
 				String contentType = properties.getProperty(name);
-				this.mapContentType(fileExtension, contentType);
+
+				// Obtain the charset
+				String charsetName = properties.getProperty(CHARSET_PREFIX
+						+ fileExtension);
+				Charset charset = (charsetName == null ? null : Charset
+						.forName(charsetName));
+
+				// Map the content-type
+				this.mapContentType(fileExtension, contentType, charset);
 			}
 		}
 	}
@@ -148,7 +165,7 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	 *            <code>Content-Encoding</code>.
 	 */
 	public void mapContentEncoding(String fileExtension, String contentEncoding) {
-		this.mapDescription(fileExtension, contentEncoding, null);
+		this.mapDescription(fileExtension, contentEncoding, null, null);
 	}
 
 	/**
@@ -158,9 +175,12 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	 *            File extension.
 	 * @param contentType
 	 *            <code>Content-Encoding</code>.
+	 * @param charset
+	 *            {@link Charset}.
 	 */
-	public void mapContentType(String fileExtension, String contentType) {
-		this.mapDescription(fileExtension, null, contentType);
+	public void mapContentType(String fileExtension, String contentType,
+			Charset charset) {
+		this.mapDescription(fileExtension, null, contentType, charset);
 	}
 
 	/**
@@ -172,9 +192,11 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 	 *            Overriding <code>Content-Encoding</code>.
 	 * @param contentType
 	 *            Overriding <code>Content-Type</code>.
+	 * @param charset
+	 *            Overriding {@link Charset}.
 	 */
 	private void mapDescription(String fileExtension, String contentEncoding,
-			String contentType) {
+			String contentType, Charset charset) {
 
 		// Always find by lower case file extension
 		fileExtension = fileExtension.toLowerCase();
@@ -184,7 +206,7 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 
 		// Override the details
 		this.descriptions.put(fileExtension, new DescriptionStruct(details,
-				contentEncoding, contentType));
+				contentEncoding, contentType, charset));
 	}
 
 	/*
@@ -212,7 +234,7 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 			description.setContentEncoding(details.contentEncoding);
 		}
 		if (details.contentType != null) {
-			description.setContentType(details.contentType);
+			description.setContentType(details.contentType, details.charset);
 		}
 	}
 
@@ -232,6 +254,11 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 		public final String contentType;
 
 		/**
+		 * {@link Charset}.
+		 */
+		public final Charset charset;
+
+		/**
 		 * Initiate.
 		 *
 		 * @param prototype
@@ -241,19 +268,33 @@ public class FileExtensionHttpFileDescriber implements HttpFileDescriber {
 		 *            Overriding <code>Content-Encoding</code>.
 		 *            <code>null</code> to not override.
 		 * @param contentType
+		 *            Overriding <code>Content-Type</code>. <code>null</code> to
+		 *            not override.
+		 * @param charset
+		 *            Overriding {@link Charset} should the
+		 *            <code>Content-Type</code> be overridden.
 		 */
 		public DescriptionStruct(DescriptionStruct prototype,
-				String contentEncoding, String contentType) {
+				String contentEncoding, String contentType, Charset charset) {
 			if (prototype == null) {
 				// No prototype, so use input values
 				this.contentEncoding = contentEncoding;
 				this.contentType = contentType;
+				this.charset = charset;
+
 			} else {
 				// Have prototype, so only override if have value
 				this.contentEncoding = (contentEncoding == null ? prototype.contentEncoding
 						: contentEncoding);
-				this.contentType = (contentType == null ? prototype.contentType
-						: contentType);
+
+				// Override if content-type is provided
+				if (contentType == null) {
+					this.contentType = null;
+					this.charset = null;
+				} else {
+					this.contentType = contentType;
+					this.charset = charset;
+				}
 			}
 		}
 	}
