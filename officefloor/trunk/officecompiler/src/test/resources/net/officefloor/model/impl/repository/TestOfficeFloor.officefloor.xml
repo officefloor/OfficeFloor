@@ -9,10 +9,9 @@
 			</properties>
 			<managing-office name="OFFICE" />
 			<input-managed-object name="INPUT_MANAGED_OBJECT" />
-			<input-dependency name="INPUT_DEPENDENCY"
-				object-type="java.sql.Connection">
+			<dependency name="INPUT_DEPENDENCY" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
-			</input-dependency>
+			</dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
 				<office-input office="OFFICE" section="SECTION" input="INPUT" />
 			</flow>

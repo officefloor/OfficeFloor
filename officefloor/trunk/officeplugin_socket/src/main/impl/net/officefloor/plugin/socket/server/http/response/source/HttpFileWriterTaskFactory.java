@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http.response.source;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -31,6 +32,7 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 
 /**
  * {@link TaskFactory} to write a {@link HttpFile} to the {@link HttpResponse}.
@@ -80,11 +82,12 @@ public class HttpFileWriterTaskFactory
 	public Task<HttpResponseWriterWork, HttpFileWriterTaskDependencies, None> createTask(
 			HttpResponseWriterWork work) {
 
-		// Obtain the writer
-		HttpResponseWriter writer = work.getHttpResponseWriter();
+		// Obtain the writer factory
+		HttpResponseWriterFactory writerFactory = work
+				.getHttpResponseWriterFactory();
 
 		// Return task to write the file
-		return new HttpFileWriterTask(writer);
+		return new HttpFileWriterTask(writerFactory);
 	}
 
 	/**
@@ -94,18 +97,18 @@ public class HttpFileWriterTaskFactory
 			Task<HttpResponseWriterWork, HttpFileWriterTaskDependencies, None> {
 
 		/**
-		 * {@link HttpResponseWriter}.
+		 * {@link HttpResponseWriterFactory}.
 		 */
-		private final HttpResponseWriter writer;
+		private final HttpResponseWriterFactory writerFactory;
 
 		/**
 		 * Initiate.
 		 *
 		 * @param writer
-		 *            {@link HttpResponseWriter}.
+		 *            {@link HttpResponseWriterFactory}.
 		 */
-		public HttpFileWriterTask(HttpResponseWriter writer) {
-			this.writer = writer;
+		public HttpFileWriterTask(HttpResponseWriterFactory writerFactory) {
+			this.writerFactory = writerFactory;
 		}
 
 		/*
@@ -126,9 +129,11 @@ public class HttpFileWriterTaskFactory
 			// Write the file
 			String contentEncoding = httpFile.getContentEncoding();
 			String contentType = httpFile.getContentType();
+			Charset charset = httpFile.getCharset();
 			ByteBuffer contents = httpFile.getContents();
-			this.writer.writeContent(connection, contentEncoding, contentType,
-					contents);
+			HttpResponseWriter writer = this.writerFactory
+					.createHttpResponseWriter(connection);
+			writer.write(contentEncoding, contentType, charset, contents);
 
 			// Return nothing as file written to response
 			return null;

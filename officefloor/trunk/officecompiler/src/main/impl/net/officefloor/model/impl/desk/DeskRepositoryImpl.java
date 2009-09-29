@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -37,6 +40,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
@@ -45,7 +49,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link DeskRepository} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskRepositoryImpl implements DeskRepository {
@@ -57,7 +61,7 @@ public class DeskRepositoryImpl implements DeskRepository {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -76,6 +80,28 @@ public class DeskRepositoryImpl implements DeskRepository {
 		// Load the desk from the configuration
 		DeskModel desk = this.modelRepository.retrieve(new DeskModel(),
 				configuration);
+
+		// Create the set of managed object sources
+		Map<String, DeskManagedObjectSourceModel> managedObjectSources = new HashMap<String, DeskManagedObjectSourceModel>();
+		for (DeskManagedObjectSourceModel mos : desk
+				.getDeskManagedObjectSources()) {
+			managedObjectSources.put(mos.getDeskManagedObjectSourceName(), mos);
+		}
+
+		// Connect the managed objects to their managed object sources
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			DeskManagedObjectToDeskManagedObjectSourceModel conn = mo
+					.getDeskManagedObjectSource();
+			if (conn != null) {
+				DeskManagedObjectSourceModel mos = managedObjectSources
+						.get(conn.getDeskManagedObjectSourceName());
+				if (mos != null) {
+					conn.setDeskManagedObject(mo);
+					conn.setDeskManagedObjectSource(mos);
+					conn.connect();
+				}
+			}
+		}
 
 		// Create the set of external managed objects
 		Map<String, ExternalManagedObjectModel> externalManagedObjects = new HashMap<String, ExternalManagedObjectModel>();
@@ -98,6 +124,31 @@ public class DeskRepositoryImpl implements DeskRepository {
 							// Connect
 							conn.setTaskObject(taskObject);
 							conn.setExternalManagedObject(extMo);
+							conn.connect();
+						}
+					}
+				}
+			}
+		}
+
+		// Create the set of managed objects
+		Map<String, DeskManagedObjectModel> managedObjects = new HashMap<String, DeskManagedObjectModel>();
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			managedObjects.put(mo.getDeskManagedObjectName(), mo);
+		}
+
+		// Connect the task objects to managed objects
+		for (WorkModel work : desk.getWorks()) {
+			for (WorkTaskModel task : work.getWorkTasks()) {
+				for (WorkTaskObjectModel object : task.getTaskObjects()) {
+					WorkTaskObjectToDeskManagedObjectModel conn = object
+							.getDeskManagedObject();
+					if (conn != null) {
+						DeskManagedObjectModel mo = managedObjects.get(conn
+								.getDeskManagedObjectName());
+						if (mo != null) {
+							conn.setWorkTaskObject(object);
+							conn.setDeskManagedObject(mo);
 							conn.connect();
 						}
 					}
@@ -269,6 +320,16 @@ public class DeskRepositoryImpl implements DeskRepository {
 	public void storeDesk(DeskModel desk, ConfigurationItem configuration)
 			throws Exception {
 
+		// Specify managed object to its managed object source
+		for (DeskManagedObjectSourceModel mos : desk
+				.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectToDeskManagedObjectSourceModel conn : mos
+					.getDeskManagedObjects()) {
+				conn.setDeskManagedObjectSourceName(mos
+						.getDeskManagedObjectSourceName());
+			}
+		}
+
 		// Specify task object to external managed object
 		for (WorkModel work : desk.getWorks()) {
 			for (WorkTaskModel workTask : work.getWorkTasks()) {
@@ -281,6 +342,14 @@ public class DeskRepositoryImpl implements DeskRepository {
 								.getExternalManagedObjectName());
 					}
 				}
+			}
+		}
+
+		// Specify task object to managed object
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			for (WorkTaskObjectToDeskManagedObjectModel conn : mo
+					.getWorkTaskObjects()) {
+				conn.setDeskManagedObjectName(mo.getDeskManagedObjectName());
 			}
 		}
 

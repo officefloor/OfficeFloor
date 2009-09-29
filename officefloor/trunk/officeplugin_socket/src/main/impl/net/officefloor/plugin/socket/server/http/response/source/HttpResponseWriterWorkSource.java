@@ -22,8 +22,8 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
-import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterImpl;
+import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
+import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
 
 /**
  * {@link WorkSource} to write the {@link HttpResponse}.
@@ -47,11 +47,12 @@ public class HttpResponseWriterWorkSource extends
 			WorkTypeBuilder<HttpResponseWriterWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
-		// Create the HTTP response writer
-		HttpResponseWriter writer = new HttpResponseWriterImpl();
+		// Create the HTTP response writer factory
+		HttpResponseWriterFactory writerFactory = new HttpResponseWriterFactoryImpl();
 
 		// Provide work type information
-		workTypeBuilder.setWorkFactory(new HttpResponseWriterWork(writer));
+		workTypeBuilder
+				.setWorkFactory(new HttpResponseWriterWork(writerFactory));
 
 		// Provide the HTTP file writer task
 		HttpFileWriterTaskFactory.addTaskType("FILE", workTypeBuilder);

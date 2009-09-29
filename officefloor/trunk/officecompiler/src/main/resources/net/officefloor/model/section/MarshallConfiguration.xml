@@ -14,6 +14,48 @@
 			</attributes>
 		</item>
 	</collection>
+	<!-- MANAGED OBJECT SOURCES -->
+	<collection method="getSectionManagedObjectSources" element="managed-object-sources">
+		<item type="net.officefloor.model.section.SectionManagedObjectSourceModel"
+			element="managed-object-source">
+			<attributes>
+				<attribute method="getSectionManagedObjectSourceName"
+					attribute="name" />
+				<attribute method="getManagedObjectSourceClassName"
+					attribute="source" />
+				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.section.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+	</collection>
+	<!-- MANAGED OBJECTS -->
+	<collection method="getSectionManagedObjects" element="managed-objects">
+		<item type="net.officefloor.model.section.SectionManagedObjectModel"
+			element="managed-object">
+			<attributes>
+				<attribute method="getSectionManagedObjectName" attribute="name" />
+				<attribute method="getManagedObjectScope" attribute="scope" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getSectionManagedObjectSource" element="managed-object-source">
+				<attributes>
+					<attribute method="getSectionManagedObjectSourceName"
+						attribute="name" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
 	<!-- EXTERNAL FLOWS -->
 	<collection method="getExternalFlows" element="external-flows">
 		<item type="net.officefloor.model.section.ExternalFlowModel"
@@ -88,6 +130,12 @@
 					<object method="getExternalManagedObject" element="external-managed-object">
 						<attributes>
 							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSectionManagedObject" element="managed-object">
+						<attributes>
+							<attribute method="getSectionManagedObjectName"
 								attribute="name" />
 						</attributes>
 					</object>

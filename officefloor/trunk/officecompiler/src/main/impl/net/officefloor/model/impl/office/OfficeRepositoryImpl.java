@@ -28,12 +28,19 @@ import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -48,7 +55,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link OfficeRepository} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeRepositoryImpl implements OfficeRepository {
@@ -60,7 +67,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -170,6 +177,92 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Create the set of office managed objects
+		Map<String, OfficeManagedObjectModel> managedObjects = new HashMap<String, OfficeManagedObjectModel>();
+		for (OfficeManagedObjectModel managedObject : office
+				.getOfficeManagedObjects()) {
+			managedObjects.put(managedObject.getOfficeManagedObjectName(),
+					managedObject);
+		}
+
+		// Connect the objects to the office managed objects
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionObjectModel object : section
+					.getOfficeSectionObjects()) {
+				OfficeSectionObjectToOfficeManagedObjectModel conn = object
+						.getOfficeManagedObject();
+				if (conn != null) {
+					OfficeManagedObjectModel mo = managedObjects.get(conn
+							.getOfficeManagedObjectName());
+					if (mo != null) {
+						conn.setOfficeSectionObject(object);
+						conn.setOfficeManagedObject(mo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect to managed object dependencies to external managed objects
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectDependencyModel dependency : mo
+					.getOfficeManagedObjectDependencies()) {
+				OfficeManagedObjectDependencyToExternalManagedObjectModel conn = dependency
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = extMos.get(conn
+							.getExternalManagedObjectName());
+					if (extMo != null) {
+						conn.setOfficeManagedObjectDependency(dependency);
+						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect to managed object dependencies to managed object
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectDependencyModel dependency : mo
+					.getOfficeManagedObjectDependencies()) {
+				OfficeManagedObjectDependencyToOfficeManagedObjectModel conn = dependency
+						.getOfficeManagedObject();
+				if (conn != null) {
+					OfficeManagedObjectModel dependentMo = managedObjects
+							.get(conn.getOfficeManagedObjectName());
+					if (dependentMo != null) {
+						conn.setOfficeManagedObjectDependency(dependency);
+						conn.setOfficeManagedObject(dependentMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the set of managed object sources
+		Map<String, OfficeManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeManagedObjectSourceModel>();
+		for (OfficeManagedObjectSourceModel managedObjectSource : office
+				.getOfficeManagedObjectSources()) {
+			managedObjectSources.put(managedObjectSource
+					.getOfficeManagedObjectSourceName(), managedObjectSource);
+		}
+
+		// Connect the managed objects to their corresponding sources
+		for (OfficeManagedObjectModel managedObject : office
+				.getOfficeManagedObjects()) {
+			OfficeManagedObjectToOfficeManagedObjectSourceModel conn = managedObject
+					.getOfficeManagedObjectSource();
+			if (conn != null) {
+				OfficeManagedObjectSourceModel managedObjectSource = managedObjectSources
+						.get(conn.getOfficeManagedObjectSourceName());
+				if (managedObjectSource != null) {
+					conn.setOfficeManagedObject(managedObject);
+					conn.setOfficeManagedObjectSource(managedObjectSource);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the map of administrators and duties
 		Map<String, AdministratorModel> administrators = new HashMap<String, AdministratorModel>();
 		DoubleKeyMap<String, String, DutyModel> duties = new DoubleKeyMap<String, String, DutyModel>();
@@ -207,7 +300,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 	/**
 	 * Connects the {@link OfficeTaskModel} to {@link DutyModel} instances.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel}.
 	 * @param duties
@@ -294,6 +387,46 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					.getOfficeSectionObjects()) {
 				conn.setExternalManagedObjectName(extMo
 						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify objects to office managed objects
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeSectionObjectToOfficeManagedObjectModel conn : mo
+					.getOfficeSectionObjects()) {
+				conn
+						.setOfficeManagedObjectName(mo
+								.getOfficeManagedObjectName());
+			}
+		}
+
+		// Specify managed objects to their corresponding sources
+		for (OfficeManagedObjectSourceModel mos : office
+				.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectToOfficeManagedObjectSourceModel conn : mos
+					.getOfficeManagedObjects()) {
+				conn.setOfficeManagedObjectSourceName(mos
+						.getOfficeManagedObjectSourceName());
+			}
+		}
+
+		// Specify external managed objects to dependencies
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			for (OfficeManagedObjectDependencyToExternalManagedObjectModel conn : extMo
+					.getDependentOfficeManagedObjects()) {
+				conn.setExternalManagedObjectName(extMo
+						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify managed objects to dependencies
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectDependencyToOfficeManagedObjectModel conn : mo
+					.getDependentOfficeManagedObjects()) {
+				conn
+						.setOfficeManagedObjectName(mo
+								.getOfficeManagedObjectName());
 			}
 		}
 

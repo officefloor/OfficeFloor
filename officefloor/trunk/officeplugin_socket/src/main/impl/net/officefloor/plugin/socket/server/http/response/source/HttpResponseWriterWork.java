@@ -20,6 +20,7 @@ package net.officefloor.plugin.socket.server.http.response.source;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
+import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 
 /**
  * {@link HttpResponseWriter} {@link Work}.
@@ -30,27 +31,27 @@ public class HttpResponseWriterWork implements
 		WorkFactory<HttpResponseWriterWork>, Work {
 
 	/**
-	 * {@link HttpResponseWriter}.
+	 * {@link HttpResponseWriterFactory}.
 	 */
-	private final HttpResponseWriter writer;
+	private final HttpResponseWriterFactory writerFactory;
 
 	/**
 	 * Initiate.
 	 *
-	 * @param writer
-	 *            {@link HttpResponseWriter}.
+	 * @param writerFactory
+	 *            {@link HttpResponseWriterFactory}.
 	 */
-	public HttpResponseWriterWork(HttpResponseWriter writer) {
-		this.writer = writer;
+	public HttpResponseWriterWork(HttpResponseWriterFactory writerFactory) {
+		this.writerFactory = writerFactory;
 	}
 
 	/**
-	 * Obtains the {@link HttpResponseWriter}.
+	 * Obtains the {@link HttpResponseWriterFactory}.
 	 *
-	 * @return {@link HttpResponseWriter}.
+	 * @return {@link HttpResponseWriterFactory}.
 	 */
-	public HttpResponseWriter getHttpResponseWriter() {
-		return this.writer;
+	public HttpResponseWriterFactory getHttpResponseWriterFactory() {
+		return this.writerFactory;
 	}
 
 	/*

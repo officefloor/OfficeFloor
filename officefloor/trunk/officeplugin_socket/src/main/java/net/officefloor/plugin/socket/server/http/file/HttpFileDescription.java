@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.file;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
@@ -66,7 +67,9 @@ public interface HttpFileDescription {
 	 *
 	 * @param type
 	 *            <code>Content-Type</code> of the {@link HttpFile}.
+	 * @param charset
+	 *            {@link Charset} or <code>null</code> if content is not text.
 	 */
-	void setContentType(String type);
+	void setContentType(String type, Charset charset);
 
 }

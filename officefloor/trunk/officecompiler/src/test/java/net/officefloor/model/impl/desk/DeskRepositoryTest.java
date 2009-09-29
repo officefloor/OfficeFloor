@@ -23,6 +23,9 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskRepository;
@@ -40,6 +43,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.desk.DeskRepositoryImpl;
@@ -48,7 +52,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * Tests the {@link DeskRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskRepositoryTest extends OfficeFrameTestCase {
@@ -79,6 +83,14 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw desk to be connected
 		DeskModel desk = new DeskModel();
+		DeskManagedObjectSourceModel mos = new DeskManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Object.class
+						.getName());
+		desk.addDeskManagedObjectSource(mos);
+		DeskManagedObjectModel mo = new DeskManagedObjectModel(
+				"MANAGED_OBJECT", "THREAD");
+		desk.addDeskManagedObject(mo);
 		WorkModel work = new WorkModel("WORK", "net.example.ExampleWorkSource");
 		desk.addWork(work);
 		WorkTaskModel workTask = new WorkTaskModel("WORK_TASK");
@@ -86,16 +98,26 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		TaskModel task = new TaskModel("TASK", false, "WORK", "WORK_TASK",
 				Object.class.getName());
 		desk.addTask(task);
-
-		// taskObject -> extMo
 		WorkTaskObjectModel taskObject = new WorkTaskObjectModel();
 		workTask.addTaskObject(taskObject);
+
+		// managed object -> managed object source
+		DeskManagedObjectToDeskManagedObjectSourceModel moToMos = new DeskManagedObjectToDeskManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE");
+		mo.setDeskManagedObjectSource(moToMos);
+
+		// taskObject -> extMo
 		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel(
 				"taskObject - extMo", Connection.class.getName());
 		desk.addExternalManagedObject(extMo);
 		WorkTaskObjectToExternalManagedObjectModel objectToExtMo = new WorkTaskObjectToExternalManagedObjectModel(
 				"taskObject - extMo");
 		taskObject.setExternalManagedObject(objectToExtMo);
+
+		// taskObject -> managed object
+		WorkTaskObjectToDeskManagedObjectModel objectToMo = new WorkTaskObjectToDeskManagedObjectModel(
+				"MANAGED_OBJECT");
+		taskObject.setDeskManagedObject(objectToMo);
 
 		// taskFlow -> extFlow
 		TaskFlowModel taskFlow_extFlow = new TaskFlowModel();
@@ -176,11 +198,21 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect desk", desk, retrievedDesk);
 
+		// Ensure the managed object connected to its source
+		assertEquals("mo -> mos", mo, moToMos.getDeskManagedObject());
+		assertEquals("mo <- mos", mos, moToMos.getDeskManagedObjectSource());
+
 		// Ensure the external managed object connected
 		assertEquals("taskObject <- extMo", taskObject, objectToExtMo
 				.getTaskObject());
 		assertEquals("taskObject -> extMo", extMo, objectToExtMo
 				.getExternalManagedObject());
+
+		// Ensure task object connected to managed object
+		assertEquals("taskObject <- managed object", taskObject, objectToMo
+				.getWorkTaskObject());
+		assertEquals("taskObject -> managed object", mo, objectToMo
+				.getDeskManagedObject());
 
 		// Ensure the external flow connected
 		assertEquals("taskFlow <- extFlow", taskFlow_extFlow, flowToExtFlow
@@ -220,7 +252,8 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("next -> task", task_next, nextToTask.getNextTask());
 
 		// Ensure the tasks are connected to their work tasks
-		assertEquals("task <- workTask", workTask, task.getWorkTask().getWorkTask());
+		assertEquals("task <- workTask", workTask, task.getWorkTask()
+				.getWorkTask());
 		assertEquals("task -> workTask", task, workTask.getTasks().get(0)
 				.getTask());
 	}
@@ -233,6 +266,14 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the desk (without connections)
 		DeskModel desk = new DeskModel();
+		DeskManagedObjectSourceModel mos = new DeskManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Object.class
+						.getName());
+		desk.addDeskManagedObjectSource(mos);
+		DeskManagedObjectModel mo = new DeskManagedObjectModel(
+				"MANAGED_OBJECT", "THREAD");
+		desk.addDeskManagedObject(mo);
 		WorkModel work = new WorkModel("WORK", "net.example.ExampleWorkSource");
 		desk.addWork(work);
 		WorkTaskModel workTask = new WorkTaskModel("WORK_TASK");
@@ -256,11 +297,23 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 				Object.class.getName());
 		desk.addExternalFlow(extFlow);
 
+		// managed object -> managed object source
+		DeskManagedObjectToDeskManagedObjectSourceModel moToMos = new DeskManagedObjectToDeskManagedObjectSourceModel();
+		moToMos.setDeskManagedObject(mo);
+		moToMos.setDeskManagedObjectSource(mos);
+		moToMos.connect();
+
 		// taskObject -> extMo
 		WorkTaskObjectToExternalManagedObjectModel objectToExtMo = new WorkTaskObjectToExternalManagedObjectModel();
 		objectToExtMo.setTaskObject(taskObject);
 		objectToExtMo.setExternalManagedObject(extMo);
 		objectToExtMo.connect();
+
+		// taskObject -> mo
+		WorkTaskObjectToDeskManagedObjectModel objectToMo = new WorkTaskObjectToDeskManagedObjectModel();
+		objectToMo.setWorkTaskObject(taskObject);
+		objectToMo.setDeskManagedObject(mo);
+		objectToMo.connect();
 
 		// taskFlow -> extFlow
 		TaskFlowToExternalFlowModel flowToExtFlow = new TaskFlowToExternalFlowModel();
@@ -313,8 +366,12 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
+		assertEquals("mo - mos", "MANAGED_OBJECT_SOURCE", moToMos
+				.getDeskManagedObjectSourceName());
 		assertEquals("taskObject - extMo", "EXTERNAL_MANAGED_OBJECT",
 				objectToExtMo.getExternalManagedObjectName());
+		assertEquals("taskObject - mo", "MANAGED_OBJECT", objectToMo
+				.getDeskManagedObjectName());
 		assertEquals("taskFlow - extFlow", "EXTERNAL_FLOW", flowToExtFlow
 				.getExternalFlowName());
 		assertEquals("next - extFlow", "EXTERNAL_FLOW", nextToExtFlow
@@ -328,4 +385,5 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 				.getInitialTaskName());
 		assertEquals("next - task", "TASK", nextToTask.getNextTaskName());
 	}
+
 }

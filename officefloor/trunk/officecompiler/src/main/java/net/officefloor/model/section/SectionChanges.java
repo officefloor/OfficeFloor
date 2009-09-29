@@ -20,18 +20,37 @@ package net.officefloor.model.section;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 
 /**
  * Changes that can be made to a {@link SectionModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface SectionChanges {
 
 	/**
+	 * Value for {@link ManagedObjectScope#PROCESS} on
+	 * {@link SectionManagedObjectModel} instances.
+	 */
+	String PROCESS_MANAGED_OBJECT_SCOPE = ManagedObjectScope.PROCESS.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#THREAD} on
+	 * {@link SectionManagedObjectModel} instances.
+	 */
+	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#WORK} on
+	 * {@link SectionManagedObjectModel} instances.
+	 */
+	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+
+	/**
 	 * Adds a {@link SubSectionModel} to the {@link SectionModel}.
-	 * 
+	 *
 	 * @param subSectionName
 	 *            Name of the {@link SubSectionModel}.
 	 * @param sectionSourceClassName
@@ -50,7 +69,7 @@ public interface SectionChanges {
 
 	/**
 	 * Removes the {@link SubSectionModel} from the {@link SectionModel}.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link SubSectionModel} to remove.
 	 * @return {@link Change} to remove the {@link SubSectionModel}.
@@ -59,7 +78,7 @@ public interface SectionChanges {
 
 	/**
 	 * Renames the {@link SubSectionModel} to the new name.
-	 * 
+	 *
 	 * @param subSection
 	 *            {@link SubSectionModel} to rename.
 	 * @param newSubSectionName
@@ -71,7 +90,7 @@ public interface SectionChanges {
 
 	/**
 	 * Sets the {@link SubSectionInputModel} public/private.
-	 * 
+	 *
 	 * @param isPublic
 	 *            Flag indicating if public/private.
 	 * @param publicName
@@ -85,7 +104,7 @@ public interface SectionChanges {
 
 	/**
 	 * Adds an {@link ExternalFlowModel} to the {@link SectionModel}.
-	 * 
+	 *
 	 * @param externalFlowName
 	 *            Name of the {@link ExternalFlowModel}.
 	 * @param argumentType
@@ -97,7 +116,7 @@ public interface SectionChanges {
 
 	/**
 	 * Removes the {@link ExternalFlowModel} from the {@link SectionModel}.
-	 * 
+	 *
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel} to remove.
 	 * @return {@link Change} to remove the {@link ExternalFlowModel}.
@@ -106,7 +125,7 @@ public interface SectionChanges {
 
 	/**
 	 * Renames the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel} to rename.
 	 * @param newExternalFlowName
@@ -118,7 +137,7 @@ public interface SectionChanges {
 
 	/**
 	 * Adds the {@link ExternalManagedObjectModel} to the {@link SectionModel}.
-	 * 
+	 *
 	 * @param externalManagedObjectName
 	 *            Name of the {@link ExternalManagedObjectModel}.
 	 * @param objectType
@@ -131,7 +150,7 @@ public interface SectionChanges {
 	/**
 	 * Removes the {@link ExternalManagedObjectModel} from the
 	 * {@link SectionModel}.
-	 * 
+	 *
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to remove.
 	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
@@ -141,7 +160,7 @@ public interface SectionChanges {
 
 	/**
 	 * Renames the {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param externalManagedObject
 	 *            {@link ExternalManagedObjectModel} to rename.
 	 * @param newExternalManagedObjectName
@@ -155,7 +174,7 @@ public interface SectionChanges {
 	/**
 	 * Links the {@link SubSectionInputModel} to the
 	 * {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param subSectionObject
 	 *            {@link SubSectionObjectModel}.
 	 * @param externalManagedObject
@@ -169,7 +188,7 @@ public interface SectionChanges {
 
 	/**
 	 * Removes the {@link SubSectionObjectToExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param subSectionObjectToExternalManagedObject
 	 *            {@link SubSectionObjectToExternalManagedObjectModel} to
 	 *            remove.
@@ -182,7 +201,7 @@ public interface SectionChanges {
 	/**
 	 * Links the {@link SubSectionOutputModel} to the
 	 * {@link SubSectionInputModel}.
-	 * 
+	 *
 	 * @param subSectionOutput
 	 *            {@link SubSectionOutputModel}.
 	 * @param subSectionInput
@@ -196,7 +215,7 @@ public interface SectionChanges {
 
 	/**
 	 * Removes the {@link SubSectionOutputToSubSectionInputModel}.
-	 * 
+	 *
 	 * @param subSectionOutputToSubSectionInput
 	 *            {@link SubSectionOutputToSubSectionInputModel} to remove.
 	 * @return {@link Change} to remove the
@@ -207,7 +226,7 @@ public interface SectionChanges {
 
 	/**
 	 * Links the {@link SubSectionOutputModel} to the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param subSectionOutput
 	 *            {@link SubSectionOutputModel}.
 	 * @param externalFlow
@@ -221,7 +240,7 @@ public interface SectionChanges {
 
 	/**
 	 * Removes the {@link SubSectionOutputToExternalFlowModel}.
-	 * 
+	 *
 	 * @param subSectionOutputToExternalFlow
 	 *            {@link SubSectionOutputToExternalFlowModel} to remove.
 	 * @return {@link Change} to remove the

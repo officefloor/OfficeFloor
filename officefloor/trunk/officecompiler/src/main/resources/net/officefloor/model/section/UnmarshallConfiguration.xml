@@ -8,6 +8,45 @@
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
 	</object>
+	<!-- MANAGED OBJECT SOURCES -->
+	<object method="addSectionManagedObjectSource" node="managed-object-source"
+		class="net.officefloor.model.section.SectionManagedObjectSourceModel">
+		<value method="setSectionManagedObjectSourceName" node="managed-object-source@name" />
+		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
+		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setX" node="managed-object-source@x" />
+		<value method="setY" node="managed-object-source@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.section.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+	</object>
+	<!-- MANAGED_OBJECTS -->
+	<object method="addSectionManagedObject" node="managed-object"
+		class="net.officefloor.model.section.SectionManagedObjectModel">
+		<value method="setSectionManagedObjectName" node="managed-object@name" />
+		<value method="setManagedObjectScope" node="managed-object@scope" />
+		<value method="setX" node="managed-object@x" />
+		<value method="setY" node="managed-object@y" />
+		<object method="setSectionManagedObjectSource" node="managed-object-source"
+			class="net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel">
+			<value method="setSectionManagedObjectSourceName" node="managed-object-source@name" />
+		</object>
+		<object method="addSectionManagedObjectDependency" node="dependency"
+			class="net.officefloor.model.section.SectionManagedObjectDependencyModel">
+			<value method="setSectionManagedObjectDependencyName" node="dependency@name" />
+			<value method="setDependencyType" node="dependency@object-type" />
+			<object method="setExternalManagedObject" node="external-managed-object"
+				class="net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel">
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+			</object>
+			<object method="setSectionManagedObject" node="managed-object"
+				class="net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel">
+				<value method="setSectionManagedObjectName" node="managed-object@name" />
+			</object>
+		</object>
+	</object>
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.section.ExternalFlowModel">
@@ -58,6 +97,10 @@
 			<object method="setExternalManagedObject" node="external-managed-object"
 				class="net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel">
 				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+			</object>
+			<object method="setSectionManagedObject" node="managed-object"
+				class="net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel">
+				<value method="setSectionManagedObjectName" node="managed-object@name" />
 			</object>
 		</object>
 	</object>

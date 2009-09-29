@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -188,10 +189,11 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 				: description.contentEncoding);
 		String contentType = (description.contentType == null ? ""
 				: description.contentType);
+		Charset charset = description.charset;
 
 		// Create the HTTP File
 		HttpFile httpFile = new HttpFileImpl(canonicalPath, contentEncoding,
-				contentType, contents);
+				contentType, charset, contents);
 
 		// Return the HTTP File
 		return httpFile;
@@ -223,6 +225,11 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 		public String contentType = null;
 
 		/**
+		 * {@link Charset} for the {@link HttpFile}.
+		 */
+		public Charset charset = null;
+
+		/**
 		 * Initiate.
 		 *
 		 * @param extension
@@ -241,6 +248,7 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 		 * @return <code>true</code> if the {@link HttpFile} is described.
 		 */
 		public boolean isDescribed() {
+			// Describe if have encoding and type (charset optional)
 			return ((this.contentEncoding != null) && (this.contentType != null));
 		}
 
@@ -264,8 +272,9 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 		}
 
 		@Override
-		public void setContentType(String type) {
+		public void setContentType(String type, Charset charset) {
 			this.contentType = type;
+			this.charset = charset;
 		}
 	}
 

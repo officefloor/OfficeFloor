@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -45,13 +46,13 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		assertTrue("Must be heap buffer for valid test", heapBuffer.hasArray());
 
 		// Create Http File (with mock details)
-		HttpFile httpFile = new HttpFileImpl("/path", "zip",
-				"text/html; charset=UTF-8", heapBuffer);
+		HttpFile httpFile = new HttpFileImpl("/path", "zip", "text/html", null,
+				heapBuffer);
 		assertTrue("Should exist for valid test", httpFile.isExist());
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", true, "zip",
-				"text/html; charset=UTF-8", contents);
+		this.doSerialiseTest(httpFile, "/path", true, "zip", "text/html", null,
+				contents);
 	}
 
 	/**
@@ -77,11 +78,11 @@ public class HttpFileTest extends OfficeFrameTestCase {
 
 		// Create Http File (with mock details)
 		HttpFile httpFile = new HttpFileImpl("/path", "",
-				"application/octet-stream", offsetHeapBuffer);
+				"application/octet-stream", null, offsetHeapBuffer);
 
 		// Ensure can serialise
 		this.doSerialiseTest(httpFile, "/path", true, "",
-				"application/octet-stream", contents);
+				"application/octet-stream", null, contents);
 	}
 
 	/**
@@ -97,10 +98,32 @@ public class HttpFileTest extends OfficeFrameTestCase {
 				.hasArray());
 
 		// Create Http File (with mock details)
-		HttpFile httpFile = new HttpFileImpl("/path", null, null, heapBuffer);
+		HttpFile httpFile = new HttpFileImpl("/path", null, null, null,
+				heapBuffer);
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", true, "", "", contents);
+		this.doSerialiseTest(httpFile, "/path", true, "", "", null, contents);
+	}
+
+	/**
+	 * Ensure can serialise a {@link HttpFile} with a {@link Charset}.
+	 */
+	public void testSerialiseWithCharset() throws Exception {
+
+		// Create the contents
+		byte[] contents = new byte[0];
+		ByteBuffer buffer = ByteBuffer.wrap(contents);
+
+		// Create the charset
+		Charset charset = Charset.defaultCharset();
+
+		// Create Http File (with mock details)
+		HttpFile httpFile = new HttpFileImpl("/path", null, "text/html",
+				charset, buffer);
+
+		// Ensure can serialise
+		this.doSerialiseTest(httpFile, "/path", true, "", "text/html", charset,
+				contents);
 	}
 
 	/**
@@ -113,15 +136,19 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		assertFalse("Should not exist for valid test", httpFile.isExist());
 
 		// Ensure can serialise
-		this.doSerialiseTest(httpFile, "/path", false, "", "", new byte[0]);
+		this.doSerialiseTest(httpFile, "/path", false, "", "", null,
+				new byte[0]);
 	}
 
 	/**
 	 * Ensure equals is based on details of {@link HttpFile}.
 	 */
 	public void testEquals() {
-		HttpFile one = new HttpFileImpl("/path", "encoding", "type", null);
-		HttpFile two = new HttpFileImpl("/path", "encoding", "type", null);
+		Charset charset = Charset.defaultCharset();
+		HttpFile one = new HttpFileImpl("/path", "encoding", "type", charset,
+				null);
+		HttpFile two = new HttpFileImpl("/path", "encoding", "type", charset,
+				null);
 		assertEquals("Should equal", one, two);
 		assertEquals("Same hash", one.hashCode(), two.hashCode());
 	}
@@ -133,24 +160,34 @@ public class HttpFileTest extends OfficeFrameTestCase {
 		final String PATH = "/path";
 		final String ENCODING = "encoding";
 		final String TYPE = "type";
-		HttpFile file = new HttpFileImpl(PATH, ENCODING, TYPE, null);
+		final Charset CHARSET = Charset.defaultCharset();
+		HttpFile file = new HttpFileImpl(PATH, ENCODING, TYPE, CHARSET, null);
 		assertFalse("Should not match if different path", file
-				.equals(new HttpFileImpl("/wrong/path", ENCODING, TYPE, null)));
+				.equals(new HttpFileImpl("/wrong/path", ENCODING, TYPE,
+						CHARSET, null)));
 		assertFalse("Should not match if different encoding", file
-				.equals(new HttpFileImpl(PATH, "wrong", TYPE, null)));
-		assertFalse("Should not match if different type", file
-				.equals(new HttpFileImpl(PATH, ENCODING, "wrong", null)));
+				.equals(new HttpFileImpl(PATH, "wrong", TYPE, CHARSET, null)));
+		assertFalse("Should not match if different type",
+				file.equals(new HttpFileImpl(PATH, ENCODING, "wrong", CHARSET,
+						null)));
+		assertFalse("Should not match if different charset", file
+				.equals(new HttpFileImpl(PATH, ENCODING, TYPE, null, null)));
 	}
 
 	/**
 	 * Ensure obtain details from <code>toString</code> method.
 	 */
 	public void testToString() {
-		HttpFile file = new HttpFileImpl("/path", "encoding", "type", null);
+		final Charset charset = Charset.defaultCharset();
 		assertEquals(
-				"Incorrect toString",
-				"HttpFileImpl: /path (Exist: true, Content-Encoding: encoding, Content-Type: type)",
-				file.toString());
+				"Incorrect toString with full details",
+				"HttpFileImpl: /path (Exist: true, Content-Encoding: encoding, Content-Type: type; charset="
+						+ charset.name() + ")", new HttpFileImpl("/path",
+						"encoding", "type", charset, null).toString());
+		assertEquals(
+				"Incorrect toString with no details",
+				"HttpFileImpl: /path (Exist: true, Content-Encoding: , Content-Type: )",
+				new HttpFileImpl("/path", null, null, null, null).toString());
 	}
 
 	/**
@@ -183,12 +220,14 @@ public class HttpFileTest extends OfficeFrameTestCase {
 	 *            Expected content encoding.
 	 * @param contentType
 	 *            Expected content type.
+	 * @param charset
+	 *            Expected {@link Charset}.
 	 * @param contents
 	 *            Expected contents.
 	 */
 	private void doSerialiseTest(HttpFile httpFile, String path,
 			boolean isExist, String contentEncoding, String contentType,
-			byte[] contents) throws Exception {
+			Charset charset, byte[] contents) throws Exception {
 
 		// Serialise the http file
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
@@ -211,6 +250,7 @@ public class HttpFileTest extends OfficeFrameTestCase {
 				retrievedFile.getContentEncoding());
 		assertEquals("Incorrect content-type", contentType, retrievedFile
 				.getContentType());
+		assertEquals("Incorrect charset", charset, retrievedFile.getCharset());
 		ByteBuffer buffer = retrievedFile.getContents();
 		assertEquals("Incorrect content position", 0, buffer.position());
 		assertEquals("Incorrect content size", contents.length, buffer

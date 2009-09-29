@@ -422,6 +422,27 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			builtManagedObjects.add(managedObjectNode);
 		}
 
+		// Load the managed object sources for office (in deterministic order)
+		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
+				.toSortedArray(this.managedObjectSources.values(),
+						new ManagedObjectSourceNode[0],
+						new StringExtractor<ManagedObjectSourceNode>() {
+							@Override
+							public String toString(
+									ManagedObjectSourceNode object) {
+								return object
+										.getOfficeManagedObjectSourceName();
+							}
+						});
+		for (ManagedObjectSourceNode mos : managedObjectSources) {
+			mos.loadManagedObjectType();
+		}
+
+		// Build the managed object sources for office (in deterministic order)
+		for (ManagedObjectSourceNode mos : managedObjectSources) {
+			mos.buildManagedObject(builder, this, officeBuilder);
+		}
+
 		// Build the sections of the office (in deterministic order)
 		SectionNode[] sections = CompileUtil.toSortedArray(this.sections
 				.values(), new SectionNode[0],
@@ -432,7 +453,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					}
 				});
 		for (SectionNode section : sections) {
-			section.buildSection(officeBuilder);
+			section.buildSection(builder, this, officeBuilder);
 		}
 
 		// Build the administrators for the office (in deterministic order)
@@ -562,7 +583,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Create the office managed object source (within office context)
 			managedObjectSource = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.OFFICE, this.officeLocation,
+					LocationType.OFFICE, this.officeLocation, null, this,
 					this.managedObjects, this.context);
 			managedObjectSource.addOfficeContext(this.officeLocation);
 

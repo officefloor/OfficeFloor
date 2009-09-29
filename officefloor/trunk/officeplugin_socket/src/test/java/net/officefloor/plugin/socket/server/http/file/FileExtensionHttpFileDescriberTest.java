@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.file;
 
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -34,6 +35,11 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	private final FileExtensionHttpFileDescriber describer = new FileExtensionHttpFileDescriber();
 
 	/**
+	 * Default {@link Charset}.
+	 */
+	private final Charset charset = Charset.defaultCharset();
+
+	/**
 	 * Mock {@link HttpFileDescription}.
 	 */
 	private final HttpFileDescription description = this
@@ -43,14 +49,14 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 * Ensure does nothing if <code>null</code> file extension.
 	 */
 	public void testNoDetailsForNullExtension() {
-		this.doTest(null, null, null);
+		this.doTest(null, null, null, null);
 	}
 
 	/**
 	 * Ensure does nothing if no details.
 	 */
 	public void testNoDetailsForUnknownExtension() {
-		this.doTest("unknown", null, null);
+		this.doTest("unknown", null, null, null);
 	}
 
 	/**
@@ -58,7 +64,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 */
 	public void testHtmlDefault() {
 		this.describer.loadDefaultDescriptions();
-		this.doTest("html", null, "text/html");
+		this.doTest("html", null, "text/html", this.charset);
 	}
 
 	/**
@@ -66,7 +72,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 */
 	public void testCaseInsenstive() {
 		this.describer.loadDefaultDescriptions();
-		this.doTest("HtMl", null, "text/html");
+		this.doTest("HtMl", null, "text/html", this.charset);
 	}
 
 	/**
@@ -74,8 +80,8 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 */
 	public void testCustomiseDetails() {
 		this.describer.mapContentEncoding("zip", "gzip");
-		this.describer.mapContentType("zip", "application/octet-stream");
-		this.doTest("zip", "gzip", "application/octet-stream");
+		this.describer.mapContentType("zip", "custom/type", this.charset);
+		this.doTest("zip", "gzip", "custom/type", this.charset);
 	}
 
 	/**
@@ -84,8 +90,8 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	public void testOverrideDefaults() {
 		this.describer.loadDefaultDescriptions();
 		this.describer.mapContentEncoding("html", "deflate");
-		this.describer.mapContentType("html", "text/plain; charset=UTF-8");
-		this.doTest("html", "deflate", "text/plain; charset=UTF-8");
+		this.describer.mapContentType("html", "text/plain", null);
+		this.doTest("html", "deflate", "text/plain", null);
 	}
 
 	/**
@@ -95,14 +101,19 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 
 		// Create properties
 		Properties properties = new Properties();
-		properties.put(FileExtensionHttpFileDescriber.CONTENT_ENCODING_PREFIX
-				+ "html", "compress");
-		properties.put(FileExtensionHttpFileDescriber.CONTENT_TYPE_PREFIX
-				+ "html", "text/html; charset=UTF-8");
+		properties
+				.setProperty(
+						FileExtensionHttpFileDescriber.CONTENT_ENCODING_PREFIX
+								+ "html", "compress");
+		properties.setProperty(
+				FileExtensionHttpFileDescriber.CONTENT_TYPE_PREFIX + "html",
+				"text/html");
+		properties.setProperty(FileExtensionHttpFileDescriber.CHARSET_PREFIX
+				+ "html", this.charset.name());
 
 		// Load properties and test
 		this.describer.loadDescriptions(properties);
-		this.doTest("html", "compress", "text/html; charset=UTF-8");
+		this.doTest("html", "compress", "text/html", this.charset);
 	}
 
 	/**
@@ -114,9 +125,11 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 	 *            Expected <code>Content-Encoding</code> for file extension.
 	 * @param contentType
 	 *            Expected <code>Content-Type</code> for file extension.
+	 * @param charset
+	 *            Expected {@link Charset}.
 	 */
 	private void doTest(String extension, String contentEncoding,
-			String contentType) {
+			String contentType, Charset charset) {
 
 		// Record obtaining file extension
 		this.recordReturn(this.description, this.description.getExtension(),
@@ -127,7 +140,7 @@ public class FileExtensionHttpFileDescriberTest extends OfficeFrameTestCase {
 			this.description.setContentEncoding(contentEncoding);
 		}
 		if (contentType != null) {
-			this.description.setContentType(contentType);
+			this.description.setContentType(contentType, charset);
 		}
 
 		// Test

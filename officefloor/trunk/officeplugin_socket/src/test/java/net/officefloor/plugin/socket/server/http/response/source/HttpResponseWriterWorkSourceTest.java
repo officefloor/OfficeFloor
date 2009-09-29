@@ -94,6 +94,7 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		this.recordReturn(httpFile, httpFile.getContentEncoding(), "");
 		this.recordReturn(httpFile, httpFile.getContentType(), "");
+		this.recordReturn(httpFile, httpFile.getCharset(), null);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
 		this.recordReturn(response, response.getBody(), body);
 		body.append(contents);

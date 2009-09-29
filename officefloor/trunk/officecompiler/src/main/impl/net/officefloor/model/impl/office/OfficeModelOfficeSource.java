@@ -32,6 +32,8 @@ import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -44,6 +46,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -53,11 +56,16 @@ import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeChanges;
+import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -72,7 +80,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeModel} {@link OfficeSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeModelOfficeSource extends AbstractOfficeSource implements
@@ -126,6 +134,56 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeObject officeObject = architect.addOfficeObject(
 					officeObjectName, object.getObjectType());
 			officeObjects.put(officeObjectName, officeObject);
+		}
+
+		// Add the managed object sources, keeping registry of them
+		Map<String, OfficeManagedObjectSource> managedObjectSources = new HashMap<String, OfficeManagedObjectSource>();
+		for (OfficeManagedObjectSourceModel mosModel : office
+				.getOfficeManagedObjectSources()) {
+
+			// Add the managed object source
+			String mosName = mosModel.getOfficeManagedObjectSourceName();
+			OfficeManagedObjectSource mos = architect
+					.addOfficeManagedObjectSource(mosName, mosModel
+							.getManagedObjectSourceClassName());
+			for (PropertyModel property : mosModel.getProperties()) {
+				mos.addProperty(property.getName(), property.getValue());
+			}
+			managedObjectSources.put(mosName, mos);
+		}
+
+		// Add the managed objects, keeping registry of them
+		Map<String, OfficeManagedObject> managedObjects = new HashMap<String, OfficeManagedObject>();
+		for (OfficeManagedObjectModel moModel : office
+				.getOfficeManagedObjects()) {
+
+			// Obtain the managed object details
+			String managedObjectName = moModel.getOfficeManagedObjectName();
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
+					moModel.getManagedObjectScope(), architect,
+					managedObjectName);
+
+			// Obtain the managed object source for the managed object
+			OfficeManagedObjectSource moSource = null;
+			OfficeManagedObjectToOfficeManagedObjectSourceModel moToSource = moModel
+					.getOfficeManagedObjectSource();
+			if (moToSource != null) {
+				OfficeManagedObjectSourceModel moSourceModel = moToSource
+						.getOfficeManagedObjectSource();
+				if (moSourceModel != null) {
+					moSource = managedObjectSources.get(moSourceModel
+							.getOfficeManagedObjectSourceName());
+				}
+			}
+			if (moSource == null) {
+				continue; // must have managed object source
+			}
+
+			// Add the managed object and also register it
+			OfficeManagedObject managedObject = moSource
+					.addOfficeManagedObject(managedObjectName,
+							managedObjectScope);
+			managedObjects.put(managedObjectName, managedObject);
 		}
 
 		// Add the teams, keeping registry of the teams
@@ -237,10 +295,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 				// Determine if link object to office object
 				OfficeObject officeObject = null;
-				OfficeSectionObjectToExternalManagedObjectModel conn = objectModel
+				OfficeSectionObjectToExternalManagedObjectModel connToExtMo = objectModel
 						.getExternalManagedObject();
-				if (conn != null) {
-					ExternalManagedObjectModel extMo = conn
+				if (connToExtMo != null) {
+					ExternalManagedObjectModel extMo = connToExtMo
 							.getExternalManagedObject();
 					if (extMo != null) {
 						officeObject = officeObjects.get(extMo
@@ -252,6 +310,22 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					architect.link(object, officeObject);
 				}
 
+				// Determinf if link object to office managed object
+				OfficeManagedObject officeMo = null;
+				OfficeSectionObjectToOfficeManagedObjectModel connToMo = objectModel
+						.getOfficeManagedObject();
+				if (connToMo != null) {
+					OfficeManagedObjectModel mo = connToMo
+							.getOfficeManagedObject();
+					if (mo != null) {
+						officeMo = managedObjects.get(mo
+								.getOfficeManagedObjectName());
+					}
+				}
+				if (officeMo != null) {
+					// Link object to office managed object
+					architect.link(object, officeMo);
+				}
 			}
 
 			// Link the outputs to the inputs
@@ -384,17 +458,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeAdministrator admin = administrators.get(administratorName);
 
 			// Obtain the objects to administer
-			List<AdministeredManagedObject> managedObjects = administration
+			List<AdministeredManagedObject> administeredManagedObjects = administration
 					.get(administratorName);
-			if (managedObjects == null) {
+			if (administeredManagedObjects == null) {
 				continue; // no managed objects to administer
 			}
 
 			// Order the managed objects
-			Collections.sort(managedObjects);
+			Collections.sort(administeredManagedObjects);
 
 			// Add managed objects for administration
-			for (AdministeredManagedObject managedObject : managedObjects) {
+			for (AdministeredManagedObject managedObject : administeredManagedObjects) {
 				admin.administerManagedObject(managedObject.managedObject);
 			}
 		}
@@ -404,7 +478,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Recurses through the {@link OfficeSubSectionModel} instances linking the
 	 * {@link OfficeTaskModel} instances to the {@link DutyModel} instances.
-	 * 
+	 *
 	 * @param subSectionPath
 	 *            Path from top level {@link OfficeSubSectionModel} to current
 	 *            {@link OfficeSubSectionModel}.
@@ -561,9 +635,44 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	/**
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope
+	 * name.
+	 *
+	 * @param managedObjectScope
+	 *            Name of the {@link ManagedObjectScope}.
+	 * @param architect
+	 *            {@link OfficeArchitect}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
+	 *         reported to the {@link OfficeArchitect}.
+	 */
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
+			OfficeArchitect architect, String managedObjectName) {
+
+		// Obtain the managed object scope
+		if (OfficeChanges.PROCESS_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.PROCESS;
+		} else if (OfficeChanges.THREAD_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.THREAD;
+		} else if (OfficeChanges.WORK_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.WORK;
+		}
+
+		// Unknown scope if at this point
+		architect.addIssue(
+				"Unknown managed object scope " + managedObjectScope,
+				AssetType.MANAGED_OBJECT, managedObjectName);
+		return null;
+	}
+
+	/**
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeSectionInputModel}.
-	 * 
+	 *
 	 * @param office
 	 *            {@link OfficeModel}.
 	 * @param input
@@ -592,7 +701,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Loads the {@link OfficeTask} instances for the {@link OfficeSubSection}
 	 * and its {@link OfficeSubSection} instances.
-	 * 
+	 *
 	 * @param section
 	 *            {@link OfficeSubSection}.
 	 * @param tasks
@@ -630,7 +739,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param officeTeam
 		 *            {@link OfficeTeam} responsible for this responsibility.
 		 */
@@ -640,7 +749,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Indicates if {@link OfficeTask} is within this responsibility.
-		 * 
+		 *
 		 * @param task
 		 *            {@link OfficeTask}.
 		 * @return <code>true</code> if {@link OfficeTask} is within this
@@ -670,7 +779,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Initiate.
-		 * 
+		 *
 		 * @param order
 		 *            Position in the order that the objects are administered.
 		 * @param managedObject
@@ -693,7 +802,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Obtains the order as an {@link Integer}.
-		 * 
+		 *
 		 * @param order
 		 *            Text order value.
 		 * @return Numeric order value.

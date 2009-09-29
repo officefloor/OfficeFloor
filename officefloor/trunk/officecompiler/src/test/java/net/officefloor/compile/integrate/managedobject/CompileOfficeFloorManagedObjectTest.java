@@ -59,9 +59,9 @@ public class CompileOfficeFloorManagedObjectTest extends
 		AbstractCompileTestCase {
 
 	/**
-	 * Tests compiling a simple {@link ManagedObject}.
+	 * Tests compiling a simple {@link ManagedObjectSource}.
 	 */
-	public void testSimpleManagedObject() {
+	public void testSimpleManagedObjectSource() {
 
 		// Record building the office floor
 		this.record_officeFloorBuilder_addOffice("OFFICE");

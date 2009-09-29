@@ -73,13 +73,14 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link SectionNode} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionNodeImpl extends AbstractNode implements SectionNode {
@@ -175,7 +176,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for loading the {@link SectionType}.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionLocation
@@ -196,7 +197,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	/**
 	 * Allows for obtaining {@link DeployedOfficeInput} from the
 	 * {@link OfficeFloorDeployer}.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param office
@@ -214,7 +215,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for loading top level {@link OfficeSection} to an {@link Office}.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param sectionSource
@@ -244,7 +245,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for adding a top level {@link OfficeSection} to an {@link Office}.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName
@@ -273,7 +274,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for the creation of {@link SubSection} instances.
-	 * 
+	 *
 	 * @param sectionName
 	 *            Name of this {@link SectionNode} as a {@link SubSection}.
 	 * @param sectionSourceClassName
@@ -307,7 +308,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 * 
+	 *
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
@@ -438,7 +439,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void buildSection(OfficeBuilder builder) {
+	public void buildSection(OfficeFloorBuilder officeFloorBuilder,
+			OfficeNode officeNode, OfficeBuilder officeBuilder) {
 
 		// Build the work of this section (in deterministic order)
 		WorkNode[] works = CompileUtil.toSortedArray(this.workNodes.values(),
@@ -449,10 +451,25 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					}
 				});
 		for (WorkNode work : works) {
-			work.buildWork(builder);
+			work.buildWork(officeBuilder);
 		}
 
-		// TODO build the section managed objects
+		// Build the managed object sources for office (in deterministic order)
+		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
+				.toSortedArray(this.managedObjectSourceNodes.values(),
+						new ManagedObjectSourceNode[0],
+						new StringExtractor<ManagedObjectSourceNode>() {
+							@Override
+							public String toString(
+									ManagedObjectSourceNode object) {
+								return object
+										.getOfficeManagedObjectSourceName();
+							}
+						});
+		for (ManagedObjectSourceNode mos : managedObjectSources) {
+			mos.buildManagedObject(officeFloorBuilder, officeNode,
+					officeBuilder);
+		}
 
 		// Build the sub sections (in deterministic order)
 		SectionNode[] subSections = CompileUtil.toSortedArray(this.subSections
@@ -464,7 +481,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					}
 				});
 		for (SectionNode subSection : subSections) {
-			subSection.buildSection(builder);
+			subSection.buildSection(officeFloorBuilder, officeNode,
+					officeBuilder);
 		}
 	}
 
@@ -679,8 +697,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section managed object source
 			managedObjectSource = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.SECTION, this.sectionLocation,
-					this.managedObjects, this.context);
+					LocationType.SECTION, this.sectionLocation, this,
+					this.office, this.managedObjects, this.context);
 			this.managedObjectSourceNodes.put(managedObjectSourceName,
 					managedObjectSource);
 		} else {
@@ -724,7 +742,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Adds a {@link SubSection}.
-	 * 
+	 *
 	 * @param subSectionName
 	 *            Name of the {@link SubSection}.
 	 * @param sectionSourceClassName
@@ -846,7 +864,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Loads the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
-	 * 
+	 *
 	 * @param taskFlow
 	 *            {@link TaskFlow}.
 	 * @param instigationStrategy

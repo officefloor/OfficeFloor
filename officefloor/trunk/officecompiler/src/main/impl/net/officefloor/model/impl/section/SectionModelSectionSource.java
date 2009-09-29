@@ -25,27 +25,38 @@ import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
+import net.officefloor.model.section.SectionChanges;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionSource} for a {@link SectionModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionModelSectionSource extends AbstractSectionSource implements
@@ -132,6 +143,56 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 					extMo.getObjectType());
 		}
 
+		// Add the managed object sources, keeping registry of them
+		Map<String, SectionManagedObjectSource> managedObjectSources = new HashMap<String, SectionManagedObjectSource>();
+		for (SectionManagedObjectSourceModel mosModel : section
+				.getSectionManagedObjectSources()) {
+
+			// Add the managed object source
+			String mosName = mosModel.getSectionManagedObjectSourceName();
+			SectionManagedObjectSource mos = designer
+					.addSectionManagedObjectSource(mosName, mosModel
+							.getManagedObjectSourceClassName());
+			for (PropertyModel property : mosModel.getProperties()) {
+				mos.addProperty(property.getName(), property.getValue());
+			}
+			managedObjectSources.put(mosName, mos);
+		}
+
+		// Add the managed objects, keeping registry of them
+		Map<String, SectionManagedObject> managedObjects = new HashMap<String, SectionManagedObject>();
+		for (SectionManagedObjectModel moModel : section
+				.getSectionManagedObjects()) {
+
+			// Obtain the managed object details
+			String managedObjectName = moModel.getSectionManagedObjectName();
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
+					moModel.getManagedObjectScope(), designer,
+					managedObjectName);
+
+			// Obtain the managed object source for the managed object
+			SectionManagedObjectSource moSource = null;
+			SectionManagedObjectToSectionManagedObjectSourceModel moToSource = moModel
+					.getSectionManagedObjectSource();
+			if (moToSource != null) {
+				SectionManagedObjectSourceModel moSourceModel = moToSource
+						.getSectionManagedObjectSource();
+				if (moSourceModel != null) {
+					moSource = managedObjectSources.get(moSourceModel
+							.getSectionManagedObjectSourceName());
+				}
+			}
+			if (moSource == null) {
+				continue; // must have managed object source
+			}
+
+			// Add the managed object and also register it
+			SectionManagedObject managedObject = moSource
+					.addSectionManagedObject(managedObjectName,
+							managedObjectScope);
+			managedObjects.put(managedObjectName, managedObject);
+		}
+
 		// Add the sub sections, keeping registry of sub sections/inputs
 		Map<String, SubSection> subSections = new HashMap<String, SubSection>();
 		DoubleKeyMap<String, String, SubSectionInput> subSectionInputs = new DoubleKeyMap<String, String, SubSectionInput>();
@@ -157,7 +218,7 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Add the sub section outputs now that all inputs available
+		// Add the sub section outputs/objects now that all links available
 		for (SubSectionModel subSectionModel : section.getSubSections()) {
 
 			// Obtain the sub section
@@ -193,13 +254,40 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 					designer.link(output, linkedInput);
 				}
 			}
+
+			// Add the sub section objects
+			for (SubSectionObjectModel objectModel : subSectionModel
+					.getSubSectionObjects()) {
+
+				// Add the sub section object
+				String objectName = objectModel.getSubSectionObjectName();
+				SubSectionObject object = subSection
+						.getSubSectionObject(objectName);
+
+				// Determine if link to a managed object
+				SectionManagedObject linkedMo = null;
+				SubSectionObjectToSectionManagedObjectModel objectToMo = objectModel
+						.getSectionManagedObject();
+				if (objectToMo != null) {
+					SectionManagedObjectModel moModel = objectToMo
+							.getSectionManagedObject();
+					if (moModel != null) {
+						linkedMo = managedObjects.get(moModel
+								.getSectionManagedObjectName());
+					}
+				}
+				if (linkedMo != null) {
+					// Link the object to the managed object
+					designer.link(object, linkedMo);
+				}
+			}
 		}
 	}
 
 	/**
 	 * Obtains the {@link SubSectionModel} containing the input
 	 * {@link SubSectionInputModel}.
-	 * 
+	 *
 	 * @param section
 	 *            {@link SectionModel}.
 	 * @param input
@@ -221,6 +309,40 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 		}
 
 		// No sub section if at this point
+		return null;
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope
+	 * name.
+	 *
+	 * @param managedObjectScope
+	 *            Name of the {@link ManagedObjectScope}.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
+	 *         reported to the {@link SectionDesigner}.
+	 */
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
+			SectionDesigner designer, String managedObjectName) {
+
+		// Obtain the managed object scope
+		if (SectionChanges.PROCESS_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.PROCESS;
+		} else if (SectionChanges.THREAD_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.THREAD;
+		} else if (SectionChanges.WORK_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.WORK;
+		}
+
+		// Unknown scope if at this point
+		designer.addIssue("Unknown managed object scope " + managedObjectScope,
+				AssetType.MANAGED_OBJECT, managedObjectName);
 		return null;
 	}
 

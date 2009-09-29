@@ -8,6 +8,32 @@
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
 	</object>
+	<!-- MANAGED OBJECT SOURCES -->
+	<object method="addDeskManagedObjectSource" node="managed-object-source"
+		class="net.officefloor.model.desk.DeskManagedObjectSourceModel">
+		<value method="setDeskManagedObjectSourceName" node="managed-object-source@name" />
+		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
+		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setX" node="managed-object-source@x" />
+		<value method="setY" node="managed-object-source@y" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.desk.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+	</object>
+	<!-- MANAGED_OBJECTS -->
+	<object method="addDeskManagedObject" node="managed-object"
+		class="net.officefloor.model.desk.DeskManagedObjectModel">
+		<value method="setDeskManagedObjectName" node="managed-object@name" />
+		<value method="setManagedObjectScope" node="managed-object@scope" />
+		<value method="setX" node="managed-object@x" />
+		<value method="setY" node="managed-object@y" />
+		<object method="setDeskManagedObjectSource" node="managed-object-source"
+			class="net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel">
+			<value method="setDeskManagedObjectSourceName" node="managed-object-source@name" />
+		</object>
+	</object>
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.desk.ExternalFlowModel">
@@ -44,6 +70,10 @@
 				<object method="setExternalManagedObject" node="external-managed-object"
 					class="net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel">
 					<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+				</object>
+				<object method="setDeskManagedObject" node="managed-object"
+					class="net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel">
+					<value method="setDeskManagedObjectName" node="managed-object@name" />
 				</object>
 			</object>
 		</object>

@@ -17,6 +17,8 @@
  */
 package net.officefloor.model.impl.repository;
 
+import java.sql.Connection;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
@@ -26,11 +28,18 @@ import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
@@ -38,7 +47,7 @@ import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 /**
  * Tests the marshalling/unmarshalling of the {@link SectionModel} via the
  * {@link ModelRepository}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionModelRepositoryTest extends OfficeFrameTestCase {
@@ -50,7 +59,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -77,15 +86,67 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getExternalManagedObjectName",
 				"getObjectType", "getX", "getY" }, section
 				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"MO", Object.class.getName(), null, 10, 11));
+				"MO", Object.class.getName(), null, null, 100, 101));
+
+		// ----------------------------------------------
+		// Validate the managed object sources
+		// ----------------------------------------------
+		assertList(new String[] { "getSectionManagedObjectSourceName",
+				"getManagedObjectSourceClassName", "getObjectType", "getX",
+				"getY" }, section.getSectionManagedObjectSources(),
+				new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
+						"net.example.ExampleManagedObjectSource",
+						"net.orm.Session", null, null, 200, 201));
+		SectionManagedObjectSourceModel mos = section
+				.getSectionManagedObjectSources().get(0);
+		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
+				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
+						"MO_TWO", "VALUE_TWO"));
+
+		// ----------------------------------------------
+		// Validate the managed objects
+		// ----------------------------------------------
+		assertList(new String[] { "getSectionManagedObjectName",
+				"getManagedObjectScope", "getX", "getY" }, section
+				.getSectionManagedObjects(), new SectionManagedObjectModel(
+				"MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, 300,
+				301), new SectionManagedObjectModel("MANAGED_OBJECT_TWO",
+				"PROCESS", null, null, null, null, 310, 311));
+		SectionManagedObjectModel mo = section.getSectionManagedObjects()
+				.get(0);
+		assertProperties(
+				new SectionManagedObjectToSectionManagedObjectSourceModel(
+						"MANAGED_OBJECT_SOURCE"), mo
+						.getSectionManagedObjectSource(),
+				"getSectionManagedObjectSourceName");
+		assertList(new String[] { "getSectionManagedObjectDependencyName",
+				"getDependencyType" },
+				mo.getSectionManagedObjectDependencies(),
+				new SectionManagedObjectDependencyModel("DEPENDENCY_ONE",
+						Object.class.getName()),
+				new SectionManagedObjectDependencyModel("DEPENDENCY_TWO",
+						Connection.class.getName()));
+		SectionManagedObjectDependencyModel dependencyOne = mo
+				.getSectionManagedObjectDependencies().get(0);
+		assertProperties(
+				new SectionManagedObjectDependencyToExternalManagedObjectModel(
+						"MO"), dependencyOne.getExternalManagedObject(),
+				"getExternalManagedObjectName");
+		SectionManagedObjectDependencyModel dependencyTwo = mo
+				.getSectionManagedObjectDependencies().get(1);
+		assertProperties(
+				new SectionManagedObjectDependencyToSectionManagedObjectModel(
+						"MANAGED_OBJECT_TWO"), dependencyTwo
+						.getSectionManagedObject(),
+				"getSectionManagedObjectName");
 
 		// ----------------------------------------------
 		// Validate the external flows
 		// ----------------------------------------------
 		assertList(new String[] { "getExternalFlowName", "getArgumentType",
 				"getX", "getY" }, section.getExternalFlows(),
-				new ExternalFlowModel("FLOW", String.class.getName(), null, 20,
-						21));
+				new ExternalFlowModel("FLOW", String.class.getName(), null,
+						400, 401));
 
 		// ----------------------------------------------
 		// Validate the sub sections
@@ -94,11 +155,11 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 				"getSectionSourceClassName", "getSectionLocation", "getX",
 				"getY" }, section.getSubSections(), new SubSectionModel(
 				"SECTION_A", "DESK", "DESK_LOCATION", null, null, null, null,
-				100, 101), new SubSectionModel("SECTION_B", "SECTION",
-				"SECTION_LOCATION", null, null, null, null, 200, 201),
+				500, 501), new SubSectionModel("SECTION_B", "SECTION",
+				"SECTION_LOCATION", null, null, null, null, 510, 511),
 				new SubSectionModel("SECTION_C",
 						"net.example.ExampleSectionSource", "EXAMPLE_LOCATION",
-						null, null, null, null, 300, 301));
+						null, null, null, null, 520, 521));
 		SubSectionModel subSectionA = section.getSubSections().get(0);
 		SubSectionModel subSectionB = section.getSubSections().get(1);
 		SubSectionModel subSectionC = section.getSubSections().get(2);
@@ -149,12 +210,15 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		String[] objectValidation = new String[] {};
 		assertList(objectValidation, subSectionA.getSubSectionObjects(),
 				new SubSectionObjectModel("OBJECT_A", Object.class.getName()),
-				new SubSectionObjectModel("OBJECT_B", Double.class.getName()));
+				new SubSectionObjectModel("OBJECT_B", Double.class.getName()),
+				new SubSectionObjectModel("OBJECT_C", "net.orm.Session"));
 		assertList(objectValidation, subSectionB.getSubSectionObjects());
 		SubSectionObjectModel objectA = subSectionA.getSubSectionObjects().get(
 				0);
 		SubSectionObjectModel objectB = subSectionA.getSubSectionObjects().get(
 				1);
+		SubSectionObjectModel objectC = subSectionA.getSubSectionObjects().get(
+				2);
 
 		// Validate the object connections
 		assertProperties(
@@ -162,6 +226,10 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 						.getExternalManagedObject(),
 				"getExternalManagedObjectName");
 		assertNull("Should not link object", objectB.getExternalManagedObject());
+		assertNull("Should not link object", objectB.getSectionManagedObject());
+		assertProperties(new SubSectionObjectToSectionManagedObjectModel(
+				"MANAGED_OBJECT"), objectC.getSectionManagedObject(),
+				"getSectionManagedObjectName");
 	}
 
 	/**

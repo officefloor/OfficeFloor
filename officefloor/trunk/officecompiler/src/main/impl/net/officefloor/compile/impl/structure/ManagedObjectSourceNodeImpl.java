@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -125,6 +126,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final String location;
 
 	/**
+	 * Containing {@link SectionNode}. <code>null</code> if contained in the
+	 * {@link Office} or {@link OfficeFloor}.
+	 */
+	private final SectionNode containingSectionNode;
+
+	/**
+	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
+	 * {@link OfficeFloor}.
+	 */
+	private final OfficeNode containingOfficeNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -183,6 +196,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            {@link ManagedObjectSource}.
 	 * @param location
 	 *            Location containing this {@link ManagedObjectSource}.
+	 * @param containingOfficeNode
+	 *            {@link OfficeNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link OfficeFloor}.
+	 * @param containingSectionNode
+	 *            {@link SectionNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link Office} or {@link OfficeFloor}.
 	 * @param locationManagedObjects
 	 *            Registry of all {@link ManagedObjectNode} instances within a
 	 *            location. This allows to check that no other
@@ -193,13 +214,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
 			String managedObjectSourceClassName, LocationType locationType,
-			String location,
+			String location, SectionNode containingSectionNode,
+			OfficeNode containingOfficeNode,
 			Map<String, ManagedObjectNode> locationManagedObjects,
 			NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.locationType = locationType;
 		this.location = location;
+		this.containingSectionNode = containingSectionNode;
+		this.containingOfficeNode = containingOfficeNode;
 		this.locationManagedObjects = locationManagedObjects;
 		this.context = context;
 	}
@@ -222,6 +246,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Add the managed object and register it
 			managedObject = new ManagedObjectNodeImpl(managedObjectName,
 					managedObjectScope, this.locationType, this.location, this,
+					this.containingSectionNode, this.containingOfficeNode,
 					this.context);
 			this.locationManagedObjects.put(managedObjectName, managedObject);
 			this.managedObjects.put(managedObjectName, managedObject);
@@ -336,7 +361,27 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getManagedObjectSourceName() {
-		return this.managedObjectSourceName;
+		// Obtain the name based on location
+		switch (this.locationType) {
+		case OFFICE_FLOOR:
+			// Use name unqualified
+			return this.managedObjectSourceName;
+
+		case OFFICE:
+			// Use name qualified with office name
+			return this.containingOfficeNode.getDeployedOfficeName() + "."
+					+ this.managedObjectSourceName;
+
+		case SECTION:
+			// Use name qualified with both office and section
+			return this.containingOfficeNode.getDeployedOfficeName()
+					+ "."
+					+ this.containingSectionNode
+							.getSectionQualifiedName(this.managedObjectSourceName);
+
+		default:
+			throw new IllegalStateException("Unknown location type");
+		}
 	}
 
 	@Override
@@ -403,8 +448,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Build the managed object source
-		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(this
-				.getManagedObjectSourceName(), managedObjectSourceClass);
+		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(
+				managedObjectSourceName, managedObjectSourceClass);
 		for (Property property : this.propertyList) {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
@@ -553,6 +598,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					+ teamName;
 			officeBuilder.registerTeam(officeTeamName, team
 					.getOfficeFloorTeamName());
+		}
+
+		// Build the managed objects from this (in deterministic order)
+		ManagedObjectNode[] managedObjectNodes = CompileUtil.toSortedArray(
+				this.managedObjects.values(), new ManagedObjectNode[0],
+				new StringExtractor<ManagedObjectNode>() {
+					@Override
+					public String toString(ManagedObjectNode object) {
+						return object.getBoundManagedObjectName();
+					}
+				});
+		for (ManagedObjectNode mo : managedObjectNodes) {
+			mo.buildOfficeManagedObject(managingOffice, officeBuilder);
 		}
 	}
 
