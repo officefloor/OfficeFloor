@@ -28,11 +28,18 @@ import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -110,6 +117,24 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the managed object source teams to the office teams
+		for (OfficeManagedObjectSourceModel mos : office
+				.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceTeamModel moTeam : mos
+					.getOfficeManagedObjectSourceTeams()) {
+				OfficeManagedObjectSourceTeamToOfficeTeamModel conn = moTeam
+						.getOfficeTeam();
+				if (conn != null) {
+					OfficeTeamModel team = teams.get(conn.getOfficeTeamName());
+					if (team != null) {
+						conn.setOfficeManagedObjectSourceTeam(moTeam);
+						conn.setOfficeTeam(team);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Connect the administrators to the teams
 		for (AdministratorModel admin : office.getOfficeAdministrators()) {
 			AdministratorToOfficeTeamModel conn = admin.getOfficeTeam();
@@ -148,6 +173,42 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 						conn.setOfficeSectionInput(input);
 						conn.connect();
 					}
+				}
+			}
+		}
+
+		// Connect the managed object source flows to the inputs
+		for (OfficeManagedObjectSourceModel mos : office
+				.getOfficeManagedObjectSources()) {
+			for (OfficeManagedObjectSourceFlowModel flow : mos
+					.getOfficeManagedObjectSourceFlows()) {
+				OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = flow
+						.getOfficeSectionInput();
+				if (conn != null) {
+					OfficeSectionInputModel input = inputs.get(conn
+							.getOfficeSectionName(), conn
+							.getOfficeSectionInputName());
+					if (input != null) {
+						conn.setOfficeManagedObjectSourceFlow(flow);
+						conn.setOfficeSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the escalations to the inputs
+		for (OfficeEscalationModel escalation : office.getOfficeEscalations()) {
+			OfficeEscalationToOfficeSectionInputModel conn = escalation
+					.getOfficeSectionInput();
+			if (conn != null) {
+				OfficeSectionInputModel sectionInput = inputs.get(conn
+						.getOfficeSectionName(), conn
+						.getOfficeSectionInputName());
+				if (sectionInput != null) {
+					conn.setOfficeEscalation(escalation);
+					conn.setOfficeSectionInput(sectionInput);
+					conn.connect();
 				}
 			}
 		}
@@ -294,6 +355,20 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect the managed objects to administrators
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeManagedObjectToAdministratorModel conn : mo
+					.getAdministrators()) {
+				AdministratorModel admin = administrators.get(conn
+						.getAdministratorName());
+				if (admin != null) {
+					conn.setOfficeManagedObject(mo);
+					conn.setAdministrator(admin);
+					conn.connect();
+				}
+			}
+		}
+
 		// Return the office
 		return office;
 	}
@@ -360,6 +435,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Specify managed object source teams to office teams
+		for (OfficeTeamModel team : office.getOfficeTeams()) {
+			for (OfficeManagedObjectSourceTeamToOfficeTeamModel conn : team
+					.getOfficeManagedObjectSourceTeams()) {
+				conn.setOfficeTeamName(team.getOfficeTeamName());
+			}
+		}
+
 		// Specify administrators to team
 		for (OfficeTeamModel team : office.getOfficeTeams()) {
 			for (AdministratorToOfficeTeamModel conn : team.getAdministrators()) {
@@ -373,6 +456,32 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					.getOfficeSectionInputs()) {
 				for (OfficeSectionOutputToOfficeSectionInputModel conn : input
 						.getOfficeSectionOutputs()) {
+					conn.setOfficeSectionName(section.getOfficeSectionName());
+					conn.setOfficeSectionInputName(input
+							.getOfficeSectionInputName());
+				}
+			}
+		}
+
+		// Specify managed object source flows to inputs
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel input : section
+					.getOfficeSectionInputs()) {
+				for (OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn : input
+						.getOfficeManagedObjectSourceFlows()) {
+					conn.setOfficeSectionName(section.getOfficeSectionName());
+					conn.setOfficeSectionInputName(input
+							.getOfficeSectionInputName());
+				}
+			}
+		}
+
+		// Specify escalation to inputs
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel input : section
+					.getOfficeSectionInputs()) {
+				for (OfficeEscalationToOfficeSectionInputModel conn : input
+						.getOfficeEscalations()) {
 					conn.setOfficeSectionName(section.getOfficeSectionName());
 					conn.setOfficeSectionInputName(input
 							.getOfficeSectionInputName());
@@ -454,6 +563,14 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (AdministratorModel admin : office.getOfficeAdministrators()) {
 			for (ExternalManagedObjectToAdministratorModel conn : admin
 					.getExternalManagedObjects()) {
+				conn.setAdministratorName(admin.getAdministratorName());
+			}
+		}
+
+		// Specify managed objects to administrators
+		for (AdministratorModel admin : office.getOfficeAdministrators()) {
+			for (OfficeManagedObjectToAdministratorModel conn : admin
+					.getOfficeManagedObjects()) {
 				conn.setAdministratorName(admin.getAdministratorName());
 			}
 		}

@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 
 /**
  * {@link OfficeEscalationFigure} implementation.
@@ -40,8 +41,12 @@ public class StandardOfficeEscalationFigure extends AbstractOfficeFloorFigure
 	 */
 	public StandardOfficeEscalationFigure(OfficeEscalationFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeEscalationTypeName(), ConnectorDirection.WEST,
+				.getOfficeEscalationTypeName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
+
+		this.registerConnectionAnchor(
+				OfficeEscalationToOfficeSectionInputModel.class, figure
+						.getConnectionAnchor());
 
 		this.setFigure(figure);
 	}

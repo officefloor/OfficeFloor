@@ -31,7 +31,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeSectionInputModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeSectionInputEditPart
@@ -52,6 +52,10 @@ public class OfficeSectionInputEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionOutputs());
+		models
+				.addAll(this.getCastedModel()
+						.getOfficeManagedObjectSourceFlows());
+		models.addAll(this.getCastedModel().getOfficeEscalations());
 	}
 
 	@Override
@@ -65,6 +69,10 @@ public class OfficeSectionInputEditPart
 		switch (property) {
 		case ADD_OFFICE_SECTION_OUTPUT:
 		case REMOVE_OFFICE_SECTION_OUTPUT:
+		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_FLOW:
+		case ADD_OFFICE_ESCALATION:
+		case REMOVE_OFFICE_ESCALATION:
 			this.refreshTargetConnections();
 			break;
 		}

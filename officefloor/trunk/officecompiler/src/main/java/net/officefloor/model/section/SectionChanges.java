@@ -17,10 +17,12 @@
  */
 package net.officefloor.model.section;
 
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.change.Change;
 
 /**
@@ -172,6 +174,106 @@ public interface SectionChanges {
 			String newExternalManagedObjectName);
 
 	/**
+	 * Adds an {@link SectionManagedObjectSourceModel} to {@link SectionModel}.
+	 *
+	 * @param managedObjectSourceName
+	 *            Name of the {@link SectionManagedObjectSourceModel}.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link SectionManagedObjectSourceModel}
+	 *         .
+	 */
+	Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link SectionManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link SectionManagedObjectSourceModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectSourceModel}.
+	 */
+	Change<SectionManagedObjectSourceModel> removeSectionManagedObjectSource(
+			SectionManagedObjectSourceModel managedObjectSource);
+
+	/**
+	 * Renames the {@link SectionManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link SectionManagedObjectSourceModel} to rename.
+	 * @param newManagedObjectSourceName
+	 *            New name for the {@link SectionManagedObjectSourceModel}.
+	 * @return {@link Change} to rename the
+	 *         {@link SectionManagedObjectSourceModel}.
+	 */
+	Change<SectionManagedObjectSourceModel> renameSectionManagedObjectSource(
+			SectionManagedObjectSourceModel managedObjectSource,
+			String newManagedObjectSourceName);
+
+	/**
+	 * Adds an {@link SectionManagedObjectModel} for an
+	 * {@link SectionManagedObjectSourceModel} to the {@link SectionModel}.
+	 *
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObjectModel}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the
+	 *            {@link SectionManagedObjectModel}.
+	 * @param managedObjectSource
+	 *            {@link SectionManagedObjectSourceModel}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link SectionManagedObjectModel}.
+	 */
+	Change<SectionManagedObjectModel> addSectionManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			SectionManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link SectionManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link SectionManagedObjectModel}.
+	 */
+	Change<SectionManagedObjectModel> removeSectionManagedObject(
+			SectionManagedObjectModel managedObject);
+
+	/**
+	 * Renames the {@link SectionManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel} to rename.
+	 * @param newManagedObjectName
+	 *            New name for the {@link SectionManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link SectionManagedObjectModel}.
+	 */
+	Change<SectionManagedObjectModel> renameSectionManagedObject(
+			SectionManagedObjectModel managedObject, String newManagedObjectName);
+
+	/**
+	 * Scopes the {@link SectionManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel} to scope.
+	 * @param newManagedObjectScope
+	 *            New {@link ManagedObjectScope} for the
+	 *            {@link SectionManagedObjectModel}.
+	 * @return {@link Change} to scope {@link SectionManagedObjectModel}.
+	 */
+	Change<SectionManagedObjectModel> rescopeSectionManagedObject(
+			SectionManagedObjectModel managedObject,
+			ManagedObjectScope newManagedObjectScope);
+
+	/**
 	 * Links the {@link SubSectionInputModel} to the
 	 * {@link ExternalManagedObjectModel}.
 	 *
@@ -231,8 +333,8 @@ public interface SectionChanges {
 	 *            {@link SubSectionOutputModel}.
 	 * @param externalFlow
 	 *            {@link ExternalFlowModel}.
-	 * @return {@link Change} to add {@link SubSectionOutputToExternalFlowModel}
-	 *         .
+	 * @return {@link Change} to add the
+	 *         {@link SubSectionOutputToExternalFlowModel}.
 	 */
 	Change<SubSectionOutputToExternalFlowModel> linkSubSectionOutputToExternalFlow(
 			SubSectionOutputModel subSectionOutput,
@@ -248,5 +350,59 @@ public interface SectionChanges {
 	 */
 	Change<SubSectionOutputToExternalFlowModel> removeSubSectionOutputToExternalFlow(
 			SubSectionOutputToExternalFlowModel subSectionOutputToExternalFlow);
+
+	/**
+	 * Links the {@link SectionManagedObjectSourceFlowModel} to the
+	 * {@link ExternalFlowModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link SectionManagedObjectSourceFlowModel}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToSubSectionInputModel> linkSectionManagedObjectSourceFlowToSubSectionInput(
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
+			SubSectionInputModel subSectionInput);
+
+	/**
+	 * Removes the {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
+	 *
+	 * @param managedObjectSourceFlowToSubSectionInput
+	 *            {@link SectionManagedObjectSourceFlowToSubSectionInputModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectSourceFlowToSubSectionInputModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToSubSectionInputModel> removeSectionManagedObjectSourceFlowToSubSectionInput(
+			SectionManagedObjectSourceFlowToSubSectionInputModel managedObjectSourceFlowToSubSectionInput);
+
+	/**
+	 * Links the {@link SectionManagedObjectSourceFlowModel} to the
+	 * {@link ExternalFlowModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link SectionManagedObjectSourceFlowModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SectionManagedObjectSourceFlowToExternalFlowModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToExternalFlowModel> linkSectionManagedObjectSourceFlowToExternalFlow(
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
+			ExternalFlowModel externalFlow);
+
+	/**
+	 * Removes the {@link SectionManagedObjectSourceFlowToExternalFlowModel}.
+	 *
+	 * @param managedObjectSourceFlowToExternalFlow
+	 *            {@link SectionManagedObjectSourceFlowToExternalFlowModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectSourceFlowToExternalFlowModel}.
+	 */
+	Change<SectionManagedObjectSourceFlowToExternalFlowModel> removeSectionManagedObjectSourceFlowToExternalFlow(
+			SectionManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow);
 
 }

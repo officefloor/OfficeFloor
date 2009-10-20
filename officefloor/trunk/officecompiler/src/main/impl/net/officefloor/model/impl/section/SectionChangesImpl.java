@@ -23,12 +23,16 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
@@ -36,8 +40,15 @@ import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
-import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionChanges;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
@@ -48,14 +59,14 @@ import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionChanges} implementation.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionChangesImpl implements SectionChanges {
 
 	/**
 	 * Sorts the {@link SubSectionModel} instances.
-	 * 
+	 *
 	 * @param subSections
 	 *            Listing of {@link SubSectionModel} instances to sort.
 	 */
@@ -73,7 +84,7 @@ public class SectionChangesImpl implements SectionChanges {
 	 * Sorts the {@link ExternalFlowModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param externalFlows
 	 *            {@link ExternalFlowModel} instances.
 	 */
@@ -92,7 +103,7 @@ public class SectionChangesImpl implements SectionChanges {
 	 * Sorts the {@link ExternalManagedObjectModel} instances.
 	 * <p>
 	 * This enables easier merging of configuration under SCM.
-	 * 
+	 *
 	 * @param externalManagedObjects
 	 *            {@link ExternalManagedObjectModel} instances.
 	 */
@@ -110,13 +121,40 @@ public class SectionChangesImpl implements SectionChanges {
 	}
 
 	/**
+	 * Obtains the text name identifying the {@link ManagedObjectScope}.
+	 *
+	 * @param scope
+	 *            {@link ManagedObjectScope}.
+	 * @return Text name for the {@link ManagedObjectScope}.
+	 */
+	public static String getManagedObjectScope(ManagedObjectScope scope) {
+
+		// Ensure have scope
+		if (scope == null) {
+			return null;
+		}
+
+		// Return the text of the scope
+		switch (scope) {
+		case PROCESS:
+			return PROCESS_MANAGED_OBJECT_SCOPE;
+		case THREAD:
+			return THREAD_MANAGED_OBJECT_SCOPE;
+		case WORK:
+			return WORK_MANAGED_OBJECT_SCOPE;
+		default:
+			throw new IllegalStateException("Unknown scope " + scope);
+		}
+	}
+
+	/**
 	 * {@link SectionModel} to be operated on.
 	 */
 	private final SectionModel section;
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param section
 	 *            {@link SectionModel}.
 	 */
@@ -641,6 +679,222 @@ public class SectionChangesImpl implements SectionChanges {
 	}
 
 	@Override
+	public Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addSectionManagedObjectSource)
+
+		// Create the managed object source
+		final SectionManagedObjectSourceModel managedObjectSource = new SectionManagedObjectSourceModel(
+				managedObjectSourceName, managedObjectSourceClassName,
+				managedObjectType.getObjectClass().getName());
+		for (Property property : properties) {
+			managedObjectSource.addProperty(new PropertyModel(property
+					.getName(), property.getValue()));
+		}
+
+		// Add the flows for the managed object source
+		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
+			managedObjectSource
+					.addSectionManagedObjectSourceFlow(new SectionManagedObjectSourceFlowModel(
+							flow.getFlowName(), flow.getArgumentType()
+									.getName()));
+		}
+
+		// Return the change to add the managed object source
+		return new AbstractChange<SectionManagedObjectSourceModel>(
+				managedObjectSource, "Add managed object source") {
+			@Override
+			public void apply() {
+				SectionChangesImpl.this.section
+						.addSectionManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				SectionChangesImpl.this.section
+						.removeSectionManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceModel> removeSectionManagedObjectSource(
+			final SectionManagedObjectSourceModel managedObjectSource) {
+
+		// TODO test this method (removeSectionManagedObjectSource)
+
+		// Return change to remove the managed object source
+		return new AbstractChange<SectionManagedObjectSourceModel>(
+				managedObjectSource, "Remove managed object source") {
+			@Override
+			public void apply() {
+				SectionChangesImpl.this.section
+						.removeSectionManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				SectionChangesImpl.this.section
+						.addSectionManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceModel> renameSectionManagedObjectSource(
+			final SectionManagedObjectSourceModel managedObjectSource,
+			final String newManagedObjectSourceName) {
+
+		// TODO test this method (renameSectionManagedObjectSource)
+
+		// Obtain the old managed object source name
+		final String oldManagedObjectSourceName = managedObjectSource
+				.getSectionManagedObjectSourceName();
+
+		// Return change to rename the managed object source
+		return new AbstractChange<SectionManagedObjectSourceModel>(
+				managedObjectSource, "Rename managed object source to "
+						+ newManagedObjectSourceName) {
+			@Override
+			public void apply() {
+				managedObjectSource
+						.setSectionManagedObjectSourceName(newManagedObjectSourceName);
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSource
+						.setSectionManagedObjectSourceName(oldManagedObjectSourceName);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectModel> addSectionManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			SectionManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addSectionManagedObject)
+
+		// Create the managed object
+		final SectionManagedObjectModel managedObject = new SectionManagedObjectModel(
+				managedObjectName, getManagedObjectScope(managedObjectScope));
+
+		// Add the dependencies for the managed object
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType
+				.getDependencyTypes()) {
+			managedObject
+					.addSectionManagedObjectDependency(new SectionManagedObjectDependencyModel(
+							dependency.getDependencyName(), dependency
+									.getDependencyType().getName()));
+		}
+
+		// Create connection to the managed object source
+		final SectionManagedObjectToSectionManagedObjectSourceModel conn = new SectionManagedObjectToSectionManagedObjectSourceModel();
+		conn.setSectionManagedObject(managedObject);
+		conn.setSectionManagedObjectSource(managedObjectSource);
+
+		// Return change to add the managed object
+		return new AbstractChange<SectionManagedObjectModel>(managedObject,
+				"Add managed object") {
+			@Override
+			public void apply() {
+				SectionChangesImpl.this.section
+						.addSectionManagedObject(managedObject);
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+				SectionChangesImpl.this.section
+						.removeSectionManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectModel> removeSectionManagedObject(
+			final SectionManagedObjectModel managedObject) {
+
+		// TODO test this method (removeSectionManagedObject)
+
+		// Return change to remove the managed object
+		return new AbstractChange<SectionManagedObjectModel>(managedObject,
+				"Remove managed object") {
+			@Override
+			public void apply() {
+				SectionChangesImpl.this.section
+						.removeSectionManagedObject(managedObject);
+			}
+
+			@Override
+			public void revert() {
+				SectionChangesImpl.this.section
+						.addSectionManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectModel> renameSectionManagedObject(
+			final SectionManagedObjectModel managedObject,
+			final String newManagedObjectName) {
+
+		// TODO test this method (renameSectionManagedObject)
+
+		// Obtain the old managed object name
+		final String oldManagedObjectName = managedObject
+				.getSectionManagedObjectName();
+
+		// Return change to rename the managed object
+		return new AbstractChange<SectionManagedObjectModel>(managedObject,
+				"Rename managed object to " + newManagedObjectName) {
+			@Override
+			public void apply() {
+				managedObject.setSectionManagedObjectName(newManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setSectionManagedObjectName(oldManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectModel> rescopeSectionManagedObject(
+			final SectionManagedObjectModel managedObject,
+			final ManagedObjectScope newManagedObjectScope) {
+
+		// TODO test this method (rescopeSectionManagedObject)
+
+		// Obtain the new scope text
+		final String newScope = getManagedObjectScope(newManagedObjectScope);
+
+		// OBtain the old managed object scope
+		final String oldScope = managedObject.getManagedObjectScope();
+
+		// Return change to re-scope the managed object
+		return new AbstractChange<SectionManagedObjectModel>(managedObject,
+				"Rescope managed object to " + newScope) {
+			@Override
+			public void apply() {
+				managedObject.setManagedObjectScope(newScope);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setManagedObjectScope(oldScope);
+			}
+		};
+	}
+
+	@Override
 	public Change<SubSectionObjectToExternalManagedObjectModel> linkSubSectionObjectToExternalManagedObject(
 			SubSectionObjectModel subSectionObject,
 			ExternalManagedObjectModel externalManagedObject) {
@@ -780,6 +1034,102 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void revert() {
 				subSectionOutputToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceFlowToSubSectionInputModel> linkSectionManagedObjectSourceFlowToSubSectionInput(
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
+			SubSectionInputModel subSectionInput) {
+
+		// TODO test (linkSectionManagedObjectSourceFlowToSubSectionInput)
+
+		// Create the connection
+		final SectionManagedObjectSourceFlowToSubSectionInputModel conn = new SectionManagedObjectSourceFlowToSubSectionInputModel();
+		conn.setSectionManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setSubSectionInput(subSectionInput);
+
+		// Return change to add the connection
+		return new AbstractChange<SectionManagedObjectSourceFlowToSubSectionInputModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceFlowToSubSectionInputModel> removeSectionManagedObjectSourceFlowToSubSectionInput(
+			final SectionManagedObjectSourceFlowToSubSectionInputModel managedObjectSourceFlowToSubSectionInput) {
+
+		// TODO test (removeSectionManagedObjectSourceFlowToSubSectionInput)
+
+		// Return change to remove the connection
+		return new AbstractChange<SectionManagedObjectSourceFlowToSubSectionInputModel>(
+				managedObjectSourceFlowToSubSectionInput, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToSubSectionInput.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToSubSectionInput.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceFlowToExternalFlowModel> linkSectionManagedObjectSourceFlowToExternalFlow(
+			SectionManagedObjectSourceFlowModel managedObjectSourceFlow,
+			ExternalFlowModel externalFlow) {
+
+		// TODO test (linkSectionManagedObjectSourceFlowToExternalFlow)
+
+		// Create the connection
+		final SectionManagedObjectSourceFlowToExternalFlowModel conn = new SectionManagedObjectSourceFlowToExternalFlowModel();
+		conn.setSectionManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setExternalFlow(externalFlow);
+
+		// Return change to add the connection
+		return new AbstractChange<SectionManagedObjectSourceFlowToExternalFlowModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectSourceFlowToExternalFlowModel> removeSectionManagedObjectSourceFlowToExternalFlow(
+			final SectionManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow) {
+
+		// TODO test (removeSectionManagedObjectSourceFlowToExternalFlow)
+
+		// Return change to remove the connection
+		return new AbstractChange<SectionManagedObjectSourceFlowToExternalFlowModel>(
+				managedObjectSourceFlowToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToExternalFlow.connect();
 			}
 		};
 	}

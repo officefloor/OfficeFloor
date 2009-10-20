@@ -28,7 +28,9 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.IFigure;
@@ -69,10 +71,12 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		figure.add(mo);
 		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
 
-		// Register the anchor to external managed objects
+		// Register the anchor to external and office managed objects
+		ConnectionAnchor moAnchor = mo.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				ExternalManagedObjectToAdministratorModel.class, mo
-						.getConnectionAnchor());
+				ExternalManagedObjectToAdministratorModel.class, moAnchor);
+		this.registerConnectionAnchor(
+				OfficeManagedObjectToAdministratorModel.class, moAnchor);
 
 		// Create the administrator container
 		RoundedContainerFigure administrator = new RoundedContainerFigure(

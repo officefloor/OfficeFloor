@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.TaskEscalationType;
@@ -37,9 +40,15 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -211,6 +220,33 @@ public class DeskChangesImpl implements DeskChanges {
 								b.getExternalManagedObjectName());
 					}
 				});
+	}
+
+	/**
+	 * Obtains the text name identifying the {@link ManagedObjectScope}.
+	 *
+	 * @param scope
+	 *            {@link ManagedObjectScope}.
+	 * @return Text name for the {@link ManagedObjectScope}.
+	 */
+	public static String getManagedObjectScope(ManagedObjectScope scope) {
+
+		// Ensure have scope
+		if (scope == null) {
+			return null;
+		}
+
+		// Return the text of the scope
+		switch (scope) {
+		case PROCESS:
+			return PROCESS_MANAGED_OBJECT_SCOPE;
+		case THREAD:
+			return THREAD_MANAGED_OBJECT_SCOPE;
+		case WORK:
+			return WORK_MANAGED_OBJECT_SCOPE;
+		default:
+			throw new IllegalStateException("Unknown scope " + scope);
+		}
 	}
 
 	/**
@@ -1893,6 +1929,220 @@ public class DeskChangesImpl implements DeskChanges {
 			public void revert() {
 				externalManagedObject
 						.setExternalManagedObjectName(oldExternalManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addDeskManagedObjectSource)
+
+		// Create the managed object source
+		final DeskManagedObjectSourceModel managedObjectSource = new DeskManagedObjectSourceModel(
+				managedObjectSourceName, managedObjectSourceClassName,
+				managedObjectType.getObjectClass().getName());
+		for (Property property : properties) {
+			managedObjectSource.addProperty(new PropertyModel(property
+					.getName(), property.getValue()));
+		}
+
+		// Add the flows for the managed object source
+		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
+			managedObjectSource
+					.addDeskManagedObjectSourceFlow(new DeskManagedObjectSourceFlowModel(
+							flow.getFlowName(), flow.getArgumentType()
+									.getName()));
+		}
+
+		// Return the change to add the managed object source
+		return new AbstractChange<DeskManagedObjectSourceModel>(
+				managedObjectSource, "Add managed object source") {
+			@Override
+			public void apply() {
+				DeskChangesImpl.this.desk
+						.addDeskManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				DeskChangesImpl.this.desk
+						.removeDeskManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceModel> removeDeskManagedObjectSource(
+			final DeskManagedObjectSourceModel managedObjectSource) {
+
+		// TODO test this method (removeDeskManagedObjectSource)
+
+		// Return change to remove the managed object source
+		return new AbstractChange<DeskManagedObjectSourceModel>(
+				managedObjectSource, "Remove managed object source") {
+			@Override
+			public void apply() {
+				DeskChangesImpl.this.desk
+						.removeDeskManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				DeskChangesImpl.this.desk
+						.addDeskManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceModel> renameDeskManagedObjectSource(
+			final DeskManagedObjectSourceModel managedObjectSource,
+			final String newManagedObjectSourceName) {
+
+		// TODO test this method (renameDeskManagedObjectSource)
+
+		// Obtain the old managed object source name
+		final String oldManagedObjectSourceName = managedObjectSource
+				.getDeskManagedObjectSourceName();
+
+		// Return change to rename the managed object source
+		return new AbstractChange<DeskManagedObjectSourceModel>(
+				managedObjectSource, "Rename managed object source to "
+						+ newManagedObjectSourceName) {
+			@Override
+			public void apply() {
+				managedObjectSource
+						.setDeskManagedObjectSourceName(newManagedObjectSourceName);
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSource
+						.setDeskManagedObjectSourceName(oldManagedObjectSourceName);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectModel> addDeskManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			DeskManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addDeskManagedObject)
+
+		// Create the managed object
+		final DeskManagedObjectModel managedObject = new DeskManagedObjectModel(
+				managedObjectName, getManagedObjectScope(managedObjectScope));
+
+		// Add the dependencies for the managed object
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType
+				.getDependencyTypes()) {
+			managedObject
+					.addDeskManagedObjectDependency(new DeskManagedObjectDependencyModel(
+							dependency.getDependencyName(), dependency
+									.getDependencyType().getName()));
+		}
+
+		// Create connection to the managed object source
+		final DeskManagedObjectToDeskManagedObjectSourceModel conn = new DeskManagedObjectToDeskManagedObjectSourceModel();
+		conn.setDeskManagedObject(managedObject);
+		conn.setDeskManagedObjectSource(managedObjectSource);
+
+		// Return change to add the managed object
+		return new AbstractChange<DeskManagedObjectModel>(managedObject,
+				"Add managed object") {
+			@Override
+			public void apply() {
+				DeskChangesImpl.this.desk.addDeskManagedObject(managedObject);
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+				DeskChangesImpl.this.desk
+						.removeDeskManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectModel> removeDeskManagedObject(
+			final DeskManagedObjectModel managedObject) {
+
+		// TODO test this method (removeDeskManagedObject)
+
+		// Return change to remove the managed object
+		return new AbstractChange<DeskManagedObjectModel>(managedObject,
+				"Remove managed object") {
+			@Override
+			public void apply() {
+				DeskChangesImpl.this.desk
+						.removeDeskManagedObject(managedObject);
+			}
+
+			@Override
+			public void revert() {
+				DeskChangesImpl.this.desk.addDeskManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectModel> renameDeskManagedObject(
+			final DeskManagedObjectModel managedObject,
+			final String newManagedObjectName) {
+
+		// TODO test this method (renameDeskManagedObject)
+
+		// Obtain the old managed object name
+		final String oldManagedObjectName = managedObject
+				.getDeskManagedObjectName();
+
+		// Return change to rename the managed object
+		return new AbstractChange<DeskManagedObjectModel>(managedObject,
+				"Rename managed object to " + newManagedObjectName) {
+			@Override
+			public void apply() {
+				managedObject.setDeskManagedObjectName(newManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setDeskManagedObjectName(oldManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectModel> rescopeDeskManagedObject(
+			final DeskManagedObjectModel managedObject,
+			final ManagedObjectScope newManagedObjectScope) {
+
+		// TODO test this method (rescopeDeskManagedObject)
+
+		// Obtain the new scope text
+		final String newScope = getManagedObjectScope(newManagedObjectScope);
+
+		// OBtain the old managed object scope
+		final String oldScope = managedObject.getManagedObjectScope();
+
+		// Return change to re-scope the managed object
+		return new AbstractChange<DeskManagedObjectModel>(managedObject,
+				"Rescope managed object to " + newScope) {
+			@Override
+			public void apply() {
+				managedObject.setManagedObjectScope(newScope);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setManagedObjectScope(oldScope);
 			}
 		};
 	}

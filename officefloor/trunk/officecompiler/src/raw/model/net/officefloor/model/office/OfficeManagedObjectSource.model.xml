@@ -6,10 +6,10 @@
 	<list type="PropertyModel" name="property" plural="properties" />
     <list type="OfficeManagedObjectToOfficeManagedObjectSourceModel"
         name="office managed object" />
+	<list type="OfficeManagedObjectSourceFlowModel" name="office managed object source flow" />
+	<list type="OfficeManagedObjectSourceTeamModel" name="office managed object source team" />
 <!--
 	<list type="OfficeManagedObjectSourceDependencyModel"
 		name="office managed object source dependency" plural="office managed object source dependencies" />
-	<list type="OfficeManagedObjectSourceFlowModel" name="office managed object source flow" />
-	<list type="OfficeManagedObjectSourceTeamModel" name="office managed object source team" />
 -->
 </model>

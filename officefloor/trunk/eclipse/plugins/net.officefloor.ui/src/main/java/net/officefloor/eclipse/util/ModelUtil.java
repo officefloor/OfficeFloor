@@ -35,8 +35,10 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.Model;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
 
 import org.eclipse.core.resources.IProject;
 
@@ -104,7 +106,6 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	@SuppressWarnings("unchecked")
 	public static ManagedObjectType<?> getManagedObjectType(
 			OfficeFloorManagedObjectSourceModel managedObjectSource,
 			AbstractOfficeFloorEditor<?, ?> editor) {
@@ -112,6 +113,118 @@ public class ModelUtil {
 		// Obtain the office floor compiler
 		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
 				.createCompiler(editor);
+
+		// Obtain the managed object source class name
+		String managedObjectSourceClassName = managedObjectSource
+				.getManagedObjectSourceClassName();
+
+		// Obtain the properties
+		PropertyList properties = compiler.createPropertyList();
+		for (net.officefloor.model.officefloor.PropertyModel property : managedObjectSource
+				.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load and return the managed object type
+		return getManagedObjectType(managedObjectSourceClassName, properties,
+				compiler, editor);
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectType} for the
+	 * {@link OfficeManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSourceModel}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
+	 *         it.
+	 */
+	public static ManagedObjectType<?> getManagedObjectType(
+			OfficeManagedObjectSourceModel managedObjectSource,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+
+		// Obtain the office floor compiler
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
+				.createCompiler(editor);
+
+		// Obtain the class name
+		String managedObjectSourceClassName = managedObjectSource
+				.getManagedObjectSourceClassName();
+
+		// Obtain the properties
+		PropertyList properties = compiler.createPropertyList();
+		for (net.officefloor.model.office.PropertyModel property : managedObjectSource
+				.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load and return the managed object type
+		return getManagedObjectType(managedObjectSourceClassName, properties,
+				compiler, editor);
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectType} for the
+	 * {@link SectionManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link SectionManagedObjectSourceModel}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
+	 *         it.
+	 */
+	public static ManagedObjectType<?> getManagedObjectType(
+			SectionManagedObjectSourceModel managedObjectSource,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+
+		// Obtain the office floor compiler
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
+				.createCompiler(editor);
+
+		// Obtain the class name
+		String managedObjectSourceClassName = managedObjectSource
+				.getManagedObjectSourceClassName();
+
+		// Obtain the properties
+		PropertyList properties = compiler.createPropertyList();
+		for (net.officefloor.model.section.PropertyModel property : managedObjectSource
+				.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load and return the managed object type
+		return getManagedObjectType(managedObjectSourceClassName, properties,
+				compiler, editor);
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectType} for the
+	 * {@link OfficeManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
+	 *         it.
+	 */
+	@SuppressWarnings("unchecked")
+	public static ManagedObjectType<?> getManagedObjectType(
+			String managedObjectSourceClassName, PropertyList properties,
+			OfficeFloorCompiler compiler, AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the managed object loader
 		ManagedObjectLoader managedObjectLoader = compiler
@@ -122,18 +235,10 @@ public class ModelUtil {
 
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = obtainClass(
-				managedObjectSource.getManagedObjectSourceClassName(),
-				ManagedObjectSource.class, classLoader, editor);
+				managedObjectSourceClassName, ManagedObjectSource.class,
+				classLoader, editor);
 		if (managedObjectSourceClass == null) {
 			return null; // must have managed object source class
-		}
-
-		// Obtain the properties
-		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.officefloor.PropertyModel property : managedObjectSource
-				.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
 		}
 
 		// Load and return the managed object type

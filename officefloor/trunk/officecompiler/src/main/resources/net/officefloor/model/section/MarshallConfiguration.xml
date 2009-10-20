@@ -36,6 +36,28 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getSectionManagedObjectSourceFlows">
+				<item
+					type="net.officefloor.model.section.SectionManagedObjectSourceFlowModel"
+					element="flow">
+					<attributes>
+						<attribute method="getSectionManagedObjectSourceFlowName"
+							attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSubSectionInput" element="sub-section-input">
+						<attributes>
+							<attribute method="getSubSectionName" attribute="sub-section" />
+							<attribute method="getSubSectionInputName" attribute="input" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- MANAGED OBJECTS -->
@@ -54,6 +76,29 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<collection method="getSectionManagedObjectDependencies">
+				<item
+					type="net.officefloor.model.section.SectionManagedObjectDependencyModel"
+					element="dependency">
+					<attributes>
+						<attribute method="getSectionManagedObjectDependencyName"
+							attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
+					</attributes>
+					<object method="getExternalManagedObject" element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getSectionManagedObject" element="managed-object">
+						<attributes>
+							<attribute method="getSectionManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- EXTERNAL FLOWS -->

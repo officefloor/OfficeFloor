@@ -32,7 +32,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SubSectionInputModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SubSectionInputEditPart
@@ -49,6 +49,8 @@ public class SubSectionInputEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionOutputs());
+		models.addAll(this.getCastedModel()
+				.getSectionManagedObjectSourceFlows());
 	}
 
 	@Override
@@ -68,6 +70,8 @@ public class SubSectionInputEditPart
 			break;
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
+		case ADD_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 			SubSectionInputEditPart.this.refreshTargetConnections();
 			break;
 		}

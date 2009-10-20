@@ -26,7 +26,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeEditPart extends
@@ -37,6 +37,8 @@ public class OfficeEditPart extends
 		OfficeModel office = this.getCastedModel();
 		childModels.addAll(office.getOfficeSections());
 		childModels.addAll(office.getExternalManagedObjects());
+		childModels.addAll(office.getOfficeManagedObjectSources());
+		childModels.addAll(office.getOfficeManagedObjects());
 		childModels.addAll(office.getOfficeTeams());
 		childModels.addAll(office.getOfficeAdministrators());
 		childModels.addAll(office.getOfficeEscalations());

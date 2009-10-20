@@ -32,6 +32,9 @@ import net.officefloor.model.section.SectionManagedObjectDependencyModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
@@ -96,12 +99,28 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 				"getY" }, section.getSectionManagedObjectSources(),
 				new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, 200, 201));
+						"net.orm.Session", null, null, null, 200, 201));
 		SectionManagedObjectSourceModel mos = section
 				.getSectionManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
 						"MO_TWO", "VALUE_TWO"));
+		assertList(new String[] { "getSectionManagedObjectSourceFlowName",
+				"getArgumentType" }, mos.getSectionManagedObjectSourceFlows(),
+				new SectionManagedObjectSourceFlowModel("FLOW_ONE",
+						String.class.getName()),
+				new SectionManagedObjectSourceFlowModel("FLOW_TWO",
+						Integer.class.getName()));
+		SectionManagedObjectSourceFlowModel flowOne = mos
+				.getSectionManagedObjectSourceFlows().get(0);
+		assertProperties(new SectionManagedObjectSourceFlowToExternalFlowModel(
+				"FLOW"), flowOne.getExternalFlow(), "getExternalFlowName");
+		SectionManagedObjectSourceFlowModel flowTwo = mos
+				.getSectionManagedObjectSourceFlows().get(1);
+		assertProperties(
+				new SectionManagedObjectSourceFlowToSubSectionInputModel(
+						"SECTION_A", "INPUT_A"), flowTwo.getSubSectionInput(),
+				"getSubSectionName", "getSubSectionInputName");
 
 		// ----------------------------------------------
 		// Validate the managed objects
@@ -146,7 +165,7 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getExternalFlowName", "getArgumentType",
 				"getX", "getY" }, section.getExternalFlows(),
 				new ExternalFlowModel("FLOW", String.class.getName(), null,
-						400, 401));
+						null, 400, 401));
 
 		// ----------------------------------------------
 		// Validate the sub sections

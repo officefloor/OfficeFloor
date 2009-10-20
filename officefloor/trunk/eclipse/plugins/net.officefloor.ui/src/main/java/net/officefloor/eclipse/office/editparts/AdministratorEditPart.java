@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link AdministratorModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AdministratorEditPart
@@ -64,6 +64,7 @@ public class AdministratorEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getExternalManagedObjects());
+		models.addAll(this.getCastedModel().getOfficeManagedObjects());
 	}
 
 	@Override
@@ -115,6 +116,8 @@ public class AdministratorEditPart
 			break;
 		case ADD_EXTERNAL_MANAGED_OBJECT:
 		case REMOVE_EXTERNAL_MANAGED_OBJECT:
+		case ADD_OFFICE_MANAGED_OBJECT:
+		case REMOVE_OFFICE_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		}

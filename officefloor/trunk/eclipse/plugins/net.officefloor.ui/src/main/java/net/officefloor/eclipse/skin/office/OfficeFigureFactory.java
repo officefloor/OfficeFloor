@@ -25,6 +25,17 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
@@ -46,14 +57,69 @@ import org.eclipse.draw2d.PolylineConnection;
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
  * {@link OfficeModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeFigureFactory {
 
 	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link ManagedObjectSourceModel}.
+	 *
+	 * @param context
+	 *            {@link OfficeManagedObjectSourceFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeManagedObjectSourceFigure createOfficeManagedObjectSourceFigure(
+			OfficeManagedObjectSourceFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeManagedObjectSourceFlowModel}.
+	 *
+	 * @param context
+	 *            {@link OfficeManagedObjectSourceFlowFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeManagedObjectSourceFlowFigure createOfficeManagedObjectSourceFlowFigure(
+			OfficeManagedObjectSourceFlowFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeManagedObjectSourceTeamModel}.
+	 *
+	 * @param context
+	 *            {@link OfficeManagedObjectSourceTeamFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeManagedObjectSourceTeamFigure createOfficeManagedObjectSourceTeamFigure(
+			OfficeManagedObjectSourceTeamFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeManagedObjectModel}.
+	 *
+	 * @param context
+	 *            {@link OfficeManagedObjectFigureContext}.
+	 * @return {@link OfficeManagedObjectFigure}.
+	 */
+	OfficeManagedObjectFigure createOfficeManagedObjectFigure(
+			OfficeManagedObjectFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeManagedObjectDependencyModel}.
+	 *
+	 * @param context
+	 *            {@link OfficeManagedObjectDependencyFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeManagedObjectDependencyFigure createOfficeManagedObjectDependencyFigure(
+			OfficeManagedObjectDependencyFigureContext context);
+
+	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link AdministratorModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link AdministratorFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -63,7 +129,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DutyModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link DutyFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -73,7 +139,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -84,7 +150,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeEscalationModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeEscalationFigureContext}.
 	 * @return {@link OfficeEscalationFigure}.
@@ -94,7 +160,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTeamModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -103,7 +169,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -114,7 +180,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSectionInputModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionInputFigureContext}.
 	 * @return {@link OfficeSectionInputFigure}.
@@ -125,7 +191,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSectionOutputModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionOutputFigureContext}.
 	 * @return {@link OfficeSectionOutputFigure}.
@@ -136,7 +202,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSectionObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionObjectFigure}.
 	 * @return {@link OfficeSectionObjectFigure}.
@@ -147,7 +213,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSectionResponsibilityModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSectionResponsibilityFigureContext}.
 	 * @return {@link OfficeSectionResponsibilityFigure}.
@@ -158,7 +224,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeSubSectionModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeSubSectionFigureContext}.
 	 * @return {@link OfficeSubSectionFigure}.
@@ -168,7 +234,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link OfficeTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -178,15 +244,80 @@ public interface OfficeFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link AbstractTaskAdministrationJoinPointModel}.
-	 * 
+	 *
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure();
 
 	/**
+	 * Decorates the {@link OfficeManagedObjectToOfficeManagedObjectSourceModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectToOfficeManagedObjectSourceModel}
+	 */
+	void decorateOfficeManagedObjectToOfficeManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectToOfficeManagedObjectSourceFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectDependencyToOfficeManagedObjectFigureContext}
+	 */
+	void decorateOfficeManagedObjectDependencyToOfficeManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectDependencyToOfficeManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeManagedObjectDependencyToExternalManagedObjectModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectDependencyToExternalManagedObjectFigureContext}
+	 */
+	void decorateOfficeManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectDependencyToExternalManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectSourceFlowToOfficeSectionInputFigureContext}
+	 */
+	void decorateOfficeManagedObjectSourceFlowToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectSourceFlowToOfficeSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeManagedObjectSourceTeamToOfficeTeamModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectSourceTeamToOfficeTeamFigureContext}
+	 */
+	void decorateOfficeManagedObjectSourceTeamToOfficeTeamFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectSourceTeamToOfficeTeamFigureContext context);
+
+	/**
 	 * Decorates the {@link OfficeSectionObjectToExternalManagedObjectModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -199,7 +330,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Decorates the {@link OfficeSectionOutputToOfficeSectionInputModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -212,7 +343,7 @@ public interface OfficeFigureFactory {
 	/**
 	 * Decorates the {@link OfficeSectionResponsibilityToOfficeTeamModel}
 	 * figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -224,7 +355,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Decorates the {@link AdministratorToOfficeTeamModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -235,7 +366,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Decorates the {@link ExternalManagedObjectToAdministratorModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -246,8 +377,20 @@ public interface OfficeFigureFactory {
 			ExternalManagedObjectToAdministratorFigureContext context);
 
 	/**
+	 * Decorates the {@link OfficeManagedObjectToAdministratorModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeManagedObjectToAdministratorFigureContext}.
+	 */
+	void decorateOfficeManagedObjectToAdministratorFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectToAdministratorFigureContext context);
+
+	/**
 	 * Decorates the {@link OfficeTaskToPreDutyModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -258,7 +401,7 @@ public interface OfficeFigureFactory {
 
 	/**
 	 * Decorates the {@link OfficeTaskToPostDutyModel} figure.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -266,5 +409,17 @@ public interface OfficeFigureFactory {
 	 */
 	void decorateOfficeTaskToPostDutyFigure(PolylineConnection figure,
 			OfficeTaskToPostDutyFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeEscalationToOfficeSectionInputModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeEscalationToOfficeSectionInputFigureContext}
+	 */
+	void decorateOfficeEscalationToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeEscalationToOfficeSectionInputFigureContext context);
 
 }

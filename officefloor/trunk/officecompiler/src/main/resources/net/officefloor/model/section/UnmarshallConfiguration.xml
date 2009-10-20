@@ -21,6 +21,20 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addSectionManagedObjectSourceFlow" node="flow"
+			class="net.officefloor.model.section.SectionManagedObjectSourceFlowModel">
+			<value method="setSectionManagedObjectSourceFlowName" node="flow@name" />
+			<value method="setArgumentType" node="flow@argument-type" />
+			<object method="setExternalFlow" node="external-flow"
+				class="net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel">
+				<value method="setExternalFlowName" node="external-flow@name" />
+			</object>
+			<object method="setSubSectionInput" node="sub-section-input"
+				class="net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel">
+				<value method="setSubSectionName" node="sub-section-input@sub-section" />
+				<value method="setSubSectionInputName" node="sub-section-input@input" />
+			</object>
+		</object>
 	</object>
 	<!-- MANAGED_OBJECTS -->
 	<object method="addSectionManagedObject" node="managed-object"

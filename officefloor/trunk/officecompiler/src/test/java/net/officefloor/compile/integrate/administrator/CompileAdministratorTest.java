@@ -19,6 +19,7 @@ package net.officefloor.compile.integrate.administrator;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.AdministratorBuilder;
@@ -34,7 +35,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Tests compiling the {@link Administrator}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class CompileAdministratorTest extends AbstractCompileTestCase {
@@ -138,6 +139,35 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		admin.administerManagedObject("MANAGED_OBJECT");
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Tests administering an {@link OfficeManagedObject}.
+	 */
+	public void testAdministerOfficeManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT",
+				"OFFICE.MANAGED_OBJECT_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
+		AdministratorBuilder<?> admin = this
+				.record_officeBuilder_addThreadAdministrator("ADMIN",
+						"OFFICE_TEAM", ClassAdministratorSource.class,
+						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
+						SimpleAdmin.class.getName());
+		admin.administerManagedObject("OFFICE.MANAGED_OBJECT");
 
 		// Compile
 		this.compile(true);

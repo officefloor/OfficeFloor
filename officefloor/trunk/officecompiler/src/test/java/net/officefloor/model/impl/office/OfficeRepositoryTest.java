@@ -26,11 +26,18 @@ import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
@@ -98,9 +105,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", "java.lang.Object");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
+				"FLOW", Integer.class.getName());
+		mos.addOfficeManagedObjectSourceFlow(moFlow);
+		OfficeManagedObjectSourceTeamModel moTeam = new OfficeManagedObjectSourceTeamModel(
+				"MO_TEAM");
+		mos.addOfficeManagedObjectSourceTeam(moTeam);
 		office.addExternalManagedObject(extMo);
 		OfficeTeamModel team = new OfficeTeamModel("TEAM");
 		office.addOfficeTeam(team);
+		OfficeEscalationModel escalation = new OfficeEscalationModel(
+				"ESCALATION");
+		office.addOfficeEscalation(escalation);
 		OfficeSectionModel section = new OfficeSectionModel("SECTION",
 				"net.example.ExampleSectionSource", "SECTION_LOCATION");
 		office.addOfficeSection(section);
@@ -115,6 +131,13 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeAdministrator(admin);
 		DutyModel duty = new DutyModel("DUTY");
 		admin.addDuty(duty);
+		OfficeSectionModel targetSection = new OfficeSectionModel(
+				"SECTION_TARGET", "net.example.ExcampleSectionSource",
+				"SECTION_LOCATION");
+		office.addOfficeSection(targetSection);
+		OfficeSectionInputModel targetInput = new OfficeSectionInputModel(
+				"INPUT", String.class.getName());
+		targetSection.addOfficeSectionInput(targetInput);
 
 		// responsibility -> team
 		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel(
@@ -125,13 +148,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionOutputModel output = new OfficeSectionOutputModel(
 				"OUTPUT", String.class.getName(), false);
 		section.addOfficeSectionOutput(output);
-		OfficeSectionModel targetSection = new OfficeSectionModel(
-				"SECTION_TARGET", "net.example.ExcampleSectionSource",
-				"SECTION_LOCATION");
-		office.addOfficeSection(targetSection);
-		OfficeSectionInputModel targetInput = new OfficeSectionInputModel(
-				"INPUT", String.class.getName());
-		targetSection.addOfficeSectionInput(targetInput);
 		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel(
 				"SECTION_TARGET", "INPUT");
 		output.setOfficeSectionInput(outputToInput);
@@ -175,10 +191,25 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"ADMINISTRATOR", "1");
 		extMo.addAdministrator(extMoToAdmin);
 
+		// managed object -> administrator
+		OfficeManagedObjectToAdministratorModel moToAdmin = new OfficeManagedObjectToAdministratorModel(
+				"ADMINISTRATOR", "1");
+		mo.addAdministrator(moToAdmin);
+
 		// managed object -> managed object source
 		OfficeManagedObjectToOfficeManagedObjectSourceModel moToMos = new OfficeManagedObjectToOfficeManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE");
 		mo.setOfficeManagedObjectSource(moToMos);
+
+		// mo flow -> section input
+		OfficeManagedObjectSourceFlowToOfficeSectionInputModel flowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		moFlow.setOfficeSectionInput(flowToInput);
+
+		// mo team -> team
+		OfficeManagedObjectSourceTeamToOfficeTeamModel moTeamToTeam = new OfficeManagedObjectSourceTeamToOfficeTeamModel(
+				"TEAM");
+		moTeam.setOfficeTeam(moTeamToTeam);
 
 		// managed object dependency -> external managed object
 		OfficeManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new OfficeManagedObjectDependencyToExternalManagedObjectModel(
@@ -189,6 +220,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = new OfficeManagedObjectDependencyToOfficeManagedObjectModel(
 				"MANAGED_OBJECT");
 		dependency.setOfficeManagedObject(dependencyToMo);
+
+		// escalation -> section input
+		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		escalation.setOfficeSectionInput(escalationToInput);
 
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -239,6 +275,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object -> managed object source", mos, moToMos
 				.getOfficeManagedObjectSource());
 
+		// Ensure managed object source flow connected to section input
+		assertEquals("mos flow <- section input", moFlow, flowToInput
+				.getOfficeManagedObjectSourceFlow());
+		assertEquals("mos flow -> section input", targetInput, flowToInput
+				.getOfficeSectionInput());
+
+		// Ensure managed object source team connected to office team
+		assertEquals("mos team <- office team", moTeam, moTeamToTeam
+				.getOfficeManagedObjectSourceTeam());
+		assertEquals("mos team -> office team", team, moTeamToTeam
+				.getOfficeTeam());
+
 		// Ensure the administrator teams connected
 		assertEquals("administrator <- team", admin, adminToTeam
 				.getAdministrator());
@@ -260,6 +308,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("external managed object -> administrator", admin,
 				extMoToAdmin.getAdministrator());
 
+		// Ensure managed object administration connected
+		assertEquals("managed object <- administrator", mo, moToAdmin
+				.getOfficeManagedObject());
+		assertEquals("managed object -> administrator", admin, moToAdmin
+				.getAdministrator());
+
 		// Ensure dependency connected to external managed object
 		assertEquals("dependency <- external mo", dependency, dependencyToExtMo
 				.getOfficeManagedObjectDependency());
@@ -271,6 +325,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeManagedObjectDependency());
 		assertEquals("dependency -> managed object", mo, dependencyToMo
 				.getOfficeManagedObject());
+
+		// Ensure escalation connected to section input
+		assertEquals("escalation <- section input", escalation,
+				escalationToInput.getOfficeEscalation());
+		assertEquals("escalation -> section input", targetInput,
+				escalationToInput.getOfficeSectionInput());
 	}
 
 	/**
@@ -294,6 +354,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", "java.lang.Object");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
+				"FLOW", Integer.class.getName());
+		mos.addOfficeManagedObjectSourceFlow(moFlow);
+		OfficeManagedObjectSourceTeamModel moTeam = new OfficeManagedObjectSourceTeamModel(
+				"MO_TEAM");
+		mos.addOfficeManagedObjectSourceTeam(moTeam);
+		OfficeEscalationModel escalation = new OfficeEscalationModel(
+				"ESCALATION");
+		office.addOfficeEscalation(escalation);
 		OfficeTeamModel team = new OfficeTeamModel("TEAM");
 		office.addOfficeTeam(team);
 		OfficeSectionModel section = new OfficeSectionModel("SECTION",
@@ -351,6 +420,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		moToMos.setOfficeManagedObjectSource(mos);
 		moToMos.connect();
 
+		// managed object source flow -> section input
+		OfficeManagedObjectSourceFlowToOfficeSectionInputModel flowToInput = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel();
+		flowToInput.setOfficeManagedObjectSourceFlow(moFlow);
+		flowToInput.setOfficeSectionInput(targetInput);
+		flowToInput.connect();
+
+		// managed object source team -> office team
+		OfficeManagedObjectSourceTeamToOfficeTeamModel moTeamToTeam = new OfficeManagedObjectSourceTeamToOfficeTeamModel();
+		moTeamToTeam.setOfficeManagedObjectSourceTeam(moTeam);
+		moTeamToTeam.setOfficeTeam(team);
+		moTeamToTeam.connect();
+
 		// dependency -> external managed object
 		OfficeManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = new OfficeManagedObjectDependencyToExternalManagedObjectModel();
 		dependencyToExtMo.setOfficeManagedObjectDependency(dependency);
@@ -396,6 +477,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		extMoToAdmin.setAdministrator(admin);
 		extMoToAdmin.connect();
 
+		// managed object -> administrator
+		OfficeManagedObjectToAdministratorModel moToAdmin = new OfficeManagedObjectToAdministratorModel();
+		moToAdmin.setOfficeManagedObject(mo);
+		moToAdmin.setAdministrator(admin);
+		moToAdmin.connect();
+
+		// escalation -> section input
+		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel();
+		escalationToInput.setOfficeEscalation(escalation);
+		escalationToInput.setOfficeSectionInput(targetInput);
+		escalationToInput.connect();
+
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -419,6 +512,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("managed object - managed object source",
 				"MANAGED_OBJECT_SOURCE", moToMos
 						.getOfficeManagedObjectSourceName());
+		assertEquals("managed object source flow - input (section name)",
+				"SECTION_TARGET", flowToInput.getOfficeSectionName());
+		assertEquals("managed object source flow - input (input name)",
+				"INPUT", flowToInput.getOfficeSectionInputName());
+		assertEquals("managed object source team - office team", "TEAM",
+				moTeamToTeam.getOfficeTeamName());
 		assertEquals("dependency - external managed object",
 				"EXTERNAL_MANAGED_OBJECT", dependencyToExtMo
 						.getExternalManagedObjectName());
@@ -436,5 +535,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				.getDutyName());
 		assertEquals("external managed object - administrator",
 				"ADMINISTRATOR", extMoToAdmin.getAdministratorName());
+		assertEquals("office managed object - administrator", "ADMINISTRATOR",
+				moToAdmin.getAdministratorName());
+		assertEquals("escalation - input (section name)", "SECTION_TARGET",
+				escalationToInput.getOfficeSectionName());
+		assertEquals("escalation - input (input name", "INPUT",
+				escalationToInput.getOfficeSectionInputName());
 	}
+
 }

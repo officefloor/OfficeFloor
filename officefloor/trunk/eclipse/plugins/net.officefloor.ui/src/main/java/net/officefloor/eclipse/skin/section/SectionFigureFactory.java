@@ -20,6 +20,12 @@ package net.officefloor.eclipse.skin.section;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
+import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
@@ -35,14 +41,14 @@ import org.eclipse.draw2d.PolylineConnection;
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
  * {@link SectionModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface SectionFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -53,7 +59,7 @@ public interface SectionFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ExternalManagedObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -62,8 +68,52 @@ public interface SectionFigureFactory {
 			ExternalManagedObjectFigureContext context);
 
 	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link ManagedObjectSourceModel}.
+	 *
+	 * @param context
+	 *            {@link SectionManagedObjectSourceFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	SectionManagedObjectSourceFigure createSectionManagedObjectSourceFigure(
+			SectionManagedObjectSourceFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link SectionManagedObjectSourceFlowModel}.
+	 *
+	 * @param context
+	 *            {@link SectionManagedObjectSourceFlowFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	SectionManagedObjectSourceFlowFigure createSectionManagedObjectSourceFlowFigure(
+			SectionManagedObjectSourceFlowFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link SectionManagedObjectModel}.
+	 *
+	 * @param context
+	 *            {@link SectionManagedObjectFigureContext}.
+	 * @return {@link SectionManagedObjectFigure}.
+	 */
+	SectionManagedObjectFigure createSectionManagedObjectFigure(
+			SectionManagedObjectFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link SectionManagedObjectDependencyModel}.
+	 *
+	 * @param context
+	 *            {@link SectionManagedObjectDependencyFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	SectionManagedObjectDependencyFigure createSectionManagedObjectDependencyFigure(
+			SectionManagedObjectDependencyFigureContext context);
+
+	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link SubSectionModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -73,7 +123,7 @@ public interface SectionFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link SubSectionInputModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionInputFigureContext}.
 	 * @return {@link SubSectionInputFigure}.
@@ -84,7 +134,7 @@ public interface SectionFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link SubSectionObjectModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -95,7 +145,7 @@ public interface SectionFigureFactory {
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link SubSectionOutputModel}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link SubSectionOutputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
@@ -104,9 +154,22 @@ public interface SectionFigureFactory {
 			SubSectionOutputFigureContext context);
 
 	/**
+	 * Decorates the
+	 * {@link SectionManagedObjectToSectionManagedObjectSourceModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionManagedObjectToSectionManagedObjectSourceModel}
+	 */
+	void decorateSectionManagedObjectToSectionManagedObjectSourceFigure(
+			PolylineConnection figure,
+			SectionManagedObjectToSectionManagedObjectSourceFigureContext context);
+
+	/**
 	 * Decorates the {@link SubSectionObjectToExternalManagedObjectModel}
 	 * connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -118,7 +181,7 @@ public interface SectionFigureFactory {
 
 	/**
 	 * Decorates the {@link SubSectionOutputToSubSectionInputModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -129,7 +192,7 @@ public interface SectionFigureFactory {
 
 	/**
 	 * Decorates the {@link SubSectionOutputToExternalFlowModel} connection.
-	 * 
+	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
@@ -138,5 +201,31 @@ public interface SectionFigureFactory {
 	void decorateSubSectionOutputToExternalFlowFigure(
 			PolylineConnection figure,
 			SubSectionOutputToExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link SectionManagedObjectSourceFlowToSubSectionInputModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionManagedObjectSourceFlowToSubSectionInputFigureContext}
+	 */
+	void decorateSectionManagedObjectSourceFlowToSubSectionInputFigure(
+			PolylineConnection figure,
+			SectionManagedObjectSourceFlowToSubSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link SectionManagedObjectSourceFlowToExternalFlowModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionManagedObjectSourceFlowToExternalFlowFigureContext}
+	 */
+	void decorateSectionManagedObjectSourceFlowToExternalFlowFigure(
+			PolylineConnection figure,
+			SectionManagedObjectSourceFlowToExternalFlowFigureContext context);
 
 }

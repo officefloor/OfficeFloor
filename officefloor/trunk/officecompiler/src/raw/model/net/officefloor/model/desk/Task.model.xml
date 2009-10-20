@@ -12,6 +12,8 @@
 	<list type="TaskToNextTaskModel" name="previous task" />
 	<list type="TaskFlowModel" name="task flow" cascade-remove="true" />
 	<list type="TaskFlowToTaskModel" name="task flow input" />
-	<list type="TaskEscalationModel" name="task escalation" cascade-remove="true" />
+	<list type="TaskEscalationModel" name="task escalation"
+		cascade-remove="true" />
 	<list type="TaskEscalationToTaskModel" name="task escalation input" />
+	<list type="DeskManagedObjectSourceFlowToTaskModel" name="desk managed object source flow" />
 </model>

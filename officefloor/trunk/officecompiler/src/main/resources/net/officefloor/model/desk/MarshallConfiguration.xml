@@ -34,6 +34,26 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getDeskManagedObjectSourceFlows">
+				<item type="net.officefloor.model.desk.DeskManagedObjectSourceFlowModel"
+					element="flow">
+					<attributes>
+						<attribute method="getDeskManagedObjectSourceFlowName"
+							attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getTask" element="task">
+						<attributes>
+							<attribute method="getTaskName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- MANAGED OBJECTS -->
@@ -52,6 +72,27 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<collection method="getDeskManagedObjectDependencies">
+				<item type="net.officefloor.model.desk.DeskManagedObjectDependencyModel"
+					element="dependency">
+					<attributes>
+						<attribute method="getDeskManagedObjectDependencyName"
+							attribute="name" />
+						<attribute method="getDependencyType" attribute="object-type" />
+					</attributes>
+					<object method="getExternalManagedObject" element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getDeskManagedObject" element="managed-object">
+						<attributes>
+							<attribute method="getDeskManagedObjectName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- EXTERNAL FLOWS -->

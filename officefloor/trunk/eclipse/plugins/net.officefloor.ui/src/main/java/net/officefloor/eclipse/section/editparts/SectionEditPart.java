@@ -26,7 +26,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SectionModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SectionEditPart extends
@@ -37,6 +37,8 @@ public class SectionEditPart extends
 		SectionModel section = this.getCastedModel();
 		childModels.addAll(section.getSubSections());
 		childModels.addAll(section.getExternalManagedObjects());
+		childModels.addAll(section.getSectionManagedObjectSources());
+		childModels.addAll(section.getSectionManagedObjects());
 		childModels.addAll(section.getExternalFlows());
 	}
 
