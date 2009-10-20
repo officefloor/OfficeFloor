@@ -24,8 +24,10 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
@@ -54,9 +56,15 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 				StandardOfficeFloorColours.BLACK());
 		this.externalFlowName = figure.getLabel();
 
+		// Register connection anchor
+		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				SubSectionOutputToExternalFlowModel.class, figure
-						.getConnectionAnchor());
+				SubSectionOutputToExternalFlowModel.class, anchor);
+		this
+				.registerConnectionAnchor(
+						SectionManagedObjectSourceFlowToExternalFlowModel.class,
+						anchor);
+
 		this.setFigure(figure);
 	}
 

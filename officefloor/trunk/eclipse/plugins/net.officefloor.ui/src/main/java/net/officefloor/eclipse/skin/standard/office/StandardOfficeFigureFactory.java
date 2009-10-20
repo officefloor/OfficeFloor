@@ -30,6 +30,23 @@ import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectToAdministratorFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeEscalationToOfficeSectionInputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectDependencyToOfficeManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFlowFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFlowToOfficeSectionInputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceTeamFigure;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceTeamFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceTeamToOfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectToAdministratorFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeManagedObjectToOfficeManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionInputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
@@ -53,13 +70,44 @@ import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 
 /**
  * Standard {@link OfficeFigureFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardOfficeFigureFactory implements OfficeFigureFactory {
+
+	@Override
+	public OfficeManagedObjectSourceFigure createOfficeManagedObjectSourceFigure(
+			OfficeManagedObjectSourceFigureContext context) {
+		return new StandardOfficeManagedObjectSourceFigure(context);
+	}
+
+	@Override
+	public OfficeManagedObjectSourceFlowFigure createOfficeManagedObjectSourceFlowFigure(
+			OfficeManagedObjectSourceFlowFigureContext context) {
+		return new StandardOfficeManagedObjectSourceFlowFigure(context);
+	}
+
+	@Override
+	public OfficeManagedObjectSourceTeamFigure createOfficeManagedObjectSourceTeamFigure(
+			OfficeManagedObjectSourceTeamFigureContext context) {
+		return new StandardOfficeManagedObjectSourceTeamFigure(context);
+	}
+
+	@Override
+	public OfficeManagedObjectFigure createOfficeManagedObjectFigure(
+			OfficeManagedObjectFigureContext context) {
+		return new StandardOfficeManagedObjectFigure(context);
+	}
+
+	@Override
+	public OfficeManagedObjectDependencyFigure createOfficeManagedObjectDependencyFigure(
+			OfficeManagedObjectDependencyFigureContext context) {
+		return new StandardOfficeManagedObjectDependencyFigure(context);
+	}
 
 	@Override
 	public AdministratorFigure createAdministratorFigure(
@@ -138,6 +186,34 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
+	public void decorateOfficeManagedObjectToOfficeManagedObjectSourceFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectToOfficeManagedObjectSourceFigureContext context) {
+		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
+	}
+
+	@Override
+	public void decorateOfficeManagedObjectDependencyToOfficeManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectDependencyToOfficeManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectDependencyToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeManagedObjectSourceFlowToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectSourceFlowToOfficeSectionInputFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
 	public void decorateOfficeSectionObjectToExternalManagedObjectFigure(
 			PolylineConnection figure,
 			OfficeSectionObjectToExternalManagedObjectFigureContext context) {
@@ -160,6 +236,13 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
+	public void decorateOfficeManagedObjectSourceTeamToOfficeTeamFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectSourceTeamToOfficeTeamFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
 	public void decorateAdministratorToOfficeTeamFigure(
 			PolylineConnection figure,
 			AdministratorToOfficeTeamFigureContext context) {
@@ -174,6 +257,13 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
+	public void decorateOfficeManagedObjectToAdministratorFigure(
+			PolylineConnection figure,
+			OfficeManagedObjectToAdministratorFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
 	public void decorateOfficeTaskToPreDutyFigure(PolylineConnection figure,
 			OfficeTaskToPreDutyFigureContext context) {
 		// Leave as default line
@@ -182,6 +272,13 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	@Override
 	public void decorateOfficeTaskToPostDutyFigure(PolylineConnection figure,
 			OfficeTaskToPostDutyFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeEscalationToOfficeSectionInputFigure(
+			PolylineConnection figure,
+			OfficeEscalationToOfficeSectionInputFigureContext context) {
 		// Leave as default line
 	}
 

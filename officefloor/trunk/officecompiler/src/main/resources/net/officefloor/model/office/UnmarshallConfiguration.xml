@@ -26,6 +26,24 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addOfficeManagedObjectSourceFlow" node="flow"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel">
+			<value method="setOfficeManagedObjectSourceFlowName" node="flow@name" />
+			<value method="setArgumentType" node="flow@argument-type" />
+			<object method="setOfficeSectionInput" node="section-input"
+				class="net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel">
+				<value method="setOfficeSectionName" node="section-input@section" />
+				<value method="setOfficeSectionInputName" node="section-input@input" />
+			</object>
+		</object>
+		<object method="addOfficeManagedObjectSourceTeam" node="team"
+			class="net.officefloor.model.office.OfficeManagedObjectSourceTeamModel">
+			<value method="setOfficeManagedObjectSourceTeamName" node="team@name" />
+			<object method="setOfficeTeam" node="office-team"
+				class="net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel">
+				<value method="setOfficeTeamName" node="office-team@name" />
+			</object>
+		</object>
 	</object>
 	<!-- MANAGED_OBJECTS -->
 	<object method="addOfficeManagedObject" node="managed-object"
@@ -37,6 +55,11 @@
 		<object method="setOfficeManagedObjectSource" node="managed-object-source"
 			class="net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel">
 			<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
+		</object>
+		<object method="addAdministrator" node="administer"
+			class="net.officefloor.model.office.OfficeManagedObjectToAdministratorModel">
+			<value method="setAdministratorName" node="administer@administrator" />
+			<value method="setOrder" node="administer@order" />
 		</object>
 		<object method="addOfficeManagedObjectDependency" node="dependency"
 			class="net.officefloor.model.office.OfficeManagedObjectDependencyModel">
@@ -65,6 +88,11 @@
 		<value method="setEscalationType" node="escalation@escalation-type" />
 		<value method="setX" node="escalation@x" />
 		<value method="setY" node="escalation@y" />
+		<object method="setOfficeSectionInput" node="handler"
+			class="net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel">
+			<value method="setOfficeSectionName" node="handler@section" />
+			<value method="setOfficeSectionInputName" node="handler@input" />
+		</object>
 	</object>
 	<!-- OFFICE ADMINISTRATORS -->
 	<object method="addOfficeAdministrator" node="administrator"

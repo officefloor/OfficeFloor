@@ -18,11 +18,13 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationModel.OfficeEscalationEvent;
 
@@ -30,7 +32,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeEscalationModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeEscalationEditPart
@@ -54,10 +56,18 @@ public class OfficeEscalationEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeSectionInput());
+	}
+
+	@Override
 	protected void handlePropertyChange(OfficeEscalationEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		// TODO handle property changes
+		case CHANGE_OFFICE_SECTION_INPUT:
+			this.refreshSourceConnections();
+			break;
 		}
 	}
 

@@ -36,7 +36,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeTeamModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeTeamEditPart
@@ -53,6 +53,9 @@ public class OfficeTeamEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionResponsibilities());
+		models
+				.addAll(this.getCastedModel()
+						.getOfficeManagedObjectSourceTeams());
 		models.addAll(this.getCastedModel().getAdministrators());
 	}
 
@@ -97,6 +100,8 @@ public class OfficeTeamEditPart
 			break;
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+		case ADD_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
+		case REMOVE_OFFICE_MANAGED_OBJECT_SOURCE_TEAM:
 		case ADD_ADMINISTRATOR:
 		case REMOVE_ADMINISTRATOR:
 			this.refreshTargetConnections();

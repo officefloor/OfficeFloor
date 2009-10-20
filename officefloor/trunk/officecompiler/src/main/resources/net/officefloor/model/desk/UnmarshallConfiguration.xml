@@ -21,6 +21,19 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addDeskManagedObjectSourceFlow" node="flow"
+			class="net.officefloor.model.desk.DeskManagedObjectSourceFlowModel">
+			<value method="setDeskManagedObjectSourceFlowName" node="flow@name" />
+			<value method="setArgumentType" node="flow@argument-type" />
+			<object method="setExternalFlow" node="external-flow"
+				class="net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel">
+				<value method="setExternalFlowName" node="external-flow@name" />
+			</object>
+			<object method="setTask" node="task"
+				class="net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel">
+				<value method="setTaskName" node="task@name" />
+			</object>
+		</object>
 	</object>
 	<!-- MANAGED_OBJECTS -->
 	<object method="addDeskManagedObject" node="managed-object"
@@ -32,6 +45,19 @@
 		<object method="setDeskManagedObjectSource" node="managed-object-source"
 			class="net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel">
 			<value method="setDeskManagedObjectSourceName" node="managed-object-source@name" />
+		</object>
+		<object method="addDeskManagedObjectDependency" node="dependency"
+			class="net.officefloor.model.desk.DeskManagedObjectDependencyModel">
+			<value method="setDeskManagedObjectDependencyName" node="dependency@name" />
+			<value method="setDependencyType" node="dependency@object-type" />
+			<object method="setExternalManagedObject" node="external-managed-object"
+				class="net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel">
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+			</object>
+			<object method="setDeskManagedObject" node="managed-object"
+				class="net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel">
+				<value method="setDeskManagedObjectName" node="managed-object@name" />
+			</object>
 		</object>
 	</object>
 	<!-- EXTERNAL FLOWS -->

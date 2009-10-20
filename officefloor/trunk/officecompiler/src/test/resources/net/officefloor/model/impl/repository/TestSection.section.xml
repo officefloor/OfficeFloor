@@ -12,10 +12,12 @@
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
-			<!--
-				<flow name="FLOW" argument-type="java.lang.Integer"> <office-input
-				office="OFFICE" section="SECTION" input="INPUT" /> </flow>
-			-->
+			<flow name="FLOW_ONE" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</flow>
+			<flow name="FLOW_TWO" argument-type="java.lang.Integer">
+				<sub-section-input sub-section="SECTION_A" input="INPUT_A" />
+			</flow>
 		</managed-object-source>
 	</managed-object-sources>
 

@@ -44,7 +44,7 @@ public class StandardOfficeSectionObjectFigure extends
 	public StandardOfficeSectionObjectFigure(
 			OfficeSectionObjectFigureContext context) {
 		LabelConnectorFigure connector = new LabelConnectorFigure(context
-				.getOfficeSectionObjectName(), ConnectorDirection.WEST,
+				.getOfficeSectionObjectName(), ConnectorDirection.EAST,
 				StandardOfficeFloorColours.BLACK());
 
 		// Register the anchors

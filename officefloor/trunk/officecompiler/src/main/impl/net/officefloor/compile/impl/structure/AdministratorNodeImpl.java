@@ -228,13 +228,20 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			LinkObjectNode linkObject = (LinkObjectNode) administerableManagedObject;
 
 			// Obtain the managed object
-			BoundManagedObjectNode managedObject = LinkUtil.retrieveTarget(
-					linkObject, BoundManagedObjectNode.class, "Managed Object "
-							+ administerableManagedObject
-									.getAdministerableManagedObjectName(),
-					LocationType.OFFICE, this.officeLocation,
-					AssetType.ADMINISTRATOR, this.administratorName,
-					this.context.getCompilerIssues());
+			BoundManagedObjectNode managedObject;
+			if (linkObject instanceof BoundManagedObjectNode) {
+				// Directly linked to managed object
+				managedObject = (BoundManagedObjectNode) linkObject;
+			} else {
+				// Locate the managed object
+				managedObject = LinkUtil.retrieveTarget(linkObject,
+						BoundManagedObjectNode.class, "Managed Object "
+								+ administerableManagedObject
+										.getAdministerableManagedObjectName(),
+						LocationType.OFFICE, this.officeLocation,
+						AssetType.ADMINISTRATOR, this.administratorName,
+						this.context.getCompilerIssues());
+			}
 			if (managedObject == null) {
 				continue; // must have managed object
 			}

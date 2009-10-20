@@ -1,10 +1,12 @@
 <office>
+
 	<external-managed-objects>
 		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
 			object-type="java.sql.Connection" object-scope="PROCESS" x="100" y="101">
 			<administer administrator="ADMINISTRATOR" order="1" />
 		</external-managed-object>
 	</external-managed-objects>
+
 	<managed-object-sources>
 		<managed-object-source name="MANAGED_OBJECT_SOURCE"
 			source="net.example.ExampleManagedObjectSource" object-type="net.orm.Session"
@@ -13,17 +15,20 @@
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />
 			</properties>
-			<!--
-				<flow name="FLOW" argument-type="java.lang.Integer"> <office-input
-				office="OFFICE" section="SECTION" input="INPUT" /> </flow> <team
-				name="MO_TEAM"> <office-floor-team name="TEAM" /> </team>
-			-->
+			<flow name="FLOW" argument-type="java.lang.Integer">
+				<section-input section="SECTION" input="INPUT" />
+			</flow>
+			<team name="MO_TEAM">
+				<office-team name="TEAM" />
+			</team>
 		</managed-object-source>
 	</managed-object-sources>
+
 	<managed-objects>
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
+			<administer administrator="ADMINISTRATOR" order="1" />
 			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
 			</dependency>
@@ -36,13 +41,18 @@
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
 		</managed-object>
 	</managed-objects>
+
 	<teams>
 		<team name="TEAM" x="400" y="401" />
 	</teams>
+
 	<escalations>
 		<escalation escalation-type="java.lang.Exception" x="500"
-			y="501" />
+			y="501">
+			<handler section="SECTION" input="INPUT" />
+		</escalation>
 	</escalations>
+
 	<administrators>
 		<administrator name="ADMINISTRATOR"
 			source="net.example.ExampleAdministratorSource" scope="THREAD" x="600"
@@ -56,6 +66,7 @@
 			<duty name="DUTY_TWO" />
 		</administrator>
 	</administrators>
+
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION" x="700" y="701">
@@ -102,4 +113,5 @@
 			<input name="INPUT" parameter-type="java.lang.Float" />
 		</section>
 	</sections>
+
 </office>

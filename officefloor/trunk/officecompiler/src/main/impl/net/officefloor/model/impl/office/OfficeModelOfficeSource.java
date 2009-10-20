@@ -59,6 +59,7 @@ import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -446,6 +447,31 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					}
 					list.add(new AdministeredManagedObject(extMoToAdmin
 							.getOrder(), officeObject));
+				}
+			}
+		}
+		for (OfficeManagedObjectModel moModel : office
+				.getOfficeManagedObjects()) {
+
+			// Obtain the office managed object
+			OfficeManagedObject mo = managedObjects.get(moModel
+					.getOfficeManagedObjectName());
+
+			// Add the managed object for administration
+			for (OfficeManagedObjectToAdministratorModel moToAdmin : moModel
+					.getAdministrators()) {
+				AdministratorModel adminModel = moToAdmin.getAdministrator();
+				if (adminModel != null) {
+					String administratorName = adminModel
+							.getAdministratorName();
+					List<AdministeredManagedObject> list = administration
+							.get(administratorName);
+					if (list == null) {
+						list = new LinkedList<AdministeredManagedObject>();
+						administration.put(administratorName, list);
+					}
+					list.add(new AdministeredManagedObject(
+							moToAdmin.getOrder(), mo));
 				}
 			}
 		}

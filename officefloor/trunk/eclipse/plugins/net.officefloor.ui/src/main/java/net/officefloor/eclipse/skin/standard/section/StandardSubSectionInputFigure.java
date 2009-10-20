@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.SubSectionItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -48,12 +49,15 @@ public class StandardSubSectionInputFigure extends AbstractOfficeFloorFigure
 	 *            {@link SubSectionInputFigureContext}.
 	 */
 	public StandardSubSectionInputFigure(SubSectionInputFigureContext context) {
-		this.figure = new SubSectionItemFigure(context.getSubSectionInputName(),
-				context.isPublic(), ConnectorDirection.WEST,
-				StandardOfficeFloorColours.BLACK());
+		this.figure = new SubSectionItemFigure(
+				context.getSubSectionInputName(), context.isPublic(),
+				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
 		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				SubSectionOutputToSubSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(
+				SectionManagedObjectSourceFlowToSubSectionInputModel.class,
+				anchor);
 		this.setFigure(figure);
 	}
 

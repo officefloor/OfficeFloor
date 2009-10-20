@@ -36,7 +36,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalFlowModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalFlowEditPart
@@ -53,6 +53,8 @@ public class ExternalFlowEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionOutputs());
+		models.addAll(this.getCastedModel()
+				.getSectionManagedObjectSourceFlows());
 	}
 
 	@Override
@@ -96,6 +98,8 @@ public class ExternalFlowEditPart
 			break;
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
+		case ADD_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_SECTION_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
 			break;
 		}

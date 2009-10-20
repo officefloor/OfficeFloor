@@ -23,6 +23,8 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -51,6 +53,11 @@ public class StandardOfficeSectionInputFigure extends AbstractOfficeFloorFigure
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeSectionOutputToOfficeSectionInputModel.class, anchor);
+		this.registerConnectionAnchor(
+				OfficeManagedObjectSourceFlowToOfficeSectionInputModel.class,
+				anchor);
+		this.registerConnectionAnchor(
+				OfficeEscalationToOfficeSectionInputModel.class, anchor);
 
 		this.setFigure(connector);
 	}

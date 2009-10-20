@@ -25,6 +25,17 @@ import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SectionFigureFactory;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigure;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFlowToSubSectionInputFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectToSectionManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionFigure;
 import net.officefloor.eclipse.skin.section.SubSectionFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigure;
@@ -36,10 +47,11 @@ import net.officefloor.eclipse.skin.section.SubSectionOutputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionOutputToExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionOutputToSubSectionInputFigureContext;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 
 /**
  * Standard {@link SectionFigureFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardSectionFigureFactory implements SectionFigureFactory {
@@ -54,6 +66,30 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
 		return new StandardExternalManagedObjectFigure(context);
+	}
+
+	@Override
+	public SectionManagedObjectSourceFigure createSectionManagedObjectSourceFigure(
+			SectionManagedObjectSourceFigureContext context) {
+		return new StandardSectionManagedObjectSourceFigure(context);
+	}
+
+	@Override
+	public SectionManagedObjectSourceFlowFigure createSectionManagedObjectSourceFlowFigure(
+			SectionManagedObjectSourceFlowFigureContext context) {
+		return new StandardSectionManagedObjectSourceFlowFigure(context);
+	}
+
+	@Override
+	public SectionManagedObjectFigure createSectionManagedObjectFigure(
+			SectionManagedObjectFigureContext context) {
+		return new StandardSectionManagedObjectFigure(context);
+	}
+
+	@Override
+	public SectionManagedObjectDependencyFigure createSectionManagedObjectDependencyFigure(
+			SectionManagedObjectDependencyFigureContext context) {
+		return new StandardSectionManagedObjectDependencyFigure(context);
 	}
 
 	@Override
@@ -101,6 +137,30 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 			SubSectionOutputToExternalFlowFigureContext context) {
 		// Provide arrow
 		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionManagedObjectSourceFlowToExternalFlowFigure(
+			PolylineConnection figure,
+			SectionManagedObjectSourceFlowToExternalFlowFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionManagedObjectSourceFlowToSubSectionInputFigure(
+			PolylineConnection figure,
+			SectionManagedObjectSourceFlowToSubSectionInputFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionManagedObjectToSectionManagedObjectSourceFigure(
+			PolylineConnection figure,
+			SectionManagedObjectToSectionManagedObjectSourceFigureContext context) {
+		// Link line
+		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
 	}
 
 }

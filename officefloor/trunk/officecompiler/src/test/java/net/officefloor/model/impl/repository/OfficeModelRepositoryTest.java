@@ -30,11 +30,17 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
@@ -117,12 +123,29 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getY" }, office.getOfficeManagedObjectSources(),
 				new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, 200, 201));
+						"net.orm.Session", null, null, null, null, 200, 201));
 		OfficeManagedObjectSourceModel mos = office
 				.getOfficeManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
 						"MO_TWO", "VALUE_TWO"));
+		assertList(new String[] { "getOfficeManagedObjectSourceFlowName",
+				"getArgumentType" }, mos.getOfficeManagedObjectSourceFlows(),
+				new OfficeManagedObjectSourceFlowModel("FLOW", Integer.class
+						.getName()));
+		OfficeManagedObjectSourceFlowModel flow = mos
+				.getOfficeManagedObjectSourceFlows().get(0);
+		assertProperties(
+				new OfficeManagedObjectSourceFlowToOfficeSectionInputModel(
+						"SECTION", "INPUT"), flow.getOfficeSectionInput(),
+				"getOfficeSectionName", "getOfficeSectionInputName");
+		assertList(new String[] { "getOfficeManagedObjectSourceTeamName" }, mos
+				.getOfficeManagedObjectSourceTeams(),
+				new OfficeManagedObjectSourceTeamModel("MO_TEAM"));
+		OfficeManagedObjectSourceTeamModel moTeam = mos
+				.getOfficeManagedObjectSourceTeams().get(0);
+		assertProperties(new OfficeManagedObjectSourceTeamToOfficeTeamModel(
+				"TEAM"), moTeam.getOfficeTeam(), "getOfficeTeamName");
 
 		// ----------------------------------------
 		// Validate the managed objects
@@ -130,15 +153,19 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeManagedObjectName",
 				"getManagedObjectScope", "getX", "getY" }, office
 				.getOfficeManagedObjects(), new OfficeManagedObjectModel(
-				"MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, 300,
-				301), new OfficeManagedObjectModel("MANAGED_OBJECT_TWO",
-				"PROCESS", null, null, null, null, 310, 311));
+				"MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null,
+				300, 301), new OfficeManagedObjectModel("MANAGED_OBJECT_TWO",
+				"PROCESS", null, null, null, null, null, 310, 311));
 		OfficeManagedObjectModel mo = office.getOfficeManagedObjects().get(0);
 		assertProperties(
 				new OfficeManagedObjectToOfficeManagedObjectSourceModel(
 						"MANAGED_OBJECT_SOURCE"), mo
 						.getOfficeManagedObjectSource(),
 				"getOfficeManagedObjectSourceName");
+		assertList(new String[] { "getAdministratorName", "getOrder" }, mo
+				.getAdministrators(),
+				new OfficeManagedObjectToAdministratorModel("ADMINISTRATOR",
+						"1"));
 		assertList(new String[] { "getOfficeManagedObjectDependencyName",
 				"getDependencyType" }, mo.getOfficeManagedObjectDependencies(),
 				new OfficeManagedObjectDependencyModel("DEPENDENCY_ONE",
@@ -163,15 +190,19 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeTeamName", "getX", "getY" }, office
-				.getOfficeTeams(), new OfficeTeamModel("TEAM", null, null, 400,
-				401));
+				.getOfficeTeams(), new OfficeTeamModel("TEAM", null, null,
+				null, 400, 401));
 
 		// ----------------------------------------
 		// Validate the escalations
 		// ----------------------------------------
 		assertList(new String[] { "getEscalationType", "getX", "getY" }, office
 				.getOfficeEscalations(), new OfficeEscalationModel(
-				Exception.class.getName(), 500, 501));
+				Exception.class.getName(), null, 500, 501));
+		OfficeEscalationModel escalation = office.getOfficeEscalations().get(0);
+		assertProperties(new OfficeEscalationToOfficeSectionInputModel(
+				"SECTION", "INPUT"), escalation.getOfficeSectionInput(),
+				"getOfficeSectionName", "getOfficeSectionInputName");
 
 		// ----------------------------------------
 		// Validate the administrators
@@ -181,7 +212,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getX", "getY" }, office.getOfficeAdministrators(),
 				new AdministratorModel("ADMINISTRATOR",
 						"net.example.ExampleAdministratorSource", "THREAD",
-						null, null, null, null, 600, 601));
+						null, null, null, null, null, 600, 601));
 		AdministratorModel admin = office.getOfficeAdministrators().get(0);
 		assertList(new String[] { "getName", "getValue" }, admin
 				.getProperties(), new PropertyModel("ADMIN_ONE", "VALUE_ONE"),

@@ -23,8 +23,9 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel
 /**
  * {@link OfficeFloorFigure} for the
  * {@link OfficeFloorManagedObjectSourceFlowModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorManagedObjectSourceFlowFigure extends OfficeFloorFigure {
+public interface OfficeFloorManagedObjectSourceFlowFigure extends
+		OfficeFloorFigure {
 }

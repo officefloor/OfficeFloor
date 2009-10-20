@@ -485,6 +485,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						.setInputManagedObjectName(inputBoundManagedObjectName);
 
 				// TODO load input dependencies
+				System.err
+						.println("TODO implement loading input dependency mappings: "
+								+ inputDependencyMappings);
 			}
 		}
 

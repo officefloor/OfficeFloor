@@ -20,6 +20,7 @@ package net.officefloor.model.office;
 import java.util.Map;
 
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -32,6 +33,7 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.change.Change;
 
 /**
@@ -218,6 +220,105 @@ public interface OfficeChanges {
 			String newExternalManagedObjectName);
 
 	/**
+	 * Adds an {@link OfficeManagedObjectSourceModel} to {@link OfficeModel}.
+	 *
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSourceModel}.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link OfficeManagedObjectSourceModel}.
+	 */
+	Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link OfficeManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSourceModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectSourceModel}.
+	 */
+	Change<OfficeManagedObjectSourceModel> removeOfficeManagedObjectSource(
+			OfficeManagedObjectSourceModel managedObjectSource);
+
+	/**
+	 * Renames the {@link OfficeManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSourceModel} to rename.
+	 * @param newManagedObjectSourceName
+	 *            New name for the {@link OfficeManagedObjectSourceModel}.
+	 * @return {@link Change} to rename the
+	 *         {@link OfficeManagedObjectSourceModel}.
+	 */
+	Change<OfficeManagedObjectSourceModel> renameOfficeManagedObjectSource(
+			OfficeManagedObjectSourceModel managedObjectSource,
+			String newManagedObjectSourceName);
+
+	/**
+	 * Adds an {@link OfficeManagedObjectModel} for an
+	 * {@link OfficeManagedObjectSourceModel} to the {@link OfficeModel}.
+	 *
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeManagedObjectModel}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the
+	 *            {@link OfficeManagedObjectModel}.
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSourceModel}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link OfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectModel> addOfficeManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			OfficeManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link OfficeManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link OfficeManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectModel> removeOfficeManagedObject(
+			OfficeManagedObjectModel managedObject);
+
+	/**
+	 * Renames the {@link OfficeManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link OfficeManagedObjectModel} to rename.
+	 * @param newManagedObjectName
+	 *            New name for the {@link OfficeManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link OfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectModel> renameOfficeManagedObject(
+			OfficeManagedObjectModel managedObject, String newManagedObjectName);
+
+	/**
+	 * Scopes the {@link OfficeManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link OfficeManagedObjectModel} to scope.
+	 * @param newManagedObjectScope
+	 *            New {@link ManagedObjectScope} for the
+	 *            {@link OfficeManagedObjectModel}.
+	 * @return {@link Change} to scope {@link OfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(
+			OfficeManagedObjectModel managedObject,
+			ManagedObjectScope newManagedObjectScope);
+
+	/**
 	 * Adds an {@link AdministratorModel} to the {@link OfficeModel}.
 	 *
 	 * @param administratorName
@@ -346,6 +447,92 @@ public interface OfficeChanges {
 			OfficeSectionObjectToExternalManagedObjectModel officeSectionObjectToExternalManagedObject);
 
 	/**
+	 * Links the {@link OfficeManagedObjectDependencyModel} to the
+	 * {@link OfficeManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link OfficeManagedObjectDependencyModel}.
+	 * @param managedObject
+	 *            {@link OfficeManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> linkOfficeManagedObjectDependencyToOfficeManagedObject(
+			OfficeManagedObjectDependencyModel dependency,
+			OfficeManagedObjectModel managedObject);
+
+	/**
+	 * Removes the
+	 * {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}.
+	 *
+	 * @param officeManagedObjectDependencyToOfficeManagedObject
+	 *            {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectDependencyToOfficeManagedObjectModel}.
+	 */
+	Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> removeOfficeManagedObjectDependencyToOfficeManagedObject(
+			OfficeManagedObjectDependencyToOfficeManagedObjectModel officeManagedObjectDependencyToOfficeManagedObject);
+
+	/**
+	 * Links the {@link OfficeManagedObjectDependencyModel} to the
+	 * {@link ExternalManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link OfficeManagedObjectDependencyModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}
+	 *         .
+	 */
+	Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> linkOfficeManagedObjectDependencyToExternalManagedObject(
+			OfficeManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the
+	 * {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}.
+	 *
+	 * @param officeManagedObjectDependencyToExternalManagedObject
+	 *            {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}
+	 *            to remove.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeManagedObjectDependencyToExternalManagedObjectModel}
+	 *         .
+	 */
+	Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> removeOfficeManagedObjectDependencyToExternalManagedObject(
+			OfficeManagedObjectDependencyToExternalManagedObjectModel officeManagedObjectDependencyToExternalManagedObject);
+
+	/**
+	 * Links the {@link OfficeManagedObjectSourceFlowModel} to the
+	 * {@link OfficeSectionInputModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link OfficeManagedObjectSourceFlowModel}.
+	 * @param officeSectionInput
+	 *            {@link OfficeSectionInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}.
+	 */
+	Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> linkOfficeManagedObjectSourceFlowToOfficeSectionInput(
+			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow,
+			OfficeSectionInputModel officeSectionInput);
+
+	/**
+	 * Removes the the
+	 * {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}.
+	 *
+	 * @param managedObjectSourceFlowToOfficeSectionInput
+	 *            {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectSourceFlowToOfficeSectionInputModel}.
+	 */
+	Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> removeOfficeManagedObjectSourceFlowToOfficeSectionInput(
+			OfficeManagedObjectSourceFlowToOfficeSectionInputModel managedObjectSourceFlowToOfficeSectionInput);
+
+	/**
 	 * Links the {@link OfficeSectionOutputModel} to the
 	 * {@link OfficeSectionInputModel}.
 	 *
@@ -400,6 +587,33 @@ public interface OfficeChanges {
 			OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam);
 
 	/**
+	 * Links the {@link OfficeManagedObjectSourceTeamModel} to the
+	 * {@link OfficeTeamModel}.
+	 *
+	 * @param mosTeam
+	 *            {@link OfficeManagedObjectSourceTeamModel}.
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeManagedObjectSourceTeamModel}.
+	 */
+	Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> linkOfficeManagedObjectSourceTeamToOfficeTeam(
+			OfficeManagedObjectSourceTeamModel mosTeam,
+			OfficeTeamModel officeTeam);
+
+	/**
+	 * Removes the {@link OfficeManagedObjectSourceTeamToOfficeTeamModel}.
+	 *
+	 * @param officeManagedObjectSourceTeamToOfficeTeam
+	 *            {@link OfficeManagedObjectSourceTeamToOfficeTeamModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectSourceTeamToOfficeTeamModel}.
+	 */
+	Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> removeOfficeManagedObjectSourceTeamToOfficeTeam(
+			OfficeManagedObjectSourceTeamToOfficeTeamModel officeManagedObjectSourceTeamToOfficeTeam);
+
+	/**
 	 * Links the {@link AdministratorModel} to the {@link OfficeTeamModel}.
 	 *
 	 * @param administrator
@@ -447,6 +661,32 @@ public interface OfficeChanges {
 	 */
 	Change<ExternalManagedObjectToAdministratorModel> removeExternalManagedObjectToAdministrator(
 			ExternalManagedObjectToAdministratorModel externalManagedObjectToAdministrator);
+
+	/**
+	 * Links the {@link OfficeManagedObjectModel} to the
+	 * {@link AdministratorModel}.
+	 *
+	 * @param managedObject
+	 *            {@link OfficeManagedObjectModel}.
+	 * @param administrator
+	 *            {@link AdministratorModel}.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectToAdministratorModel}.
+	 */
+	Change<OfficeManagedObjectToAdministratorModel> linkOfficeManagedObjectToAdministrator(
+			OfficeManagedObjectModel managedObject,
+			AdministratorModel administrator);
+
+	/**
+	 * Removes the {@link OfficeManagedObjectToAdministratorModel}.
+	 *
+	 * @param managedObjectToAdministrator
+	 *            {@link OfficeManagedObjectToAdministratorModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeManagedObjectToAdministratorModel}.
+	 */
+	Change<OfficeManagedObjectToAdministratorModel> removeOfficeManagedObjectToAdministrator(
+			OfficeManagedObjectToAdministratorModel managedObjectToAdministrator);
 
 	/**
 	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
@@ -507,5 +747,31 @@ public interface OfficeChanges {
 	 */
 	Change<OfficeTaskToPostDutyModel> removeOfficeTaskToPostDuty(
 			OfficeTaskToPostDutyModel officeTaskToPostDuty);
+
+	/**
+	 * Links the {@link OfficeEscalationModel} to the
+	 * {@link OfficeSectionInputModel}.
+	 *
+	 * @param escalation
+	 *            {@link OfficeEscalationModel}.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeEscalationToOfficeSectionInputModel}.
+	 */
+	Change<OfficeEscalationToOfficeSectionInputModel> linkOfficeEscalationToOfficeSectionInput(
+			OfficeEscalationModel escalation,
+			OfficeSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link OfficeEscalationToOfficeSectionInputModel}.
+	 *
+	 * @param escalationToSectionInput
+	 *            {@link OfficeEscalationToOfficeSectionInputModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeEscalationToOfficeSectionInputModel}.
+	 */
+	Change<OfficeEscalationToOfficeSectionInputModel> removeOfficeEscalationToOfficeSectionInput(
+			OfficeEscalationToOfficeSectionInputModel escalationToSectionInput);
 
 }

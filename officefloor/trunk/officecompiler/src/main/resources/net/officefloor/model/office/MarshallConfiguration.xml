@@ -46,6 +46,39 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getOfficeManagedObjectSourceFlows">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel"
+					element="flow">
+					<attributes>
+						<attribute method="getOfficeManagedObjectSourceFlowName"
+							attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getOfficeSectionInput" element="section-input">
+						<attributes>
+							<attribute method="getOfficeSectionName" attribute="section" />
+							<attribute method="getOfficeSectionInputName"
+								attribute="input" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<collection method="getOfficeManagedObjectSourceTeams">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectSourceTeamModel"
+					element="team">
+					<attributes>
+						<attribute method="getOfficeManagedObjectSourceTeamName"
+							attribute="name" />
+					</attributes>
+					<object method="getOfficeTeam" element="office-team">
+						<attributes>
+							<attribute method="getOfficeTeamName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- MANAGED OBJECTS -->
@@ -64,6 +97,16 @@
 						attribute="name" />
 				</attributes>
 			</object>
+			<collection method="getAdministrators">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectToAdministratorModel"
+					element="administer">
+					<attributes>
+						<attribute method="getAdministratorName" attribute="administrator" />
+						<attribute method="getOrder" attribute="order" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getOfficeManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.office.OfficeManagedObjectDependencyModel"
@@ -109,6 +152,12 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<object method="getOfficeSectionInput" element="handler">
+				<attributes>
+					<attribute method="getOfficeSectionName" attribute="section" />
+					<attribute method="getOfficeSectionInputName" attribute="input" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 	<!-- OFFICE ADMINISTRATORS -->

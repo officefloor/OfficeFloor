@@ -58,6 +58,7 @@ public class ExternalManagedObjectEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeSectionObjects());
+		models.addAll(this.getCastedModel().getDependentOfficeManagedObjects());
 	}
 
 	@Override
@@ -108,6 +109,8 @@ public class ExternalManagedObjectEditPart
 			break;
 		case ADD_OFFICE_SECTION_OBJECT:
 		case REMOVE_OFFICE_SECTION_OBJECT:
+		case ADD_DEPENDENT_OFFICE_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_OFFICE_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		}

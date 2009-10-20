@@ -2,14 +2,11 @@
 <model>
 	<field type="String" name="desk managed object name" />
 	<field type="String" name="managed object scope" />
-    <field type="DeskManagedObjectToDeskManagedObjectSourceModel"
-        name="desk managed object source" />
+	<field type="DeskManagedObjectToDeskManagedObjectSourceModel"
+		name="desk managed object source" />
 	<list type="WorkTaskObjectToDeskManagedObjectModel" name="work task object" />
-<!--
-    <list type="DeskManagedObjectDependencyModel" name="desk managed object dependency"
-        plural="desk managed object dependencies" />
-	<list
-		type="DeskManagedObjectDependencyToDeskManagedObjectModel"
+	<list type="DeskManagedObjectDependencyModel" name="desk managed object dependency"
+		plural="desk managed object dependencies" />
+	<list type="DeskManagedObjectDependencyToDeskManagedObjectModel"
 		name="dependent desk managed object" />
--->
 </model>

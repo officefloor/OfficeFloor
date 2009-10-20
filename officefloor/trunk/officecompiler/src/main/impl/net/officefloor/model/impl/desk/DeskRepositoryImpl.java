@@ -21,7 +21,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
@@ -156,10 +162,65 @@ public class DeskRepositoryImpl implements DeskRepository {
 			}
 		}
 
+		// Connect the dependencies to external managed objects
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			for (DeskManagedObjectDependencyModel dependency : mo
+					.getDeskManagedObjectDependencies()) {
+				DeskManagedObjectDependencyToExternalManagedObjectModel conn = dependency
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = externalManagedObjects
+							.get(conn.getExternalManagedObjectName());
+					if (extMo != null) {
+						conn.setDeskManagedObjectDependency(dependency);
+						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the dependencies to managed objects
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			for (DeskManagedObjectDependencyModel dependency : mo
+					.getDeskManagedObjectDependencies()) {
+				DeskManagedObjectDependencyToDeskManagedObjectModel conn = dependency
+						.getDeskManagedObject();
+				if (conn != null) {
+					DeskManagedObjectModel dependentMo = managedObjects
+							.get(conn.getDeskManagedObjectName());
+					if (dependentMo != null) {
+						conn.setDeskManagedObjectDependency(dependency);
+						conn.setDeskManagedObject(dependentMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the set of external flows
 		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
 		for (ExternalFlowModel flow : desk.getExternalFlows()) {
 			externalFlows.put(flow.getExternalFlowName(), flow);
+		}
+
+		// Connect the managed object source flows to external flows
+		for (DeskManagedObjectSourceModel mos : desk
+				.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectSourceFlowModel mosFlow : mos
+					.getDeskManagedObjectSourceFlows()) {
+				DeskManagedObjectSourceFlowToExternalFlowModel conn = mosFlow
+						.getExternalFlow();
+				if (conn != null) {
+					ExternalFlowModel extFlow = externalFlows.get(conn
+							.getExternalFlowName());
+					if (extFlow != null) {
+						conn.setDeskManagedObjectSourceFlow(mosFlow);
+						conn.setExternalFlow(extFlow);
+						conn.connect();
+					}
+				}
+			}
 		}
 
 		// Connect the task flows to external flow
@@ -202,6 +263,23 @@ public class DeskRepositoryImpl implements DeskRepository {
 		Map<String, TaskModel> tasks = new HashMap<String, TaskModel>();
 		for (TaskModel task : desk.getTasks()) {
 			tasks.put(task.getTaskName(), task);
+		}
+
+		// Connect the managed object source flows to tasks
+		for (DeskManagedObjectSourceModel mos : desk
+				.getDeskManagedObjectSources()) {
+			for (DeskManagedObjectSourceFlowModel mosFlow : mos
+					.getDeskManagedObjectSourceFlows()) {
+				DeskManagedObjectSourceFlowToTaskModel conn = mosFlow.getTask();
+				if (conn != null) {
+					TaskModel task = tasks.get(conn.getTaskName());
+					if (task != null) {
+						conn.setDeskManagedObjectSourceFlow(mosFlow);
+						conn.setTask(task);
+						conn.connect();
+					}
+				}
+			}
 		}
 
 		// Connect the task flows to tasks
@@ -330,6 +408,22 @@ public class DeskRepositoryImpl implements DeskRepository {
 			}
 		}
 
+		// Specify managed object source flow to its external flow
+		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
+			for (DeskManagedObjectSourceFlowToExternalFlowModel conn : extFlow
+					.getDeskManagedObjectSourceFlows()) {
+				conn.setExternalFlowName(extFlow.getExternalFlowName());
+			}
+		}
+
+		// Specify managed object source flow to its task
+		for (TaskModel task : desk.getTasks()) {
+			for (DeskManagedObjectSourceFlowToTaskModel conn : task
+					.getDeskManagedObjectSourceFlows()) {
+				conn.setTaskName(task.getTaskName());
+			}
+		}
+
 		// Specify task object to external managed object
 		for (WorkModel work : desk.getWorks()) {
 			for (WorkTaskModel workTask : work.getWorkTasks()) {
@@ -349,6 +443,24 @@ public class DeskRepositoryImpl implements DeskRepository {
 		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
 			for (WorkTaskObjectToDeskManagedObjectModel conn : mo
 					.getWorkTaskObjects()) {
+				conn.setDeskManagedObjectName(mo.getDeskManagedObjectName());
+			}
+		}
+
+		// Specify dependency to external managed object
+		for (ExternalManagedObjectModel extMo : desk
+				.getExternalManagedObjects()) {
+			for (DeskManagedObjectDependencyToExternalManagedObjectModel conn : extMo
+					.getDependentDeskManagedObjects()) {
+				conn.setExternalManagedObjectName(extMo
+						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify dependency to managed object
+		for (DeskManagedObjectModel mo : desk.getDeskManagedObjects()) {
+			for (DeskManagedObjectDependencyToDeskManagedObjectModel conn : mo
+					.getDependentDeskManagedObjects()) {
 				conn.setDeskManagedObjectName(mo.getDeskManagedObjectName());
 			}
 		}

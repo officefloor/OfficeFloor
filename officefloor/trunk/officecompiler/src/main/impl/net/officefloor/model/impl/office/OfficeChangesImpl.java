@@ -31,6 +31,10 @@ import java.util.Set;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -40,6 +44,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
@@ -52,6 +57,18 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
+import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
@@ -88,6 +105,33 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 */
 	public OfficeChangesImpl(OfficeModel office) {
 		this.office = office;
+	}
+
+	/**
+	 * Obtains the text name identifying the {@link ManagedObjectScope}.
+	 *
+	 * @param scope
+	 *            {@link ManagedObjectScope}.
+	 * @return Text name for the {@link ManagedObjectScope}.
+	 */
+	public static String getManagedObjectScope(ManagedObjectScope scope) {
+
+		// Ensure have scope
+		if (scope == null) {
+			return null;
+		}
+
+		// Return the text of the scope
+		switch (scope) {
+		case PROCESS:
+			return PROCESS_MANAGED_OBJECT_SCOPE;
+		case THREAD:
+			return THREAD_MANAGED_OBJECT_SCOPE;
+		case WORK:
+			return WORK_MANAGED_OBJECT_SCOPE;
+		default:
+			throw new IllegalStateException("Unknown scope " + scope);
+		}
 	}
 
 	/**
@@ -1063,6 +1107,229 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
+	public Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addOfficeManagedObjectSource)
+
+		// Create the managed object source
+		final OfficeManagedObjectSourceModel managedObjectSource = new OfficeManagedObjectSourceModel(
+				managedObjectSourceName, managedObjectSourceClassName,
+				managedObjectType.getObjectClass().getName());
+		for (Property property : properties) {
+			managedObjectSource.addProperty(new PropertyModel(property
+					.getName(), property.getValue()));
+		}
+
+		// Add the flows for the managed object source
+		for (ManagedObjectFlowType<?> flow : managedObjectType.getFlowTypes()) {
+			managedObjectSource
+					.addOfficeManagedObjectSourceFlow(new OfficeManagedObjectSourceFlowModel(
+							flow.getFlowName(), flow.getArgumentType()
+									.getName()));
+		}
+
+		// Add the teams for the managed object source
+		for (ManagedObjectTeamType team : managedObjectType.getTeamTypes()) {
+			managedObjectSource
+					.addOfficeManagedObjectSourceTeam(new OfficeManagedObjectSourceTeamModel(
+							team.getTeamName()));
+		}
+
+		// Return the change to add the managed object source
+		return new AbstractChange<OfficeManagedObjectSourceModel>(
+				managedObjectSource, "Add managed object source") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.addOfficeManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.removeOfficeManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectSourceModel> removeOfficeManagedObjectSource(
+			final OfficeManagedObjectSourceModel managedObjectSource) {
+
+		// TODO this this method (removeOfficeManagedObjectSource)
+
+		// Return change to remove the managed object source
+		return new AbstractChange<OfficeManagedObjectSourceModel>(
+				managedObjectSource, "Remove managed object source") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.removeOfficeManagedObjectSource(managedObjectSource);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.addOfficeManagedObjectSource(managedObjectSource);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectSourceModel> renameOfficeManagedObjectSource(
+			final OfficeManagedObjectSourceModel managedObjectSource,
+			final String newManagedObjectSourceName) {
+
+		// TODO test this method (renameOfficeManagedObjectSource)
+
+		// Obtain the old managed object source name
+		final String oldManagedObjectSourceName = managedObjectSource
+				.getOfficeManagedObjectSourceName();
+
+		// Return change to rename the managed object source
+		return new AbstractChange<OfficeManagedObjectSourceModel>(
+				managedObjectSource, "Rename managed object source to "
+						+ newManagedObjectSourceName) {
+			@Override
+			public void apply() {
+				managedObjectSource
+						.setOfficeManagedObjectSourceName(newManagedObjectSourceName);
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSource
+						.setOfficeManagedObjectSourceName(oldManagedObjectSourceName);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectModel> addOfficeManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			OfficeManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType) {
+
+		// TODO test this method (addOfficeManagedObject)
+
+		// Create the managed object
+		final OfficeManagedObjectModel managedObject = new OfficeManagedObjectModel(
+				managedObjectName, getManagedObjectScope(managedObjectScope));
+
+		// Add the dependencies for the managed object
+		for (ManagedObjectDependencyType<?> dependency : managedObjectType
+				.getDependencyTypes()) {
+			managedObject
+					.addOfficeManagedObjectDependency(new OfficeManagedObjectDependencyModel(
+							dependency.getDependencyName(), dependency
+									.getDependencyType().getName()));
+		}
+
+		// Create connection to the managed object source
+		final OfficeManagedObjectToOfficeManagedObjectSourceModel conn = new OfficeManagedObjectToOfficeManagedObjectSourceModel();
+		conn.setOfficeManagedObject(managedObject);
+		conn.setOfficeManagedObjectSource(managedObjectSource);
+
+		// Return change to add the managed object
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
+				"Add managed object") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.addOfficeManagedObject(managedObject);
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+				OfficeChangesImpl.this.office
+						.removeOfficeManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectModel> removeOfficeManagedObject(
+			final OfficeManagedObjectModel managedObject) {
+
+		// TODO test this method (removeFloorManagedObject)
+
+		// Return change to remove the managed object
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
+				"Remove managed object") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.removeOfficeManagedObject(managedObject);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.addOfficeManagedObject(managedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectModel> renameOfficeManagedObject(
+			final OfficeManagedObjectModel managedObject,
+			final String newManagedObjectName) {
+
+		// TODO test this method (renameOfficeManagedObject)
+
+		// Obtain the old managed object name
+		final String oldManagedObjectName = managedObject
+				.getOfficeManagedObjectName();
+
+		// Return change to rename the managed object
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
+				"Rename managed object to " + newManagedObjectName) {
+			@Override
+			public void apply() {
+				managedObject.setOfficeManagedObjectName(newManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setOfficeManagedObjectName(oldManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectModel> rescopeOfficeManagedObject(
+			final OfficeManagedObjectModel managedObject,
+			final ManagedObjectScope newManagedObjectScope) {
+
+		// TODO test this method (rescopeOfficeManagedObject)
+
+		// Obtain the new scope text
+		final String newScope = getManagedObjectScope(newManagedObjectScope);
+
+		// OBtain the old managed object scope
+		final String oldScope = managedObject.getManagedObjectScope();
+
+		// Return change to re-scope the managed object
+		return new AbstractChange<OfficeManagedObjectModel>(managedObject,
+				"Rescope managed object to " + newScope) {
+			@Override
+			public void apply() {
+				managedObject.setManagedObjectScope(newScope);
+			}
+
+			@Override
+			public void revert() {
+				managedObject.setManagedObjectScope(oldScope);
+			}
+		};
+	}
+
+	@Override
 	public Change<OfficeTeamModel> addOfficeTeam(String teamName) {
 
 		// TODO test this method (addOfficeTeam)
@@ -1381,8 +1648,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 			OfficeSectionObjectModel officeSectionObject,
 			ExternalManagedObjectModel externalManagedObject) {
 
-		// TODO test this method
-		// (linkOfficeSectionObjectToExternalManagedObject)
+		// TODO test (linkOfficeSectionObjectToExternalManagedObject)
 
 		// Create the connection
 		final OfficeSectionObjectToExternalManagedObjectModel conn = new OfficeSectionObjectToExternalManagedObjectModel();
@@ -1421,6 +1687,151 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				officeSectionObjectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> linkOfficeManagedObjectDependencyToOfficeManagedObject(
+			OfficeManagedObjectDependencyModel dependency,
+			OfficeManagedObjectModel managedObject) {
+
+		// TODO test (linkOfficeManagedObjectDependencyToOfficeManagedObject)
+
+		// Create the connection
+		final OfficeManagedObjectDependencyToOfficeManagedObjectModel conn = new OfficeManagedObjectDependencyToOfficeManagedObjectModel();
+		conn.setOfficeManagedObjectDependency(dependency);
+		conn.setOfficeManagedObject(managedObject);
+
+		// Return change to add connection
+		return new AbstractChange<OfficeManagedObjectDependencyToOfficeManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectDependencyToOfficeManagedObjectModel> removeOfficeManagedObjectDependencyToOfficeManagedObject(
+			final OfficeManagedObjectDependencyToOfficeManagedObjectModel officeManagedObjectDependencyToOfficeManagedObject) {
+
+		// TODO test (removeOfficeManagedObjectDependencyToOfficeManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<OfficeManagedObjectDependencyToOfficeManagedObjectModel>(
+				officeManagedObjectDependencyToOfficeManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				officeManagedObjectDependencyToOfficeManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObjectDependencyToOfficeManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> linkOfficeManagedObjectDependencyToExternalManagedObject(
+			OfficeManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test (linkOfficeManagedObjectDependencyToExternalManagedObject)
+
+		// Create the connection
+		final OfficeManagedObjectDependencyToExternalManagedObjectModel conn = new OfficeManagedObjectDependencyToExternalManagedObjectModel();
+		conn.setOfficeManagedObjectDependency(dependency);
+		conn.setExternalManagedObject(externalManagedObject);
+
+		// Return the change to add the connection
+		return new AbstractChange<OfficeManagedObjectDependencyToExternalManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectDependencyToExternalManagedObjectModel> removeOfficeManagedObjectDependencyToExternalManagedObject(
+			final OfficeManagedObjectDependencyToExternalManagedObjectModel officeManagedObjectDependencyToExternalManagedObject) {
+
+		// TODO test
+		// (removeOfficeManagedObjectDependencyToExternalManagedObject)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeManagedObjectDependencyToExternalManagedObjectModel>(
+				officeManagedObjectDependencyToExternalManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				officeManagedObjectDependencyToExternalManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObjectDependencyToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> linkOfficeManagedObjectSourceFlowToOfficeSectionInput(
+			OfficeManagedObjectSourceFlowModel managedObjectSourceFlow,
+			OfficeSectionInputModel officeSectionInput) {
+
+		// TODO test (linkOfficeManagedObjectSourceFlowToOfficeSectionInput)
+
+		// Create the connection
+		final OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = new OfficeManagedObjectSourceFlowToOfficeSectionInputModel();
+		conn.setOfficeManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setOfficeSectionInput(officeSectionInput);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeManagedObjectSourceFlowToOfficeSectionInputModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectSourceFlowToOfficeSectionInputModel> removeOfficeManagedObjectSourceFlowToOfficeSectionInput(
+			final OfficeManagedObjectSourceFlowToOfficeSectionInputModel managedObjectSourceFlowToOfficeSectionInput) {
+
+		// TODO test (removeOfficeManagedObjectSourceFlowToOfficeSectionInput)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeManagedObjectSourceFlowToOfficeSectionInputModel>(
+				managedObjectSourceFlowToOfficeSectionInput, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToOfficeSectionInput.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToOfficeSectionInput.connect();
 			}
 		};
 	}
@@ -1522,6 +1933,54 @@ public class OfficeChangesImpl implements OfficeChanges {
 	}
 
 	@Override
+	public Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> linkOfficeManagedObjectSourceTeamToOfficeTeam(
+			OfficeManagedObjectSourceTeamModel mosTeam,
+			OfficeTeamModel officeTeam) {
+
+		// TODO test this method (linkOfficeManagedObjectSourceTeamToOfficeTeam)
+
+		// Create the connection
+		final OfficeManagedObjectSourceTeamToOfficeTeamModel conn = new OfficeManagedObjectSourceTeamToOfficeTeamModel();
+		conn.setOfficeManagedObjectSourceTeam(mosTeam);
+		conn.setOfficeTeam(officeTeam);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeManagedObjectSourceTeamToOfficeTeamModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectSourceTeamToOfficeTeamModel> removeOfficeManagedObjectSourceTeamToOfficeTeam(
+			final OfficeManagedObjectSourceTeamToOfficeTeamModel officeManagedObjectSourceTeamToOfficeTeam) {
+
+		// TODO test (removeOfficeManagedObjectSourceTeamToOfficeTeam)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeManagedObjectSourceTeamToOfficeTeamModel>(
+				officeManagedObjectSourceTeamToOfficeTeam, "Remove") {
+			@Override
+			public void apply() {
+				officeManagedObjectSourceTeamToOfficeTeam.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeManagedObjectSourceTeamToOfficeTeam.connect();
+			}
+		};
+	}
+
+	@Override
 	public Change<AdministratorToOfficeTeamModel> linkAdministratorToOfficeTeam(
 			AdministratorModel administrator, OfficeTeamModel officeTeam) {
 
@@ -1612,6 +2071,54 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				externalManagedObjectToAdministrator.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectToAdministratorModel> linkOfficeManagedObjectToAdministrator(
+			OfficeManagedObjectModel managedObject,
+			AdministratorModel administrator) {
+
+		// TODO test this method (linkOfficeManagedObjectToAdministrator)
+
+		// Create the connection
+		final OfficeManagedObjectToAdministratorModel conn = new OfficeManagedObjectToAdministratorModel();
+		conn.setOfficeManagedObject(managedObject);
+		conn.setAdministrator(administrator);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeManagedObjectToAdministratorModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeManagedObjectToAdministratorModel> removeOfficeManagedObjectToAdministrator(
+			final OfficeManagedObjectToAdministratorModel managedObjectToAdministrator) {
+
+		// TODO test this method (removeOfficeManagedObjectToAdministrator)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeManagedObjectToAdministratorModel>(
+				managedObjectToAdministrator, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectToAdministrator.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectToAdministrator.connect();
 			}
 		};
 	}
@@ -1841,6 +2348,54 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 				// Re-add the connection
 				officeTaskToPostDuty.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeEscalationToOfficeSectionInputModel> linkOfficeEscalationToOfficeSectionInput(
+			OfficeEscalationModel escalation,
+			OfficeSectionInputModel sectionInput) {
+
+		// TODO test this method (linkOfficeEscalationToOfficeSectionInput)
+
+		// Create the connection
+		final OfficeEscalationToOfficeSectionInputModel conn = new OfficeEscalationToOfficeSectionInputModel();
+		conn.setOfficeEscalation(escalation);
+		conn.setOfficeSectionInput(sectionInput);
+
+		// Return change to add the connection
+		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeEscalationToOfficeSectionInputModel> removeOfficeEscalationToOfficeSectionInput(
+			final OfficeEscalationToOfficeSectionInputModel escalationToSectionInput) {
+
+		// TODO test this method (removeOfficeEscalationToOfficeSectionInput)
+
+		// Return change to remove the connection
+		return new AbstractChange<OfficeEscalationToOfficeSectionInputModel>(
+				escalationToSectionInput, "Remove") {
+			@Override
+			public void apply() {
+				escalationToSectionInput.remove();
+			}
+
+			@Override
+			public void revert() {
+				escalationToSectionInput.connect();
 			}
 		};
 	}

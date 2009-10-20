@@ -19,6 +19,7 @@ package net.officefloor.model.desk;
 
 import java.util.Map;
 
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
@@ -30,6 +31,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 
@@ -321,6 +323,105 @@ public interface DeskChanges {
 	Change<ExternalManagedObjectModel> renameExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject,
 			String newExternalManagedObjectName);
+
+	/**
+	 * Adds an {@link DeskManagedObjectSourceModel} to {@link DeskModel}.
+	 *
+	 * @param managedObjectSourceName
+	 *            Name of the {@link DeskManagedObjectSourceModel}.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link DeskManagedObjectSourceModel} .
+	 */
+	Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link DeskManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link DeskManagedObjectSourceModel} to remove.
+	 * @return {@link Change} to remove the {@link DeskManagedObjectSourceModel}
+	 *         .
+	 */
+	Change<DeskManagedObjectSourceModel> removeDeskManagedObjectSource(
+			DeskManagedObjectSourceModel managedObjectSource);
+
+	/**
+	 * Renames the {@link DeskManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link DeskManagedObjectSourceModel} to rename.
+	 * @param newManagedObjectSourceName
+	 *            New name for the {@link DeskManagedObjectSourceModel}.
+	 * @return {@link Change} to rename the {@link DeskManagedObjectSourceModel}
+	 *         .
+	 */
+	Change<DeskManagedObjectSourceModel> renameDeskManagedObjectSource(
+			DeskManagedObjectSourceModel managedObjectSource,
+			String newManagedObjectSourceName);
+
+	/**
+	 * Adds an {@link DeskManagedObjectModel} for an
+	 * {@link DeskManagedObjectSourceModel} to the {@link DeskModel}.
+	 *
+	 * @param managedObjectName
+	 *            Name of the {@link DeskManagedObjectModel}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the
+	 *            {@link DeskManagedObjectModel}.
+	 * @param managedObjectSource
+	 *            {@link DeskManagedObjectSourceModel}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link DeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectModel> addDeskManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			DeskManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link DeskManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link DeskManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link DeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectModel> removeDeskManagedObject(
+			DeskManagedObjectModel managedObject);
+
+	/**
+	 * Renames the {@link DeskManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link DeskManagedObjectModel} to rename.
+	 * @param newManagedObjectName
+	 *            New name for the {@link DeskManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link DeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectModel> renameDeskManagedObject(
+			DeskManagedObjectModel managedObject, String newManagedObjectName);
+
+	/**
+	 * Scopes the {@link DeskManagedObjectModel}.
+	 *
+	 * @param managedObject
+	 *            {@link DeskManagedObjectModel} to scope.
+	 * @param newManagedObjectScope
+	 *            New {@link ManagedObjectScope} for the
+	 *            {@link DeskManagedObjectModel}.
+	 * @return {@link Change} to scope {@link DeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectModel> rescopeDeskManagedObject(
+			DeskManagedObjectModel managedObject,
+			ManagedObjectScope newManagedObjectScope);
 
 	/**
 	 * Links the {@link WorkTaskObjectModel} to be the

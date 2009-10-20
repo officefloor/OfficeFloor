@@ -4,11 +4,6 @@
 	<field type="String" name="managed object source class name" />
 	<field type="String" name="object type" />
 	<list type="PropertyModel" name="property" plural="properties" />
-    <list type="DeskManagedObjectToDeskManagedObjectSourceModel"
-        name="desk managed object" />
-<!--
-	<list type="DeskManagedObjectSourceDependencyModel"
-		name="desk managed object source dependency" plural="desk managed object source dependencies" />
+	<list type="DeskManagedObjectToDeskManagedObjectSourceModel" name="desk managed object" />
 	<list type="DeskManagedObjectSourceFlowModel" name="desk managed object source flow" />
--->
 </model>
