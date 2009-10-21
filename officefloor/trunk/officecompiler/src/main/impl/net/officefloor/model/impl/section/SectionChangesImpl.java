@@ -42,6 +42,8 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
@@ -1130,6 +1132,102 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void revert() {
 				managedObjectSourceFlowToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectDependencyToSectionManagedObjectModel> linkSectionManagedObjectDependencyToSectionManagedObject(
+			SectionManagedObjectDependencyModel dependency,
+			SectionManagedObjectModel managedObject) {
+
+		// TODO test (linkSectionManagedObjectDependencyToSectionManagedObject)
+
+		// Create the connection
+		final SectionManagedObjectDependencyToSectionManagedObjectModel conn = new SectionManagedObjectDependencyToSectionManagedObjectModel();
+		conn.setSectionManagedObjectDependency(dependency);
+		conn.setSectionManagedObject(managedObject);
+
+		// Return change to add the connection
+		return new AbstractChange<SectionManagedObjectDependencyToSectionManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectDependencyToSectionManagedObjectModel> removeSectionManagedObjectDependencyToSectionManagedObject(
+			final SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToManagedObject) {
+
+		// TODO (removeSectionManagedObjectDependencyToSectionManagedObject)
+
+		// Return change to remove the connection
+		return new AbstractChange<SectionManagedObjectDependencyToSectionManagedObjectModel>(
+				dependencyToManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				dependencyToManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				dependencyToManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectDependencyToExternalManagedObjectModel> linkSectionManagedObjectDependencyToExternalManagedObject(
+			SectionManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test (linkSectionManagedObjectDependencyToExternalManagedObject)
+
+		// Create connection
+		final SectionManagedObjectDependencyToExternalManagedObjectModel conn = new SectionManagedObjectDependencyToExternalManagedObjectModel();
+		conn.setSectionManagedObjectDependency(dependency);
+		conn.setExternalManagedObject(externalManagedObject);
+
+		// Return change to add connection
+		return new AbstractChange<SectionManagedObjectDependencyToExternalManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SectionManagedObjectDependencyToExternalManagedObjectModel> removeSectionManagedObjectDependencyToExternalManagedObject(
+			final SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExternalManagedObject) {
+
+		// TODO (removeSectionManagedObjectDependencyToExternalManagedObject)
+
+		// Return change to remove the connection
+		return new AbstractChange<SectionManagedObjectDependencyToExternalManagedObjectModel>(
+				dependencyToExternalManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				dependencyToExternalManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				dependencyToExternalManagedObject.connect();
 			}
 		};
 	}

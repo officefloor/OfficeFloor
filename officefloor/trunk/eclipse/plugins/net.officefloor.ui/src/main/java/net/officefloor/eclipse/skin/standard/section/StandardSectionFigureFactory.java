@@ -27,6 +27,8 @@ import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SectionFigureFactory;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.section.SectionManagedObjectDependencyToSectionManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectFigure;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SectionManagedObjectSourceFigure;
@@ -161,6 +163,20 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 			SectionManagedObjectToSectionManagedObjectSourceFigureContext context) {
 		// Link line
 		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
+	}
+
+	@Override
+	public void decorateSectionManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			SectionManagedObjectDependencyToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateSectionManagedObjectDependencyToSectionManagedObjectFigure(
+			PolylineConnection figure,
+			SectionManagedObjectDependencyToSectionManagedObjectFigureContext context) {
+		// Leave as default line
 	}
 
 }

@@ -21,6 +21,8 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
@@ -227,5 +229,32 @@ public interface SectionFigureFactory {
 	void decorateSectionManagedObjectSourceFlowToExternalFlowFigure(
 			PolylineConnection figure,
 			SectionManagedObjectSourceFlowToExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link SectionManagedObjectDependencyToSectionManagedObjectModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionManagedObjectDependencyToSectionManagedObjectFigureContext}
+	 */
+	void decorateSectionManagedObjectDependencyToSectionManagedObjectFigure(
+			PolylineConnection figure,
+			SectionManagedObjectDependencyToSectionManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionManagedObjectDependencyToExternalManagedObjectFigureContext}
+	 */
+	void decorateSectionManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			SectionManagedObjectDependencyToExternalManagedObjectFigureContext context);
 
 }

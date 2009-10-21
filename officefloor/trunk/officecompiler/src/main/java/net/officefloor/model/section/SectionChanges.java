@@ -405,4 +405,64 @@ public interface SectionChanges {
 	Change<SectionManagedObjectSourceFlowToExternalFlowModel> removeSectionManagedObjectSourceFlowToExternalFlow(
 			SectionManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow);
 
+	/**
+	 * Links the {@link SectionManagedObjectDependencyModel} to the
+	 * {@link SectionManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link SectionManagedObjectDependencyModel}.
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
+	 *         .
+	 */
+	Change<SectionManagedObjectDependencyToSectionManagedObjectModel> linkSectionManagedObjectDependencyToSectionManagedObject(
+			SectionManagedObjectDependencyModel dependency,
+			SectionManagedObjectModel managedObject);
+
+	/**
+	 * Removes the
+	 * {@link SectionManagedObjectDependencyToSectionManagedObjectModel}.
+	 *
+	 * @param dependencyToManagedObject
+	 *            {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectDependencyToSectionManagedObjectModel}
+	 *         .
+	 */
+	Change<SectionManagedObjectDependencyToSectionManagedObjectModel> removeSectionManagedObjectDependencyToSectionManagedObject(
+			SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToManagedObject);
+
+	/**
+	 * Links the {@link SectionManagedObjectDependencyModel} to the
+	 * {@link ExternalManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link SectionManagedObjectDependencyModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
+	 *         .
+	 */
+	Change<SectionManagedObjectDependencyToExternalManagedObjectModel> linkSectionManagedObjectDependencyToExternalManagedObject(
+			SectionManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the
+	 * {@link SectionManagedObjectDependencyToExternalManagedObjectModel}.
+	 *
+	 * @param dependencyToExternalManagedObject
+	 *            {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
+	 *            to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SectionManagedObjectDependencyToExternalManagedObjectModel}
+	 *         .
+	 */
+	Change<SectionManagedObjectDependencyToExternalManagedObjectModel> removeSectionManagedObjectDependencyToExternalManagedObject(
+			SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExternalManagedObject);
+
 }
