@@ -30,6 +30,8 @@ import net.officefloor.eclipse.section.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.section.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
 import net.officefloor.eclipse.section.editparts.SectionManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.section.editparts.SectionManagedObjectDependencyToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.section.editparts.SectionManagedObjectDependencyToSectionManagedObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SectionManagedObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SectionManagedObjectSourceEditPart;
 import net.officefloor.eclipse.section.editparts.SectionManagedObjectSourceFlowEditPart;
@@ -58,6 +60,8 @@ import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
@@ -141,6 +145,14 @@ public class SectionEditor extends
 				SectionManagedObjectSourceFlowToSubSectionInputEditPart.class);
 		map.put(SectionManagedObjectSourceFlowToExternalFlowModel.class,
 				SectionManagedObjectSourceFlowToExternalFlowEditPart.class);
+		map
+				.put(
+						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
+						SectionManagedObjectDependencyToSectionManagedObjectEditPart.class);
+		map
+				.put(
+						SectionManagedObjectDependencyToExternalManagedObjectModel.class,
+						SectionManagedObjectDependencyToExternalManagedObjectEditPart.class);
 		map.put(SectionManagedObjectToSectionManagedObjectSourceModel.class,
 				SectionManagedObjectToSectionManagedObjectSourceEditPart.class);
 		map.put(SubSectionObjectToExternalManagedObjectModel.class,
@@ -279,6 +291,36 @@ public class SectionEditor extends
 												target);
 							}
 						});
+
+		// Allow deleting managed object dependency to managed object
+		policy
+				.addDelete(
+						SectionManagedObjectDependencyToSectionManagedObjectModel.class,
+						new DeleteChangeFactory<SectionManagedObjectDependencyToSectionManagedObjectModel>() {
+							@Override
+							public Change<SectionManagedObjectDependencyToSectionManagedObjectModel> createChange(
+									SectionManagedObjectDependencyToSectionManagedObjectModel target) {
+								return SectionEditor.this
+										.getModelChanges()
+										.removeSectionManagedObjectDependencyToSectionManagedObject(
+												target);
+							}
+						});
+
+		// Allow deleting managed object dependency to external managed object
+		policy
+				.addDelete(
+						SectionManagedObjectDependencyToExternalManagedObjectModel.class,
+						new DeleteChangeFactory<SectionManagedObjectDependencyToExternalManagedObjectModel>() {
+							@Override
+							public Change<SectionManagedObjectDependencyToExternalManagedObjectModel> createChange(
+									SectionManagedObjectDependencyToExternalManagedObjectModel target) {
+								return SectionEditor.this
+										.getModelChanges()
+										.removeSectionManagedObjectDependencyToExternalManagedObject(
+												target);
+							}
+						});
 	}
 
 	@Override
@@ -369,6 +411,42 @@ public class SectionEditor extends
 								return SectionEditor.this
 										.getModelChanges()
 										.linkSectionManagedObjectSourceFlowToExternalFlow(
+												source, target);
+							}
+						});
+
+		// Connect managed object dependency to managed object
+		policy
+				.addConnection(
+						SectionManagedObjectDependencyModel.class,
+						SectionManagedObjectModel.class,
+						new ConnectionChangeFactory<SectionManagedObjectDependencyModel, SectionManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									SectionManagedObjectDependencyModel source,
+									SectionManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return SectionEditor.this
+										.getModelChanges()
+										.linkSectionManagedObjectDependencyToSectionManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect managed object dependency to external managed object
+		policy
+				.addConnection(
+						SectionManagedObjectDependencyModel.class,
+						ExternalManagedObjectModel.class,
+						new ConnectionChangeFactory<SectionManagedObjectDependencyModel, ExternalManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									SectionManagedObjectDependencyModel source,
+									ExternalManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return SectionEditor.this
+										.getModelChanges()
+										.linkSectionManagedObjectDependencyToExternalManagedObject(
 												source, target);
 							}
 						});

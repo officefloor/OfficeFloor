@@ -36,7 +36,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalManagedObjectEditPart}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalManagedObjectEditPart
@@ -53,6 +53,9 @@ public class ExternalManagedObjectEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionObjects());
+		models
+				.addAll(this.getCastedModel()
+						.getDependentSectionManagedObjects());
 	}
 
 	@Override
@@ -99,6 +102,8 @@ public class ExternalManagedObjectEditPart
 			break;
 		case ADD_SUB_SECTION_OBJECT:
 		case REMOVE_SUB_SECTION_OBJECT:
+		case ADD_DEPENDENT_SECTION_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_SECTION_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		}
