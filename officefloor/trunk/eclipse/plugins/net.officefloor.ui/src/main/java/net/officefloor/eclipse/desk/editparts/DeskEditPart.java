@@ -26,7 +26,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> {
@@ -35,6 +35,8 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	protected void populateChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getWorks());
 		childModels.addAll(this.getCastedModel().getExternalManagedObjects());
+		childModels.addAll(this.getCastedModel().getDeskManagedObjectSources());
+		childModels.addAll(this.getCastedModel().getDeskManagedObjects());
 		childModels.addAll(this.getCastedModel().getTasks());
 		childModels.addAll(this.getCastedModel().getExternalFlows());
 	}
