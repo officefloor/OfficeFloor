@@ -24,15 +24,15 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.section.SubSectionObjectModel;
-import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.SubSectionObjectModel.SubSectionObjectEvent;
 
 import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link SubSectionObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class SubSectionObjectEditPart
@@ -48,11 +48,10 @@ public class SubSectionObjectEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		SubSectionObjectToExternalManagedObjectModel source = this
-				.getCastedModel().getExternalManagedObject();
-		if (source != null) {
-			models.add(source);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getExternalManagedObject());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getSectionManagedObject());
 	}
 
 	@Override
@@ -65,6 +64,7 @@ public class SubSectionObjectEditPart
 			PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
+		case CHANGE_SECTION_MANAGED_OBJECT:
 			SubSectionObjectEditPart.this.refreshSourceConnections();
 			break;
 		}

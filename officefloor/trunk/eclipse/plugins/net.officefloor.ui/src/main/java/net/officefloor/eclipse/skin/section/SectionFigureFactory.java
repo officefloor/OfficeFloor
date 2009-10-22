@@ -33,6 +33,7 @@ import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
@@ -180,6 +181,19 @@ public interface SectionFigureFactory {
 	void decorateSubSectionObjectToExternalManagedObjectFigure(
 			PolylineConnection figure,
 			SubSectionObjectToExternalManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the {@link SubSectionObjectToSectionManagedObjectModel}
+	 * connection.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SubSectionObjectToSectionManagedObjectFigureContext}.
+	 */
+	void decorateSubSectionObjectToSectionManagedObjectFigure(
+			PolylineConnection figure,
+			SubSectionObjectToSectionManagedObjectFigureContext context);
 
 	/**
 	 * Decorates the {@link SubSectionOutputToSubSectionInputModel} connection.
