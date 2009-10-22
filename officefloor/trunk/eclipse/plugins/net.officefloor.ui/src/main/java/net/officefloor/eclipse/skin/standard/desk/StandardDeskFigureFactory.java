@@ -18,6 +18,10 @@
 package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigure;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigure;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
@@ -143,6 +147,18 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public TaskFlowFigure createTaskFlowFigure(TaskFlowFigureContext context) {
 		return new StandardTaskFlowFigure(context);
+	}
+
+	@Override
+	public DeskManagedObjectSourceFigure createDeskManagedObjectSourceFigure(
+			DeskManagedObjectSourceFigureContext context) {
+		return new StandardDeskManagedObjectSourceFigure(context);
+	}
+
+	@Override
+	public DeskManagedObjectSourceFlowFigure createDeskManagedObjectSourceFlowFigure(
+			DeskManagedObjectSourceFlowFigureContext context) {
+		return new StandardDeskManagedObjectSourceFlowFigure(context);
 	}
 
 	@Override

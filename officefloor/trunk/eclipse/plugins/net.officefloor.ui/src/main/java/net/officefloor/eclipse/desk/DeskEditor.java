@@ -27,6 +27,8 @@ import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphic
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
@@ -44,6 +46,7 @@ import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskToTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkToInitialTaskEditPart;
+import net.officefloor.eclipse.desk.operations.AddDeskManagedObjectSourceOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -58,6 +61,8 @@ import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperatio
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -89,7 +94,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link DeskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class DeskEditor extends
@@ -140,6 +145,10 @@ public class DeskEditor extends
 		map.put(TaskFlowModel.class, TaskFlowEditPart.class);
 		map.put(TaskEscalationModel.class, TaskEscalationEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
+		map.put(DeskManagedObjectSourceModel.class,
+				DeskManagedObjectSourceEditPart.class);
+		map.put(DeskManagedObjectSourceFlowModel.class,
+				DeskManagedObjectSourceFlowEditPart.class);
 
 		// Connections
 		map.put(WorkTaskToTaskModel.class, WorkTaskToTaskEditPart.class);
@@ -185,6 +194,17 @@ public class DeskEditor extends
 							ExternalManagedObjectModel target) {
 						return DeskEditor.this.getModelChanges()
 								.removeExternalManagedObject(target);
+					}
+				});
+
+		// Allow deleting managed object source
+		policy.addDelete(DeskManagedObjectSourceModel.class,
+				new DeleteChangeFactory<DeskManagedObjectSourceModel>() {
+					@Override
+					public Change<DeskManagedObjectSourceModel> createChange(
+							DeskManagedObjectSourceModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeDeskManagedObjectSource(target);
 					}
 				});
 
@@ -436,6 +456,7 @@ public class DeskEditor extends
 		list.add(new CreateTaskFromWorkTaskOperation(deskChanges));
 		list.add(new AddExternalFlowOperation(deskChanges));
 		list.add(new AddExternalManagedObjectOperation(deskChanges));
+		list.add(new AddDeskManagedObjectSourceOperation(deskChanges));
 
 		// Delete actions
 		list.add(new DeleteWorkOperation(deskChanges));
@@ -471,7 +492,7 @@ public class DeskEditor extends
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 * 
+	 *
 	 * @param instigationType
 	 *            Instigation type.
 	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
@@ -501,7 +522,7 @@ public class DeskEditor extends
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 * 
+	 *
 	 * @param instigationStrategy
 	 *            Text name of the {@link FlowInstigationStrategyEnum}.
 	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
@@ -522,4 +543,5 @@ public class DeskEditor extends
 			return null;
 		}
 	}
+
 }

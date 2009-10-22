@@ -18,6 +18,8 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -124,6 +126,28 @@ public interface DeskFigureFactory {
 	 */
 	TaskEscalationFigure createTaskEscalationFigure(
 			TaskEscalationFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link DeskManagedObjectSourceModel}.
+	 *
+	 * @param context
+	 *            {@link DeskManagedObjectSourceFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	DeskManagedObjectSourceFigure createDeskManagedObjectSourceFigure(
+			DeskManagedObjectSourceFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link DeskManagedObjectSourceFlowModel}.
+	 *
+	 * @param context
+	 *            {@link DeskManagedObjectSourceFlowFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	DeskManagedObjectSourceFlowFigure createDeskManagedObjectSourceFlowFigure(
+			DeskManagedObjectSourceFlowFigureContext context);
 
 	/**
 	 * Decorates the {@link WorkTaskToTaskModel} connection.
