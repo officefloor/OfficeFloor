@@ -45,6 +45,7 @@ import net.officefloor.eclipse.skin.section.SubSectionInputFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigure;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionObjectToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.section.SubSectionObjectToSectionManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionOutputToExternalFlowFigureContext;
@@ -123,6 +124,13 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 			PolylineConnection figure,
 			SubSectionObjectToExternalManagedObjectFigureContext context) {
 		// Leave as default
+	}
+
+	@Override
+	public void decorateSubSectionObjectToSectionManagedObjectFigure(
+			PolylineConnection figure,
+			SubSectionObjectToSectionManagedObjectFigureContext context) {
+		// Leave as default line
 	}
 
 	@Override

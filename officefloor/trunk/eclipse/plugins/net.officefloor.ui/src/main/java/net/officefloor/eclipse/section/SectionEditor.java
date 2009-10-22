@@ -42,6 +42,7 @@ import net.officefloor.eclipse.section.editparts.SubSectionEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionInputEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionObjectToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.section.editparts.SubSectionObjectToSectionManagedObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionOutputEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionOutputToExternalFlowEditPart;
 import net.officefloor.eclipse.section.editparts.SubSectionOutputToSubSectionInputEditPart;
@@ -73,6 +74,7 @@ import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
@@ -157,6 +159,8 @@ public class SectionEditor extends
 				SectionManagedObjectToSectionManagedObjectSourceEditPart.class);
 		map.put(SubSectionObjectToExternalManagedObjectModel.class,
 				SubSectionObjectToExternalManagedObjectEditPart.class);
+		map.put(SubSectionObjectToSectionManagedObjectModel.class,
+				SubSectionObjectToSectionManagedObjectEditPart.class);
 		map.put(SubSectionOutputToSubSectionInputModel.class,
 				SubSectionOutputToSubSectionInputEditPart.class);
 		map.put(SubSectionOutputToExternalFlowModel.class,
@@ -232,6 +236,21 @@ public class SectionEditor extends
 								return SectionEditor.this
 										.getModelChanges()
 										.removeSubSectionObjectToExternalManagedObject(
+												target);
+							}
+						});
+
+		// Allow deleting sub section object to managed object
+		policy
+				.addDelete(
+						SubSectionObjectToSectionManagedObjectModel.class,
+						new DeleteChangeFactory<SubSectionObjectToSectionManagedObjectModel>() {
+							@Override
+							public Change<SubSectionObjectToSectionManagedObjectModel> createChange(
+									SubSectionObjectToSectionManagedObjectModel target) {
+								return SectionEditor.this
+										.getModelChanges()
+										.removeSubSectionObjectToSectionManagedObject(
 												target);
 							}
 						});
@@ -341,6 +360,24 @@ public class SectionEditor extends
 								return SectionEditor.this
 										.getModelChanges()
 										.linkSubSectionObjectToExternalManagedObject(
+												source, target);
+							}
+						});
+
+		// Connection sub section object to managed object
+		policy
+				.addConnection(
+						SubSectionObjectModel.class,
+						SectionManagedObjectModel.class,
+						new ConnectionChangeFactory<SubSectionObjectModel, SectionManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									SubSectionObjectModel source,
+									SectionManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return SectionEditor.this
+										.getModelChanges()
+										.linkSubSectionObjectToSectionManagedObject(
 												source, target);
 							}
 						});

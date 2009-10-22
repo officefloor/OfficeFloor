@@ -55,6 +55,7 @@ import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
@@ -940,6 +941,54 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void revert() {
 				subSectionObjectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionObjectToSectionManagedObjectModel> linkSubSectionObjectToSectionManagedObject(
+			SubSectionObjectModel subSectionObject,
+			SectionManagedObjectModel managedObject) {
+
+		// TODO test this method (linkSubSectionObjectToSectionManagedObject)
+
+		// Create the connection
+		final SubSectionObjectToSectionManagedObjectModel conn = new SubSectionObjectToSectionManagedObjectModel();
+		conn.setSubSectionObject(subSectionObject);
+		conn.setSectionManagedObject(managedObject);
+
+		// Return change to add connection
+		return new AbstractChange<SubSectionObjectToSectionManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionObjectToSectionManagedObjectModel> removeSubSectionObjectToSectionManagedObject(
+			final SubSectionObjectToSectionManagedObjectModel subSectionObjectToManagedObject) {
+
+		// TODO test this method (removeSubSectionObjectToSectionManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<SubSectionObjectToSectionManagedObjectModel>(
+				subSectionObjectToManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				subSectionObjectToManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				subSectionObjectToManagedObject.connect();
 			}
 		};
 	}

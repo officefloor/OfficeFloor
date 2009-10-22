@@ -301,6 +301,32 @@ public interface SectionChanges {
 			SubSectionObjectToExternalManagedObjectModel subSectionObjectToExternalManagedObject);
 
 	/**
+	 * Links the {@link SubSectionObjectModel} to the
+	 * {@link SectionManagedObjectModel}.
+	 *
+	 * @param subSectionObject
+	 *            {@link SubSectionObjectModel}.
+	 * @param managedObject
+	 *            {@link SectionManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link SubSectionObjectToSectionManagedObjectModel}.
+	 */
+	Change<SubSectionObjectToSectionManagedObjectModel> linkSubSectionObjectToSectionManagedObject(
+			SubSectionObjectModel subSectionObject,
+			SectionManagedObjectModel managedObject);
+
+	/**
+	 * Removes the {@link SubSectionObjectToSectionManagedObjectModel}.
+	 *
+	 * @param subSectionObjectToManagedObject
+	 *            {@link SubSectionObjectToSectionManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SubSectionObjectToSectionManagedObjectModel}.
+	 */
+	Change<SubSectionObjectToSectionManagedObjectModel> removeSubSectionObjectToSectionManagedObject(
+			SubSectionObjectToSectionManagedObjectModel subSectionObjectToManagedObject);
+
+	/**
 	 * Links the {@link SubSectionOutputModel} to the
 	 * {@link SubSectionInputModel}.
 	 *
