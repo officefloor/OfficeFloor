@@ -25,6 +25,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
@@ -75,6 +76,8 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 						inputAnchor);
 		this.registerTargetConnectionAnchor(TaskToNextTaskModel.class,
 				inputAnchor);
+		this.registerConnectionAnchor(
+				DeskManagedObjectSourceFlowToTaskModel.class, inputAnchor);
 		figure.add(inputConnector);
 		layout.setConstraint(inputConnector, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, true, false));

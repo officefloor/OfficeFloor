@@ -47,6 +47,8 @@ import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
@@ -2517,6 +2519,102 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				workToInitialTask.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToTaskModel> linkDeskManagedObjectSourceFlowToTask(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
+			TaskModel task) {
+
+		// TODO test this method (linkDeskManagedObjectSourceFlowToTask)
+
+		// Create the connection
+		final DeskManagedObjectSourceFlowToTaskModel conn = new DeskManagedObjectSourceFlowToTaskModel();
+		conn.setDeskManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setTask(task);
+
+		// Return change to add connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToTaskModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToTaskModel> removeDeskManagedObjectSourceFlowToTask(
+			final DeskManagedObjectSourceFlowToTaskModel managedObjectSourceFlowToTask) {
+
+		// TODO test this method (removeDeskManagedObjectSourceFlowToTask)
+
+		// Return change to remove connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToTaskModel>(
+				managedObjectSourceFlowToTask, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToTask.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToTask.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToExternalFlowModel> linkDeskManagedObjectSourceFlowToExternalFlow(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
+			ExternalFlowModel externalFlow) {
+
+		// TODO test this method (linkDeskManagedObjectSourceFlowToExternalFlow)
+
+		// Create the connection
+		final DeskManagedObjectSourceFlowToExternalFlowModel conn = new DeskManagedObjectSourceFlowToExternalFlowModel();
+		conn.setDeskManagedObjectSourceFlow(managedObjectSourceFlow);
+		conn.setExternalFlow(externalFlow);
+
+		// Return change to add connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectSourceFlowToExternalFlowModel> removeDeskManagedObjectSourceFlowToExternalFlow(
+			final DeskManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow) {
+
+		// TODO test (removeDeskManagedObjectSourceFlowToExternalFlow)
+
+		// Return change to remove connection
+		return new AbstractChange<DeskManagedObjectSourceFlowToExternalFlowModel>(
+				managedObjectSourceFlowToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				managedObjectSourceFlowToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				managedObjectSourceFlowToExternalFlow.connect();
 			}
 		};
 	}

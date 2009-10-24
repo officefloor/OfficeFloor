@@ -18,8 +18,13 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -150,6 +155,28 @@ public interface DeskFigureFactory {
 			DeskManagedObjectSourceFlowFigureContext context);
 
 	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link DeskManagedObjectModel}.
+	 *
+	 * @param context
+	 *            {@link DeskManagedObjectFigureContext}.
+	 * @return {@link DeskManagedObjectFigure}.
+	 */
+	DeskManagedObjectFigure createDeskManagedObjectFigure(
+			DeskManagedObjectFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link DeskManagedObjectDependencyModel}.
+	 *
+	 * @param context
+	 *            {@link DeskManagedObjectDependencyFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	DeskManagedObjectDependencyFigure createDeskManagedObjectDependencyFigure(
+			DeskManagedObjectDependencyFigureContext context);
+
+	/**
 	 * Decorates the {@link WorkTaskToTaskModel} connection.
 	 *
 	 * @param figure
@@ -246,5 +273,43 @@ public interface DeskFigureFactory {
 	 */
 	void decorateWorkToInitialTaskFigure(PolylineConnection figure,
 			WorkToInitialTaskFigureContext context);
+
+	/**
+	 * Decorates the {@link DeskManagedObjectToDeskManagedObjectSourceModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeskManagedObjectToDeskManagedObjectSourceModel}
+	 */
+	void decorateDeskManagedObjectToDeskManagedObjectSourceFigure(
+			PolylineConnection figure,
+			DeskManagedObjectToDeskManagedObjectSourceFigureContext context);
+
+	/**
+	 * Decorates the {@link DeskManagedObjectSourceFlowToTaskModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeskManagedObjectSourceFlowToTaskFigureContext}
+	 */
+	void decorateDeskManagedObjectSourceFlowToTaskFigure(
+			PolylineConnection figure,
+			DeskManagedObjectSourceFlowToTaskFigureContext context);
+
+	/**
+	 * Decorates the {@link DeskManagedObjectSourceFlowToExternalFlowModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeskManagedObjectSourceFlowToExternalFlowFigureContext}
+	 */
+	void decorateDeskManagedObjectSourceFlowToExternalFlowFigure(
+			PolylineConnection figure,
+			DeskManagedObjectSourceFlowToExternalFlowFigureContext context);
 
 }

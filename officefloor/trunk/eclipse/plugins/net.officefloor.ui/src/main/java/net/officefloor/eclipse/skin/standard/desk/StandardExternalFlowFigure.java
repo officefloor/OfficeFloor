@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
@@ -68,6 +69,8 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 						anchor);
 		this.registerConnectionAnchor(TaskEscalationToExternalFlowModel.class,
 				anchor);
+		this.registerConnectionAnchor(
+				DeskManagedObjectSourceFlowToExternalFlowModel.class, anchor);
 
 		this.setFigure(figure);
 	}
