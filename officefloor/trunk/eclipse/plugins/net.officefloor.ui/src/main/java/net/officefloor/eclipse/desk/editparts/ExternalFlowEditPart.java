@@ -36,7 +36,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalFlowModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalFlowEditPart
@@ -55,6 +55,7 @@ public class ExternalFlowEditPart
 		models.addAll(this.getCastedModel().getTaskFlows());
 		models.addAll(this.getCastedModel().getTaskEscalations());
 		models.addAll(this.getCastedModel().getPreviousTasks());
+		models.addAll(this.getCastedModel().getDeskManagedObjectSourceFlows());
 	}
 
 	@Override
@@ -102,6 +103,8 @@ public class ExternalFlowEditPart
 		case REMOVE_TASK_ESCALATION:
 		case ADD_PREVIOUS_TASK:
 		case REMOVE_PREVIOUS_TASK:
+		case ADD_DESK_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
 			break;
 		}

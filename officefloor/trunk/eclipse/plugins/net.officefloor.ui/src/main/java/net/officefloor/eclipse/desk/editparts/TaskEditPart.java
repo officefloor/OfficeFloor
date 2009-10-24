@@ -31,8 +31,6 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.TaskToNextExternalFlowModel;
-import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.TaskModel.TaskEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -40,7 +38,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link TaskModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class TaskEditPart extends
@@ -61,18 +59,9 @@ public class TaskEditPart extends
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Add task to next task
-		TaskToNextTaskModel nextTask = this.getCastedModel().getNextTask();
-		if (nextTask != null) {
-			models.add(nextTask);
-		}
-
-		// Add task to next external flow
-		TaskToNextExternalFlowModel nextExternalFlow = this.getCastedModel()
-				.getNextExternalFlow();
-		if (nextExternalFlow != null) {
-			models.add(nextExternalFlow);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel().getNextTask());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getNextExternalFlow());
 	}
 
 	@Override
@@ -88,6 +77,9 @@ public class TaskEditPart extends
 		models.addAll(this.getCastedModel().getTaskFlowInputs());
 		models.addAll(this.getCastedModel().getTaskEscalationInputs());
 		models.addAll(this.getCastedModel().getPreviousTasks());
+
+		// Add managed object source flows
+		models.addAll(this.getCastedModel().getDeskManagedObjectSourceFlows());
 	}
 
 	@Override
@@ -143,6 +135,8 @@ public class TaskEditPart extends
 		case REMOVE_TASK_ESCALATION_INPUT:
 		case ADD_PREVIOUS_TASK:
 		case REMOVE_PREVIOUS_TASK:
+		case ADD_DESK_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_DESK_MANAGED_OBJECT_SOURCE_FLOW:
 			this.refreshTargetConnections();
 			break;
 		case ADD_TASK_FLOW:

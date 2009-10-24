@@ -27,8 +27,13 @@ import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphic
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceFlowToExternalFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceFlowToTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectToDeskManagedObjectSourceEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
@@ -46,6 +51,7 @@ import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskToTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkToInitialTaskEditPart;
+import net.officefloor.eclipse.desk.operations.AddDeskManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddDeskManagedObjectSourceOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
@@ -61,8 +67,13 @@ import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperatio
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -149,6 +160,9 @@ public class DeskEditor extends
 				DeskManagedObjectSourceEditPart.class);
 		map.put(DeskManagedObjectSourceFlowModel.class,
 				DeskManagedObjectSourceFlowEditPart.class);
+		map.put(DeskManagedObjectModel.class, DeskManagedObjectEditPart.class);
+		map.put(DeskManagedObjectDependencyModel.class,
+				DeskManagedObjectDependencyEditPart.class);
 
 		// Connections
 		map.put(WorkTaskToTaskModel.class, WorkTaskToTaskEditPart.class);
@@ -165,6 +179,12 @@ public class DeskEditor extends
 		map.put(TaskEscalationToExternalFlowModel.class,
 				TaskEscalationToExternalFlowEditPart.class);
 		map.put(WorkToInitialTaskModel.class, WorkToInitialTaskEditPart.class);
+		map.put(DeskManagedObjectToDeskManagedObjectSourceModel.class,
+				DeskManagedObjectToDeskManagedObjectSourceEditPart.class);
+		map.put(DeskManagedObjectSourceFlowToExternalFlowModel.class,
+				DeskManagedObjectSourceFlowToExternalFlowEditPart.class);
+		map.put(DeskManagedObjectSourceFlowToTaskModel.class,
+				DeskManagedObjectSourceFlowToTaskEditPart.class);
 	}
 
 	@Override
@@ -205,6 +225,17 @@ public class DeskEditor extends
 							DeskManagedObjectSourceModel target) {
 						return DeskEditor.this.getModelChanges()
 								.removeDeskManagedObjectSource(target);
+					}
+				});
+
+		// Allow deleting managed object
+		policy.addDelete(DeskManagedObjectModel.class,
+				new DeleteChangeFactory<DeskManagedObjectModel>() {
+					@Override
+					public Change<DeskManagedObjectModel> createChange(
+							DeskManagedObjectModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeDeskManagedObject(target);
 					}
 				});
 
@@ -310,6 +341,36 @@ public class DeskEditor extends
 								.removeWorkToInitialTask(target);
 					}
 				});
+
+		// Allow deleting managed object source flow to task
+		policy
+				.addDelete(
+						DeskManagedObjectSourceFlowToTaskModel.class,
+						new DeleteChangeFactory<DeskManagedObjectSourceFlowToTaskModel>() {
+							@Override
+							public Change<DeskManagedObjectSourceFlowToTaskModel> createChange(
+									DeskManagedObjectSourceFlowToTaskModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeDeskManagedObjectSourceFlowToTask(
+												target);
+							}
+						});
+
+		// Allow deleting managed object source flow to external flow
+		policy
+				.addDelete(
+						DeskManagedObjectSourceFlowToExternalFlowModel.class,
+						new DeleteChangeFactory<DeskManagedObjectSourceFlowToExternalFlowModel>() {
+							@Override
+							public Change<DeskManagedObjectSourceFlowToExternalFlowModel> createChange(
+									DeskManagedObjectSourceFlowToExternalFlowModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeDeskManagedObjectSourceFlowToExternalFlow(
+												target);
+							}
+						});
 	}
 
 	@Override
@@ -443,6 +504,41 @@ public class DeskEditor extends
 								.linkWorkToInitialTask(source, target);
 					}
 				});
+
+		// Connect managed object source flow to task
+		policy
+				.addConnection(
+						DeskManagedObjectSourceFlowModel.class,
+						TaskModel.class,
+						new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, TaskModel>() {
+							@Override
+							public Change<?> createChange(
+									DeskManagedObjectSourceFlowModel source,
+									TaskModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this.getModelChanges()
+										.linkDeskManagedObjectSourceFlowToTask(
+												source, target);
+							}
+						});
+
+		// Connect managed object source flow to external flow
+		policy
+				.addConnection(
+						DeskManagedObjectSourceFlowModel.class,
+						ExternalFlowModel.class,
+						new ConnectionChangeFactory<DeskManagedObjectSourceFlowModel, ExternalFlowModel>() {
+							@Override
+							public Change<?> createChange(
+									DeskManagedObjectSourceFlowModel source,
+									ExternalFlowModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this
+										.getModelChanges()
+										.linkDeskManagedObjectSourceFlowToExternalFlow(
+												source, target);
+							}
+						});
 	}
 
 	@Override
@@ -457,6 +553,7 @@ public class DeskEditor extends
 		list.add(new AddExternalFlowOperation(deskChanges));
 		list.add(new AddExternalManagedObjectOperation(deskChanges));
 		list.add(new AddDeskManagedObjectSourceOperation(deskChanges));
+		list.add(new AddDeskManagedObjectOperation(deskChanges));
 
 		// Delete actions
 		list.add(new DeleteWorkOperation(deskChanges));

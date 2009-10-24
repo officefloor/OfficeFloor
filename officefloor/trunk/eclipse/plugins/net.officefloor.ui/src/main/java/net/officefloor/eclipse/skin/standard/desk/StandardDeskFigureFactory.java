@@ -18,10 +18,17 @@
 package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigure;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFlowToTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectToDeskManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
@@ -162,6 +169,18 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
+	public DeskManagedObjectFigure createDeskManagedObjectFigure(
+			DeskManagedObjectFigureContext context) {
+		return new StandardDeskManagedObjectFigure(context);
+	}
+
+	@Override
+	public DeskManagedObjectDependencyFigure createDeskManagedObjectDependencyFigure(
+			DeskManagedObjectDependencyFigureContext context) {
+		return new StandardDeskManagedObjectDependencyFigure(context);
+	}
+
+	@Override
 	public void decorateWorkTaskToTaskFigure(PolylineConnection figure,
 			WorkTaskToTaskFigureContext context) {
 		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
@@ -218,6 +237,27 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 			WorkToInitialTaskFigureContext context) {
 		figure.setForegroundColor(StandardOfficeFloorColours
 				.INITIAL_TASK_LINE());
+	}
+
+	@Override
+	public void decorateDeskManagedObjectToDeskManagedObjectSourceFigure(
+			PolylineConnection figure,
+			DeskManagedObjectToDeskManagedObjectSourceFigureContext context) {
+		figure.setForegroundColor(StandardOfficeFloorColours.LINK_LINE());
+	}
+
+	@Override
+	public void decorateDeskManagedObjectSourceFlowToExternalFlowFigure(
+			PolylineConnection figure,
+			DeskManagedObjectSourceFlowToExternalFlowFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateDeskManagedObjectSourceFlowToTaskFigure(
+			PolylineConnection figure,
+			DeskManagedObjectSourceFlowToTaskFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 }

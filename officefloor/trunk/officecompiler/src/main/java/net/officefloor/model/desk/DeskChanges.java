@@ -609,4 +609,57 @@ public interface DeskChanges {
 	Change<WorkToInitialTaskModel> removeWorkToInitialTask(
 			WorkToInitialTaskModel workToInitialTask);
 
+	/**
+	 * Links the {@link DeskManagedObjectSourceFlowModel} to the
+	 * {@link TaskModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link DeskManagedObjectSourceFlowModel}.
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 */
+	Change<DeskManagedObjectSourceFlowToTaskModel> linkDeskManagedObjectSourceFlowToTask(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
+			TaskModel task);
+
+	/**
+	 * Removes the {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 *
+	 * @param managedObjectSourceFlowToTask
+	 *            {@link DeskManagedObjectSourceFlowToTaskModel} to be removed.
+	 * @return {@link Change} to remove the
+	 *         {@link DeskManagedObjectSourceFlowToTaskModel}.
+	 */
+	Change<DeskManagedObjectSourceFlowToTaskModel> removeDeskManagedObjectSourceFlowToTask(
+			DeskManagedObjectSourceFlowToTaskModel managedObjectSourceFlowToTask);
+
+	/**
+	 * Links the {@link DeskManagedObjectSourceFlowModel} to the
+	 * {@link ExternalFlowModel}.
+	 *
+	 * @param managedObjectSourceFlow
+	 *            {@link DeskManagedObjectSourceFlowModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeskManagedObjectSourceFlowToExternalFlowModel}.
+	 */
+	Change<DeskManagedObjectSourceFlowToExternalFlowModel> linkDeskManagedObjectSourceFlowToExternalFlow(
+			DeskManagedObjectSourceFlowModel managedObjectSourceFlow,
+			ExternalFlowModel externalFlow);
+
+	/**
+	 * Removes the {@link DeskManagedObjectSourceFlowToExternalFlowModel}.
+	 *
+	 * @param managedObjectSourceFlowToExternalFlow
+	 *            {@link DeskManagedObjectSourceFlowToExternalFlowModel} to be
+	 *            removed.
+	 * @return {@link Change} to remove the
+	 *         {@link DeskManagedObjectSourceFlowToExternalFlowModel}.
+	 */
+	Change<DeskManagedObjectSourceFlowToExternalFlowModel> removeDeskManagedObjectSourceFlowToExternalFlow(
+			DeskManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow);
+
 }

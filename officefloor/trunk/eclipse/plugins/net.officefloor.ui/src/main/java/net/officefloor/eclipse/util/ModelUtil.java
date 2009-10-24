@@ -33,6 +33,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.Model;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
@@ -195,6 +196,43 @@ public class ModelUtil {
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
 		for (net.officefloor.model.section.PropertyModel property : managedObjectSource
+				.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load and return the managed object type
+		return getManagedObjectType(managedObjectSourceClassName, properties,
+				compiler, editor);
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectType} for the
+	 * {@link DeskManagedObjectSourceModel}.
+	 *
+	 * @param managedObjectSource
+	 *            {@link DeskManagedObjectSourceModel}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
+	 *         it.
+	 */
+	public static ManagedObjectType<?> getManagedObjectType(
+			DeskManagedObjectSourceModel managedObjectSource,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+
+		// Obtain the office floor compiler
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
+				.createCompiler(editor);
+
+		// Obtain the class name
+		String managedObjectSourceClassName = managedObjectSource
+				.getManagedObjectSourceClassName();
+
+		// Obtain the properties
+		PropertyList properties = compiler.createPropertyList();
+		for (net.officefloor.model.desk.PropertyModel property : managedObjectSource
 				.getProperties()) {
 			properties.addProperty(property.getName()).setValue(
 					property.getValue());
