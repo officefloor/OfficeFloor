@@ -69,6 +69,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
@@ -2196,6 +2197,54 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				objectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkTaskObjectToDeskManagedObjectModel> linkWorkTaskObjectToDeskManagedObject(
+			WorkTaskObjectModel workTaskObject,
+			DeskManagedObjectModel managedObject) {
+
+		// TODO test this method (linkWorkTaskObjectToDeskManagedObject)
+
+		// Create the connection
+		final WorkTaskObjectToDeskManagedObjectModel conn = new WorkTaskObjectToDeskManagedObjectModel();
+		conn.setWorkTaskObject(workTaskObject);
+		conn.setDeskManagedObject(managedObject);
+
+		// Return change to add connection
+		return new AbstractChange<WorkTaskObjectToDeskManagedObjectModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkTaskObjectToDeskManagedObjectModel> removeWorkTaskObjectToDeskManagedObject(
+			final WorkTaskObjectToDeskManagedObjectModel workTaskObjectToManagedObject) {
+
+		// TODO test this method (removeWorkTaskObjectToDeskManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<WorkTaskObjectToDeskManagedObjectModel>(
+				workTaskObjectToManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				workTaskObjectToManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				workTaskObjectToManagedObject.connect();
 			}
 		};
 	}

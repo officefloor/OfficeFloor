@@ -201,6 +201,18 @@ public interface DeskFigureFactory {
 			WorkTaskObjectToExternalManagedObjectFigureContext context);
 
 	/**
+	 * Decorates the {@link WorkTaskObjectToDeskManagedObjectModel} connection.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 */
+	void decorateWorkTaskObjectToDeskManagedObjectFigure(
+			PolylineConnection figure,
+			WorkTaskObjectToDeskManagedObjectFigureContext context);
+
+	/**
 	 * Decorates the {@link TaskFlowToTaskModel} connection.
 	 *
 	 * @param figure

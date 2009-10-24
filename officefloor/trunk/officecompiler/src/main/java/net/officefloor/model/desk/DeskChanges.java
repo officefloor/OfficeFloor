@@ -450,6 +450,32 @@ public interface DeskChanges {
 			WorkTaskObjectToExternalManagedObjectModel objectToExternalManagedObject);
 
 	/**
+	 * Links the {@link WorkTaskObjectModel} to the
+	 * {@link DeskManagedObjectModel}.
+	 *
+	 * @param workTaskObject
+	 *            {@link WorkTaskObjectModel}.
+	 * @param managedObject
+	 *            {@link DeskManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 */
+	Change<WorkTaskObjectToDeskManagedObjectModel> linkWorkTaskObjectToDeskManagedObject(
+			WorkTaskObjectModel workTaskObject,
+			DeskManagedObjectModel managedObject);
+
+	/**
+	 * Removes the {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 *
+	 * @param workTaskObjectToManagedObject
+	 *            {@link WorkTaskObjectToDeskManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link WorkTaskObjectToDeskManagedObjectModel}.
+	 */
+	Change<WorkTaskObjectToDeskManagedObjectModel> removeWorkTaskObjectToDeskManagedObject(
+			WorkTaskObjectToDeskManagedObjectModel workTaskObjectToManagedObject);
+
+	/**
 	 * Links the {@link TaskFlowModel} to the {@link TaskModel}.
 	 *
 	 * @param taskFlow
