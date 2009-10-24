@@ -28,6 +28,8 @@ import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectDependencyToDeskManagedObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.DeskManagedObjectDependencyToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskManagedObjectSourceFlowEditPart;
@@ -68,6 +70,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
@@ -185,6 +189,12 @@ public class DeskEditor extends
 				DeskManagedObjectSourceFlowToExternalFlowEditPart.class);
 		map.put(DeskManagedObjectSourceFlowToTaskModel.class,
 				DeskManagedObjectSourceFlowToTaskEditPart.class);
+		map.put(DeskManagedObjectDependencyToDeskManagedObjectModel.class,
+				DeskManagedObjectDependencyToDeskManagedObjectEditPart.class);
+		map
+				.put(
+						DeskManagedObjectDependencyToExternalManagedObjectModel.class,
+						DeskManagedObjectDependencyToExternalManagedObjectEditPart.class);
 	}
 
 	@Override
@@ -371,6 +381,36 @@ public class DeskEditor extends
 												target);
 							}
 						});
+
+		// Allow deleting managed object dependency to managed object
+		policy
+				.addDelete(
+						DeskManagedObjectDependencyToDeskManagedObjectModel.class,
+						new DeleteChangeFactory<DeskManagedObjectDependencyToDeskManagedObjectModel>() {
+							@Override
+							public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> createChange(
+									DeskManagedObjectDependencyToDeskManagedObjectModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeDeskManagedObjectDependencyToDeskManagedObject(
+												target);
+							}
+						});
+
+		// Allow deleting managed object dependency to external managed object
+		policy
+				.addDelete(
+						DeskManagedObjectDependencyToExternalManagedObjectModel.class,
+						new DeleteChangeFactory<DeskManagedObjectDependencyToExternalManagedObjectModel>() {
+							@Override
+							public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> createChange(
+									DeskManagedObjectDependencyToExternalManagedObjectModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeDeskManagedObjectDependencyToExternalManagedObject(
+												target);
+							}
+						});
 	}
 
 	@Override
@@ -536,6 +576,42 @@ public class DeskEditor extends
 								return DeskEditor.this
 										.getModelChanges()
 										.linkDeskManagedObjectSourceFlowToExternalFlow(
+												source, target);
+							}
+						});
+
+		// Connect managed object dependency to managed object
+		policy
+				.addConnection(
+						DeskManagedObjectDependencyModel.class,
+						DeskManagedObjectModel.class,
+						new ConnectionChangeFactory<DeskManagedObjectDependencyModel, DeskManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									DeskManagedObjectDependencyModel source,
+									DeskManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this
+										.getModelChanges()
+										.linkDeskManagedObjectDependencyToDeskManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect managed object dependency to external managed object
+		policy
+				.addConnection(
+						DeskManagedObjectDependencyModel.class,
+						ExternalManagedObjectModel.class,
+						new ConnectionChangeFactory<DeskManagedObjectDependencyModel, ExternalManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									DeskManagedObjectDependencyModel source,
+									ExternalManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this
+										.getModelChanges()
+										.linkDeskManagedObjectDependencyToExternalManagedObject(
 												source, target);
 							}
 						});

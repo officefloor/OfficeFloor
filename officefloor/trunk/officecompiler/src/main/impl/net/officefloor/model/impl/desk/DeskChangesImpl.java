@@ -45,6 +45,8 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
@@ -2615,6 +2617,102 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				managedObjectSourceFlowToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> linkDeskManagedObjectDependencyToDeskManagedObject(
+			DeskManagedObjectDependencyModel dependency,
+			DeskManagedObjectModel managedObject) {
+
+		// TODO test (linkDeskManagedObjectDependencyToDeskManagedObject)
+
+		// Create the connection
+		final DeskManagedObjectDependencyToDeskManagedObjectModel conn = new DeskManagedObjectDependencyToDeskManagedObjectModel();
+		conn.setDeskManagedObjectDependency(dependency);
+		conn.setDeskManagedObject(managedObject);
+
+		// Return change to add connection
+		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectDependencyToDeskManagedObjectModel> removeDeskManagedObjectDependencyToDeskManagedObject(
+			final DeskManagedObjectDependencyToDeskManagedObjectModel dependencyToManagedObject) {
+
+		// TODO test (removeDeskManagedObjectDependencyToDeskManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<DeskManagedObjectDependencyToDeskManagedObjectModel>(
+				dependencyToManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				dependencyToManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				dependencyToManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> linkDeskManagedObjectDependencyToExternalManagedObject(
+			DeskManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test (linkDeskManagedObjectDependencyToExternalManagedObject)
+
+		// Create the connection
+		final DeskManagedObjectDependencyToExternalManagedObjectModel conn = new DeskManagedObjectDependencyToExternalManagedObjectModel();
+		conn.setDeskManagedObjectDependency(dependency);
+		conn.setExternalManagedObject(externalManagedObject);
+
+		// Return change to add connection
+		return new AbstractChange<DeskManagedObjectDependencyToExternalManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<DeskManagedObjectDependencyToExternalManagedObjectModel> removeDeskManagedObjectDependencyToExternalManagedObject(
+			final DeskManagedObjectDependencyToExternalManagedObjectModel dependencyToExternalManagedObject) {
+
+		// TODO test (removeDeskManagedObjectDependencyToExternalManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<DeskManagedObjectDependencyToExternalManagedObjectModel>(
+				dependencyToExternalManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				dependencyToExternalManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				dependencyToExternalManagedObject.connect();
 			}
 		};
 	}

@@ -662,4 +662,59 @@ public interface DeskChanges {
 	Change<DeskManagedObjectSourceFlowToExternalFlowModel> removeDeskManagedObjectSourceFlowToExternalFlow(
 			DeskManagedObjectSourceFlowToExternalFlowModel managedObjectSourceFlowToExternalFlow);
 
+	/**
+	 * Links the {@link DeskManagedObjectDependencyModel} to the
+	 * {@link DeskManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link DeskManagedObjectDependencyModel}.
+	 * @param managedObject
+	 *            {@link DeskManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeskManagedObjectDependencyToDeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectDependencyToDeskManagedObjectModel> linkDeskManagedObjectDependencyToDeskManagedObject(
+			DeskManagedObjectDependencyModel dependency,
+			DeskManagedObjectModel managedObject);
+
+	/**
+	 * Removes the {@link DeskManagedObjectDependencyToDeskManagedObjectModel}.
+	 *
+	 * @param dependencyToManagedObject
+	 *            {@link DeskManagedObjectDependencyToDeskManagedObjectModel} to
+	 *            be removed.
+	 * @return {@link Change} to remove the
+	 *         {@link DeskManagedObjectDependencyToDeskManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectDependencyToDeskManagedObjectModel> removeDeskManagedObjectDependencyToDeskManagedObject(
+			DeskManagedObjectDependencyToDeskManagedObjectModel dependencyToManagedObject);
+
+	/**
+	 * Links the {@link DeskManagedObjectDependencyModel} to the
+	 * {@link ExternalManagedObjectModel}.
+	 *
+	 * @param dependency
+	 *            {@link DeskManagedObjectDependencyModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link DeskManagedObjectDependencyToExternalManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectDependencyToExternalManagedObjectModel> linkDeskManagedObjectDependencyToExternalManagedObject(
+			DeskManagedObjectDependencyModel dependency,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the
+	 * {@link DeskManagedObjectDependencyToExternalManagedObjectModel}.
+	 *
+	 * @param dependencyToExternalManagedObject
+	 *            {@link DeskManagedObjectDependencyToExternalManagedObjectModel}
+	 *            to be removed.
+	 * @return {@link Change} to remove the
+	 *         {@link DeskManagedObjectDependencyToExternalManagedObjectModel}.
+	 */
+	Change<DeskManagedObjectDependencyToExternalManagedObjectModel> removeDeskManagedObjectDependencyToExternalManagedObject(
+			DeskManagedObjectDependencyToExternalManagedObjectModel dependencyToExternalManagedObject);
+
 }
