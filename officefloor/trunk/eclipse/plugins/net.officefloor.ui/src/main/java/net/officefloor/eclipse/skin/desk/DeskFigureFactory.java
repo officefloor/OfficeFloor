@@ -19,6 +19,8 @@ package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
@@ -311,5 +313,31 @@ public interface DeskFigureFactory {
 	void decorateDeskManagedObjectSourceFlowToExternalFlowFigure(
 			PolylineConnection figure,
 			DeskManagedObjectSourceFlowToExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the {@link DeskManagedObjectDependencyToDeskManagedObjectModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeskManagedObjectDependencyToDeskManagedObjectFigureContext}
+	 */
+	void decorateDeskManagedObjectDependencyToDeskManagedObjectFigure(
+			PolylineConnection figure,
+			DeskManagedObjectDependencyToDeskManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the
+	 * {@link DeskManagedObjectDependencyToExternalManagedObjectModel} figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link DeskManagedObjectDependencyToExternalManagedObjectFigureContext}
+	 */
+	void decorateDeskManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			DeskManagedObjectDependencyToExternalManagedObjectFigureContext context);
 
 }

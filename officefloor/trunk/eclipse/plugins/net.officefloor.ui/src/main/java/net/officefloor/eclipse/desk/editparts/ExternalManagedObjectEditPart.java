@@ -36,7 +36,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalManagedObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ExternalManagedObjectEditPart
@@ -53,6 +53,7 @@ public class ExternalManagedObjectEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getTaskObjects());
+		models.addAll(this.getCastedModel().getDependentDeskManagedObjects());
 	}
 
 	@Override
@@ -99,6 +100,8 @@ public class ExternalManagedObjectEditPart
 			break;
 		case ADD_TASK_OBJECT:
 		case REMOVE_TASK_OBJECT:
+		case ADD_DEPENDENT_DESK_MANAGED_OBJECT:
+		case REMOVE_DEPENDENT_DESK_MANAGED_OBJECT:
 			this.refreshTargetConnections();
 			break;
 		}

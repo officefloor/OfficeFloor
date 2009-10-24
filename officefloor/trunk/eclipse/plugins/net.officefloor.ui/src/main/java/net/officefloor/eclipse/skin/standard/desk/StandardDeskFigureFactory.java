@@ -20,6 +20,8 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyToDeskManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskManagedObjectDependencyToExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectSourceFigure;
@@ -258,6 +260,20 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 			PolylineConnection figure,
 			DeskManagedObjectSourceFlowToTaskFigureContext context) {
 		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateDeskManagedObjectDependencyToDeskManagedObjectFigure(
+			PolylineConnection figure,
+			DeskManagedObjectDependencyToDeskManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateDeskManagedObjectDependencyToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			DeskManagedObjectDependencyToExternalManagedObjectFigureContext context) {
+		// Leave as default line
 	}
 
 }
