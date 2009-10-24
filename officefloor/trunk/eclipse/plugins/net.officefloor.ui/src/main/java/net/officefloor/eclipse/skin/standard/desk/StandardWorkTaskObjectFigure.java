@@ -23,8 +23,10 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
 /**
@@ -54,10 +56,12 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 
 		// Create the figure
 		this.parameterFigure = new LabelConnectorFigure(shortObjectTypeName,
-				ConnectorDirection.WEST, StandardOfficeFloorColours.BLACK());
+				ConnectorDirection.EAST, StandardOfficeFloorColours.BLACK());
+		ConnectionAnchor anchor = this.parameterFigure.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				WorkTaskObjectToExternalManagedObjectModel.class,
-				this.parameterFigure.getConnectionAnchor());
+				WorkTaskObjectToExternalManagedObjectModel.class, anchor);
+		this.registerConnectionAnchor(
+				WorkTaskObjectToDeskManagedObjectModel.class, anchor);
 
 		// Specify initial state
 		this.setIsParameter(context.isParameter());
@@ -67,12 +71,9 @@ public class StandardWorkTaskObjectFigure extends AbstractOfficeFloorFigure
 	}
 
 	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure#setIsParameter
-	 * (boolean)
+	 * ===================== WorkTaskObjectFigure =======================
 	 */
+
 	@Override
 	public void setIsParameter(boolean isParameter) {
 		this.parameterFigure.setConnectorVisible(!isParameter);

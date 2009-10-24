@@ -50,6 +50,7 @@ import net.officefloor.eclipse.desk.editparts.TaskToNextTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToDeskManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskToTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkToInitialTaskEditPart;
@@ -93,6 +94,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
@@ -172,6 +174,8 @@ public class DeskEditor extends
 		map.put(WorkTaskToTaskModel.class, WorkTaskToTaskEditPart.class);
 		map.put(WorkTaskObjectToExternalManagedObjectModel.class,
 				WorkTaskObjectToExternalManagedObjectEditPart.class);
+		map.put(WorkTaskObjectToDeskManagedObjectModel.class,
+				WorkTaskObjectToDeskManagedObjectEditPart.class);
 		map.put(TaskFlowToTaskModel.class, TaskFlowToTaskEditPart.class);
 		map.put(TaskFlowToExternalFlowModel.class,
 				TaskFlowToExternalFlowEditPart.class);
@@ -341,6 +345,21 @@ public class DeskEditor extends
 							}
 						});
 
+		// Allow deleting work task object to managed object
+		policy
+				.addDelete(
+						WorkTaskObjectToDeskManagedObjectModel.class,
+						new DeleteChangeFactory<WorkTaskObjectToDeskManagedObjectModel>() {
+							@Override
+							public Change<WorkTaskObjectToDeskManagedObjectModel> createChange(
+									WorkTaskObjectToDeskManagedObjectModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeWorkTaskObjectToDeskManagedObject(
+												target);
+							}
+						});
+
 		// Allow deleting work to initial task
 		policy.addDelete(WorkToInitialTaskModel.class,
 				new DeleteChangeFactory<WorkToInitialTaskModel>() {
@@ -431,6 +450,23 @@ public class DeskEditor extends
 								return DeskEditor.this
 										.getModelChanges()
 										.linkWorkTaskObjectToExternalManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect work task object to managed object
+		policy
+				.addConnection(
+						WorkTaskObjectModel.class,
+						DeskManagedObjectModel.class,
+						new ConnectionChangeFactory<WorkTaskObjectModel, DeskManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									WorkTaskObjectModel source,
+									DeskManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this.getModelChanges()
+										.linkWorkTaskObjectToDeskManagedObject(
 												source, target);
 							}
 						});

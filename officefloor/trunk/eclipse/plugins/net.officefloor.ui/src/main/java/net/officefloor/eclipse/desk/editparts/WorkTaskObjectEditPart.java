@@ -33,7 +33,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link WorkTaskObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class WorkTaskObjectEditPart
@@ -51,6 +51,8 @@ public class WorkTaskObjectEditPart
 	protected void populateConnectionSourceModels(List<Object> models) {
 		EclipseUtil.addToList(models, this.getCastedModel()
 				.getExternalManagedObject());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getDeskManagedObject());
 	}
 
 	@Override
@@ -69,6 +71,7 @@ public class WorkTaskObjectEditPart
 							.getIsParameter());
 			break;
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
+		case CHANGE_DESK_MANAGED_OBJECT:
 			WorkTaskObjectEditPart.this.refreshSourceConnections();
 			break;
 		}

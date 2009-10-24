@@ -53,6 +53,7 @@ import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskObjectToDeskManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskToTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkToInitialTaskFigureContext;
@@ -192,6 +193,13 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	public void decorateWorkTaskObjectToExternalManagedObjectFigure(
 			PolylineConnection figure,
 			WorkTaskObjectToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateWorkTaskObjectToDeskManagedObjectFigure(
+			PolylineConnection figure,
+			WorkTaskObjectToDeskManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 
