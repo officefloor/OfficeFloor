@@ -24,9 +24,13 @@ import java.util.Map;
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
@@ -42,7 +46,13 @@ import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionChanges;
+import net.officefloor.model.section.SectionManagedObjectDependencyModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectDependencyToSectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
@@ -118,7 +128,8 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Add the external flows as outputs from the section
+		// Add the external flows as outputs from the section, keeping registry
+		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
 		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
 
 			// Determine if all connected sub section outputs are escalation
@@ -131,16 +142,28 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 				}
 			}
 
-			// Add the output
-			designer.addSectionOutput(extFlow.getExternalFlowName(), extFlow
-					.getArgumentType(), isEscalationOnly);
+			// Obtain the section output name
+			String sectionOutputName = extFlow.getExternalFlowName();
+
+			// Add the output and register it
+			SectionOutput sectionOutput = designer.addSectionOutput(
+					sectionOutputName, extFlow.getArgumentType(),
+					isEscalationOnly);
+			sectionOutputs.put(sectionOutputName, sectionOutput);
 		}
 
-		// Add the external managed objects as objects required by section
+		// Add the external managed objects as objects, keeping registry
+		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
 		for (ExternalManagedObjectModel extMo : section
 				.getExternalManagedObjects()) {
-			designer.addSectionObject(extMo.getExternalManagedObjectName(),
-					extMo.getObjectType());
+
+			// Obtain the section object name
+			String sectionObjectName = extMo.getExternalManagedObjectName();
+
+			// Add the section object and register it
+			SectionObject sectionObject = designer.addSectionObject(
+					sectionObjectName, extMo.getObjectType());
+			sectionObjects.put(sectionObjectName, sectionObject);
 		}
 
 		// Add the managed object sources, keeping registry of them
@@ -191,6 +214,62 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 					.addSectionManagedObject(managedObjectName,
 							managedObjectScope);
 			managedObjects.put(managedObjectName, managedObject);
+		}
+
+		// Link managed object dependencies to managed objects
+		for (SectionManagedObjectModel moModel : section
+				.getSectionManagedObjects()) {
+
+			// Obtain the managed object
+			SectionManagedObject mo = managedObjects.get(moModel
+					.getSectionManagedObjectName());
+			if (mo == null) {
+				continue; // should always have managed object
+			}
+
+			// Link managed object dependencies to managed object
+			for (SectionManagedObjectDependencyModel dependencyModel : moModel
+					.getSectionManagedObjectDependencies()) {
+
+				// Obtain the managed object dependency
+				ManagedObjectDependency dependency = mo
+						.getManagedObjectDependency(dependencyModel
+								.getSectionManagedObjectDependencyName());
+
+				// Link the dependency to managed object
+				SectionManagedObject linkedManagedObject = null;
+				SectionManagedObjectDependencyToSectionManagedObjectModel dependencyToMo = dependencyModel
+						.getSectionManagedObject();
+				if (dependencyToMo != null) {
+					SectionManagedObjectModel linkedMoModel = dependencyToMo
+							.getSectionManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel
+								.getSectionManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link dependency to managed object
+					designer.link(dependency, linkedManagedObject);
+				}
+
+				// Link the dependency to section object
+				SectionObject linkedObject = null;
+				SectionManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
+						.getExternalManagedObject();
+				if (dependencyToExtMo != null) {
+					ExternalManagedObjectModel extMo = dependencyToExtMo
+							.getExternalManagedObject();
+					if (extMo != null) {
+						linkedObject = sectionObjects.get(extMo
+								.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link dependency to section object
+					designer.link(dependency, linkedObject);
+				}
+			}
 		}
 
 		// Add the sub sections, keeping registry of sub sections/inputs
@@ -279,6 +358,66 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 				if (linkedMo != null) {
 					// Link the object to the managed object
 					designer.link(object, linkedMo);
+				}
+			}
+		}
+
+		// Link managed object source flow to sub section input/external flow
+		for (SectionManagedObjectSourceModel mosModel : section
+				.getSectionManagedObjectSources()) {
+
+			// Obtain the managed object source
+			SectionManagedObjectSource mos = managedObjectSources.get(mosModel
+					.getSectionManagedObjectSourceName());
+			if (mos == null) {
+				continue; // should always have
+			}
+
+			// Link mos flow to sub section input/external flow
+			for (SectionManagedObjectSourceFlowModel mosFlowModel : mosModel
+					.getSectionManagedObjectSourceFlows()) {
+
+				// Obtain the managed object source flow
+				ManagedObjectFlow mosFlow = mos
+						.getManagedObjectFlow(mosFlowModel
+								.getSectionManagedObjectSourceFlowName());
+
+				// Link managed object source flow to sub section input
+				SubSectionInput linkedInput = null;
+				SectionManagedObjectSourceFlowToSubSectionInputModel flowToInput = mosFlowModel
+						.getSubSectionInput();
+				if (flowToInput != null) {
+					SubSectionInputModel inputModel = flowToInput
+							.getSubSectionInput();
+					if (inputModel != null) {
+						SubSectionModel sectionModel = this
+								.getSubSectionForInput(section, inputModel);
+						if (sectionModel != null) {
+							linkedInput = subSectionInputs.get(sectionModel
+									.getSubSectionName(), inputModel
+									.getSubSectionInputName());
+						}
+					}
+				}
+				if (linkedInput != null) {
+					// Link managed object source flow to sub section input
+					designer.link(mosFlow, linkedInput);
+				}
+
+				// Link managed object source flow to section output
+				SectionOutput linkedOutput = null;
+				SectionManagedObjectSourceFlowToExternalFlowModel flowToExtFlow = mosFlowModel
+						.getExternalFlow();
+				if (flowToExtFlow != null) {
+					ExternalFlowModel extFlow = flowToExtFlow.getExternalFlow();
+					if (extFlow != null) {
+						linkedOutput = sectionOutputs.get(extFlow
+								.getExternalFlowName());
+					}
+				}
+				if (linkedOutput != null) {
+					// Link managed object source flow to section output
+					designer.link(mosFlow, linkedOutput);
 				}
 			}
 		}
