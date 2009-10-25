@@ -474,10 +474,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 				break;
 			case OFFICE:
+			case SECTION:
 				// Can not link to managed object initiating flow.
 				// Use name of managed object source.
 				inputBoundManagedObjectName = managedObjectSourceName;
 				break;
+			default:
+				throw new IllegalStateException("Unknown location type: "
+						+ this.locationType);
 			}
 			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
 				// Provide issue as should be input
