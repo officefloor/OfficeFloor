@@ -29,6 +29,7 @@ import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
@@ -45,6 +46,8 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -57,8 +60,15 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
+import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
+import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeModel;
@@ -185,6 +195,62 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					.addOfficeManagedObject(managedObjectName,
 							managedObjectScope);
 			managedObjects.put(managedObjectName, managedObject);
+		}
+
+		// Link the managed object dependencies
+		for (OfficeManagedObjectModel moModel : office
+				.getOfficeManagedObjects()) {
+
+			// Obtain the managed object
+			OfficeManagedObject managedObject = managedObjects.get(moModel
+					.getOfficeManagedObjectName());
+			if (managedObject == null) {
+				continue; // should always have
+			}
+
+			// Link the dependencies
+			for (OfficeManagedObjectDependencyModel dependencyModel : moModel
+					.getOfficeManagedObjectDependencies()) {
+
+				// Obtain the dependency
+				ManagedObjectDependency dependency = managedObject
+						.getManagedObjectDependency(dependencyModel
+								.getOfficeManagedObjectDependencyName());
+
+				// Determine if linked to managed object
+				OfficeManagedObject linkedManagedObject = null;
+				OfficeManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = dependencyModel
+						.getOfficeManagedObject();
+				if (dependencyToMo != null) {
+					OfficeManagedObjectModel linkedMoModel = dependencyToMo
+							.getOfficeManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel
+								.getOfficeManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link to managed object
+					architect.link(dependency, linkedManagedObject);
+				}
+
+				// Determine if linked to external managed object
+				OfficeObject linkedObject = null;
+				OfficeManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
+						.getExternalManagedObject();
+				if (dependencyToExtMo != null) {
+					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo
+							.getExternalManagedObject();
+					if (linkedExtMoModel != null) {
+						linkedObject = officeObjects.get(linkedExtMoModel
+								.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link to office object
+					architect.link(dependency, linkedObject);
+				}
+			}
 		}
 
 		// Add the teams, keeping registry of the teams
@@ -363,6 +429,88 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 				// Link output to the input
 				architect.link(output, input);
+			}
+		}
+
+		// Link managed object source flows to section inputs
+		for (OfficeManagedObjectSourceModel mosModel : office
+				.getOfficeManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
+					.getOfficeManagedObjectSourceName());
+			if (mos == null) {
+				continue; // should always have managed object source
+			}
+
+			// Link managed object source flow to section input
+			for (OfficeManagedObjectSourceFlowModel mosFlowModel : mosModel
+					.getOfficeManagedObjectSourceFlows()) {
+
+				// Obtain the managed object source flow
+				ManagedObjectFlow mosFlow = mos
+						.getManagedObjectFlow(mosFlowModel
+								.getOfficeManagedObjectSourceFlowName());
+
+				// Link to section input
+				OfficeSectionInput sectionInput = null;
+				OfficeManagedObjectSourceFlowToOfficeSectionInputModel conn = mosFlowModel
+						.getOfficeSectionInput();
+				if (conn != null) {
+					OfficeSectionInputModel sectionInputModel = conn
+							.getOfficeSectionInput();
+					if (sectionInputModel != null) {
+						OfficeSectionModel sectionModel = this
+								.getOfficeSectionForInput(office,
+										sectionInputModel);
+						if (sectionModel != null) {
+							sectionInput = inputs.get(sectionModel
+									.getOfficeSectionName(), sectionInputModel
+									.getOfficeSectionInputName());
+						}
+					}
+				}
+				if (sectionInput != null) {
+					// Link managed object source flow to section input
+					architect.link(mosFlow, sectionInput);
+				}
+			}
+		}
+
+		// Link managed object source teams to office teams
+		for (OfficeManagedObjectSourceModel mosModel : office
+				.getOfficeManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
+					.getOfficeManagedObjectSourceName());
+			if (mos == null) {
+				continue; // should always have managed object source
+			}
+
+			// Link managed object source teams to office team
+			for (OfficeManagedObjectSourceTeamModel mosTeamModel : mosModel
+					.getOfficeManagedObjectSourceTeams()) {
+
+				// Obtain the managed object source team
+				ManagedObjectTeam mosTeam = mos
+						.getManagedObjectTeam(mosTeamModel
+								.getOfficeManagedObjectSourceTeamName());
+
+				// Link managed object source team to office team
+				OfficeTeam officeTeam = null;
+				OfficeManagedObjectSourceTeamToOfficeTeamModel conn = mosTeamModel
+						.getOfficeTeam();
+				if (conn != null) {
+					OfficeTeamModel teamModel = conn.getOfficeTeam();
+					if (teamModel != null) {
+						officeTeam = teams.get(teamModel.getOfficeTeamName());
+					}
+				}
+				if (officeTeam != null) {
+					// Link managed object source team to office team
+					architect.link(mosTeam, officeTeam);
+				}
 			}
 		}
 
