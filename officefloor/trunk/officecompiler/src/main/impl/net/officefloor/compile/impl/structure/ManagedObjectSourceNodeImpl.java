@@ -466,9 +466,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
-			if (this.inputManagedObjectNode != null) {
-				inputBoundManagedObjectName = this.inputManagedObjectNode
-						.getBoundManagedObjectName();
+			switch (this.locationType) {
+			case OFFICE_FLOOR:
+				if (this.inputManagedObjectNode != null) {
+					inputBoundManagedObjectName = this.inputManagedObjectNode
+							.getBoundManagedObjectName();
+				}
+				break;
+			case OFFICE:
+				// Can not link to managed object initiating flow.
+				// Use name of managed object source.
+				inputBoundManagedObjectName = managedObjectSourceName;
+				break;
 			}
 			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
 				// Provide issue as should be input
