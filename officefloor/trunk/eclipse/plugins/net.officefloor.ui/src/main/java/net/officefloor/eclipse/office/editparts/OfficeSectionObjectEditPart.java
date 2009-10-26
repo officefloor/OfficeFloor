@@ -32,7 +32,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeSectionObjectModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class OfficeSectionObjectEditPart
@@ -54,6 +54,8 @@ public class OfficeSectionObjectEditPart
 	protected void populateConnectionSourceModels(List<Object> models) {
 		EclipseUtil.addToList(models, this.getCastedModel()
 				.getExternalManagedObject());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeManagedObject());
 	}
 
 	@Override
@@ -66,6 +68,7 @@ public class OfficeSectionObjectEditPart
 			PropertyChangeEvent evt) {
 		switch (property) {
 		case CHANGE_EXTERNAL_MANAGED_OBJECT:
+		case CHANGE_OFFICE_MANAGED_OBJECT:
 			this.refreshSourceConnections();
 			break;
 		}

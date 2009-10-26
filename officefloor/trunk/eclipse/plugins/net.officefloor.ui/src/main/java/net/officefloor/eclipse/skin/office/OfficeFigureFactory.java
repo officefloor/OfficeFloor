@@ -328,6 +328,19 @@ public interface OfficeFigureFactory {
 			OfficeSectionObjectToExternalManagedObjectFigureContext context);
 
 	/**
+	 * Decorates the {@link OfficeSectionObjectToOfficeManagedObjectModel}
+	 * figure.
+	 *
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeSectionObjectToOfficeManagedObjectFigureContext}
+	 */
+	void decorateOfficeSectionObjectToOfficeManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeSectionObjectToOfficeManagedObjectFigureContext context);
+
+	/**
 	 * Decorates the {@link OfficeSectionOutputToOfficeSectionInputModel}
 	 * figure.
 	 *

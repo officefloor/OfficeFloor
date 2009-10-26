@@ -1515,8 +1515,10 @@ public class DeskChangesImpl implements DeskChanges {
 
 				// Remove connection to work task
 				WorkTaskToTaskModel workTaskConn = task.getWorkTask();
-				workTaskConn.remove();
-				connList.add(workTaskConn);
+				if (workTaskConn != null) {
+					workTaskConn.remove();
+					connList.add(workTaskConn);
+				}
 
 				// Store for revert
 				this.connections = connList.toArray(new ConnectionModel[0]);

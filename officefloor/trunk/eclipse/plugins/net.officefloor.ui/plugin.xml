@@ -49,14 +49,14 @@
 		<wizard category="net.officefloor.eclipse"
 			class="net.officefloor.eclipse.wizard.file.OfficeFloorNewWizard"
 			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
-			name="Office Floor">
+			name="OfficeFloor">
 		</wizard>
 	</extension>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 		<launchConfigurationType
 			delegate="net.officefloor.eclipse.launch.OfficeFloorLaunchConfigurationDelegate"
 			id="net.officefloor.eclipse.launch.configurationtype.officeFloor"
-			modes="run, debug" name="Office Floor">
+			modes="run, debug" name="OfficeFloor">
 		</launchConfigurationType>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -74,7 +74,7 @@
 	<extension point="org.eclipse.debug.ui.launchShortcuts">
 		<shortcut class="net.officefloor.eclipse.launch.OfficeFloorLaunchShortcut"
 			icon="icons/OfficeFloor.png" id="net.officefloor.eclipse.launch.shortcut.officeFloor"
-			label="Office Floor" modes="run,debug">
+			label="OfficeFloor" modes="run,debug">
 			<configurationType
 				id="net.officefloor.eclipse.launch.configurationtype.officeFloor">
 			</configurationType>

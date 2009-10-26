@@ -24,6 +24,7 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 
@@ -51,6 +52,8 @@ public class StandardOfficeSectionObjectFigure extends
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(
 				OfficeSectionObjectToExternalManagedObjectModel.class, anchor);
+		this.registerConnectionAnchor(
+				OfficeSectionObjectToOfficeManagedObjectModel.class, anchor);
 
 		this.setFigure(connector);
 	}
