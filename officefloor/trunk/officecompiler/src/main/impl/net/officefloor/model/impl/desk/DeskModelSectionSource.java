@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -40,7 +42,13 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskManagedObjectDependencyModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToDeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.DeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskModel;
@@ -188,6 +196,61 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					.addSectionManagedObject(managedObjectName,
 							managedObjectScope);
 			managedObjects.put(managedObjectName, managedObject);
+		}
+
+		// Link managed object dependencies to managed objects/external objects
+		for (DeskManagedObjectModel moModel : desk.getDeskManagedObjects()) {
+
+			// Obtain the managed object
+			SectionManagedObject managedObject = managedObjects.get(moModel
+					.getDeskManagedObjectName());
+			if (managedObject == null) {
+				continue; // should always have
+			}
+
+			// Link dependencies to managed object/external object
+			for (DeskManagedObjectDependencyModel dependencyModel : moModel
+					.getDeskManagedObjectDependencies()) {
+
+				// Obtain the dependency
+				ManagedObjectDependency dependency = managedObject
+						.getManagedObjectDependency(dependencyModel
+								.getDeskManagedObjectDependencyName());
+
+				// Link dependency to managed object
+				SectionManagedObject linkedManagedObject = null;
+				DeskManagedObjectDependencyToDeskManagedObjectModel dependencyToMo = dependencyModel
+						.getDeskManagedObject();
+				if (dependencyToMo != null) {
+					DeskManagedObjectModel linkedMoModel = dependencyToMo
+							.getDeskManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel
+								.getDeskManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link dependency to managed object
+					designer.link(dependency, linkedManagedObject);
+				}
+
+				// Link dependency to external managed object
+				SectionObject linkedObject = null;
+				DeskManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
+						.getExternalManagedObject();
+				if (dependencyToExtMo != null) {
+					ExternalManagedObjectModel extMoModel = dependencyToExtMo
+							.getExternalManagedObject();
+					if (extMoModel != null) {
+						linkedObject = sectionObjects.get(extMoModel
+								.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link dependency to external managed object
+					designer.link(dependency, linkedObject);
+				}
+			}
 		}
 
 		// Add the works, keeping registry of the tasks
@@ -451,6 +514,59 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
+		// Link managed object source flows to tasks/section outputs
+		for (DeskManagedObjectSourceModel mosModel : desk
+				.getDeskManagedObjectSources()) {
+
+			// Obtain the managed object source
+			SectionManagedObjectSource mos = managedObjectSources.get(mosModel
+					.getDeskManagedObjectSourceName());
+			if (mos == null) {
+				continue; // should always have
+			}
+
+			// Link flows to tasks/section outputs
+			for (DeskManagedObjectSourceFlowModel mosFlowModel : mosModel
+					.getDeskManagedObjectSourceFlows()) {
+
+				// Obtain the managed object source flow
+				ManagedObjectFlow mosFlow = mos
+						.getManagedObjectFlow(mosFlowModel
+								.getDeskManagedObjectSourceFlowName());
+
+				// Link managed object source flow to task
+				SectionTask linkedTask = null;
+				DeskManagedObjectSourceFlowToTaskModel flowToTask = mosFlowModel
+						.getTask();
+				if (flowToTask != null) {
+					TaskModel taskModel = flowToTask.getTask();
+					if (taskModel != null) {
+						linkedTask = tasks.get(taskModel.getTaskName());
+					}
+				}
+				if (linkedTask != null) {
+					// Link managed object source flow to task
+					designer.link(mosFlow, linkedTask);
+				}
+
+				// Link managed object source flow to external flow
+				SectionOutput linkedOutput = null;
+				DeskManagedObjectSourceFlowToExternalFlowModel flowToOutput = mosFlowModel
+						.getExternalFlow();
+				if (flowToOutput != null) {
+					ExternalFlowModel extOutput = flowToOutput
+							.getExternalFlow();
+					if (extOutput != null) {
+						linkedOutput = sectionOutputs.get(extOutput
+								.getExternalFlowName());
+					}
+				}
+				if (linkedOutput != null) {
+					// Link managed object source flow to external flow
+					designer.link(mosFlow, linkedOutput);
+				}
+			}
+		}
 	}
 
 	/**
