@@ -52,6 +52,7 @@ import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectToOfficeManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputToOfficeSectionInputFigureContext;
@@ -217,6 +218,13 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	public void decorateOfficeSectionObjectToExternalManagedObjectFigure(
 			PolylineConnection figure,
 			OfficeSectionObjectToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeSectionObjectToOfficeManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeSectionObjectToOfficeManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 

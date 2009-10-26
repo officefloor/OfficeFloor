@@ -58,7 +58,8 @@ public class AddOfficeFloorInputManagedObjectOperation extends
 
 		// Create the populated Input Managed Object
 		OfficeFloorInputManagedObjectModel inputMo = new OfficeFloorInputManagedObjectModel();
-		BeanDialog dialog = editPart.createBeanDialog(inputMo, "X", "Y");
+		BeanDialog dialog = editPart.createBeanDialog(inputMo, "X", "Y",
+				"Bound Office Floor Managed Object Source");
 		dialog.registerPropertyInput("Object Type", new ClasspathClassInput(
 				editPart.getEditor()));
 		if (!dialog.populate()) {

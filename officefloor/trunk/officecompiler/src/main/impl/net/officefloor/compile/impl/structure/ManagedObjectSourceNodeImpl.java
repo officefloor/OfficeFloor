@@ -454,6 +454,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 
+		// TODO provide configuration for default timeout
+		System.err
+				.println("TODO provide configuration for default timeout on ManagedObjectSource");
+		moBuilder.setDefaultTimeout(1000);
+
 		// Specify the managing office
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 				.setManagingOffice(managingOffice.getDeployedOfficeName());

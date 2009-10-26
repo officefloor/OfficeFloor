@@ -447,6 +447,33 @@ public interface OfficeChanges {
 			OfficeSectionObjectToExternalManagedObjectModel officeSectionObjectToExternalManagedObject);
 
 	/**
+	 * Links the {@link OfficeSectionObjectModel} to the
+	 * {@link OfficeManagedObjectModel}.
+	 *
+	 * @param officeSectionObject
+	 *            {@link OfficeSectionObjectModel}.
+	 * @param officeManagedObject
+	 *            {@link OfficeManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeSectionObjectToOfficeManagedObjectModel}.
+	 */
+	Change<OfficeSectionObjectToOfficeManagedObjectModel> linkOfficeSectionObjectToOfficeManagedObject(
+			OfficeSectionObjectModel officeSectionObject,
+			OfficeManagedObjectModel officeManagedObject);
+
+	/**
+	 * Removes the {@link OfficeSectionObjectToOfficeManagedObjectModel}.
+	 *
+	 * @param officeSectionObjectToExternalManagedObject
+	 *            {@link OfficeSectionObjectToOfficeManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeSectionObjectToOfficeManagedObjectModel}.
+	 */
+	Change<OfficeSectionObjectToOfficeManagedObjectModel> removeOfficeSectionObjectToOfficeManagedObject(
+			OfficeSectionObjectToOfficeManagedObjectModel officeSectionObjectToOfficeManagedObject);
+
+	/**
 	 * Links the {@link OfficeManagedObjectDependencyModel} to the
 	 * {@link OfficeManagedObjectModel}.
 	 *

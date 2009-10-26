@@ -63,9 +63,12 @@ public class LeaderFollowerTeamSourceExtension implements
 		final Property sizeProperty = properties
 				.getOrAddProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME);
 
-		// Obtain the initial values
+		// Default initial values
 		String sizeValue = sizeProperty.getValue();
-		sizeValue = (sizeValue == null ? "10" : sizeValue);
+		if (sizeValue == null) {
+			sizeValue = "10";
+			sizeProperty.setValue(sizeValue);
+		}
 
 		// Add controls to change properties
 		page.setLayout(new GridLayout(2, false));

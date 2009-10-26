@@ -74,6 +74,7 @@ import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -1687,6 +1688,54 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				officeSectionObjectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeSectionObjectToOfficeManagedObjectModel> linkOfficeSectionObjectToOfficeManagedObject(
+			OfficeSectionObjectModel officeSectionObject,
+			OfficeManagedObjectModel officeManagedObject) {
+
+		// TODO test this method (linkOfficeSectionObjectToOfficeManagedObject)
+
+		// Create the connection
+		final OfficeSectionObjectToOfficeManagedObjectModel conn = new OfficeSectionObjectToOfficeManagedObjectModel();
+		conn.setOfficeSectionObject(officeSectionObject);
+		conn.setOfficeManagedObject(officeManagedObject);
+
+		// Return change to add connection
+		return new AbstractChange<OfficeSectionObjectToOfficeManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeSectionObjectToOfficeManagedObjectModel> removeOfficeSectionObjectToOfficeManagedObject(
+			final OfficeSectionObjectToOfficeManagedObjectModel officeSectionObjectToOfficeManagedObject) {
+
+		// TODO test (removeOfficeSectionObjectToOfficeManagedObject)
+
+		// Return change to remove connection
+		return new AbstractChange<OfficeSectionObjectToOfficeManagedObjectModel>(
+				officeSectionObjectToOfficeManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				officeSectionObjectToOfficeManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				officeSectionObjectToOfficeManagedObject.connect();
 			}
 		};
 	}

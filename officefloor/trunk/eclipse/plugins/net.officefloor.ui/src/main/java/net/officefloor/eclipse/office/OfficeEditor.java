@@ -49,6 +49,7 @@ import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionInputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionObjectEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionObjectToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeSectionObjectToOfficeManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionOutputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionOutputToOfficeSectionInputEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionResponsibilityEditPart;
@@ -100,6 +101,7 @@ import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -194,6 +196,8 @@ public class OfficeEditor extends
 		// Connections
 		map.put(OfficeSectionObjectToExternalManagedObjectModel.class,
 				OfficeSectionObjectToExternalManagedObjectEditPart.class);
+		map.put(OfficeSectionObjectToOfficeManagedObjectModel.class,
+				OfficeSectionObjectToOfficeManagedObjectEditPart.class);
 		map.put(OfficeSectionOutputToOfficeSectionInputModel.class,
 				OfficeSectionOutputToOfficeSectionInputEditPart.class);
 		map.put(OfficeSectionResponsibilityToOfficeTeamModel.class,
@@ -330,6 +334,21 @@ public class OfficeEditor extends
 								return OfficeEditor.this
 										.getModelChanges()
 										.removeOfficeSectionObjectToExternalManagedObject(
+												target);
+							}
+						});
+
+		// Allow deleting office section object to managed object
+		policy
+				.addDelete(
+						OfficeSectionObjectToOfficeManagedObjectModel.class,
+						new DeleteChangeFactory<OfficeSectionObjectToOfficeManagedObjectModel>() {
+							@Override
+							public Change<OfficeSectionObjectToOfficeManagedObjectModel> createChange(
+									OfficeSectionObjectToOfficeManagedObjectModel target) {
+								return OfficeEditor.this
+										.getModelChanges()
+										.removeOfficeSectionObjectToOfficeManagedObject(
 												target);
 							}
 						});
@@ -521,6 +540,24 @@ public class OfficeEditor extends
 								return OfficeEditor.this
 										.getModelChanges()
 										.linkOfficeSectionObjectToExternalManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect office section object to managed object
+		policy
+				.addConnection(
+						OfficeSectionObjectModel.class,
+						OfficeManagedObjectModel.class,
+						new ConnectionChangeFactory<OfficeSectionObjectModel, OfficeManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									OfficeSectionObjectModel source,
+									OfficeManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return OfficeEditor.this
+										.getModelChanges()
+										.linkOfficeSectionObjectToOfficeManagedObject(
 												source, target);
 							}
 						});
