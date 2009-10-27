@@ -58,7 +58,8 @@ public class AddDeskManagedObjectSourceOperation extends
 		Change<DeskManagedObjectSourceModel> change = changes
 				.addDeskManagedObjectSource(mo.getManagedObjectName(), mo
 						.getManagedObjectSourceClassName(), mo
-						.getPropertylist(), mo.getManagedObjectType());
+						.getPropertylist(), mo.getTimeout(), mo
+						.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());

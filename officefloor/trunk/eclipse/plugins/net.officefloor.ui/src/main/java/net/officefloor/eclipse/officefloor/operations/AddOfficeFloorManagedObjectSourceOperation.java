@@ -28,7 +28,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 /**
  * Adds a {@link OfficeFloorManagedObjectSourceModel} to the
  * {@link OfficeFloorModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AddOfficeFloorManagedObjectSourceOperation extends
@@ -61,7 +61,8 @@ public class AddOfficeFloorManagedObjectSourceOperation extends
 		Change<OfficeFloorManagedObjectSourceModel> change = changes
 				.addOfficeFloorManagedObjectSource(mo.getManagedObjectName(),
 						mo.getManagedObjectSourceClassName(), mo
-								.getPropertylist(), mo.getManagedObjectType());
+								.getPropertylist(), mo.getTimeout(), mo
+								.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());

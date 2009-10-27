@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Instance of a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectInstance {
@@ -51,32 +51,32 @@ public class ManagedObjectInstance {
 	private final ManagedObjectType<?> managedObjectType;
 
 	/**
-	 * Default timeout for the {@link ManagedObject}
+	 * Timeout for the {@link ManagedObject}
 	 */
-	private final long defaultTimeout;
+	private final long timeout;
 
 	/**
 	 * Initiate for public use.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceClassName
 	 *            {@link ManagedObjectSource} class name.
-	 * @param defaultTimeout
-	 *            Default timeout for the {@link ManagedObject}
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}
 	 */
 	public ManagedObjectInstance(String managedObjectName,
-			String managedObjectSourceClassName, long defaultTimeout) {
+			String managedObjectSourceClassName, long timeout) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
 		this.managedObjectType = null;
-		this.defaultTimeout = defaultTimeout;
+		this.timeout = timeout;
 	}
 
 	/**
 	 * Initiate from {@link ManagedObjectSourceInstance}.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceClassName
@@ -85,22 +85,22 @@ public class ManagedObjectInstance {
 	 *            {@link PropertyList}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
-	 * @param defaultTimeout
-	 *            Default timeout for the {@link ManagedObject}
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}
 	 */
 	ManagedObjectInstance(String managedObjectName,
 			String managedObjectSourceClassName, PropertyList propertyList,
-			ManagedObjectType<?> managedObjectType, long defaultTimeout) {
+			ManagedObjectType<?> managedObjectType, long timeout) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.propertyList = propertyList;
 		this.managedObjectType = managedObjectType;
-		this.defaultTimeout = defaultTimeout;
+		this.timeout = timeout;
 	}
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
-	 * 
+	 *
 	 * @return Name of the {@link ManagedObject}.
 	 */
 	public String getManagedObjectName() {
@@ -109,7 +109,7 @@ public class ManagedObjectInstance {
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} class name.
-	 * 
+	 *
 	 * @return {@link ManagedObjectSource} class name.
 	 */
 	public String getManagedObjectSourceClassName() {
@@ -118,7 +118,7 @@ public class ManagedObjectInstance {
 
 	/**
 	 * Obtains the {@link PropertyList}.
-	 * 
+	 *
 	 * @return {@link PropertyList}.
 	 */
 	public PropertyList getPropertylist() {
@@ -127,7 +127,7 @@ public class ManagedObjectInstance {
 
 	/**
 	 * Obtains the {@link ManagedObjectType}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectType} if obtained from
 	 *         {@link ManagedObjectSourceInstance} or <code>null</code> if
 	 *         initiated by <code>public</code> constructor.
@@ -137,11 +137,11 @@ public class ManagedObjectInstance {
 	}
 
 	/**
-	 * Returns the default timeout for the {@link ManagedObject}.
-	 * 
-	 * @return Default timeout for the {@link ManagedObject}.
+	 * Returns the timeout for the {@link ManagedObject}.
+	 *
+	 * @return Timeout for the {@link ManagedObject}.
 	 */
-	public long getDefaultTimeout() {
-		return this.defaultTimeout;
+	public long getTimeout() {
+		return this.timeout;
 	}
 }
