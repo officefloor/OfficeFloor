@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <marshall type="net.officefloor.model.desk.DeskModel" element="desk">
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<collection method="getExternalManagedObjects" element="external-managed-objects">
 		<item type="net.officefloor.model.desk.ExternalManagedObjectModel"
@@ -13,6 +14,7 @@
 			</attributes>
 		</item>
 	</collection>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<collection method="getDeskManagedObjectSources" element="managed-object-sources">
 		<item type="net.officefloor.model.desk.DeskManagedObjectSourceModel"
@@ -23,6 +25,7 @@
 				<attribute method="getManagedObjectSourceClassName"
 					attribute="source" />
 				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -56,6 +59,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- MANAGED OBJECTS -->
 	<collection method="getDeskManagedObjects" element="managed-objects">
 		<item type="net.officefloor.model.desk.DeskManagedObjectModel"
@@ -95,6 +99,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- EXTERNAL FLOWS -->
 	<collection method="getExternalFlows" element="external-flows">
 		<item type="net.officefloor.model.desk.ExternalFlowModel"
@@ -107,6 +112,7 @@
 			</attributes>
 		</item>
 	</collection>
+
 	<!-- WORKS -->
 	<collection method="getWorks" element="works">
 		<item type="net.officefloor.model.desk.WorkModel" element="work">
@@ -161,6 +167,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- TASKS -->
 	<collection method="getTasks" element="tasks">
 		<item type="net.officefloor.model.desk.TaskModel" element="task">

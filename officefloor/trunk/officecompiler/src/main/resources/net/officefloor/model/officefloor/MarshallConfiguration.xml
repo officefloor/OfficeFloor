@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
 	element="office-floor">
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<collection method="getOfficeFloorManagedObjectSources"
 		element="managed-object-sources">
@@ -13,6 +14,7 @@
 				<attribute method="getManagedObjectSourceClassName"
 					attribute="source" />
 				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -88,6 +90,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- INPUT MANAGED OBJECTS -->
 	<collection method="getOfficeFloorInputManagedObjects"
 		element="input-managed-objects">
@@ -110,6 +113,7 @@
 			</object>
 		</item>
 	</collection>
+
 	<!-- MANAGED OBJECTS -->
 	<collection method="getOfficeFloorManagedObjects" element="managed-objects">
 		<item
@@ -147,6 +151,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- TEAMS -->
 	<collection method="getOfficeFloorTeams" element="teams">
 		<item type="net.officefloor.model.officefloor.OfficeFloorTeamModel"
@@ -168,6 +173,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- OFFICES -->
 	<collection method="getDeployedOffices" element="offices">
 		<item type="net.officefloor.model.officefloor.DeployedOfficeModel"

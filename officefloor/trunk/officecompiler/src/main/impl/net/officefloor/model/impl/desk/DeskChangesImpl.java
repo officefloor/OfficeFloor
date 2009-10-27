@@ -1944,14 +1944,15 @@ public class DeskChangesImpl implements DeskChanges {
 	public Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType) {
+			long timeout, ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addDeskManagedObjectSource)
 
 		// Create the managed object source
 		final DeskManagedObjectSourceModel managedObjectSource = new DeskManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName());
+				managedObjectType.getObjectClass().getName(), String
+						.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));

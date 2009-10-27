@@ -7,7 +7,7 @@
 	<managed-object-sources>
 		<managed-object-source name="MANAGED_OBJECT_SOURCE"
 			source="net.example.ExampleManagedObjectSource" object-type="net.orm.Session"
-			x="200" y="201">
+			timeout="10" x="200" y="201">
 			<properties>
 				<property name="MO_ONE" value="VALUE_ONE" />
 				<property name="MO_TWO" value="VALUE_TWO" />

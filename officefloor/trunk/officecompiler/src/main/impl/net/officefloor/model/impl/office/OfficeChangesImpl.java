@@ -1111,14 +1111,15 @@ public class OfficeChangesImpl implements OfficeChanges {
 	public Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType) {
+			long timeout, ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeManagedObjectSource)
 
 		// Create the managed object source
 		final OfficeManagedObjectSourceModel managedObjectSource = new OfficeManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName());
+				managedObjectType.getObjectClass().getName(), String
+						.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));

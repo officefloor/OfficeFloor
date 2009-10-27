@@ -7,7 +7,7 @@
 	<office>
 		<managed-object-sources>
 			<managed-object-source name="MANAGED_OBJECT_SOURCE"
-				source="CLASS">
+				source="CLASS"> <!-- no timeout -->
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleManagedObject" />
 				</properties>

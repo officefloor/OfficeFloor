@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="office-floor"
 	class="net.officefloor.model.officefloor.OfficeFloorModel">
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addOfficeFloorManagedObjectSource" node="managed-object-source"
 		class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel">
 		<value method="setOfficeFloorManagedObjectSourceName" node="managed-object-source@name" />
 		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
 		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setTimeout" node="managed-object-source@timeout" />
 		<value method="setX" node="managed-object-source@x" />
 		<value method="setY" node="managed-object-source@y" />
 		<object method="addProperty" node="property"
@@ -53,6 +55,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- INPUT MANAGED OBJECTS -->
 	<object method="addOfficeFloorInputManagedObject" node="input-managed-object"
 		class="net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel">
@@ -65,6 +68,7 @@
 			<value method="setOfficeFloorManagedObjectSourceName" node="bound-managed-object-source@name" />
 		</object>
 	</object>
+
 	<!-- MANAGED OBJECTS -->
 	<object method="addOfficeFloorManagedObject" node="managed-object"
 		class="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel">
@@ -86,6 +90,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- TEAMS -->
 	<object method="addOfficeFloorTeam" node="team"
 		class="net.officefloor.model.officefloor.OfficeFloorTeamModel">
@@ -99,6 +104,7 @@
 			<value method="setValue" node="property@value" />
 		</object>
 	</object>
+
 	<!-- OFFICES -->
 	<object method="addDeployedOffice" node="office"
 		class="net.officefloor.model.officefloor.DeployedOfficeModel">

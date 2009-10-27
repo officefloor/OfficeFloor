@@ -36,7 +36,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests handling {@link FailedToSourceManagedObjectEscalation}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class HandleFailedToSourceManagedObjectTest extends
@@ -44,7 +44,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
 	 */
 	@Override
@@ -126,7 +126,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 
 	/**
 	 * Does the test expecting to handle input failure.
-	 * 
+	 *
 	 * @param failure
 	 *            Cause of failing to source {@link ManagedObject}.
 	 */
@@ -137,7 +137,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 
 		// Construct the managed object and team
 		this.constructManagedObject("MO", MockManagedObjectSource.class,
-				officeName).setDefaultTimeout(1000);
+				officeName).setTimeout(1000);
 		this.constructTeam("TEAM", OnePersonTeamSource.class);
 
 		// Construct the work

@@ -129,6 +129,17 @@ public class OfficeFloorModelOfficeFloorSource extends
 						.getValue());
 			}
 
+			// Provide timeout
+			String timeoutValue = managedObjectSourceModel.getTimeout();
+			if (!CompileUtil.isBlank(timeoutValue)) {
+				try {
+					managedObjectSource.setTimeout(Long.valueOf(timeoutValue));
+				} catch (NumberFormatException ex) {
+					deployer.addIssue("Invalid timeout value: " + timeoutValue,
+							AssetType.MANAGED_OBJECT, managedObjectSourceName);
+				}
+			}
+
 			// Register the managed object source
 			officeFloorManagedObjectSources.put(managedObjectSourceName,
 					managedObjectSource);

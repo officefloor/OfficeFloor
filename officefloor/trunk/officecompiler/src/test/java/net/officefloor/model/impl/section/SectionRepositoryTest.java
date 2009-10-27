@@ -104,7 +104,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		SectionManagedObjectSourceModel mos = new SectionManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Connection.class
-						.getName());
+						.getName(), "0");
 		section.addSectionManagedObjectSource(mos);
 		SectionManagedObjectSourceFlowModel flow = new SectionManagedObjectSourceFlowModel(
 				"FLOW", Object.class.getName());
@@ -274,7 +274,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		SectionManagedObjectSourceModel mos = new SectionManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Connection.class
-						.getName());
+						.getName(), "0");
 		section.addSectionManagedObjectSource(mos);
 		SectionManagedObjectSourceFlowModel mosFlow = new SectionManagedObjectSourceFlowModel(
 				"MOS_FLOW", Object.class.getName());

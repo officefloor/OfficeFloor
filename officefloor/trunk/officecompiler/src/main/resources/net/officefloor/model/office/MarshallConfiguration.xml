@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <marshall type="net.officefloor.model.office.OfficeModel"
 	element="office">
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<collection method="getExternalManagedObjects" element="external-managed-objects">
 		<item type="net.officefloor.model.office.ExternalManagedObjectModel"
@@ -24,6 +25,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<collection method="getOfficeManagedObjectSources" element="managed-object-sources">
 		<item type="net.officefloor.model.office.OfficeManagedObjectSourceModel"
@@ -34,6 +36,7 @@
 				<attribute method="getManagedObjectSourceClassName"
 					attribute="source" />
 				<attribute method="getObjectType" attribute="object-type" />
+				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -81,6 +84,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- MANAGED OBJECTS -->
 	<collection method="getOfficeManagedObjects" element="managed-objects">
 		<item type="net.officefloor.model.office.OfficeManagedObjectModel"
@@ -132,6 +136,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- OFFICE TEAMS -->
 	<collection method="getOfficeTeams" element="teams">
 		<item type="net.officefloor.model.office.OfficeTeamModel"
@@ -143,6 +148,7 @@
 			</attributes>
 		</item>
 	</collection>
+
 	<!-- OFFICE ESCALATIONS -->
 	<collection method="getOfficeEscalations" element="escalations">
 		<item type="net.officefloor.model.office.OfficeEscalationModel"
@@ -160,6 +166,7 @@
 			</object>
 		</item>
 	</collection>
+
 	<!-- OFFICE ADMINISTRATORS -->
 	<collection method="getOfficeAdministrators" element="administrators">
 		<item type="net.officefloor.model.office.AdministratorModel"
@@ -195,6 +202,7 @@
 			</collection>
 		</item>
 	</collection>
+
 	<!-- OFFICE SECTIONS -->
 	<collection method="getOfficeSections" element="sections">
 		<item type="net.officefloor.model.office.OfficeSectionModel"

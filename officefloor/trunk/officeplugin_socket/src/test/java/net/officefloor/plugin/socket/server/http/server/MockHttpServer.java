@@ -133,7 +133,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
 				"1024");
-		serverSocketBuilder.setDefaultTimeout(3000);
+		serverSocketBuilder.setTimeout(3000);
 
 		// Have server socket managed by office
 		ManagingOfficeBuilder<Indexed> managingOfficeBuilder = serverSocketBuilder

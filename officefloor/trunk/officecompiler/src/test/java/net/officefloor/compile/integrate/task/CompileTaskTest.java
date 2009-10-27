@@ -304,7 +304,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -329,7 +329,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.linkManagedObject(0, "INPUT_MANAGED_OBJECT",
 				InputManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", InputManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -363,7 +363,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				"class.name", CompileManagedObject.class.getName());
+				0, "class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the office floor
@@ -388,7 +388,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE.SECTION.MANAGED_OBJECT");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
@@ -425,7 +425,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE.SECTION.DESK.MANAGED_OBJECT");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.SECTION.DESK.MANAGED_OBJECT_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 

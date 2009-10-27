@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.change.Change;
 
@@ -182,6 +183,8 @@ public interface SectionChanges {
 	 *            Class name of the {@link ManagedObjectSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param timeout
+	 *            Timeout of the {@link ManagedObject}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link SectionManagedObjectSourceModel}
@@ -190,7 +193,7 @@ public interface SectionChanges {
 	Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType);
+			long timeout, ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link SectionManagedObjectSourceModel}.

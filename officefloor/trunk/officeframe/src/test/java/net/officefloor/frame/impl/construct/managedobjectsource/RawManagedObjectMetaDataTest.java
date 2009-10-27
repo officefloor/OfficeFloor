@@ -404,9 +404,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if negative default timeout.
+	 * Ensures issue if negative timeout.
 	 */
-	public void testNegativeDefaultTimeout() {
+	public void testNegativeTimeout() {
 
 		// Record negative default timeout
 		this.record_initManagedObject();
@@ -414,9 +414,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration
-				.getDefaultTimeout(), -1);
-		this.record_issue("Must not have negative default timeout");
+		this.recordReturn(this.configuration, this.configuration.getTimeout(),
+				-1);
+		this.record_issue("Must not have negative timeout");
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -435,8 +435,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				AsynchronousManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration
-				.getDefaultTimeout(), 0);
+		this.recordReturn(this.configuration, this.configuration.getTimeout(),
+				0);
 		this
 				.record_issue("Non-zero timeout must be provided for AsynchronousManagedObject");
 
@@ -460,8 +460,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
-		this.recordReturn(this.configuration, this.configuration
-				.getDefaultTimeout(), 0);
+		this.recordReturn(this.configuration, this.configuration.getTimeout(),
+				0);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowMetaData });
 		this.recordReturn(this.managingOfficeConfiguration,
@@ -871,8 +871,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				managedObjectClass);
-		this.recordReturn(this.configuration, this.configuration
-				.getDefaultTimeout(), timeout);
+		this.recordReturn(this.configuration, this.configuration.getTimeout(),
+				timeout);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				moFlowMetaData);
 		if (moFlowMetaData.length > 0) {

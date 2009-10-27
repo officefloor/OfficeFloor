@@ -70,7 +70,7 @@ public class SecureTcpServerTest extends AbstractTcpServerTestCase {
 		serverSocketBuilder.addProperty(
 				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_CONFIGURATOR,
 				MockSslEngineConfigurator.class.getName());
-		serverSocketBuilder.setDefaultTimeout(10000);
+		serverSocketBuilder.setTimeout(10000);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",

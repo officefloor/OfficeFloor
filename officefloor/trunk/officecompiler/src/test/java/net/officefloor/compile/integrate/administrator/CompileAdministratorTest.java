@@ -18,10 +18,8 @@
 package net.officefloor.compile.integrate.administrator;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -39,12 +37,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public class CompileAdministratorTest extends AbstractCompileTestCase {
-
-	// TODO remove once tests written and passing
-	@Override
-	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
-		return new StderrCompilerIssuesWrapper(issues);
-	}
 
 	/**
 	 * Tests compiling a simple {@link Administrator}.
@@ -128,7 +120,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		office.registerManagedObjectSource("MANAGED_OBJECT",
 				"MANAGED_OBJECT_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
@@ -158,7 +150,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				"OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				"class.name", SimpleManagedObject.class.getName());
+				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject(
 				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");

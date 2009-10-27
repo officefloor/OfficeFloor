@@ -22,8 +22,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -65,15 +63,6 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	ManagedObjectSourceMetaData<D, F> getManagedObjectSourceMetaData();
 
 	/**
-	 * Obtains the default timeout for the {@link ManagedObject}.
-	 *
-	 * @return Default timeout for the {@link ManagedObject}.
-	 */
-	// TODO remove getDefaultTimeout as deprecated
-	@Deprecated
-	long getDefaultTimeout();
-
-	/**
 	 * Obtains the {@link ManagedObjectPool}.
 	 *
 	 * @return {@link ManagedObjectPool} or <code>null</code> if not pooled.
@@ -88,24 +77,6 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	 *         {@link ManagedObject}.
 	 */
 	Class<?> getObjectType();
-
-	/**
-	 * Indicates if {@link AsynchronousManagedObject}.
-	 *
-	 * @return <code>true</code> if {@link AsynchronousManagedObject}.
-	 */
-	// TODO remove isAsynchronous as deprecated
-	@Deprecated
-	boolean isAsynchronous();
-
-	/**
-	 * Indicates if {@link CoordinatingManagedObject}.
-	 *
-	 * @return <code>true</code> if {@link CoordinatingManagedObject}.
-	 */
-	// TODO remove isCoordinating as deprecated
-	@Deprecated
-	boolean isCoordinating();
 
 	/**
 	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}

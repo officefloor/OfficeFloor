@@ -210,16 +210,16 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 *            {@link ManagedObject}.
 	 * @param scope
 	 *            {@link ManagedObjectScope} when inside {@link Office}.
-	 * @param defaultTimeout
-	 *            Default timeout. If greater than zero will have the
+	 * @param timeout
+	 *            Timeout. If greater than zero will have the
 	 *            {@link ManagedObject} be an {@link AsynchronousManagedObject}.
 	 */
 	private void doTest(boolean isManagedObjectOutside,
 			boolean isManagedObjectInside, ManagedObjectScope scope,
-			long defaultTimeout) throws Throwable {
+			long timeout) throws Throwable {
 		String officeName = this.getOfficeName();
 		this.initiateOfficeFloor(isManagedObjectOutside, isManagedObjectInside,
-				scope, defaultTimeout);
+				scope, timeout);
 		if (isManagedObjectOutside) {
 			// As managed object outside, validate can handle external event
 			this.ensureCanTriggerExternalEvent();
@@ -297,15 +297,15 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 *            {@link ManagedObject}.
 	 * @param scope
 	 *            {@link ManagedObjectScope} when inside {@link Office}.
-	 * @param defaultTimeout
-	 *            Default timeout. If greater than zero will have the
+	 * @param timeout
+	 *            Timeout. If greater than zero will have the
 	 *            {@link ManagedObject} be an {@link AsynchronousManagedObject}.
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloor}.
 	 */
 	private void initiateOfficeFloor(boolean isManagedObjectOutside,
 			boolean isManagedObjectInside, ManagedObjectScope scope,
-			long defaultTimeout) throws Exception {
+			long timeout) throws Exception {
 
 		final String EXTERNAL_EVENT_TASK = "externalEvent";
 		final String INVOKED_TASK = "invokedTask";
@@ -324,9 +324,9 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Specify whether asynchronous
-		if (defaultTimeout > 0) {
+		if (timeout > 0) {
 			// Asynchronous managed object
-			managedObjectBuilder.setDefaultTimeout(defaultTimeout);
+			managedObjectBuilder.setTimeout(timeout);
 			TestManagedObjectSource.managedObjectClass = AsynchronousManagedObject.class;
 		} else {
 			// Not asynchronous managed object

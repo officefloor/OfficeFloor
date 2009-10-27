@@ -92,13 +92,14 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the office floor managed object sources
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorManagedObjectSourceName",
-				"getManagedObjectSourceClassName", "getObjectType", "getX",
-				"getY" }, officeFloor.getOfficeFloorManagedObjectSources(),
+				"getManagedObjectSourceClassName", "getObjectType",
+				"getTimeout", "getX", "getY" }, officeFloor
+				.getOfficeFloorManagedObjectSources(),
 				new OfficeFloorManagedObjectSourceModel(
 						"MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, null, null, null,
-						null, null, 100, 101));
+						"net.orm.Session", "10", null, null, null, null, null,
+						null, null, null, 100, 101));
 		OfficeFloorManagedObjectSourceModel moSource = officeFloor
 				.getOfficeFloorManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, moSource

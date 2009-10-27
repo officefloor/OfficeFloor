@@ -105,11 +105,12 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the Managed Object Sources
 		// ----------------------------------------
 		assertList(new String[] { "getDeskManagedObjectSourceName",
-				"getManagedObjectSourceClassName", "getObjectType", "getX",
-				"getY" }, desk.getDeskManagedObjectSources(),
+				"getManagedObjectSourceClassName", "getObjectType",
+				"getTimeout", "getX", "getY" }, desk
+				.getDeskManagedObjectSources(),
 				new DeskManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, 200, 201));
+						"net.orm.Session", "10", null, null, null, 200, 201));
 		DeskManagedObjectSourceModel mos = desk.getDeskManagedObjectSources()
 				.get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),

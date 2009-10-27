@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="office" class="net.officefloor.model.office.OfficeModel">
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.office.ExternalManagedObjectModel">
@@ -13,12 +14,14 @@
 			<value method="setOrder" node="administer@order" />
 		</object>
 	</object>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addOfficeManagedObjectSource" node="managed-object-source"
 		class="net.officefloor.model.office.OfficeManagedObjectSourceModel">
 		<value method="setOfficeManagedObjectSourceName" node="managed-object-source@name" />
 		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
 		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setTimeout" node="managed-object-source@timeout" />
 		<value method="setX" node="managed-object-source@x" />
 		<value method="setY" node="managed-object-source@y" />
 		<object method="addProperty" node="property"
@@ -45,6 +48,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- MANAGED_OBJECTS -->
 	<object method="addOfficeManagedObject" node="managed-object"
 		class="net.officefloor.model.office.OfficeManagedObjectModel">
@@ -75,6 +79,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- OFFICE TEAMS -->
 	<object method="addOfficeTeam" node="team"
 		class="net.officefloor.model.office.OfficeTeamModel">
@@ -82,6 +87,7 @@
 		<value method="setX" node="team@x" />
 		<value method="setY" node="team@y" />
 	</object>
+
 	<!-- OFFICE ESCALATIONS -->
 	<object method="addOfficeEscalation" node="escalation"
 		class="net.officefloor.model.office.OfficeEscalationModel">
@@ -94,6 +100,7 @@
 			<value method="setOfficeSectionInputName" node="handler@input" />
 		</object>
 	</object>
+
 	<!-- OFFICE ADMINISTRATORS -->
 	<object method="addOfficeAdministrator" node="administrator"
 		class="net.officefloor.model.office.AdministratorModel">
@@ -116,6 +123,7 @@
 			<value method="setDutyName" node="duty@name" />
 		</object>
 	</object>
+
 	<!-- OFFICE SECTIONS -->
 	<object method="addOfficeSection" node="section"
 		class="net.officefloor.model.office.OfficeSectionModel">
