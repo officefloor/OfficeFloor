@@ -3,6 +3,7 @@
 	<field type="String" name="section managed object source name" />
 	<field type="String" name="managed object source class name" />
 	<field type="String" name="object type" />
+	<field type="String" name="timeout" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="SectionManagedObjectToSectionManagedObjectSourceModel"
 		name="section managed object" />

@@ -93,10 +93,10 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	private final ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData;
 
 	/**
-	 * Default timeout for sourcing the {@link ManagedObject} and asynchronous
+	 * Timeout for sourcing the {@link ManagedObject} and asynchronous
 	 * operations on the {@link ManagedObject}.
 	 */
-	private final long defaultTimeout;
+	private final long timeout;
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -140,8 +140,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	 * @param managedObjectSourceMetaData
 	 *            {@link ManagedObjectSourceMetaData} for the
 	 *            {@link ManagedObjectSource}.
-	 * @param defaultTimeout
-	 *            Default timeout for the {@link ManagedObjectSource}.
+	 * @param Timeout
+	 *            Timeout for the {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 * @param objectType
@@ -161,7 +161,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<D, F> managedObjectSource,
 			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData,
-			long defaultTimeout, ManagedObjectPool managedObjectPool,
+			long timeout, ManagedObjectPool managedObjectPool,
 			Class<?> objectType, boolean isNameAware, boolean isAsynchronous,
 			boolean isCoordinating,
 			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
@@ -169,7 +169,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectSourceMetaData = managedObjectSourceMetaData;
-		this.defaultTimeout = defaultTimeout;
+		this.timeout = timeout;
 		this.managedObjectPool = managedObjectPool;
 		this.objectType = objectType;
 		this.isNameAware = isNameAware;
@@ -310,14 +310,14 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class
 				.isAssignableFrom(managedObjectClass);
 
-		// Obtain the default timeout
-		long defaultTimeout = configuration.getDefaultTimeout();
-		if (defaultTimeout < 0) {
+		// Obtain the timeout
+		long timeout = configuration.getTimeout();
+		if (timeout < 0) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"Must not have negative default timeout");
+					"Must not have negative timeout");
 			return null; // can not carry on
 		}
-		if ((isManagedObjectAsynchronous) && (defaultTimeout <= 0)) {
+		if ((isManagedObjectAsynchronous) && (timeout <= 0)) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					"Non-zero timeout must be provided for "
 							+ AsynchronousManagedObject.class.getSimpleName());
@@ -358,7 +358,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Created raw managed object meta-data
 		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
 				managedObjectSourceName, configuration, managedObjectSource,
-				metaData, defaultTimeout, managedObjectPool, objectType,
+				metaData, timeout, managedObjectPool, objectType,
 				isManagedObjectNameAware, isManagedObjectAsynchronous,
 				isManagedObjectCoordinating, rawManagingOfficeMetaData);
 
@@ -394,11 +394,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	}
 
 	@Override
-	public long getDefaultTimeout() {
-		return this.defaultTimeout;
-	}
-
-	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
 	}
@@ -406,16 +401,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@Override
 	public Class<?> getObjectType() {
 		return this.objectType;
-	}
-
-	@Override
-	public boolean isAsynchronous() {
-		return this.isAsynchronous;
-	}
-
-	@Override
-	public boolean isCoordinating() {
-		return this.isCoordinating;
 	}
 
 	@Override
@@ -482,7 +467,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 				this.managedObjectSource, this.managedObjectPool,
 				this.isNameAware, sourcingAssetManager, this.isAsynchronous,
 				operationsAssetManager, this.isCoordinating,
-				dependencyMappings, this.defaultTimeout);
+				dependencyMappings, this.timeout);
 
 		// Have the managed object managed by its managing office
 		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);

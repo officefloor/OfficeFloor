@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.change.Change;
@@ -189,6 +190,8 @@ public interface OfficeFloorChanges {
 	 *            Class name of the {@link ManagedObjectSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param timeout
+	 *            Timeout of the {@link ManagedObject}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the
@@ -197,7 +200,7 @@ public interface OfficeFloorChanges {
 	Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType);
+			long timeout, ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectSourceModel}.

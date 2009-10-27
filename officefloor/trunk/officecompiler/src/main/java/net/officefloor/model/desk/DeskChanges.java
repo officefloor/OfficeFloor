@@ -31,6 +31,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
@@ -333,6 +334,8 @@ public interface DeskChanges {
 	 *            Class name of the {@link ManagedObjectSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param timeout
+	 *            Timeout of the {@link ManagedObject}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link DeskManagedObjectSourceModel} .
@@ -340,7 +343,7 @@ public interface DeskChanges {
 	Change<DeskManagedObjectSourceModel> addDeskManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType);
+			long timeout, ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link DeskManagedObjectSourceModel}.

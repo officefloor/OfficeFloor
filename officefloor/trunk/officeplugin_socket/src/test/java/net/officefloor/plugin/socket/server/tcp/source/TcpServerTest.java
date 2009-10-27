@@ -56,7 +56,7 @@ public class TcpServerTest extends AbstractTcpServerTestCase {
 		serverSocketBuilder.addProperty(
 				TcpCommunicationProtocol.PROPERTY_MAXIMUM_IDLE_TIME, String
 						.valueOf(1000));
-		serverSocketBuilder.setDefaultTimeout(3000);
+		serverSocketBuilder.setTimeout(3000);
 
 		// Register the necessary teams for socket listening
 		this.constructManagedObjectSourceTeam(managedObjectName, "accepter",

@@ -39,7 +39,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests loading the {@link ManagedObject} asynchronously.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
@@ -56,7 +56,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
 	 */
 	@Override
@@ -69,7 +69,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Construct the managed object
 		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("MO",
 				TestManagedObjectSource.class, officeName);
-		moBuilder.setDefaultTimeout(1000);
+		moBuilder.setTimeout(1000);
 
 		// Construct the work to execute
 		this.work = new TestWork();
@@ -160,7 +160,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Executes the {@link Job}.
-		 * 
+		 *
 		 * @param isExpectExecute
 		 *            Flag indicating whether the {@link TestWork} should be
 		 *            executed.
@@ -247,7 +247,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * {@link Job} for execution.
-		 * 
+		 *
 		 * @param object
 		 *            Object from the {@link ManagedObject}.
 		 * @param taskContext
@@ -290,7 +290,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Loads the {@link ManagedObject}.
-		 * 
+		 *
 		 * @param managedObject
 		 *            {@link ManagedObject}.
 		 */

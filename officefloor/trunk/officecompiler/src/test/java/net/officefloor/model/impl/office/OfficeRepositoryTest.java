@@ -103,7 +103,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		mo.addOfficeManagedObjectDependency(dependency);
 		OfficeManagedObjectSourceModel mos = new OfficeManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
-				"net.example.ExampleManagedObjectSource", "java.lang.Object");
+				"net.example.ExampleManagedObjectSource", "java.lang.Object",
+				"0");
 		office.addOfficeManagedObjectSource(mos);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
 				"FLOW", Integer.class.getName());
@@ -352,7 +353,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		mo.addOfficeManagedObjectDependency(dependency);
 		OfficeManagedObjectSourceModel mos = new OfficeManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
-				"net.example.ExampleManagedObjectSource", "java.lang.Object");
+				"net.example.ExampleManagedObjectSource", "java.lang.Object",
+				"0");
 		office.addOfficeManagedObjectSource(mos);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
 				"FLOW", Integer.class.getName());

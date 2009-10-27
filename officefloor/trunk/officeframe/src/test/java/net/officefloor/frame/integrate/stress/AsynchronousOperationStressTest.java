@@ -81,12 +81,12 @@ public class AsynchronousOperationStressTest extends
 
 		// Create and register the two asynchronous managed objects
 		MockManagedObject moOne = new MockManagedObject();
-		this.constructManagedObject("MO_ONE", moOne, officeName)
-				.setDefaultTimeout(100000);
+		this.constructManagedObject("MO_ONE", moOne, officeName).setTimeout(
+				100000);
 		officeBuilder.addProcessManagedObject("MO_ONE", "MO_ONE");
 		MockManagedObject moTwo = new MockManagedObject();
-		this.constructManagedObject("MO_TWO", moTwo, officeName)
-				.setDefaultTimeout(100000);
+		this.constructManagedObject("MO_TWO", moTwo, officeName).setTimeout(
+				100000);
 		officeBuilder.addProcessManagedObject("MO_TWO", "MO_TWO");
 
 		// Create and register the setup task

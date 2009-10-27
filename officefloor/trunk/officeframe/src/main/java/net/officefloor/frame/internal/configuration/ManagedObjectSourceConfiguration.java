@@ -26,28 +26,28 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Configuration of a {@link ManagedObjectSource}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends ManagedObjectSource<?, F>> {
 
 	/**
 	 * Obtains the name of this {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return Name of this {@link ManagedObjectSource}.
 	 */
 	String getManagedObjectSourceName();
 
 	/**
 	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link Class} of the {@link ManagedObjectSource}.
 	 */
 	Class<MS> getManagedObjectSourceClass();
 
 	/**
 	 * Obtains the properties to initialise the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return Properties to initialise the {@link ManagedObjectSource}.
 	 */
 	Properties getProperties();
@@ -55,7 +55,7 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	/**
 	 * Obtains the {@link ManagingOfficeConfiguration} detailing the
 	 * {@link Office} responsible for managing this {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagingOfficeConfiguration}.
 	 */
 	ManagingOfficeConfiguration<F> getManagingOfficeConfiguration();
@@ -63,21 +63,21 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	/**
 	 * Obtains the {@link ManagedObjectPool} for this
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @return {@link ManagedObjectPool} for this {@link ManagedObjectSource} or
 	 *         <code>null</code> if not to be pooled.
 	 */
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
-	 * Obtains the default timeout default timeout to:
+	 * Obtains the timeout to:
 	 * <ol>
 	 * <li>to source the {@link ManagedObject}</li>
 	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
 	 * </ol>
-	 * 
-	 * @return Default timeout.
+	 *
+	 * @return Timeout.
 	 */
-	long getDefaultTimeout();
+	long getTimeout();
 
 }

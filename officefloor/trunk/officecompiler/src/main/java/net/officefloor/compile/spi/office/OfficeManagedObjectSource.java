@@ -28,14 +28,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} within the {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface OfficeManagedObjectSource {
 
 	/**
 	 * Obtains the name of this {@link OfficeManagedObjectSource}.
-	 * 
+	 *
 	 * @return Name of this {@link OfficeManagedObjectSource}.
 	 */
 	String getOfficeManagedObjectSourceName();
@@ -43,7 +43,7 @@ public interface OfficeManagedObjectSource {
 	/**
 	 * Adds a {@link Property} to source the {@link ManagedObject} from the
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link Property}.
 	 * @param value
@@ -52,9 +52,17 @@ public interface OfficeManagedObjectSource {
 	void addProperty(String name, String value);
 
 	/**
+	 * Specifies the timeout for the {@link ManagedObject}.
+	 *
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}.
+	 */
+	void setTimeout(long timeout);
+
+	/**
 	 * Obtains the {@link ManagedObjectFlow} for the
 	 * {@link ManagedObjectFlowType}.
-	 * 
+	 *
 	 * @param managedObjectSourceFlowName
 	 *            Name of the {@link ManagedObjectFlowType}.
 	 * @return {@link ManagedObjectFlow}.
@@ -64,7 +72,7 @@ public interface OfficeManagedObjectSource {
 	/**
 	 * Obtains the {@link ManagedObjectTeam} for the
 	 * {@link ManagedObjectTeamType}.
-	 * 
+	 *
 	 * @param managedObjectSourceTeamName
 	 *            Name of the {@link ManagedObjectTeamType}.
 	 * @return {@link ManagedObjectTeam}.
@@ -74,7 +82,7 @@ public interface OfficeManagedObjectSource {
 	/**
 	 * Obtains the {@link OfficeManagedObject} representing an instance use of a
 	 * {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link OfficeManagedObject}. Typically this will
 	 *            be the name under which the {@link ManagedObject} will be

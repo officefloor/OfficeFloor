@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="section" class="net.officefloor.model.section.SectionModel">
+
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.section.ExternalManagedObjectModel">
@@ -8,12 +9,14 @@
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
 	</object>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addSectionManagedObjectSource" node="managed-object-source"
 		class="net.officefloor.model.section.SectionManagedObjectSourceModel">
 		<value method="setSectionManagedObjectSourceName" node="managed-object-source@name" />
 		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
 		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setTimeout" node="managed-object-source@timeout" />
 		<value method="setX" node="managed-object-source@x" />
 		<value method="setY" node="managed-object-source@y" />
 		<object method="addProperty" node="property"
@@ -36,6 +39,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- MANAGED_OBJECTS -->
 	<object method="addSectionManagedObject" node="managed-object"
 		class="net.officefloor.model.section.SectionManagedObjectModel">
@@ -61,6 +65,7 @@
 			</object>
 		</object>
 	</object>
+
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.section.ExternalFlowModel">
@@ -69,6 +74,7 @@
 		<value method="setX" node="external-flow@x" />
 		<value method="setY" node="external-flow@y" />
 	</object>
+
 	<!-- SUB SECTIONS -->
 	<object method="addSubSection" node="sub-section"
 		class="net.officefloor.model.section.SubSectionModel">

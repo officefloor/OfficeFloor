@@ -14,6 +14,7 @@
 		<value method="setDeskManagedObjectSourceName" node="managed-object-source@name" />
 		<value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
 		<value method="setObjectType" node="managed-object-source@object-type" />
+		<value method="setTimeout" node="managed-object-source@timeout" />
 		<value method="setX" node="managed-object-source@x" />
 		<value method="setY" node="managed-object-source@y" />
 		<object method="addProperty" node="property"

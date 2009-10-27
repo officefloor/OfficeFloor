@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -162,6 +163,19 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
+
+			// Provide timeout
+			String timeoutValue = mosModel.getTimeout();
+			if (!CompileUtil.isBlank(timeoutValue)) {
+				try {
+					mos.setTimeout(Long.valueOf(timeoutValue));
+				} catch (NumberFormatException ex) {
+					designer.addIssue("Invalid timeout value: " + timeoutValue,
+							AssetType.MANAGED_OBJECT, mosName);
+				}
+			}
+
+			// Register the managed object source
 			managedObjectSources.put(mosName, mos);
 		}
 

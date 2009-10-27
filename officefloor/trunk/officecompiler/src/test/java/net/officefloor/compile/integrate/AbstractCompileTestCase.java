@@ -145,6 +145,8 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
+	 * @param timeout
+	 *            Timeout of the {@link ManagedObject}.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
 	 * @param {@link ManagedObjectBuilder} for the added
@@ -153,7 +155,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
 			String managedObjectSourceName, Class<S> managedObjectSourceClass,
-			String... propertyNameValues) {
+			long timeout, String... propertyNameValues) {
 		this.managedObjectBuilder = this.createMock(ManagedObjectBuilder.class);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addManagedObject(managedObjectSourceName,
@@ -163,6 +165,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String value = propertyNameValues[i + 1];
 			this.managedObjectBuilder.addProperty(name, value);
 		}
+		this.managedObjectBuilder.setTimeout(timeout);
 		return this.managedObjectBuilder;
 	}
 

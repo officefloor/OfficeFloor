@@ -66,7 +66,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Record building the office floor
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 10,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -87,7 +87,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.recordReturn(office, office.addProcessManagedObject(
 				"MANAGED_OBJECT", "MANAGED_OBJECT"), null);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -115,7 +115,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Add managed objects to office floor
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -148,11 +148,11 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Add managed objects to office floor
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -181,11 +181,11 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Add managed objects to office floor
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
-				ClassManagedObjectSource.class, "class.name",
+				ClassManagedObjectSource.class, 0, "class.name",
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -202,7 +202,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Record building the office floor
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
@@ -231,7 +231,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -261,7 +261,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -293,7 +293,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		// Add the managed object source (flow linked to invalid office)
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
@@ -315,7 +315,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Record building the office floor
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class);
+				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
@@ -337,7 +337,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class);
+				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_registerTeam(
 				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
@@ -363,7 +363,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE_A", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE_A", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> mosA = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -373,7 +373,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 				.setBoundInputManagedObject("INPUT_MO",
 						"MANAGED_OBJECT_SOURCE_A");
 		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class,
+				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> mosB = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");

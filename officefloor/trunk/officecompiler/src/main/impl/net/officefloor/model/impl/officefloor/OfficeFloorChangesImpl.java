@@ -809,14 +809,15 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	public Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType) {
+			long timeout, ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addOfficeFloorManagedObjectSource)
 
 		// Create the managed object source
 		final OfficeFloorManagedObjectSourceModel managedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName());
+				managedObjectType.getObjectClass().getName(), String
+						.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));

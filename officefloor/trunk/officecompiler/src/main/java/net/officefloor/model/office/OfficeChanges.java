@@ -33,6 +33,7 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.change.Change;
 
@@ -228,6 +229,8 @@ public interface OfficeChanges {
 	 *            Class name of the {@link ManagedObjectSource}.
 	 * @param properties
 	 *            {@link PropertyList}.
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}.
 	 * @param managedObjectType
 	 *            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link OfficeManagedObjectSourceModel}.
@@ -235,7 +238,7 @@ public interface OfficeChanges {
 	Change<OfficeManagedObjectSourceModel> addOfficeManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType);
+			long timeout, ManagedObjectType<?> managedObjectType);
 
 	/**
 	 * Removes the {@link OfficeManagedObjectSourceModel}.

@@ -24,14 +24,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Builder of a {@link ManagedObject}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectBuilder<F extends Enum<F>> {
 
 	/**
 	 * Specifies a property for the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of property.
 	 * @param value
@@ -41,27 +41,27 @@ public interface ManagedObjectBuilder<F extends Enum<F>> {
 
 	/**
 	 * Specifies the {@link ManagedObjectPool} for this {@link ManagedObject}.
-	 * 
+	 *
 	 * @param pool
 	 *            {@link ManagedObjectPool} for this {@link ManagedObject}.
 	 */
 	void setManagedObjectPool(ManagedObjectPool pool);
 
 	/**
-	 * Specifies the default timeout to:
+	 * Specifies the timeout to:
 	 * <ol>
 	 * <li>to source the {@link ManagedObject}</li>
 	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
 	 * </ol>
-	 * 
+	 *
 	 * @param timeout
-	 *            Default timeout.
+	 *            Timeout.
 	 */
-	void setDefaultTimeout(long timeout);
+	void setTimeout(long timeout);
 
 	/**
 	 * Specifies the {@link Office} to manage this {@link ManagedObject}.
-	 * 
+	 *
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @return {@link ManagingOfficeBuilder}.

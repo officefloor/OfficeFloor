@@ -95,7 +95,7 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		DeskManagedObjectSourceModel mos = new DeskManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Object.class
-						.getName());
+						.getName(), "0");
 		desk.addDeskManagedObjectSource(mos);
 		DeskManagedObjectSourceFlowModel mosFlow = new DeskManagedObjectSourceFlowModel(
 				"MOS_FLOW", Object.class.getName());
@@ -327,7 +327,7 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		DeskManagedObjectSourceModel mos = new DeskManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Object.class
-						.getName());
+						.getName(), "0");
 		desk.addDeskManagedObjectSource(mos);
 		DeskManagedObjectSourceFlowModel mosFlow = new DeskManagedObjectSourceFlowModel(
 				"MOS_FLOW", Object.class.getName());

@@ -119,11 +119,13 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the managed object sources
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeManagedObjectSourceName",
-				"getManagedObjectSourceClassName", "getObjectType", "getX",
-				"getY" }, office.getOfficeManagedObjectSources(),
+				"getManagedObjectSourceClassName", "getObjectType",
+				"getTimeout", "getX", "getY" }, office
+				.getOfficeManagedObjectSources(),
 				new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, null, 200, 201));
+						"net.orm.Session", "10", null, null, null, null, 200,
+						201));
 		OfficeManagedObjectSourceModel mos = office
 				.getOfficeManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),

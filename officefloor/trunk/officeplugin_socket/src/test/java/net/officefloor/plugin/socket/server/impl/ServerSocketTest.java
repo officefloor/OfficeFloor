@@ -96,7 +96,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		serverSocketBuilder.addProperty(
 				AbstractServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
 				"16");
-		serverSocketBuilder.setDefaultTimeout(3000);
+		serverSocketBuilder.setTimeout(3000);
 
 		// Register the necessary teams
 		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam("ACCEPTER_TEAM",

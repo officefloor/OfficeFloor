@@ -87,7 +87,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Connection.class
-						.getName());
+						.getName(), "0");
 		officeFloor
 				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(
@@ -309,7 +309,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE",
 				"net.example.ExampleManagedObjectSource", Connection.class
-						.getName());
+						.getName(), "0");
 		officeFloor
 				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		OfficeFloorInputManagedObjectModel officeFloorInputManagedObject = new OfficeFloorInputManagedObjectModel(

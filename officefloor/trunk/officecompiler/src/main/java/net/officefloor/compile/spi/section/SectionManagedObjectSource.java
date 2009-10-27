@@ -27,21 +27,21 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} within an {@link OfficeSection}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface SectionManagedObjectSource {
 
 	/**
 	 * Obtains the name of this {@link SectionManagedObjectSource}.
-	 * 
+	 *
 	 * @return Name of this {@link SectionManagedObjectSource}.
 	 */
 	String getSectionManagedObjectSourceName();
 
 	/**
 	 * Adds a {@link Property} to source the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param name
 	 *            Name of the {@link Property}.
 	 * @param value
@@ -50,9 +50,17 @@ public interface SectionManagedObjectSource {
 	void addProperty(String name, String value);
 
 	/**
+	 * Specifies the timeout for the {@link ManagedObject}.
+	 *
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}.
+	 */
+	void setTimeout(long timeout);
+
+	/**
 	 * Obtains the {@link ManagedObjectFlow} for the
 	 * {@link ManagedObjectFlowType}.
-	 * 
+	 *
 	 * @param managedObjectSourceFlowName
 	 *            Name of the {@link ManagedObjectFlowType}.
 	 * @return {@link ManagedObjectFlow}.
@@ -62,7 +70,7 @@ public interface SectionManagedObjectSource {
 	/**
 	 * Obtains the {@link SectionManagedObject} representing an instance use of
 	 * a {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 * 
+	 *
 	 * @param managedObjectName
 	 *            Name of the {@link SectionManagedObject}. Typically this will
 	 *            be the name under which the {@link ManagedObject} will be

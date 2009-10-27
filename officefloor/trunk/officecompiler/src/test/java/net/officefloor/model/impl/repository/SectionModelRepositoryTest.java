@@ -95,11 +95,12 @@ public class SectionModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the managed object sources
 		// ----------------------------------------------
 		assertList(new String[] { "getSectionManagedObjectSourceName",
-				"getManagedObjectSourceClassName", "getObjectType", "getX",
-				"getY" }, section.getSectionManagedObjectSources(),
+				"getManagedObjectSourceClassName", "getObjectType",
+				"getTimeout", "getX", "getY" }, section
+				.getSectionManagedObjectSources(),
 				new SectionManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, 200, 201));
+						"net.orm.Session", "10", null, null, null, 200, 201));
 		SectionManagedObjectSourceModel mos = section
 				.getSectionManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),

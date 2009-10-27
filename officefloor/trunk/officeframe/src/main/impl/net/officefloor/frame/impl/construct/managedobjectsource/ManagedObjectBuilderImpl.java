@@ -23,13 +23,14 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Implements the {@link ManagedObjectBuilder}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>>
@@ -62,13 +63,13 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	private ManagedObjectPool pool;
 
 	/**
-	 * Default timeout for asynchronous operations on the {@link ManagedObject}.
+	 * Timeout for {@link AsynchronousManagedObject}.
 	 */
-	private long defaultTimeout = 0;
+	private long timeout = 0;
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
@@ -95,8 +96,8 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	}
 
 	@Override
-	public void setDefaultTimeout(long timeout) {
-		this.defaultTimeout = timeout;
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
 	}
 
 	@Override
@@ -137,8 +138,8 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	}
 
 	@Override
-	public long getDefaultTimeout() {
-		return this.defaultTimeout;
+	public long getTimeout() {
+		return this.timeout;
 	}
 
 }

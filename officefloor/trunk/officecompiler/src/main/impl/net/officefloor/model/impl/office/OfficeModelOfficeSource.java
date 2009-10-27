@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeSourceService;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
@@ -160,6 +161,20 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
+
+			// Provide timeout
+			String timeoutValue = mosModel.getTimeout();
+			if (!CompileUtil.isBlank(timeoutValue)) {
+				try {
+					mos.setTimeout(Long.valueOf(timeoutValue));
+				} catch (NumberFormatException ex) {
+					architect.addIssue(
+							"Invalid timeout value: " + timeoutValue,
+							AssetType.MANAGED_OBJECT, mosName);
+				}
+			}
+
+			// Register the managed object source
 			managedObjectSources.put(mosName, mos);
 		}
 

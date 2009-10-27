@@ -143,6 +143,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final NodeContext context;
 
 	/**
+	 * Timeout for the {@link ManagedObject}.
+	 */
+	private long timeout = 0;
+
+	/**
 	 * Indicates if the {@link ManagedObjectType} is loaded.
 	 */
 	private boolean isManagedObjectTypeLoaded = false;
@@ -454,10 +459,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 
-		// TODO provide configuration for default timeout
-		System.err
-				.println("TODO provide configuration for default timeout on ManagedObjectSource");
-		moBuilder.setDefaultTimeout(1000);
+		// Provide timeout
+		moBuilder.setTimeout(this.timeout);
 
 		// Specify the managing office
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
@@ -642,6 +645,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public void addProperty(String name, String value) {
 		this.propertyList.addProperty(name).setValue(value);
+	}
+
+	@Override
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
 	}
 
 	@Override

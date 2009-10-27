@@ -55,7 +55,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 		ManagedObjectBuilder<Indexed> session = server.constructManagedObject(
 				"HTTP_SESSION", HttpSessionManagedObjectSource.class, this
 						.getOfficeName());
-		session.setDefaultTimeout(1000);
+		session.setTimeout(1000);
 
 		// Register the servicer
 		ReflectiveWorkBuilder work = server.constructWork(new Servicer(),

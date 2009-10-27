@@ -2,7 +2,7 @@
 	<office-floor>
 		<managed-object-sources>
 			<managed-object-source name="MANAGED_OBJECT_SOURCE"
-				source="CLASS">
+				source="CLASS" timeout="10">
 				<properties>
 					<property name="class.name" value="${testcase}$SimpleManagedObject" />
 				</properties>

@@ -685,14 +685,15 @@ public class SectionChangesImpl implements SectionChanges {
 	public Change<SectionManagedObjectSourceModel> addSectionManagedObjectSource(
 			String managedObjectSourceName,
 			String managedObjectSourceClassName, PropertyList properties,
-			ManagedObjectType<?> managedObjectType) {
+			long timeout, ManagedObjectType<?> managedObjectType) {
 
 		// TODO test this method (addSectionManagedObjectSource)
 
 		// Create the managed object source
 		final SectionManagedObjectSourceModel managedObjectSource = new SectionManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSourceClassName,
-				managedObjectType.getObjectClass().getName());
+				managedObjectType.getObjectClass().getName(), String
+						.valueOf(timeout));
 		for (Property property : properties) {
 			managedObjectSource.addProperty(new PropertyModel(property
 					.getName(), property.getValue()));
