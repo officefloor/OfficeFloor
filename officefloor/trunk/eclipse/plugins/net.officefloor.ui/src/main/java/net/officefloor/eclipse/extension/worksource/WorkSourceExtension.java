@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.swt.widgets.Composite;
@@ -29,9 +30,9 @@ import org.eclipse.swt.widgets.Control;
 
 /**
  * Interface for extension to provide enriched {@link WorkSource} usage.
- * 
+ *
  * @author Daniel Sagenschneider
- * 
+ *
  * @see ExtensionClasspathProvider
  */
 public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
@@ -44,7 +45,7 @@ public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 
 	/**
 	 * Obtains the class of the {@link WorkSource} being enriched in its usage.
-	 * 
+	 *
 	 * @return Class of the {@link WorkSource} being enriched in its usage.
 	 */
 	Class<S> getWorkSourceClass();
@@ -55,7 +56,7 @@ public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 	 * <p>
 	 * This is a descriptive name that can be used other than the fully
 	 * qualified name of the {@link WorkSource}.
-	 * 
+	 *
 	 * @return Label for the {@link WorkSource}.
 	 */
 	String getWorkSourceLabel();
@@ -64,7 +65,7 @@ public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 	 * Loads the input page with the necessary {@link Control} instances to
 	 * populate the {@link PropertyList}. Also allows notifying of changes to
 	 * {@link Property} instances via the {@link WorkSourceExtensionContext}.
-	 * 
+	 *
 	 * @param page
 	 *            Page to be setup for populating the {@link PropertyList}.
 	 * @param context
@@ -74,12 +75,24 @@ public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 
 	/**
 	 * Obtains the suggested name of the {@link Work}.
-	 * 
+	 *
 	 * @param properties
 	 *            {@link PropertyList}.
 	 * @return Suggested {@link Work} name or <code>null</code> if no
 	 *         suggestion.
 	 */
 	String getSuggestedWorkName(PropertyList properties);
+
+	/**
+	 * Obtains documentation about a {@link Task} of the {@link Work}.
+	 *
+	 * @param context
+	 *            {@link TaskDocumentationContext}.
+	 * @return Documentation about the {@link Task}.
+	 * @throws Throwable
+	 *             If fails to obtain documentation about the {@link Task}.
+	 */
+	String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable;
 
 }

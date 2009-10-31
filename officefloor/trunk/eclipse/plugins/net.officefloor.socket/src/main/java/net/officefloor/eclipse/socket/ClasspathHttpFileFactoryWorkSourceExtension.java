@@ -22,8 +22,11 @@ import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileFactoryWorkSource;
 import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask;
 
@@ -71,6 +74,31 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 	@Override
 	public String getSuggestedWorkName(PropertyList properties) {
 		return "HttpFile";
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Should always only have the one task
+
+		// Obtain the prefix
+		String prefix = context.getPropertyList().getPropertyValue(
+				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				"<not specified>");
+
+		// Return the documentation
+		return "Returns the "
+				+ HttpFile.class.getSimpleName()
+				+ " from the class path as specified on the request URI of the "
+				+ HttpRequest.class.getSimpleName()
+				+ "\n\nIn finding the "
+				+ HttpFile.class.getSimpleName()
+				+ " the prefix '"
+				+ prefix
+				+ "' is added to the "
+				+ HttpRequest.class.getSimpleName()
+				+ " request URI to restrict access to full class path resources.";
 	}
 
 	/*

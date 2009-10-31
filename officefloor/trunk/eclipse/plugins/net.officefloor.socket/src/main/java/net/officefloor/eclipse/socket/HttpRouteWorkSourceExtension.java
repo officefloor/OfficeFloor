@@ -28,8 +28,10 @@ import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
 import net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource;
 
@@ -116,6 +118,44 @@ public class HttpRouteWorkSourceExtension implements
 	@Override
 	public String getSuggestedWorkName(PropertyList properties) {
 		return "HttpRouter";
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Should only be the one task
+
+		// Create the routing list as documentation
+		StringBuilder doc = new StringBuilder();
+		doc.append("Routes based on the ");
+		doc.append(HttpRequest.class.getSimpleName());
+		doc.append(" request URI to the flow as follows:\n");
+
+		// Provide listing of routes (in order)
+		for (Property property : context.getPropertyList()) {
+			String name = property.getName();
+			if ((name == null)
+					|| (!name
+							.startsWith(HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX))) {
+				continue; // not a routing property
+			}
+			name = name.substring(HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX
+					.length());
+
+			// Document the routing entry
+			doc.append("\n\t");
+			doc.append(name);
+			doc.append("  [");
+			doc.append(property.getValue());
+			doc.append("]");
+		}
+
+		// Add the default route
+		doc.append("\n\tdefault  (no match)");
+
+		// Return the documentation
+		return doc.toString();
 	}
 
 	/*

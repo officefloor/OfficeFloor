@@ -23,11 +23,12 @@ import org.eclipse.draw2d.Label;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ToolTipFigure;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 
 /**
  * Standard {@link ExternalManagedObjectFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public class StandardExternalManagedObjectFigure extends
@@ -40,7 +41,7 @@ public class StandardExternalManagedObjectFigure extends
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 */
@@ -49,6 +50,13 @@ public class StandardExternalManagedObjectFigure extends
 		net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure mo = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
 				context.getExternalManagedObjectName());
 		this.externalManagedObjectName = mo.getLabel();
+
+		// Provide tool tip
+		mo
+				.setToolTip(new ToolTipFigure(
+						"External Managed Object\n\nObject type: "
+								+ context.getObjectTypeName()
+								+ "\n\nAllows linking to a Managed Object not within this Desk."));
 
 		this.setFigure(mo);
 	}

@@ -24,7 +24,9 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.ToolTipFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToTaskModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
@@ -82,12 +84,22 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		layout.setConstraint(inputConnector, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, true, false));
 
+		// Provide tool tip for input
+		String parameterTypeName = context.getParameterTypeName();
+		String inputToolTipText = (EclipseUtil.isBlank(parameterTypeName) ? "No input parameter"
+				: "Input parameter type: " + parameterTypeName);
+		inputConnector.setToolTip(new ToolTipFigure(inputToolTipText));
+
 		// Create container of flow item and next flow connector
 		Figure flowItemAndTaskLink = new Figure();
 		NoSpacingGridLayout flowItemAndNextFlowLayout = new NoSpacingGridLayout(
 				1);
 		flowItemAndTaskLink.setLayoutManager(flowItemAndNextFlowLayout);
 		figure.add(flowItemAndTaskLink);
+
+		// Provide tool tip for task
+		flowItemAndTaskLink.setToolTip(new ToolTipFigure(context
+				.getTaskDocumentation()));
 
 		// Create the flow item container
 		this.flowItem = new RoundedContainerFigure(context.getTaskName(),
@@ -118,6 +130,12 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		layout.setConstraint(nextFlow, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, true, false));
 		figure.add(nextFlow);
+
+		// Provide tool tip for output
+		String returnTypeName = context.getReturnTypeName();
+		String outputToolTipText = (EclipseUtil.isBlank(returnTypeName) ? "No output argument"
+				: "Output argument type: " + returnTypeName);
+		nextFlow.setToolTip(new ToolTipFigure(outputToolTipText));
 
 		// Specify figures
 		this.setFigure(figure);

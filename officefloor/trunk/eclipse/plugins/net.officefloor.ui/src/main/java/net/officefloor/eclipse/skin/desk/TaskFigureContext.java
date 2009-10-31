@@ -17,37 +17,59 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.model.desk.TaskModel;
 
 import org.eclipse.draw2d.IFigure;
 
 /**
  * Context for the {@link TaskModel} {@link IFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface TaskFigureContext {
 
 	/**
 	 * Obtains the {@link TaskModel} name.
-	 * 
+	 *
 	 * @return {@link TaskModel} name.
 	 */
 	String getTaskName();
 
 	/**
 	 * Indicates if the {@link TaskModel} is public.
-	 * 
+	 *
 	 * @return <code>true</code> if public.
 	 */
 	boolean isPublic();
 
 	/**
 	 * Flags whether the {@link TaskModel} is public.
-	 * 
+	 *
 	 * @param isPublic
 	 *            <code>true</code> if to be public.
 	 */
 	void setIsPublic(boolean isPublic);
+
+	/**
+	 * Obtains the parameter type name.
+	 *
+	 * @return Parameter type name.
+	 */
+	String getParameterTypeName();
+
+	/**
+	 * Obtains the return type name.
+	 *
+	 * @return Return type name.
+	 */
+	String getReturnTypeName();
+
+	/**
+	 * Obtains the documentation of the {@link Task}.
+	 *
+	 * @return Documentation of the {@link Task}.
+	 */
+	String getTaskDocumentation();
 
 }

@@ -22,6 +22,7 @@ import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ToolTipFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.DeskManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -71,6 +72,11 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 				anchor);
 		this.registerConnectionAnchor(
 				DeskManagedObjectSourceFlowToExternalFlowModel.class, anchor);
+
+		// Provide tool tip
+		figure.setToolTip(new ToolTipFigure("External Flow\n\nArgument type: "
+				+ context.getArgumentTypeName()
+				+ "\n\nAllows linking to a Task not within this Desk."));
 
 		this.setFigure(figure);
 	}

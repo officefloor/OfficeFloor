@@ -23,8 +23,11 @@ import org.eclipse.swt.widgets.Label;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWork;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWorkSource;
@@ -62,6 +65,17 @@ public class HttpResponseWriterWorkSourceExtension
 	@Override
 	public String getSuggestedWorkName(PropertyList properties) {
 		return "HttpResponseWriter";
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Should only be the one task
+
+		// Return documentation
+		return "Writes the " + HttpFile.class.getSimpleName() + " to the "
+				+ HttpResponse.class.getSimpleName();
 	}
 
 }

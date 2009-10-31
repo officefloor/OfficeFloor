@@ -23,16 +23,23 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
 
 /**
  * Context for the {@link ExternalManagedObjectModel} {@link IFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExternalManagedObjectFigureContext {
 
 	/**
 	 * Obtains the {@link ExternalManagedObjectModel} name.
-	 * 
+	 *
 	 * @return {@link ExternalManagedObjectModel} name.
 	 */
 	String getExternalManagedObjectName();
+
+	/**
+	 * Obtains the object type name.
+	 *
+	 * @return Object type name.
+	 */
+	String getObjectTypeName();
 
 }

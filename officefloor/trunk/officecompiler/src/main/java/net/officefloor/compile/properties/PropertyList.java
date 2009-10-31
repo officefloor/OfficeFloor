@@ -78,6 +78,19 @@ public interface PropertyList extends Iterable<Property> {
 	Property getOrAddProperty(String name);
 
 	/**
+	 * Convenience method to obtain the {@link Property} value.
+	 *
+	 * @param name
+	 *            Name of the {@link Property} to obtain its value.
+	 * @param defaultValue
+	 *            Default value should the {@link Property} not exist or have
+	 *            blank value.
+	 * @return Value for the {@link Property} (or <code>defaultValue</code> if
+	 *         not available).
+	 */
+	String getPropertyValue(String name, String defaultValue);
+
+	/**
 	 * Obtains the {@link Properties} populated with the {@link Property}
 	 * values.
 	 *
