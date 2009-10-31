@@ -52,7 +52,7 @@ import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Used by the {@link AbstractTaskNodeTestCase} to initiate an execution path.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ExecutionNode<W extends Work> implements
@@ -92,7 +92,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param executionNodeId
 	 *            Unique Id of this {@link ExecutionNode}.
 	 * @param testCase
@@ -109,7 +109,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Obtains the unique Id for this {@link ExecutionNode}.
-	 *
+	 * 
 	 * @return Unique Id for this {@link ExecutionNode}.
 	 */
 	public int getExecutionNodeId() {
@@ -118,7 +118,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Indicates if this {@link ExecutionNode} was executed.
-	 *
+	 * 
 	 * @return <code>true</code> if this {@link ExecutionNode} was executed,
 	 *         <code>false</code> otherwise.
 	 */
@@ -128,7 +128,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Link in {@link ManagedObject} to be processed.
-	 *
+	 * 
 	 * @param moScope
 	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
 	 * @param objectOfManagedObject
@@ -202,13 +202,12 @@ public class ExecutionNode<W extends Work> implements
 
 		// Add to listing of processing for the Task
 		this.taskProcessing.add(new ManagedObjectTaskProcessItem<O>(
-				new ManagedObjectIndexImpl(moScope, 0), isAsynchronous,
-				processer));
+				new ManagedObjectIndexImpl(moScope, 0), processer));
 	}
 
 	/**
 	 * Set {@link TaskMetaData} of the next {@link Task}.
-	 *
+	 * 
 	 * @param nextTask
 	 *            {@link TaskMetaData} of the next {@link Task}.
 	 */
@@ -218,7 +217,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Add a {@link Flow} to be executed.
-	 *
+	 * 
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param initialTask
@@ -233,7 +232,7 @@ public class ExecutionNode<W extends Work> implements
 
 	/**
 	 * Adds a {@link ExecutionNode} to join.
-	 *
+	 * 
 	 * @param futureNode
 	 *            {@link ExecutionNode} to join.
 	 */
@@ -277,7 +276,7 @@ public class ExecutionNode<W extends Work> implements
 		// Create the listing of required managed objects
 		List<ManagedObjectIndex> moListing = new LinkedList<ManagedObjectIndex>();
 		for (TaskProcessItem<W> item : this.taskProcessing) {
-			if (item instanceof ManagedObjectTaskProcessItem) {
+			if (item instanceof ExecutionNode<?>.ManagedObjectTaskProcessItem<?>) {
 				ManagedObjectTaskProcessItem<?> moItem = (ManagedObjectTaskProcessItem<?>) item;
 				moListing.add(moItem.getManagedObjectIndex());
 			}
@@ -382,7 +381,7 @@ public class ExecutionNode<W extends Work> implements
 
 		/**
 		 * Process.
-		 *
+		 * 
 		 * @param itemIndex
 		 *            Index of this item.
 		 * @param context
@@ -405,56 +404,32 @@ public class ExecutionNode<W extends Work> implements
 		protected final ManagedObjectIndex moIndex;
 
 		/**
-		 * Specifies whether the {@link ManagedObject} is
-		 * {@link AsynchronousManagedObject}.
-		 *
-		 * @return Whether the {@link ManagedObject} is
-		 *         {@link AsynchronousManagedObject}.
-		 */
-		protected final boolean isAsynchronous;
-
-		/**
 		 * {@link ManagedObjectProcesser}.
 		 */
 		protected final ManagedObjectProcesser<O> processer;
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param moIndex
 		 *            {@link ManagedObjectIndex}.
-		 * @param isAsynchronous
-		 *            <code>true</code> if the {@link ManagedObject} is
-		 *            {@link AsynchronousManagedObject}.
 		 * @param processer
 		 *            {@link ManagedObjectProcesser} for the
 		 *            {@link ManagedObject}.
 		 */
 		public ManagedObjectTaskProcessItem(ManagedObjectIndex moIndex,
-				boolean isAsynchronous, ManagedObjectProcesser<O> processer) {
+				ManagedObjectProcesser<O> processer) {
 			this.moIndex = moIndex;
-			this.isAsynchronous = isAsynchronous;
 			this.processer = processer;
 		}
 
 		/**
 		 * Obtains the {@link ManagedObjectIndex} of the {@link ManagedObject}.
-		 *
+		 * 
 		 * @return {@link ManagedObjectIndex} of the {@link ManagedObject}.
 		 */
 		public ManagedObjectIndex getManagedObjectIndex() {
 			return this.moIndex;
-		}
-
-		/**
-		 * Obtains whether the {@link ManagedObject} is
-		 * {@link AsynchronousManagedObject}.
-		 *
-		 * @return <code>true</code> if the {@link ManagedObject} is
-		 *         {@link AsynchronousManagedObject}.
-		 */
-		public boolean isAsynchronous() {
-			return this.isAsynchronous;
 		}
 
 		/*
@@ -503,7 +478,7 @@ public class ExecutionNode<W extends Work> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param instigationStrategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param taskMetaData
@@ -586,7 +561,7 @@ public class ExecutionNode<W extends Work> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param futureNode
 		 *            {@link ExecutionNode} for completion.
 		 * @param testCase
