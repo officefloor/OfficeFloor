@@ -60,7 +60,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link RawWorkMetaDataImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
@@ -605,7 +605,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records bounding {@link ManagedObject} instances to the {@link Work}.
-	 *
+	 * 
 	 * @param nameMoPairs
 	 *            Name and {@link RawBoundManagedObjectMetaData} pairs.
 	 */
@@ -656,7 +656,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records bounding {@link Administrator} instances to the {@link Work}.
-	 *
+	 * 
 	 * @param nameAdminPairs
 	 *            Name and {@link RawBoundAdministratorMetaData} pairs.
 	 */
@@ -714,7 +714,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to record {@link Task} construction without an initial
 	 * {@link Task}.
-	 *
+	 * 
 	 * @param tasks
 	 *            {@link RecordedTask} instances for each {@link Task}.
 	 */
@@ -724,7 +724,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records creation of {@link Task} instances on the {@link Work}.
-	 *
+	 * 
 	 * @param initialTaskName
 	 *            Name of the initial {@link Task} on the {@link Work}. May be
 	 *            <code>null</code> if no initial {@link Task}.
@@ -770,7 +770,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 							assertEquals("Incorrect issues",
 									RawWorkMetaDataTest.this.issues, actual[1]);
 							assertTrue("Must be RawWorkMetaData",
-									actual[2] instanceof RawWorkMetaData);
+									actual[2] instanceof RawWorkMetaData<?>);
 
 							// Obtain the details for task construction
 							OfficeFloorIssues issues = (OfficeFloorIssues) actual[1];
@@ -836,7 +836,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param taskName
 		 *            Name of the {@link Task}.
 		 * @param taskConstruction
@@ -849,7 +849,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param taskName
 		 *            Name of the {@link Task}.
 		 */
@@ -865,7 +865,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		/**
 		 * Constructs the {@link TaskMetaData}.
-		 *
+		 * 
 		 * @param rawWorkMetaData
 		 *            {@link RawWorkMetaData}.
 		 * @param issues
@@ -877,7 +877,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Records a {@link Work} construction issue.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Issue description.
 	 */
@@ -887,7 +887,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Construct the {@link RawWorkMetaData}.
-	 *
+	 * 
 	 * @param isExpectConstruct
 	 *            Is expect to construct.
 	 * @return {@link RawWorkMetaData}.
@@ -916,7 +916,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * Fully constructs the {@link RawWorkMetaData} including making the
 	 * {@link WorkMetaData} available. Will always expect to construct the
 	 * {@link RawWorkMetaData}.
-	 *
+	 * 
 	 * @return {@link RawWorkMetaData}.
 	 */
 	private RawWorkMetaData<W> fullyConstructRawWorkMetaData() {

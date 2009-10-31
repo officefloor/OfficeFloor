@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -35,8 +36,8 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class MockAdministratorSource<I, A extends Enum<A>> implements
-		AdministratorSource<I, A> {
+public class MockAdministratorSource implements
+		AdministratorSource<Object, Indexed> {
 
 	/**
 	 * Property name to source the {@link Administrator}.
@@ -116,14 +117,14 @@ public class MockAdministratorSource<I, A extends Enum<A>> implements
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public AdministratorSourceMetaData<I, A> getMetaData() {
-		return (AdministratorSourceMetaData<I, A>) this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
+	public AdministratorSourceMetaData getMetaData() {
+		return this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Administrator<I, A> createAdministrator() {
-		return (Administrator<I, A>) this.taskAdministratorSourceState.taskAdministrator;
+	public Administrator createAdministrator() {
+		return this.taskAdministratorSourceState.taskAdministrator;
 	}
 
 	/**
@@ -141,4 +142,5 @@ public class MockAdministratorSource<I, A extends Enum<A>> implements
 		 */
 		AdministratorSourceMetaData<?, ?> taskAdministratorSourceMetaData;
 	}
+
 }

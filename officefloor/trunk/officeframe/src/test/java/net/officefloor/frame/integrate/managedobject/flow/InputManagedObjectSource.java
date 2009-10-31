@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.integrate.managedobject.flow;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -29,8 +30,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class InputManagedObjectSource<D extends Enum<D>> extends
-		AbstractManagedObjectSource<D, InputManagedObjectSource.Flows> {
+public class InputManagedObjectSource extends
+		AbstractManagedObjectSource<None, InputManagedObjectSource.Flows> {
 
 	/**
 	 * Keys of {@link Flow} instances instigated.
@@ -42,7 +43,7 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	/**
 	 * Instance.
 	 */
-	private static InputManagedObjectSource<?> INSTANCE;
+	private static InputManagedObjectSource INSTANCE;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -78,7 +79,7 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<D, Flows> context)
+	protected void loadMetaData(MetaDataContext<None, Flows> context)
 			throws Exception {
 		context.setObjectClass(this.getClass());
 		context.addFlow(Flows.INPUT, Object.class);

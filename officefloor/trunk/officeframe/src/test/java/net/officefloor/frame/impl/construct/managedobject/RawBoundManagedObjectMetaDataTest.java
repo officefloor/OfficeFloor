@@ -47,7 +47,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Test the {@link RawBoundManagedObjectMetaDataImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
@@ -1052,7 +1052,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Provides a scope {@link RawBoundManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param scopeManagedObjectName
 	 *            Name of the scope {@link RawBoundManagedObjectMetaData}.
 	 * @return Scope {@link RawBoundManagedObjectMetaData}.
@@ -1067,7 +1067,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Registers and returns a {@link RawManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param registeredManagedObjectName
 	 *            Name to registered the {@link RawManagedObjectMetaData} under.
 	 * @return Registered {@link RawManagedObjectMetaData}.
@@ -1084,7 +1084,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records initialising the {@link RawBoundManagedObjectMetaData} for the
 	 * bound {@link ManagedObject}.
-	 *
+	 * 
 	 * @param boundName
 	 *            Bound name.
 	 * @param officeName
@@ -1117,7 +1117,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records initialising the {@link RawBoundManagedObjectMetaData} for the
 	 * Input {@link ManagedObject}.
-	 *
+	 * 
 	 * @param inputName
 	 *            Input name.
 	 * @param inputMo
@@ -1156,7 +1156,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records obtaining the {@link ManagedObjectDependencyMetaData}.
-	 *
+	 * 
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
 	 * @param dependencyMetaData
@@ -1179,7 +1179,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records obtaining the {@link ManagedObjectDependencyMetaData} details.
-	 *
+	 * 
 	 * @param dependency
 	 *            {@link ManagedObjectDependencyMetaData}.
 	 * @param key
@@ -1199,7 +1199,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records matching type for a dependency on another
 	 * {@link RawManagedObjectMetaData} in same bounding scope.
-	 *
+	 * 
 	 * @param dependencyMetaData
 	 *            {@link ManagedObjectDependencyMetaData}.
 	 * @param dependency
@@ -1219,7 +1219,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records matching type for a dependency on another scope.
-	 *
+	 * 
 	 * @param dependencyMetaData
 	 *            {@link ManagedObjectDependencyMetaData}.
 	 * @param dependency
@@ -1251,7 +1251,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records loading the {@link ManagedObjectMetaData} from the
 	 * {@link RawManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
 	 * @param instanceIndex
@@ -1291,7 +1291,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 						RawBoundManagedObjectInstanceMetaData<?> boundMoInstance = (RawBoundManagedObjectInstanceMetaData<?>) actual[2];
 						assertTrue(
 								"Should have bound managed object instance",
-								(boundMoInstance instanceof RawBoundManagedObjectInstanceMetaData));
+								(boundMoInstance instanceof RawBoundManagedObjectInstanceMetaData<?>));
 
 						// Verify the dependencies
 						ManagedObjectIndex[] indexes = (ManagedObjectIndex[]) actual[3];
@@ -1337,7 +1337,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param expectedNumberConstructed
 	 *            Expected number of {@link RawBoundManagedObjectMetaData}
 	 *            instances to be constructed.
@@ -1355,7 +1355,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param expectedNumberConstructed
 	 *            Expected number of {@link RawBoundManagedObjectMetaData}
 	 *            instances to be constructed.
@@ -1372,7 +1372,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param expectedNumberConstructed
 	 *            Expected number of {@link RawBoundManagedObjectMetaData}
 	 *            instances to be constructed.

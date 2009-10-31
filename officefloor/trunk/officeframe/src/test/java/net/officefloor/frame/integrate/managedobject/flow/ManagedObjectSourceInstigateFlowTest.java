@@ -33,7 +33,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * Tests {@link ManagedObjectSource} invoking a {@link Flow}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceInstigateFlowTest extends
@@ -42,7 +42,6 @@ public class ManagedObjectSourceInstigateFlowTest extends
 	/**
 	 * Ensures {@link ManagedObjectSource} invokes process.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testInvokeFlow() throws Exception {
 
 		String officeName = this.getOfficeName();
