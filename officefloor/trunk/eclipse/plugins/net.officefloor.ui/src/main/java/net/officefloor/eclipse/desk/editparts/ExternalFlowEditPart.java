@@ -119,4 +119,9 @@ public class ExternalFlowEditPart
 		return this.getCastedModel().getExternalFlowName();
 	}
 
+	@Override
+	public String getArgumentTypeName() {
+		return this.getCastedModel().getArgumentType();
+	}
+
 }

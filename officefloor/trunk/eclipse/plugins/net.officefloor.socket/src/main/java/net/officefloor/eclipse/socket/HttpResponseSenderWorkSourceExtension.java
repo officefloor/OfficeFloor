@@ -21,9 +21,11 @@ import org.eclipse.swt.widgets.Composite;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
 
 /**
@@ -61,6 +63,22 @@ public class HttpResponseSenderWorkSourceExtension implements
 	@Override
 	public String getSuggestedWorkName(PropertyList properties) {
 		return "HTTP Response Sender";
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Should only be the one task
+
+		// Obtain the status
+		String status = context.getPropertyList().getPropertyValue(
+				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
+				"<not specified>");
+
+		// Provide documentation
+		return "Send the " + HttpResponse.class.getSimpleName()
+				+ " to the client with status " + status;
 	}
 
 }

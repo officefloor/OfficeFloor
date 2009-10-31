@@ -118,12 +118,23 @@ public class PropertyListImpl implements PropertyList {
 		// Attempt to get the property
 		Property property = this.getProperty(name);
 		if (property == null) {
-			// Not property found, so add
+			// No property found, so add
 			property = this.addProperty(name);
 		}
 
 		// Return the property
 		return property;
+	}
+
+	@Override
+	public String getPropertyValue(String name, String defaultValue) {
+
+		// Attempt to get the property
+		Property property = this.getProperty(name);
+		String value = (property == null ? null : property.getValue());
+
+		// Return value or default if no value
+		return (value != null ? value : defaultValue);
 	}
 
 	@Override

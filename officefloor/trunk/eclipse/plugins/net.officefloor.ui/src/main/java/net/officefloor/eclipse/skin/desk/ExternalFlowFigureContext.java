@@ -23,16 +23,23 @@ import net.officefloor.model.desk.ExternalFlowModel;
 
 /**
  * Context for the {@link ExternalFlowModel} {@link IFigure}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExternalFlowFigureContext {
 
 	/**
 	 * Obtains the {@link ExternalFlowModel} name.
-	 * 
+	 *
 	 * @return {@link ExternalFlowModel} name.
 	 */
 	String getExternalFlowName();
+
+	/**
+	 * Obtains the argument type name.
+	 *
+	 * @return Argument type name.
+	 */
+	String getArgumentTypeName();
 
 }

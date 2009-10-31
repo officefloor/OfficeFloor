@@ -19,8 +19,10 @@ package net.officefloor.eclipse.socket;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.template.HttpTemplateWork;
 import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource;
 
@@ -71,6 +73,25 @@ public class HttpTemplateWorkSourceExtension implements
 
 		// Return the name
 		return "Http Template " + templateName;
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Obtain the task name as the section name
+		String sectionName = context.getTaskName();
+
+		// Obtain the property template file
+		String templateName = context.getPropertyList()
+				.getPropertyValue(
+						HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+						"<not specified");
+
+		// Provide documentation
+		return "Writes section " + sectionName + " of template file "
+				+ templateName + " to the "
+				+ HttpResponse.class.getSimpleName();
 	}
 
 }

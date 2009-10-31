@@ -19,8 +19,10 @@ package net.officefloor.eclipse.socket;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource;
 import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
 
@@ -77,6 +79,23 @@ public class HttpParametersLoaderWorkSourceExtension
 
 		// Return the name
 		return "Http load " + beanTypeName;
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Should always have the one task
+
+		// Obtain the object type
+		String objectType = context.getPropertyList().getPropertyValue(
+				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
+				"<object type not specified>");
+
+		// Return documentation
+		return "Loads HTTP parameter values of the "
+				+ HttpRequest.class.getSimpleName() + " onto the object ("
+				+ objectType + ") via the corresponding setXxx(...) methods.";
 	}
 
 }

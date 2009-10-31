@@ -116,4 +116,9 @@ public class ExternalManagedObjectEditPart
 		return this.getCastedModel().getExternalManagedObjectName();
 	}
 
+	@Override
+	public String getObjectTypeName() {
+		return this.getCastedModel().getObjectType();
+	}
+
 }

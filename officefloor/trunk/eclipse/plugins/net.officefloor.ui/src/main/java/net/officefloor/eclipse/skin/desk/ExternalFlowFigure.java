@@ -24,14 +24,14 @@ import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ExternalFlowFigure extends OfficeFloorFigure {
 
 	/**
 	 * Indicates a change in the {@link ExternalFlowModel} name.
-	 * 
+	 *
 	 * @param externalFlowName
 	 *            Name to display for the {@link ExternalFlowModel}.
 	 */
@@ -44,8 +44,9 @@ public interface ExternalFlowFigure extends OfficeFloorFigure {
 	 * <p>
 	 * This is to allow placement of the editor in changing the
 	 * {@link ExternalFlowModel} name.
-	 * 
+	 *
 	 * @return {@link IFigure} containing the {@link ExternalFlowModel} name.
 	 */
 	IFigure getExternalFlowNameFigure();
+
 }

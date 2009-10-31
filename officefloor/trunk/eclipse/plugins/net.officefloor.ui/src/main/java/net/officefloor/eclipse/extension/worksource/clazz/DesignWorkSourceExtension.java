@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.frame.api.execute.Work;
@@ -60,6 +61,13 @@ public class DesignWorkSourceExtension implements
 
 	@Override
 	public String getSuggestedWorkName(PropertyList properties) {
+		return null;
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+		// No documentation
 		return null;
 	}
 

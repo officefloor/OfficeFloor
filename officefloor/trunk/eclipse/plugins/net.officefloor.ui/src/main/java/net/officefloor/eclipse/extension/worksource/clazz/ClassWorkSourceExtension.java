@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.extension.worksource.clazz;
 
+import java.lang.reflect.Method;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
@@ -25,8 +27,10 @@ import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
@@ -116,6 +120,50 @@ public class ClassWorkSourceExtension implements
 
 		// Return the simple class name
 		return simpleClassName;
+	}
+
+	@Override
+	public String getTaskDocumentation(TaskDocumentationContext context)
+			throws Throwable {
+
+		// Obtain the name of the class
+		String className = context.getPropertyList().getPropertyValue(
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				"<class not specified>");
+
+		// Obtain the task name (also the method name)
+		String taskName = context.getTaskName();
+
+		// Attempt to obtain the method signature
+		String methodSignature = null;
+		try {
+			// Obtain the method
+			Class<?> clazz = context.getClassLoader().loadClass(className);
+			Method method = null;
+			for (Method possibleMethod : clazz.getMethods()) {
+				if (possibleMethod.getName().equals(taskName)) {
+					method = possibleMethod; // method found
+				}
+			}
+			if (method != null) {
+				// Provide detailed method signature
+				methodSignature = method.toGenericString();
+			}
+
+		} catch (Throwable ex) {
+			// Ignore failure and set to have basic method signature
+			methodSignature = null;
+		}
+
+		// Provide documentation
+		if (EclipseUtil.isBlank(methodSignature)) {
+			// Provide simple method (as could not obtain method signature)
+			return "Invokes method:\n\n\t" + className + "." + taskName
+					+ "(...)";
+		} else {
+			// Provide detailed method signature
+			return "Invokes method:\n\n\t" + methodSignature;
+		}
 	}
 
 	/*
