@@ -33,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 /**
  * Tests invoking asynchronous {@link Flow} instances and joining on the
  * resulting {@link Flow}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase {
@@ -59,7 +59,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 	/**
 	 * Does the asynchronous join stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -139,11 +139,11 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		/**
 		 * Number of iterations so far.
 		 */
-		public volatile int iterationCount = 0;
+		public int iterationCount = 0;
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxAsynchronousFlows
 		 *            Number of asynchronous {@link Flow} instances to invoke
 		 *            and join on per iteration.
@@ -164,7 +164,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 		/**
 		 * Invokes and joins the asynchronous {@link Flow} instances.
-		 *
+		 * 
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 * @param flow
@@ -244,12 +244,16 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 			if (this.iterationCount < this.maxIterations) {
 				// Continue as more iterations
 				taskContext.setComplete(false);
+			} else {
+				// Provide indication that iterations complete
+				AsynchronousJoinStressTest.this
+						.printMessage("Iterations complete");
 			}
 		}
 
 		/**
 		 * Asynchronous {@link Task} invoked.
-		 *
+		 * 
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 */
