@@ -52,7 +52,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link AdministratorNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorNodeImpl implements AdministratorNode {
@@ -95,7 +95,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param administratorName
 	 *            Name of this {@link OfficeAdministrator}.
 	 * @param administratorSourceClassName
@@ -164,14 +164,13 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private AdministratorType<?, ?> administratorType = null;
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AdministratorType<?, ?> getAdministratorType() {
 
 		// Lazy load the administrator type
 		if (this.administratorType == null) {
 
 			// Obtain the administrator source class
-			Class<? extends AdministratorSource> administratorSourceClass = this.context
+			Class<? extends AdministratorSource<?, ?>> administratorSourceClass = this.context
 					.getAdministratorSourceClass(
 							this.administratorSourceClassName,
 							this.officeLocation, this.administratorName);
@@ -192,11 +191,10 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void buildAdministrator(OfficeBuilder officeBuilder) {
 
 		// Obtain the administrator source class
-		Class<? extends AdministratorSource> administratorSourceClass = this.context
+		Class<? extends AdministratorSource<?, ?>> administratorSourceClass = this.context
 				.getAdministratorSourceClass(this.administratorSourceClassName,
 						this.officeLocation, this.administratorName);
 		if (administratorSourceClass == null) {
