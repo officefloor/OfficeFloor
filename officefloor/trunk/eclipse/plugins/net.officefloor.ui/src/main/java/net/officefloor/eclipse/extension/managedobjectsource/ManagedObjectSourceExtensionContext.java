@@ -86,4 +86,12 @@ public interface ManagedObjectSourceExtensionContext {
 	 */
 	IProject getProject();
 
+	/**
+	 * Obtains the {@link ClassLoader} for adding the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ClassLoader} for adding the {@link ManagedObjectSource}.
+	 */
+	ClassLoader getClassLoader();
+
 }
