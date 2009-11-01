@@ -26,7 +26,6 @@ import javax.sql.PooledConnection;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
@@ -238,8 +237,7 @@ public class JdbcManagedObjectSourceExtension implements
 				// Test the connection
 				try {
 					// Create the connection pool data source
-					ProjectClassLoader classLoader = ProjectClassLoader
-							.create(context.getProject());
+					ClassLoader classLoader = context.getClassLoader();
 					ConnectionPoolDataSource dataSource = JdbcManagedObjectSource
 							.createConnectionPoolDataSource(
 									dataSourceClassName, classLoader,

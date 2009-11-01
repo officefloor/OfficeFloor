@@ -23,6 +23,7 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
@@ -45,7 +46,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link ManagedObjectSource} instance.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceInstance implements
@@ -100,7 +101,7 @@ public class ManagedObjectSourceInstance implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param managedObjectSourceClassName
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceExtension
@@ -157,7 +158,7 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * Includes the {@link ManagedObjectSourceExtension} on the {@link IProject}
 	 * class path.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link EditPart} adding the {@link ManagedObjectSource}.
 	 */
@@ -176,7 +177,7 @@ public class ManagedObjectSourceInstance implements
 
 	/**
 	 * Obtains the label for the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @return Label for the {@link ManagedObjectSource}.
 	 */
 	public String getManagedObjectSourceLabel() {
@@ -198,7 +199,7 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * Obtains the fully qualified class name of the {@link ManagedObjectSource}
 	 * .
-	 *
+	 * 
 	 * @return {@link ManagedObjectSource} class name.
 	 */
 	public String getManagedObjectSourceClassName() {
@@ -208,7 +209,7 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * Obtains the {@link PropertyList} to source the {@link ManagedObject} from
 	 * the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @return Populated {@link PropertyList}.
 	 */
 	public PropertyList getPropertyList() {
@@ -217,7 +218,7 @@ public class ManagedObjectSourceInstance implements
 
 	/**
 	 * Obtains the loaded {@link ManagedObjectType}.
-	 *
+	 * 
 	 * @return Loaded {@link ManagedObjectType} or <code>null</code> if issue
 	 *         loading.
 	 */
@@ -227,7 +228,7 @@ public class ManagedObjectSourceInstance implements
 
 	/**
 	 * Obtains the suggested name for the {@link ManagedObject}.
-	 *
+	 * 
 	 * @return Suggested name for the {@link ManagedObject}.
 	 */
 	public String getSuggestedManagedObjectName() {
@@ -245,7 +246,7 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * Creates the {@link Control} instances to populate the
 	 * {@link ManagedObjectLoaderProperty} instances.
-	 *
+	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
 	 * @param context
@@ -348,6 +349,11 @@ public class ManagedObjectSourceInstance implements
 	@Override
 	public IProject getProject() {
 		return this.project;
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		return ProjectClassLoader.create(this.project);
 	}
 
 	/*
