@@ -30,6 +30,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.spi.TestSource;
@@ -574,7 +575,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 */
 	@TestSource
 	@SuppressWarnings("unchecked")
-	public static class MockAdministratorSource implements AdministratorSource {
+	public static class MockAdministratorSource implements
+			AdministratorSource<Object, Indexed> {
 
 		/**
 		 * Failure to instantiate an instance.

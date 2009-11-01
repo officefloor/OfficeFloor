@@ -1648,7 +1648,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 */
 	@TestSource
 	@SuppressWarnings("unchecked")
-	public static class MockManagedObjectSource implements ManagedObjectSource {
+	public static class MockManagedObjectSource implements
+			ManagedObjectSource<None, None> {
 
 		/**
 		 * Failure to instantiate an instance.
