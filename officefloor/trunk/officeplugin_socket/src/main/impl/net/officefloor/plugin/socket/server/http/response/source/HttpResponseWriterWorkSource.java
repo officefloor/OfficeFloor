@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFact
 
 /**
  * {@link WorkSource} to write the {@link HttpResponse}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseWriterWorkSource extends
@@ -55,7 +55,7 @@ public class HttpResponseWriterWorkSource extends
 				.setWorkFactory(new HttpResponseWriterWork(writerFactory));
 
 		// Provide the HTTP file writer task
-		HttpFileWriterTaskFactory.addTaskType("FILE", workTypeBuilder);
+		HttpFileWriterTaskFactory.addTaskType("WriteFileToResponse", workTypeBuilder);
 	}
 
 }

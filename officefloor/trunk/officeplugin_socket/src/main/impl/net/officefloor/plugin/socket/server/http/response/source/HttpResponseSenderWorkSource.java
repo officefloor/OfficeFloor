@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http.response.source;
 
+import java.io.File;
+
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -26,7 +28,7 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
  * {@link WorkSource} to trigger sending the {@link HttpResponse}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
@@ -35,6 +37,12 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 	 * Property to obtain the HTTP status for the {@link HttpResponse}.
 	 */
 	public static final String PROPERTY_HTTP_STATUS = "http.status";
+
+	/**
+	 * Property to obtain the class path location of the {@link File} containing
+	 * the HTTP response.
+	 */
+	public static final String PROPERTY_HTTP_RESPONSE_CONTENT_FILE = "http.response.file";
 
 	/*
 	 * ======================= AbstractWorkSource ========================
@@ -52,6 +60,17 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 		// Obtain the HTTP status (default negative to not set)
 		int httpStatus = Integer.parseInt(context.getProperty(
 				PROPERTY_HTTP_STATUS, String.valueOf(-1)));
+
+		// Obtain the HTTP response content (null to not set)
+		String httpResponseFile = context.getProperty(
+				PROPERTY_HTTP_RESPONSE_CONTENT_FILE, null);
+		if (httpResponseFile != null) {
+			// Obtain the HTTP response content
+
+			// TODO provide content to HTTP response
+			throw new UnsupportedOperationException(
+					"TODO implement providing content for HTTP response");
+		}
 
 		// Create the send task
 		HttpResponseSendTask task = new HttpResponseSendTask(httpStatus);

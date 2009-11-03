@@ -32,7 +32,7 @@
 			id="net.officefloor.editors.officefloor" name="OfficeFloor Editor" />
 	</extension>
 	<extension point="org.eclipse.ui.newWizards">
-		<category id="net.officefloor.eclipse" name="Office Floor">
+		<category id="net.officefloor.eclipse" name="OfficeFloor">
 		</category>
 		<wizard category="net.officefloor.eclipse"
 			class="net.officefloor.eclipse.wizard.file.DeskNewWizard" icon="icons/Desk.png"
