@@ -36,7 +36,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * Tests the {@link HttpResponseWriterWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
@@ -56,7 +56,8 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 		WorkTypeBuilder<HttpResponseWriterWork> work = WorkLoaderUtil
 				.createWorkTypeBuilder(new HttpResponseWriterWork(null));
 		TaskTypeBuilder<HttpFileWriterTaskDependencies, None> file = work
-				.addTaskType("FILE", new HttpFileWriterTaskFactory(),
+				.addTaskType("WriteFileToResponse",
+						new HttpFileWriterTaskFactory(),
 						HttpFileWriterTaskDependencies.class, None.class);
 		file.addObject(HttpFile.class).setKey(
 				HttpFileWriterTaskDependencies.HTTP_FILE);

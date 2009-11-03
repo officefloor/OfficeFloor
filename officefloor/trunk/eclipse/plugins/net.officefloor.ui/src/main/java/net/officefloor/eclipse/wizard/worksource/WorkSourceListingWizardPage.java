@@ -27,6 +27,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 
 /**
@@ -53,6 +54,12 @@ public class WorkSourceListingWizardPage extends WizardPage {
 	private final String[] workSourceLabels;
 
 	/**
+	 * Listing of the {@link WorkSource} types in order of
+	 * {@link WorkSourceInstance} listing.
+	 */
+	private final String[] workSourceTypes;
+
+	/**
 	 * List containing the {@link WorkSource} labels.
 	 */
 	private List list;
@@ -72,11 +79,14 @@ public class WorkSourceListingWizardPage extends WizardPage {
 		this.workSourceInstances = workSourceInstances;
 		this.workInstance = workInstance;
 
-		// Create the listing of labels
+		// Create the listing of labels and types
 		this.workSourceLabels = new String[this.workSourceInstances.length];
+		this.workSourceTypes = new String[this.workSourceInstances.length];
 		for (int i = 0; i < this.workSourceLabels.length; i++) {
 			this.workSourceLabels[i] = this.workSourceInstances[i]
 					.getWorkSourceLabel();
+			this.workSourceTypes[i] = this.workSourceInstances[i]
+					.getWorkSourceClassName();
 		}
 
 		// Specify page details
@@ -109,20 +119,35 @@ public class WorkSourceListingWizardPage extends WizardPage {
 
 		// Fill the width
 		Composite page = new Composite(parent, SWT.NULL);
-		page.setLayout(new FillLayout(SWT.HORIZONTAL));
+		page.setLayout(new FillLayout(SWT.VERTICAL));
 
 		// Add listing
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
 		this.list.setItems(this.workSourceLabels);
+
+		// Add label for selected WorkSource
+		final Label detail = new Label(page, SWT.NONE);
+
+		// Handle change in selection of WorkSource
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+
+				// Obtain the selected index
+				int selectedIndex = WorkSourceListingWizardPage.this.list
+						.getSelectionIndex();
+
 				// Determine if selected
-				boolean isSelected = (WorkSourceListingWizardPage.this.list
-						.getSelectionIndex() >= 0);
+				boolean isSelected = (selectedIndex >= 0);
 
 				// Page complete when work loader selected
 				WorkSourceListingWizardPage.this.setPageComplete(isSelected);
+
+				// Obtain details
+				String workSourceClassName = (isSelected ? WorkSourceListingWizardPage.this.workSourceInstances[selectedIndex]
+						.getWorkSourceClassName()
+						: "");
+				detail.setText(workSourceClassName);
 			}
 		});
 

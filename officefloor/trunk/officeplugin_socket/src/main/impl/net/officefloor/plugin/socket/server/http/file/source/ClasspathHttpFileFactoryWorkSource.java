@@ -36,7 +36,7 @@ import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask
 
 /**
  * {@link WorkSource} to locate a {@link HttpFile} on the class path.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClasspathHttpFileFactoryWorkSource extends
@@ -95,7 +95,7 @@ public class ClasspathHttpFileFactoryWorkSource extends
 
 		// Load the task to create the HTTP file
 		TaskTypeBuilder<Indexed, HttpFileFactoryTaskFlows> taskTypeBuilder = workTypeBuilder
-				.addTaskType("FILE", task, Indexed.class,
+				.addTaskType("FindFile", task, Indexed.class,
 						HttpFileFactoryTaskFlows.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
