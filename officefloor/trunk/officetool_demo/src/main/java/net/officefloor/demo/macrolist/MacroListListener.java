@@ -15,23 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.demo;
+package net.officefloor.demo.macrolist;
 
 import net.officefloor.demo.macro.Macro;
 
 /**
- * Listens to actions of the {@link RecordComponent}.
- *
+ * Listener to actions on the {@link MacroList}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface RecordListener {
+public interface MacroListListener {
 
 	/**
-	 * Adds a {@link Macro}.
-	 *
-	 * @param macro
-	 *            {@link Macro}.
+	 * Indicates a {@link Macro} was added to the {@link MacroList}.
+	 * 
+	 * @param item
+	 *            {@link MacroItem} containing the added {@link Macro}.
+	 * @param index
+	 *            Index of the added {@link MacroItem}.
 	 */
-	void addMacro(Macro macro);
+	void macroAdded(MacroItem item, int index);
+
+	/**
+	 * Indicates a {@link Macro} was removed from the {@link MacroList}.
+	 * 
+	 * @param item
+	 *            {@link MacroItem} containing the removed {@link Macro}.
+	 * @param index
+	 *            Index that the {@link MacroItem} previous had before being
+	 *            removed.
+	 */
+	void macroRemoved(MacroItem item, int index);
 
 }

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.demo;
+package net.officefloor.demo.record;
 
 import java.awt.Container;
 import java.awt.Point;
@@ -36,10 +36,12 @@ import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroContext;
 import net.officefloor.demo.macro.MacroFactory;
+import net.officefloor.demo.record.RecordComponent;
+import net.officefloor.demo.record.RecordListener;
 
 /**
  * Test the {@link RecordComponent}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RecordComponentTest extends TestCase {
@@ -106,8 +108,8 @@ public class RecordComponentTest extends TestCase {
 
 		// Create window containing the record component in front
 		this.recordFrame = new JFrame();
-		this.recordComponent = new RecordComponent(this.recordFrame,
-				this.recordListener);
+		this.recordComponent = new RecordComponent(new Robot(),
+				this.recordFrame, this.recordListener);
 		this.recordFrame.setTitle("Recorder");
 		this.recordFrame.setLocation(100, 100);
 		this.recordFrame.setSize(400, 400);
@@ -121,6 +123,10 @@ public class RecordComponentTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Wait test completed
+		this.robot.waitForIdle();
+
 		// Dispose of windows
 		this.recordFrame.setVisible(false);
 		this.recordFrame.dispose();
@@ -141,7 +147,7 @@ public class RecordComponentTest extends TestCase {
 
 	/**
 	 * Runs the input {@link Macro} on the {@link JComponent}.
-	 *
+	 * 
 	 * @param macroFactory
 	 *            {@link MacroFactory} for the {@link Macro}.
 	 * @param component
@@ -189,7 +195,7 @@ public class RecordComponentTest extends TestCase {
 	/**
 	 * Obtains the relative mouse location to run a {@link Macro} on the input
 	 * {@link JComponent}.
-	 *
+	 * 
 	 * @param component
 	 *            {@link JComponent}.
 	 * @return Relative mouse location to run a {@link Macro} on the input
@@ -209,7 +215,7 @@ public class RecordComponentTest extends TestCase {
 	/**
 	 * Obtains the location for the mouse to run a {@link Macro} on the input
 	 * {@link JComponent}.
-	 *
+	 * 
 	 * @param component
 	 *            {@link JComponent}.
 	 * @return Location for the mouse to run a {@link Macro} on the input
@@ -276,7 +282,7 @@ public class RecordComponentTest extends TestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param delegate
 		 *            Delegate {@link MacroFactory}.
 		 */
@@ -311,7 +317,7 @@ public class RecordComponentTest extends TestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param delegate
 		 *            Delegate {@link Macro}.
 		 */
@@ -361,7 +367,7 @@ public class RecordComponentTest extends TestCase {
 
 	/**
 	 * Adds an expected {@link Macro}.
-	 *
+	 * 
 	 * @param macroType
 	 *            Expected {@link Macro} type.
 	 * @param macroConfiguration
