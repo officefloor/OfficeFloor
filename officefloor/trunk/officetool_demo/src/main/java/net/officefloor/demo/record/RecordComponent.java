@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.demo;
+package net.officefloor.demo.record;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
@@ -45,10 +46,11 @@ import javax.swing.JPopupMenu;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroContext;
 import net.officefloor.demo.macro.MacroFactory;
+import net.officefloor.demo.play.MacroPlayer;
 
 /**
  * Component that records actions sending them to {@link RecordListener}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RecordComponent extends JComponent {
@@ -80,6 +82,11 @@ public class RecordComponent extends JComponent {
 	private final Robot robot;
 
 	/**
+	 * {@link MacroPlayer}.
+	 */
+	private final MacroPlayer player;
+
+	/**
 	 * Background image to mimic transparency.
 	 */
 	private Image backgroundImage;
@@ -91,7 +98,9 @@ public class RecordComponent extends JComponent {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
+	 * @param robot
+	 *            {@link Robot}.
 	 * @param frame
 	 *            {@link JFrame} containing this {@link RecordComponent}.
 	 * @param recordListener
@@ -99,11 +108,14 @@ public class RecordComponent extends JComponent {
 	 * @throws AWTException
 	 *             If fails to create necessary AWT components.
 	 */
-	public RecordComponent(JFrame frame, RecordListener recordListener)
-			throws AWTException {
+	public RecordComponent(Robot robot, JFrame frame,
+			RecordListener recordListener) throws AWTException {
 		this.frame = frame;
 		this.recordListener = recordListener;
-		this.robot = new Robot();
+		this.robot = robot;
+
+		// Create the player (to aid in recording)
+		this.player = new MacroPlayer(this.robot);
 
 		// Initiate for transparency
 		this.updateBackgroundImage();
@@ -120,7 +132,7 @@ public class RecordComponent extends JComponent {
 
 	/**
 	 * Adds a {@link MacroFactory}.
-	 *
+	 * 
 	 * @param macroFactory
 	 *            {@link MacroFactory}.
 	 * @return {@link JMenuItem} for the {@link MacroFactory}.
@@ -151,8 +163,8 @@ public class RecordComponent extends JComponent {
 	 * Repaints the {@link RecordComponent} should it be visible.
 	 */
 	private void refreshBackground() {
-		if (this.isVisible() && RecordComponent.this.isVisible()) {
-			repaint();
+		if (this.isVisible()) {
+			this.repaint();
 		}
 	}
 
@@ -190,7 +202,7 @@ public class RecordComponent extends JComponent {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param macroFactory
 		 *            {@link MacroFactory}.
 		 * @param isRecord
@@ -204,7 +216,7 @@ public class RecordComponent extends JComponent {
 
 		/**
 		 * Translates the relative {@link Point} to an absolute {@link Point}.
-		 *
+		 * 
 		 * @param relativeLocation
 		 *            Relative location.
 		 * @return Absolute location.
@@ -217,9 +229,9 @@ public class RecordComponent extends JComponent {
 
 		/**
 		 * Translates the absolute {@link Point} to the relative {@link Point}.
-		 *
+		 * 
 		 * @param absoluateLocation
-		 *            Absoluate location.
+		 *            Absolute location.
 		 * @return Relative location.
 		 */
 		private Point translateAbsoluteToRelative(Point absoluateLocation) {
@@ -250,10 +262,25 @@ public class RecordComponent extends JComponent {
 			Point frameLocation = RecordComponent.this.frame.getLocation();
 			RecordComponent.this.frame.setVisible(false);
 
+			// Allow window time to hide
+			if (!EventQueue.isDispatchThread()) {
+				// May only wait if not dispatch thread
+				RecordComponent.this.robot.waitForIdle();
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException ex) {
+				// Ignore and carry on to run macro
+			}
+
 			// Run the macro
 			macro.runMacro(this);
 
 			// Allow time for macro to complete
+			if (!EventQueue.isDispatchThread()) {
+				// May only wait if not dispatch thread
+				RecordComponent.this.robot.waitForIdle();
+			}
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException ex) {
@@ -266,7 +293,7 @@ public class RecordComponent extends JComponent {
 			RecordComponent.this.frame.setLocation(frameLocation);
 			RecordComponent.this.refreshBackground();
 
-			// Record the macro if recordable
+			// Record the macro if required
 			if (this.isRecord) {
 				RecordComponent.this.recordListener.addMacro(macro);
 			}
@@ -283,18 +310,18 @@ public class RecordComponent extends JComponent {
 					.translateRelativeToAbsolute(new Point(x, y));
 
 			// Move to absolute location (immediately)
-			RecordComponent.this.robot.mouseMove(absoluteLocation.x,
+			RecordComponent.this.player.mouseMove(absoluteLocation.x,
 					absoluteLocation.y);
 		}
 
 		@Override
 		public void mousePress(int buttons) {
-			RecordComponent.this.robot.mousePress(buttons);
+			RecordComponent.this.player.mousePress(buttons);
 		}
 
 		@Override
 		public void mouseRelease(int buttons) {
-			RecordComponent.this.robot.mouseRelease(buttons);
+			RecordComponent.this.player.mouseRelease(buttons);
 		}
 
 		@Override
@@ -305,23 +332,28 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public void mouseWheel(int wheelAmt) {
-			RecordComponent.this.robot.mouseWheel(wheelAmt);
+			RecordComponent.this.player.mouseWheel(wheelAmt);
 		}
 
 		@Override
 		public void keyPress(int keycode) {
-			RecordComponent.this.robot.keyPress(keycode);
+			RecordComponent.this.player.keyPress(keycode);
 		}
 
 		@Override
 		public void keyRelease(int keycode) {
-			RecordComponent.this.robot.keyRelease(keycode);
+			RecordComponent.this.player.keyRelease(keycode);
 		}
 
 		@Override
 		public void keyStroke(int keycode) {
 			this.keyPress(keycode);
 			this.keyRelease(keycode);
+		}
+
+		@Override
+		public void keyText(String text) {
+			RecordComponent.this.player.keyText(text);
 		}
 	}
 

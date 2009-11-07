@@ -27,14 +27,14 @@ import java.awt.Robot;
  * relative locations to absolute locations.
  * <p>
  * See the corresponding methods of {@link Robot} for details on the methods.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param x
 	 *            X location.
 	 * @param y
@@ -44,7 +44,7 @@ public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param buttons
 	 *            Buttons.
 	 */
@@ -52,7 +52,7 @@ public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param buttons
 	 *            Buttons.
 	 */
@@ -60,7 +60,7 @@ public interface MacroContext {
 
 	/**
 	 * Convenience method to do press and release of mouse button.
-	 *
+	 * 
 	 * @param buttons
 	 *            Buttons as per {@link Robot}.
 	 */
@@ -68,7 +68,7 @@ public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param buttons
 	 *            Wheel amount.
 	 */
@@ -76,7 +76,7 @@ public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param keycode
 	 *            Key code.
 	 */
@@ -84,7 +84,7 @@ public interface MacroContext {
 
 	/**
 	 * As per {@link Robot}.
-	 *
+	 * 
 	 * @param keycode
 	 *            Key code.
 	 */
@@ -92,10 +92,18 @@ public interface MacroContext {
 
 	/**
 	 * Convenience method to do press and release of key.
-	 *
+	 * 
 	 * @param keycode
 	 *            Key code as per {@link Robot}.
 	 */
 	void keyStroke(int keycode);
+
+	/**
+	 * Convenience method to type in text.
+	 * 
+	 * @param text
+	 *            Text to be typed in.
+	 */
+	void keyText(String text);
 
 }
