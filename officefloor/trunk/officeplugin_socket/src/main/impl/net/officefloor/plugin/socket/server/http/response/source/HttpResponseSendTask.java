@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.response.source;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -32,7 +33,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * {@link Task} to trigger sending the {@link HttpResponse}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseSendTask
@@ -48,7 +49,7 @@ public class HttpResponseSendTask
 
 	/**
 	 * Adds the {@link TaskType} information for {@link HttpResponseSendTask}.
-	 *
+	 * 
 	 * @param taskName
 	 *            {@link Task} name.
 	 * @param taskFactory
@@ -76,13 +77,30 @@ public class HttpResponseSendTask
 	private final int status;
 
 	/**
+	 * Content for the {@link HttpResponse}. May be <code>null</code>.
+	 */
+	private final ByteBuffer content;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param status
 	 *            HTTP status for the {@link HttpResponse}.
+	 * @param content
+	 *            Content for {@link HttpResponse}. May be <code>null</code>.
 	 */
-	public HttpResponseSendTask(int status) {
+	public HttpResponseSendTask(int status, byte[] content) {
 		this.status = status;
+		if (content == null) {
+			// No content
+			this.content = null;
+		} else {
+			// Provide direct buffer with content
+			ByteBuffer buffer = ByteBuffer.allocateDirect(content.length);
+			buffer.put(content);
+			buffer.flip();
+			this.content = buffer.asReadOnlyBuffer();
+		}
 	}
 
 	/*
@@ -102,6 +120,11 @@ public class HttpResponseSendTask
 		// Provide the status if specified
 		if (this.status > 0) {
 			response.setStatus(this.status);
+		}
+
+		// Provide body content if have content
+		if (this.content != null) {
+			response.getBody().append(this.content);
 		}
 
 		// Trigger sending the response
