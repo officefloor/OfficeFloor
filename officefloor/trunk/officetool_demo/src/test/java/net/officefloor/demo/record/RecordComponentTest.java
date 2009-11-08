@@ -408,10 +408,25 @@ public class RecordComponentTest extends TestCase {
 				Class<?> type = this.macroTypes.remove();
 				assertEquals("Incorrect macro type", type, macro.getClass());
 
-				// Ensure the expected configuration
+				// Obtain expected start location
 				String configuration = this.macroConfigs.remove();
-				assertEquals("Incorrect macro configuration", configuration,
-						macro.getConfigurationMemento());
+				LeftClickMacro leftClick = new LeftClickMacro();
+				leftClick.setConfigurationMemento(configuration);
+				Point expectedStart = leftClick.getStartingMouseLocation();
+
+				// Obtain the actual start location
+				configuration = macro.getConfigurationMemento();
+				leftClick.setConfigurationMemento(configuration);
+				Point actualStart = leftClick.getStartingMouseLocation();
+
+				// Ensure same (given margin of error detecting location)
+				assertTrue("Incorrect macro x configuration (e="
+						+ expectedStart.x + ", a=" + actualStart.x + ")", (Math
+						.abs(expectedStart.x - actualStart.x) < 10));
+				assertTrue("Incorrect macro y configuration (e="
+						+ expectedStart.y + ", a=" + actualStart.y + ")", (Math
+						.abs(expectedStart.y - actualStart.y) < 10));
+
 			} catch (Throwable ex) {
 				RecordComponentTest.this.macroFailure = ex;
 			}
