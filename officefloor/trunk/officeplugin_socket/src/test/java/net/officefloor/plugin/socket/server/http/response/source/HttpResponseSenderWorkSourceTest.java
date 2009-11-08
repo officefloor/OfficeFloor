@@ -18,11 +18,11 @@
 package net.officefloor.plugin.socket.server.http.response.source;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -37,6 +37,8 @@ import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
 import net.officefloor.plugin.stream.OutputBufferStream;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link HttpResponseSenderWorkSource}.
@@ -57,7 +59,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * Validate type.
 	 */
 	public void testType() {
-		HttpResponseSendTask task = new HttpResponseSendTask(-1);
+		HttpResponseSendTask task = new HttpResponseSendTask(-1, null);
 		WorkTypeBuilder<Work> workTypeBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 		TaskTypeBuilder<HttpResponseSendTaskDependencies, None> taskBuilder = workTypeBuilder
@@ -132,7 +134,6 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
 		OutputBufferStream body = this.createMock(OutputBufferStream.class);
-		ByteArrayOutputStream bodyStream = new ByteArrayOutputStream();
 
 		// Record
 		this
@@ -144,7 +145,15 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		this.recordReturn(response, response.getBody(), body);
-		this.recordReturn(body, body.getOutputStream(), bodyStream);
+		final ByteBuffer[] bodyContent = new ByteBuffer[1];
+		body.append((ByteBuffer) null);
+		this.control(body).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				bodyContent[0] = (ByteBuffer) actual[0];
+				return true;
+			}
+		});
 		response.send();
 
 		// Test
@@ -166,9 +175,10 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Validate the body contents
+		byte[] bodyData = new byte[bodyContent[0].limit()];
+		bodyContent[0].get(bodyData);
 		assertContents(new StringReader(testContentFileContents),
-				new InputStreamReader(new ByteArrayInputStream(bodyStream
-						.toByteArray())));
+				new InputStreamReader(new ByteArrayInputStream(bodyData)));
 	}
 
 }

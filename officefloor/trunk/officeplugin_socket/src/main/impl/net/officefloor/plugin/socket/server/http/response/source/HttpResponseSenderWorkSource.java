@@ -17,7 +17,10 @@
  */
 package net.officefloor.plugin.socket.server.http.response.source;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -64,16 +67,27 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 		// Obtain the HTTP response content (null to not set)
 		String httpResponseFile = context.getProperty(
 				PROPERTY_HTTP_RESPONSE_CONTENT_FILE, null);
+		byte[] httpResponseContent = null;
 		if (httpResponseFile != null) {
 			// Obtain the HTTP response content
-
-			// TODO provide content to HTTP response
-			throw new UnsupportedOperationException(
-					"TODO implement providing content for HTTP response");
+			InputStream httpResponseInputStream = context.getClassLoader()
+					.getResourceAsStream(httpResponseFile);
+			if (httpResponseInputStream == null) {
+				throw new FileNotFoundException(
+						"Can not find HTTP response file '" + httpResponseFile
+								+ "' on the class path");
+			}
+			ByteArrayOutputStream fileContent = new ByteArrayOutputStream();
+			for (int data = httpResponseInputStream.read(); data != -1; data = httpResponseInputStream
+					.read()) {
+				fileContent.write(data);
+			}
+			httpResponseContent = fileContent.toByteArray();
 		}
 
 		// Create the send task
-		HttpResponseSendTask task = new HttpResponseSendTask(httpStatus);
+		HttpResponseSendTask task = new HttpResponseSendTask(httpStatus,
+				httpResponseContent);
 
 		// Load the work type information
 		workTypeBuilder.setWorkFactory(task);
