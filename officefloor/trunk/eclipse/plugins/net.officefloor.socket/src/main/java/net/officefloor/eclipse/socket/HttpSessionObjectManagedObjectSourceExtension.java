@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * {@link ManagedObjectSourceExtension} for the
  * {@link HttpSessionObjectManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionObjectManagedObjectSourceExtension
@@ -58,7 +58,7 @@ public class HttpSessionObjectManagedObjectSourceExtension
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyClass("Object class",
 				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, page,
-				context);
+				context, null);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for the {@link HttpHtmlFormToBeanWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderWorkSourceExtension
@@ -58,11 +58,11 @@ public class HttpParametersLoaderWorkSourceExtension
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyClass("Bean type",
 				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME, page,
-				context);
+				context, null);
 		SourceExtensionUtil.createPropertyCheckbox("Case sensitive names",
 				HttpParametersLoaderWorkSource.PROPERTY_CASE_SENSITIVE, false,
 				Boolean.TRUE.toString(), Boolean.FALSE.toString(), page,
-				context);
+				context, null);
 	}
 
 	@Override

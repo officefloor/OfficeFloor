@@ -23,7 +23,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link PropertyList}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class PropertyListTest extends OfficeFrameTestCase {
@@ -53,6 +53,22 @@ public class PropertyListTest extends OfficeFrameTestCase {
 		property.setValue("VALUE");
 		assertEquals("Should get value", "VALUE", this.list.getPropertyValue(
 				"test", "DEFAULT"));
+	}
+
+	/**
+	 * Ensure can remove the {@link Property}.
+	 */
+	public void testRemoveProperty() {
+
+		// Add the property
+		Property property = this.list.addProperty("test");
+		assertEquals("Ensure property added", property, this.list
+				.getProperty("test"));
+
+		// Remove the property
+		this.list.removeProperty(property);
+		assertNull("Should no longer have property", this.list
+				.getProperty("test"));
 	}
 
 }

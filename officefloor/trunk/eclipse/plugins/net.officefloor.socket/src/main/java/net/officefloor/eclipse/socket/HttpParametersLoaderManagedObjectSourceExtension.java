@@ -31,7 +31,7 @@ import net.officefloor.plugin.socket.server.http.parameters.source.HttpParameter
 /**
  * {@link ManagedObjectSourceExtension} for the
  * {@link HttpParametersLoaderManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderManagedObjectSourceExtension
@@ -60,13 +60,13 @@ public class HttpParametersLoaderManagedObjectSourceExtension
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyClass("Bean type",
 				HttpParametersLoaderManagedObjectSource.PROPERTY_TYPE_NAME,
-				page, context);
+				page, context, null);
 		SourceExtensionUtil
 				.createPropertyCheckbox(
 						"Case sensitive names",
 						HttpParametersLoaderManagedObjectSource.PROPERTY_CASE_SENSITIVE,
 						false, Boolean.TRUE.toString(), Boolean.FALSE
-								.toString(), page, context);
+								.toString(), page, context, null);
 	}
 
 	@Override

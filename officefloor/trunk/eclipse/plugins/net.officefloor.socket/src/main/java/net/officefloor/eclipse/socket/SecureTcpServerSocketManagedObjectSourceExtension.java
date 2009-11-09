@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * {@link ManagedObjectSourceExtension} for the
  * {@link SecureTcpServerSocketManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SecureTcpServerSocketManagedObjectSourceExtension
@@ -61,15 +61,15 @@ public class SecureTcpServerSocketManagedObjectSourceExtension
 		// Provide the properties
 		SourceExtensionUtil.createPropertyText("Port",
 				SecureTcpServerSocketManagedObjectSource.PROPERTY_PORT, "80",
-				page, context);
+				page, context, null);
 		SourceExtensionUtil.createPropertyText("Buffer size",
 				SecureTcpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
-				"1024", page, context);
+				"1024", page, context, null);
 		SourceExtensionUtil
 				.createPropertyText(
 						"Maximum connections per listener",
 						SecureTcpServerSocketManagedObjectSource.PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
-						"-1", page, context);
+						"-1", page, context, null);
 	}
 
 	@Override

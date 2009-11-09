@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.common.dialog.input.impl;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 /**
  * {@link Table} to create and populate a list of beans.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanListInput<B> implements Input<Table> {
@@ -82,6 +83,11 @@ public class BeanListInput<B> implements Input<Table> {
 	private final List<B> beans = new LinkedList<B>();
 
 	/**
+	 * Indicates to include the buttons.
+	 */
+	private final boolean isIncludeButtons;
+
+	/**
 	 * {@link Table}.
 	 */
 	private Table table;
@@ -98,12 +104,25 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param beanType
 	 *            Type of the bean.
 	 */
 	public BeanListInput(Class<B> beanType) {
+		this(beanType, true);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param beanType
+	 *            Type of the bean.
+	 * @param isIncludeButtons
+	 *            Indicates if should include the buttons.
+	 */
+	public BeanListInput(Class<B> beanType, boolean isIncludeButtons) {
 		this.beanType = beanType;
+		this.isIncludeButtons = isIncludeButtons;
 
 		// Bean marker always the first column
 		this.beanPropertyOrder.add(BEAN_MARKER);
@@ -114,7 +133,7 @@ public class BeanListInput<B> implements Input<Table> {
 	 * Adds property to be populated on the bean.
 	 * <p>
 	 * This may NOT be called after {@link #buildControl(InputContext)}.
-	 *
+	 * 
 	 * @param propertyName
 	 *            Name of the property on the bean.
 	 * @param weight
@@ -138,7 +157,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Adds a bean.
-	 *
+	 * 
 	 * @param bean
 	 *            Bean.
 	 */
@@ -154,7 +173,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Removes a bean.
-	 *
+	 * 
 	 * @param bean
 	 *            Bean.
 	 */
@@ -165,6 +184,15 @@ public class BeanListInput<B> implements Input<Table> {
 		// Remove from viewer
 		if (this.tableViewer != null) {
 			this.tableViewer.remove(bean);
+		}
+	}
+
+	/**
+	 * Clears all the beans.
+	 */
+	public void clearBeans() {
+		for (B bean : new ArrayList<B>(this.beans)) {
+			this.removeBean(bean);
 		}
 	}
 
@@ -238,58 +266,61 @@ public class BeanListInput<B> implements Input<Table> {
 		// Load the beans to be populated
 		this.tableViewer.setInput(this.beans);
 
-		// Provide button to add
-		Button addButton = new Button(this.table.getParent(), SWT.PUSH
-				| SWT.CENTER);
-		addButton.setText("Add");
-		addButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_BEGINNING));
-		addButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				try {
-					// Create a new instance of the bean
-					B bean = BeanListInput.this.beanType.newInstance();
+		// Determine if to include the buttons
+		if (this.isIncludeButtons) {
+			// Provide button to add
+			Button addButton = new Button(this.table.getParent(), SWT.PUSH
+					| SWT.CENTER);
+			addButton.setText("Add");
+			addButton.setLayoutData(new GridData(
+					GridData.HORIZONTAL_ALIGN_BEGINNING));
+			addButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					try {
+						// Create a new instance of the bean
+						B bean = BeanListInput.this.beanType.newInstance();
 
-					// Add the bean
-					BeanListInput.this.addBean(bean);
+						// Add the bean
+						BeanListInput.this.addBean(bean);
+
+						// Notify changed
+						context.notifyValueChanged(BeanListInput.this.beans);
+
+					} catch (Exception ex) {
+						LogUtil.logError("Failed to add bean", ex);
+					}
+				}
+			});
+
+			// Create and configure the "Delete" button
+			Button deleteButton = new Button(this.table.getParent(), SWT.PUSH
+					| SWT.CENTER);
+			deleteButton.setText("Delete");
+			deleteButton.setLayoutData(new GridData(
+					GridData.HORIZONTAL_ALIGN_BEGINNING));
+			deleteButton.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				@SuppressWarnings("unchecked")
+				public void widgetSelected(SelectionEvent e) {
+
+					// Obtain the first bean selected
+					B bean = (B) ((IStructuredSelection) BeanListInput.this.tableViewer
+							.getSelection()).getFirstElement();
+					if (bean == null) {
+						// Nothing selected to delete
+						return;
+					}
+
+					// Remove the bean
+					BeanListInput.this.removeBean(bean);
 
 					// Notify changed
 					context.notifyValueChanged(BeanListInput.this.beans);
-
-				} catch (Exception ex) {
-					LogUtil.logError("Failed to add bean", ex);
 				}
-			}
-		});
-
-		// Create and configure the "Delete" button
-		Button deleteButton = new Button(this.table.getParent(), SWT.PUSH
-				| SWT.CENTER);
-		deleteButton.setText("Delete");
-		deleteButton.setLayoutData(new GridData(
-				GridData.HORIZONTAL_ALIGN_BEGINNING));
-		deleteButton.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			@SuppressWarnings("unchecked")
-			public void widgetSelected(SelectionEvent e) {
-
-				// Obtain the first bean selected
-				B bean = (B) ((IStructuredSelection) BeanListInput.this.tableViewer
-						.getSelection()).getFirstElement();
-				if (bean == null) {
-					// Nothing selected to delete
-					return;
-				}
-
-				// Remove the bean
-				BeanListInput.this.removeBean(bean);
-
-				// Notify changed
-				context.notifyValueChanged(BeanListInput.this.beans);
-			}
-		});
+			});
+		}
 
 		// Return the table
 		return this.table;
@@ -327,7 +358,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param name
 		 *            Property Name.
 		 * @param weight
@@ -367,7 +398,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Obtains the weight of the column width for this property.
-		 *
+		 * 
 		 * @return Weight of the column width for this property.
 		 */
 		public int getWeight() {
@@ -376,7 +407,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Obtains the property value from the bean.
-		 *
+		 * 
 		 * @param bean
 		 *            Bean to obtain the property value.
 		 * @return Value of the bean's property.
@@ -398,7 +429,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Indicates if can modify this property.
-		 *
+		 * 
 		 * @return <code>true</code> if can modify this property.
 		 */
 		public boolean canModify() {
@@ -407,7 +438,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Specifies the property value on the bean.
-		 *
+		 * 
 		 * @param bean
 		 *            Bean to have its property specified.
 		 * @param value
@@ -442,7 +473,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param inputContext
 		 *            {@link InputContext}.
 		 */
@@ -452,7 +483,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
 		 * java.lang.String)
@@ -475,7 +506,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
 		 * java.lang.String)
@@ -498,7 +529,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
 		 * java.lang.String, java.lang.Object)
 		 */
@@ -536,7 +567,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java
 		 * .lang.Object, int)
@@ -548,7 +579,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.
 		 * lang.Object, int)
@@ -586,7 +617,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.IStructuredContentProvider#getElements(
 		 * java.lang.Object)
@@ -599,7 +630,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		@Override
@@ -609,7 +640,7 @@ public class BeanListInput<B> implements Input<Table> {
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see
 		 * org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse
 		 * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)
