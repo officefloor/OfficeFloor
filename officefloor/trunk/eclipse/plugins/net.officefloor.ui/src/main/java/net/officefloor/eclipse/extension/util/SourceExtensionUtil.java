@@ -43,14 +43,14 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * Utility class providing helper methods for source extension implementations.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SourceExtensionUtil {
 
 	/**
 	 * Loads the property layout for creating property displays.
-	 *
+	 * 
 	 * @param container
 	 *            {@link Composite} to contain the properties.
 	 */
@@ -60,7 +60,7 @@ public class SourceExtensionUtil {
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -69,17 +69,20 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link WorkSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	public static Property createPropertyClass(String label, String name,
-			Composite container, WorkSourceExtensionContext context) {
+			Composite container, WorkSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyClass(label, name, container, new WorkGeneric(
-				context));
+				context), listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -88,17 +91,20 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link ManagedObjectSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	public static Property createPropertyClass(String label, String name,
-			Composite container, ManagedObjectSourceExtensionContext context) {
+			Composite container, ManagedObjectSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyClass(label, name, container,
-				new ManagedObjectGeneric(context));
+				new ManagedObjectGeneric(context), listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -107,10 +113,13 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	private static Property createPropertyClass(String label, String name,
-			Composite container, final GenericSourceExtensionContext context) {
+			Composite container, final GenericSourceExtensionContext context,
+			final PropertyValueChangeListener listener) {
 
 		// Obtain the property
 		final Property property = context.getPropertyList().getOrAddProperty(
@@ -129,6 +138,11 @@ public class SourceExtensionUtil {
 			public void notifyValueChanged(Object value) {
 				String propertyValue = (String) value;
 				property.setValue(propertyValue);
+				if (listener != null) {
+					listener
+							.propertyValueChanged(new PropertyValueChangeEventImpl(
+									property));
+				}
 				context.notifyPropertiesChanged();
 			}
 
@@ -145,7 +159,7 @@ public class SourceExtensionUtil {
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -156,18 +170,21 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link ManagedObjectSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	public static Property createPropertyText(String label, String name,
 			String defaultValue, Composite container,
-			final ManagedObjectSourceExtensionContext context) {
+			final ManagedObjectSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyText(label, name, defaultValue, container,
-				new ManagedObjectGeneric(context));
+				new ManagedObjectGeneric(context), listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -178,18 +195,21 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link WorkSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	public static Property createPropertyText(String label, String name,
 			String defaultValue, Composite container,
-			WorkSourceExtensionContext context) {
+			WorkSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyText(label, name, defaultValue, container,
-				new WorkGeneric(context));
+				new WorkGeneric(context), listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -200,11 +220,14 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link Text}.
 	 */
 	private static Property createPropertyText(String label, String name,
 			String defaultValue, Composite container,
-			final GenericSourceExtensionContext context) {
+			final GenericSourceExtensionContext context,
+			final PropertyValueChangeListener listener) {
 
 		// Obtain the property
 		final Property property = context.getPropertyList().getOrAddProperty(
@@ -227,6 +250,11 @@ public class SourceExtensionUtil {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				property.setValue(text.getText());
+				if (listener != null) {
+					listener
+							.propertyValueChanged(new PropertyValueChangeEventImpl(
+									property));
+				}
 				context.notifyPropertiesChanged();
 			}
 		});
@@ -237,7 +265,7 @@ public class SourceExtensionUtil {
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -252,18 +280,22 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link ManagedObjectSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
 	 */
 	public static Property createPropertyCheckbox(String label, String name,
 			boolean defaultValue, String trueValue, String falseValue,
-			Composite container, ManagedObjectSourceExtensionContext context) {
+			Composite container, ManagedObjectSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyCheckbox(label, name, defaultValue, trueValue,
-				falseValue, container, new ManagedObjectGeneric(context));
+				falseValue, container, new ManagedObjectGeneric(context),
+				listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -278,18 +310,21 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link WorkSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
 	 */
 	public static Property createPropertyCheckbox(String label, String name,
 			boolean defaultValue, String trueValue, String falseValue,
-			Composite container, WorkSourceExtensionContext context) {
+			Composite container, WorkSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
 		return createPropertyCheckbox(label, name, defaultValue, trueValue,
-				falseValue, container, new WorkGeneric(context));
+				falseValue, container, new WorkGeneric(context), listener);
 	}
 
 	/**
 	 * Creates the display for the input {@link Property}.
-	 *
+	 * 
 	 * @param label
 	 *            Label for the {@link Property}.
 	 * @param name
@@ -304,12 +339,15 @@ public class SourceExtensionUtil {
 	 *            {@link Composite} to add display {@link Control} instances.
 	 * @param context
 	 *            {@link GenericSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
 	 * @return {@link Property} for the {@link SWT#CHECK} {@link Button}.
 	 */
 	private static Property createPropertyCheckbox(String label, String name,
 			boolean defaultValue, final String trueValue,
 			final String falseValue, Composite container,
-			final GenericSourceExtensionContext context) {
+			final GenericSourceExtensionContext context,
+			final PropertyValueChangeListener listener) {
 
 		// Obtain the property
 		final Property property = context.getPropertyList().getOrAddProperty(
@@ -338,6 +376,11 @@ public class SourceExtensionUtil {
 			public void widgetSelected(SelectionEvent e) {
 				property.setValue(checkbox.getSelection() ? trueValue
 						: falseValue);
+				if (listener != null) {
+					listener
+							.propertyValueChanged(new PropertyValueChangeEventImpl(
+									property));
+				}
 				context.notifyPropertiesChanged();
 			}
 		});
@@ -353,20 +396,51 @@ public class SourceExtensionUtil {
 	}
 
 	/**
+	 * {@link PropertyValueChangeEvent} implementation.
+	 */
+	private static class PropertyValueChangeEventImpl implements
+			PropertyValueChangeEvent {
+
+		/**
+		 * {@link Property}.
+		 */
+		private final Property property;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param property
+		 *            {@link Property}.
+		 */
+		public PropertyValueChangeEventImpl(Property property) {
+			this.property = property;
+		}
+
+		/*
+		 * ================== PropertyValueChangeEvent ===================
+		 */
+
+		@Override
+		public Property getProperty() {
+			return this.property;
+		}
+	}
+
+	/**
 	 * Generic source extension context.
 	 */
 	private static interface GenericSourceExtensionContext {
 
 		/**
 		 * Obtains the {@link IProject}.
-		 *
+		 * 
 		 * @return {@link IProject}.
 		 */
 		IProject getProject();
 
 		/**
 		 * Obtains the {@link PropertyList}.
-		 *
+		 * 
 		 * @return {@link PropertyList}.
 		 */
 		PropertyList getPropertyList();
@@ -389,7 +463,7 @@ public class SourceExtensionUtil {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param context
 		 *            {@link WorkSourceExtensionContext}.
 		 */
@@ -431,7 +505,7 @@ public class SourceExtensionUtil {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param context
 		 *            {@link ManagedObjectSourceExtensionContext}.
 		 */

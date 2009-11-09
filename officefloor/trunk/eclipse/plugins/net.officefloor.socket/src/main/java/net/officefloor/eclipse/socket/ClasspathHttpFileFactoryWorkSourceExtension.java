@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * {@link WorkSourceExtension} for the
  * {@link ClasspathHttpFileFactoryWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClasspathHttpFileFactoryWorkSourceExtension
@@ -65,10 +65,10 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyText("Package prefix",
 				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"html", page, context);
+				"html", page, context, null);
 		SourceExtensionUtil.createPropertyText("Directory index file name",
 				ClasspathHttpFileFactoryWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"index.html", page, context);
+				"index.html", page, context, null);
 	}
 
 	@Override

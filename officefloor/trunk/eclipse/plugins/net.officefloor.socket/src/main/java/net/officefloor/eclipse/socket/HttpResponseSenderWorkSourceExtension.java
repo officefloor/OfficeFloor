@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 
 /**
  * {@link WorkSourceExtension} for the {@link HttpResponseSenderWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseSenderWorkSourceExtension implements
@@ -57,7 +57,12 @@ public class HttpResponseSenderWorkSourceExtension implements
 		SourceExtensionUtil.loadPropertyLayout(page);
 		SourceExtensionUtil.createPropertyText("HTTP Status",
 				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS, "200", page,
-				context);
+				context, null);
+		SourceExtensionUtil
+				.createPropertyText(
+						"HTTP Content File",
+						HttpResponseSenderWorkSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
+						"", page, context, null);
 	}
 
 	@Override

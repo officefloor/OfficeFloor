@@ -18,9 +18,11 @@
 package net.officefloor.plugin.socket.server.http.template;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Properties;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -31,10 +33,12 @@ import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFact
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
+import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTemplateSectionContent;
 
 /**
  * {@link WorkSource} for the HTTP template.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWorkSource extends
@@ -60,6 +64,84 @@ public class HttpTemplateWorkSource extends
 	 */
 	public static final String PROPERTY_BEAN_PREFIX = HttpTemplateTask.PROPERTY_BEAN_PREFIX;
 
+	/**
+	 * Obtains the {@link HttpTemplate}.
+	 * 
+	 * @param properties
+	 *            {@link Properties} providing details about the
+	 *            {@link HttpTemplate}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @return {@link HttpTemplate}.
+	 * @throws IOException
+	 *             If fails to obtain the {@link HttpTemplate}.
+	 */
+	public static HttpTemplate getHttpTemplate(Properties properties,
+			ClassLoader classLoader) throws IOException {
+
+		// Obtain the details of the template
+		String templateFilePath = properties
+				.getProperty(PROPERTY_TEMPLATE_FILE);
+		Charset charset = getCharset(properties);
+
+		// Obtain the template configuration
+		InputStream configuration = classLoader
+				.getResourceAsStream(templateFilePath);
+		if (configuration == null) {
+			throw new FileNotFoundException("Can not find template '"
+					+ templateFilePath + "'");
+		}
+
+		// Parse the template
+		HttpTemplate template = new HttpTemplateParserImpl()
+				.parse(new InputStreamReader(configuration, charset));
+		configuration.close();
+
+		// Return the template
+		return template;
+	}
+
+	/**
+	 * Determines if the {@link HttpTemplateSection} requires a bean.
+	 * 
+	 * @param section
+	 *            {@link HttpTemplateSection}.
+	 * @return <code>true</code> if the {@link HttpTemplateSection} requires a
+	 *         bean.
+	 */
+	public static boolean isHttpTemplateSectionRequireBean(
+			HttpTemplateSection section) {
+
+		// Determine if contains reference content
+		for (HttpTemplateSectionContent content : section.getContent()) {
+			if (content instanceof ReferenceHttpTemplateSectionContent) {
+				// Section contains reference content, so requires bean
+				return true;
+			}
+		}
+
+		// No reference content, so does not require bean
+		return false;
+	}
+
+	/**
+	 * Obtains the {@link Charset} from the {@link Properties}.
+	 * 
+	 * @param properties
+	 *            {@link Properties}.
+	 * @return {@link Charset}.
+	 */
+	private static Charset getCharset(Properties properties) {
+
+		// Obtain the charset
+		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
+		Charset charset = (charsetName != null ? Charset.forName(charsetName)
+				: Charset.defaultCharset());
+
+		// Return the charset
+		return charset;
+	}
+
 	/*
 	 * =================== AbstractWorkSource =========================
 	 */
@@ -73,26 +155,15 @@ public class HttpTemplateWorkSource extends
 	public void sourceWork(WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
+		// Obtain the template
+		Properties properties = context.getProperties();
+		HttpTemplate template = getHttpTemplate(properties, context
+				.getClassLoader());
+
 		// Obtain the details of the template
-		String templateFilePath = context.getProperty(PROPERTY_TEMPLATE_FILE);
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE,
 				"text/html");
-		String charsetName = context.getProperty(PROPERTY_CHARSET, null);
-		Charset charset = (charsetName != null ? Charset.forName(charsetName)
-				: Charset.defaultCharset());
-
-		// Obtain the template configuration
-		InputStream configuration = context.getClassLoader()
-				.getResourceAsStream(templateFilePath);
-		if (configuration == null) {
-			throw new FileNotFoundException("Can not find template '"
-					+ templateFilePath + "'");
-		}
-
-		// Parse the template
-		HttpTemplate template = new HttpTemplateParserImpl()
-				.parse(new InputStreamReader(configuration, charset));
-		configuration.close();
+		Charset charset = getCharset(properties);
 
 		// Create the writer factory
 		HttpResponseWriterFactory writerFactory = new HttpResponseWriterFactoryImpl();

@@ -85,4 +85,11 @@ public interface WorkSourceExtensionContext {
 	 */
 	IProject getProject();
 
+	/**
+	 * Obtains the {@link ClassLoader} for adding the {@link WorkSource}.
+	 * 
+	 * @return {@link ClassLoader} for adding the {@link WorkSource}.
+	 */
+	ClassLoader getClassLoader();
+
 }
