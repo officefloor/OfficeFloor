@@ -20,30 +20,29 @@ package net.officefloor.plugin.socket.server.http.parameters;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
- * Indicates a failure loading the {@link HttpRequest} parameters onto an
- * object.
- *
+ * Indicates a failure with the {@link HttpRequest} parameters.
+ * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersLoadException extends Exception {
+public class HttpParametersException extends Exception {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param reason
 	 *            Reason.
 	 */
-	public HttpParametersLoadException(String reason) {
+	public HttpParametersException(String reason) {
 		super(reason);
 	}
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause.
 	 */
-	public HttpParametersLoadException(Throwable cause) {
+	public HttpParametersException(Throwable cause) {
 		super(cause);
 	}
 
