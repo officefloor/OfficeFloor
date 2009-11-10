@@ -19,21 +19,18 @@ package net.officefloor.eclipse.extension.managedobjectsource.clazz;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for {@link ClassManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceExtension
@@ -58,38 +55,11 @@ public class ClassManagedObjectSourceExtension
 	public void createControl(Composite page,
 			final ManagedObjectSourceExtensionContext context) {
 
-		// Specify layout
-		page.setLayout(new GridLayout(1, false));
-
-		// Obtain the class name property
-		Property property = context.getPropertyList().getProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
-		if (property == null) {
-			property = context.getPropertyList().addProperty(
-					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
-		}
-		final Property classNameProperty = property;
-
-		// Provide listing of class names
-		new InputHandler<String>(page, new ClasspathClassInput(context
-				.getProject(), page.getShell()), new InputListener() {
-
-			@Override
-			public void notifyValueChanged(Object value) {
-
-				// Obtain the class name
-				String className = (value == null ? null : value.toString());
-
-				// Inform of change of class name
-				classNameProperty.setValue(className);
-				context.notifyPropertiesChanged();
-			}
-
-			@Override
-			public void notifyValueInvalid(String message) {
-				context.setErrorMessage(message);
-			}
-		});
+		// Provide property for class name
+		SourceExtensionUtil.loadPropertyLayout(page);
+		SourceExtensionUtil.createPropertyClass("Class",
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, page,
+				context, null);
 	}
 
 	@Override
