@@ -18,25 +18,15 @@
 package net.officefloor.plugin.socket.server.http.parameters;
 
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
-import net.officefloor.plugin.stream.BufferStream;
-import net.officefloor.plugin.stream.InputBufferStream;
-import net.officefloor.plugin.stream.impl.BufferStreamImpl;
 
 /**
  * Tests the {@link HttpParametersLoader}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderTest extends OfficeFrameTestCase {
@@ -75,8 +65,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testOnlyTypeParametersLoaded() throws Exception {
 
 		// Load the parameters
-		HttpRequest request = this
-				.createRequest(
+		HttpRequest request = HttpTestUtil
+				.createHttpRequest(
 						"GET",
 						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=NotLoaded",
 						null);
@@ -223,8 +213,30 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Does the test (mainly for parsing content)
-	 *
+	 * Ensure able to load multiple values for a GET request. In other words
+	 * will look for prefix on parameter name and use remaining of parameter
+	 * name as key identifying the value.
+	 */
+	public void testGetWithMultipleValues() throws Exception {
+		this.object.setMultipleValues("One", "1");
+		this.object.setMultipleValues("Two", "2");
+		this.doTest("GET", "/path?MultipleValuesOne=1&MultipleValuesTwo=2",
+				null, true);
+	}
+
+	/**
+	 * Ensure can load multiple values for a POST request.
+	 */
+	public void testPostWithMultipleValues() throws Exception {
+		this.object.setMultipleValues("One", "1");
+		this.object.setMultipleValues("Two", "2");
+		this.doTest("POST", "/path", "MultipleValuesOne=1&MultipleValuesTwo=2",
+				true);
+	}
+
+	/**
+	 * Does the test, expecting mocks to have recorded actions.
+	 * 
 	 * @param method
 	 *            {@link HttpRequest} Method.
 	 * @param requestUri
@@ -240,7 +252,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 			boolean isCaseSensitive, String... aliasProperties)
 			throws Exception {
 		this.replayMockObjects();
-		HttpRequest request = this.createRequest(method, requestUri, body);
+		HttpRequest request = HttpTestUtil.createHttpRequest(method,
+				requestUri, body);
 		HttpParametersLoader<MockInterface> loader = this.createLoader(
 				MockInterface.class, isCaseSensitive, aliasProperties);
 		loader.loadParameters(request, this.object);
@@ -249,7 +262,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the initialisd {@link HttpParametersLoader} for testing.
-	 *
+	 * 
 	 * @param type
 	 *            Object type to be loaded.
 	 * @param isCaseSensitive
@@ -281,49 +294,6 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates a {@link HttpRequest} for testing.
-	 *
-	 * @param method
-	 *            HTTP method (GET, POST).
-	 * @param requestUri
-	 *            Request URI.
-	 * @param body
-	 *            Contents of the {@link HttpRequest} body.
-	 * @param headerNameValues
-	 *            {@link HttpHeader} name values.
-	 * @return {@link HttpRequest}.
-	 */
-	private HttpRequest createRequest(String method, String requestUri,
-			String body, String... headerNameValues) throws Exception {
-
-		// Transform the body into input buffer stream
-		byte[] bodyData = (body == null ? new byte[0] : body.getBytes(Charset
-				.forName("UTF-8")));
-		BufferStream bufferStream = new BufferStreamImpl(ByteBuffer
-				.wrap(bodyData));
-		bufferStream.getOutputBufferStream().close(); // all data available
-		InputBufferStream inputBufferStream = bufferStream
-				.getInputBufferStream();
-
-		// Create the headers
-		List<HttpHeader> headers = new LinkedList<HttpHeader>();
-		if (body != null) {
-			// Include content length if body
-			headers.add(new HttpHeaderImpl("content-length", String
-					.valueOf(bodyData.length)));
-		}
-		for (int i = 0; i < headerNameValues.length; i += 2) {
-			String name = headerNameValues[i];
-			String value = headerNameValues[i + 1];
-			headers.add(new HttpHeaderImpl(name, value));
-		}
-
-		// Return the HTTP request
-		return new HttpRequestImpl(method, requestUri, "HTTP/1.1", headers,
-				inputBufferStream);
-	}
-
-	/**
 	 * Interface of Mock object. Allows to test type rather than class.
 	 */
 	public static interface MockInterface {
@@ -333,6 +303,8 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		void setLastName(String lastName);
 
 		void setDescription(String description);
+
+		void setMultipleValues(String key, String value);
 
 		void setIgnore(int value);
 	}
@@ -359,7 +331,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 		/**
 		 * Ensures only the interface (type) methods are loaded.
-		 *
+		 * 
 		 * @param value
 		 *            String value as required.
 		 */
@@ -384,6 +356,11 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		@Override
 		public void setDescription(String description) {
 			this.description = description;
+		}
+
+		@Override
+		public void setMultipleValues(String key, String value) {
+			fail("Should not be used in testing");
 		}
 
 		@Override

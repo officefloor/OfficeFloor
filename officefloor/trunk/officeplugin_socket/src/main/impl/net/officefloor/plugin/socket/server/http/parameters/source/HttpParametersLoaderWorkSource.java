@@ -31,7 +31,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoadException;
+import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoaderImpl;
 
@@ -126,7 +126,7 @@ public class HttpParametersLoaderWorkSource
 		taskBuilder.addObject(type).setKey(
 				HttpParametersLoaderDependencies.OBJECT);
 		taskBuilder.setReturnType(type);
-		taskBuilder.addEscalation(HttpParametersLoadException.class);
+		taskBuilder.addEscalation(HttpParametersException.class);
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class HttpParametersLoaderWorkSource
 		@SuppressWarnings("unchecked")
 		public Object doTask(
 				TaskContext<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> context)
-				throws HttpParametersLoadException {
+				throws HttpParametersException {
 
 			// Obtain the dependencies
 			ServerHttpConnection connection = (ServerHttpConnection) context

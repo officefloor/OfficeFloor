@@ -29,14 +29,14 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
  * Due to the complications of attempting to validate and translate values, the
  * {@link HttpParametersLoader} will only load {@link String} values. Validation
  * of the values can then be done on the values contained in the loaded Object.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpParametersLoader<T> {
 
 	/**
 	 * Initialises this {@link HttpParametersLoader}.
-	 *
+	 * 
 	 * @param type
 	 *            Type of object to be loaded (and may be an interface). The
 	 *            type is interrogated for
@@ -59,16 +59,16 @@ public interface HttpParametersLoader<T> {
 
 	/**
 	 * Loads the parameters of the {@link HttpRequest} to the Object.
-	 *
+	 * 
 	 * @param httpRequest
 	 *            {@link HttpRequest} to extract the parameters.
 	 * @param object
 	 *            Object to be loaded with the parameters.
-	 * @throws HttpParametersLoadException
+	 * @throws HttpParametersException
 	 *             If fails to load the {@link HttpRequest} parameters to the
 	 *             Object.
 	 */
 	<O extends T> void loadParameters(HttpRequest httpRequest, O object)
-			throws HttpParametersLoadException;
+			throws HttpParametersException;
 
 }

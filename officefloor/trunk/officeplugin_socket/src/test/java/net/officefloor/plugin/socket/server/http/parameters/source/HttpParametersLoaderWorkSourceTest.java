@@ -29,7 +29,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
-import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoadException;
+import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
 
 /**
@@ -64,7 +64,7 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 		taskBuilder.addObject(MockType.class).setKey(
 				HttpParametersLoaderDependencies.OBJECT);
 		taskBuilder.setReturnType(MockType.class);
-		taskBuilder.addEscalation(HttpParametersLoadException.class);
+		taskBuilder.addEscalation(HttpParametersException.class);
 		WorkLoaderUtil.validateWorkType(workBuilder,
 				HttpParametersLoaderWorkSource.class,
 				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
