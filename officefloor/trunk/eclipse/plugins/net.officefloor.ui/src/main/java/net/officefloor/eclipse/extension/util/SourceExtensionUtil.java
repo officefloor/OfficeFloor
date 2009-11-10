@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -133,25 +134,130 @@ public class SourceExtensionUtil {
 		new Label(container, SWT.NONE).setText(label + ": ");
 
 		// Provide the input to specify value
-		new InputHandler<String>(container, input, new InputListener() {
-			@Override
-			public void notifyValueChanged(Object value) {
-				String propertyValue = (String) value;
-				property.setValue(propertyValue);
-				if (listener != null) {
-					listener
-							.propertyValueChanged(new PropertyValueChangeEventImpl(
-									property));
-				}
-				context.notifyPropertiesChanged();
-			}
+		InputHandler<String> handler = new InputHandler<String>(container,
+				input, new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						String propertyValue = (String) value;
+						property.setValue(propertyValue);
+						if (listener != null) {
+							listener
+									.propertyValueChanged(new PropertyValueChangeEventImpl(
+											property));
+						}
+						context.notifyPropertiesChanged();
+					}
 
-			@Override
-			public void notifyValueInvalid(String message) {
-				property.setValue("");
-				context.notifyPropertiesChanged();
-			}
-		});
+					@Override
+					public void notifyValueInvalid(String message) {
+						property.setValue("");
+						context.notifyPropertiesChanged();
+					}
+				});
+		handler.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+		// Return the property
+		return property;
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link WorkSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	public static Property createPropertyResource(String label, String name,
+			Composite container, WorkSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyResource(label, name, container, new WorkGeneric(
+				context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link ManagedObjectSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	public static Property createPropertyResource(String label, String name,
+			Composite container, ManagedObjectSourceExtensionContext context,
+			PropertyValueChangeListener listener) {
+		return createPropertyResource(label, name, container,
+				new ManagedObjectGeneric(context), listener);
+	}
+
+	/**
+	 * Creates the display for the input {@link Property}.
+	 * 
+	 * @param label
+	 *            Label for the {@link Property}.
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param container
+	 *            {@link Composite} to add display {@link Control} instances.
+	 * @param context
+	 *            {@link GenericSourceExtensionContext}.
+	 * @param listener
+	 *            {@link PropertyValueChangeListener}. May be <code>null</code>.
+	 * @return {@link Property} for the {@link Text}.
+	 */
+	private static Property createPropertyResource(String label, String name,
+			Composite container, final GenericSourceExtensionContext context,
+			final PropertyValueChangeListener listener) {
+
+		// Obtain the property
+		final Property property = context.getPropertyList().getOrAddProperty(
+				name);
+
+		// Create the input to obtain the resource
+		ClasspathFileInput input = new ClasspathFileInput(context.getProject(),
+				property.getValue(), container.getShell());
+
+		// Provide the label
+		new Label(container, SWT.NONE).setText(label + ": ");
+
+		// Provide the input to specify value
+		InputHandler<String> handler = new InputHandler<String>(container,
+				input, new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						String propertyValue = (String) value;
+						property.setValue(propertyValue);
+						if (listener != null) {
+							listener
+									.propertyValueChanged(new PropertyValueChangeEventImpl(
+											property));
+						}
+						context.notifyPropertiesChanged();
+					}
+
+					@Override
+					public void notifyValueInvalid(String message) {
+						property.setValue("");
+						context.notifyPropertiesChanged();
+					}
+				});
+		handler.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Return the property
 		return property;

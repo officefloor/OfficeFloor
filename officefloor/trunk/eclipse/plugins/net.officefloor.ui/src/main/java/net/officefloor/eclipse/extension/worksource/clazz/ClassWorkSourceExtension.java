@@ -21,12 +21,10 @@ import java.lang.reflect.Method;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
@@ -34,14 +32,11 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for the {@link ClassWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSourceExtension implements
@@ -66,35 +61,10 @@ public class ClassWorkSourceExtension implements
 	public void createControl(Composite page,
 			final WorkSourceExtensionContext context) {
 
-		// Specify layout
-		page.setLayout(new GridLayout(1, false));
-
-		// Obtain the class name property
-		final Property classNameProperty = context.getPropertyList()
-				.getOrAddProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
-
-		// Provide listing of class names
-		InputHandler<String> inputHandler = new InputHandler<String>(page,
-				new ClasspathClassInput(context.getProject(), classNameProperty
-						.getValue(), page.getShell()), new InputListener() {
-					@Override
-					public void notifyValueChanged(Object value) {
-						// Obtain the class name
-						String className = (value == null ? null : value
-								.toString());
-
-						// Inform of change of class name
-						classNameProperty.setValue(className);
-						context.notifyPropertiesChanged();
-					}
-
-					@Override
-					public void notifyValueInvalid(String message) {
-						context.setErrorMessage(message);
-					}
-				});
-		inputHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		// Provide property for class name
+		SourceExtensionUtil.loadPropertyLayout(page);
+		SourceExtensionUtil.createPropertyClass("Class",
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, page, context, null);
 	}
 
 	@Override

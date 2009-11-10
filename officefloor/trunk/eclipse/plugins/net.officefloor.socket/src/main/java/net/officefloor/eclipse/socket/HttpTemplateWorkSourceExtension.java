@@ -39,6 +39,9 @@ import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -76,10 +79,14 @@ public class HttpTemplateWorkSourceExtension implements
 		// Add initial section to bean type properties
 		loadSectionToBeanTypeMappings(input, context);
 
-		// Provide properties
-		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyText("Template",
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, "", page,
+		// Provide means to specify template file
+		page.setLayout(new GridLayout(1, false));
+		Composite template = new Composite(page, SWT.NONE);
+		template.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+				false));
+		SourceExtensionUtil.loadPropertyLayout(template);
+		SourceExtensionUtil.createPropertyResource("Template",
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, template,
 				context, new PropertyValueChangeListener() {
 					@Override
 					public void propertyValueChanged(
