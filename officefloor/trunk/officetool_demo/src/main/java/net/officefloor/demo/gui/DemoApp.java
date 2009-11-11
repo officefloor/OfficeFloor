@@ -19,20 +19,29 @@ package net.officefloor.demo.gui;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Robot;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
+import net.officefloor.demo.macro.Macro;
+import net.officefloor.demo.macro.RightClickMacro;
 import net.officefloor.demo.macrolist.MacroItem;
 import net.officefloor.demo.macrolist.MacroList;
 import net.officefloor.demo.macrolist.MacroListListener;
+import net.officefloor.demo.play.MacroPlayer;
 import net.officefloor.demo.record.RecordComponent;
 
 public class DemoApp {
@@ -48,8 +57,7 @@ public class DemoApp {
 		// Create the application
 
 		// Create the frame for the recording
-		JFrame frame = new JFrame();
-		frame.setLayout(new FlowLayout());
+		final JFrame frame = new JFrame();
 
 		// Create the panel
 		JPanel panel = new JPanel();
@@ -58,7 +66,7 @@ public class DemoApp {
 
 		// Create the macro listing
 		final DefaultListModel macroListModel = new DefaultListModel();
-		MacroList macroList = new MacroList(new MacroListListener() {
+		final MacroList macroList = new MacroList(new MacroListListener() {
 			@Override
 			public void macroAdded(MacroItem item, int index) {
 				macroListModel.add(index, item.getMacro().getClass()
@@ -77,11 +85,13 @@ public class DemoApp {
 		// Create the record component
 		RecordComponent recorder = new RecordComponent(robot, frame, macroList);
 		recorder.setMinimumSize(new Dimension(640, 420));
-		recorder.setPreferredSize(new Dimension(640, 420));
+		recorder.setPreferredSize(new Dimension(800, 600));
 		panel.add(recorder);
 
 		// Add the macro factories
 		recorder.addMacro(new LeftClickMacro());
+		recorder.addMacro(new RightClickMacro());
+		recorder.addMacro(new InputTextMacro());
 
 		// Add panel with listing of added macros
 		JPanel controlPanel = new JPanel();
@@ -90,10 +100,57 @@ public class DemoApp {
 
 		// Provide listing of the macros
 		controlPanel.add(new JLabel("Macros"));
-		controlPanel.add(new JList(macroListModel));
+		final JList macroJList = new JList(macroListModel);
+		controlPanel.add(macroJList);
+
+		// Provide play button
+		JButton playButton = new JButton("Play");
+		playButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				// Obtain the listing of selected macros
+				List<Macro> macros = new LinkedList<Macro>();
+				for (int index : macroJList.getSelectedIndices()) {
+					Macro macro = macroList.getItem(index).getMacro();
+					macros.add(macro);
+				}
+				if (macros.size() == 0) {
+					// Nothing selected, so play all macros
+					for (int i = 0; i < macroList.size(); i++) {
+						Macro macro = macroList.getItem(i).getMacro();
+						macros.add(macro);
+					}
+				}
+
+				// Hide the frame for playing
+				frame.setVisible(false);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex) {
+					// Ignore
+				}
+
+				// Play the macros
+				try {
+					MacroPlayer player = new MacroPlayer(5);
+					player.play(macros.toArray(new Macro[0]));
+				} catch (AWTException ex) {
+					JOptionPane.showMessageDialog(frame,
+							"Failed to initiate player: " + ex.getMessage()
+									+ " [" + ex.getClass().getSimpleName()
+									+ "]", "Player error",
+							JOptionPane.ERROR_MESSAGE);
+				} finally {
+					// Ensure frame is made visible again
+					frame.setVisible(true);
+				}
+			}
+		});
+		controlPanel.add(playButton);
 
 		// Run the application
-		frame.setSize(800, 600);
+		frame.setSize(1000, 800);
 		frame.setVisible(true);
 	}
 

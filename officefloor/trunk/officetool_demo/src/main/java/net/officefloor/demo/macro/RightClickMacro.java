@@ -21,11 +21,11 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 
 /**
- * {@link Macro} to left click.
+ * {@link Macro} to right click.
  * 
  * @author Daniel Sagenschneider
  */
-public class LeftClickMacro implements Macro, MacroFactory {
+public class RightClickMacro implements MacroFactory, Macro {
 
 	/**
 	 * Location.
@@ -38,12 +38,12 @@ public class LeftClickMacro implements Macro, MacroFactory {
 
 	@Override
 	public String getDisplayName() {
-		return "Left Click";
+		return "Right Click";
 	}
 
 	@Override
 	public Macro createMacro(Point location) {
-		LeftClickMacro macro = new LeftClickMacro();
+		RightClickMacro macro = new RightClickMacro();
 		macro.location = location;
 		return macro;
 	}
@@ -74,7 +74,14 @@ public class LeftClickMacro implements Macro, MacroFactory {
 	@Override
 	public void runMacro(MacroContext context) {
 		context.mouseMove(this.location.x, this.location.y);
-		context.mouseClick(InputEvent.BUTTON1_MASK); // left click
+		context.mouseClick(InputEvent.BUTTON3_MASK); // right click
+
+		// Right click may take some time to bring up
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException ex) {
+			// Ignore
+		}
 	}
 
 }

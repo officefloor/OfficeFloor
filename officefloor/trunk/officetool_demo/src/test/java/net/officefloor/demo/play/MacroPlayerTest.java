@@ -213,6 +213,40 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Tests moving the mouse in negative direction for next {@link Macro}.
+	 */
+	public void testMouseMoveLocationInNegativeDirection() {
+
+		// Obtain starting and ending location for mouse move
+		Point windowLocation = this.frame.getContentPane().getLocation();
+		final Point startLocation = new Point(windowLocation.x
+				+ this.frame.getSize().width - OFFSET, windowLocation.y
+				+ this.frame.getSize().height - OFFSET);
+		final Point finishLocation = new Point(windowLocation.x + OFFSET,
+				windowLocation.y + OFFSET);
+
+		// Create mock objects for testing
+		final Macro initPositionMacro = this.createMock(Macro.class);
+		final Macro movePositionMacro = this.createMock(Macro.class);
+
+		// Record actions
+		this.recordReturn(initPositionMacro, initPositionMacro
+				.getStartingMouseLocation(), startLocation);
+		initPositionMacro.runMacro(this.player);
+		this.recordReturn(movePositionMacro, movePositionMacro
+				.getStartingMouseLocation(), finishLocation);
+		movePositionMacro.runMacro(this.player);
+
+		// Run test
+		this.replayMockObjects();
+		this.player.play(new Macro[] { initPositionMacro, movePositionMacro });
+		this.verifyMockObjects();
+
+		// Ensure mouse at finishing location
+		this.assertMousePosition(finishLocation);
+	}
+
+	/**
 	 * Ensure able to trigger moving the mouse from the {@link MacroContext}.
 	 */
 	public void testContext_mouseMove() {
