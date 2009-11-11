@@ -100,7 +100,6 @@ public class MacroPlayer implements MacroContext {
 	 */
 	public MacroPlayer(int delay) throws AWTException {
 		this.robot = new Robot();
-		this.robot.setAutoWaitForIdle(true);
 		this.robot.setAutoDelay(delay);
 
 		// Determine if require press/release delay
@@ -156,13 +155,14 @@ public class MacroPlayer implements MacroContext {
 		this.robot.mouseMove(start.x, end.y);
 
 		// Calculate distance from start to end
-		int width = Math.abs(end.x - start.x);
-		int height = Math.abs(end.y - start.y);
+		int width = end.x - start.x;
+		int height = end.y - start.y;
 		if ((width == 0) && (height == 0)) {
 			// Start and end same location so no need to move
 			return;
 		}
-		int distance = (int) Math.sqrt((width * width) + (height * height));
+		int distance = (int) Math.sqrt(Math.abs(width * width)
+				+ Math.abs(height * height));
 
 		// Calculate increment per step
 		float widthIncrement = width / (float) distance;

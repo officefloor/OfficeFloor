@@ -18,63 +18,66 @@
 package net.officefloor.demo.macro;
 
 import java.awt.Point;
-import java.awt.event.InputEvent;
+
+import javax.swing.JOptionPane;
 
 /**
- * {@link Macro} to left click.
+ * {@link Macro} to input text.
  * 
  * @author Daniel Sagenschneider
  */
-public class LeftClickMacro implements Macro, MacroFactory {
+public class InputTextMacro implements MacroFactory, Macro {
 
 	/**
-	 * Location.
+	 * Text to input.
 	 */
-	private Point location;
+	private String text;
 
 	/*
-	 * ================ MacroFactory =================================
+	 * ==================== MacroFactory =======================
 	 */
 
 	@Override
 	public String getDisplayName() {
-		return "Left Click";
+		return "Input text";
 	}
 
 	@Override
 	public Macro createMacro(Point location) {
-		LeftClickMacro macro = new LeftClickMacro();
-		macro.location = location;
+
+		// Obtain text to input
+		String inputText = JOptionPane.showInputDialog("Input text:");
+
+		// Create and return the macro
+		InputTextMacro macro = new InputTextMacro();
+		macro.text = inputText;
 		return macro;
 	}
 
 	/*
-	 * ============== Macro ===========================================
+	 * ======================= Macro ===========================
 	 */
 
 	@Override
-	public void setConfigurationMemento(String memento) {
-		String[] coordinates = memento.split(",");
-		int x = Integer.parseInt(coordinates[0]);
-		int y = Integer.parseInt(coordinates[1]);
-		this.location = new Point(x, y);
+	public String getConfigurationMemento() {
+		return this.text;
 	}
 
 	@Override
-	public String getConfigurationMemento() {
-		return String.valueOf(this.location.x) + ","
-				+ String.valueOf(this.location.y);
+	public void setConfigurationMemento(String memento) {
+		this.text = memento;
 	}
 
 	@Override
 	public Point getStartingMouseLocation() {
-		return this.location;
+		// No starting location required
+		return null;
 	}
 
 	@Override
 	public void runMacro(MacroContext context) {
-		context.mouseMove(this.location.x, this.location.y);
-		context.mouseClick(InputEvent.BUTTON1_MASK); // left click
+		// Input the text
+		context.keyText(this.text);
 	}
 
 }
