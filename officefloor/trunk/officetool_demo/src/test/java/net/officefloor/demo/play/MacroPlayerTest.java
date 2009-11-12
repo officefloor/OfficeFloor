@@ -58,6 +58,11 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	private JFrame frame;
 
 	/**
+	 * Location of the {@link JFrame}.
+	 */
+	private Point windowLocation;
+
+	/**
 	 * {@link JButton} to click.
 	 */
 	private JButton button;
@@ -80,15 +85,13 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		// Create the player to test
-		this.player = new MacroPlayer(5);
-
 		// Initiate the robot
 		this.robot = new Robot();
 		this.robot.setAutoWaitForIdle(true);
 
 		// Provide window to record mouse location
 		this.frame = new JFrame();
+		this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.frame.setSize(300, 300);
 		this.frame.setLayout(new BoxLayout(this.frame.getContentPane(),
 				BoxLayout.Y_AXIS));
@@ -118,6 +121,10 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 				(this.frame.getSize().width > (OFFSET * 2)));
 		assertTrue("Window must have more height",
 				(this.frame.getSize().height > (OFFSET * 2)));
+
+		// Create the player to test (offset by frame location)
+		this.windowLocation = this.frame.getLocationOnScreen();
+		this.player = new MacroPlayer(5, this.windowLocation);
 	}
 
 	@Override
@@ -150,12 +157,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	public void testMouseStartLocation() throws Exception {
 
 		// Obtain starting and ending location for mouse move
-		Point windowLocation = this.frame.getContentPane().getLocation();
-		final Point initLocation = new Point(windowLocation.x + OFFSET,
-				windowLocation.y + OFFSET);
-		final Point startLocation = new Point(windowLocation.x
-				+ this.frame.getSize().width - OFFSET, windowLocation.y
-				+ this.frame.getSize().height - OFFSET);
+		final Point initLocation = new Point(OFFSET, OFFSET);
+		final Point startLocation = new Point(this.frame.getSize().width
+				- OFFSET, this.frame.getSize().height - OFFSET);
 
 		// Create mock objects for testing
 		final Macro macro = this.createMock(Macro.class);
@@ -184,12 +188,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	public void testMouseMoveLocation() {
 
 		// Obtain starting and ending location for mouse move
-		Point windowLocation = this.frame.getContentPane().getLocation();
-		final Point startLocation = new Point(windowLocation.x + OFFSET,
-				windowLocation.y + OFFSET);
-		final Point finishLocation = new Point(windowLocation.x
-				+ this.frame.getSize().width - OFFSET, windowLocation.y
-				+ this.frame.getSize().height - OFFSET);
+		final Point startLocation = new Point(OFFSET, OFFSET);
+		final Point finishLocation = new Point(this.frame.getSize().width
+				- OFFSET, this.frame.getSize().height - OFFSET);
 
 		// Create mock objects for testing
 		final Macro initPositionMacro = this.createMock(Macro.class);
@@ -218,12 +219,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	public void testMouseMoveLocationInNegativeDirection() {
 
 		// Obtain starting and ending location for mouse move
-		Point windowLocation = this.frame.getContentPane().getLocation();
-		final Point startLocation = new Point(windowLocation.x
-				+ this.frame.getSize().width - OFFSET, windowLocation.y
-				+ this.frame.getSize().height - OFFSET);
-		final Point finishLocation = new Point(windowLocation.x + OFFSET,
-				windowLocation.y + OFFSET);
+		final Point startLocation = new Point(this.frame.getSize().width
+				- OFFSET, this.frame.getSize().height - OFFSET);
+		final Point finishLocation = new Point(OFFSET, OFFSET);
 
 		// Create mock objects for testing
 		final Macro initPositionMacro = this.createMock(Macro.class);
@@ -252,12 +250,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	public void testContext_mouseMove() {
 
 		// Obtain starting and ending location for mouse move
-		Point windowLocation = this.frame.getContentPane().getLocation();
-		final Point startLocation = new Point(windowLocation.x + OFFSET,
-				windowLocation.y + OFFSET);
-		final Point finishLocation = new Point(windowLocation.x
-				+ this.frame.getSize().width - OFFSET, windowLocation.y
-				+ this.frame.getSize().height - OFFSET);
+		final Point startLocation = new Point(OFFSET, OFFSET);
+		final Point finishLocation = new Point(this.frame.getSize().width
+				- OFFSET, this.frame.getSize().height - OFFSET);
 
 		// Ensure mouse at macro starting location
 		this.robot.mouseMove(startLocation.x, startLocation.y);
@@ -361,12 +356,10 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Asserts that the mouse is at the expected location.
+	 * Asserts that the mouse is at the location relative to the {@link JFrame}.
 	 * 
-	 * @param expected
-	 *            Expected location.
-	 * @param actual
-	 *            Actual location.
+	 * @param location
+	 *            Location on the {@link JFrame}.
 	 */
 	private void assertMousePosition(Point location) {
 
@@ -376,11 +369,15 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 				"No actual location (likely issue with window capturing it)",
 				mouseLocation);
 
+		// Obtain screen location of relative location
+		Point screenLocation = new Point(location.x + this.windowLocation.x,
+				location.y + this.windowLocation.y);
+
 		// Provide slight margin of error in obtaining mouse location
-		assertTrue("Incorrect x location (e=" + location.x + ", a="
+		assertTrue("Incorrect x location (e=" + screenLocation.x + ", a="
 				+ mouseLocation.x + ")",
 				Math.abs(location.x - mouseLocation.x) <= 1);
-		assertTrue("Incorrect y location (e=" + location.y + ", a="
+		assertTrue("Incorrect y location (e=" + screenLocation.y + ", a="
 				+ mouseLocation.y + ")",
 				Math.abs(location.y - mouseLocation.y) <= 1);
 	}
