@@ -79,6 +79,11 @@ public class MacroPlayer implements MacroContext {
 	private final Robot robot;
 
 	/**
+	 * Reference point for relative locations.
+	 */
+	private final Point offset;
+
+	/**
 	 * Location of the mouse. Not null after first {@link Macro} providing
 	 * starting position.
 	 */
@@ -95,12 +100,15 @@ public class MacroPlayer implements MacroContext {
 	 * @param delay
 	 *            Delay in between events for the player. The higher the value
 	 *            the slower the play.
+	 * @param offset
+	 *            Reference point for relative locations.
 	 * @throws AWTException
 	 *             If fails to initialise for playing.
 	 */
-	public MacroPlayer(int delay) throws AWTException {
+	public MacroPlayer(int delay, Point offset) throws AWTException {
 		this.robot = new Robot();
 		this.robot.setAutoDelay(delay);
+		this.offset = offset;
 
 		// Determine if require press/release delay
 		this.isRequirePressReleaseDelay = (delay < MIN_PRESS_RELEASE_DELAY);
@@ -111,9 +119,12 @@ public class MacroPlayer implements MacroContext {
 	 * 
 	 * @param robot
 	 *            {@link Robot} to use for playing.
+	 * @param offset
+	 *            Reference point for relative locations.
 	 */
-	public MacroPlayer(Robot robot) {
+	public MacroPlayer(Robot robot, Point offset) {
 		this.robot = robot;
+		this.offset = offset;
 
 		// Always require press/release delay
 		this.isRequirePressReleaseDelay = true;
@@ -145,9 +156,9 @@ public class MacroPlayer implements MacroContext {
 	 * Moves the mouse from the start to the end.
 	 * 
 	 * @param start
-	 *            Start location.
+	 *            Absolute start location - location on screen.
 	 * @param end
-	 *            End location.
+	 *            Absolute end location - location on screen.
 	 */
 	private void moveMouse(Point start, Point end) {
 
@@ -200,15 +211,19 @@ public class MacroPlayer implements MacroContext {
 
 	@Override
 	public void mouseMove(int x, int y) {
+
+		// Obtain the absolute location
+		Point location = new Point(this.offset.x + x, this.offset.y + y);
+
+		// Move the mouse
 		if (this.mouseLocation == null) {
 			// Mouse location not yet specified, start at location
-			this.robot.mouseMove(x, y);
-			this.mouseLocation = new Point(x, y);
+			this.robot.mouseMove(location.x, location.y);
+			this.mouseLocation = location;
 		} else {
 			// Move mouse to location to run macro
-			Point targetLocation = new Point(x, y);
-			this.moveMouse(this.mouseLocation, targetLocation);
-			this.mouseLocation = targetLocation;
+			this.moveMouse(this.mouseLocation, location);
+			this.mouseLocation = location;
 		}
 	}
 

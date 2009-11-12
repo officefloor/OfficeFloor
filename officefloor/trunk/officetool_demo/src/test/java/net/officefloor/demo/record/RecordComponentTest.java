@@ -101,6 +101,7 @@ public class RecordComponentTest extends TestCase {
 
 		// Create the mock window first to be in background
 		this.mockFrame = new MockFrame();
+		this.mockFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.mockFrame.setLocation(100, 100);
 		this.mockFrame.setSize(400, 400);
 		this.mockFrame.setVisible(true);
@@ -108,6 +109,7 @@ public class RecordComponentTest extends TestCase {
 
 		// Create window containing the record component in front
 		this.recordFrame = new JFrame();
+		this.recordFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.recordComponent = new RecordComponent(new Robot(),
 				this.recordFrame, this.recordListener);
 		this.recordFrame.setTitle("Recorder");
@@ -164,21 +166,19 @@ public class RecordComponentTest extends TestCase {
 		final Point macroLocation = getMouseLocation(component);
 
 		// Right click on component for popup menu
-		RecordComponentTest.this.robot.mouseMove(macroLocation.x,
-				macroLocation.y);
-		RecordComponentTest.this.robot.mousePress(InputEvent.BUTTON3_MASK);
-		RecordComponentTest.this.robot.mouseRelease(InputEvent.BUTTON3_MASK);
-		RecordComponentTest.this.robot.waitForIdle();
+		this.robot.mouseMove(macroLocation.x, macroLocation.y);
+		this.robot.mousePress(InputEvent.BUTTON3_MASK);
+		this.robot.mouseRelease(InputEvent.BUTTON3_MASK);
+		this.robot.waitForIdle();
 
 		// Move to macro menu item
 		final Point menuItemLocation = getMouseLocation(menuItem);
-		RecordComponentTest.this.robot.mouseMove(menuItemLocation.x,
-				menuItemLocation.y);
+		this.robot.mouseMove(menuItemLocation.x, menuItemLocation.y);
 
 		// Click on the menu item
-		RecordComponentTest.this.robot.mousePress(InputEvent.BUTTON1_MASK);
-		RecordComponentTest.this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
-		RecordComponentTest.this.robot.waitForIdle();
+		this.robot.mousePress(InputEvent.BUTTON1_MASK);
+		this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
+		this.robot.waitForIdle();
 
 		// Allow processing of macro
 		Thread.sleep(100);
@@ -207,7 +207,7 @@ public class RecordComponentTest extends TestCase {
 		Point absoluteLocation = getMouseLocation(component);
 
 		// Return relative location
-		Point frameLocation = this.recordComponent.getLocationOnScreen();
+		Point frameLocation = this.mockFrame.getLocationOnScreen();
 		return new Point(absoluteLocation.x - frameLocation.x,
 				absoluteLocation.y - frameLocation.y);
 	}
@@ -422,10 +422,10 @@ public class RecordComponentTest extends TestCase {
 				// Ensure same (given margin of error detecting location)
 				assertTrue("Incorrect macro x configuration (e="
 						+ expectedStart.x + ", a=" + actualStart.x + ")", (Math
-						.abs(expectedStart.x - actualStart.x) < 10));
+						.abs(expectedStart.x - actualStart.x) <= 1));
 				assertTrue("Incorrect macro y configuration (e="
 						+ expectedStart.y + ", a=" + actualStart.y + ")", (Math
-						.abs(expectedStart.y - actualStart.y) < 10));
+						.abs(expectedStart.y - actualStart.y) <= 1));
 
 			} catch (Throwable ex) {
 				RecordComponentTest.this.macroFailure = ex;

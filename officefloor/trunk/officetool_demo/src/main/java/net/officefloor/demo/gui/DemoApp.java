@@ -20,18 +20,14 @@ package net.officefloor.demo.gui;
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Robot;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import net.officefloor.demo.macro.InputTextMacro;
@@ -41,32 +37,58 @@ import net.officefloor.demo.macro.RightClickMacro;
 import net.officefloor.demo.macrolist.MacroItem;
 import net.officefloor.demo.macrolist.MacroList;
 import net.officefloor.demo.macrolist.MacroListListener;
-import net.officefloor.demo.play.MacroPlayer;
 import net.officefloor.demo.record.RecordComponent;
 
-public class DemoApp {
+public class DemoApp extends JFrame {
 
 	/**
-	 * Starts the demo application.
+	 * Provides ability to run the Demo Tool from command line.
 	 * 
 	 * @param args
 	 *            Command line arguments.
 	 */
 	public static void main(String[] args) throws AWTException {
 
-		// Create the application
+		// Create the demo application frame
+		final DemoApp frame = new DemoApp();
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		// Create the frame for the recording
-		final JFrame frame = new JFrame();
+		// Run the application
+		frame.setSize(800, 600);
+		frame.setVisible(true);
+	}
+
+	/**
+	 * Extension for recording file.
+	 */
+	public static final String RECORDING_FILE_EXTENSION = "rcd";
+
+	/**
+	 * {@link MacroList} containing the {@link Macro} items.
+	 */
+	private final MacroList macros;
+
+	/**
+	 * {@link JList} for the {@link Macro} instances.
+	 */
+	private final JList macroList;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @throws AWTException
+	 *             If running in headless environment.
+	 */
+	public DemoApp() throws AWTException {
 
 		// Create the panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		frame.add(panel);
+		this.add(panel);
 
-		// Create the macro listing
+		// Create the macro listing (ensuring that they keep in sync)
 		final DefaultListModel macroListModel = new DefaultListModel();
-		final MacroList macroList = new MacroList(new MacroListListener() {
+		this.macros = new MacroList(new MacroListListener() {
 			@Override
 			public void macroAdded(MacroItem item, int index) {
 				macroListModel.add(index, item.getMacro().getClass()
@@ -83,9 +105,9 @@ public class DemoApp {
 		Robot robot = new Robot();
 
 		// Create the record component
-		RecordComponent recorder = new RecordComponent(robot, frame, macroList);
+		RecordComponent recorder = new RecordComponent(robot, this, this.macros);
 		recorder.setMinimumSize(new Dimension(640, 420));
-		recorder.setPreferredSize(new Dimension(800, 600));
+		recorder.setPreferredSize(new Dimension(640, 420));
 		panel.add(recorder);
 
 		// Add the macro factories
@@ -100,58 +122,59 @@ public class DemoApp {
 
 		// Provide listing of the macros
 		controlPanel.add(new JLabel("Macros"));
-		final JList macroJList = new JList(macroListModel);
-		controlPanel.add(macroJList);
+		this.macroList = new JList(macroListModel);
+		controlPanel.add(this.macroList);
 
-		// Provide play button
-		JButton playButton = new JButton("Play");
-		playButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				// Obtain the listing of selected macros
-				List<Macro> macros = new LinkedList<Macro>();
-				for (int index : macroJList.getSelectedIndices()) {
-					Macro macro = macroList.getItem(index).getMacro();
-					macros.add(macro);
-				}
-				if (macros.size() == 0) {
-					// Nothing selected, so play all macros
-					for (int i = 0; i < macroList.size(); i++) {
-						Macro macro = macroList.getItem(i).getMacro();
-						macros.add(macro);
-					}
-				}
-
-				// Hide the frame for playing
-				frame.setVisible(false);
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException ex) {
-					// Ignore
-				}
-
-				// Play the macros
-				try {
-					MacroPlayer player = new MacroPlayer(5);
-					player.play(macros.toArray(new Macro[0]));
-				} catch (AWTException ex) {
-					JOptionPane.showMessageDialog(frame,
-							"Failed to initiate player: " + ex.getMessage()
-									+ " [" + ex.getClass().getSimpleName()
-									+ "]", "Player error",
-							JOptionPane.ERROR_MESSAGE);
-				} finally {
-					// Ensure frame is made visible again
-					frame.setVisible(true);
-				}
-			}
-		});
-		controlPanel.add(playButton);
-
-		// Run the application
-		frame.setSize(1000, 800);
-		frame.setVisible(true);
+		// Provide buttons
+		controlPanel.add(new PlayButton(this));
+		controlPanel.add(new SaveButton(this));
+		controlPanel.add(new OpenButton(this));
+		controlPanel.add(new DeleteButton(this));
 	}
 
+	/**
+	 * Obtains the selected {@link Macro} instances.
+	 * 
+	 * @param isReturnAllIfNoneSelected
+	 *            <code>true</code> indicates to return all {@link Macro}
+	 *            instances if none are selected.
+	 * @return Selected {@link Macro} instances.
+	 */
+	public Macro[] getSelectedMacros(boolean isReturnAllIfNoneSelected) {
+
+		// Obtain the listing of selected macros
+		List<Macro> selectedMacros = new LinkedList<Macro>();
+		for (int index : this.macroList.getSelectedIndices()) {
+			Macro macro = this.macros.getItem(index).getMacro();
+			selectedMacros.add(macro);
+		}
+		if (isReturnAllIfNoneSelected && (selectedMacros.size() == 0)) {
+			// Nothing selected, so play all macros
+			for (int i = 0; i < this.macros.size(); i++) {
+				Macro macro = this.macros.getItem(i).getMacro();
+				selectedMacros.add(macro);
+			}
+		}
+
+		// Return the macros
+		return selectedMacros.toArray(new Macro[0]);
+	}
+
+	/**
+	 * Obtains the indices of the selected {@link Macro} instances.
+	 * 
+	 * @return Indices of the selected {@link Macro} instances.
+	 */
+	public int[] getSelectedMacroIndices() {
+		return this.macroList.getSelectedIndices();
+	}
+
+	/**
+	 * Obtains the {@link MacroList}.
+	 * 
+	 * @return {@link MacroList}.
+	 */
+	public MacroList getMacroList() {
+		return this.macros;
+	}
 }

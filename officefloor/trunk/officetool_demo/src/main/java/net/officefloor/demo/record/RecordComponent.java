@@ -82,11 +82,6 @@ public class RecordComponent extends JComponent {
 	private final Robot robot;
 
 	/**
-	 * {@link MacroPlayer}.
-	 */
-	private final MacroPlayer player;
-
-	/**
 	 * Background image to mimic transparency.
 	 */
 	private Image backgroundImage;
@@ -113,9 +108,6 @@ public class RecordComponent extends JComponent {
 		this.frame = frame;
 		this.recordListener = recordListener;
 		this.robot = robot;
-
-		// Create the player (to aid in recording)
-		this.player = new MacroPlayer(this.robot);
 
 		// Initiate for transparency
 		this.updateBackgroundImage();
@@ -196,9 +188,9 @@ public class RecordComponent extends JComponent {
 		private final boolean isRecord;
 
 		/**
-		 * Location of the {@link RecordComponent} on the screen.
+		 * {@link Point} by which to obtain relative locations.
 		 */
-		private Point recordComponentScreenLocation = null;
+		private Point referencePoint = null;
 
 		/**
 		 * Initiate.
@@ -215,16 +207,20 @@ public class RecordComponent extends JComponent {
 		}
 
 		/**
-		 * Translates the relative {@link Point} to an absolute {@link Point}.
+		 * Obtains the {@link Point} by which to obtain relative locations.
 		 * 
-		 * @param relativeLocation
-		 *            Relative location.
-		 * @return Absolute location.
+		 * @return {@link Point} by which to obtain relative locations.
 		 */
-		private Point translateRelativeToAbsolute(Point relativeLocation) {
-			return new Point(this.recordComponentScreenLocation.x
-					+ relativeLocation.x, this.recordComponentScreenLocation.y
-					+ relativeLocation.y);
+		private Point getReferencePoint() {
+
+			// If window visible, reset reference point
+			if (RecordComponent.this.frame.isVisible()) {
+				this.referencePoint = RecordComponent.this.frame
+						.getLocationOnScreen();
+			}
+
+			// Return the reference point
+			return this.referencePoint;
 		}
 
 		/**
@@ -235,9 +231,23 @@ public class RecordComponent extends JComponent {
 		 * @return Relative location.
 		 */
 		private Point translateAbsoluteToRelative(Point absoluateLocation) {
-			return new Point(absoluateLocation.x
-					- this.recordComponentScreenLocation.x, absoluateLocation.y
-					- this.recordComponentScreenLocation.y);
+			Point offset = this.getReferencePoint();
+			return new Point(absoluateLocation.x - offset.x,
+					absoluateLocation.y - offset.y);
+		}
+
+		/**
+		 * Obtains the {@link MacroPlayer} ready for immediate use.
+		 * 
+		 * @return {@link MacroPlayer}.
+		 */
+		private MacroPlayer getMacroPlayer() {
+
+			// Obtain the reference point
+			Point offset = this.getReferencePoint();
+
+			// Return the player
+			return new MacroPlayer(RecordComponent.this.robot, offset);
 		}
 
 		/*
@@ -246,10 +256,6 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public synchronized void actionPerformed(ActionEvent e) {
-
-			// Obtain the location of this record component
-			this.recordComponentScreenLocation = RecordComponent.this
-					.getLocationOnScreen();
 
 			// Obtain the relative location of macro
 			Point macroLocation = this
@@ -305,23 +311,17 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public void mouseMove(int x, int y) {
-			// Obtain absolute location
-			Point absoluteLocation = this
-					.translateRelativeToAbsolute(new Point(x, y));
-
-			// Move to absolute location (immediately)
-			RecordComponent.this.player.mouseMove(absoluteLocation.x,
-					absoluteLocation.y);
+			this.getMacroPlayer().mouseMove(x, y);
 		}
 
 		@Override
 		public void mousePress(int buttons) {
-			RecordComponent.this.player.mousePress(buttons);
+			this.getMacroPlayer().mousePress(buttons);
 		}
 
 		@Override
 		public void mouseRelease(int buttons) {
-			RecordComponent.this.player.mouseRelease(buttons);
+			this.getMacroPlayer().mouseRelease(buttons);
 		}
 
 		@Override
@@ -332,17 +332,17 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public void mouseWheel(int wheelAmt) {
-			RecordComponent.this.player.mouseWheel(wheelAmt);
+			this.getMacroPlayer().mouseWheel(wheelAmt);
 		}
 
 		@Override
 		public void keyPress(int keycode) {
-			RecordComponent.this.player.keyPress(keycode);
+			this.getMacroPlayer().keyPress(keycode);
 		}
 
 		@Override
 		public void keyRelease(int keycode) {
-			RecordComponent.this.player.keyRelease(keycode);
+			this.getMacroPlayer().keyRelease(keycode);
 		}
 
 		@Override
@@ -353,7 +353,7 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public void keyText(String text) {
-			RecordComponent.this.player.keyText(text);
+			this.getMacroPlayer().keyText(text);
 		}
 	}
 
