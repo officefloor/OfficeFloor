@@ -2,8 +2,8 @@
 <?eclipse version="3.0"?>
 <plugin>
     <extension point="org.eclipse.ui.actionSets">
-      <actionSet label="Office Floor Action Set" visible="true" id="net.officefloor.eclipse.actionSet">
-         <menu label="Office Floor" id="officefloorMenu">
+      <actionSet label="OfficeFloor Action Set" visible="true" id="net.officefloor.eclipse.actionSet">
+         <menu label="OfficeFloor" id="officefloorMenu">
             <separator name="officefloorGroup"/>
          </menu>
          <action
