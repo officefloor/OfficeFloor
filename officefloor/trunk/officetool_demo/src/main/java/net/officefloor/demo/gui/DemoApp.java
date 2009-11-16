@@ -18,17 +18,22 @@
 package net.officefloor.demo.gui;
 
 import java.awt.AWTException;
+import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
 
 import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
@@ -40,6 +45,12 @@ import net.officefloor.demo.macrolist.MacroListListener;
 import net.officefloor.demo.record.RecordComponent;
 
 public class DemoApp extends JFrame {
+
+	/**
+	 * Default recording size.
+	 */
+	private static final Dimension DEFAULT_RECORDING_SIZE = new Dimension(640,
+			420);
 
 	/**
 	 * Provides ability to run the Demo Tool from command line.
@@ -54,8 +65,14 @@ public class DemoApp extends JFrame {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// Run the application
-		frame.setSize(800, 600);
+		frame.pack();
 		frame.setVisible(true);
+
+		// Position window in middle of screen
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension frameSize = frame.getSize();
+		frame.setLocation(Math.abs(screenSize.width - frameSize.width) / 2,
+				Math.abs(screenSize.height - frameSize.height) / 2);
 	}
 
 	/**
@@ -82,9 +99,7 @@ public class DemoApp extends JFrame {
 	public DemoApp() throws AWTException {
 
 		// Create the panel
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		this.add(panel);
+		JPanel panel = new ConfiguredPanel(true, this);
 
 		// Create the macro listing (ensuring that they keep in sync)
 		final DefaultListModel macroListModel = new DefaultListModel();
@@ -101,14 +116,24 @@ public class DemoApp extends JFrame {
 			}
 		});
 
-		// Create the robot
-		Robot robot = new Robot();
+		// Create panel for recording and alignments
+		JPanel recordPanel = new ConfiguredPanel(false, panel);
 
 		// Create the record component
-		RecordComponent recorder = new RecordComponent(robot, this, this.macros);
-		recorder.setMinimumSize(new Dimension(640, 420));
-		recorder.setPreferredSize(new Dimension(640, 420));
-		panel.add(recorder);
+		RecordComponent recorder = new RecordComponent(new Robot(), this,
+				this.macros);
+		recorder.setBorder(new LineBorder(Color.RED));
+		Dimension recorderSize = DEFAULT_RECORDING_SIZE;
+		recorder.setMinimumSize(recorderSize);
+		recorder.setPreferredSize(recorderSize);
+		recorder.setMaximumSize(recorderSize);
+		recordPanel.add(recorder);
+
+		// Create marker for left menu
+		JPanel markerPanel = new ConfiguredPanel(true, recordPanel);
+		markerPanel.add(Box.createHorizontalStrut(100));
+		markerPanel.add(new JLabel("|"));
+		markerPanel.add(Box.createGlue());
 
 		// Add the macro factories
 		recorder.addMacro(new LeftClickMacro());
@@ -116,20 +141,38 @@ public class DemoApp extends JFrame {
 		recorder.addMacro(new InputTextMacro());
 
 		// Add panel with listing of added macros
-		JPanel controlPanel = new JPanel();
-		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-		panel.add(controlPanel);
+		JPanel controlPanel = new ConfiguredPanel(false, panel);
 
 		// Provide listing of the macros
-		controlPanel.add(new JLabel("Macros"));
+		JPanel macroPanel = new ConfiguredPanel(false, controlPanel);
+		JPanel macroLabelPanel = new ConfiguredPanel(true, macroPanel);
+		macroLabelPanel.add(new JLabel("Macros"));
+		macroPanel.add(Box.createVerticalStrut(5));
 		this.macroList = new JList(macroListModel);
-		controlPanel.add(this.macroList);
+		this.macroList.setBorder(new LineBorder(Color.BLACK));
+		macroPanel.add(this.macroList);
 
 		// Provide buttons
-		controlPanel.add(new PlayButton(this));
-		controlPanel.add(new SaveButton(this));
-		controlPanel.add(new OpenButton(this));
-		controlPanel.add(new DeleteButton(this));
+		controlPanel.add(Box.createVerticalStrut(20));
+
+		// Play button
+		JPanel playPanel = new ConfiguredPanel(true, controlPanel);
+		playPanel.add(new PlayButton(this));
+		playPanel.add(Box.createHorizontalGlue());
+
+		controlPanel.add(Box.createVerticalStrut(20));
+
+		// Save/Open buttons
+		JPanel saveOpenPanel = new ConfiguredPanel(true, controlPanel);
+		saveOpenPanel.add(new SaveButton(this));
+		saveOpenPanel.add(new OpenButton(this));
+
+		controlPanel.add(Box.createVerticalStrut(20));
+
+		// Delete button
+		JPanel deletePanel = new ConfiguredPanel(true, controlPanel);
+		deletePanel.add(new DeleteButton(this));
+		deletePanel.add(Box.createHorizontalGlue());
 	}
 
 	/**
@@ -177,4 +220,27 @@ public class DemoApp extends JFrame {
 	public MacroList getMacroList() {
 		return this.macros;
 	}
+
+	/**
+	 * {@link JPanel} configured for use.
+	 */
+	private class ConfiguredPanel extends JPanel {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param isHorizontal
+		 *            Layout is <code>true</code> for horizontal,
+		 *            <code>false</code> for vertical.
+		 * @param container
+		 *            {@link Container} to add this {@link JPanel}.
+		 */
+		public ConfiguredPanel(boolean isHorizontal, Container container) {
+			BoxLayout layout = new BoxLayout(this,
+					(isHorizontal ? BoxLayout.X_AXIS : BoxLayout.Y_AXIS));
+			this.setLayout(layout);
+			container.add(this);
+		}
+	}
+
 }
