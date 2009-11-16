@@ -15,27 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.common.editpolicies.officefloor;
+package net.officefloor.eclipse.common.editpolicies.open;
 
-import org.eclipse.gef.EditPart;
+import net.officefloor.model.Model;
+
+import org.eclipse.gef.Request;
+import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 
 /**
- * {@link Command} factory for a double click.
+ * {@link Command} factory for an open {@link {@link Request} (
+ * {@link RequestConstants#REQ_OPEN}).
  * 
  * @author Daniel Sagenschneider
  */
-public interface DoubleClickCommandFactory<M> {
+public interface OpenHandler<M extends Model> {
 
 	/**
-	 * Creates {@link Command} for the double click.
+	 * Triggers handle the open.
 	 * 
-	 * @param model
-	 *            Model being double clicked.
-	 * @param editPart
-	 *            {@link EditPart} being double clicked.
-	 * @return {@link Command} or <code>null</code> if nothing to be done.
+	 * @param context
+	 *            {@link OpenHandlerContext} for the open.
 	 */
-	Command createCommand(M model, EditPart editPart);
+	void doOpen(OpenHandlerContext<M> context);
 
 }
