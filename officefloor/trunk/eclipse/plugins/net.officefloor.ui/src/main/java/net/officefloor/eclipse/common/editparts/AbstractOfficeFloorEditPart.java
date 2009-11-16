@@ -19,7 +19,6 @@ package net.officefloor.eclipse.common.editparts;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,19 +28,14 @@ import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.MovePositionalModelCommand;
-import net.officefloor.eclipse.common.editpolicies.officefloor.OfficeFloorEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.model.repository.ConfigurationContext;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
@@ -61,9 +55,6 @@ import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.ide.IDE;
 
 /**
  * <p>
@@ -88,6 +79,11 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * {@link OfficeFloorFigure} for this {@link EditPart}.
 	 */
 	private F officeFloorFigure = null;
+
+	/**
+	 * {@link OfficeFloorOpenEditPolicy}.
+	 */
+	private OfficeFloorOpenEditPolicy<M> officeFloorOpenEditPolicy;
 
 	/**
 	 * {@link OfficeFloorDirectEditPolicy}.
@@ -131,55 +127,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 		// Refresh the view
 		this.refreshVisuals();
-	}
-
-	/**
-	 * Opens the {@link IFile} that corresponds to the input class path location
-	 * of the {@link IProject} containing this {@link IEditorInput}.
-	 * 
-	 * @param classpathFilePath
-	 *            Path of the file on the class path to open.
-	 * @param editorId
-	 *            Id of the {@link IEditorPart}.
-	 */
-	public void openClasspathFile(String classpathFilePath, String editorId) {
-		try {
-			// Obtain the URL with full path
-			ProjectClassLoader projectClassLoader = ProjectClassLoader
-					.create(this.getEditor());
-			URL url = projectClassLoader.getResource(classpathFilePath);
-			if (url == null) {
-				// Can not find item to open
-				MessageDialog.openWarning(this.getEditor().getEditorSite()
-						.getShell(), "Open", "Can not find '"
-						+ classpathFilePath + "'");
-				return;
-			}
-
-			// Obtain the file to open
-			String urlFilePath = url.getFile();
-			IPath path = new Path(urlFilePath);
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocation(path);
-			if (files.length != 1) {
-				// Can not find file
-				MessageDialog.openWarning(this.getEditor().getEditorSite()
-						.getShell(), "Open", "Can not find '"
-						+ classpathFilePath + "' at [" + urlFilePath + "]");
-				return;
-			}
-			IFile file = files[0];
-
-			// Open the file
-			IDE.openEditor(this.getEditor().getEditorSite().getPage(), file,
-					editorId);
-
-		} catch (Throwable ex) {
-			// Failed to open file
-			MessageDialog.openInformation(this.getEditor().getEditorSite()
-					.getShell(), "Open", "Failed to open '" + classpathFilePath
-					+ "': " + ex.getMessage());
-		}
 	}
 
 	/**
@@ -320,11 +267,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
 				new NonResizableEditPolicy());
 
-		// Allow delegating back to this EditPart
-		OfficeFloorEditPolicy officeFloorEditPolicy = new OfficeFloorEditPolicy();
-		this.populateOfficeFloorEditPolicy(officeFloorEditPolicy);
-		this.installEditPolicy("OfficeFloor", officeFloorEditPolicy);
-
 		// Allow direct editing (if configured)
 		this.officeFloorDirectEditPolicy = new OfficeFloorDirectEditPolicy<M>();
 		this
@@ -332,22 +274,18 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 		this.installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
 				this.officeFloorDirectEditPolicy);
 
+		// Allow open
+		this.officeFloorOpenEditPolicy = new OfficeFloorOpenEditPolicy<M>();
+		this.populateOfficeFloorOpenEditPolicy(this.officeFloorOpenEditPolicy);
+		this.installEditPolicy("OfficeFloorOpen",
+				this.officeFloorOpenEditPolicy);
+
 		// Install the graphical node edit policy
 		this.installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, this.getEditor()
 				.createGraphicalEditPolicy());
 
 		// Initialise
 		this.init();
-	}
-
-	/**
-	 * Sub classes may override to populate the {@link OfficeFloorEditPolicy}.
-	 * 
-	 * @param policy
-	 *            {@link OfficeFloorEditPolicy} to populate.
-	 */
-	protected void populateOfficeFloorEditPolicy(OfficeFloorEditPolicy policy) {
-		// Default, do nothing
 	}
 
 	/**
@@ -359,6 +297,18 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 */
 	protected void populateOfficeFloorDirectEditPolicy(
 			OfficeFloorDirectEditPolicy<M> policy) {
+		// Default, do nothing
+	}
+
+	/**
+	 * Sub classes may override to populate the
+	 * {@link OfficeFloorOpenEditPolicy}.
+	 * 
+	 * @param policy
+	 *            {@link OfficeFloorOpenEditPolicy} to populate.
+	 */
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<M> policy) {
 		// Default, do nothing
 	}
 
@@ -557,9 +507,14 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	@Override
 	public void performRequest(Request req) {
 
-		// Determine if direct edit
+		// Determine if specifically handle request
 		if (RequestConstants.REQ_DIRECT_EDIT.equals(req.getType())) {
+			// Direct edit
 			this.officeFloorDirectEditPolicy.doDirectEdit(this);
+			return; // edit policy will handle creating commands
+		} else if (RequestConstants.REQ_OPEN.equals(req.getType())) {
+			// Open model
+			this.officeFloorOpenEditPolicy.doOpen(this);
 			return; // edit policy will handle creating commands
 		}
 

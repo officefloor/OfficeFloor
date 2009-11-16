@@ -24,6 +24,9 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.model.change.Change;
@@ -88,6 +91,22 @@ public class DeployedOfficeEditPart
 						return changes.renameDeployedOffice(target, newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<DeployedOfficeModel> policy) {
+		policy.allowOpening(new OpenHandler<DeployedOfficeModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<DeployedOfficeModel> context) {
+
+				// Obtain the office file location
+				String location = context.getModel().getOfficeLocation();
+
+				// Open the office
+				context.openClasspathFile(location);
+			}
+		});
 	}
 
 	@Override
