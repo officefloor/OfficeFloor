@@ -25,17 +25,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.officesource.OfficeSourceExtension;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
+import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -274,6 +280,100 @@ public class ExtensionUtil {
 	}
 
 	/**
+	 * Opens the {@link WorkSource}.
+	 * 
+	 * @param workSourceClassName
+	 *            {@link WorkSource} class name.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link WorkSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openWorkSource(String workSourceClassName,
+			PropertyList properties, AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(WorkSourceExtension.EXTENSION_ID, WorkSourceExtension.class,
+				WORK_SOURCE_CLASS_EXTRACTOR, workSourceClassName, null,
+				properties, editor);
+	}
+
+	/**
+	 * Opens the source.
+	 * 
+	 * @param extensionId
+	 *            Extension Id.
+	 * @param extensionType
+	 *            Type of extension.
+	 * @param extractor
+	 *            {@link SourceClassExtractor}.
+	 * @param sourceClassName
+	 *            Class name of the source.
+	 * @param sourceLocation
+	 *            Location of the source. May be <code>null</code> if not
+	 *            applicable.
+	 * @param properties
+	 *            {@link PropertyList} containing the properties for the source.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring to open the
+	 *            source.
+	 */
+	private static <E> void openSource(String extensionId,
+			Class<E> extensionType, SourceClassExtractor<E> extractor,
+			String sourceClassName, String sourceLocation,
+			final PropertyList properties,
+			final AbstractOfficeFloorEditor<?, ?> editor) {
+
+		// Obtain the source extension map
+		Map<String, E> extensionMap = createSourceExtensionMap(extensionId,
+				extensionType, extractor);
+
+		// Obtain the source extension
+		E extension = extensionMap.get(sourceClassName);
+
+		// Determine if have extension opener for source
+		if (extension != null) {
+			if (extension instanceof ExtensionOpener) {
+				// Allow extension opener to open the source
+				ExtensionOpener opener = (ExtensionOpener) extension;
+				try {
+					opener.openSource(new ExtensionOpenerContext() {
+						@Override
+						public PropertyList getPropertyList() {
+							return properties;
+						}
+
+						@Override
+						public void openClasspathResource(String resourcePath) {
+							ClasspathUtil.openClasspathResource(resourcePath,
+									editor);
+						}
+					});
+
+					// Opened source
+					return;
+
+				} catch (Exception ex) {
+					// Indicate failure opening source
+					editor.messageError("Failed to open via source extension",
+							ex);
+
+					// Carry on to attempt to open source instead
+				}
+			}
+		}
+
+		// No extension, attempt to use location
+		if (!EclipseUtil.isBlank(sourceLocation)) {
+			// Open the source from its location
+			ClasspathUtil.openClasspathResource(sourceLocation, editor);
+			return; // opened source
+		}
+
+		// No extension or source location, so open the source class directly
+		String resourcePath = sourceClassName.replace('.', '/') + ".class";
+		ClasspathUtil.openClasspathResource(resourcePath, editor);
+	}
+
+	/**
 	 * Obtains the map of {@link ExtensionClasspathProvider} instances by the
 	 * extension class name.
 	 * 
@@ -401,7 +501,7 @@ public class ExtensionUtil {
 	 *            Type of extension.
 	 * @param extractor
 	 *            {@link SourceClassExtractor}.
-	 * @return
+	 * @return {@link Map} of source class name to source extension.
 	 */
 	private static <E> Map<String, E> createSourceExtensionMap(
 			String extensionId, Class<E> extensionType,

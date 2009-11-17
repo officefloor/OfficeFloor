@@ -104,7 +104,7 @@ public class DeployedOfficeEditPart
 				String location = context.getModel().getOfficeLocation();
 
 				// Open the office
-				context.openClasspathFile(location);
+				context.openClasspathResource(location);
 			}
 		});
 	}
