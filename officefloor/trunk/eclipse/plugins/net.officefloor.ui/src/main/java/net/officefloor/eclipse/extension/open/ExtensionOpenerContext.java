@@ -15,48 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.common.editpolicies.open;
+package net.officefloor.eclipse.extension.open;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.model.Model;
-
-import org.eclipse.core.resources.IProject;
 
 /**
- * Context for the {@link OpenHandler}.
+ * Context for the {@link ExtensionOpenerContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OpenHandlerContext<M extends Model> {
+public interface ExtensionOpenerContext {
 
 	/**
-	 * Obtains the {@link Model}.
+	 * Obtains the {@link PropertyList} for the source.
 	 * 
-	 * @return {@link Model}.
+	 * @return {@link PropertyList} for the source.
 	 */
-	M getModel();
+	PropertyList getPropertyList();
 
 	/**
-	 * Obtains the {@link AbstractOfficeFloorEditPart} for the {@link Model}.
+	 * Opens the resource on the class path.
 	 * 
-	 * @return {@link AbstractOfficeFloorEditPart} for the {@link Model}.
-	 */
-	AbstractOfficeFloorEditPart<M, ?, ?> getEditPart();
-
-	/**
-	 * Creates a new {@link PropertyList}.
-	 * 
-	 * @return New {@link PropertyList}.
-	 */
-	PropertyList createPropertyList();
-
-	/**
-	 * Opens the resource on the class path for the {@link IProject} containing
-	 * the {@link Model}.
-	 * 
-	 * @param resourcePath
-	 *            Path to the resource on the class path.
+	 * @param resourceName
+	 *            Path of the resource on the class path.
 	 */
 	void openClasspathResource(String resourcePath);
 

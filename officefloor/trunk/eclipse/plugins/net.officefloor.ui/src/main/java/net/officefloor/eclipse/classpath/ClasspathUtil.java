@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
@@ -54,6 +55,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.ide.IDE;
 
 /**
  * Utility methods for working with class path.
@@ -259,6 +261,54 @@ public class ClasspathUtil {
 
 			// No class path as failed to obtain
 			return null;
+		}
+	}
+
+	/**
+	 * Opens the class path resource.
+	 * 
+	 * @param resourcePath
+	 *            Path to the resource on the class path.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} opening the resource.
+	 */
+	public static void openClasspathResource(String resourcePath,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+
+		try {
+			// Obtain the URL with full path
+			ProjectClassLoader projectClassLoader = ProjectClassLoader
+					.create(editor);
+			URL url = projectClassLoader.getResource(resourcePath);
+			if (url == null) {
+				// Can not find item to open
+				MessageDialog.openWarning(editor.getEditorSite().getShell(),
+						"Open", "Can not find '" + resourcePath + "'");
+				return;
+			}
+
+			// Obtain the file to open
+			String urlFilePath = url.getFile();
+			IPath path = new Path(urlFilePath);
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocation(path);
+			if (files.length != 1) {
+				// Can not find file
+				MessageDialog.openWarning(editor.getEditorSite().getShell(),
+						"Open", "Can not find '" + resourcePath + "' at ["
+								+ urlFilePath + "]");
+				return;
+			}
+			IFile file = files[0];
+
+			// Open the file
+			IDE.openEditor(editor.getEditorSite().getPage(), file);
+
+		} catch (Throwable ex) {
+			// Failed to open file
+			MessageDialog.openInformation(editor.getEditorSite().getShell(),
+					"Open", "Failed to open '" + resourcePath + "': "
+							+ ex.getMessage());
 		}
 	}
 

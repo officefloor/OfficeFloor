@@ -20,14 +20,20 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.desk.WorkFigure;
 import net.officefloor.eclipse.skin.desk.WorkFigureContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.WorkModel.WorkEvent;
@@ -83,6 +89,29 @@ public class WorkEditPart extends
 			public Change<WorkModel> createChange(DeskChanges changes,
 					WorkModel target, String newValue) {
 				return changes.renameWork(target, newValue);
+			}
+		});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<WorkModel> policy) {
+		policy.allowOpening(new OpenHandler<WorkModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<WorkModel> context) {
+
+				// Obtain the details about the work
+				WorkModel work = context.getModel();
+				String workSourceClassName = work.getWorkSourceClassName();
+				PropertyList properties = context.createPropertyList();
+				for (PropertyModel property : work.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
+				}
+
+				// Open the work source
+				ExtensionUtil.openWorkSource(workSourceClassName, properties,
+						context.getEditPart().getEditor());
 			}
 		});
 	}

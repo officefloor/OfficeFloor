@@ -24,6 +24,8 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
+import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -41,7 +43,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class ClassWorkSourceExtension implements
 		WorkSourceExtension<ClassWork, ClassWorkSource>,
-		ExtensionClasspathProvider {
+		ExtensionClasspathProvider, ExtensionOpener {
 
 	/*
 	 * =================== WorkSourceExtension ==========================
@@ -144,6 +146,29 @@ public class ClassWorkSourceExtension implements
 	public ClasspathProvision[] getClasspathProvisions() {
 		return new ClasspathProvision[] { new TypeClasspathProvision(
 				ClassWorkSource.class) };
+	}
+
+	/*
+	 * ========================= ExtensionOpener ==============================
+	 */
+
+	@Override
+	public void openSource(ExtensionOpenerContext context) throws Exception {
+
+		// Obtain the name of the class
+		String className = context.getPropertyList().getPropertyValue(
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, null);
+
+		// Ensure have class name
+		if (EclipseUtil.isBlank(className)) {
+			throw new Exception("No class name provided");
+		}
+
+		// Translate class name to resource name
+		String resourceName = className.replace('.', '/') + ".class";
+
+		// Open the class file
+		context.openClasspathResource(resourceName);
 	}
 
 }

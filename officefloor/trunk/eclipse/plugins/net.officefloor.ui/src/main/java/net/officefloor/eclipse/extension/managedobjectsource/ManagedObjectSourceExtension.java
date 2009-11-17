@@ -20,6 +20,7 @@ package net.officefloor.eclipse.extension.managedobjectsource;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 import org.eclipse.swt.widgets.Composite;
@@ -32,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
  * @author Daniel Sagenschneider
  * 
  * @see ExtensionClasspathProvider
+ * @see ExtensionOpener
  */
 public interface ManagedObjectSourceExtension<D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> {
 

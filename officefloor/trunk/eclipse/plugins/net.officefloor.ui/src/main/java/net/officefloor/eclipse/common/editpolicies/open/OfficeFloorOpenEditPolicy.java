@@ -17,22 +17,16 @@
  */
 package net.officefloor.eclipse.common.editpolicies.open;
 
-import java.net.URL;
-
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.ide.IDE;
 
 /**
  * {@link EditPolicy} to handle open requests for the {@link OfficeFloor}.
@@ -69,8 +63,7 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 		M model = editPart.getCastedModel();
 
 		// Open the model
-		this.handler.doOpen(new OpenCommandContextImpl(model,
-				editPart));
+		this.handler.doOpen(new OpenCommandContextImpl(model, editPart));
 	}
 
 	/**
@@ -103,7 +96,7 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 		}
 
 		/*
-		 * ================ OpenCommandContext =========================
+		 * ================ OpenHandlerContext =========================
 		 */
 
 		@Override
@@ -117,49 +110,19 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 		}
 
 		@Override
-		public void openClasspathFile(String filePath) {
+		public PropertyList createPropertyList() {
+			return OfficeFloorPlugin.getDefault().createCompiler(
+					this.editPart.getEditor()).createPropertyList();
+		}
+
+		@Override
+		public void openClasspathResource(String resourcePath) {
 
 			// Obtain the editor
 			AbstractOfficeFloorEditor<?, ?> editor = this.editPart.getEditor();
 
-			try {
-				// Obtain the URL with full path
-				ProjectClassLoader projectClassLoader = ProjectClassLoader
-						.create(editor);
-				URL url = projectClassLoader.getResource(filePath);
-				if (url == null) {
-					// Can not find item to open
-					MessageDialog.openWarning(
-							editor.getEditorSite().getShell(), "Open",
-							"Can not find '" + filePath + "'");
-					return;
-				}
-
-				// Obtain the file to open
-				String urlFilePath = url.getFile();
-				IPath path = new Path(urlFilePath);
-				IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-						.findFilesForLocation(path);
-				if (files.length != 1) {
-					// Can not find file
-					MessageDialog.openWarning(
-							editor.getEditorSite().getShell(), "Open",
-							"Can not find '" + filePath + "' at ["
-									+ urlFilePath + "]");
-					return;
-				}
-				IFile file = files[0];
-
-				// Open the file
-				IDE.openEditor(editor.getEditorSite().getPage(), file);
-
-			} catch (Throwable ex) {
-				// Failed to open file
-				MessageDialog
-						.openInformation(editor.getEditorSite().getShell(),
-								"Open", "Failed to open '" + filePath + "': "
-										+ ex.getMessage());
-			}
+			// Open the resource
+			ClasspathUtil.openClasspathResource(resourcePath, editor);
 		}
 	}
 
