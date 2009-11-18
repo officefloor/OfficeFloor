@@ -30,6 +30,7 @@ import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IFile;
@@ -54,7 +55,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ide.IDE;
 
 /**
@@ -275,31 +278,127 @@ public class ClasspathUtil {
 	public static void openClasspathResource(String resourcePath,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
+		// Extensions
+		final String CLASS_EXTENSION = ".class";
+		final String SOURCE_EXTENSION = ".java";
+
 		try {
-			// Obtain the URL with full path
-			ProjectClassLoader projectClassLoader = ProjectClassLoader
-					.create(editor);
-			URL url = projectClassLoader.getResource(resourcePath);
-			if (url == null) {
-				// Can not find item to open
-				MessageDialog.openWarning(editor.getEditorSite().getShell(),
-						"Open", "Can not find '" + resourcePath + "'");
-				return;
+			// Obtain the package and resource name
+			int index = resourcePath.lastIndexOf('/');
+			String packageName = (index < 0 ? "" : resourcePath.substring(0,
+					index)).replace('/', '.');
+			String resourceName = (index < 0 ? resourcePath : resourcePath
+					.substring(index + 1)); // +1 to skip separator
+
+			// Obtain the java project
+			IJavaProject project = JavaCore.create(ProjectConfigurationContext
+					.getProject(editor.getEditorInput()));
+
+			// Iterate over the fragment roots searching for the file
+			for (IPackageFragmentRoot root : project
+					.getAllPackageFragmentRoots()) {
+
+				// Attempt to obtain the package
+				IPackageFragment packageFragment = root
+						.getPackageFragment(packageName);
+				if (!packageFragment.exists()) {
+					continue; // must have package
+				}
+
+				// Handle if a java or class file
+				if (JavaCore.isJavaLikeFileName(resourceName)
+						|| resourceName.endsWith(CLASS_EXTENSION)) {
+
+					// Handle based on kind of fragment root
+					int rootKind = root.getKind();
+					switch (rootKind) {
+					case IPackageFragmentRoot.K_BINARY:
+						// Binary, so ensure extension is class
+						if (resourceName.endsWith(SOURCE_EXTENSION)) {
+							resourceName = resourceName.replace(
+									SOURCE_EXTENSION, CLASS_EXTENSION);
+						}
+
+						// Attempt to obtain and open the class file
+						IClassFile classFile = packageFragment
+								.getClassFile(resourceName);
+						if (classFile != null) {
+							openEditor(editor, classFile);
+							return; // opened
+						}
+						break;
+
+					case IPackageFragmentRoot.K_SOURCE:
+						// Source, so ensure extension is java
+						if (resourceName.endsWith(CLASS_EXTENSION)) {
+							resourceName = resourceName.replace(
+									CLASS_EXTENSION, SOURCE_EXTENSION);
+						}
+
+						// Attempt to obtain the compilation unit (source file)
+						ICompilationUnit sourceFile = packageFragment
+								.getCompilationUnit(resourceName);
+						if (sourceFile != null) {
+							openEditor(editor, sourceFile);
+							return; // opened
+						}
+						break;
+
+					default:
+						throw new IllegalStateException(
+								"Unknown package fragment root kind: "
+										+ rootKind);
+					}
+
+				} else {
+					// Not java file, so open as resource
+					for (Object nonJavaResource : packageFragment
+							.getNonJavaResources()) {
+						// Should only be opening files
+						if (nonJavaResource instanceof IFile) {
+							IFile file = (IFile) nonJavaResource;
+
+							// Determine if the file looking for
+							if (resourceName.equals(file.getName())) {
+								// Found file to open, so open
+								openEditor(editor, file);
+								return;
+							}
+						} else {
+							// Unknown resource type
+							throw new IllegalStateException(
+									"Unkown resource type: "
+											+ nonJavaResource.getClass()
+													.getName());
+						}
+					}
+				}
 			}
 
-			// Obtain the file to open
-			String urlFilePath = url.getFile();
-			IPath path = new Path(urlFilePath);
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocation(path);
-			if (files.length != 1) {
-				// Can not find file
-				MessageDialog.openWarning(editor.getEditorSite().getShell(),
-						"Open", "Can not find '" + resourcePath + "' at ["
-								+ urlFilePath + "]");
-				return;
-			}
-			IFile file = files[0];
+			// Unable to open as could not find
+			MessageDialog.openWarning(editor.getEditorSite().getShell(),
+					"Open", "Could not find: " + resourcePath);
+
+		} catch (Throwable ex) {
+			// Failed to open file
+			MessageDialog.openInformation(editor.getEditorSite().getShell(),
+					"Open", "Failed to open '" + resourcePath + "': "
+							+ ex.getMessage());
+		}
+	}
+
+	/**
+	 * Opens the editor for the {@link IFile}.
+	 * 
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring to open the
+	 *            {@link IFile}.
+	 * @param file
+	 *            {@link IFile} to open.
+	 */
+	public static void openEditor(AbstractOfficeFloorEditor<?, ?> editor,
+			IFile file) {
+		try {
 
 			// Open the file
 			IDE.openEditor(editor.getEditorSite().getPage(), file);
@@ -307,8 +406,32 @@ public class ClasspathUtil {
 		} catch (Throwable ex) {
 			// Failed to open file
 			MessageDialog.openInformation(editor.getEditorSite().getShell(),
-					"Open", "Failed to open '" + resourcePath + "': "
-							+ ex.getMessage());
+					"Open", "Failed to open '" + file.getFullPath().toString()
+							+ "': " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Opens the editor for the {@link IJavaElement}.
+	 * 
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring to open the
+	 *            {@link IFile}.
+	 * @param element
+	 *            {@link IEditorInput} to open.
+	 */
+	private static void openEditor(AbstractOfficeFloorEditor<?, ?> editor,
+			IJavaElement element) {
+		try {
+
+			// Open the java element
+			JavaUI.openInEditor(element);
+
+		} catch (Throwable ex) {
+			// Failed to open file
+			MessageDialog.openInformation(editor.getEditorSite().getShell(),
+					"Open", "Failed to open '" + element.getElementName()
+							+ "': " + ex.getMessage());
 		}
 	}
 

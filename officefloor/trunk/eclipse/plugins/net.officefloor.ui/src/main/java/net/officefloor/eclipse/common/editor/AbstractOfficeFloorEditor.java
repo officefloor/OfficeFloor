@@ -28,7 +28,6 @@ import java.util.Map;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
-import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
@@ -67,7 +66,6 @@ import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.events.MouseAdapter;
@@ -325,13 +323,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		this.loadEditPartTypes();
 		viewer.setEditPartFactory(this);
 		viewer.setContents(this.getCastedModel());
-
-		// Specify if capable of dropping items into editor
-		if (this.isDragTarget()) {
-			viewer
-					.addDropTargetListener((TransferDropTargetListener) new LocalSelectionTransferDragTargetListener(
-							viewer));
-		}
 
 		// Initialise the context menu
 		this.initialiseContextMenu();
