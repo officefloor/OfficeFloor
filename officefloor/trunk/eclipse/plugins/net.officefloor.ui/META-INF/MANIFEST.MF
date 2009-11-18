@@ -59,7 +59,9 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.plugin,
  org.eclipse.ui.views.navigator,
  org.osgi.framework;version="1.4.0"
-Require-Bundle: net.officefloor.core;bundle-version="0.0.1"
+Require-Bundle: net.officefloor.core;bundle-version="0.0.1",
+ org.eclipse.jdt.ui,
+ org.eclipse.core.resources
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.bootstrap,
  net.officefloor.eclipse.classpath,
@@ -71,7 +73,6 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.common.dialog.input.filter,
  net.officefloor.eclipse.common.dialog.input.impl,
  net.officefloor.eclipse.common.dialog.input.translator,
- net.officefloor.eclipse.common.drag,
  net.officefloor.eclipse.common.editor,
  net.officefloor.eclipse.common.editparts,
  net.officefloor.eclipse.common.editpolicies.connection,

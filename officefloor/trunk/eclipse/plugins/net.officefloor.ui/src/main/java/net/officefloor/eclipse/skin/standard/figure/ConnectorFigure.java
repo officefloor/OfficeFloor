@@ -30,7 +30,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link IFigure} providing a connector.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ConnectorFigure extends Figure {
@@ -57,7 +57,7 @@ public class ConnectorFigure extends Figure {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param direction
 	 *            {@link ConnectorDirection}.
 	 * @param colour
@@ -66,7 +66,7 @@ public class ConnectorFigure extends Figure {
 	public ConnectorFigure(ConnectorDirection direction, Color colour) {
 
 		final int SIZE = 4;
-		final int ALIGNMENT = (((SIZE % 2) == 0) ? -1 : 0);
+		final int ALIGNMENT = -1;
 
 		// Specify layout
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
@@ -142,7 +142,7 @@ public class ConnectorFigure extends Figure {
 
 	/**
 	 * Obtains the {@link ConnectionAnchor}.
-	 *
+	 * 
 	 * @return {@link ConnectionAnchor}.
 	 */
 	public ConnectionAnchor getConnectionAnchor() {
