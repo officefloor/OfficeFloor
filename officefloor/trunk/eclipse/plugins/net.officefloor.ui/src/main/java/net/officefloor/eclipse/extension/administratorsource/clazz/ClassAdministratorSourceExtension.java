@@ -23,6 +23,12 @@ import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
 import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtensionContext;
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
+import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 
@@ -31,11 +37,13 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link AdministratorSourceExtension} for {@link ClassAdministratorSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class ClassAdministratorSourceExtension implements
-		AdministratorSourceExtension<Object, Indexed, ClassAdministratorSource> {
+public class ClassAdministratorSourceExtension
+		implements
+		AdministratorSourceExtension<Object, Indexed, ClassAdministratorSource>,
+		ExtensionClasspathProvider, ExtensionOpener {
 
 	/*
 	 * ================== AdministratorSourceExtension ========================
@@ -87,6 +95,39 @@ public class ClassAdministratorSourceExtension implements
 				context.setErrorMessage(message);
 			}
 		});
+	}
+
+	/*
+	 * ======================= ExtensionClasspathProvider ======================
+	 */
+
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[] { new TypeClasspathProvision(
+				ClassAdministratorSource.class) };
+	}
+
+	/*
+	 * ========================= ExtensionOpener ==============================
+	 */
+
+	@Override
+	public void openSource(ExtensionOpenerContext context) throws Exception {
+
+		// Obtain the name of the class
+		String className = context.getPropertyList().getPropertyValue(
+				ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME, null);
+
+		// Ensure have class name
+		if (EclipseUtil.isBlank(className)) {
+			throw new Exception("No class name provided");
+		}
+
+		// Translate class name to resource name
+		String resourceName = className.replace('.', '/') + ".class";
+
+		// Open the class file
+		context.openClasspathResource(resourceName);
 	}
 
 }

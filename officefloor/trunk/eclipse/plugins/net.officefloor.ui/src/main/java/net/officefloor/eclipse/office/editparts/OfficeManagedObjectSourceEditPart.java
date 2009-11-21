@@ -20,15 +20,21 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.office.OfficeManagedObjectSourceFigureContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel;
+import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceModel.OfficeManagedObjectSourceEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -36,13 +42,39 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeManagedObjectSourceModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeManagedObjectSourceEditPart
 		extends
 		AbstractOfficeFloorEditPart<OfficeManagedObjectSourceModel, OfficeManagedObjectSourceEvent, OfficeManagedObjectSourceFigure>
 		implements OfficeManagedObjectSourceFigureContext {
+
+	/**
+	 * Opens the underlying {@link OfficeManagedObjectSourceModel}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link OfficeManagedObjectSourceModel}.
+	 * @param context
+	 *            {@link OpenHandlerContext}.
+	 */
+	public static void openManagedObjectSource(
+			OfficeManagedObjectSourceModel managedObjectSource,
+			OpenHandlerContext<?> context) {
+
+		// Obtain the managed object source details
+		String className = managedObjectSource
+				.getManagedObjectSourceClassName();
+		PropertyList properties = context.createPropertyList();
+		for (PropertyModel property : managedObjectSource.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Open the managed object source
+		ExtensionUtil.openManagedObjectSource(className, properties, context
+				.getEditPart().getEditor());
+	}
 
 	@Override
 	protected OfficeManagedObjectSourceFigure createOfficeFloorFigure() {
@@ -91,6 +123,19 @@ public class OfficeManagedObjectSourceEditPart
 								newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<OfficeManagedObjectSourceModel> policy) {
+		policy.allowOpening(new OpenHandler<OfficeManagedObjectSourceModel>() {
+			@Override
+			public void doOpen(
+					OpenHandlerContext<OfficeManagedObjectSourceModel> context) {
+				OfficeManagedObjectSourceEditPart.openManagedObjectSource(
+						context.getModel(), context);
+			}
+		});
 	}
 
 	@Override

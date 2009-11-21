@@ -21,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
@@ -49,6 +50,30 @@ import org.eclipse.gef.EditPart;
 public class WorkEditPart extends
 		AbstractOfficeFloorEditPart<WorkModel, WorkEvent, WorkFigure> implements
 		WorkFigureContext {
+
+	/**
+	 * Opens the {@link WorkSource} for the {@link WorkModel}.
+	 * 
+	 * @param work
+	 *            {@link WorkModel}.
+	 * @param context
+	 *            {@link OpenHandlerContext}.
+	 */
+	public static void openWorkSource(WorkModel work,
+			OpenHandlerContext<?> context) {
+
+		// Obtain the details about the work
+		String workSourceClassName = work.getWorkSourceClassName();
+		PropertyList properties = context.createPropertyList();
+		for (PropertyModel property : work.getProperties()) {
+			properties.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Open the work source
+		ExtensionUtil.openWorkSource(workSourceClassName, properties, context
+				.getEditPart().getEditor());
+	}
 
 	@Override
 	protected WorkFigure createOfficeFloorFigure() {
@@ -99,19 +124,7 @@ public class WorkEditPart extends
 		policy.allowOpening(new OpenHandler<WorkModel>() {
 			@Override
 			public void doOpen(OpenHandlerContext<WorkModel> context) {
-
-				// Obtain the details about the work
-				WorkModel work = context.getModel();
-				String workSourceClassName = work.getWorkSourceClassName();
-				PropertyList properties = context.createPropertyList();
-				for (PropertyModel property : work.getProperties()) {
-					properties.addProperty(property.getName()).setValue(
-							property.getValue());
-				}
-
-				// Open the work source
-				ExtensionUtil.openWorkSource(workSourceClassName, properties,
-						context.getEditPart().getEditor());
+				WorkEditPart.openWorkSource(context.getModel(), context);
 			}
 		});
 	}

@@ -20,7 +20,10 @@ package net.officefloor.eclipse.socket;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
+import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
@@ -35,7 +38,8 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class HttpSessionObjectManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<HttpSessionObjectDependencies, None, HttpSessionObjectManagedObjectSource> {
+		ManagedObjectSourceExtension<HttpSessionObjectDependencies, None, HttpSessionObjectManagedObjectSource>,
+		ExtensionOpener {
 
 	/*
 	 * ================== ManagedObjectSourceExtension ========================
@@ -76,6 +80,25 @@ public class HttpSessionObjectManagedObjectSourceExtension
 
 		// Return the name
 		return "Http Session Object " + className;
+	}
+
+	/*
+	 * ====================== ExtensionOpener ==================================
+	 */
+
+	@Override
+	public void openSource(ExtensionOpenerContext context) throws Exception {
+
+		// Obtain the class
+		String className = context.getPropertyList().getPropertyValue(
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, null);
+		if (EclipseUtil.isBlank(className)) {
+			throw new Exception("Class name not specified");
+		}
+
+		// Transform class name to resource name and open
+		String resourceName = className.replace('.', '/') + ".class";
+		context.openClasspathResource(resourceName);
 	}
 
 }

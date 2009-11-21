@@ -20,6 +20,7 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
@@ -27,11 +28,13 @@ import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectE
 import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
 import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel.DeployedOfficeEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -100,11 +103,19 @@ public class DeployedOfficeEditPart
 			@Override
 			public void doOpen(OpenHandlerContext<DeployedOfficeModel> context) {
 
-				// Obtain the office file location
-				String location = context.getModel().getOfficeLocation();
+				// Obtain the office details
+				DeployedOfficeModel office = context.getModel();
+				String className = office.getOfficeSourceClassName();
+				String location = office.getOfficeLocation();
+				PropertyList properties = context.createPropertyList();
+				for (PropertyModel property : office.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
+				}
 
 				// Open the office
-				context.openClasspathResource(location);
+				ExtensionUtil.openOfficeSource(className, location, properties,
+						context.getEditPart().getEditor());
 			}
 		});
 	}

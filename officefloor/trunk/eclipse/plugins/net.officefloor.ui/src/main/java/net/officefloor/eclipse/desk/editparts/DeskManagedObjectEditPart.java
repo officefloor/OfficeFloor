@@ -24,6 +24,9 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.DeskManagedObjectFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -31,6 +34,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskManagedObjectModel;
+import net.officefloor.model.desk.DeskManagedObjectSourceModel;
+import net.officefloor.model.desk.DeskManagedObjectToDeskManagedObjectSourceModel;
 import net.officefloor.model.desk.DeskManagedObjectModel.DeskManagedObjectEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -38,7 +43,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link DeskManagedObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeskManagedObjectEditPart
@@ -100,6 +105,40 @@ public class DeskManagedObjectEditPart
 								.renameDeskManagedObject(target, newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<DeskManagedObjectModel> policy) {
+		policy.allowOpening(new OpenHandler<DeskManagedObjectModel>() {
+			@Override
+			public void doOpen(
+					OpenHandlerContext<DeskManagedObjectModel> context) {
+				// Obtain the managed object source for the managed object
+				DeskManagedObjectSourceModel managedObjectSource = null;
+				DeskManagedObjectModel managedObject = context.getModel();
+				if (managedObject != null) {
+					DeskManagedObjectToDeskManagedObjectSourceModel conn = managedObject
+							.getDeskManagedObjectSource();
+					if (conn != null) {
+						managedObjectSource = conn.getDeskManagedObjectSource();
+					}
+				}
+				if (managedObjectSource == null) {
+					// Must have connected managed object source
+					context
+							.getEditPart()
+							.messageError(
+									"Can not open managed object.\n"
+											+ "\nPlease ensure the managed object is connected to a managed object source.");
+					return; // can not open
+				}
+
+				// Open the managed object source
+				DeskManagedObjectSourceEditPart.openManagedObjectSource(
+						managedObjectSource, context);
+			}
+		});
 	}
 
 	@Override

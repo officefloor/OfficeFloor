@@ -19,12 +19,13 @@ package net.officefloor.eclipse.common.editpolicies.open;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.model.Model;
-
-import org.eclipse.core.resources.IProject;
 
 /**
  * Context for the {@link OpenHandler}.
+ * 
+ * @see ExtensionUtil
  * 
  * @author Daniel Sagenschneider
  */
@@ -45,19 +46,14 @@ public interface OpenHandlerContext<M extends Model> {
 	AbstractOfficeFloorEditPart<M, ?, ?> getEditPart();
 
 	/**
+	 * <p>
 	 * Creates a new {@link PropertyList}.
+	 * <p>
+	 * This is useful to create the {@link PropertyList} for using the
+	 * {@link ExtensionUtil} to open.
 	 * 
 	 * @return New {@link PropertyList}.
 	 */
 	PropertyList createPropertyList();
-
-	/**
-	 * Opens the resource on the class path for the {@link IProject} containing
-	 * the {@link Model}.
-	 * 
-	 * @param resourcePath
-	 *            Path to the resource on the class path.
-	 */
-	void openClasspathResource(String resourcePath);
 
 }
