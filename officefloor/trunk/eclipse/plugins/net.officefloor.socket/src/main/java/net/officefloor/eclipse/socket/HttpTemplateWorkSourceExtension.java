@@ -26,6 +26,8 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
+import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.PropertyValueChangeEvent;
 import net.officefloor.eclipse.extension.util.PropertyValueChangeListener;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
@@ -33,6 +35,7 @@ import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension.RoutingEntry;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.template.HttpTemplateWork;
 import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource;
@@ -50,7 +53,8 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWorkSourceExtension implements
-		WorkSourceExtension<HttpTemplateWork, HttpTemplateWorkSource> {
+		WorkSourceExtension<HttpTemplateWork, HttpTemplateWorkSource>,
+		ExtensionOpener {
 
 	/*
 	 * ================== WorkSourceExtension =================================
@@ -299,6 +303,26 @@ public class HttpTemplateWorkSourceExtension implements
 			// Property value is the type
 			this.property.setValue(type);
 		}
+	}
+
+	/*
+	 * ======================== ExtensionOpener ==========================
+	 */
+
+	@Override
+	public void openSource(ExtensionOpenerContext context) throws Exception {
+
+		// Obtain the location of the template
+		String location = context.getPropertyList().getPropertyValue(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, null);
+
+		// Ensure have the template location
+		if (EclipseUtil.isBlank(location)) {
+			throw new FileNotFoundException("Template file not specified");
+		}
+
+		// Open the template file
+		context.openClasspathResource(location);
 	}
 
 }

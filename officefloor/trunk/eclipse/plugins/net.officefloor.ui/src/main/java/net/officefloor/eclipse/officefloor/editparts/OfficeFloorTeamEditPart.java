@@ -20,15 +20,21 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -82,6 +88,29 @@ public class OfficeFloorTeamEditPart
 						return changes.renameOfficeFloorTeam(target, newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<OfficeFloorTeamModel> policy) {
+		policy.allowOpening(new OpenHandler<OfficeFloorTeamModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<OfficeFloorTeamModel> context) {
+
+				// Obtain the team details
+				OfficeFloorTeamModel team = context.getModel();
+				String className = team.getTeamSourceClassName();
+				PropertyList properties = context.createPropertyList();
+				for (PropertyModel property : team.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
+				}
+
+				// Open the team
+				ExtensionUtil.openTeamSource(className, properties, context
+						.getEditPart().getEditor());
+			}
+		});
 	}
 
 	@Override

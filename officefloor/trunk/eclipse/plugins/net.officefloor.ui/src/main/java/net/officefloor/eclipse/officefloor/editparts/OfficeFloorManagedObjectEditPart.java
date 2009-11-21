@@ -24,6 +24,9 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -31,6 +34,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel.OfficeFloorManagedObjectEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -38,7 +43,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorManagedObjectModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorManagedObjectEditPart
@@ -103,6 +108,43 @@ public class OfficeFloorManagedObjectEditPart
 								newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<OfficeFloorManagedObjectModel> policy) {
+		policy.allowOpening(new OpenHandler<OfficeFloorManagedObjectModel>() {
+			@Override
+			public void doOpen(
+					OpenHandlerContext<OfficeFloorManagedObjectModel> context) {
+
+				// Obtain the managed object source for the managed object
+				OfficeFloorManagedObjectSourceModel managedObjectSource = null;
+				OfficeFloorManagedObjectModel managedObject = context
+						.getModel();
+				if (managedObject != null) {
+					OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel conn = managedObject
+							.getOfficeFloorManagedObjectSource();
+					if (conn != null) {
+						managedObjectSource = conn
+								.getOfficeFloorManagedObjectSource();
+					}
+				}
+				if (managedObjectSource == null) {
+					// Must have connected managed object source
+					context
+							.getEditPart()
+							.messageError(
+									"Can not open managed object.\n"
+											+ "\nPlease ensure the managed object is connected to a managed object source.");
+					return; // can not open
+				}
+
+				// Open the managed object source for the managed object
+				OfficeFloorManagedObjectSourceEditPart.openManagedObjectSource(
+						managedObjectSource, context);
+			}
+		});
 	}
 
 	@Override

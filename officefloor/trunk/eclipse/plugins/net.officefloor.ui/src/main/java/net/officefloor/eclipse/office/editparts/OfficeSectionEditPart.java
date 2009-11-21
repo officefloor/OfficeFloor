@@ -20,6 +20,7 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
@@ -27,12 +28,14 @@ import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectE
 import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
 import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.OfficeSectionModel.OfficeSectionEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -98,11 +101,20 @@ public class OfficeSectionEditPart
 		policy.allowOpening(new OpenHandler<OfficeSectionModel>() {
 			@Override
 			public void doOpen(OpenHandlerContext<OfficeSectionModel> context) {
-				// Obtain the section location
-				String location = context.getModel().getSectionLocation();
+
+				// Obtain the section details
+				OfficeSectionModel section = context.getModel();
+				String className = section.getSectionSourceClassName();
+				String location = section.getSectionLocation();
+				PropertyList properties = context.createPropertyList();
+				for (PropertyModel property : section.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
+				}
 
 				// Open the section
-				context.openClasspathResource(location);
+				ExtensionUtil.openSectionSource(className, location,
+						properties, context.getEditPart().getEditor());
 			}
 		});
 	}

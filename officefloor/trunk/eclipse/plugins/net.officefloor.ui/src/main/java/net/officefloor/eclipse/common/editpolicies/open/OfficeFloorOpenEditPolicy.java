@@ -19,8 +19,6 @@ package net.officefloor.eclipse.common.editpolicies.open;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.Model;
@@ -113,16 +111,6 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 		public PropertyList createPropertyList() {
 			return OfficeFloorPlugin.getDefault().createCompiler(
 					this.editPart.getEditor()).createPropertyList();
-		}
-
-		@Override
-		public void openClasspathResource(String resourcePath) {
-
-			// Obtain the editor
-			AbstractOfficeFloorEditor<?, ?> editor = this.editPart.getEditor();
-
-			// Open the resource
-			ClasspathUtil.openClasspathResource(resourcePath, editor);
 		}
 	}
 

@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.open.ExtensionOpener;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Control;
  * @author Daniel Sagenschneider
  * 
  * @see ExtensionClasspathProvider
+ * @see ExtensionOpener
  */
 public interface AdministratorSourceExtension<I, A extends Enum<A>, S extends AdministratorSource<I, A>> {
 

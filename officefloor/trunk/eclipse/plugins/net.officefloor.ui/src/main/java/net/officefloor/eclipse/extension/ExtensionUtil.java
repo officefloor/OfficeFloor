@@ -43,6 +43,7 @@ import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.LogUtil;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -294,6 +295,101 @@ public class ExtensionUtil {
 		openSource(WorkSourceExtension.EXTENSION_ID, WorkSourceExtension.class,
 				WORK_SOURCE_CLASS_EXTRACTOR, workSourceClassName, null,
 				properties, editor);
+	}
+
+	/**
+	 * Opens the {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceClassName
+	 *            {@link ManagedObjectSource} class name.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link ManagedObjectSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openManagedObjectSource(
+			String managedObjectSourceClassName, PropertyList properties,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(ManagedObjectSourceExtension.EXTENSION_ID,
+				ManagedObjectSourceExtension.class,
+				MANAGED_OBJECT_SOURCE_CLASS_EXTRACTOR,
+				managedObjectSourceClassName, null, properties, editor);
+	}
+
+	/**
+	 * Opens the {@link TeamSource}.
+	 * 
+	 * @param teamSourceClassName
+	 *            {@link TeamSource} class name.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link TeamSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openTeamSource(String teamSourceClassName,
+			PropertyList properties, AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(TeamSourceExtension.EXTENSION_ID, TeamSourceExtension.class,
+				TEAM_SOURCE_CLASS_EXTRACTOR, teamSourceClassName, null,
+				properties, editor);
+	}
+
+	/**
+	 * Opens the {@link AdministratorSource}.
+	 * 
+	 * @param administratorSourceClassName
+	 *            {@link AdministratorSource} class name.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link AdministratorSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openAdministratorSource(
+			String administratorSourceClassName, PropertyList properties,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(AdministratorSourceExtension.EXTENSION_ID,
+				AdministratorSourceExtension.class,
+				ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR,
+				administratorSourceClassName, null, properties, editor);
+	}
+
+	/**
+	 * Opens the {@link SectionSource}.
+	 * 
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} class name.
+	 * @param sectionLocation
+	 *            Location of the section.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link SectionSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openSectionSource(String sectionSourceClassName,
+			String sectionLocation, PropertyList properties,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(SectionSourceExtension.EXTENSION_ID,
+				SectionSourceExtension.class, SECTION_SOURCE_CLASS_EXTRACTOR,
+				sectionSourceClassName, sectionLocation, properties, editor);
+	}
+
+	/**
+	 * Opens the {@link OfficeSource}.
+	 * 
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link OfficeSource}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 */
+	public static void openOfficeSource(String officeSourceClassName,
+			String officeLocation, PropertyList properties,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		openSource(OfficeSourceExtension.EXTENSION_ID,
+				OfficeSourceExtension.class, OFFICE_SOURCE_CLASS_EXTRACTOR,
+				officeSourceClassName, officeLocation, properties, editor);
 	}
 
 	/**

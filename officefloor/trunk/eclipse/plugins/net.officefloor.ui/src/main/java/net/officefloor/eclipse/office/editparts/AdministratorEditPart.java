@@ -20,16 +20,22 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
+import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
 import org.eclipse.draw2d.IFigure;
@@ -37,7 +43,7 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link AdministratorModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorEditPart
@@ -92,6 +98,29 @@ public class AdministratorEditPart
 						return changes.renameAdministrator(target, newValue);
 					}
 				});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<AdministratorModel> policy) {
+		policy.allowOpening(new OpenHandler<AdministratorModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<AdministratorModel> context) {
+
+				// Obtain the administrator details
+				AdministratorModel admin = context.getModel();
+				String className = admin.getAdministratorSourceClassName();
+				PropertyList properties = context.createPropertyList();
+				for (PropertyModel property : admin.getProperties()) {
+					properties.addProperty(property.getName()).setValue(
+							property.getValue());
+				}
+
+				// Open the administrator source
+				ExtensionUtil.openAdministratorSource(className, properties,
+						context.getEditPart().getEditor());
+			}
+		});
 	}
 
 	@Override

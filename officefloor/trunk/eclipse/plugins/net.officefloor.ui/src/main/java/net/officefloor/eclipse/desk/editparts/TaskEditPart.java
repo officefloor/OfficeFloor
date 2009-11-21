@@ -30,6 +30,9 @@ import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
 import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandler;
+import net.officefloor.eclipse.common.editpolicies.open.OpenHandlerContext;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -53,12 +56,51 @@ import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link TaskModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TaskEditPart extends
 		AbstractOfficeFloorEditPart<TaskModel, TaskEvent, TaskFigure> implements
 		TaskFigureContext {
+
+	/**
+	 * Obtains the {@link WorkTaskModel} for the {@link TaskModel}.
+	 * 
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @return {@link WorkTaskModel} or <code>null</code> if not attached.
+	 */
+	public static WorkTaskModel getWorkTask(TaskModel task) {
+		// Ensure have task
+		if (task == null) {
+			return null;
+		}
+
+		// Obtain the work task
+		WorkTaskToTaskModel conn = task.getWorkTask();
+		if (conn != null) {
+			// Return the work task
+			return conn.getWorkTask();
+		}
+
+		// If here then no work task attached
+		return null;
+	}
+
+	/**
+	 * Obtains the {@link DeskModel} for the {@link TaskModel}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @return {@link DeskModel} or <code>null</code> if {@link Task} not
+	 *         contained in a {@link DeskModel}.
+	 */
+	public static DeskModel getDesk(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+		// Obtain the desk (root model), ensuring is correct type
+		Object rootModel = editPart.getEditor().getCastedModel();
+		return (rootModel instanceof DeskModel ? (DeskModel) rootModel : null);
+	}
 
 	@Override
 	protected TaskFigure createOfficeFloorFigure() {
@@ -116,6 +158,38 @@ public class TaskEditPart extends
 			public Change<TaskModel> createChange(DeskChanges changes,
 					TaskModel target, String newValue) {
 				return changes.renameTask(target, newValue);
+			}
+		});
+	}
+
+	@Override
+	protected void populateOfficeFloorOpenEditPolicy(
+			OfficeFloorOpenEditPolicy<TaskModel> policy) {
+		policy.allowOpening(new OpenHandler<TaskModel>() {
+			@Override
+			public void doOpen(OpenHandlerContext<TaskModel> context) {
+
+				// Obtain the desk
+				DeskModel desk = TaskEditPart.getDesk(context.getEditPart());
+
+				// Obtain the work
+				WorkTaskModel workTask = TaskEditPart.getWorkTask(context
+						.getModel());
+				WorkModel work = WorkTaskEditPart.getWork(workTask, desk);
+
+				// Ensure have the work
+				if (work == null) {
+					// Must have connected work
+					context
+							.getEditPart()
+							.messageError(
+									"Can not open task.\n"
+											+ "\nPlease ensure the task is connected to a work source.");
+					return; // can not open
+				}
+
+				// Open the work
+				WorkEditPart.openWorkSource(work, context);
 			}
 		});
 	}
@@ -202,18 +276,14 @@ public class TaskEditPart extends
 	public String getParameterTypeName() {
 
 		// Obtain the work task for the task
-		WorkTaskToTaskModel workTaskToTask = this.getCastedModel()
-				.getWorkTask();
-		if (workTaskToTask != null) {
-			WorkTaskModel workTask = workTaskToTask.getWorkTask();
-			if (workTask != null) {
-
-				// Have work task, so find first parameter
-				for (WorkTaskObjectModel object : workTask.getTaskObjects()) {
-					if (object.getIsParameter()) {
-						// Have parameter, so return its type
-						return object.getObjectType();
-					}
+		WorkTaskModel workTask = TaskEditPart
+				.getWorkTask(this.getCastedModel());
+		if (workTask != null) {
+			// Have work task, so find first parameter
+			for (WorkTaskObjectModel object : workTask.getTaskObjects()) {
+				if (object.getIsParameter()) {
+					// Have parameter, so return its type
+					return object.getObjectType();
 				}
 			}
 		}
@@ -231,7 +301,7 @@ public class TaskEditPart extends
 	public String getTaskDocumentation() {
 
 		// Obtain the desk
-		DeskModel desk = (DeskModel) this.getEditor().getCastedModel();
+		DeskModel desk = TaskEditPart.getDesk(this);
 
 		// Return task documentation
 		return TaskDocumentationContextImpl.getTaskDocumentation(desk, this
@@ -246,7 +316,7 @@ public class TaskEditPart extends
 
 		/**
 		 * Obtains the {@link Task} documentation for a {@link TaskModel}.
-		 *
+		 * 
 		 * @param desk
 		 *            {@link DeskModel}.
 		 * @param task
@@ -260,23 +330,8 @@ public class TaskEditPart extends
 				TaskModel task, AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 
 			// Obtain the work and work task for the task
-			WorkModel work = null;
-			WorkTaskModel workTask = null;
-			WorkTaskToTaskModel workTaskToTask = task.getWorkTask();
-			if (workTaskToTask != null) {
-				workTask = workTaskToTask.getWorkTask();
-				if (workTask != null) {
-					// Obtain the containing work
-					for (WorkModel workModel : desk.getWorks()) {
-						for (WorkTaskModel check : workModel.getWorkTasks()) {
-							if (workTask == check) {
-								// Found work task, so use the containing work
-								work = workModel;
-							}
-						}
-					}
-				}
-			}
+			WorkTaskModel workTask = TaskEditPart.getWorkTask(task);
+			WorkModel work = WorkTaskEditPart.getWork(workTask, desk);
 			if (work == null) {
 				// Can not obtain work, so provide available documentation
 				return "Task "
@@ -362,7 +417,7 @@ public class TaskEditPart extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param taskName
 		 *            {@link Task} name.
 		 * @param propertyList

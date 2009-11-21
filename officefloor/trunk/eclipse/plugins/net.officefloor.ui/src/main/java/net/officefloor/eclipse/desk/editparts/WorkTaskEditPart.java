@@ -26,7 +26,10 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskModel.WorkTaskEvent;
 
@@ -41,6 +44,36 @@ public class WorkTaskEditPart
 		extends
 		AbstractOfficeFloorEditPart<WorkTaskModel, WorkTaskEvent, OfficeFloorFigure>
 		implements WorkTaskFigureContext {
+
+	/**
+	 * Obtains the {@link Work} that contains the {@link WorkTaskModel}.
+	 * 
+	 * @param workTask
+	 *            {@link WorkTaskModel}.
+	 * @param desk
+	 *            {@link DeskModel} containing the {@link WorkTaskModel}.
+	 * @return {@link WorkModel} or <code>null</code> if not contained by a
+	 *         {@link WorkModel}.
+	 */
+	public static WorkModel getWork(WorkTaskModel workTask, DeskModel desk) {
+		// Ensure have work task
+		if (workTask == null) {
+			return null;
+		}
+
+		// Obtain the containing work
+		for (WorkModel work : desk.getWorks()) {
+			for (WorkTaskModel check : work.getWorkTasks()) {
+				if (workTask == check) {
+					// Found work task, so use the containing work
+					return work;
+				}
+			}
+		}
+
+		// As here no containing work
+		return null;
+	}
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {

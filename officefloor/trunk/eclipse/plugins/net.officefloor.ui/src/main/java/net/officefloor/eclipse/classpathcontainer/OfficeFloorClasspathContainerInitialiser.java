@@ -22,6 +22,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,7 +40,7 @@ public class OfficeFloorClasspathContainerInitialiser extends
 	/*
 	 * ============= ClasspathContainerInitializer ==================
 	 */
-	
+
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project)
 			throws CoreException {
@@ -56,6 +58,13 @@ public class OfficeFloorClasspathContainerInitialiser extends
 		JavaCore.setClasspathContainer(containerPath,
 				new IJavaProject[] { project },
 				new IClasspathContainer[] { container }, null);
+	}
+
+	@Override
+	public IStatus getSourceAttachmentStatus(IPath containerPath,
+			IJavaProject project) {
+		// Allow adding sources
+		return Status.OK_STATUS;
 	}
 
 }
