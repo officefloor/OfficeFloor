@@ -171,8 +171,9 @@ public class ManagedObjectSourceInstance implements
 		}
 
 		// Update the class path to include the extension
-		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
-				this.managedObjectSourceClassName);
+		ClasspathUtil
+				.attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
+						editPart, null, this.managedObjectSourceClassName);
 	}
 
 	/**

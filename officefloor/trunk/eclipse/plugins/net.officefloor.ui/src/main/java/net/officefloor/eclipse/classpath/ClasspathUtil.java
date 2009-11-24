@@ -24,9 +24,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
+import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainerInitialiser;
+import net.officefloor.eclipse.classpathcontainer.SourceAttachmentEntry;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
@@ -90,9 +93,49 @@ public class ClasspathUtil {
 	}
 
 	/**
+	 * Loads the {@link Class} from the plug-in class path.
+	 * 
+	 * @param className
+	 *            Class name.
+	 * @return {@link Class}.
+	 * @throws ClassNotFoundException
+	 *             If {@link Class} not found.
+	 */
+	public static Class<?> loadPluginClass(String className)
+			throws ClassNotFoundException {
+		return Thread.currentThread().getContextClassLoader().loadClass(
+				className);
+	}
+
+	/**
+	 * Ensures the {@link OfficeFloorClasspathContainer} is on the
+	 * {@link IJavaProject}.
+	 * 
+	 * @param project
+	 *            {@link IJavaProject}.
+	 * @param monitor
+	 *            {@link IProgressMonitor}. May be <code>null</code>.
+	 */
+	public static void ensureProjectHasOfficeFloorClasspathContainer(
+			IJavaProject project, IProgressMonitor monitor) {
+		try {
+			// Attempt to ensure OfficeFloor class path container on project
+			OfficeFloorClasspathContainerInitialiser
+					.ensureOfficeFloorClasspathContainerOnProject(project,
+							monitor);
+		} catch (Throwable ex) {
+			// Indicate failure to update class path
+			LogUtil
+					.logError(
+							"Failed to ensure OfficeFloor class path container on project",
+							ex);
+		}
+	}
+
+	/**
 	 * <p>
-	 * Attempts to update the class path of the {@link IJavaProject} for the
-	 * edit part with the extension class names.
+	 * Attempts to add the {@link ExtensionClasspathProvider} instances to the
+	 * class path of the {@link IJavaProject} for the edit part.
 	 * <p>
 	 * No exception is thrown if unable to update the class path and the class
 	 * path is subsequently not updated.
@@ -104,62 +147,23 @@ public class ClasspathUtil {
 	 * @param extensionClassNames
 	 *            Listing of class names that may have extension associated.
 	 */
-	public static void attemptUpdateOfficeFloorClasspath(
+	public static void attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			IProgressMonitor monitor, String... extensionClassNames) {
 		try {
-			// Obtain the project for the edit part
+			// Obtain the java project for the edit part
 			IProject project = FileConfigurationItem.getProject(editPart);
+			IJavaProject javaProject = JavaCore.create(project);
 
 			// Attempt to update the class path
-			updateOfficeFloorClasspath(project, monitor, extensionClassNames);
+			OfficeFloorClasspathContainerInitialiser
+					.addExtensionClasspathProvidersToOfficeFloorClassPath(
+							javaProject, monitor, extensionClassNames);
 
 		} catch (Throwable ex) {
 			// Indicate failure to update class path
-			editPart.messageError(ex);
+			LogUtil.logError("Failed to update OfficeFloor class path", ex);
 		}
-	}
-
-	/**
-	 * Convenience method to ensure {@link OfficeFloorClasspathContainer} is
-	 * available on the {@link IProject} and that the class paths for the input
-	 * extensions are available.
-	 * 
-	 * @param project
-	 *            {@link IProject}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}. May be <code>null</code>.
-	 * @param extensionClassNames
-	 *            Listing of class names that may have an extension associated.
-	 * @throws Exception
-	 *             If fails to ensure available.
-	 */
-	public static void updateOfficeFloorClasspath(IProject project,
-			IProgressMonitor monitor, String... extensionClassNames)
-			throws Exception {
-		updateOfficeFloorClasspath(JavaCore.create(project), monitor,
-				extensionClassNames);
-	}
-
-	/**
-	 * Ensures the {@link OfficeFloorClasspathContainer} is available on the
-	 * {@link IJavaProject} and that the class paths for the input extensions
-	 * are available.
-	 * 
-	 * @param javaProject
-	 *            {@link IJavaProject}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}. May be <code>null</code>.
-	 * @param extensionClassNames
-	 *            Listing of class names that may have an extension associated.
-	 * @throws Exception
-	 *             If fails to ensure available.
-	 */
-	public static void updateOfficeFloorClasspath(IJavaProject javaProject,
-			IProgressMonitor monitor, String... extensionClassNames)
-			throws Exception {
-		OfficeFloorClasspathContainer.addExtensionToProjectClasspath(
-				javaProject, monitor, extensionClassNames);
 	}
 
 	/**
@@ -167,16 +171,19 @@ public class ClasspathUtil {
 	 * 
 	 * @param provision
 	 *            {@link ClasspathProvision}.
+	 * @param container
+	 *            {@link OfficeFloorClasspathContainer}.
 	 * @return {@link IClasspathEntry} or <code>null</code> if fails.
 	 */
 	public static IClasspathEntry createClasspathEntry(
-			ClasspathProvision provision) {
+			ClasspathProvision provision,
+			OfficeFloorClasspathContainer container) {
 
 		// Handle based on type of provision
 		if (provision instanceof TypeClasspathProvision) {
 			// Type provision
 			TypeClasspathProvision typeProvision = (TypeClasspathProvision) provision;
-			return createClasspathEntry(typeProvision.getType());
+			return createClasspathEntry(typeProvision.getType(), container);
 		} else if (provision instanceof VariableClasspathProvision) {
 			// Variable provision
 			VariableClasspathProvision variableProvision = (VariableClasspathProvision) provision;
@@ -186,7 +193,7 @@ public class ClasspathUtil {
 			// Unknown provision type
 			String provisionTypeName = (provision == null ? null : provision
 					.getClass().getName());
-			MessageDialog.openWarning(null, "Unknown", "Unknown "
+			LogUtil.logError("Unknown "
 					+ ClasspathProvision.class.getSimpleName() + " type "
 					+ provisionTypeName);
 			return null;
@@ -219,10 +226,13 @@ public class ClasspathUtil {
 	 * 
 	 * @param clazz
 	 *            {@link Class}.
+	 * @param container
+	 *            {@link OfficeFloorClasspathContainer}.
 	 * @return {@link IClasspathEntry} of the class path containing the
 	 *         {@link Class} or <code>null</code> if issue obtaining.
 	 */
-	public static IClasspathEntry createClasspathEntry(Class<?> clazz) {
+	public static IClasspathEntry createClasspathEntry(Class<?> clazz,
+			OfficeFloorClasspathContainer container) {
 
 		try {
 			// Obtain the class resource name
@@ -253,8 +263,20 @@ public class ClasspathUtil {
 			// Obtain the path for the class path
 			IPath classpathPath = new Path(classpath);
 
+			// Obtain the source attachment paths
+			IPath sourceAttachmentPath = null;
+			IPath sourceAttachmentRootPath = null;
+			SourceAttachmentEntry entry = container
+					.getSourceAttachmentEntry(classpathPath);
+			if (entry != null) {
+				// Provide source attachment paths
+				sourceAttachmentPath = entry.getSourceAttachmentIPath();
+				sourceAttachmentRootPath = entry.getSourceAttachmentRootIPath();
+			}
+
 			// Return the class path entry
-			return JavaCore.newLibraryEntry(classpathPath, null, null);
+			return JavaCore.newLibraryEntry(classpathPath,
+					sourceAttachmentPath, sourceAttachmentRootPath);
 
 		} catch (Throwable ex) {
 

@@ -173,8 +173,9 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		}
 
 		// Update the class path to include the extension
-		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
-				this.workSourceClassName);
+		ClasspathUtil
+				.attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
+						editPart, null, this.workSourceClassName);
 	}
 
 	/**
