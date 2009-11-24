@@ -17,6 +17,12 @@
  */
 package net.officefloor.eclipse.classpathcontainer;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,24 +30,23 @@ import java.util.Map;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.main.OfficeFloorMain;
+import net.officefloor.plugin.xml.XmlMarshaller;
+import net.officefloor.plugin.xml.XmlOutput;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
+import net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerFactory;
+import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 /**
  * {@link IClasspathContainer} for the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorClasspathContainer implements IClasspathContainer {
@@ -52,232 +57,183 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	public static String CONTAINER_ID = "net.officefloor.eclipse.OFFICE_FLOOR";
 
 	/**
-	 * Listing of {@link Class} instances with one per framework jar.
+	 * Listing of core {@link Class} instances for OfficeFloor.
 	 */
-	private static final Class<?>[] frameworkClasses = new Class<?>[] {
+	private static final Class<?>[] CORE_CLASSES = new Class<?>[] {
 			OfficeFrame.class, OfficeFloorCompiler.class,
 			XmlUnmarshaller.class, OfficeFloorMain.class };
 
 	/**
-	 * Ensures the {@link OfficeFloor} {@link IClasspathEntry} entries are
-	 * available on the {@link IJavaProject} including the
-	 * {@link IClasspathEntry} instances of the extensions.
-	 *
-	 * @param javaProject
-	 *            {@link IJavaProject}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}.
-	 * @param extensionClassNames
-	 *            Class names of the extensions that may be
-	 *            {@link ExtensionClasspathProvider} to contribute to the class
-	 *            path.
-	 * @throws Exception
-	 *             If fails to adjust class path for extensions.
+	 * {@link IPath} for this {@link OfficeFloorClasspathContainer}.
 	 */
-	public static void addExtensionToProjectClasspath(IJavaProject javaProject,
-			IProgressMonitor monitor, String... extensionClassNames)
-			throws Exception {
-
-		// Determine if the class path entry is on project
-		IClasspathEntry[] entries = javaProject.getRawClasspath();
-		int officeFloorEntryIndex = -1;
-		for (int i = 0; i < entries.length; i++) {
-			IClasspathEntry entry = entries[i];
-
-			// Ensure entry is a container
-			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-
-				// Obtain the container ID of the entry
-				IPath containerPath = entry.getPath();
-				String containerId = containerPath.segment(0);
-
-				// Determine if the Office Floor container
-				if (OfficeFloorClasspathContainer.CONTAINER_ID
-						.equals(containerId)) {
-					// Found the office floor entry
-					officeFloorEntryIndex = i;
-				}
-			}
-		}
-
-		// Flag if class path dirty and requires changes
-		boolean isOfficeFloorClasspathDirty = false;
-
-		// Obtain office floor entry (may required creating if not available)
-		IClasspathEntry officeFloorEntry;
-		if (officeFloorEntryIndex >= 0) {
-			// Already existing
-			officeFloorEntry = entries[officeFloorEntryIndex];
-		} else {
-			// Add the entry (and flag class path dirty)
-			officeFloorEntry = JavaCore.newContainerEntry(new Path(
-					OfficeFloorClasspathContainer.CONTAINER_ID));
-			isOfficeFloorClasspathDirty = true;
-		}
-
-		// Extract the extension class names from the path
-		List<String> entryClassNames = new LinkedList<String>();
-		String[] pathSegments = officeFloorEntry.getPath().segments();
-		for (int i = 1; i < pathSegments.length; i++) {
-			String pathSegment = pathSegments[i];
-			entryClassNames.add(pathSegment);
-		}
-
-		// Determine if need to include further entries
-		for (String extensionClassName : extensionClassNames) {
-			if (!entryClassNames.contains(extensionClassName)) {
-				// Missing extension entry, so add and flag class path dirty
-				entryClassNames.add(extensionClassName);
-				isOfficeFloorClasspathDirty = true;
-			}
-		}
-
-		// Make change to the class path if dirty
-		if (isOfficeFloorClasspathDirty) {
-
-			// Create the office floor entry path
-			IPath officeFloorPath = new Path(
-					OfficeFloorClasspathContainer.CONTAINER_ID);
-			for (String entryClassName : entryClassNames) {
-				officeFloorPath = officeFloorPath.append(entryClassName);
-			}
-
-			// Create the adjusted office floor entry
-			officeFloorEntry = JavaCore.newContainerEntry(officeFloorPath);
-
-			// Adjust the project's class path
-			IClasspathEntry[] newEntries;
-			if (officeFloorEntryIndex >= 0) {
-				// Overwrite office floor entry
-				newEntries = entries;
-				newEntries[officeFloorEntryIndex] = officeFloorEntry;
-			} else {
-				// Append the office floor class path container
-				newEntries = new IClasspathEntry[entries.length + 1];
-				for (int i = 0; i < entries.length; i++) {
-					newEntries[i] = entries[i];
-				}
-				newEntries[newEntries.length - 1] = officeFloorEntry;
-			}
-
-			// Register the new class path entries for project
-			javaProject.setRawClasspath(newEntries, monitor);
-		}
-	}
+	private final IPath containerPath;
 
 	/**
-	 * {@link IPath}.
+	 * Listing of the {@link SourceAttachmentEntry} instances.
 	 */
-	private final IPath path;
+	private final List<SourceAttachmentEntry> sourceAttachmentEntries = new LinkedList<SourceAttachmentEntry>();
 
 	/**
-	 * Listing of the {@link IClasspathEntry} instances.
+	 * Listing of the {@link ExtensionClasspathProviderEntry} instances.
 	 */
-	private List<IClasspathEntry> classPaths = new LinkedList<IClasspathEntry>();
+	private final List<ExtensionClasspathProviderEntry> extensionEntries = new LinkedList<ExtensionClasspathProviderEntry>();
 
 	/**
 	 * Initiate.
-	 *
-	 * @param path
+	 * 
+	 * @param containerPath
 	 *            {@link IPath}.
-	 * @param javaProject
-	 *            {@link IJavaProject}.
-	 * @throws Exception
-	 *             If fails to initialise.
 	 */
-	public OfficeFloorClasspathContainer(IPath path, IJavaProject javaProject)
-			throws Exception {
-		this.path = path;
-
-		// Ensure the framework class paths available
-		for (Class<?> frameworkClass : frameworkClasses) {
-
-			// Obtain the class path
-			IClasspathEntry classpath = ClasspathUtil
-					.createClasspathEntry(frameworkClass);
-			if (classpath == null) {
-				continue; // ignore as issue in obtaining
-			}
-
-			// Have path so add the class path
-			this.classPaths.add(classpath);
-		}
-
-		// Add the extension class paths (skipping container id)
-		List<String> classNames = new LinkedList<String>();
-		String[] pathSegments = path.segments();
-		for (int i = 1; i < pathSegments.length; i++) {
-			classNames.add(pathSegments[i]);
-		}
-		this.addExtensionClasspaths(classNames.toArray(new String[0]));
+	public OfficeFloorClasspathContainer(IPath containerPath) {
+		this.containerPath = containerPath;
 	}
 
 	/**
-	 * <p>
-	 * Adds the {@link IClasspathEntry} instances for the names of the extension
-	 * classes.
-	 * <p>
-	 * Note: that this method looks up extensions and extracts the class paths
-	 * from them. Should the extension not be found, then its class paths will
-	 * not be added.
-	 *
-	 * @param extensionClassNames
-	 *            Names of the classes for which there may be extensions.
+	 * Loads this {@link OfficeFloorClasspathContainer} from configuration.
+	 * 
+	 * @param configuration
+	 *            Configuration.
 	 * @throws Exception
-	 *             If fails to add extension class paths.
+	 *             If fails to load configuration.
 	 */
-	public void addExtensionClasspaths(String... extensionClassNames)
-			throws Exception {
+	public void load(InputStream configuration) throws Exception {
 
-		// Obtain the extension to class provider map
-		Map<String, ExtensionClasspathProvider> providers = ExtensionUtil
-				.createClasspathProvidersByExtensionClassNames();
+		// Clear this container
+		this.sourceAttachmentEntries.clear();
+		this.extensionEntries.clear();
 
-		// Iterate over the class names adding the class paths
-		for (String extensionClassName : extensionClassNames) {
-
-			// Obtain the extension class path provider
-			ExtensionClasspathProvider provider = providers
-					.get(extensionClassName);
-			if (provider != null) {
-
-				// Add the class path values for the extension
-				for (ClasspathProvision provision : provider
-						.getClasspathProvisions()) {
-
-					// Obtain the class path entry
-					IClasspathEntry classpathEntry = ClasspathUtil
-							.createClasspathEntry(provision);
-					if (classpathEntry == null) {
-						continue; // issue in obtaining class path
-					}
-
-					// Add the class path entry
-					this.addClasspathEntry(classpathEntry);
-				}
-			}
+		// Obtain the unmarshal configuration
+		final String configurationFileName = "UnmarshalConfiguration.xml";
+		InputStream unmarshalConfiguration = this.getClass()
+				.getResourceAsStream(configurationFileName);
+		if (unmarshalConfiguration == null) {
+			throw new FileNotFoundException("Can not find file "
+					+ configurationFileName);
 		}
+
+		// Obtain the unmarshaler
+		XmlUnmarshaller unmarshaller = TreeXmlUnmarshallerFactory.getInstance()
+				.createUnmarshaller(unmarshalConfiguration);
+
+		// Load this container
+		unmarshaller.unmarshall(configuration, this);
 	}
 
 	/**
-	 * Adds the {@link IClasspathEntry} if necessary so as to not create
-	 * duplicate {@link IClasspathEntry} instances.
-	 *
-	 * @param classpathEntry
-	 *            {@link IClasspathEntry}.
+	 * Stores this {@link OfficeFloorClasspathContainer} to configuration.
+	 * 
+	 * @param configuration
+	 *            Configuration.
+	 * @throws Exception
+	 *             If fails to store.
 	 */
-	public void addClasspathEntry(IClasspathEntry classpathEntry) {
+	public void store(OutputStream configuration) throws Exception {
 
-		// Determine if already exists
-		for (IClasspathEntry entry : this.classPaths) {
-			if (entry.equals(classpathEntry)) {
-				// Already available, so do not add
-				return;
+		// Obtain the marshal configuration
+		final String configurationFileName = "MarshalConfiguration.xml";
+		InputStream marshalConfiguration = this.getClass().getResourceAsStream(
+				configurationFileName);
+		if (marshalConfiguration == null) {
+			throw new FileNotFoundException("Can not find file "
+					+ configurationFileName);
+		}
+
+		// Obtain the marshaler
+		XmlMarshaller marshaler = TreeXmlMarshallerFactory.getInstance()
+				.createMarshaller(marshalConfiguration);
+
+		// Store this container
+		final Writer writer = new OutputStreamWriter(configuration);
+		marshaler.marshall(this, new XmlOutput() {
+			@Override
+			public void write(String content) throws IOException {
+				writer.write(content);
+			}
+		});
+		writer.flush();
+	}
+
+	/**
+	 * Obtains the {@link SourceAttachmentEntry} for the {@link IClasspathEntry}
+	 * {@link IPath}.
+	 * 
+	 * @param path
+	 *            {@link IClasspathEntry} {@link IPath}.
+	 */
+	public SourceAttachmentEntry getSourceAttachmentEntry(IPath path) {
+
+		// Obtain the portable path
+		String portablePath = path.toPortableString();
+
+		// Obtain the source attachment entry
+		for (SourceAttachmentEntry entry : this.sourceAttachmentEntries) {
+			if (portablePath.equals(entry.getClasspathPath())) {
+				// Found the source attachment entry
+				return entry;
 			}
 		}
 
-		// Not available, so add class path entry
-		this.classPaths.add(classpathEntry);
+		// As here, no source attachment entry
+		return null;
+	}
+
+	/**
+	 * Adds the {@link ExtensionClasspathProvider} class name.
+	 * 
+	 * @param extensionClassName
+	 *            {@link ExtensionClasspathProvider} class name.
+	 */
+	public void addExtensionClasspathProvider(String extensionClassName) {
+
+		// Determine if extension already added
+		for (ExtensionClasspathProviderEntry entry : this.extensionEntries) {
+			if (extensionClassName.equals(entry.getExtensionClassName())) {
+				return; // Already added
+			}
+		}
+
+		// Add the extension provider entry
+		this.extensionEntries.add(new ExtensionClasspathProviderEntry(
+				extensionClassName));
+	}
+
+	/**
+	 * Obtains the {@link SourceAttachmentEntry} instances.
+	 * 
+	 * @return {@link SourceAttachmentEntry} instances.
+	 */
+	public List<SourceAttachmentEntry> getSourceAttachmentEntries() {
+		return this.sourceAttachmentEntries;
+	}
+
+	/**
+	 * Adds the {@link SourceAttachmentEntry}.
+	 * 
+	 * @param entry
+	 *            {@link SourceAttachmentEntry}.
+	 */
+	public void addSourceAttachmentEntry(SourceAttachmentEntry entry) {
+		this.sourceAttachmentEntries.add(entry);
+	}
+
+	/**
+	 * Obtains the {@link ExtensionClasspathProviderEntry} instances.
+	 * 
+	 * @return {@link ExtensionClasspathProviderEntry} instances.
+	 */
+	public List<ExtensionClasspathProviderEntry> getExtensionClasspathProviderEntries() {
+		return this.extensionEntries;
+	}
+
+	/**
+	 * Adds the {@link ExtensionClasspathProviderEntry}.
+	 * 
+	 * @param entry
+	 *            {@link ExtensionClasspathProviderEntry}.
+	 */
+	public void addExtensionClasspathProviderEntry(
+			ExtensionClasspathProviderEntry entry) {
+		this.extensionEntries.add(entry);
 	}
 
 	/*
@@ -296,13 +252,66 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 
 	@Override
 	public IPath getPath() {
-		return this.path;
+		return this.containerPath;
 	}
 
 	@Override
 	public IClasspathEntry[] getClasspathEntries() {
+
+		// Obtain the mapping of extension class name to extension
+		Map<String, ExtensionClasspathProvider> providers = ExtensionUtil
+				.createClasspathProvidersByExtensionClassNames();
+
+		// Create the listing of class path entries
+		List<IClasspathEntry> classpathEntries = new LinkedList<IClasspathEntry>();
+
+		// Add the core classes first
+		for (Class<?> coreClass : CORE_CLASSES) {
+			this.addClasspathEntry(ClasspathUtil.createClasspathEntry(
+					coreClass, this), classpathEntries);
+		}
+
+		// Add the extension class path providers next
+		for (ExtensionClasspathProviderEntry providerEntry : this.extensionEntries) {
+			for (IClasspathEntry classpathEntry : providerEntry
+					.getClasspathEntries(providers, this)) {
+				this.addClasspathEntry(classpathEntry, classpathEntries);
+			}
+		}
+
 		// Return the class path entries
-		return this.classPaths.toArray(new IClasspathEntry[0]);
+		return classpathEntries.toArray(new IClasspathEntry[0]);
+	}
+
+	/**
+	 * Adds the {@link IClasspathEntry} to the list if not in the list.
+	 * 
+	 * @param entry
+	 *            {@link IClasspathEntry}. May be <code>null</code>.
+	 * @param list
+	 *            List to add the {@link IClasspathEntry}.
+	 */
+	private void addClasspathEntry(IClasspathEntry entry,
+			List<IClasspathEntry> list) {
+
+		// Do not add if null
+		if (entry == null) {
+			return;
+		}
+
+		// Determine if entry in list
+		for (IClasspathEntry item : list) {
+			// Check matching on kind, content and path
+			if ((entry.getEntryKind() == item.getEntryKind())
+					&& (entry.getContentKind() == item.getContentKind())
+					&& (entry.getPath().equals(item.getPath()))) {
+				// Already included, so do not add
+				return;
+			}
+		}
+
+		// As here not in list, so add
+		list.add(entry);
 	}
 
 }
