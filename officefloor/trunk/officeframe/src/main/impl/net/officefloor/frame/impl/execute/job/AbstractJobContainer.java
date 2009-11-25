@@ -48,7 +48,7 @@ import net.officefloor.frame.spi.team.Team;
 /**
  * Abstract implementation of the {@link Job} that provides the additional
  * {@link JobNode} functionality.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
@@ -84,7 +84,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param flow
 	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
@@ -113,7 +113,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Overridden by specific container to execute the {@link Job}.
-	 *
+	 * 
 	 * @return Parameter for the next {@link Job}.
 	 * @throws Throwable
 	 *             If failure in executing the {@link Job}.
@@ -295,17 +295,17 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.purgeEntries();
 							}
 
+							// Now to handle if job is complete
+							this.jobState = JobState.HANDLE_JOB_COMPLETION;
+
 							// Determine if join to a flow asset
 							if (headJoinOnFlowAsset != null) {
-								// Parallel job done before re-executing
-								this.jobState = JobState.ACTIVATE_PARALLEL_JOB;
-
 								// Finally block handles joins (outside locks)
-								return true;
+								return true; // join to wake this job
 							}
 
-						case ACTIVATE_PARALLEL_JOB:
-							// Activate only if job not completed
+						case HANDLE_JOB_COMPLETION:
+							// Handle only if job not completed
 							if (!this.isComplete) {
 								// Execute the job again
 								this.jobState = JobState.EXECUTE_JOB;
@@ -329,7 +329,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								}
 							}
 
-							// Flag job completed
+							// No parallel job so try for next job
 							this.jobState = JobState.ACTIVATE_NEXT_JOB_IN_FLOW;
 
 						case ACTIVATE_NEXT_JOB_IN_FLOW:
@@ -372,7 +372,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								job.activateJob();
 							}
 
-							// Complete this job
+							// Complete this job (flags state complete)
 							this.completeJob(activateSet);
 
 						case COMPLETED:
@@ -406,7 +406,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 						/*
 						 * FIXME escalation path takes account many sequential.
-						 *
+						 * 
 						 * DETAILS: Adding another sequential flow transforms
 						 * the previous sequential flow into a parallel flow.
 						 * This allows the flows to be executed in order and
@@ -416,7 +416,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						 * (which it should not). Some identifier is to be
 						 * provided to know when actually invoked as parallel
 						 * rather than sequential transformed to parallel.
-						 *
+						 * 
 						 * MITIGATION: This is an edge case where two sequential
 						 * flows are invoked and the first flow throws an
 						 * Escalation that is handled by this Node. Require
@@ -537,11 +537,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						// Should not receive failure here.
 						// If so likely something has corrupted - eg OOM.
 						System.err
-								.println("FAILURE: please restart office floor as likely become corrupt");
+								.println("FAILURE: please restart OfficeFloor as likely become corrupt");
 						ex.printStackTrace();
 					}
 
 					// Now complete
+					this.completeJob(activateSet);
 					return true;
 
 				} finally {
@@ -568,7 +569,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Completes this {@link Job}.
-	 *
+	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
 	 */
@@ -590,7 +591,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Indicates if the graph of parallel {@link JobNode} instances from this
 	 * {@link JobNode}are complete.
-	 *
+	 * 
 	 * @return <code>true</code> if the {@link JobNode} is not complete and this
 	 *         {@link JobNode} should release the
 	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
@@ -615,7 +616,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * Passive teams may complete the {@link JobNode} immediately on
 	 * {@link Team#assignJob(Job)} and hence processing of this {@link JobNode}
 	 * should continue.
-	 *
+	 * 
 	 * @param parallelJob
 	 *            Parallel {@link JobNode} to check if complete.
 	 * @return <code>true</code> if the {@link JobNode} is not complete and this
@@ -652,7 +653,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Obtains the parallel {@link JobNode} to execute.
-	 *
+	 * 
 	 * @return Parallel {@link JobNode} to execute.
 	 */
 	private JobNode getParallelJobNodeToExecute() {
@@ -676,7 +677,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Obtains the next {@link JobNode} to execute.
-	 *
+	 * 
 	 * @return Next {@link JobNode} to execute.
 	 */
 	private JobNode getNextJobNodeToExecute() {
@@ -711,7 +712,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/*
 	 * ======================= JobExecuteContext ==========================
-	 *
+	 * 
 	 * All methods will be guarded by lock taken in the doJob method.
 	 * Furthermore the JobContext methods do not require synchronised
 	 * coordination between themselves as executing a task is single threaded.
@@ -778,7 +779,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Creates an {@link EscalationFlow} {@link JobNode} from the input
 	 * {@link FlowMetaData}.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -808,7 +809,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates an asynchronous {@link Flow} from the input {@link FlowMetaData}.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -840,7 +841,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates a parallel {@link Flow} from the input {@link FlowMetaData}.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -871,7 +872,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	/**
 	 * Creates a sequential {@link Flow} from the input {@link FlowMetaData}.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
@@ -899,7 +900,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Loads a sequential {@link JobNode} relative to this {@link JobNode}
 	 * within the tree of {@link JobNode} instances.
-	 *
+	 * 
 	 * @param sequentialJobNode
 	 *            {@link JobNode} to load to tree.
 	 */
@@ -920,7 +921,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * Loads a parallel {@link JobNode} relative to this {@link JobNode} within
 	 * the tree of {@link JobNode} instances.
-	 *
+	 * 
 	 * @param parallelJobNode
 	 *            {@link JobNode} to load to tree.
 	 */
@@ -1097,9 +1098,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		EXECUTE_JOB,
 
 		/**
-		 * Indicates to activate the parallel {@link Job}.
+		 * Handles if the {@link Job} is completed.
 		 */
-		ACTIVATE_PARALLEL_JOB,
+		HANDLE_JOB_COMPLETION,
 
 		/**
 		 * Indicates to activate the next {@link Task} in the {@link Flow}.
@@ -1142,7 +1143,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param flowAsset
 		 *            {@link FlowAsset} that this {@link JobNode} is to join on.
 		 * @param timeout
@@ -1184,7 +1185,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param flowFuture
 		 *            Actual {@link FlowFuture}.
 		 */

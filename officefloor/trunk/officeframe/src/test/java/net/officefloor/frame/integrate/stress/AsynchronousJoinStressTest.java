@@ -234,7 +234,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 			// Provide progress on number of iterations
 			long asynchronousTasksRun = (this.iterationCount * this.maxAsynchronousFlows);
-			if ((asynchronousTasksRun % 10000) == 0) {
+			if ((asynchronousTasksRun % (this.maxIterations / 10)) == 0) {
 				AsynchronousJoinStressTest.this.printMessage("Iterations="
 						+ this.iterationCount + " (asynchronous tasks="
 						+ asynchronousTasksRun + ")");
