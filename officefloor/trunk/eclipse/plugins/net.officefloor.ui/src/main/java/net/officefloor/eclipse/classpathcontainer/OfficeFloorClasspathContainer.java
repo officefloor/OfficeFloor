@@ -154,6 +154,39 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	}
 
 	/**
+	 * Updates the state of this {@link IClasspathContainer} from the input
+	 * suggested {@link IClasspathContainer}.
+	 * 
+	 * @param containerSuggestion
+	 *            Suggested {@link IClasspathContainer}.
+	 */
+	public void updateState(IClasspathContainer containerSuggestion) {
+
+		// Clear the source attachment entries
+		this.sourceAttachmentEntries.clear();
+
+		// Reload the source attachment entries from suggested container
+		for (IClasspathEntry entry : containerSuggestion.getClasspathEntries()) {
+
+			// Obtain the details about the entry
+			IPath path = entry.getPath();
+			IPath sourceAttachmentPath = entry.getSourceAttachmentPath();
+			IPath sourceAttachmentRootPath = entry
+					.getSourceAttachmentRootPath();
+
+			// Include entry if has source attachments
+			if ((sourceAttachmentPath != null)
+					|| (sourceAttachmentRootPath != null)) {
+
+				// Create and register the source attachment entry
+				SourceAttachmentEntry sourceAttachmentEntry = new SourceAttachmentEntry(
+						path, sourceAttachmentPath, sourceAttachmentRootPath);
+				this.sourceAttachmentEntries.add(sourceAttachmentEntry);
+			}
+		}
+	}
+
+	/**
 	 * Obtains the {@link SourceAttachmentEntry} for the {@link IClasspathEntry}
 	 * {@link IPath}.
 	 * 
