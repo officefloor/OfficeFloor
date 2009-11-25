@@ -50,7 +50,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of the {@link ProcessState}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ProcessStateImpl implements ProcessState {
@@ -122,7 +122,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
 	 * @param officeMetaData
@@ -138,7 +138,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	/**
 	 * Initiate for a {@link ProcessState} initiated by a {@link ManagedObject}.
-	 *
+	 * 
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
 	 * @param officeMetaData
@@ -229,11 +229,11 @@ public class ProcessStateImpl implements ProcessState {
 	public void threadComplete(ThreadState thread,
 			JobNodeActivateSet activateSet) {
 
-		// Remove thread from active thread listing
-		if (this.activeThreads.removeEntry(thread)) {
+		// Removing completed thread so must obtain process lock
+		synchronized (this.getProcessLock()) {
 
-			// No more active threads so process is complete
-			synchronized (this.getProcessLock()) {
+			// Remove thread from active thread listing
+			if (this.activeThreads.removeEntry(thread)) {
 
 				// Notify process complete
 				for (ProcessCompletionListener listener : this.completionListeners) {
