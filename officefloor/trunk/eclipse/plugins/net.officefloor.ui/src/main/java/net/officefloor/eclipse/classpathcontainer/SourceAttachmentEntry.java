@@ -69,6 +69,27 @@ public class SourceAttachmentEntry {
 	}
 
 	/**
+	 * Initiate.
+	 * 
+	 * @param classpathPath
+	 *            {@link IClasspathEntry#getPath()}.
+	 * @param sourceAttachmentPath
+	 *            {@link IClasspathEntry#getSourceAttachmentPath()}.
+	 * @param sourceAttachmentRootPath
+	 *            {@link IClasspathEntry#getSourceAttachmentRootPath()}.
+	 */
+	public SourceAttachmentEntry(IPath classpathPath,
+			IPath sourceAttachmentPath, IPath sourceAttachmentRootPath) {
+		this.classpathPath = classpathPath.toPortableString();
+		this.sourceAttachmentPath = (sourceAttachmentPath != null ? sourceAttachmentPath
+				.toString()
+				: null);
+		this.sourceAttachmentRootPath = (sourceAttachmentRootPath != null ? sourceAttachmentRootPath
+				.toString()
+				: null);
+	}
+
+	/**
 	 * Obtains the {@link IClasspathEntry} {@link IPath#toPortableString()}.
 	 * 
 	 * @return {@link IClasspathEntry} {@link IPath#toPortableString()}.

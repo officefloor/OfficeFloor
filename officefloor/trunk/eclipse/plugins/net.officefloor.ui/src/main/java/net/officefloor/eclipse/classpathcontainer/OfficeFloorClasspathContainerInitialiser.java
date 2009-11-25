@@ -259,23 +259,15 @@ public class OfficeFloorClasspathContainerInitialiser extends
 			IJavaProject project, IClasspathContainer containerSuggestion)
 			throws CoreException {
 
-		// TODO remove
-		System.out
-				.println("TODO: implement updating the OfficeFloor classpath container");
-		System.out.println("Container type: "
-				+ containerSuggestion.getClass().getName());
-
-		// Obtain the suggestions
-		IClasspathEntry[] entries = containerSuggestion.getClasspathEntries();
-		for (IClasspathEntry entry : entries) {
-			System.out.println("Entry=" + entry.getPath() + ", sourcePath="
-					+ entry.getSourceAttachmentPath() + ", sourceRoot="
-					+ entry.getSourceAttachmentRootPath());
-		}
-
-		// Obtain the container
+		// Update the OfficeFloor container state
 		OfficeFloorClasspathContainer container = getOfficeFloorClasspathContainer(project);
-		System.out.println("Container: " + container.getClass().getName());
+		container.updateState(containerSuggestion);
+		storeOfficeFloorClasspathContainer(container, project, null);
+
+		// Update the OfficeFloor container for the project
+		JavaCore.setClasspathContainer(container.getPath(),
+				new IJavaProject[] { project },
+				new IClasspathContainer[] { containerSuggestion }, null);
 	}
 
 }
