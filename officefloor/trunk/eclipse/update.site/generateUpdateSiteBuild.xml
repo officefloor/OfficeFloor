@@ -2,7 +2,7 @@
 <project name="project" default="generate">
 
 	<description>
-	    Builds the Office Floor Eclipse Update Site Content.
+	    Builds the OfficeFloor Eclipse Update Site Content.
     </description>
 
 	<!-- ====== Ensure all properties available (and inherited from maven) ======== -->

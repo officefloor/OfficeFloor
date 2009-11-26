@@ -164,13 +164,14 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private AdministratorType<?, ?> administratorType = null;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public AdministratorType<?, ?> getAdministratorType() {
 
 		// Lazy load the administrator type
 		if (this.administratorType == null) {
 
 			// Obtain the administrator source class
-			Class<? extends AdministratorSource<?, ?>> administratorSourceClass = this.context
+			Class administratorSourceClass = this.context
 					.getAdministratorSourceClass(
 							this.administratorSourceClassName,
 							this.officeLocation, this.administratorName);
@@ -191,10 +192,11 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void buildAdministrator(OfficeBuilder officeBuilder) {
 
 		// Obtain the administrator source class
-		Class<? extends AdministratorSource<?, ?>> administratorSourceClass = this.context
+		Class administratorSourceClass = this.context
 				.getAdministratorSourceClass(this.administratorSourceClassName,
 						this.officeLocation, this.administratorName);
 		if (administratorSourceClass == null) {

@@ -290,6 +290,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void loadManagedObjectType() {
 
 		// Only load the managed object type once (whether successful or not)
@@ -299,7 +300,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.isManagedObjectTypeLoaded = true;
 
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
+		Class managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
 						this.locationType, this.location,
 						this.managedObjectSourceName);
@@ -443,7 +444,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagedObjectType<?> managedObjectType = this.getManagedObjectType();
 
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
+		Class managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
 						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
 						managedObjectSourceName);

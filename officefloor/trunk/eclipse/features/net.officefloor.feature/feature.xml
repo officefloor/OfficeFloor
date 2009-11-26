@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="net.officefloor.feature"
-      label="Office Floor Feature"
-      version="0.0.1">
+      label="OfficeFloor Feature"
+      version="0.0.2">
 
    <description url="http://www.officefloor.net/">
-      OfficeFloor simplifies the development of high performance systems.
+      OfficeFloor simplifies the development of high performance applications.
    </description>
 
    <copyright>
@@ -21,8 +21,9 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.commands"/>
+      <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.jobs"/>
       <import plugin="org.eclipse.debug.core"/>
@@ -35,6 +36,7 @@
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.osgi"/>
    </requires>
@@ -43,13 +45,13 @@
          id="net.officefloor.core"
          download-size="0"
          install-size="0"
-         version="0.0.1"/>
+         version="0.0.2"/>
 
    <plugin
          id="net.officefloor.ui"
          download-size="0"
          install-size="0"
-         version="0.0.1"
+         version="0.0.2"
          unpack="false"/>
 
 </feature>
