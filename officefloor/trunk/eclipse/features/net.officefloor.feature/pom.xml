@@ -7,7 +7,8 @@
 		<!--
 			Reminder: do not forget to update feature.xml with change in version.
 		-->
-		<version>0.0.1</version>
+		<version>0.0.2</version>
+		<relativePath>../../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.feature</artifactId>
 	<name>Eclipse Feature</name>
