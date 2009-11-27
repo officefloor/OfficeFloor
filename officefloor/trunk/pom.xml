@@ -13,8 +13,11 @@
 		<!-- Core functionality -->
 		<module>officeframe</module>
 		<module>officexml</module>
-        <module>officemodelgen</module>
+		<module>officemodelgen</module>
 		<module>officecompiler</module>
+
+		<!-- Run functionality -->
+		<module>officebuilding</module>
 
 		<!-- Plug-in functionality -->
 		<module>officeplugin_jdbc</module>
