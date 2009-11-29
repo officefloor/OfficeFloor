@@ -21,11 +21,10 @@ import java.io.Serializable;
 
 /**
  * <p>
- * Provides hooks for starting/stopping and sending {@link ProcessRequest}
- * instances to the managed process functionality.
+ * Provides hooks for starting/stopping and processing commands.
  * <p>
  * This object must be {@link Serializable} to allow its state to be sent to the
- * process.
+ * {@link Process}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,5 +43,26 @@ public interface ManagedProcess extends Serializable {
 	 *             If fails to start.
 	 */
 	void run(ManagedProcessContext context) throws Throwable;
+
+	/**
+	 * <p>
+	 * Does the particular command.
+	 * <p>
+	 * A new {@link Thread} is used for each invocation. This enables:
+	 * <ol>
+	 * <li>Commands to be executed in parallel</li>
+	 * <li>Commands not need to wait for previous commands to complete</li>
+	 * </ol>
+	 * <p>
+	 * This however requires the implementation of this method to be
+	 * {@link Thread} safe.
+	 * 
+	 * @param command
+	 *            Command known by the implementing {@link ManagedProcess}.
+	 * @return Response from the command.
+	 * @throws Throwable
+	 *             If command fails.
+	 */
+	Object doCommand(Object command) throws Throwable;
 
 }
