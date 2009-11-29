@@ -42,7 +42,7 @@ public class ProcessManager {
 	/**
 	 * {@link Timer}.
 	 */
-	private static Timer TIMER = new Timer(true);
+	private static final Timer TIMER = new Timer(true);
 
 	/**
 	 * Starts the {@link Process} for the {@link ManagedProcess} returning the
