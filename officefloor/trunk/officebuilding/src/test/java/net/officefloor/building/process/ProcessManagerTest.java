@@ -151,6 +151,22 @@ public class ProcessManagerTest extends TestCase {
 	}
 
 	/**
+	 * Ensure able to destroy the {@link Process}.
+	 */
+	public void testDestroyProcess() throws Exception {
+
+		// Start the process
+		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess(),
+				null);
+
+		// Destroy the process
+		this.manager.destroyProcess();
+
+		// Wait until process completes
+		this.waitUntilProcessComplete(this.manager);
+	}
+
+	/**
 	 * {@link ManagedProcess} to loop until informed to stop.
 	 */
 	public static class LoopUntilStopProcess implements ManagedProcess {
@@ -212,6 +228,13 @@ public class ProcessManagerTest extends TestCase {
 		ObjectInstance instance = server.getObjectInstance(this.manager
 				.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME));
 		assertNotNull("Should have Process Shell MBean", instance);
+
+		// Ensure Process Manager MBean registered
+		assertTrue(
+				"Process Manager MBean should be registered",
+				server
+						.isRegistered(this.manager
+								.getLocalObjectName(ProcessManager.PROCESS_MANAGER_OBJECT_NAME)));
 	}
 
 	/**
@@ -271,12 +294,16 @@ public class ProcessManagerTest extends TestCase {
 				.getLocalObjectName(mockRemoteMBeanName);
 		ObjectName processShellLocalMBeanName = this.manager
 				.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
+		ObjectName processManagerLocalMBeanName = this.manager
+				.getLocalObjectName(ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
 
 		// Ensure the MBeans are registered
 		assertTrue("Mock MBean not registered", server
 				.isRegistered(mockLocalMBeanName));
 		assertTrue("Process Shell MBean not registered", server
 				.isRegistered(processShellLocalMBeanName));
+		assertTrue("Process Manager MBean not registered", server
+				.isRegistered(processManagerLocalMBeanName));
 
 		// Stop the process
 		this.manager.triggerStopProcess();
@@ -287,6 +314,8 @@ public class ProcessManagerTest extends TestCase {
 				.isRegistered(mockLocalMBeanName));
 		assertFalse("Process Shell MBean should be unregistered", server
 				.isRegistered(processShellLocalMBeanName));
+		assertFalse("Process Manager MBean should be unregistered", server
+				.isRegistered(processManagerLocalMBeanName));
 	}
 
 	/**

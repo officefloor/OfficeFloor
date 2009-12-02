@@ -37,6 +37,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 
 import mx4j.tools.remote.proxy.RemoteMBeanProxy;
@@ -47,6 +48,20 @@ import mx4j.tools.remote.proxy.RemoteMBeanProxy;
  * @author Daniel Sagenschneider
  */
 public class ProcessManager implements ProcessManagerMBean {
+
+	/**
+	 * {@link ObjectName} for the {@link ProcessManagerMBean}.
+	 */
+	static ObjectName PROCESS_MANAGER_OBJECT_NAME;
+
+	static {
+		try {
+			PROCESS_MANAGER_OBJECT_NAME = new ObjectName("process", "type",
+					"ProcessManager");
+		} catch (MalformedObjectNameException ex) {
+			// This should never be the case
+		}
+	}
 
 	/**
 	 * Active set of MBean domain name spaces.
@@ -149,7 +164,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			// Handle process responses
 			new ProcessNotificationHandler(processManager,
-					fromProcessServerSocket, mbeanServer).start();
+					fromProcessServerSocket).start();
 
 			// Send managed process and response port to process
 			ObjectOutputStream toProcessPipe = new ObjectOutputStream(process
@@ -200,6 +215,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	private final MBeanServer mbeanServer;
 
 	/**
+	 * Listing of the {@link ObjectName} instances for the registered MBeans.
+	 */
+	private List<ObjectName> registeredMBeanNames = new LinkedList<ObjectName>();
+
+	/**
 	 * Flag indicating if the {@link Process} has been initialised.
 	 */
 	private volatile boolean isInitialised = false;
@@ -247,6 +267,52 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
+	 * Registers the remote MBean locally.
+	 * 
+	 * @param remoteMBeanName
+	 *            {@link ObjectName} of the MBean in the remote
+	 *            {@link MBeanServer} in the {@link Process}.
+	 * @param connection
+	 *            {@link MBeanServerConnection} to the
+	 *            {@link JMXConnectorServer} for the {@link Process}.
+	 * @throws Exception
+	 *             If fails to register the MBean.
+	 */
+	private void registerRemoteMBeanLocally(ObjectName remoteMBeanName,
+			MBeanServerConnection connection) throws Exception {
+		// Register the remote MBean locally
+		RemoteMBeanProxy mbeanProxy = new RemoteMBeanProxy(remoteMBeanName,
+				connection);
+		this.registerMBean(mbeanProxy, remoteMBeanName);
+	}
+
+	/**
+	 * Registers the MBean.
+	 * 
+	 * @param mbean
+	 *            Mbean.
+	 * @param name
+	 *            {@link ObjectName} for the MBean.
+	 * @throws Exception
+	 *             If fails to register the MBean.
+	 */
+	private synchronized void registerMBean(Object mbean, ObjectName name)
+			throws Exception {
+
+		// Do not register if already complete
+		if (this.isComplete) {
+			return;
+		}
+
+		// Register the MBean
+		ObjectName localMBeanName = this.getLocalObjectName(name);
+		this.mbeanServer.registerMBean(mbean, localMBeanName);
+
+		// Keep track of the registered MBeans
+		this.registeredMBeanNames.add(localMBeanName);
+	}
+
+	/**
 	 * Flags the {@link Process} is initialised.
 	 */
 	private void flagInitialised() {
@@ -263,7 +329,28 @@ public class ProcessManager implements ProcessManagerMBean {
 	/**
 	 * Flags the {@link Process} is complete.
 	 */
-	private void flagComplete() {
+	private synchronized void flagComplete() {
+
+		// Do not run completion twice
+		if (this.isComplete) {
+			return;
+		}
+
+		// Unregister the MBeans
+		for (ObjectName mbeanName : this.registeredMBeanNames) {
+			try {
+				this.mbeanServer.unregisterMBean(mbeanName);
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		// Release process name space
+		synchronized (activeMBeanDomainNamespaces) {
+			activeMBeanDomainNamespaces.remove(this.mbeanDomainNamespace);
+		}
+
+		// Flag complete
 		this.isComplete = true;
 	}
 
@@ -330,16 +417,6 @@ public class ProcessManager implements ProcessManagerMBean {
 		private final ServerSocket fromProcessServerSocket;
 
 		/**
-		 * {@link MBeanServer}.
-		 */
-		private final MBeanServer mbeanServer;
-
-		/**
-		 * Listing of the {@link ObjectName} instances for the registered MBeans
-		 */
-		private List<ObjectName> registeredMBeanNames = new LinkedList<ObjectName>();
-
-		/**
 		 * {@link MBeanServerConnection} to the {@link ManagedProcess}
 		 * {@link MBeanServer}. This is lazy created as needed.
 		 */
@@ -353,16 +430,13 @@ public class ProcessManager implements ProcessManagerMBean {
 		 * @param fromProcessServerSocket
 		 *            {@link ServerSocket} to receive {@link ProcessResponse}
 		 *            instances.
-		 * @param mbeanServer
-		 *            {@link MBeanServer}. May be <code>null</code>.
 		 */
 		public ProcessNotificationHandler(ProcessManager processManager,
-				ServerSocket fromProcessServerSocket, MBeanServer mbeanServer) {
+				ServerSocket fromProcessServerSocket) {
 			this.processManager = processManager;
 			this.fromProcessServerSocket = fromProcessServerSocket;
-			this.mbeanServer = mbeanServer;
 
-			// Flag as deamon (should not stop process finishing)
+			// Flag as daemon (should not stop process finishing)
 			this.setDaemon(true);
 		}
 
@@ -375,6 +449,10 @@ public class ProcessManager implements ProcessManagerMBean {
 			try {
 				// Accept only the first connection (from process)
 				Socket socket = this.fromProcessServerSocket.accept();
+
+				// Register the Process Manager MBean
+				this.processManager.registerMBean(this.processManager,
+						ProcessManager.PROCESS_MANAGER_OBJECT_NAME);
 
 				// Obtain pipe from process
 				ObjectInputStream fromProcessPipe = new ObjectInputStream(
@@ -409,7 +487,7 @@ public class ProcessManager implements ProcessManagerMBean {
 							Thread.sleep(100);
 
 							// Check if process is complete
-							if (this.processManager.isComplete) {
+							if (this.processManager.isProcessComplete()) {
 								// Process complete, so stop
 								return;
 							} else {
@@ -420,18 +498,10 @@ public class ProcessManager implements ProcessManagerMBean {
 						this.connection = connector.getMBeanServerConnection();
 					}
 
-					// Obtain the remote MBean name
-					ObjectName remoteMBeanName = registration.getMBeanName();
-
 					// Register the remote MBean locally
-					ObjectName localMBeanName = this.processManager
-							.getLocalObjectName(remoteMBeanName);
-					RemoteMBeanProxy mbeanProxy = new RemoteMBeanProxy(
-							remoteMBeanName, this.connection);
-					this.mbeanServer.registerMBean(mbeanProxy, localMBeanName);
-
-					// Keep track of the registered MBeans
-					this.registeredMBeanNames.add(localMBeanName);
+					ObjectName remoteMBeanName = registration.getMBeanName();
+					this.processManager.registerRemoteMBeanLocally(
+							remoteMBeanName, connection);
 
 					// Determine if process shell MBean.
 					// Must be done after registering to ensure available.
@@ -450,23 +520,7 @@ public class ProcessManager implements ProcessManagerMBean {
 				ex.printStackTrace();
 
 			} finally {
-				// Unregister the MBeans
-				for (ObjectName mbeanName : this.registeredMBeanNames) {
-					try {
-						this.mbeanServer.unregisterMBean(mbeanName);
-					} catch (Throwable ex) {
-						ex.printStackTrace();
-					}
-				}
-
-				// Release process name space as it is complete
-				synchronized (ProcessManager.activeMBeanDomainNamespaces) {
-					ProcessManager.activeMBeanDomainNamespaces
-							.remove(this.processManager
-									.getMBeanDomainNamespace());
-				}
-
-				// Close the socket as process complete
+				// Close the socket as no longer listening
 				try {
 					this.fromProcessServerSocket.close();
 				} catch (Throwable ex) {
@@ -524,10 +578,8 @@ public class ProcessManager implements ProcessManagerMBean {
 				// Provide stack trace and exit
 				ex.printStackTrace();
 			} finally {
-				if (this.processManager != null) {
-					// Flag process is complete
-					this.processManager.flagComplete();
-				}
+				// Flag process is complete
+				this.processManager.flagComplete();
 			}
 		}
 	}
