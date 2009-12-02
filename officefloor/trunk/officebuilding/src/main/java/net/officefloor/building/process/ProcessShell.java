@@ -17,11 +17,28 @@
  */
 package net.officefloor.building.process;
 
-import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.server.RMIServerSocketFactory;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
 
 /**
  * Provides the <code>main</code> method of an invoked {@link Process} for a
@@ -29,7 +46,26 @@ import java.net.Socket;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessShell extends Thread implements ManagedProcessContext {
+public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
+
+	/**
+	 * {@link ObjectName} for the {@link ProcessShellMBean}.
+	 */
+	static ObjectName PROCESS_SHELL_OBJECT_NAME;
+
+	static {
+		try {
+			PROCESS_SHELL_OBJECT_NAME = new ObjectName("process", "type",
+					"ProcessShell");
+		} catch (MalformedObjectNameException ex) {
+			// This should never be the case
+		}
+	}
+
+	/**
+	 * JMX communication protocol.
+	 */
+	private static final String JMX_COMMUNICATION_PROTOCOL = "rmi";
 
 	/**
 	 * Entrance point for running the {@link ManagedProcess}.
@@ -39,53 +75,104 @@ public class ProcessShell extends Thread implements ManagedProcessContext {
 	 * @throws Throwable
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	public static void main(String... arguments) throws Throwable {
+	public static void main(String[] arguments) throws Throwable {
+		main(System.in, arguments);
+	}
+
+	/**
+	 * Runs the process providing ability to specify the from parent pipe.
+	 * 
+	 * @param fromParentPipe
+	 *            From parent pipe.
+	 * @param arguments
+	 *            Arguments.
+	 * @throws Throwable
+	 *             If failure in running the {@link ManagedProcess}.
+	 */
+	static void main(InputStream fromParentPipe, String... arguments)
+			throws Throwable {
+
+		// Obtain pipe from parent
+		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(
+				fromParentPipe);
 
 		// Obtain the Managed Process (always first)
-		ObjectInputStream fromParentPipe = new ObjectInputStream(System.in);
-		Object object = fromParentPipe.readObject();
+		Object object = fromParentObjectPipe.readObject();
 		if (!(object instanceof ManagedProcess)) {
 			throw new IllegalArgumentException("First object must be a "
 					+ ManagedProcess.class.getName());
 		}
 		ManagedProcess managedProcess = (ManagedProcess) object;
 
-		// Connect to parent to send responses
-		int parentPort = fromParentPipe.readInt();
+		// Connect to parent to send notifications
+		int parentPort = fromParentObjectPipe.readInt();
 		Socket parentSocket = new Socket();
 		parentSocket.connect(new InetSocketAddress(parentPort));
 		ObjectOutputStream toParentPipe = new ObjectOutputStream(parentSocket
 				.getOutputStream());
 
-		// Create instance to start processing commands
-		ProcessShell context = new ProcessShell(fromParentPipe, toParentPipe,
-				managedProcess, arguments);
-		context.setDaemon(true);
-		context.start();
+		// Create the MBean Server
+		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
 
-		// Run the managed process
-		managedProcess.run(context);
+		// Create the server socket for the JMX Connector Server
+		final ServerSocket serverSocket = new ServerSocket();
+		serverSocket.bind(null); // Any available port
+		int serverPort = serverSocket.getLocalPort();
+
+		// Set up environment for JMX Connector Server
+		Map<String, Object> environment = new HashMap<String, Object>();
+		environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+				new RMIServerSocketFactory() {
+					@Override
+					public ServerSocket createServerSocket(int port)
+							throws IOException {
+						return serverSocket;
+					}
+				});
+
+		// Create and start the JMX Connecter Server (also ensure shut down)
+		JMXConnectorServer connectorServer = null;
+		try {
+			connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
+					new JMXServiceURL(JMX_COMMUNICATION_PROTOCOL, null,
+							serverPort), environment, mbeanServer);
+			connectorServer.start();
+
+			// Create instance as context
+			ProcessShell context = new ProcessShell(arguments, connectorServer,
+					toParentPipe);
+
+			// Initialise the managed process
+			managedProcess.init(context);
+
+			// Initialised so register the process shell MBean
+			context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
+
+			// Run the managed process
+			managedProcess.main();
+
+		} finally {
+			// Ensure shut down JMX connector server
+			if (connectorServer != null) {
+				connectorServer.stop();
+			}
+		}
 	}
-
-	/**
-	 * {@link ObjectInputStream} to read in the requests.
-	 */
-	private final ObjectInputStream fromParentPipe;
-
-	/**
-	 * {@link ObjectOutputStream} to send the responses.
-	 */
-	private final ObjectOutputStream toParentPipe;
-
-	/**
-	 * {@link ManagedProcess}.
-	 */
-	private final ManagedProcess managedProcess;
 
 	/**
 	 * Command arguments.
 	 */
 	private final String[] commandArguments;
+
+	/**
+	 * {@link JMXConnectorServer}.
+	 */
+	private final JMXConnectorServer connectorServer;
+
+	/**
+	 * {@link ObjectOutputStream} to send notifications.
+	 */
+	private final ObjectOutputStream toParentPipe;
 
 	/**
 	 * Flag indicating if should continue processing.
@@ -95,66 +182,28 @@ public class ProcessShell extends Thread implements ManagedProcessContext {
 	/**
 	 * Initiate.
 	 * 
-	 * @param fromParentPipe
-	 *            {@link ObjectInputStream} to read in the requests.
-	 * @param toParentPipe
-	 *            {@link ObjectOutputStream} to send the responses.
-	 * @param managedProcess
-	 *            {@link ManagedProcess}.
 	 * @param commandArguments
 	 *            Command arguments.
+	 * @param connectorServer
+	 *            {@link JMXConnectorServers}.
+	 * @param toParentPipe
+	 *            {@link ObjectOutputStream} to send the notifications.
 	 */
-	public ProcessShell(ObjectInputStream fromParentPipe,
-			ObjectOutputStream toParentPipe, ManagedProcess managedProcess,
-			String[] commandArguments) {
-		this.fromParentPipe = fromParentPipe;
-		this.toParentPipe = toParentPipe;
-		this.managedProcess = managedProcess;
+	public ProcessShell(String[] commandArguments,
+			JMXConnectorServer connectorServer, ObjectOutputStream toParentPipe) {
 		this.commandArguments = commandArguments;
+		this.connectorServer = connectorServer;
+		this.toParentPipe = toParentPipe;
 	}
 
 	/*
-	 * ========================== Thread ==================================
+	 * ==================== ProcessShellMBean =============================
 	 */
 
 	@Override
-	public void run() {
-		try {
-			// Loop forever processing requests
-			for (;;) {
-
-				// Read in the request
-				Object object = this.fromParentPipe.readObject();
-				if (!(object instanceof ProcessRequest)) {
-					throw new IllegalArgumentException("Unknown request: "
-							+ object
-							+ " ["
-							+ (object == null ? "null" : object.getClass()
-									.getName()));
-				}
-				ProcessRequest request = (ProcessRequest) object;
-
-				// Handle request
-				if (request.isStop()) {
-					// Flag to stop
-					this.isContinueProcessing = false;
-
-				} else {
-					// Run the command
-					long requestId = request.getRequestId();
-					Object command = request.getCommand();
-
-					// Create the Command executor and run command
-					new CommandExecutor(requestId, command,
-							this.managedProcess, this.toParentPipe).start();
-				}
-			}
-		} catch (EOFException ex) {
-			// Process is complete
-		} catch (Throwable ex) {
-			// Indicate failure
-			ex.printStackTrace();
-		}
+	public void triggerStopProcess() {
+		// Flag to stop processing
+		this.isContinueProcessing = false;
 	}
 
 	/*
@@ -167,89 +216,28 @@ public class ProcessShell extends Thread implements ManagedProcessContext {
 	}
 
 	@Override
-	public boolean continueProcessing() {
-		return this.isContinueProcessing;
+	public void registerMBean(Object mbean, ObjectName name)
+			throws InstanceAlreadyExistsException, MBeanRegistrationException,
+			NotCompliantMBeanException {
+
+		// Register the MBean locally
+		this.connectorServer.getMBeanServer().registerMBean(mbean, name);
+
+		// Notify managing parent process of the MBean
+		JMXServiceURL serviceUrl = this.connectorServer.getAddress();
+		try {
+			this.toParentPipe.writeObject(new MBeanRegistrationNotification(
+					serviceUrl, name));
+			this.toParentPipe.flush();
+		} catch (IOException ex) {
+			// Must be able to register with managing parent process
+			throw new MBeanRegistrationException(ex);
+		}
 	}
 
-	/**
-	 * {@link Thread} to do a command on the {@link ManagedProcess}.
-	 */
-	private static class CommandExecutor extends Thread {
-
-		/**
-		 * {@link ProcessRequest} Id to correlate response with request.
-		 */
-		private final long requestId;
-
-		/**
-		 * Command to execute.
-		 */
-		private final Object command;
-
-		/**
-		 * {@link ManagedProcess}.
-		 */
-		private final ManagedProcess managedProcess;
-
-		/**
-		 * {@link ObjectOutputStream} to send the response.
-		 */
-		private final ObjectOutputStream toParentPipe;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param requestId
-		 *            {@link ProcessRequest} Id to correlate response with
-		 *            request.
-		 * @param command
-		 *            Command to execute.
-		 * @param managedProcess
-		 *            {@link ManagedProcess}.
-		 * @param toParentPipe
-		 *            {@link ObjectOutputStream} to send the response.
-		 */
-		public CommandExecutor(long requestId, Object command,
-				ManagedProcess managedProcess, ObjectOutputStream toParentPipe) {
-			super("ProcessRequest" + requestId);
-			this.requestId = requestId;
-			this.command = command;
-			this.managedProcess = managedProcess;
-			this.toParentPipe = toParentPipe;
-		}
-
-		/*
-		 * ===================== Thread =================================
-		 */
-
-		@Override
-		public void run() {
-
-			// Obtain the process response
-			ProcessResponse response;
-			try {
-
-				// Do the command
-				Object commandResponse = this.managedProcess
-						.doCommand(this.command);
-
-				// Create the successful command response
-				response = new ProcessResponse(this.requestId, commandResponse,
-						null);
-			} catch (Throwable ex) {
-				// Create the failed command response
-				response = new ProcessResponse(this.requestId, null, ex);
-			}
-
-			// Send the response
-			try {
-				this.toParentPipe.writeObject(response);
-				this.toParentPipe.flush();
-			} catch (Throwable ex) {
-				// Indicate failure
-				ex.printStackTrace();
-			}
-		}
+	@Override
+	public boolean continueProcessing() {
+		return this.isContinueProcessing;
 	}
 
 }

@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * Provides hooks for starting/stopping and processing commands.
+ * Provides hooks for managing the {@link Process}.
  * <p>
  * This object must be {@link Serializable} to allow its state to be sent to the
  * {@link Process}.
@@ -32,37 +32,29 @@ public interface ManagedProcess extends Serializable {
 
 	/**
 	 * <p>
-	 * Runs the functionality of this managed process.
+	 * Initialises this {@link ManagedProcess}.
+	 * <p>
+	 * All MBean instances registered before this method returns will be made
+	 * available to the {@link ProcessManager} before it is returned on starting
+	 * the {@link Process}.
+	 * 
+	 * @param context
+	 *            {@link ManagedProcessContext}.
+	 * @throws Throwable
+	 *             If fails to initialise.
+	 */
+	void init(ManagedProcessContext context) throws Throwable;
+
+	/**
+	 * <p>
+	 * Runs the functionality.
 	 * <p>
 	 * This should be a blocking call. Once this method returns the process is
 	 * considered finished.
 	 * 
-	 * @param commandArguments
-	 *            Command arguments for the managed process functionality.
 	 * @throws Throwable
-	 *             If fails to start.
+	 *             If fails.
 	 */
-	void run(ManagedProcessContext context) throws Throwable;
-
-	/**
-	 * <p>
-	 * Does the particular command.
-	 * <p>
-	 * A new {@link Thread} is used for each invocation. This enables:
-	 * <ol>
-	 * <li>Commands to be executed in parallel</li>
-	 * <li>Commands not need to wait for previous commands to complete</li>
-	 * </ol>
-	 * <p>
-	 * This however requires the implementation of this method to be
-	 * {@link Thread} safe.
-	 * 
-	 * @param command
-	 *            Command known by the implementing {@link ManagedProcess}.
-	 * @return Response from the command.
-	 * @throws Throwable
-	 *             If command fails.
-	 */
-	Object doCommand(Object command) throws Throwable;
+	void main() throws Throwable;
 
 }
