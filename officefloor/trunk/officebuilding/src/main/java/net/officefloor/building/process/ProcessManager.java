@@ -23,26 +23,35 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+
+import mx4j.tools.remote.proxy.RemoteMBeanProxy;
 
 /**
  * Manages a {@link Process}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessManager {
+public class ProcessManager implements ProcessManagerMBean {
 
 	/**
-	 * {@link Timer}.
+	 * Active set of MBean domain name spaces.
 	 */
-	private static final Timer TIMER = new Timer(true);
+	private static final Set<String> activeMBeanDomainNamespaces = new HashSet<String>();
 
 	/**
 	 * Starts the {@link Process} for the {@link ManagedProcess} returning the
@@ -50,12 +59,20 @@ public class ProcessManager {
 	 * 
 	 * @param managedProcess
 	 *            {@link ManagedProcess}.
+	 * @param configuration
+	 *            Optional {@link ProcessConfiguration}. May be
+	 *            <code>null</code> to use defaults.
 	 * @return {@link ProcessManager}.
 	 * @throws ProcessException
 	 *             If fails to start the {@link Process}.
 	 */
-	public static ProcessManager startProcess(ManagedProcess managedProcess)
-			throws ProcessException {
+	public static ProcessManager startProcess(ManagedProcess managedProcess,
+			ProcessConfiguration configuration) throws ProcessException {
+
+		// Ensure have configuration to prevent NPE
+		if (configuration == null) {
+			configuration = new ProcessConfiguration();
+		}
 
 		// Obtain the java bin directory location
 		String javaHome = System.getProperty("java.home");
@@ -87,6 +104,25 @@ public class ProcessManager {
 		command.add(classPath);
 		command.add(ProcessShell.class.getName());
 
+		// Obtain the process name
+		String processName = configuration.getProcessName();
+		if (processName == null) {
+			processName = "Process";
+		}
+
+		// Obtain the unique MBean domain name space
+		String mbeanDomainNamespace = processName;
+		synchronized (activeMBeanDomainNamespaces) {
+			int suffix = 1;
+			while (activeMBeanDomainNamespaces.contains(mbeanDomainNamespace)) {
+				suffix++;
+				mbeanDomainNamespace = processName + suffix;
+			}
+
+			// Reserve name space for the process
+			activeMBeanDomainNamespaces.add(mbeanDomainNamespace);
+		}
+
 		try {
 			// Create the from process communication pipe
 			ServerSocket fromProcessServerSocket = new ServerSocket();
@@ -97,24 +133,42 @@ public class ProcessManager {
 			ProcessBuilder builder = new ProcessBuilder(command);
 			Process process = builder.start();
 
+			// Obtain the MBean Server
+			MBeanServer mbeanServer = configuration.getMbeanServer();
+			if (mbeanServer == null) {
+				mbeanServer = ManagementFactory.getPlatformMBeanServer();
+			}
+
 			// Create the process manager for the process
-			ObjectOutputStream toProcessPipe = new ObjectOutputStream(process
-					.getOutputStream());
-			ProcessManager processManager = new ProcessManager(process,
-					toProcessPipe);
+			ProcessManager processManager = new ProcessManager(processName,
+					mbeanDomainNamespace, process, mbeanServer);
 
 			// Gobble the process's stdout and stderr
 			new StreamGobbler(process.getInputStream(), processManager).start();
 			new StreamGobbler(process.getErrorStream(), processManager).start();
 
 			// Handle process responses
-			new ProcessResponseHandler(processManager, fromProcessServerSocket)
-					.start();
+			new ProcessNotificationHandler(processManager,
+					fromProcessServerSocket, mbeanServer).start();
 
 			// Send managed process and response port to process
+			ObjectOutputStream toProcessPipe = new ObjectOutputStream(process
+					.getOutputStream());
 			toProcessPipe.writeObject(managedProcess);
 			toProcessPipe.writeInt(fromProcessPort);
 			toProcessPipe.flush();
+
+			try {
+				// Wait until process is initialised (or complete)
+				synchronized (processManager) {
+					while ((!processManager.isInitialised)
+							&& (!processManager.isComplete)) {
+						processManager.wait(100);
+					}
+				}
+			} catch (InterruptedException ex) {
+				// Continue on as interrupted
+			}
 
 			// Return the manager for the process
 			return processManager;
@@ -126,9 +180,14 @@ public class ProcessManager {
 	}
 
 	/**
-	 * Map of active commands by request id.
+	 * Name of the {@link Process}.
 	 */
-	private final Map<Long, CommandCallback> activeCommands = new HashMap<Long, CommandCallback>();
+	private final String processName;
+
+	/**
+	 * MBean domain name space for the {@link Process}.
+	 */
+	private final String mbeanDomainNamespace;
 
 	/**
 	 * {@link Process} being managed.
@@ -136,15 +195,14 @@ public class ProcessManager {
 	private final Process process;
 
 	/**
-	 * {@link ObjectOutputStream} to send the {@link ProcessRequest} instances
-	 * to the {@link Process}.
+	 * {@link MBeanServer}.
 	 */
-	private final ObjectOutputStream toProcessPipe;
+	private final MBeanServer mbeanServer;
 
 	/**
-	 * Next {@link ProcessRequest} Id.
+	 * Flag indicating if the {@link Process} has been initialised.
 	 */
-	private long nextRequestId = 1;
+	private volatile boolean isInitialised = false;
 
 	/**
 	 * Flag indicating if the {@link Process} is complete.
@@ -154,110 +212,52 @@ public class ProcessManager {
 	/**
 	 * Initiate.
 	 * 
+	 * @param processName
+	 *            Name identifying the {@link Process}.
+	 * @param mbeanDomainNamespace
+	 *            MBean domain name space for the {@link Process}.
 	 * @param process
 	 *            {@link Process} being managed.
-	 * @param toProcessPipe
-	 *            {@link ObjectOutputStream} to send the {@link ProcessRequest}
-	 *            instances to the {@link Process}.
+	 * @param mbeanServer
+	 *            {@link MBeanServer}.
 	 */
-	private ProcessManager(Process process, ObjectOutputStream toProcessPipe) {
+	private ProcessManager(String processName, String mbeanDomainNamespace,
+			Process process, MBeanServer mbeanServer) {
+		this.processName = processName;
+		this.mbeanDomainNamespace = mbeanDomainNamespace;
 		this.process = process;
-		this.toProcessPipe = toProcessPipe;
+		this.mbeanServer = mbeanServer;
 	}
 
 	/**
-	 * <p>
-	 * Triggers for a graceful shutdown of the {@link Process}.
-	 * <p>
-	 * This is a non-blocking call to allow a timeout on graceful shutdown.
+	 * Obtains the local {@link ObjectName} for the remote MBean in the
+	 * {@link Process} being managed.
 	 * 
-	 * @throws ProcessException
-	 *             If fails to trigger stopping the {@link Process}.
+	 * @param objectName
+	 *            {@link ObjectName} of the remote MBean.
+	 * @return Local {@link ObjectName} for the remote MBean in the
+	 *         {@link Process} being managed.
+	 * @throws MalformedObjectNameException
+	 *             If resulting local name is malformed.
 	 */
-	public synchronized void triggerStopProcess() throws ProcessException {
+	public ObjectName getLocalObjectName(ObjectName objectName)
+			throws MalformedObjectNameException {
+		return new ObjectName(this.mbeanDomainNamespace + "."
+				+ objectName.getDomain(), objectName.getKeyPropertyList());
+	}
 
-		// Ignore if already complete
-		if (this.isComplete) {
-			return;
+	/**
+	 * Flags the {@link Process} is initialised.
+	 */
+	private void flagInitialised() {
+
+		// Flag initialised
+		this.isInitialised = true;
+
+		// Notify immediately that initialised
+		synchronized (this) {
+			this.notify();
 		}
-
-		// Send stop request
-		this.sendRequest(ProcessRequest.STOP_REQUEST);
-	}
-
-	/**
-	 * Triggers forcibly destroying the {@link Process}.
-	 */
-	public void destroyProcess() {
-		this.process.destroy();
-	}
-
-	/**
-	 * Determines if the {@link ManagedProcess} is complete.
-	 * 
-	 * @return <code>true</code> if the {@link ManagedProcess} is complete.
-	 */
-	public boolean isProcessComplete() {
-		// Return whether process complete
-		return this.isComplete;
-	}
-
-	/**
-	 * <p>
-	 * Does the command on the {@link ManagedProcess}.
-	 * <p>
-	 * This asynchronously invokes the command and as such this method is
-	 * non-blocking. Use the {@link CommandCallback} to be informed about
-	 * completion of the command.
-	 * 
-	 * @param command
-	 *            Command.
-	 * @param callback
-	 *            {@link CommandCallback}. May be <code>null</code> if not
-	 *            interested in results of command.
-	 * @throws ProcessException
-	 *             If fails to invoke the command.
-	 */
-	public synchronized void doCommand(Object command, CommandCallback callback)
-			throws ProcessException {
-
-		// Create the request for the command
-		long requestId = this.nextRequestId++;
-		ProcessRequest request = new ProcessRequest(requestId, command);
-
-		// Create and register the command
-		this.activeCommands.put(new Long(requestId), callback);
-
-		// Send the request
-		this.sendRequest(request);
-	}
-
-	/**
-	 * Convenience method to invoke a command on the {@link ManagedProcess}
-	 * blocking until the command completes.
-	 * 
-	 * @param command
-	 *            Command.
-	 * @param timeout
-	 *            Timeout of the command.
-	 * @return Response.
-	 * @throws ProcessException
-	 *             If command fails or times out.
-	 */
-	public Object doCommand(Object command, long timeout)
-			throws ProcessException {
-
-		// Create the blocking command call back
-		BlockingCommandCallback callback = new BlockingCommandCallback();
-
-		// Register for time out
-		TIMER.schedule(callback, timeout);
-
-		// Do command
-		this.doCommand(command, callback);
-
-		// Block waiting for response / failure / time out
-		return callback.getResponse();
 	}
 
 	/**
@@ -267,142 +267,57 @@ public class ProcessManager {
 		this.isComplete = true;
 	}
 
-	/**
-	 * Obtains the {@link CommandCallback} for the completed command.
-	 * 
-	 * @param requestId
-	 *            {@link ProcessRequest} id of the command.
-	 * @return {@link CommandCallback} or <code>null</code> if none available.
+	/*
+	 * ================== ProcessManagerMBean ======================
 	 */
-	private synchronized CommandCallback getCallbackForCompletedCommand(
-			Long requestId) {
 
-		// Obtain the command call back
-		CommandCallback callback = this.activeCommands.get(requestId);
-		if (callback != null) {
-			// Command no longer active
-			this.activeCommands.remove(requestId);
-		}
-
-		// Return the command call back
-		return callback;
+	@Override
+	public String getProcessName() {
+		return this.processName;
 	}
 
-	/**
-	 * Sends the {@link ProcessRequest} to the {@link Process}.
-	 * 
-	 * @param request
-	 *            {@link ProcessRequest}.
-	 * @throws ProcessException
-	 *             {@link ProcessException}.
-	 */
-	private void sendRequest(ProcessRequest request) throws ProcessException {
-		try {
-			// Send the request to the process
-			this.toProcessPipe.writeObject(request);
-			this.toProcessPipe.flush();
+	@Override
+	public String getMBeanDomainNamespace() {
+		return this.mbeanDomainNamespace;
+	}
 
-		} catch (IOException ex) {
+	@Override
+	public void triggerStopProcess() throws ProcessException {
+
+		// Ignore if already complete
+		if (this.isComplete) {
+			return;
+		}
+
+		try {
+			// Obtain the process shell MBean name
+			ObjectName name = this
+					.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
+
+			// Trigger stopping the process
+			this.mbeanServer.invoke(name, "triggerStopProcess", null, null);
+
+		} catch (Exception ex) {
 			// Propagate failure
 			throw new ProcessException(ex);
 		}
 	}
 
-	/**
-	 * Blocking {@link CommandCallback}.
-	 */
-	private static class BlockingCommandCallback extends TimerTask implements
-			CommandCallback {
+	@Override
+	public void destroyProcess() {
+		this.process.destroy();
+	}
 
-		/**
-		 * Flag if complete.
-		 */
-		private boolean isComplete = false;
-
-		/**
-		 * Response.
-		 */
-		private Object response = null;
-
-		/**
-		 * Failure.
-		 */
-		private ProcessException failure = null;
-
-		/**
-		 * Obtains the response from the command.
-		 * 
-		 * @return Response.
-		 * @throws ProcessException
-		 *             If fails.
-		 */
-		public synchronized Object getResponse() throws ProcessException {
-			// Loop until response / failure / time out
-			for (;;) {
-
-				// Handle if complete
-				if (this.isComplete) {
-					// Propagate possible failure
-					if (this.failure != null) {
-						throw this.failure;
-					}
-
-					// Return the command response
-					return response;
-				}
-
-				// Wait some time for completion
-				try {
-					this.wait(100);
-				} catch (InterruptedException ex) {
-					// Ignore
-				}
-			}
-		}
-
-		/*
-		 * ================== TimerTask ===========================
-		 */
-
-		@Override
-		public synchronized void run() {
-			// Flag timed out
-			this.failure = new ProcessException("Command timed out");
-			this.isComplete = true;
-
-			// Notify complete
-			this.notify();
-		}
-
-		/*
-		 * ================== CommandCallback ===========================
-		 */
-
-		@Override
-		public synchronized void complete(Object response) {
-			// Indicate complete
-			this.response = response;
-			this.isComplete = true;
-
-			// Notify complete
-			this.notify();
-		}
-
-		@Override
-		public synchronized void failed(Throwable failure) {
-			// Indicate failed
-			this.failure = new ProcessException(failure);
-			this.isComplete = true;
-
-			// Notify complete
-			this.notify();
-		}
+	@Override
+	public boolean isProcessComplete() {
+		// Return whether process complete
+		return this.isComplete;
 	}
 
 	/**
-	 * Handler for the {@link ProcessResponse}.
+	 * Handler for the notifications from the {@link Process}.
 	 */
-	private static class ProcessResponseHandler extends Thread {
+	private static class ProcessNotificationHandler extends Thread {
 
 		/**
 		 * {@link ProcessManager}.
@@ -415,6 +330,22 @@ public class ProcessManager {
 		private final ServerSocket fromProcessServerSocket;
 
 		/**
+		 * {@link MBeanServer}.
+		 */
+		private final MBeanServer mbeanServer;
+
+		/**
+		 * Listing of the {@link ObjectName} instances for the registered MBeans
+		 */
+		private List<ObjectName> registeredMBeanNames = new LinkedList<ObjectName>();
+
+		/**
+		 * {@link MBeanServerConnection} to the {@link ManagedProcess}
+		 * {@link MBeanServer}. This is lazy created as needed.
+		 */
+		private MBeanServerConnection connection = null;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param processManager
@@ -422,11 +353,14 @@ public class ProcessManager {
 		 * @param fromProcessServerSocket
 		 *            {@link ServerSocket} to receive {@link ProcessResponse}
 		 *            instances.
+		 * @param mbeanServer
+		 *            {@link MBeanServer}. May be <code>null</code>.
 		 */
-		public ProcessResponseHandler(ProcessManager processManager,
-				ServerSocket fromProcessServerSocket) {
+		public ProcessNotificationHandler(ProcessManager processManager,
+				ServerSocket fromProcessServerSocket, MBeanServer mbeanServer) {
 			this.processManager = processManager;
 			this.fromProcessServerSocket = fromProcessServerSocket;
+			this.mbeanServer = mbeanServer;
 
 			// Flag as deamon (should not stop process finishing)
 			this.setDaemon(true);
@@ -449,35 +383,63 @@ public class ProcessManager {
 				// Loop while still processing
 				while (!this.processManager.isProcessComplete()) {
 
-					// Read in the response
+					// Read in the notification
 					Object object = fromProcessPipe.readObject();
-					if (!(object instanceof ProcessResponse)) {
+					if (!(object instanceof MBeanRegistrationNotification)) {
 						throw new IllegalArgumentException("Unknown response: "
 								+ object
 								+ " ["
 								+ (object == null ? "null" : object.getClass()
 										.getName()));
 					}
-					ProcessResponse response = (ProcessResponse) object;
+					MBeanRegistrationNotification registration = (MBeanRegistrationNotification) object;
 
-					// Obtain the correlating command call back for the response
-					Long requestId = new Long(response
-							.getCorrelatingRequestId());
-					CommandCallback callback = this.processManager
-							.getCallbackForCompletedCommand(requestId);
+					// Lazy create the JMX connector.
+					// Must be lazy created as will be listening now.
+					if (this.connection == null) {
+						JMXServiceURL processServiceUrl = registration
+								.getServiceUrl();
+						JMXConnector connector;
+						try {
+							connector = JMXConnectorFactory
+									.connect(processServiceUrl);
+						} catch (Exception ex) {
+							// Likely that process completed quickly.
+							// Wait some time to detect process completion.
+							Thread.sleep(100);
 
-					// Ensure a correlating command for response
-					if (callback != null) {
-						Throwable failure = response.getFailure();
-						if (failure != null) {
-							// Command failed
-							callback.failed(failure);
-						} else {
-							// Command completed
-							callback.complete(response.getResponse());
+							// Check if process is complete
+							if (this.processManager.isComplete) {
+								// Process complete, so stop
+								return;
+							} else {
+								// Propagate the failure
+								throw ex;
+							}
 						}
+						this.connection = connector.getMBeanServerConnection();
 					}
 
+					// Obtain the remote MBean name
+					ObjectName remoteMBeanName = registration.getMBeanName();
+
+					// Register the remote MBean locally
+					ObjectName localMBeanName = this.processManager
+							.getLocalObjectName(remoteMBeanName);
+					RemoteMBeanProxy mbeanProxy = new RemoteMBeanProxy(
+							remoteMBeanName, this.connection);
+					this.mbeanServer.registerMBean(mbeanProxy, localMBeanName);
+
+					// Keep track of the registered MBeans
+					this.registeredMBeanNames.add(localMBeanName);
+
+					// Determine if process shell MBean.
+					// Must be done after registering to ensure available.
+					if (ProcessShell.PROCESS_SHELL_OBJECT_NAME
+							.equals(remoteMBeanName)) {
+						// Have process shell MBean so now initialised
+						this.processManager.flagInitialised();
+					}
 				}
 			} catch (EOFException ex) {
 				// Process completed
@@ -488,6 +450,22 @@ public class ProcessManager {
 				ex.printStackTrace();
 
 			} finally {
+				// Unregister the MBeans
+				for (ObjectName mbeanName : this.registeredMBeanNames) {
+					try {
+						this.mbeanServer.unregisterMBean(mbeanName);
+					} catch (Throwable ex) {
+						ex.printStackTrace();
+					}
+				}
+
+				// Release process name space as it is complete
+				synchronized (ProcessManager.activeMBeanDomainNamespaces) {
+					ProcessManager.activeMBeanDomainNamespaces
+							.remove(this.processManager
+									.getMBeanDomainNamespace());
+				}
+
 				// Close the socket as process complete
 				try {
 					this.fromProcessServerSocket.close();

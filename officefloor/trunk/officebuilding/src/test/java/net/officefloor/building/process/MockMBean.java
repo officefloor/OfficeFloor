@@ -18,26 +18,25 @@
 package net.officefloor.building.process;
 
 /**
- * Call back about completion/failure of a command.
+ * MBean interface for {@link Mock}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CommandCallback {
+public interface MockMBean {
 
 	/**
-	 * Flags that the command is complete.
+	 * Specify the test value.
 	 * 
-	 * @param response
-	 *            Response from the command.
+	 * @param value
+	 *            Test value.
 	 */
-	void complete(Object response);
+	void setTestValue(String value);
 
 	/**
-	 * Flags that the command failed.
+	 * Obtains the test value.
 	 * 
-	 * @param failure
-	 *            Failure of the command.
+	 * @return Test value.
 	 */
-	void failed(Throwable failure);
+	String getTestValue();
 
 }

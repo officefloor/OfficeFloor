@@ -21,6 +21,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 
 import junit.framework.TestCase;
 
@@ -44,8 +49,7 @@ public class ProcessManagerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure process is stopped
-		this.manager.triggerStopProcess();
-		this.waitUntilProcessComplete(this.manager);
+		this.manager.destroyProcess();
 	}
 
 	/**
@@ -60,7 +64,7 @@ public class ProcessManagerTest extends TestCase {
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new WriteToFileProcess(file
-				.getAbsolutePath(), TEST_CONTENT));
+				.getAbsolutePath(), TEST_CONTENT), null);
 
 		// Wait until process writes content to file
 		this.waitUntilProcessComplete(this.manager);
@@ -110,7 +114,12 @@ public class ProcessManagerTest extends TestCase {
 		 */
 
 		@Override
-		public void run(ManagedProcessContext context) throws Throwable {
+		public void init(ManagedProcessContext context) throws Throwable {
+			// Nothing to initialise
+		}
+
+		@Override
+		public void main() throws Throwable {
 
 			// Wait some time to ensure wait for process to complete
 			Thread.sleep(100);
@@ -123,12 +132,6 @@ public class ProcessManagerTest extends TestCase {
 			writer.write(this.content);
 			writer.close();
 		}
-
-		@Override
-		public Object doCommand(Object command) throws Throwable {
-			fail("Should not be invoked");
-			return null;
-		}
 	}
 
 	/**
@@ -137,7 +140,8 @@ public class ProcessManagerTest extends TestCase {
 	public void testStopProcess() throws Exception {
 
 		// Start the process
-		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess());
+		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess(),
+				null);
 
 		// Flag to stop the process
 		this.manager.triggerStopProcess();
@@ -151,11 +155,25 @@ public class ProcessManagerTest extends TestCase {
 	 */
 	public static class LoopUntilStopProcess implements ManagedProcess {
 
+		/**
+		 * {@link ManagedProcessContext}.
+		 */
+		protected ManagedProcessContext context;
+
+		/*
+		 * =================== ManagedProcess =============================
+		 */
+
 		@Override
-		public void run(ManagedProcessContext context) throws Throwable {
+		public void init(ManagedProcessContext context) throws Throwable {
+			this.context = context;
+		}
+
+		@Override
+		public void main() throws Throwable {
 			// Loop until informed to stop
 			for (;;) {
-				if (context.continueProcessing()) {
+				if (this.context.continueProcessing()) {
 					// Wait a little more until told to stop
 					Thread.sleep(100);
 				} else {
@@ -164,163 +182,111 @@ public class ProcessManagerTest extends TestCase {
 				}
 			}
 		}
-
-		@Override
-		public Object doCommand(Object command) throws Throwable {
-			fail("Should not be invoked");
-			return null;
-		}
 	}
 
 	/**
-	 * Ensure able to do a command by callback.
+	 * Ensure {@link ManagedProcess} can register a MBean.
 	 */
-	public void testAsynchronousDoCommand() throws Exception {
+	public void testMBeanRegistration() throws Exception {
+
+		// Obtain the MBean Server
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
 		// Start the process
-		this.manager = ProcessManager
-				.startProcess(new IncrementNumberProcess());
+		final ObjectName remoteMBeanName = new ObjectName("remote", "type",
+				"mock");
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessName("local");
+		configuration.setMbeanServer(server);
+		this.manager = ProcessManager.startProcess(new MBeanProcess(
+				remoteMBeanName), configuration);
 
-		// Does a command on the process
-		final Object[] result = new Object[1];
-		this.manager.doCommand(new Integer(1), new CommandCallback() {
+		// Ensure can access mock MBean
+		ObjectName localMBeanName = this.manager
+				.getLocalObjectName(remoteMBeanName);
+		Object value = server.getAttribute(localMBeanName,
+				Mock.TEST_VALUE_ATTRIBUTE_NAME);
+		assertEquals("Incorrect test value", new Mock().getTestValue(), value);
 
-			@Override
-			public void complete(Object response) {
-				assertNotNull("Expecting response", response);
-				synchronized (result) {
-					result[0] = response;
-				}
-			}
-
-			@Override
-			public void failed(Throwable failure) {
-				synchronized (result) {
-					result[0] = failure;
-				}
-			}
-		});
-
-		// Wait until have result or timed out
-		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
-		for (;;) {
-
-			// Determine if have result
-			Object value;
-			synchronized (result) {
-				value = result[0];
-			}
-
-			// Handle if have result
-			if (value != null) {
-				Integer intValue = (Integer) value;
-				assertEquals("Incorrect response", 2, intValue.intValue());
-				return; // test successful
-			}
-
-			// No result, determine if still wait for result
-			if (System.currentTimeMillis() > maxFinishTime) {
-				fail("Processing took too long");
-			}
-
-			// Wait some time for further processing
-			Thread.sleep(100);
-		}
+		// Ensure can access Process Shell MBean
+		ObjectInstance instance = server.getObjectInstance(this.manager
+				.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME));
+		assertNotNull("Should have Process Shell MBean", instance);
 	}
 
 	/**
-	 * Ensure able to do a command by synchronous method.
+	 * {@link ManagedProcess} to register the MBean.
 	 */
-	public void testSynchronousDoCommand() throws ProcessException {
-
-		// Start the process
-		this.manager = ProcessManager
-				.startProcess(new IncrementNumberProcess());
-
-		// Does a command on the process
-		Object response = this.manager.doCommand(new Integer(1), 1000);
-		Integer responseValue = (Integer) response;
-
-		// Ensure value incremented
-		assertEquals("Incorrect response", 2, responseValue.intValue());
-	}
-
-	/**
-	 * {@link ManagedProcess} to provide command to increment a number.
-	 */
-	public static class IncrementNumberProcess extends LoopUntilStopProcess {
-		@Override
-		public Object doCommand(Object command) throws Throwable {
-
-			// Obtain the integer
-			Integer value = (Integer) command;
-
-			// Return the value incremented by one
-			return new Integer(value.intValue() + 1);
-		}
-	}
-
-	/**
-	 * Ensure times out command.
-	 */
-	public void testDoCommandTimeout() throws Exception {
-
-		// Start the process
-		this.manager = ProcessManager.startProcess(new TimeoutCommandProcess());
-
-		// Do a command and validates it times out
-		try {
-			this.manager.doCommand("TEST", 100);
-			fail("Should time out");
-		} catch (ProcessException ex) {
-			assertEquals("Should be timed out", "Command timed out", ex
-					.getMessage());
-		}
-	}
-
-	/**
-	 * {@link ManagedProcess} to test timing out a command.
-	 */
-	public static class TimeoutCommandProcess extends LoopUntilStopProcess {
+	public static class MBeanProcess extends LoopUntilStopProcess {
 
 		/**
-		 * {@link ManagedProcessContext}.
+		 * {@link ObjectName}.
 		 */
-		private ManagedProcessContext context;
+		private final ObjectName objectName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param objectName
+		 *            {@link ObjectName}.
+		 */
+		public MBeanProcess(ObjectName objectName) {
+			this.objectName = objectName;
+		}
 
 		/*
-		 * ================ ManagedProcess =======================
+		 * =================== LoopUntilStopProcess =======================
 		 */
 
 		@Override
-		public void run(ManagedProcessContext context) throws Throwable {
-			// Store context
-			synchronized (this) {
-				this.context = context;
-			}
+		public void init(ManagedProcessContext context) throws Throwable {
+			this.context = context;
 
-			// Loop until stop process
-			super.run(context);
+			// Register the mock MBean
+			Mock mbean = new Mock();
+			context.registerMBean(mbean, this.objectName);
 		}
+	}
 
-		@Override
-		public Object doCommand(Object command) throws Throwable {
-			// Loop until complete
-			for (;;) {
+	/**
+	 * Ensure MBeans are unregistered after the {@link ManagedProcess}
+	 * completes.
+	 */
+	public void testMBeansUnregistered() throws Exception {
 
-				// Determine if complete
-				synchronized (this) {
-					if (this.context != null) {
-						if (!this.context.continueProcessing()) {
-							return null; // process complete
-						}
-					}
-				}
+		// Obtain the MBean Server
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
-				// Sleep some time
-				Thread.sleep(100);
-			}
-		}
+		// Start the process
+		final ObjectName mockRemoteMBeanName = new ObjectName("remote", "type",
+				"mock");
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessName("local");
+		configuration.setMbeanServer(server);
+		this.manager = ProcessManager.startProcess(new MBeanProcess(
+				mockRemoteMBeanName), configuration);
+
+		// Obtain the local MBean names
+		ObjectName mockLocalMBeanName = this.manager
+				.getLocalObjectName(mockRemoteMBeanName);
+		ObjectName processShellLocalMBeanName = this.manager
+				.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
+
+		// Ensure the MBeans are registered
+		assertTrue("Mock MBean not registered", server
+				.isRegistered(mockLocalMBeanName));
+		assertTrue("Process Shell MBean not registered", server
+				.isRegistered(processShellLocalMBeanName));
+
+		// Stop the process
+		this.manager.triggerStopProcess();
+		this.waitUntilProcessComplete(this.manager);
+
+		// Ensure the MBeans are unregistered
+		assertFalse("Mock MBean should be unregistered", server
+				.isRegistered(mockLocalMBeanName));
+		assertFalse("Process Shell MBean should be unregistered", server
+				.isRegistered(processShellLocalMBeanName));
 	}
 
 	/**
@@ -332,6 +298,7 @@ public class ProcessManagerTest extends TestCase {
 		while (!manager.isProcessComplete()) {
 			// Determine if taken too long
 			if (System.currentTimeMillis() > maxFinishTime) {
+				manager.destroyProcess();
 				fail("Processing took too long");
 			}
 

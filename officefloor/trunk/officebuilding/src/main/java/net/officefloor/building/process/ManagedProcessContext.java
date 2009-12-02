@@ -17,6 +17,12 @@
  */
 package net.officefloor.building.process;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+
 /**
  * Context for the {@link ManagedProcess}.
  * 
@@ -35,6 +41,32 @@ public interface ManagedProcessContext {
 	 * @return Command arguments.
 	 */
 	String[] getCommandArguments();
+
+	/**
+	 * <p>
+	 * Registers a MBean.
+	 * <p>
+	 * This is equivalent to corresponding {@link MBeanServer} method except
+	 * that it also registers the MBean within the {@link MBeanServer} in the
+	 * parent managing the {@link Process}.
+	 * 
+	 * @param mbean
+	 *            MBean.
+	 * @param name
+	 *            {@link ObjectName} of the MBean.
+	 * @throws InstanceAlreadyExistsException
+	 *             The MBean is already under the control of the
+	 *             {@link MBeanServer}.
+	 * @throws MBeanRegistrationException
+	 *             Failure in registering the MBean.
+	 * @throws NotCompliantMBeanException
+	 *             This MBean is not a JMX compliant MBean.
+	 * 
+	 * @see MBeanServer#registerMBean(Object, ObjectName)
+	 */
+	void registerMBean(Object mbean, ObjectName name)
+			throws InstanceAlreadyExistsException, MBeanRegistrationException,
+			NotCompliantMBeanException;
 
 	/**
 	 * Flags whether to continue processing.
