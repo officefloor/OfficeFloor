@@ -17,13 +17,7 @@
  */
 package net.officefloor.building.manager;
 
-import java.io.IOException;
-
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXServiceURL;
+import java.net.InetAddress;
 
 import junit.framework.TestCase;
 
@@ -35,46 +29,54 @@ import junit.framework.TestCase;
 public class OfficeBuildingManagerTest extends TestCase {
 
 	/**
+	 * Port to run the current test.
+	 */
+	private static int PORT = 13078;
+
+	/**
 	 * Ensure able to start the Office Building.
 	 */
 	public void testStartOfficeBuilding() throws Exception {
 
-		final int PORT = 13078;
+		// Start the Office Building (recording times before/after)
+		long beforeTime = System.currentTimeMillis();
+		OfficeBuildingManager manager = OfficeBuildingManager
+				.startOfficeBuilding(PORT);
+		long afterTime = System.currentTimeMillis();
 
-		// Start the Office Building
-		OfficeBuildingManager.startOfficeBuilding(PORT);
-
-		// Allow time to start
-		Thread.sleep(1000);
-
-		// Attempt to connect to Office Building Manager
-		this.getOfficeBuildingConnection(PORT);
+		// Ensure correct JMX Service URL
+		String actualServiceUrl = manager.getOfficeBuildingJmxServiceUrl();
+		String hostName = InetAddress.getLocalHost().getHostName();
+		String expectedServiceUrl = "service:jmx:rmi://" + hostName + ":"
+				+ PORT + "/jndi/rmi://" + hostName + ":" + PORT
+				+ "/OfficeBuilding";
+		assertEquals("Incorrect service url", expectedServiceUrl,
+				actualServiceUrl);
 
 		// Obtain the Office Building Manager MBean
-		OfficeBuildingManagerMBean mbean = OfficeBuildingManager.getMBeanProxy(
-				OfficeBuildingManager.OFFICE_BUILDING_MANAGER_OBJECT_NAME,
-				OfficeBuildingManagerMBean.class);
-		assertNotNull("Must have Office Building Manager MBean", mbean);
-	}
+		OfficeBuildingManagerMBean managerMBean = OfficeBuildingManager
+				.getOfficeBuildingManager(hostName, PORT);
 
-	/**
-	 * Waits for the {@link JMXConnectorServer} to start and then obtains a
-	 * {@link MBeanServerConnection} to it.
-	 * 
-	 * @param port
-	 *            Port of the {@link JMXConnectorServer}.
-	 * @return {@link MBeanServerConnection} to the {@link JMXConnectorServer}.
-	 */
-	private MBeanServerConnection getOfficeBuildingConnection(int port)
-			throws IOException {
+		// Ensure start time is accurate
+		long startTime = managerMBean.getStartTime().getTime();
+		assertTrue("Start time recorded incorrectly",
+				((beforeTime <= startTime) && (startTime <= afterTime)));
 
-		// Obtain the service url
-		JMXServiceURL serviceUrl = OfficeBuildingManager
-				.getOfficeBuildingJmxServiceUrl(port);
+		// Ensure MBean reports correct service URL
+		String mbeanReportedServiceUrl = managerMBean
+				.getOfficeBuildingJmxServiceUrl();
+		assertEquals("Incorrect MBean service URL", expectedServiceUrl,
+				mbeanReportedServiceUrl);
 
-		// Obtain and return the connection
-		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl);
-		return connector.getMBeanServerConnection();
+		// Ensure correct host and port
+		String mbeanReportedHostName = managerMBean.getOfficeBuildingHostName();
+		assertEquals("Incorrect MBean host name", hostName,
+				mbeanReportedHostName);
+		int mbeanReportedPort = managerMBean.getOfficeBuildingPort();
+		assertEquals("Incorrect MBean port", PORT, mbeanReportedPort);
+		
+		// Stop the Office Building
+		managerMBean.stopOfficeBuilding();
 	}
 
 }
