@@ -22,6 +22,11 @@ import java.io.FileReader;
 import java.net.InetAddress;
 import java.util.Properties;
 
+import javax.management.remote.JMXServiceURL;
+
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+
 /**
  * <p>
  * Office Building.
@@ -51,6 +56,18 @@ public class OfficeBuilding {
 	 * to run or is running on.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_PORT = "office.building.port";
+
+	/**
+	 * Usage message.
+	 */
+	static final String USAGE_MESSAGE = "USAGE: java ... "
+			+ OfficeBuilding.class.getName()
+			+ " <command>\n"
+			+ "\n"
+			+ "commands:\n"
+			+ "\tstart\tStarts OfficeBuilding\n"
+			+ "\tstop\tStops the OfficeBuilding\n"
+			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n";
 
 	/**
 	 * Main method for running the {@link OfficeBuilding}.
@@ -87,7 +104,8 @@ public class OfficeBuilding {
 				"config/OfficeBuilding.properties");
 		PropertyLocator properties = new PropertyLocator(propertiesFile);
 
-		// Obtain the Office Building host
+		// Obtain the Office Building host.
+		// Host name not provided as default to save reverse DNS lookup.
 		String officeBuildingHost = properties.getProperty(
 				PROPERTY_OFFICE_BUILDING_HOST, null);
 		if (isBlank(officeBuildingHost)) {
@@ -99,8 +117,58 @@ public class OfficeBuilding {
 		int officeBuildingPort = properties
 				.getIntegerProperty(PROPERTY_OFFICE_BUILDING_PORT);
 
-		// TODO process the command
-		System.out.println("TODO process the command");
+		// Obtain the command
+		String command = "";
+		if (arguments.length >= 1) {
+			command = arguments[0];
+		}
+
+		// Handle the command
+		if ("start".equalsIgnoreCase(command)) {
+			// Start the Office Building
+			OfficeBuildingManager manager = OfficeBuildingManager
+					.startOfficeBuilding(officeBuildingPort);
+
+			// Indicate started and location
+			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();
+			System.out.println("OfficeBuilding started at " + serviceUrl);
+
+		} else if ("stop".equalsIgnoreCase(command)) {
+			// Stop the Office Building
+			OfficeBuildingManagerMBean manager = OfficeBuildingManager
+					.getOfficeBuildingManager(officeBuildingHost,
+							officeBuildingPort);
+			manager.stopOfficeBuilding();
+
+		} else if ("url".equalsIgnoreCase(command)) {
+			// Providing URL so obtain host and port
+			if (arguments.length < 3) {
+				// Must have host and port
+				errorAndExit("ERROR: Must provide host and port arguments for 'url' command");
+			}
+			String hostName = arguments[1];
+			int port = Integer.parseInt(arguments[2]);
+
+			// Obtain the URL and output
+			JMXServiceURL serviceUrl = OfficeBuildingManager
+					.getOfficeBuildingJmxServiceUrl(hostName, port);
+			System.out.println(serviceUrl.toString());
+
+		} else {
+			// Unknown or no command
+			StringBuilder message = new StringBuilder();
+			if (!isBlank(command)) {
+				// Provide details of unknown command
+				message.append("ERROR: unknown command '" + command + "'\n\n");
+			}
+
+			// Always provide usage
+			message.append(OfficeBuilding.USAGE_MESSAGE);
+
+			// Display usage (and possible error).
+			// Never successful as checking code should be running commands.
+			errorAndExit(message.toString());
+		}
 	}
 
 	/**
