@@ -7,5 +7,5 @@ cd $BIN_DIR/..
 # Obtain the OFFICE_FLOOR_HOME location
 OFFICE_FLOOR_HOME=$PWD
 
-# Start the Office Building
+# Start OfficeBuilding
 echo "TODO: start the Office Building from $OFFICE_FLOOR_HOME"
