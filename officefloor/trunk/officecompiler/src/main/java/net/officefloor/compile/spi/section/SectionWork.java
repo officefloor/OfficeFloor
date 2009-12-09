@@ -58,4 +58,12 @@ public interface SectionWork {
 	 */
 	SectionTask addSectionTask(String taskName, String taskTypeName);
 
+	/**
+	 * Specifies the initial {@link SectionTask} for this {@link SectionWork}.
+	 * 
+	 * @param task
+	 *            Initial {@link SectionTask}.
+	 */
+	void setInitialTask(SectionTask task);
+
 }

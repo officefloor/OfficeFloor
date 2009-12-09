@@ -88,6 +88,11 @@ public class WorkNodeImpl implements WorkNode {
 	private final String workSourceClassName;
 
 	/**
+	 * Initial {@link SectionTask} for this {@link SectionWork}.
+	 */
+	private SectionTask initialTask = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param workName
@@ -160,6 +165,11 @@ public class WorkNodeImpl implements WorkNode {
 		return task;
 	}
 
+	@Override
+	public void setInitialTask(SectionTask task) {
+		this.initialTask = task;
+	}
+
 	/*
 	 * ===================== WorkNode ===================================
 	 */
@@ -205,7 +215,12 @@ public class WorkNodeImpl implements WorkNode {
 			task.buildTask(workType, workBuilder);
 		}
 
-		// TODO specify initial task for work
+		// Determine if initial task for work
+		if (this.initialTask != null) {
+			// Specify initial task for work
+			String initialTaskName = this.initialTask.getSectionTaskName();
+			workBuilder.setInitialTask(initialTaskName);
+		}
 	}
 
 }

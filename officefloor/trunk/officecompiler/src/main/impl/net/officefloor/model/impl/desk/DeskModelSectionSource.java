@@ -71,13 +71,14 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.SectionManagedObjectModel;
 
 /**
  * {@link SectionSource} for a {@link DeskModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeskModelSectionSource extends AbstractSectionSource implements
@@ -278,6 +279,13 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				work.addProperty(property.getName(), property.getValue());
 			}
 
+			// Determine if an initial task for the work
+			TaskModel initialTask = null;
+			WorkToInitialTaskModel initialTaskConn = workModel.getInitialTask();
+			if (initialTaskConn != null) {
+				initialTask = initialTaskConn.getInitialTask();
+			}
+
 			// Add the tasks for the work
 			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
 				for (WorkTaskToTaskModel conn : workTaskModel.getTasks()) {
@@ -288,6 +296,12 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 						SectionTask task = work.addSectionTask(taskName,
 								taskModel.getWorkTaskName());
 						tasks.put(taskName, task);
+
+						// Determine if the initial task
+						if (taskModel == initialTask) {
+							// Specify as the initial task
+							work.setInitialTask(task);
+						}
 					}
 				}
 			}
@@ -585,7 +599,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
-	 *
+	 * 
 	 * @param instigationStrategyName
 	 *            Name identifying the {@link FlowInstigationStrategyEnum}.
 	 * @param designer
@@ -620,7 +634,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	/**
 	 * Obtains the {@link ManagedObjectScope} from the managed object scope
 	 * name.
-	 *
+	 * 
 	 * @param managedObjectScope
 	 *            Name of the {@link ManagedObjectScope}.
 	 * @param designer
