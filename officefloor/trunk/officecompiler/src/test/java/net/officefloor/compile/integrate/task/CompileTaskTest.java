@@ -31,6 +31,7 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
@@ -46,7 +47,7 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link Task}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CompileTaskTest extends AbstractCompileTestCase {
@@ -63,6 +64,25 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling {@link Work} with an initial {@link Task}.
+	 */
+	public void testInitialTaskForWork() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		WorkBuilder<Work> work = this
+				.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		work.setInitialTask("TASK");
 
 		// Compile the office floor
 		this.compile(true);

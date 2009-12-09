@@ -59,7 +59,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshalling/unmarshalling of the {@link DeskModel} via the
  * {@link ModelRepository}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DeskModelRepositoryTest extends OfficeFrameTestCase {
@@ -71,7 +71,7 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -187,9 +187,9 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 						"VALUE_ONE"), new PropertyModel("property.two",
 						"VALUE_TWO"));
 
-		// Validate initial flow item
-		assertEquals("Incorrect initial flow item id", "taskOne", work
-				.getInitialTask().getInitialTaskName());
+		// Validate initial task
+		assertEquals("Incorrect initial task", "taskOne", work.getInitialTask()
+				.getInitialTaskName());
 
 		// Validate work tasks
 		List<WorkTaskModel> workTasks = new LinkedList<WorkTaskModel>();
