@@ -17,6 +17,12 @@
  */
 package net.officefloor.building.process;
 
+import java.rmi.registry.Registry;
+
+import javax.management.MBeanServer;
+
+import net.officefloor.building.OfficeBuilding;
+
 /**
  * MBean interface for the {@link ProcessManager}.
  * 
@@ -25,18 +31,47 @@ package net.officefloor.building.process;
 public interface ProcessManagerMBean {
 
 	/**
-	 * Obtains the name identifying the {@link Process}.
+	 * <p>
+	 * Obtains the name given to the {@link Process}.
+	 * <p>
+	 * The name may <i>not</i> be unique as more than one {@link Process} may be
+	 * started with the same name.
+	 * <p>
+	 * See {@link #getProcessNamespace()} for a unique name.
 	 * 
-	 * @return Name identifying the {@link Process}.
+	 * @return Name given to the {@link Process}.
+	 * @see #getProcessNamespace()
 	 */
 	String getProcessName();
 
 	/**
-	 * Obtains the MBean domain name space for MBeans of the {@link Process}.
+	 * <p>
+	 * Obtains the unique name space for {@link Process}.
+	 * <p>
+	 * This is the unique name that identifies the {@link Process} running
+	 * within the {@link OfficeBuilding}. The name is derived from the
+	 * {@link #getProcessName()} however to maintain uniqueness the process name
+	 * may be adjusted (typically by providing a unique suffix).
 	 * 
-	 * @return MBean domain name space for MBeans of the {@link Process}.
+	 * @return Unique name space for the {@link Process}.
 	 */
-	String getMBeanDomainNamespace();
+	String getProcessNamespace();
+
+	/**
+	 * Obtains the host name that the {@link Process} is running on.
+	 * 
+	 * @return Post name that the {@link Process} is running on.
+	 */
+	String getProcessHostName();
+
+	/**
+	 * Obtains the port to access the {@link Registry} containing the
+	 * {@link MBeanServer} for this {@link Process}.
+	 * 
+	 * @return Port to access the {@link Registry} containing the
+	 *         {@link MBeanServer} for this {@link Process}.
+	 */
+	int getProcessPort();
 
 	/**
 	 * <p>

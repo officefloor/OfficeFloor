@@ -17,9 +17,16 @@
  */
 package net.officefloor.building.manager;
 
+import java.io.File;
 import java.net.InetAddress;
 
 import junit.framework.TestCase;
+import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.officefloor.MockWork;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Tests the {@link OfficeBuildingManager}.
@@ -31,12 +38,12 @@ public class OfficeBuildingManagerTest extends TestCase {
 	/**
 	 * Port to run the current test.
 	 */
-	private static int PORT = 13078;
+	private static int PORT = 13778;
 
 	/**
 	 * Ensure able to start the Office Building.
 	 */
-	public void testStartOfficeBuilding() throws Exception {
+	public void testRunningOfficeBuilding() throws Exception {
 
 		// Start the Office Building (recording times before/after)
 		long beforeTime = System.currentTimeMillis();
@@ -74,9 +81,81 @@ public class OfficeBuildingManagerTest extends TestCase {
 				mbeanReportedHostName);
 		int mbeanReportedPort = managerMBean.getOfficeBuildingPort();
 		assertEquals("Incorrect MBean port", PORT, mbeanReportedPort);
-		
+
 		// Stop the Office Building
 		managerMBean.stopOfficeBuilding();
+	}
+
+	/**
+	 * Ensure able to open the configured {@link OfficeFloor}.
+	 */
+	public void testEnsureOfficeFloorOpens() throws Exception {
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.addSourceAliases();
+		OfficeFloor officeFloor = compiler.compile(this
+				.getOfficeFloorLocation());
+		officeFloor.openOfficeFloor();
+		officeFloor.closeOfficeFloor();
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor}.
+	 */
+	public void testOfficeFloorManagement() throws Exception {
+
+		// Start the OfficeBuilding
+		OfficeBuildingManager.startOfficeBuilding(PORT);
+
+		// Obtain the manager MBean
+		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
+				.getOfficeBuildingManager(null, PORT);
+
+		// Open the OfficeFloor
+		String officeFloorLocation = this.getOfficeFloorLocation();
+		String processNamespace = buildingManager.openOfficeFloor(this
+				.getName(), "not-needed.jar", officeFloorLocation, null);
+
+		// Ensure OfficeFloor opened (obtaining local floor manager)
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
+				.getOfficeFloorManager(null, PORT, processNamespace);
+		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
+				localFloorManager.getOfficeFloorLocation());
+
+		// Obtain the local Process manager MBean
+		ProcessManagerMBean processManager = OfficeBuildingManager
+				.getProcessManager(null, PORT, processNamespace);
+
+		// Obtain the remote OfficeFloor manager
+		String remoteHostName = processManager.getProcessHostName();
+		int remotePort = processManager.getProcessPort();
+		// TODO determine how to validate running
+		System.err.println("TODO determine how to validate running");
+
+		// Invoke the work
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+		localFloorManager.invokeWork("OFFICE", "SECTION.WORK", file
+				.getAbsolutePath());
+
+		// Ensure work invoked (content in file)
+		OfficeBuildingTestUtil.validateFileContent("Work should be invoked",
+				MockWork.MESSAGE, file);
+
+		// Stop the Office Building
+		buildingManager.stopOfficeBuilding();
+
+		// TODO ensure the OfficeFloor process is also stopped
+		fail("TODO ensure the OfficeFloor process is also stopped");
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloor} location.
+	 * 
+	 * @return {@link OfficeFloor} location.
+	 */
+	private String getOfficeFloorLocation() {
+		return this.getClass().getPackage().getName().replace('.', '/')
+				+ "/TestOfficeFloor.officefloor";
 	}
 
 }

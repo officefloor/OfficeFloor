@@ -18,7 +18,6 @@
 package net.officefloor.building.process;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
@@ -28,6 +27,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import junit.framework.TestCase;
+import net.officefloor.building.util.OfficeBuildingTestUtil;
 
 /**
  * Tests the management of a {@link Process}.
@@ -40,11 +40,6 @@ public class ProcessManagerTest extends TestCase {
 	 * {@link ProcessManager}.
 	 */
 	private ProcessManager manager;
-
-	/**
-	 * Maximum run time for tests.
-	 */
-	private static final long MAX_RUN_TIME = 1000;
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -60,25 +55,18 @@ public class ProcessManagerTest extends TestCase {
 		final String TEST_CONTENT = "test content";
 
 		// Obtain temporary file to write content
-		File file = File.createTempFile(this.getClass().getSimpleName(), "txt");
+		File file = OfficeBuildingTestUtil.createTempFile(this);
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new WriteToFileProcess(file
 				.getAbsolutePath(), TEST_CONTENT), null);
 
 		// Wait until process writes content to file
-		this.waitUntilProcessComplete(this.manager);
-
-		// Obtain the content from file
-		StringBuilder content = new StringBuilder();
-		FileReader reader = new FileReader(file);
-		for (int value = reader.read(); value != -1; value = reader.read()) {
-			content.append((char) value);
-		}
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
 
 		// Ensure content in file
-		assertEquals("Content should be in file", TEST_CONTENT, content
-				.toString());
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				TEST_CONTENT, file);
 	}
 
 	/**
@@ -121,9 +109,6 @@ public class ProcessManagerTest extends TestCase {
 		@Override
 		public void main() throws Throwable {
 
-			// Wait some time to ensure wait for process to complete
-			Thread.sleep(100);
-
 			// Obtain the file
 			File file = new File(this.filePath);
 
@@ -147,7 +132,7 @@ public class ProcessManagerTest extends TestCase {
 		this.manager.triggerStopProcess();
 
 		// Wait until process completes
-		this.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
 	}
 
 	/**
@@ -163,7 +148,7 @@ public class ProcessManagerTest extends TestCase {
 		this.manager.destroyProcess();
 
 		// Wait until process completes
-		this.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
 	}
 
 	/**
@@ -307,7 +292,7 @@ public class ProcessManagerTest extends TestCase {
 
 		// Stop the process
 		this.manager.triggerStopProcess();
-		this.waitUntilProcessComplete(this.manager);
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
 
 		// Ensure the MBeans are unregistered
 		assertFalse("Mock MBean should be unregistered", server
@@ -316,24 +301,6 @@ public class ProcessManagerTest extends TestCase {
 				.isRegistered(processShellLocalMBeanName));
 		assertFalse("Process Manager MBean should be unregistered", server
 				.isRegistered(processManagerLocalMBeanName));
-	}
-
-	/**
-	 * Waits until the {@link Process} is complete (or times out).
-	 */
-	private void waitUntilProcessComplete(ProcessManager manager)
-			throws Exception {
-		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;
-		while (!manager.isProcessComplete()) {
-			// Determine if taken too long
-			if (System.currentTimeMillis() > maxFinishTime) {
-				manager.destroyProcess();
-				fail("Processing took too long");
-			}
-
-			// Wait some time for further processing
-			Thread.sleep(100);
-		}
 	}
 
 }

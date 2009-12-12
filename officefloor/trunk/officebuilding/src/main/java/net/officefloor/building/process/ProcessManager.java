@@ -26,6 +26,8 @@ import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.registry.Registry;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
+
+import net.officefloor.building.OfficeBuilding;
 
 import mx4j.tools.remote.proxy.RemoteMBeanProxy;
 
@@ -64,9 +68,18 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
-	 * Active set of MBean domain name spaces.
+	 * Obtains the {@link ObjectName} for the {@link ProcessManagerMBean}.
+	 * 
+	 * @return {@link ObjectName} for the {@link ProcessManagerMBean}.
 	 */
-	private static final Set<String> activeMBeanDomainNamespaces = new HashSet<String>();
+	public static ObjectName getProcessManagerObjectName() {
+		return PROCESS_MANAGER_OBJECT_NAME;
+	}
+
+	/**
+	 * Active set of MBean name spaces.
+	 */
+	private static final Set<String> activeMBeanNamespaces = new HashSet<String>();
 
 	/**
 	 * Starts the {@link Process} for the {@link ManagedProcess} returning the
@@ -111,12 +124,25 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Obtain the class path
 		String classPath = System.getProperty("java.class.path");
+		String additionalClassPath = configuration.getAdditionalClassPath();
+		if (!OfficeBuilding.isBlank(additionalClassPath)) {
+			classPath = classPath + File.pathSeparator + additionalClassPath;
+		}
+
+		// Add the JVM Options
+		String[] jvmOptions = new String[0];
+		String jvmOptionText = configuration.getJvmOptions();
+		if (!OfficeBuilding.isBlank(jvmOptionText)) {
+			// Split the options for the command
+			jvmOptions = jvmOptionText.split(" ");
+		}
 
 		// Create the command to invoke process
 		List<String> command = new LinkedList<String>();
 		command.add(javaExecutable.getAbsolutePath());
 		command.add("-cp");
 		command.add(classPath);
+		command.addAll(Arrays.asList(jvmOptions));
 		command.add(ProcessShell.class.getName());
 
 		// Obtain the process name
@@ -125,17 +151,17 @@ public class ProcessManager implements ProcessManagerMBean {
 			processName = "Process";
 		}
 
-		// Obtain the unique MBean domain name space
-		String mbeanDomainNamespace = processName;
-		synchronized (activeMBeanDomainNamespaces) {
+		// Obtain the unique MBean name space
+		String mbeanNamespace = processName;
+		synchronized (activeMBeanNamespaces) {
 			int suffix = 1;
-			while (activeMBeanDomainNamespaces.contains(mbeanDomainNamespace)) {
+			while (activeMBeanNamespaces.contains(mbeanNamespace)) {
 				suffix++;
-				mbeanDomainNamespace = processName + suffix;
+				mbeanNamespace = processName + suffix;
 			}
 
 			// Reserve name space for the process
-			activeMBeanDomainNamespaces.add(mbeanDomainNamespace);
+			activeMBeanNamespaces.add(mbeanNamespace);
 		}
 
 		try {
@@ -156,7 +182,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			// Create the process manager for the process
 			ProcessManager processManager = new ProcessManager(processName,
-					mbeanDomainNamespace, process, mbeanServer);
+					mbeanNamespace, process, mbeanServer);
 
 			// Gobble the process's stdout and stderr
 			new StreamGobbler(process.getInputStream(), processManager).start();
@@ -195,14 +221,34 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
+	 * Obtains the local {@link ObjectName} for the remote MBean in the
+	 * {@link Process} being managed within the <code>MBean name space</code>.
+	 * 
+	 * @param processNamespace
+	 *            Name space of the {@link Process}.
+	 * @param objectName
+	 *            {@link ObjectName} of the remote MBean.
+	 * @return Local {@link ObjectName} for the remote MBean in the
+	 *         {@link Process} being managed.
+	 * @throws MalformedObjectNameException
+	 *             If resulting local name is malformed.
+	 */
+	public static ObjectName getLocalObjectName(String processNamespace,
+			ObjectName remoteObjectName) throws MalformedObjectNameException {
+		return new ObjectName(processNamespace + "."
+				+ remoteObjectName.getDomain(), remoteObjectName
+				.getKeyPropertyList());
+	}
+
+	/**
 	 * Name of the {@link Process}.
 	 */
 	private final String processName;
 
 	/**
-	 * MBean domain name space for the {@link Process}.
+	 * MBean name space for the {@link Process}.
 	 */
-	private final String mbeanDomainNamespace;
+	private final String mbeanNamespace;
 
 	/**
 	 * {@link Process} being managed.
@@ -220,6 +266,19 @@ public class ProcessManager implements ProcessManagerMBean {
 	private List<ObjectName> registeredMBeanNames = new LinkedList<ObjectName>();
 
 	/**
+	 * Host name of the {@link Process} being managed. This is provided once the
+	 * {@link Process} has been started.
+	 */
+	private String processHostName = null;
+
+	/**
+	 * Port that the {@link Registry} containing the {@link MBeanServer} for the
+	 * {@link Process} being managed resides on. This is provided once the
+	 * {@link Process} has been started.
+	 */
+	private int processPort = -1;
+
+	/**
 	 * Flag indicating if the {@link Process} has been initialised.
 	 */
 	private volatile boolean isInitialised = false;
@@ -234,24 +293,24 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * 
 	 * @param processName
 	 *            Name identifying the {@link Process}.
-	 * @param mbeanDomainNamespace
-	 *            MBean domain name space for the {@link Process}.
+	 * @param mbeanNamespace
+	 *            MBean name space for the {@link Process}.
 	 * @param process
 	 *            {@link Process} being managed.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
 	 */
-	private ProcessManager(String processName, String mbeanDomainNamespace,
+	private ProcessManager(String processName, String mbeanNamespace,
 			Process process, MBeanServer mbeanServer) {
 		this.processName = processName;
-		this.mbeanDomainNamespace = mbeanDomainNamespace;
+		this.mbeanNamespace = mbeanNamespace;
 		this.process = process;
 		this.mbeanServer = mbeanServer;
 	}
 
 	/**
 	 * Obtains the local {@link ObjectName} for the remote MBean in the
-	 * {@link Process} being managed.
+	 * {@link Process} being managed by this {@link ProcessManager}.
 	 * 
 	 * @param objectName
 	 *            {@link ObjectName} of the remote MBean.
@@ -262,8 +321,21 @@ public class ProcessManager implements ProcessManagerMBean {
 	 */
 	public ObjectName getLocalObjectName(ObjectName objectName)
 			throws MalformedObjectNameException {
-		return new ObjectName(this.mbeanDomainNamespace + "."
-				+ objectName.getDomain(), objectName.getKeyPropertyList());
+		return getLocalObjectName(this.mbeanNamespace, objectName);
+	}
+
+	/**
+	 * Specifies the host and port of the {@link Registry} containing the
+	 * {@link MBeanServer} for the {@link Process} being managed.
+	 * 
+	 * @param hostName
+	 *            Host name.
+	 * @param port
+	 *            Port.
+	 */
+	private synchronized void setProcessHostAndPort(String hostName, int port) {
+		this.processHostName = hostName;
+		this.processPort = port;
 	}
 
 	/**
@@ -346,8 +418,8 @@ public class ProcessManager implements ProcessManagerMBean {
 		}
 
 		// Release process name space
-		synchronized (activeMBeanDomainNamespaces) {
-			activeMBeanDomainNamespaces.remove(this.mbeanDomainNamespace);
+		synchronized (activeMBeanNamespaces) {
+			activeMBeanNamespaces.remove(this.mbeanNamespace);
 		}
 
 		// Flag complete
@@ -364,8 +436,18 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	@Override
-	public String getMBeanDomainNamespace() {
-		return this.mbeanDomainNamespace;
+	public String getProcessNamespace() {
+		return this.mbeanNamespace;
+	}
+
+	@Override
+	public synchronized String getProcessHostName() {
+		return this.processHostName;
+	}
+
+	@Override
+	public synchronized int getProcessPort() {
+		return this.processPort;
 	}
 
 	@Override
@@ -475,8 +557,16 @@ public class ProcessManager implements ProcessManagerMBean {
 					// Lazy create the JMX connector.
 					// Must be lazy created as will be listening now.
 					if (this.connection == null) {
+						// Obtain the service URL for the process
 						JMXServiceURL processServiceUrl = registration
 								.getServiceUrl();
+
+						// Specify the host and port
+						this.processManager.setProcessHostAndPort(
+								processServiceUrl.getHost(), processServiceUrl
+										.getPort());
+
+						// Connect to the process
 						JMXConnector connector;
 						try {
 							connector = JMXConnectorFactory
