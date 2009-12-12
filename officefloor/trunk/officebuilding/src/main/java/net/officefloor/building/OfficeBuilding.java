@@ -178,7 +178,7 @@ public class OfficeBuilding {
 	 *            Value.
 	 * @return <code>true</code> if blank.
 	 */
-	private static boolean isBlank(String value) {
+	public static boolean isBlank(String value) {
 		return ((value == null) || (value.trim().length() == 0));
 	}
 

@@ -20,7 +20,9 @@ package net.officefloor.building.manager;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.rmi.ConnectException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Date;
 
 import javax.management.JMX;
@@ -35,6 +37,12 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.process.ProcessConfiguration;
+import net.officefloor.building.process.ProcessManager;
+import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.officefloor.OfficeFloorManager;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeBuilding} Manager.
@@ -58,13 +66,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	/**
-	 * Main for running the {@link OfficeBuilding}.
+	 * Obtains {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
 	 * 
-	 * @param arguments
-	 * @throws Exception
+	 * @return {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
 	 */
-	public static void main(String[] arguments) throws Exception {
-
+	public static ObjectName getOfficeBuildingManagerObjectName() {
+		return OFFICE_BUILDING_MANAGER_OBJECT_NAME;
 	}
 
 	/**
@@ -86,8 +93,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		// Obtain the MBean Server
 		MBeanServer mbeanServer = getMBeanServer();
 
-		// Create the Registry on the port
-		LocateRegistry.createRegistry(port);
+		// Ensure have Registry on the port
+		Registry registry = LocateRegistry.getRegistry(port);
+		try {
+			// Attempt to communicate to validate if registry exists
+			registry.list();
+		} catch (ConnectException ex) {
+			// Registry not exist, so create it
+			LocateRegistry.createRegistry(port);
+		}
 
 		// Start the JMX connector server (on local host)
 		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(null, port);
@@ -120,14 +134,73 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @param port
 	 *            Port where the {@link OfficeBuilding} resides.
 	 * @return {@link OfficeBuildingManagerMBean}.
-	 * @throws IOException
+	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
 	 */
 	public static OfficeBuildingManagerMBean getOfficeBuildingManager(
-			String hostName, int port) throws IOException {
+			String hostName, int port) throws Exception {
 		return getMBeanProxy(hostName, port,
 				OFFICE_BUILDING_MANAGER_OBJECT_NAME,
 				OfficeBuildingManagerMBean.class);
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link ProcessManagerMBean} by the process name for the
+	 * {@link OfficeBuilding}.
+	 * <p>
+	 * This a utility method to obtain the {@link ProcessManagerMBean} of an
+	 * existing {@link Process} currently running within the
+	 * {@link OfficeBuilding}.
+	 * 
+	 * @param hostName
+	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            <code>null</code> indicates localhost.
+	 * @param port
+	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param processNamespace
+	 *            Name of the {@link Process} to obtain its
+	 *            {@link ProcessManagerMBean}.
+	 * @return {@link ProcessManagerMBean}.
+	 * @throws Exception
+	 *             If fails to obtain the {@link ProcessManagerMBean}.
+	 */
+	public static ProcessManagerMBean getProcessManager(String hostName,
+			int port, String processNamespace) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(
+				processNamespace, ProcessManager.getProcessManagerObjectName());
+		return getMBeanProxy(hostName, port, objectName,
+				ProcessManagerMBean.class);
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeFloorManagerMBean}.
+	 * <p>
+	 * The <code>hostName</code> and <code>port</code> are of the
+	 * {@link OfficeBuilding} managing the {@link OfficeFloor} {@link Process}.
+	 * They are <i>not</i> of the specific {@link Process} containing the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param hostName
+	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            <code>null</code> indicates localhost.
+	 * @param port
+	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param officeFloorManagerUrl
+	 *            URL of the {@link OfficeFloorManagerMBean}.
+	 * @return {@link OfficeFloorManagerMBean}.
+	 * @throws Exception
+	 *             If fails to obtain {@link OfficeFloorManagerMBean}.
+	 */
+	public static OfficeFloorManagerMBean getOfficeFloorManager(
+			String hostName, int port, String processNamespace)
+			throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(
+				processNamespace, OfficeFloorManager
+						.getOfficeFloorManagerObjectName());
+		return getMBeanProxy(hostName, port, objectName,
+				OfficeFloorManagerMBean.class);
 	}
 
 	/**
@@ -261,9 +334,35 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
+	public String openOfficeFloor(String processName, String jarName,
+			String officeFloorLocation, String jvmOptions) throws Exception {
+
+		// Create the configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessName(processName);
+		configuration.setAdditionalClassPath(jarName);
+		configuration.setJvmOptions(jvmOptions);
+
+		// Create the OfficeFloor managed process
+		OfficeFloorManager managedProcess = new OfficeFloorManager(
+				officeFloorLocation);
+
+		// Run the OfficeFloor
+		ProcessManager manager = ProcessManager.startProcess(managedProcess,
+				configuration);
+
+		// Return the process name space
+		return manager.getProcessNamespace();
+	}
+
+	@Override
 	public void stopOfficeBuilding() throws Exception {
 		// Stop the connector server
 		this.connectorServer.stop();
+
+		// Unregister the Office Building Manager MBean
+		MBeanServer mbeanServer = getMBeanServer();
+		mbeanServer.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
 	}
 
 }

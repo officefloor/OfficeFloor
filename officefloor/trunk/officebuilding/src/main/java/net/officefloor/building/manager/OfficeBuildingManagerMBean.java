@@ -21,6 +21,10 @@ import java.util.Date;
 
 import javax.management.remote.JMXServiceURL;
 
+import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * MBean interface for the {@link OfficeBuildingManager}.
  * 
@@ -65,6 +69,27 @@ public interface OfficeBuildingManagerMBean {
 	 * @return Port that the {@link OfficeBuilding} is listening on.
 	 */
 	int getOfficeBuildingPort();
+
+	/**
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}.
+	 * 
+	 * @param processName
+	 *            Name identifying the {@link Process} for the
+	 *            {@link OfficeFloor}.
+	 * @param jarName
+	 *            Name of the JAR containing the {@link OfficeFloor}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} within the JAR to open.
+	 * @param jvmOptions
+	 *            Options for the JVM of the {@link Process} to contain the
+	 *            {@link OfficeFloor}.
+	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 * @see ProcessManagerMBean#getProcessNamespace()
+	 */
+	String openOfficeFloor(String processName, String jarName,
+			String officeFloorLocation, String jvmOptions) throws Exception;
 
 	/**
 	 * Stops the {@link OfficeBuilding}.

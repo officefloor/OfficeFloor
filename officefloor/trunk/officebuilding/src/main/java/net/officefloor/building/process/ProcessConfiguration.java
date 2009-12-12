@@ -36,6 +36,16 @@ public class ProcessConfiguration {
 	private String processName = null;
 
 	/**
+	 * Additional class path.
+	 */
+	private String additionalClassPath = null;
+
+	/**
+	 * JVM options for the {@link Process}.
+	 */
+	private String jvmOptions = null;
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private MBeanServer mbeanServer = null;
@@ -57,6 +67,44 @@ public class ProcessConfiguration {
 	 */
 	public void setProcessName(String processName) {
 		this.processName = processName;
+	}
+
+	/**
+	 * Obtains the additional class path.
+	 * 
+	 * @return Additional class path.
+	 */
+	public String getAdditionalClassPath() {
+		return this.additionalClassPath;
+	}
+
+	/**
+	 * Specifies the additional class path.
+	 * 
+	 * @param additionalClassPath
+	 *            Additional class path.
+	 */
+	public void setAdditionalClassPath(String additionalClassPath) {
+		this.additionalClassPath = additionalClassPath;
+	}
+
+	/**
+	 * Obtains the JVM options for the {@link Process}.
+	 * 
+	 * @return JVM options for the {@link Process}.
+	 */
+	public String getJvmOptions() {
+		return this.jvmOptions;
+	}
+
+	/**
+	 * Specifies the JVM options for the {@link Process}.
+	 * 
+	 * @param jvmOptions
+	 *            JVM options for the {@link Process}.
+	 */
+	public void setJvmOptions(String jvmOptions) {
+		this.jvmOptions = jvmOptions;
 	}
 
 	/**

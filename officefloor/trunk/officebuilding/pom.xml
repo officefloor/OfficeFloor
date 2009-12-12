@@ -12,6 +12,12 @@
 	<description>Building to contain the OfficeFloors</description>
 	<dependencies>
 		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>officecompiler</artifactId>
+			<version>${pom.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>mx4j</groupId>
 			<artifactId>mx4j-tools</artifactId>
 			<version>3.0.1</version>
