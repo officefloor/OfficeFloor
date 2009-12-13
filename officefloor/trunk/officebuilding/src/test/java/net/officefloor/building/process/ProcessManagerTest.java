@@ -124,15 +124,43 @@ public class ProcessManagerTest extends TestCase {
 	 */
 	public void testStopProcess() throws Exception {
 
+		// Listen for stopping of process
+		final boolean[] isStopped = new boolean[1];
+		synchronized (isStopped) {
+			isStopped[0] = false;
+		}
+		ProcessCompletionListener listener = new ProcessCompletionListener() {
+			@Override
+			public void notifyProcessComplete(ProcessManager manager) {
+				// Flag complete
+				synchronized (isStopped) {
+					isStopped[0] = true;
+				}
+
+				// Ensure the correct manager
+				assertSame("Incorrect manager",
+						ProcessManagerTest.this.manager, manager);
+			}
+		};
+
+		// Provide listener to process
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessCompletionListener(listener);
+
 		// Start the process
 		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess(),
-				null);
+				configuration);
 
 		// Flag to stop the process
 		this.manager.triggerStopProcess();
 
 		// Wait until process completes
 		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+
+		// Ensure listener notified of process stopped
+		synchronized (isStopped) {
+			assertTrue("Listener must be notified", isStopped[0]);
+		}
 	}
 
 	/**

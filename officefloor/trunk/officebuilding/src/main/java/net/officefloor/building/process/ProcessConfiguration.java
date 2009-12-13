@@ -46,6 +46,11 @@ public class ProcessConfiguration {
 	private String jvmOptions = null;
 
 	/**
+	 * {@link ProcessCompletionListener}.
+	 */
+	private ProcessCompletionListener completionListener = null;
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private MBeanServer mbeanServer = null;
@@ -105,6 +110,26 @@ public class ProcessConfiguration {
 	 */
 	public void setJvmOptions(String jvmOptions) {
 		this.jvmOptions = jvmOptions;
+	}
+
+	/**
+	 * Obtains the {@link ProcessCompletionListener}.
+	 * 
+	 * @return {@link ProcessCompletionListener}.
+	 */
+	public ProcessCompletionListener getProcessCompletionListener() {
+		return this.completionListener;
+	}
+
+	/**
+	 * Specifies the {@link ProcessCompletionListener}.
+	 * 
+	 * @param completionListener
+	 *            {@link ProcessCompletionListener}.
+	 */
+	public void setProcessCompletionListener(
+			ProcessCompletionListener completionListener) {
+		this.completionListener = completionListener;
 	}
 
 	/**

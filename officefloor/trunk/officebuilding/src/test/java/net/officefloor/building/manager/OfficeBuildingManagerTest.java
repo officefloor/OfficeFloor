@@ -19,10 +19,20 @@ package net.officefloor.building.manager;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.rmi.ConnectException;
+
+import javax.management.JMX;
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.ProcessShell;
+import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.MockWork;
+import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -83,7 +93,9 @@ public class OfficeBuildingManagerTest extends TestCase {
 		assertEquals("Incorrect MBean port", PORT, mbeanReportedPort);
 
 		// Stop the Office Building
-		managerMBean.stopOfficeBuilding();
+		String stopDetails = managerMBean.stopOfficeBuilding(10000);
+		assertEquals("Incorrect stop details", "OfficeBuilding stopped\n",
+				stopDetails);
 	}
 
 	/**
@@ -122,15 +134,32 @@ public class OfficeBuildingManagerTest extends TestCase {
 		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
 				localFloorManager.getOfficeFloorLocation());
 
-		// Obtain the local Process manager MBean
+		// Obtain the local Process Manager MBean
 		ProcessManagerMBean processManager = OfficeBuildingManager
 				.getProcessManager(null, PORT, processNamespace);
 
-		// Obtain the remote OfficeFloor manager
+		// Obtain the local Process Shell MBean
+		ProcessShellMBean localProcessShell = OfficeBuildingManager
+				.getProcessShell(null, PORT, processNamespace);
+
+		// Validate the process host and port
 		String remoteHostName = processManager.getProcessHostName();
 		int remotePort = processManager.getProcessPort();
-		// TODO determine how to validate running
-		System.err.println("TODO determine how to validate running");
+		String serviceUrlValue = localProcessShell.getJmxConnectorServiceUrl();
+		JMXServiceURL serviceUrl = new JMXServiceURL(serviceUrlValue);
+		assertEquals("Incorrect process host", serviceUrl.getHost(),
+				remoteHostName);
+		assertEquals("Incorrect process port", serviceUrl.getPort(), remotePort);
+
+		// Obtain the MBean Server connection direct to process
+		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl);
+		MBeanServerConnection remoteMBeanServer = connector
+				.getMBeanServerConnection();
+
+		// Ensure OfficeFloor running locally
+		assertTrue("OfficeFloor manager should be running locally",
+				remoteMBeanServer.isRegistered(OfficeFloorManager
+						.getOfficeFloorManagerObjectName()));
 
 		// Invoke the work
 		File file = OfficeBuildingTestUtil.createTempFile(this);
@@ -141,11 +170,31 @@ public class OfficeBuildingManagerTest extends TestCase {
 		OfficeBuildingTestUtil.validateFileContent("Work should be invoked",
 				MockWork.MESSAGE, file);
 
-		// Stop the Office Building
-		buildingManager.stopOfficeBuilding();
+		// Obtain the remote process shell
+		ProcessShellMBean remoteProcessShell = JMX.newMBeanProxy(
+				remoteMBeanServer, ProcessShell.getProcessShellObjectName(),
+				ProcessShellMBean.class);
 
-		// TODO ensure the OfficeFloor process is also stopped
-		fail("TODO ensure the OfficeFloor process is also stopped");
+		// Obtain expected details of stopping the OfficeBuilding
+		String expectedStopDetails = "Stopping processes:\n\t"
+				+ processManager.getProcessName() + " ["
+				+ processManager.getProcessNamespace()
+				+ "]\n\nOfficeBuilding stopped\n";
+
+		// Stop the OfficeBuilding
+		String stopDetails = buildingManager.stopOfficeBuilding(10000);
+		assertEquals("Ensure correct stop details", expectedStopDetails,
+				stopDetails);
+
+		// Ensure the OfficeFloor process is also stopped
+		try {
+			remoteProcessShell.triggerStopProcess();
+			fail("Process should already be stopped");
+		} catch (Exception ex) {
+			// Ensure issue connecting
+			assertTrue("Should have issue connecting as process stopped", (ex
+					.getCause() instanceof ConnectException));
+		}
 	}
 
 	/**
