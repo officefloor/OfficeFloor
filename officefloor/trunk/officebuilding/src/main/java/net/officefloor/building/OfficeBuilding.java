@@ -29,10 +29,10 @@ import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 
 /**
  * <p>
- * Office Building.
+ * OfficeBuilding.
  * <p>
- * This provides only the <code>main</code> method for starting the Office
- * Building and running commands.
+ * This provides only the <code>main</code> method for starting the
+ * OfficeBuilding and running commands.
  * 
  * @author Daniel Sagenschneider
  */
@@ -71,7 +71,7 @@ public class OfficeBuilding {
 			+ "\n"
 			+ "commands:\n"
 			+ "\tstart\tStarts OfficeBuilding\n"
-			+ "\tstop\tStops the OfficeBuilding\n"
+			+ "\tstop [<timeout>]\tStops the OfficeBuilding\n"
 			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n";
 
 	/**
