@@ -24,6 +24,8 @@ import java.rmi.ConnectException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
@@ -37,9 +39,12 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.ProcessShell;
+import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -49,7 +54,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
+public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
+		ProcessCompletionListener {
 
 	/**
 	 * {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
@@ -175,6 +181,35 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
+	 * Obtains the {@link ProcessShellMBean} by the process name for the
+	 * {@link OfficeBuilding}.
+	 * <p>
+	 * This a utility method to obtain the {@link ProcessShellMBean} of an
+	 * existing {@link Process} currently being managed within the
+	 * {@link OfficeBuilding}.
+	 * 
+	 * @param hostName
+	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            <code>null</code> indicates localhost.
+	 * @param port
+	 *            Port where the {@link OfficeBuilding} resides.
+	 * @param processNamespace
+	 *            Name of the {@link Process} to obtain its
+	 *            {@link ProcessShellMBean}.
+	 * @return {@link ProcessShellMBean}.
+	 * @throws Exception
+	 *             If fails to obtain the {@link ProcessShellMBean}.
+	 */
+	public static ProcessShellMBean getProcessShell(String hostName, int port,
+			String processNamespace) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(
+				processNamespace, ProcessShell.getProcessShellObjectName());
+		return getMBeanProxy(hostName, port, objectName,
+				ProcessShellMBean.class);
+	}
+
+	/**
+	 * <p>
 	 * Obtains the {@link OfficeFloorManagerMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
@@ -277,6 +312,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	/**
+	 * {@link ProcessManager} instances of currently running {@link Process}
+	 * instances.
+	 */
+	private final List<ProcessManager> processManagers = new LinkedList<ProcessManager>();
+
+	/**
+	 * Flags if the {@link OfficeBuilding} is open.
+	 */
+	private boolean isOfficeBuildingOpen = true;
+
+	/**
 	 * Start time of the {@link OfficeBuilding}.
 	 */
 	private final Date startTime;
@@ -334,8 +380,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public String openOfficeFloor(String processName, String jarName,
-			String officeFloorLocation, String jvmOptions) throws Exception {
+	public synchronized String openOfficeFloor(String processName,
+			String jarName, String officeFloorLocation, String jvmOptions)
+			throws Exception {
+
+		// Ensure the OfficeBuilding is open
+		if (!this.isOfficeBuildingOpen) {
+			throw new IllegalStateException("OfficeBuilding closed");
+		}
 
 		// Create the configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
@@ -351,18 +403,116 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
 				configuration);
 
+		// Register the manager for the running process
+		this.processManagers.add(manager);
+
 		// Return the process name space
 		return manager.getProcessNamespace();
 	}
 
 	@Override
-	public void stopOfficeBuilding() throws Exception {
-		// Stop the connector server
-		this.connectorServer.stop();
+	public synchronized String stopOfficeBuilding(long waitTime)
+			throws Exception {
 
-		// Unregister the Office Building Manager MBean
-		MBeanServer mbeanServer = getMBeanServer();
-		mbeanServer.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+		// Flag no longer open
+		this.isOfficeBuildingOpen = false;
+
+		// Status of stopping
+		StringBuilder status = new StringBuilder();
+		try {
+
+			// Stop the running processes (if any)
+			if (this.processManagers.size() > 0) {
+				status.append("Stopping processes:\n");
+				for (ProcessManager processManager : this.processManagers) {
+					try {
+						// Stop process, keeping track if successful
+						status.append("\t" + processManager.getProcessName()
+								+ " [" + processManager.getProcessNamespace()
+								+ "]");
+						processManager.triggerStopProcess();
+						status.append("\n");
+					} catch (Throwable ex) {
+						// Indicate failure in stopping process
+						status.append(" failed: " + ex.getMessage() + " ["
+								+ ex.getClass().getName() + "]\n");
+					}
+				}
+				status.append("\n");
+			}
+
+			// Wait until processes complete (or time out waiting)
+			long startTime = System.currentTimeMillis();
+			WAIT_FOR_COMPLETION: for (;;) {
+
+				// Determine if all processes complete
+				boolean isAllComplete = true;
+				for (ProcessManager processManager : this.processManagers) {
+					if (!processManager.isProcessComplete()) {
+						// Process still running so not all complete
+						isAllComplete = false;
+					}
+				}
+
+				// No further checking if all processes complete
+				if (isAllComplete) {
+					break WAIT_FOR_COMPLETION;
+				}
+
+				// Determine if time out waiting
+				long currentTime = System.currentTimeMillis();
+				if ((currentTime - startTime) > waitTime) {
+					// Timed out waiting, so destroy processes
+					status.append("\nStop timeout, destroying processes:\n");
+					for (ProcessManager processManager : this.processManagers) {
+						try {
+							status.append("\t"
+									+ processManager.getProcessName() + " ["
+									+ processManager.getProcessNamespace()
+									+ "]");
+							processManager.destroyProcess();
+							status.append("\n");
+						} catch (Throwable ex) {
+							// Indicate failure in stopping process
+							status.append(" failed: " + ex.getMessage() + " ["
+									+ ex.getClass().getName() + "]\n");
+						}
+					}
+					status.append("\n");
+
+					// Timed out so no further waiting
+					break WAIT_FOR_COMPLETION;
+				}
+
+				// Wait some time for the processes to complete
+				this.wait(1000);
+			}
+
+			// Return status of stopping
+			status.append(OfficeBuilding.class.getSimpleName() + " stopped\n");
+			return status.toString();
+
+		} finally {
+			// Stop the connector server
+			this.connectorServer.stop();
+
+			// Unregister the Office Building Manager MBean
+			MBeanServer mbeanServer = getMBeanServer();
+			mbeanServer.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+		}
+	}
+
+	/*
+	 * =================== ProcessCompletionListener ===========================
+	 */
+
+	@Override
+	public synchronized void notifyProcessComplete(ProcessManager manager) {
+		// Remove manager as process no longer running
+		this.processManagers.remove(manager);
+
+		// Notify that a process manager complete
+		this.notify();
 	}
 
 }

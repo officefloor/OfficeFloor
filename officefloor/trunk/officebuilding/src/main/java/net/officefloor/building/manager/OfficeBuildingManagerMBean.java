@@ -22,6 +22,7 @@ import java.util.Date;
 import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -94,9 +95,13 @@ public interface OfficeBuildingManagerMBean {
 	/**
 	 * Stops the {@link OfficeBuilding}.
 	 * 
+	 * @param waitTime
+	 *            Time to wait for {@link ManagedProcess} instances to stop
+	 *            before being destroyed.
+	 * @return Details of stopping the {@link OfficeBuilding}.
 	 * @throws Exception
 	 *             If fails to stop the {@link OfficeBuilding}.
 	 */
-	void stopOfficeBuilding() throws Exception;
+	String stopOfficeBuilding(long waitTime) throws Exception;
 
 }

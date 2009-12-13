@@ -174,6 +174,10 @@ public class ProcessManager implements ProcessManagerMBean {
 			ProcessBuilder builder = new ProcessBuilder(command);
 			Process process = builder.start();
 
+			// Obtain the process completion listener
+			ProcessCompletionListener completionListener = configuration
+					.getProcessCompletionListener();
+
 			// Obtain the MBean Server
 			MBeanServer mbeanServer = configuration.getMbeanServer();
 			if (mbeanServer == null) {
@@ -182,7 +186,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			// Create the process manager for the process
 			ProcessManager processManager = new ProcessManager(processName,
-					mbeanNamespace, process, mbeanServer);
+					mbeanNamespace, process, completionListener, mbeanServer);
 
 			// Gobble the process's stdout and stderr
 			new StreamGobbler(process.getInputStream(), processManager).start();
@@ -256,6 +260,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	private final Process process;
 
 	/**
+	 * {@link ProcessCompletionListener}.
+	 */
+	private final ProcessCompletionListener completionListener;
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private final MBeanServer mbeanServer;
@@ -297,14 +306,18 @@ public class ProcessManager implements ProcessManagerMBean {
 	 *            MBean name space for the {@link Process}.
 	 * @param process
 	 *            {@link Process} being managed.
+	 * @param completionListener
+	 *            {@link ProcessCompletionListener}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
 	 */
 	private ProcessManager(String processName, String mbeanNamespace,
-			Process process, MBeanServer mbeanServer) {
+			Process process, ProcessCompletionListener completionListener,
+			MBeanServer mbeanServer) {
 		this.processName = processName;
 		this.mbeanNamespace = mbeanNamespace;
 		this.process = process;
+		this.completionListener = completionListener;
 		this.mbeanServer = mbeanServer;
 	}
 
@@ -424,6 +437,11 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Flag complete
 		this.isComplete = true;
+
+		// Notify process complete
+		if (this.completionListener != null) {
+			this.completionListener.notifyProcessComplete(this);
+		}
 	}
 
 	/*

@@ -17,27 +17,21 @@
  */
 package net.officefloor.building.process;
 
-import javax.management.remote.JMXServiceURL;
-
 /**
- * MBean interface for the {@link ProcessShell}.
+ * Listener for the completion of the {@link ManagedProcess}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProcessShellMBean {
+public interface ProcessCompletionListener {
 
 	/**
-	 * Obtains the {@link JMXConnector} {@link JMXServiceURL} for the
-	 * {@link Process}.
+	 * Notifies that the {@link ManagedProcess} is complete.
 	 * 
-	 * @return {@link JMXConnector} {@link JMXServiceURL} for the
-	 *         {@link Process}.
+	 * @param manager
+	 *            {@link ProcessManager} of completed {@link ManagedProcess}.
+	 *            This allows using the same {@link ProcessCompletionListener}
+	 *            for multiple {@link ManagedProcess} instances.
 	 */
-	String getJmxConnectorServiceUrl();
-
-	/**
-	 * Triggers gracefully stopping the {@link Process}.
-	 */
-	void triggerStopProcess();
+	void notifyProcessComplete(ProcessManager manager);
 
 }

@@ -58,6 +58,11 @@ public class OfficeBuilding {
 	public static final String PROPERTY_OFFICE_BUILDING_PORT = "office.building.port";
 
 	/**
+	 * Wait time to stop the {@link OfficeBuilding}.
+	 */
+	public static final String PROPERTY_STOP_WAIT_TIME = "stop.wait.time";
+
+	/**
 	 * Usage message.
 	 */
 	static final String USAGE_MESSAGE = "USAGE: java ... "
@@ -125,7 +130,7 @@ public class OfficeBuilding {
 
 		// Handle the command
 		if ("start".equalsIgnoreCase(command)) {
-			// Start the Office Building
+			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
 					.startOfficeBuilding(officeBuildingPort);
 
@@ -134,11 +139,30 @@ public class OfficeBuilding {
 			System.out.println("OfficeBuilding started at " + serviceUrl);
 
 		} else if ("stop".equalsIgnoreCase(command)) {
-			// Stop the Office Building
+			// Obtain wait time to stop the OfficeBuilding
+			long stopWaitTime;
+			if (arguments.length >= 2) {
+				// Use the command line stop wait time
+				try {
+					stopWaitTime = Long.parseLong(arguments[1]);
+				} catch (NumberFormatException ex) {
+					errorAndExit("ERROR: Stop timeout must be a long");
+					return; // Should not get here as exit
+				}
+			} else {
+				// Obtain the default stop wait time
+				stopWaitTime = properties
+						.getLongProperty(PROPERTY_STOP_WAIT_TIME);
+			}
+
+			// Stop the OfficeBuilding
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
 					.getOfficeBuildingManager(officeBuildingHost,
 							officeBuildingPort);
-			manager.stopOfficeBuilding();
+			String stopDetails = manager.stopOfficeBuilding(stopWaitTime);
+
+			// Provide details of stopping the OfficeBuilding
+			System.out.println(stopDetails);
 
 		} else if ("url".equalsIgnoreCase(command)) {
 			// Providing URL so obtain host and port
@@ -326,6 +350,32 @@ public class OfficeBuilding {
 			} catch (NumberFormatException ex) {
 				// Provide error on invalid property
 				errorAndExit("Property " + name + " must be an integer");
+				throw new IllegalStateException("Should error before here");
+			}
+		}
+
+		/**
+		 * Obtains the long property value.
+		 * 
+		 * @param name
+		 *            Name of the property.
+		 * @return Integer value for the property.
+		 */
+		public long getLongProperty(String name) {
+
+			// Obtain the property value
+			String value = this.getProperty(name);
+
+			try {
+				// Transform to long
+				long longValue = Long.parseLong(value);
+
+				// Have long value so return it
+				return longValue;
+
+			} catch (NumberFormatException ex) {
+				// Provide error on invalid property
+				errorAndExit("Property " + name + " must be a long");
 				throw new IllegalStateException("Should error before here");
 			}
 		}

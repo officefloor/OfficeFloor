@@ -99,7 +99,7 @@ public class OfficeBuildingTest extends TestCase {
 				"Office Building should be just started",
 				((beforeStartTime <= startTime) && (startTime <= afterStartTime)));
 
-		// Stop the Office Building
+		// Stop the Office Building (pulls in default stop time)
 		OfficeBuilding.main("stop");
 
 		// Ensure stopped

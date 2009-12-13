@@ -63,6 +63,15 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	}
 
 	/**
+	 * Obtains the {@link ObjectName} for the {@link ProcessShellMBean}.
+	 * 
+	 * @return {@link ObjectName} for the {@link ProcessShellMBean}.
+	 */
+	public static ObjectName getProcessShellObjectName() {
+		return PROCESS_SHELL_OBJECT_NAME;
+	}
+
+	/**
 	 * JMX communication protocol.
 	 */
 	private static final String JMX_COMMUNICATION_PROTOCOL = "rmi";
@@ -199,6 +208,12 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/*
 	 * ==================== ProcessShellMBean =============================
 	 */
+
+	@Override
+	public String getJmxConnectorServiceUrl() {
+		// Return the address of the JMX Connector
+		return this.connectorServer.getAddress().toString();
+	}
 
 	@Override
 	public void triggerStopProcess() {
