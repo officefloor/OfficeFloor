@@ -25,17 +25,15 @@ import java.net.URLClassLoader;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.OfficeBuilding;
-
 /**
- * Bootstraps the applications within the {@link OfficeBuilding} deployment.
+ * Bootstraps the applications within the deployment.
  * 
  * @author Daniel Sagenschneider
  */
 public class Bootstrap {
 
 	/**
-	 * Bootstraps the application within the {@link OfficeBuilding} deployment.
+	 * Bootstraps the application within the deployment.
 	 * 
 	 * @param arguments
 	 *            Command line arguments.
