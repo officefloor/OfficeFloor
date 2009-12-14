@@ -1,11 +1,25 @@
 #!/bin/sh
 
-# Move to OFFICE_FLOOR_HOME directory
-BIN_DIR=`dirname $0`
-cd $BIN_DIR/..
+# Fail immediately
+set -e
 
-# Obtain the OFFICE_FLOOR_HOME location
-OFFICE_FLOOR_HOME=$PWD
+# Default OFFICE_BUILDING_HOME to bin/..
+if [ -z ${OFFICE_BUILDING_HOME} ]; then
+	# Move to OFFICE_BUILDING_HOME directory
+	BIN_DIR=`dirname $0`
+	cd ${BIN_DIR}/..
 
-# Start OfficeBuilding
-echo "TODO: start the Office Building from $OFFICE_FLOOR_HOME"
+	# Obtain the OFFICE_BUILDING_HOME location
+	export OFFICE_BUILDING_HOME=$PWD
+fi
+
+# Execute from OFFICE_BUILDING_HOME
+cd ${OFFICE_BUILDING_HOME}
+
+# Run OfficeBuilding
+java \
+	${OFFICE_BUILDING_JVM_OPTIONS} \
+	-cp lib/core/officebuilding.jar \
+	net.officefloor.building.bootstrap.Bootstrap \
+	net.officefloor.building.OfficeBuilding \
+	$@
