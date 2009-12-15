@@ -1,4 +1,5 @@
 <assembly>
+	<id>plugin</id>
 	<formats>
 		<format>jar</format>
 		<format>dir</format>
