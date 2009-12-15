@@ -141,4 +141,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
 Bundle-ClassPath: .,
  junit-3.8.2.jar,
- net.officefloor.core-0.0.2.zip
+ net.officefloor.core-0.0.2.jar
