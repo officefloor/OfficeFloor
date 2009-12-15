@@ -33,14 +33,19 @@
 									<message>
 										Missing property: &apos;eclipse.install.dir&apos;
 
-										Please ensure property &apos;eclipse.install.dir&apos; is specified
+										Please ensure property &apos;eclipse.install.dir&apos; is
+										specified
 										in an external active profile.
-										Its value should contain the directory path to where Eclipse is
-										installed (eg C:\install).
+										Its value should
+										contain the directory path to where Eclipse is
+										installed (eg
+										C:\install).
 
-										Also ensure the &apos;startup.jar&apos; is available in the
+										Also ensure the &apos;startup.jar&apos; is
+										available in the
 										installed directory.
-										This may require coping and renaming from the plug-in.
+										This may require coping
+										and renaming from the plug-in.
                                     </message>
 								</requireProperty>
 							</rules>
@@ -62,7 +67,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-dependencies</id>
+						<id>make-dependencies-available-for-pde</id>
 						<phase>process-sources</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
@@ -77,6 +82,31 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>pde-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<eclipseInstall>${eclipse.install.dir}</eclipseInstall>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>plugin</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>plugin-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets>
@@ -85,18 +115,11 @@
 							<includes>
 								<include>*.jar</include>
 								<include>*.zip</include>
+								<include>build.xml</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>pde-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<eclipseInstall>${eclipse.install.dir}</eclipseInstall>
 				</configuration>
 			</plugin>
 		</plugins>

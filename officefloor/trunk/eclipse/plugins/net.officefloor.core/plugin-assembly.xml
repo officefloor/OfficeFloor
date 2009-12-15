@@ -1,0 +1,28 @@
+<assembly>
+	<formats>
+		<format>jar</format>
+		<format>dir</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<!-- Plug-in Manifest -->
+			<directory>.</directory>
+			<outputDirectory>.</outputDirectory>
+			<includes>
+				<include>META-INF/**</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<!-- Core dependencies -->
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}
+			</outputFileNameMapping>
+			<includes>
+				<include>${pom.groupId}:officeframe</include>
+				<include>${pom.groupId}:officexml</include>
+				<include>${pom.groupId}:officecompiler</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
