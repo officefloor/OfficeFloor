@@ -72,6 +72,23 @@ This may require coping and renaming from the plug-in.
                     </execution>
                 </executions>
             </plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>feature</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>feature-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
     <dependencies>
@@ -79,19 +96,13 @@ This may require coping and renaming from the plug-in.
             <groupId>${pom.groupId}</groupId>
             <artifactId>net.officefloor.core</artifactId>
             <version>${pom.version}</version>
-            <type>zip</type>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>net.officefloor.ui</artifactId>
             <version>${pom.version}</version>
-            <type>zip</type>
-        </dependency>
-        <!-- Ensure in multi-module building that all plug-ins are built first -->
-        <dependency>
-            <groupId>${pom.groupId}</groupId>
-            <artifactId>net.officefloor.eclipse.plugins</artifactId>
-            <version>${pom.version}</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 </project>
