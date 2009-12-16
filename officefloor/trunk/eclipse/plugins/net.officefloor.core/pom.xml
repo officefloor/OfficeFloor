@@ -99,6 +99,9 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
+							<archive>
+								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+							</archive>
 							<descriptors>
 								<descriptor>plugin-assembly.xml</descriptor>
 							</descriptors>

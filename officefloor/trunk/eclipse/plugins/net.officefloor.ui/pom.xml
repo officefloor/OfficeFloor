@@ -126,54 +126,21 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-plugin-resources-for-jar</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<copy todir="${project.build.outputDirectory}">
-									<fileset dir="${project.basedir}">
-										<include name="icons/**" />
-										<include name="schema/**" />
-										<include name="plugin.xml" />
-									</fileset>
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>zip</id>
+						<id>plugin</id>
 						<phase>package</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>single</goal>
 						</goals>
 						<configuration>
 							<archive>
 								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
 							</archive>
-						</configuration>
-					</execution>
-					<execution>
-						<id>plugin-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<classifier>plugin</classifier>
-							<archive>
-								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-							</archive>
+							<descriptors>
+								<descriptor>plugin-assembly.xml</descriptor>
+							</descriptors>
 						</configuration>
 					</execution>
 				</executions>
@@ -202,7 +169,6 @@
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>net.officefloor.core</artifactId>
 			<version>${pom.version}</version>
-			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
