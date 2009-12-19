@@ -25,66 +25,19 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Ensure the features are copied locally to create update site -->
-				<artifactId>maven-dependency-plugin
-				</artifactId>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>
-								${build.directory}/dependencies
-							</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Use ant to extract and build the eclipse update site content -->
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<ant antfile="${basedir}/generateUpdateSiteBuild.xml" dir="${basedir}">
-									<property name="build.dir" value="${project.build.directory}" />
-									<property name="dependency.dir"
-										value="${project.build.directory}/dependencies" />
-									<property name="update.site.dir" value="${project.build.directory}/updatesite" />
-									<property name="version" value="${pom.version}" />
-								</ant>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Assemble the update site -->
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>assemble.xml</descriptor>
-					</descriptors>
-				</configuration>
 				<executions>
 					<execution>
-						<id>make-assembly</id>
+						<id>update-site-zip</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>update-site-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -96,14 +49,14 @@
 			<artifactId>net.officefloor.feature
 			</artifactId>
 			<version>${pom.version}</version>
-			<type>zip</type>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>net.officefloor.plugins.feature
 			</artifactId>
 			<version>${pom.version}</version>
-			<type>zip</type>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 </project>
