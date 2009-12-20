@@ -13,7 +13,8 @@
 	<artifactId>net.officefloor.plugins.feature
 	</artifactId>
 	<name>Plug-ins Eclipse Feature</name>
-	<description>Eclipse Feature for the additional OfficeFloor Plug-ins</description>
+	<description>Eclipse Feature for the additional OfficeFloor Plug-ins
+	</description>
 	<packaging>zip</packaging>
 	<build>
 		<plugins>
@@ -61,15 +62,6 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 						<javacTarget>1.6</javacTarget>
 					</buildProperties>
 				</configuration>
-				<executions>
-					<execution>
-						<id>clean-pde</id>
-						<phase>clean</phase>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -87,6 +79,22 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>*.jar</include>
+								<include>*.zip</include>
+								<include>build.xml</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
