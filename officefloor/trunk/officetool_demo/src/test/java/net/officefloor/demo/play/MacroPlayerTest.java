@@ -32,7 +32,8 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroContext;
+import net.officefloor.demo.macro.MacroTask;
+import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -139,15 +140,15 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	public void testNoMouseLocation() {
 
 		// Create the macro that obtains context
-		final Macro macro = this.createMock(Macro.class);
+		SingleMacroTaskMock mock = new SingleMacroTaskMock();
 
 		// Record obtaining the context
-		this.recordReturn(macro, macro.getStartingMouseLocation(), null);
-		macro.runMacro(this.player);
+		mock.record_getStartingMouseLocation(null);
+		mock.record_getAndRunMacroTasks(this.player);
 
 		// Run the macro
 		this.replayMockObjects();
-		this.player.play(new Macro[] { macro });
+		this.player.play(mock.macro);
 		this.verifyMockObjects();
 	}
 
@@ -162,12 +163,11 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 				- OFFSET, this.frame.getSize().height - OFFSET);
 
 		// Create mock objects for testing
-		final Macro macro = this.createMock(Macro.class);
+		SingleMacroTaskMock mock = new SingleMacroTaskMock();
 
 		// Record actions
-		this.recordReturn(macro, macro.getStartingMouseLocation(),
-				startLocation);
-		macro.runMacro(this.player);
+		mock.record_getStartingMouseLocation(startLocation);
+		mock.record_getAndRunMacroTasks(this.player);
 
 		// Ensure mouse at initial location
 		this.robot.mouseMove(initLocation.x, initLocation.y);
@@ -175,7 +175,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(new Macro[] { macro });
+		this.player.play(mock.macro);
 		this.verifyMockObjects();
 
 		// Ensure mouse at macro starting location
@@ -193,20 +193,18 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 				- OFFSET, this.frame.getSize().height - OFFSET);
 
 		// Create mock objects for testing
-		final Macro initPositionMacro = this.createMock(Macro.class);
-		final Macro movePositionMacro = this.createMock(Macro.class);
+		SingleMacroTaskMock initPosition = new SingleMacroTaskMock();
+		SingleMacroTaskMock movePosition = new SingleMacroTaskMock();
 
 		// Record actions
-		this.recordReturn(initPositionMacro, initPositionMacro
-				.getStartingMouseLocation(), startLocation);
-		initPositionMacro.runMacro(this.player);
-		this.recordReturn(movePositionMacro, movePositionMacro
-				.getStartingMouseLocation(), finishLocation);
-		movePositionMacro.runMacro(this.player);
+		initPosition.record_getStartingMouseLocation(startLocation);
+		initPosition.record_getAndRunMacroTasks(this.player);
+		movePosition.record_getStartingMouseLocation(finishLocation);
+		movePosition.record_getAndRunMacroTasks(this.player);
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(new Macro[] { initPositionMacro, movePositionMacro });
+		this.player.play(initPosition.macro, movePosition.macro);
 		this.verifyMockObjects();
 
 		// Ensure mouse at finishing location
@@ -224,20 +222,18 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 		final Point finishLocation = new Point(OFFSET, OFFSET);
 
 		// Create mock objects for testing
-		final Macro initPositionMacro = this.createMock(Macro.class);
-		final Macro movePositionMacro = this.createMock(Macro.class);
+		SingleMacroTaskMock initPosition = new SingleMacroTaskMock();
+		SingleMacroTaskMock movePosition = new SingleMacroTaskMock();
 
 		// Record actions
-		this.recordReturn(initPositionMacro, initPositionMacro
-				.getStartingMouseLocation(), startLocation);
-		initPositionMacro.runMacro(this.player);
-		this.recordReturn(movePositionMacro, movePositionMacro
-				.getStartingMouseLocation(), finishLocation);
-		movePositionMacro.runMacro(this.player);
+		initPosition.record_getStartingMouseLocation(startLocation);
+		initPosition.record_getAndRunMacroTasks(this.player);
+		movePosition.record_getStartingMouseLocation(finishLocation);
+		movePosition.record_getAndRunMacroTasks(this.player);
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(new Macro[] { initPositionMacro, movePositionMacro });
+		this.player.play(initPosition.macro, movePosition.macro);
 		this.verifyMockObjects();
 
 		// Ensure mouse at finishing location
@@ -245,7 +241,8 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to trigger moving the mouse from the {@link MacroContext}.
+	 * Ensure able to trigger moving the mouse from the {@link MacroTaskContext}
+	 * .
 	 */
 	public void testContext_mouseMove() {
 
@@ -266,7 +263,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to trigger mouse click from the {@link MacroContext}.
+	 * Ensure able to trigger mouse click from the {@link MacroTaskContext}.
 	 */
 	public void testContext_mouseClick() {
 
@@ -380,6 +377,53 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 		assertTrue("Incorrect y location (e=" + screenLocation.y + ", a="
 				+ mouseLocation.y + ")",
 				Math.abs(location.y - mouseLocation.y) <= 1);
+	}
+
+	/**
+	 * Mocks for {@link Macro} and {@link MacroTask}.
+	 */
+	private class SingleMacroTaskMock {
+
+		/**
+		 * Mock {@link Macro}.
+		 */
+		public final Macro macro = MacroPlayerTest.this.createMock(Macro.class);
+
+		/**
+		 * Mock {@link MacroTask}.
+		 */
+		public final MacroTask task = MacroPlayerTest.this
+				.createMock(MacroTask.class);
+
+		/**
+		 * Records obtaining the starting location.
+		 * 
+		 * @param startingLocation
+		 *            Starting location.
+		 */
+		public void record_getStartingMouseLocation(Point startingLocation) {
+			MacroPlayerTest.this.recordReturn(this.macro, this.macro
+					.getStartingMouseLocation(), startingLocation);
+		}
+
+		/**
+		 * Records obtaining the single {@link MacroTask}.
+		 */
+		public void record_getMacroTasks() {
+			MacroPlayerTest.this.recordReturn(this.macro, this.macro
+					.getMacroTasks(), new MacroTask[] { this.task });
+		}
+
+		/**
+		 * Records obtaining the {@link MacroTask} instances and running them.
+		 * 
+		 * @param context
+		 *            {@link MacroTaskContext}.
+		 */
+		public void record_getAndRunMacroTasks(MacroTaskContext context) {
+			this.record_getMacroTasks();
+			this.task.runMacroTask(context);
+		}
 	}
 
 }

@@ -20,9 +20,8 @@ package net.officefloor.demo.store;
 import java.awt.Point;
 
 import junit.framework.TestCase;
-
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroContext;
+import net.officefloor.demo.macro.MacroTask;
 
 /**
  * Test {@link Macro} not contained in the {@link Macro} package so requires
@@ -57,8 +56,9 @@ public class FullyQualifiedNameMacro implements Macro {
 	}
 
 	@Override
-	public void runMacro(MacroContext context) {
+	public MacroTask[] getMacroTasks() {
 		TestCase.fail("Macro should not be run");
+		return null;
 	}
 
 }

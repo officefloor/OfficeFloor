@@ -17,7 +17,10 @@
  */
 package net.officefloor.demo.macro;
 
+import java.awt.Point;
 import java.awt.Robot;
+
+import javax.swing.JDialog;
 
 /**
  * <p>
@@ -30,7 +33,7 @@ import java.awt.Robot;
  * 
  * @author Daniel Sagenschneider
  */
-public interface MacroContext {
+public interface MacroTaskContext {
 
 	/**
 	 * As per {@link Robot}.
@@ -105,5 +108,18 @@ public interface MacroContext {
 	 *            Text to be typed in.
 	 */
 	void keyText(String text);
+
+	/**
+	 * <p>
+	 * Obtains the absolute location for the relative location.
+	 * <p>
+	 * This is useful for example to display a {@link JDialog} and position
+	 * correctly.
+	 * 
+	 * @param relativeLocation
+	 *            Relative location.
+	 * @return Absolute location.
+	 */
+	Point getAbsoluteLocation(Point relativeLocation);
 
 }

@@ -21,14 +21,14 @@ import java.awt.Point;
 
 /**
  * Provides wrapping of a possible action to record.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface Macro {
 
 	/**
 	 * Initialises this {@link Macro} from the configuration memento.
-	 *
+	 * 
 	 * @param memento
 	 *            Memento containing the configuration.
 	 */
@@ -37,7 +37,7 @@ public interface Macro {
 	/**
 	 * Obtains the configuration memento to reinitialise a new instance of this
 	 * {@link Macro}.
-	 *
+	 * 
 	 * @return Configuration memento.
 	 */
 	String getConfigurationMemento();
@@ -49,7 +49,7 @@ public interface Macro {
 	 * <p>
 	 * This allows for visually moving the mouse to this location before running
 	 * this {@link Macro}.
-	 *
+	 * 
 	 * @return {@link Point} where the mouse cursor must be to start this
 	 *         {@link Macro}. <code>null</code> indicates non-mouse
 	 *         {@link Macro} (typically keyboard entry).
@@ -57,11 +57,10 @@ public interface Macro {
 	Point getStartingMouseLocation();
 
 	/**
-	 * Runs this {@link Macro}.
-	 *
-	 * @param context
-	 *            {@link MacroContext}.
+	 * Obtains the listing of {@link MacroTask} instances.
+	 * 
+	 * @return Listing of {@link MacroTask} instances.
 	 */
-	void runMacro(MacroContext context);
+	MacroTask[] getMacroTasks();
 
 }

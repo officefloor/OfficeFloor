@@ -35,6 +35,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import net.officefloor.demo.macro.InfoMacro;
 import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
@@ -139,6 +140,7 @@ public class DemoApp extends JFrame {
 		recorder.addMacro(new LeftClickMacro());
 		recorder.addMacro(new RightClickMacro());
 		recorder.addMacro(new InputTextMacro());
+		recorder.addMacro(new InfoMacro());
 
 		// Add panel with listing of added macros
 		JPanel controlPanel = new ConfiguredPanel(false, panel);
@@ -157,7 +159,7 @@ public class DemoApp extends JFrame {
 
 		// Play button
 		JPanel playPanel = new ConfiguredPanel(true, controlPanel);
-		playPanel.add(new PlayButton(this));
+		playPanel.add(new PlayButton(this, recorder));
 		playPanel.add(Box.createHorizontalGlue());
 
 		controlPanel.add(Box.createVerticalStrut(20));

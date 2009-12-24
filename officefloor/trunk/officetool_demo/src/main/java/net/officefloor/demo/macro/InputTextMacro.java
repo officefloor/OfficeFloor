@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
  * 
  * @author Daniel Sagenschneider
  */
-public class InputTextMacro implements MacroFactory, Macro {
+public class InputTextMacro implements MacroFactory, Macro, MacroTask {
 
 	/**
 	 * Text to input.
@@ -43,7 +43,7 @@ public class InputTextMacro implements MacroFactory, Macro {
 	}
 
 	@Override
-	public Macro createMacro(Point location) {
+	public Macro createMacro(MacroFactoryContext context) {
 
 		// Obtain text to input
 		String inputText = JOptionPane.showInputDialog("Input text:");
@@ -75,9 +75,23 @@ public class InputTextMacro implements MacroFactory, Macro {
 	}
 
 	@Override
-	public void runMacro(MacroContext context) {
+	public MacroTask[] getMacroTasks() {
+		return new MacroTask[] { this };
+	}
+
+	/*
+	 * ====================== MacroTask ================================
+	 */
+
+	@Override
+	public void runMacroTask(MacroTaskContext context) {
 		// Input the text
 		context.keyText(this.text);
+	}
+
+	@Override
+	public long getPostRunWaitTime() {
+		return 0;
 	}
 
 }

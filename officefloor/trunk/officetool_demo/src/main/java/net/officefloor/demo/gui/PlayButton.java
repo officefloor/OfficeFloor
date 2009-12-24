@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.play.MacroPlayer;
+import net.officefloor.demo.record.RecordComponent;
 
 /**
  * {@link JButton} to play the {@link Macro} instances.
@@ -40,47 +41,46 @@ public class PlayButton extends JButton {
 	 * 
 	 * @param app
 	 *            {@link DemoApp}.
+	 * @param recordComponent
+	 *            {@link RecordComponent}.
 	 */
-	public PlayButton(final DemoApp app) {
+	public PlayButton(final DemoApp app, final RecordComponent recordComponent) {
 		super("Play");
 
 		// Run macros on clicking button
 		this.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
-				// Obtain the listing of selected macros
-				Macro[] macros = app.getSelectedMacros(true);
-
-				// Obtain the reference point for playing macros
-				Point offset = app.getLocationOnScreen();
-
-				// Hide the frame for playing
-				app.setVisible(false);
 				try {
-					Thread.sleep(500);
-				} catch (InterruptedException ex) {
-					// Ignore
-				}
+					// Obtain the listing of selected macros
+					Macro[] macros = app.getSelectedMacros(true);
 
-				// Play the macros
-				try {
+					// Obtain the reference point for playing macros
+					Point offset = app.getLocationOnScreen();
+
+					// Obtain hide/show macros
+					Macro hideMacro = recordComponent.getHideFrameMacro();
+					Macro showMacro = recordComponent.getShowFrameMacro();
+
+					// Add the hide to beginning and show to end
+					Macro[] runMacros = new Macro[macros.length + 2];
+					runMacros[0] = hideMacro;
+					for (int i = 0; i < macros.length; i++) {
+						runMacros[i + 1] = macros[i];
+					}
+					runMacros[runMacros.length - 1] = showMacro;
+
+					// Play the macros (hiding and showing frame)
 					MacroPlayer player = new MacroPlayer(5, offset);
-					player.play(macros);
+					player.play(runMacros);
+
 				} catch (AWTException ex) {
+					// Indicate failure to initiate playing macros
 					JOptionPane.showMessageDialog(app,
 							"Failed to initiate player: " + ex.getMessage()
 									+ " [" + ex.getClass().getSimpleName()
 									+ "]", "Player error",
 							JOptionPane.ERROR_MESSAGE);
-				} finally {
-					// Ensure frame is made visible again
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException ex) {
-						// Ignore
-					}
-					app.setVisible(true);
 				}
 			}
 		});

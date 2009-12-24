@@ -25,7 +25,7 @@ import java.awt.event.InputEvent;
  * 
  * @author Daniel Sagenschneider
  */
-public class RightClickMacro implements MacroFactory, Macro {
+public class RightClickMacro implements MacroFactory, Macro, MacroTask {
 
 	/**
 	 * Location.
@@ -42,9 +42,9 @@ public class RightClickMacro implements MacroFactory, Macro {
 	}
 
 	@Override
-	public Macro createMacro(Point location) {
+	public Macro createMacro(MacroFactoryContext context) {
 		RightClickMacro macro = new RightClickMacro();
-		macro.location = location;
+		macro.location = context.getLocation();
 		return macro;
 	}
 
@@ -72,7 +72,16 @@ public class RightClickMacro implements MacroFactory, Macro {
 	}
 
 	@Override
-	public void runMacro(MacroContext context) {
+	public MacroTask[] getMacroTasks() {
+		return new MacroTask[] { this };
+	}
+
+	/*
+	 * ====================== MacroTask ================================
+	 */
+
+	@Override
+	public void runMacroTask(MacroTaskContext context) {
 		context.mouseMove(this.location.x, this.location.y);
 		context.mouseClick(InputEvent.BUTTON3_MASK); // right click
 
@@ -82,6 +91,11 @@ public class RightClickMacro implements MacroFactory, Macro {
 		} catch (InterruptedException ex) {
 			// Ignore
 		}
+	}
+
+	@Override
+	public long getPostRunWaitTime() {
+		return 300;
 	}
 
 }
