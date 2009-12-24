@@ -22,15 +22,18 @@ import java.awt.Point;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
+import javax.swing.SwingUtilities;
+
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroContext;
+import net.officefloor.demo.macro.MacroTask;
+import net.officefloor.demo.macro.MacroTaskContext;
 
 /**
  * Plays the specified {@link Macro} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MacroPlayer implements MacroContext {
+public class MacroPlayer implements MacroTaskContext {
 
 	/**
 	 * Obtains the key codes for the character.
@@ -136,20 +139,82 @@ public class MacroPlayer implements MacroContext {
 	 * @param macros
 	 *            {@link Macro} instances to play.
 	 */
-	public void play(Macro[] macros) {
+	public void play(final Macro... macros) {
 
-		// Iterate over the macros
-		for (Macro macro : macros) {
+		// Run in own thread to allow event dispatch thread to update display
+		Runnable player = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					// Iterate over the macros
+					for (final Macro macro : macros) {
 
-			// Move mouse to starting location
-			Point startLocation = macro.getStartingMouseLocation();
-			if (startLocation != null) {
-				this.mouseMove(startLocation.x, startLocation.y);
+						// Move mouse to starting location
+						Point startLocation = macro.getStartingMouseLocation();
+						if (startLocation != null) {
+							MacroPlayer.this.mouseMove(startLocation.x,
+									startLocation.y);
+						}
+
+						// Run the macro tasks
+						MacroTask[] tasks = macro.getMacroTasks();
+						for (final MacroTask task : tasks) {
+
+							// Wait until display idle before running task
+							MacroPlayer.this.robot.waitForIdle();
+
+							// Flag to determine if task run
+							final boolean[] isRun = new boolean[1];
+							isRun[0] = false;
+
+							// Run the task on the event dispatcher thread
+							SwingUtilities.invokeAndWait(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										// Run the task
+										task.runMacroTask(MacroPlayer.this);
+									} finally {
+										// Flag task now run
+										synchronized (isRun) {
+											isRun[0] = true;
+											isRun.notify();
+										}
+									}
+								}
+							});
+
+							// Wait task is run
+							synchronized(isRun) {
+								while (!isRun[0]) {
+									isRun.wait(100);
+								}
+							}
+
+							// Wait for display to refresh
+							Thread.sleep(10); // allow some time for processing
+							MacroPlayer.this.robot.waitForIdle();
+
+							// Wait specified time for task
+							long taskWaitTime = task.getPostRunWaitTime();
+							if (taskWaitTime > 0) {
+								// Sleep the specified time
+								Thread.sleep(taskWaitTime);
+							}
+						}
+					}
+				} catch (Throwable ex) {
+					// Indicate failure in playing
+					System.err.println("Failed playing macros");
+					ex.printStackTrace();
+				}
 			}
+		};
 
-			// Run the macro
-			macro.runMacro(this);
-		}
+		// Run the player
+		new Thread(player).start();
+
+		// Allow calling thread (event dispatcher) to return
 	}
 
 	/**
@@ -213,7 +278,7 @@ public class MacroPlayer implements MacroContext {
 	public void mouseMove(int x, int y) {
 
 		// Obtain the absolute location
-		Point location = new Point(this.offset.x + x, this.offset.y + y);
+		Point location = this.getAbsoluteLocation(new Point(x, y));
 
 		// Move the mouse
 		if (this.mouseLocation == null) {
@@ -288,6 +353,12 @@ public class MacroPlayer implements MacroContext {
 				this.keyRelease(keyCodes[k]);
 			}
 		}
+	}
+
+	@Override
+	public Point getAbsoluteLocation(Point relativeLocation) {
+		return new Point(this.offset.x + relativeLocation.x, this.offset.y
+				+ relativeLocation.y);
 	}
 
 }

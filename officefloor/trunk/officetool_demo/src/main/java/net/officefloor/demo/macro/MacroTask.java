@@ -17,28 +17,25 @@
  */
 package net.officefloor.demo.macro;
 
-
 /**
- * Factory for the creation of a {@link Macro}.
+ * Task to be executed for the {@link Macro}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MacroFactory {
+public interface MacroTask {
 
 	/**
-	 * Obtains the display name for the {@link Macro}.
-	 * 
-	 * @return Display name for the {@link Macro}.
-	 */
-	String getDisplayName();
-
-	/**
-	 * Creates the {@link Macro}.
+	 * Runs this {@link MacroTask}.
 	 * 
 	 * @param context
-	 *            {@link MacroFactoryContext}.
-	 * @return New {@link Macro}.
+	 *            {@link MacroTaskContext}.
 	 */
-	Macro createMacro(MacroFactoryContext context);
+	void runMacroTask(MacroTaskContext context);
 
+	/**
+	 * Obtains the time to wait after executing the {@link MacroTask}.
+	 * 
+	 * @return Time to wait after executing the {@link MacroTask}.
+	 */
+	long getPostRunWaitTime();
 }

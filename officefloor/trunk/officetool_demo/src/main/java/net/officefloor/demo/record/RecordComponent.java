@@ -19,7 +19,7 @@ package net.officefloor.demo.record;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
-import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
@@ -44,8 +44,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroContext;
 import net.officefloor.demo.macro.MacroFactory;
+import net.officefloor.demo.macro.MacroFactoryContext;
+import net.officefloor.demo.macro.MacroTask;
+import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.demo.play.MacroPlayer;
 
 /**
@@ -135,6 +137,29 @@ public class RecordComponent extends JComponent {
 	}
 
 	/**
+	 * Obtains the {@link Macro} to hide the {@link JFrame}.
+	 * 
+	 * @return {@link Macro} to hide the {@link JFrame}.
+	 */
+	public Macro getHideFrameMacro() {
+		return new HideFrameMacro();
+	}
+
+	/**
+	 * Obtains the {@link Macro} to show the {@link JFrame}.
+	 * 
+	 * @return {@link Macro} to show the {@link JFrame}.
+	 */
+	public Macro getShowFrameMacro() {
+
+		// Obtain location of frame for showing again after hiding
+		Point frameLocation = RecordComponent.this.frame.getLocation();
+
+		// Return the macro to show the frame
+		return new ShowFrameMacro(frameLocation);
+	}
+
+	/**
 	 * Updates the background image to mimic transparency.
 	 */
 	private void updateBackgroundImage() {
@@ -174,7 +199,8 @@ public class RecordComponent extends JComponent {
 	/**
 	 * {@link Action} for a {@link Macro}.
 	 */
-	private class MacroAction extends AbstractAction implements MacroContext {
+	private class MacroAction extends AbstractAction implements
+			MacroTaskContext, MacroFactoryContext {
 
 		/**
 		 * {@link MacroFactory} to create the {@link Macro} for this
@@ -224,19 +250,6 @@ public class RecordComponent extends JComponent {
 		}
 
 		/**
-		 * Translates the absolute {@link Point} to the relative {@link Point}.
-		 * 
-		 * @param absoluateLocation
-		 *            Absolute location.
-		 * @return Relative location.
-		 */
-		private Point translateAbsoluteToRelative(Point absoluateLocation) {
-			Point offset = this.getReferencePoint();
-			return new Point(absoluateLocation.x - offset.x,
-					absoluateLocation.y - offset.y);
-		}
-
-		/**
 		 * Obtains the {@link MacroPlayer} ready for immediate use.
 		 * 
 		 * @return {@link MacroPlayer}.
@@ -256,53 +269,57 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public synchronized void actionPerformed(ActionEvent e) {
-
-			// Obtain the relative location of macro
-			Point macroLocation = this
-					.translateAbsoluteToRelative(RecordComponent.this.mouseLocationForNewMacro);
-
-			// Create the macro
-			final Macro macro = this.macroFactory.createMacro(macroLocation);
-
-			// Hide window to run macro on what is behind window
-			Point frameLocation = RecordComponent.this.frame.getLocation();
-			RecordComponent.this.frame.setVisible(false);
-
-			// Allow window time to hide
-			if (!EventQueue.isDispatchThread()) {
-				// May only wait if not dispatch thread
-				RecordComponent.this.robot.waitForIdle();
-			}
 			try {
-				Thread.sleep(100);
-			} catch (InterruptedException ex) {
-				// Ignore and carry on to run macro
-			}
 
-			// Run the macro
-			macro.runMacro(this);
+				// Create the macro
+				final Macro macro = this.macroFactory.createMacro(this);
 
-			// Allow time for macro to complete
-			if (!EventQueue.isDispatchThread()) {
-				// May only wait if not dispatch thread
-				RecordComponent.this.robot.waitForIdle();
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException ex) {
-				// Ignore and carry on to make visible
-			}
+				// Obtain location of frame for showing again after hiding
+				Point frameLocation = RecordComponent.this.frame.getLocation();
 
-			// Show window after macro triggered
-			RecordComponent.this.updateBackgroundImage();
-			RecordComponent.this.frame.setVisible(true);
-			RecordComponent.this.frame.setLocation(frameLocation);
-			RecordComponent.this.refreshBackground();
+				// Run the macro (hiding/showing frame)
+				new MacroPlayer(RecordComponent.this.robot, frameLocation)
+						.play(RecordComponent.this.getHideFrameMacro(), macro,
+								new ShowFrameMacro(frameLocation));
 
-			// Record the macro if required
-			if (this.isRecord) {
-				RecordComponent.this.recordListener.addMacro(macro);
+				// Record the macro if required
+				if (this.isRecord) {
+					RecordComponent.this.recordListener.addMacro(macro);
+				}
+
+			} catch (Throwable ex) {
+				System.err.println("Failed to add macro");
+				ex.printStackTrace();
 			}
+		}
+
+		/*
+		 * ===================== MacroFactoryContext ==================
+		 */
+
+		@Override
+		public Point getLocation() {
+			return this
+					.getRelativeLocation(RecordComponent.this.mouseLocationForNewMacro);
+		}
+
+		@Override
+		public Point getAbsoluteLocation(Point relativeLocation) {
+			Point offset = this.getReferencePoint();
+			return new Point(offset.x + relativeLocation.x, offset.y
+					+ relativeLocation.y);
+		}
+
+		@Override
+		public Point getRelativeLocation(Point absoluteLocation) {
+			Point offset = this.getReferencePoint();
+			return new Point(absoluteLocation.x - offset.x, absoluteLocation.y
+					- offset.y);
+		}
+
+		@Override
+		public Frame getOwnerFrame() {
+			return RecordComponent.this.frame;
 		}
 
 		/*
@@ -358,9 +375,118 @@ public class RecordComponent extends JComponent {
 	}
 
 	/**
+	 * {@link Macro} to hide the {@link JFrame}.
+	 */
+	private class HideFrameMacro implements Macro, MacroTask {
+
+		/*
+		 * ==================== Macro ==================================
+		 */
+
+		@Override
+		public String getConfigurationMemento() {
+			throw new IllegalStateException("Should not be storing");
+		}
+
+		@Override
+		public void setConfigurationMemento(String memento) {
+			throw new IllegalStateException("Should not be initiating");
+		}
+
+		@Override
+		public Point getStartingMouseLocation() {
+			return null;
+		}
+
+		@Override
+		public MacroTask[] getMacroTasks() {
+			return new MacroTask[] { this };
+		}
+
+		/*
+		 * ===================== MacroTask =============================
+		 */
+
+		@Override
+		public void runMacroTask(MacroTaskContext context) {
+			// Hide the frame
+			RecordComponent.this.frame.setVisible(false);
+		}
+
+		@Override
+		public long getPostRunWaitTime() {
+			return 0;
+		}
+	}
+
+	/**
+	 * {@link Macro} to show the {@link JFrame}.
+	 */
+	private class ShowFrameMacro implements Macro, MacroTask {
+
+		/**
+		 * Location to show the {@link JFrame}.
+		 */
+		private final Point frameLocation;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param frameLocation
+		 *            Location to show the {@link JFrame}.
+		 */
+		public ShowFrameMacro(Point frameLocation) {
+			this.frameLocation = frameLocation;
+		}
+
+		/*
+		 * ==================== Macro ==================================
+		 */
+
+		@Override
+		public String getConfigurationMemento() {
+			throw new IllegalStateException("Should not be storing");
+		}
+
+		@Override
+		public void setConfigurationMemento(String memento) {
+			throw new IllegalStateException("Should not be initiating");
+		}
+
+		@Override
+		public Point getStartingMouseLocation() {
+			return null;
+		}
+
+		@Override
+		public MacroTask[] getMacroTasks() {
+			return new MacroTask[] { this };
+		}
+
+		/*
+		 * ===================== MacroTask =============================
+		 */
+
+		@Override
+		public void runMacroTask(MacroTaskContext context) {
+			// Show the frame
+			RecordComponent.this.updateBackgroundImage();
+			RecordComponent.this.frame.setVisible(true);
+			RecordComponent.this.frame.setLocation(this.frameLocation);
+			RecordComponent.this.refreshBackground();
+		}
+
+		@Override
+		public long getPostRunWaitTime() {
+			return 0;
+		}
+	}
+
+	/**
 	 * {@link MacroFactory} to refresh the display.
 	 */
-	private class RefreshDisplayMacroFactory implements MacroFactory, Macro {
+	private class RefreshDisplayMacroFactory implements MacroFactory, Macro,
+			MacroTask {
 
 		/*
 		 * ======================= MacroFactory ============================
@@ -372,7 +498,7 @@ public class RecordComponent extends JComponent {
 		}
 
 		@Override
-		public Macro createMacro(Point location) {
+		public Macro createMacro(MacroFactoryContext context) {
 			return this;
 		}
 
@@ -396,8 +522,22 @@ public class RecordComponent extends JComponent {
 		}
 
 		@Override
-		public void runMacro(MacroContext context) {
+		public MacroTask[] getMacroTasks() {
+			return new MacroTask[] { this };
+		}
+
+		/*
+		 * =================== MacroTask ================================
+		 */
+
+		@Override
+		public void runMacroTask(MacroTaskContext context) {
 			// Do nothing as MacroAction does refresh
+		}
+
+		@Override
+		public long getPostRunWaitTime() {
+			return 0;
 		}
 	}
 

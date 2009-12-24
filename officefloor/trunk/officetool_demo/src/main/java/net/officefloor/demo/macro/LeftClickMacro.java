@@ -25,7 +25,7 @@ import java.awt.event.InputEvent;
  * 
  * @author Daniel Sagenschneider
  */
-public class LeftClickMacro implements Macro, MacroFactory {
+public class LeftClickMacro implements MacroFactory, Macro, MacroTask {
 
 	/**
 	 * Location.
@@ -42,14 +42,14 @@ public class LeftClickMacro implements Macro, MacroFactory {
 	}
 
 	@Override
-	public Macro createMacro(Point location) {
+	public Macro createMacro(MacroFactoryContext context) {
 		LeftClickMacro macro = new LeftClickMacro();
-		macro.location = location;
+		macro.location = context.getLocation();
 		return macro;
 	}
 
 	/*
-	 * ============== Macro ===========================================
+	 * ======================= Macro ===================================
 	 */
 
 	@Override
@@ -72,9 +72,23 @@ public class LeftClickMacro implements Macro, MacroFactory {
 	}
 
 	@Override
-	public void runMacro(MacroContext context) {
+	public MacroTask[] getMacroTasks() {
+		return new MacroTask[] { this };
+	}
+
+	/*
+	 * ====================== MacroTask ================================
+	 */
+
+	@Override
+	public void runMacroTask(MacroTaskContext context) {
 		context.mouseMove(this.location.x, this.location.y);
 		context.mouseClick(InputEvent.BUTTON1_MASK); // left click
+	}
+
+	@Override
+	public long getPostRunWaitTime() {
+		return 100;
 	}
 
 }

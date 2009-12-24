@@ -34,8 +34,10 @@ import javax.swing.JMenuItem;
 import junit.framework.TestCase;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroContext;
+import net.officefloor.demo.macro.MacroTask;
+import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.demo.macro.MacroFactory;
+import net.officefloor.demo.macro.MacroFactoryContext;
 import net.officefloor.demo.record.RecordComponent;
 import net.officefloor.demo.record.RecordListener;
 
@@ -300,8 +302,8 @@ public class RecordComponentTest extends TestCase {
 		}
 
 		@Override
-		public Macro createMacro(Point location) {
-			return new MockMacro(this.delegate.createMacro(location));
+		public Macro createMacro(MacroFactoryContext context) {
+			return new MockMacro(this.delegate.createMacro(context));
 		}
 	}
 
@@ -356,11 +358,56 @@ public class RecordComponentTest extends TestCase {
 		}
 
 		@Override
-		public void runMacro(MacroContext context) {
+		public MacroTask[] getMacroTasks() {
+			MacroTask[] delegates = this.delegate.getMacroTasks();
+			MacroTask[] tasks = new MacroTask[delegates.length];
+			for (int i = 0; i < tasks.length; i++) {
+				tasks[i] = new MockMacroTask(delegates[i]);
+			}
+			return tasks;
+		}
+	}
+
+	/**
+	 * Mock {@link MacroTask} to report failures.
+	 */
+	private class MockMacroTask implements MacroTask {
+
+		/**
+		 * Delegate {@link MacroTask}.
+		 */
+		private final MacroTask delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link MacroTask}.
+		 */
+		public MockMacroTask(MacroTask delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * =================== MacroTask =============================
+		 */
+
+		@Override
+		public void runMacroTask(MacroTaskContext context) {
 			try {
-				this.delegate.runMacro(context);
+				this.delegate.runMacroTask(context);
 			} catch (Throwable ex) {
 				RecordComponentTest.this.macroFailure = ex;
+			}
+		}
+
+		@Override
+		public long getPostRunWaitTime() {
+			try {
+				return this.delegate.getPostRunWaitTime();
+			} catch (Throwable ex) {
+				RecordComponentTest.this.macroFailure = ex;
+				return 0;
 			}
 		}
 	}
