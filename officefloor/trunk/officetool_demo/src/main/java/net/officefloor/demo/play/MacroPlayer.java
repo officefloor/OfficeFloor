@@ -149,31 +149,44 @@ public class MacroPlayer implements MacroTaskContext {
 					// Iterate over the macros
 					for (final Macro macro : macros) {
 
-						// Move mouse to starting location
-						Point startLocation = macro.getStartingMouseLocation();
-						if (startLocation != null) {
-							MacroPlayer.this.mouseMove(startLocation.x,
-									startLocation.y);
-						}
+						// Obtain the starting location
+						final Point startLocation = macro
+								.getStartingMouseLocation();
 
 						// Run the macro tasks
 						MacroTask[] tasks = macro.getMacroTasks();
+						boolean isFirstTask = true;
 						for (final MacroTask task : tasks) {
 
 							// Wait until display idle before running task
+							Thread.sleep(10); // allow some time for processing
 							MacroPlayer.this.robot.waitForIdle();
 
 							// Flag to determine if task run
 							final boolean[] isRun = new boolean[1];
 							isRun[0] = false;
 
+							// Flag indicating if need to move to start location
+							final boolean isMoveToStartLocation = isFirstTask;
+							isFirstTask = false; // no longer first task
+
 							// Run the task on the event dispatcher thread
 							SwingUtilities.invokeAndWait(new Runnable() {
 								@Override
 								public void run() {
 									try {
+										if (isMoveToStartLocation) {
+											// Move mouse to starting location
+											if (startLocation != null) {
+												MacroPlayer.this.mouseMove(
+														startLocation.x,
+														startLocation.y);
+											}
+										}
+
 										// Run the task
 										task.runMacroTask(MacroPlayer.this);
+										
 									} finally {
 										// Flag task now run
 										synchronized (isRun) {
@@ -185,7 +198,7 @@ public class MacroPlayer implements MacroTaskContext {
 							});
 
 							// Wait task is run
-							synchronized(isRun) {
+							synchronized (isRun) {
 								while (!isRun[0]) {
 									isRun.wait(100);
 								}
