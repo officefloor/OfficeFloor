@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
+import net.officefloor.demo.macro.WaitMacro;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -62,6 +63,11 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	 * Location of the {@link JFrame}.
 	 */
 	private Point windowLocation;
+
+	/**
+	 * {@link WaitMacro}.
+	 */
+	private WaitMacro waitMacro = new WaitMacro();
 
 	/**
 	 * {@link JButton} to click.
@@ -148,7 +154,8 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Run the macro
 		this.replayMockObjects();
-		this.player.play(mock.macro);
+		this.player.play(mock.macro, this.waitMacro);
+		this.waitMacro.waitUntilRun();
 		this.verifyMockObjects();
 	}
 
@@ -175,7 +182,8 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(mock.macro);
+		this.player.play(mock.macro, this.waitMacro);
+		this.waitMacro.waitUntilRun();
 		this.verifyMockObjects();
 
 		// Ensure mouse at macro starting location
@@ -204,7 +212,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(initPosition.macro, movePosition.macro);
+		this.player
+				.play(initPosition.macro, movePosition.macro, this.waitMacro);
+		this.waitMacro.waitUntilRun();
 		this.verifyMockObjects();
 
 		// Ensure mouse at finishing location
@@ -233,7 +243,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Run test
 		this.replayMockObjects();
-		this.player.play(initPosition.macro, movePosition.macro);
+		this.player
+				.play(initPosition.macro, movePosition.macro, this.waitMacro);
+		this.waitMacro.waitUntilRun();
 		this.verifyMockObjects();
 
 		// Ensure mouse at finishing location
@@ -423,6 +435,8 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 		public void record_getAndRunMacroTasks(MacroTaskContext context) {
 			this.record_getMacroTasks();
 			this.task.runMacroTask(context);
+			MacroPlayerTest.this.recordReturn(this.task, this.task
+					.getPostRunWaitTime(), 10);
 		}
 	}
 
