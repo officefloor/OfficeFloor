@@ -34,6 +34,17 @@ import net.officefloor.demo.macro.Macro;
 public class MacroStore {
 
 	/**
+	 * Line separator.
+	 */
+	private static final String LINE_SEPARATOR = System
+			.getProperty("line.separator");
+
+	/**
+	 * End of line token for storing.
+	 */
+	private static final String EOL_TOKEN = "{n}";
+
+	/**
 	 * Stores the {@link Macro} into the {@link Writer}.
 	 * 
 	 * @param macros
@@ -61,6 +72,9 @@ public class MacroStore {
 
 			// Obtain the configuration memento for the macro
 			String memento = macro.getConfigurationMemento();
+
+			// Ensure memento is single line
+			memento = memento.replace(LINE_SEPARATOR, EOL_TOKEN);
 
 			// Write the macro details
 			writer.write(className + ":" + memento + "\n");
@@ -135,6 +149,9 @@ public class MacroStore {
 						+ Macro.class.getName());
 			}
 			Macro macro = (Macro) object;
+
+			// Transform to multi-line content
+			configuration = configuration.replace(EOL_TOKEN, LINE_SEPARATOR);
 
 			// Configure the macro
 			macro.setConfigurationMemento(configuration);
