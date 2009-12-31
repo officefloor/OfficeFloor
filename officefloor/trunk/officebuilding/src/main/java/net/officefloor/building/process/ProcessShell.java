@@ -49,6 +49,12 @@ import javax.management.remote.rmi.RMIConnectorServer;
 public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 
 	/**
+	 * Name of the {@link #triggerStopProcess()} method to invoke via another
+	 * MBean.
+	 */
+	public static final String TRIGGER_STOP_PROCESS_METHOD = "triggerStopProcess";
+
+	/**
 	 * {@link ObjectName} for the {@link ProcessShellMBean}.
 	 */
 	static ObjectName PROCESS_SHELL_OBJECT_NAME;

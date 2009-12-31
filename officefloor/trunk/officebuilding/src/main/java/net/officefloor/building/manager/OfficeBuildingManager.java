@@ -411,6 +411,52 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	@Override
+	public synchronized String closeOfficeFloor(String processNamespace,
+			long waitTime) throws Exception {
+
+		// Find the process manager for the OfficeFloor
+		ProcessManager processManager = null;
+		for (ProcessManager manager : this.processManagers) {
+			if (manager.getProcessNamespace().equals(processNamespace)) {
+				processManager = manager;
+			}
+		}
+		if (processManager == null) {
+			// OfficeFloor not running
+			return "OfficeFloor by process name space '" + processNamespace
+					+ "' not running";
+		}
+
+		// Close the OfficeFloor
+		processManager.triggerStopProcess();
+
+		// Wait until processes complete (or time out waiting)
+		long startTime = System.currentTimeMillis();
+		for (;;) {
+
+			// Wait some time for OfficeFloor to close
+			this.wait(1000);
+
+			// Determine if OfficeFloor closed
+			if (processManager.isProcessComplete()) {
+				return "Closed"; // OfficeFloor closed
+			}
+
+			// Determine if time out waiting
+			long currentTime = System.currentTimeMillis();
+			if ((currentTime - startTime) > waitTime) {
+				// Timed out waiting, so destroy processes
+				processManager.destroyProcess();
+
+				// Indicate failure in closing OfficeFloor
+				return "Destroyed OfficeFloor '" + processNamespace
+						+ "' as timed out waiting for close of " + waitTime
+						+ " milliseconds";
+			}
+		}
+	}
+
+	@Override
 	public synchronized String stopOfficeBuilding(long waitTime)
 			throws Exception {
 

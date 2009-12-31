@@ -469,7 +469,7 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	@Override
-	public void triggerStopProcess() throws ProcessException {
+	public synchronized void triggerStopProcess() throws ProcessException {
 
 		// Ignore if already complete
 		if (this.isComplete) {
@@ -482,7 +482,8 @@ public class ProcessManager implements ProcessManagerMBean {
 					.getLocalObjectName(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
 
 			// Trigger stopping the process
-			this.mbeanServer.invoke(name, "triggerStopProcess", null, null);
+			this.mbeanServer.invoke(name,
+					ProcessShell.TRIGGER_STOP_PROCESS_METHOD, null, null);
 
 		} catch (Exception ex) {
 			// Propagate failure

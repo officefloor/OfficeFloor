@@ -93,6 +93,23 @@ public interface OfficeBuildingManagerMBean {
 			String officeFloorLocation, String jvmOptions) throws Exception;
 
 	/**
+	 * Closes the {@link OfficeFloor}.
+	 * 
+	 * @param processNamespace
+	 *            Process name space for the {@link OfficeFloor}.
+	 * @param waitTime
+	 *            Time to wait for {@link OfficeFloor} to stop before being
+	 *            destroyed.
+	 * @return <code>&quot;Closed&quot;</code> or text explaining why not
+	 *         closed.
+	 * @throws Exception
+	 *             If fails to close the {@link OfficeFloor}.
+	 * @see ProcessManagerMBean#getProcessNamespace()
+	 */
+	String closeOfficeFloor(String processNamespace, long waitTime)
+			throws Exception;
+
+	/**
 	 * Stops the {@link OfficeBuilding}.
 	 * 
 	 * @param waitTime

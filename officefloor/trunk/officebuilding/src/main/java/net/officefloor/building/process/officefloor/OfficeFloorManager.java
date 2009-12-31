@@ -162,7 +162,7 @@ public class OfficeFloorManager implements ManagedProcess,
 					}
 
 					// Wait some time for trigger to stop
-					Thread.sleep(100);
+					Thread.sleep(1000);
 				}
 
 			} else {
@@ -189,7 +189,7 @@ public class OfficeFloorManager implements ManagedProcess,
 					}
 
 					// Wait some time for work to complete
-					Thread.sleep(100);
+					Thread.sleep(1000);
 				}
 			}
 
