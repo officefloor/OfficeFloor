@@ -33,6 +33,15 @@ public class InputTextMacro implements MacroFactory, Macro, MacroTask {
 	 */
 	private String text;
 
+	/**
+	 * Obtains the text to input.
+	 * 
+	 * @return Text to input.
+	 */
+	public String getInputText() {
+		return this.text;
+	}
+
 	/*
 	 * ==================== MacroFactory =======================
 	 */

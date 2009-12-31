@@ -102,4 +102,38 @@ public class MacroStoreTest extends OfficeFrameTestCase {
 				.getConfigurationMemento());
 	}
 
+	/**
+	 * Ensure able to store and retrieve multi-line content.
+	 */
+	public void testStoreRetrieveMultilineContent() throws Exception {
+
+		// Create the store buffer
+		StringWriter content = new StringWriter();
+
+		// Multi-line content
+		String endOfLine = System.getProperty("line.separator");
+		assertNotNull("Ensure have end of line", endOfLine);
+		final String MULTI_LINE_CONTENT = "Multiple" + endOfLine + "line"
+				+ endOfLine + "content" + endOfLine + "with \twhite spacing"
+				+ endOfLine + " in content";
+
+		// Store the multi-line content
+		Macro macro = new FullyQualifiedNameMacro();
+		macro.setConfigurationMemento(MULTI_LINE_CONTENT);
+		this.store.store(new Macro[] { macro }, content);
+
+		// Retrieve the macro with multi-line content
+		Macro[] macros = this.store.retrieve(new StringReader(content
+				.toString()));
+
+		// Asset multi-line content
+		assertEquals("Incorrect number of macros", 1, macros.length);
+		Macro retrievedMacro = macros[0];
+		assertTrue("Incorrect macro type",
+				retrievedMacro instanceof FullyQualifiedNameMacro);
+		FullyQualifiedNameMacro qualifiedMacro = (FullyQualifiedNameMacro) retrievedMacro;
+		assertEquals("Incorrect multi-line content", MULTI_LINE_CONTENT,
+				qualifiedMacro.getConfigurationMemento());
+	}
+
 }

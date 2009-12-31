@@ -44,6 +44,24 @@ public class InfoMacro implements MacroFactory, Macro {
 	 */
 	private String macroInfoText = null;
 
+	/**
+	 * Obtains the location to display the information.
+	 * 
+	 * @return Location to display the information.
+	 */
+	public Point getInfoLocation() {
+		return this.macroLocation;
+	}
+
+	/**
+	 * Obtains the information text.
+	 * 
+	 * @return Information text.
+	 */
+	public String getInfoText() {
+		return this.macroInfoText;
+	}
+
 	/*
 	 * ================= MacroFactory =============================
 	 */
@@ -88,16 +106,24 @@ public class InfoMacro implements MacroFactory, Macro {
 
 	@Override
 	public String getConfigurationMemento() {
-		// TODO implement Macro.getConfigurationMemento
-		throw new UnsupportedOperationException(
-				"TODO implement Macro.getConfigurationMemento");
+		return this.macroLocation.x + "," + this.macroLocation.y + ":"
+				+ this.macroInfoText;
 	}
 
 	@Override
 	public void setConfigurationMemento(String memento) {
-		// TODO implement Macro.setConfigurationMemento
-		throw new UnsupportedOperationException(
-				"TODO implement Macro.setConfigurationMemento");
+		// Parse out the configuration
+		int split = memento.indexOf(':');
+
+		// Obtain the location
+		String location = memento.substring(0, split);
+		String[] point = location.split(",");
+		int x = Integer.parseInt(point[0]);
+		int y = Integer.parseInt(point[1]);
+		this.macroLocation = new Point(x, y);
+
+		// Obtain the information text (+1 to skip separator)
+		this.macroInfoText = memento.substring(split + 1);
 	}
 
 	@Override
