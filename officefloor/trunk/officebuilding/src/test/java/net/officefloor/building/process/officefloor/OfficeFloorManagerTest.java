@@ -68,7 +68,7 @@ public class OfficeFloorManagerTest extends TestCase {
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
 				MockWork.MESSAGE, file);
 	}
-
+	
 	/**
 	 * Ensure can start the {@link OfficeFloor} {@link Process} and invoke
 	 * {@link Work}.

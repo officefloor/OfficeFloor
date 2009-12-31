@@ -28,6 +28,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
+import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
@@ -193,6 +194,67 @@ public class OfficeBuildingManagerTest extends TestCase {
 		} catch (Exception ex) {
 			// Ensure issue connecting
 			assertTrue("Should have issue connecting as process stopped", (ex
+					.getCause() instanceof ConnectException));
+		}
+	}
+
+	/**
+	 * Ensure can close the {@link OfficeFloor}.
+	 */
+	public void testCloseOfficeFloor() throws Exception {
+
+		// Start the OfficeBuilding
+		OfficeBuildingManager.startOfficeBuilding(PORT);
+
+		// Obtain the manager MBean
+		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
+				.getOfficeBuildingManager(null, PORT);
+
+		// Open the OfficeFloor
+		String officeFloorLocation = this.getOfficeFloorLocation();
+		String processNamespace = buildingManager.openOfficeFloor(this
+				.getName(), "not-needed.jar", officeFloorLocation, null);
+
+		// Ensure OfficeFloor opened (obtaining local floor manager)
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
+				.getOfficeFloorManager(null, PORT, processNamespace);
+		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
+				localFloorManager.getOfficeFloorLocation());
+
+		// Obtain the local process shell
+		JMXConnector localConnector = JMXConnectorFactory
+				.connect(new JMXServiceURL(buildingManager
+						.getOfficeBuildingJmxServiceUrl()));
+		MBeanServerConnection localMBeanServer = localConnector
+				.getMBeanServerConnection();
+		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(
+				localMBeanServer, ProcessManager.getLocalObjectName(
+						processNamespace, ProcessShell
+								.getProcessShellObjectName()),
+				ProcessShellMBean.class);
+
+		// Obtain the remote process shell (containing the OfficeFloor)
+		JMXConnector remoteConnector = JMXConnectorFactory
+				.connect(new JMXServiceURL(localProcessShell
+						.getJmxConnectorServiceUrl()));
+		MBeanServerConnection remoteMBeanServer = remoteConnector
+				.getMBeanServerConnection();
+		ProcessShellMBean remoteProcessShell = JMX.newMBeanProxy(
+				remoteMBeanServer, ProcessShell.getProcessShellObjectName(),
+				ProcessShellMBean.class);
+
+		// Close the OfficeFloor
+		String closeText = buildingManager.closeOfficeFloor(processNamespace,
+				3000);
+		assertEquals("Should be closed", "Closed", closeText);
+
+		// Ensure the OfficeFloor process is closed
+		try {
+			remoteProcessShell.triggerStopProcess();
+			fail("OfficeFloor should already be closed and process stopped");
+		} catch (Exception ex) {
+			// Ensure issue connecting
+			assertTrue("Should have issue finding as OfficeFloor closed", (ex
 					.getCause() instanceof ConnectException));
 		}
 	}

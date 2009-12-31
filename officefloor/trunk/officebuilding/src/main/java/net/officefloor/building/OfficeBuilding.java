@@ -72,7 +72,9 @@ public class OfficeBuilding {
 			+ "commands:\n"
 			+ "\tstart\tStarts OfficeBuilding\n"
 			+ "\tstop [<timeout>]\tStops the OfficeBuilding\n"
-			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n";
+			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n"
+			+ "\topen <process name> <jar name> <office floor location> [<JVM options>]\tOpens the OfficeFloor\n"
+			+ "\tclose <process name space>\tCloses the OfficeFloor\n";
 
 	/**
 	 * Main method for running the {@link OfficeBuilding}.
@@ -141,7 +143,7 @@ public class OfficeBuilding {
 		} else if ("stop".equalsIgnoreCase(command)) {
 			// Obtain wait time to stop the OfficeBuilding
 			long stopWaitTime;
-			if (arguments.length >= 2) {
+			if (arguments.length > 1) {
 				// Use the command line stop wait time
 				try {
 					stopWaitTime = Long.parseLong(arguments[1]);
@@ -177,6 +179,60 @@ public class OfficeBuilding {
 			JMXServiceURL serviceUrl = OfficeBuildingManager
 					.getOfficeBuildingJmxServiceUrl(hostName, port);
 			System.out.println(serviceUrl.toString());
+
+		} else if ("open".equalsIgnoreCase(command)) {
+			// Opening OfficeFloor so obtain arguments
+			if (arguments.length < 4) {
+				errorAndExit("ERROR: must provide details of OfficeFloor for 'open' command");
+			}
+			String processName = arguments[1];
+			String jarName = arguments[2];
+			String officeFloorLocation = arguments[3];
+			String jvmOptions = (arguments.length > 4 ? arguments[4] : "");
+
+			// Open the OfficeFloor
+			OfficeBuildingManagerMBean manager = OfficeBuildingManager
+					.getOfficeBuildingManager(officeBuildingHost,
+							officeBuildingPort);
+			String processNameSpace = manager.openOfficeFloor(processName,
+					jarName, officeFloorLocation, jvmOptions);
+
+			// Provide details of starting OfficeFloor
+			System.out.println("OfficeFloor open under process name space '"
+					+ processNameSpace + "'");
+
+		} else if ("close".equalsIgnoreCase(command)) {
+			// Closing OfficeFloor so obtain its process name space
+			if (arguments.length < 2) {
+				errorAndExit("ERROR: must provide OfficeFloor process name space for 'close' command");
+			}
+			String processNameSpace = arguments[1];
+
+			// Obtain wait time to close the OfficeFloor
+			long closeWaitTime;
+			if (arguments.length > 2) {
+				// Use the command line stop wait time
+				try {
+					closeWaitTime = Long.parseLong(arguments[2]);
+				} catch (NumberFormatException ex) {
+					errorAndExit("ERROR: Close timeout must be a long");
+					return; // Should not get here as exit
+				}
+			} else {
+				// Obtain the default stop wait time
+				closeWaitTime = properties
+						.getLongProperty(PROPERTY_STOP_WAIT_TIME);
+			}
+
+			// Close the OfficeFloor
+			OfficeBuildingManagerMBean manager = OfficeBuildingManager
+					.getOfficeBuildingManager(officeBuildingHost,
+							officeBuildingPort);
+			manager.closeOfficeFloor(processNameSpace, closeWaitTime);
+
+			// Provide details of closing OfficeFloor
+			System.out.println("OfficeFloor under process name space '"
+					+ processNameSpace + "' closed");
 
 		} else {
 			// Unknown or no command
