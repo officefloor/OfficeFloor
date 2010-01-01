@@ -4,13 +4,13 @@
    <description name="OfficeFloor" url="http://www.officefloor.net">
       Eclipse update site for OfficeFloor
    </description>
-   <feature url="net.officefloor.feature_0.0.2.jar" id="net.officefloor.feature" version="0.0.2">
+   <feature url="net.officefloor.feature_0.1.0.jar" id="net.officefloor.feature" version="0.1.0">
       <category name="officefloor_latest"/>
    </feature>
    <feature url="net.officefloor.feature_0.0.1.jar" id="net.officefloor.feature" version="0.0.1">
       <category name="officefloor_latest"/>
    </feature>
-   <feature url="net.officefloor.plugins.feature_0.0.2.jar" id="net.officefloor.plugins.feature" version="0.0.2">
+   <feature url="net.officefloor.plugins.feature_0.1.0.jar" id="net.officefloor.plugins.feature" version="0.1.0">
       <category name="officefloor_plugin_latest"/>
    </feature>
    <feature url="net.officefloor.plugins.feature_0.0.1.jar" id="net.officefloor.plugins.feature" version="0.0.1">
