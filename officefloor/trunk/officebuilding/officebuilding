@@ -7,7 +7,7 @@
 #########################################
 
 # Version
-OFFICE_BUILDING_VERSION=0.0.2
+OFFICE_BUILDING_VERSION=0.1.0
 
 # Change to release directory package
 cd target/officebuilding-${OFFICE_BUILDING_VERSION}-release/officebuilding-${OFFICE_BUILDING_VERSION}/bin

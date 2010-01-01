@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.feature"
       label="OfficeFloor Feature"
-      version="0.0.2">
+      version="0.1.0">
 
    <description url="http://www.officefloor.net/">
       OfficeFloor simplifies the development of high performance applications.
@@ -45,13 +45,13 @@
          id="net.officefloor.core"
          download-size="0"
          install-size="0"
-         version="0.0.2"/>
+         version="0.1.0"/>
 
    <plugin
          id="net.officefloor.ui"
          download-size="0"
          install-size="0"
-         version="0.0.2"
+         version="0.1.0"
          unpack="false"/>
 
 </feature>
