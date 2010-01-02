@@ -83,7 +83,7 @@ Please ensure property 'equinox.version' is specified in an external active prof
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>generate-p2-content</id>
+						<id>build-update-site-content</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>run</goal>
@@ -98,6 +98,21 @@ Please ensure property 'equinox.version' is specified in an external active prof
 										value="${eclipse.install.dir}/plugins/org.eclipse.equinox.launcher_${equinox.version}.jar" />
 									<property name="OFFICE_FLOOR_VERSION" value="${pom.version}" />
 								</ant>
+							</tasks>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-update-site-content</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<echo>Deploying the update site content to SourceForge</echo>
+								<exec dir="${update.site.package.dir}" executable="rsync" failonerror="true">
+									<arg line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/eclipse/update" />
+								</exec>
 							</tasks>
 						</configuration>
 					</execution>
@@ -138,4 +153,11 @@ Please ensure property 'equinox.version' is specified in an external active prof
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>Ignore</id>
+			<name>Ignore as using ant to deploy</name>
+			<url>file://${java.io.tmpdir}</url>
+		</repository>
+	</distributionManagement>
 </project>
