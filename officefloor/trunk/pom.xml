@@ -105,10 +105,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.google.code.maven-license-plugin
+				<groupId>com.mycila.maven-license-plugin
 				</groupId>
 				<artifactId>maven-license-plugin</artifactId>
-				<version>1.4.0</version>
 				<configuration>
 					<header>src/license/license-header.txt
 					</header>
@@ -130,11 +129,13 @@
 						<exclude>**/*.zip</exclude>
 						<exclude>**/*.jar</exclude>
 						<exclude>**/*.css</exclude>
+						<exclude>**/*.js</exclude>
 						<exclude>**/*.log</exclude>
 						<exclude>**/*.args</exclude>
+						<exclude>**/officebuilding</exclude>
 					</excludes>
 					<properties>
-						<currentYear>2009</currentYear>
+						<currentYear>2010</currentYear>
 					</properties>
 					<headerDefinitions>
 						<headerDefinition>src/license/java-header-style.xml
