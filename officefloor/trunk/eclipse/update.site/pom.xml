@@ -15,6 +15,10 @@
 		Generates update site content for OfficeFloor in Eclipse.
 	</description>
 	<packaging>pom</packaging>
+	<properties>
+		<update.site.package.dir>${project.build.directory}/update_site_package_dir
+		</update.site.package.dir>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -23,6 +27,81 @@
 				<configuration>
 					<packaging>jar</packaging>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-property</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireProperty>
+									<property>eclipse.install.dir</property>
+									<message><![CDATA[
+Missing property: 'eclipse.install.dir'
+
+Please ensure property 'eclipse.install.dir' is specified in an external active profile. Its value should contain the directory path to where Eclipse is installed (eg C:\install).
+
+Also ensure the 'startup.jar' is available in the installed directory. This may require coping and renaming from the plug-in.
+                                   ]]></message>
+								</requireProperty>
+								<requireProperty>
+									<property>equinox.version</property>
+									<message><![CDATA[
+Missing property: 'equinox.version'
+
+Please ensure property 'equinox.version' is specified in an external active profile. Its value should contain the version of equinox used by 'eclipse.install.dir'
+									]]></message>
+								</requireProperty>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-update-site-content</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${update.site.package.dir}
+							</outputDirectory>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-p2-content</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<ant dir="${project.basedir}" antfile="build-update-site-content.xml"
+									target="build-update-site-content">
+									<property name="BUILD_DIR"
+										value="${update.site.package.dir}" />
+									<property name="P2_LAUNCH_JAR"
+										value="${eclipse.install.dir}/plugins/org.eclipse.equinox.launcher_${equinox.version}.jar" />
+									<property name="OFFICE_FLOOR_VERSION" value="${pom.version}" />
+								</ant>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>

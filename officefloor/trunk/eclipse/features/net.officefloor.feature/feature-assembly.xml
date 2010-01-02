@@ -9,6 +9,7 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>feature.xml</include>
+				<include>feature.properties</include>
 			</includes>
 		</fileSet>
 	</fileSets>
