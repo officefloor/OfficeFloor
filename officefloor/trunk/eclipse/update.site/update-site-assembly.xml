@@ -2,27 +2,11 @@
 	<formats>
 		<format>zip</format>
 	</formats>
-	<dependencySets>
-		<dependencySet>
-			<!-- Plug-ins -->
-			<outputDirectory>plugins</outputDirectory>
-			<useProjectArtifact>false</useProjectArtifact>
-			<includes>
-				<include>${pom.groupId}:net.officefloor.core</include>
-				<include>${pom.groupId}:net.officefloor.ui</include>
-				<include>${pom.groupId}:net.officefloor.jdbc</include>
-				<include>${pom.groupId}:net.officefloor.socket</include>
-				<include>${pom.groupId}:net.officefloor.filingcabinet</include>
-			</includes>
-		</dependencySet>
-		<dependencySet>
-			<!--  Features -->
-			<outputDirectory>features</outputDirectory>
-			<useProjectArtifact>false</useProjectArtifact>
-			<includes>
-				<include>${pom.groupId}:net.officefloor.feature</include>
-				<include>${pom.groupId}:net.officefloor.plugins.feature</include>
-			</includes>
-		</dependencySet>
-	</dependencySets>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>${update.site.package.dir}</directory>
+			<outputDirectory>/</outputDirectory>
+		</fileSet>
+	</fileSets>
 </assembly>
