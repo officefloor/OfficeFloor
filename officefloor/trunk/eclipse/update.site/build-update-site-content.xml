@@ -8,8 +8,9 @@
 		<fail message="Must provide P2 launcher jar location" unless="P2_LAUNCH_JAR" />
 		<fail message="Must provide OfficeFloor version" unless="OFFICE_FLOOR_VERSION" />
 
-		<!-- Copy in site and mirror files from OfficeFloor project -->
+		<!-- Copy in site and documentation files from OfficeFloor project -->
 		<copy file="${basedir}/src/main/resources/site.xml" tofile="${BUILD_DIR}/site.xml" />
+		<copy file="${basedir}/src/main/resources/index.html" tofile="${BUILD_DIR}/index.html" />
 
 		<!-- Organise features -->
 		<delete dir="${BUILD_DIR}/features" />
@@ -53,6 +54,7 @@
 				<exclude name="features/**" />
 				<exclude name="plugins/**" />
 				<exclude name="site.xml" />
+				<exclude name="index.html" />
 			</fileset>
 		</delete>
 
