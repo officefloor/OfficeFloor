@@ -9,10 +9,7 @@
 		<fail message="Must provide OfficeFloor version" unless="OFFICE_FLOOR_VERSION" />
 
 		<!-- Copy in site and mirror files from OfficeFloor project -->
-		<copy file="${basedir}/../../src/site/resources/update/site.xml"
-			tofile="${BUILD_DIR}/site.xml" />
-		<copy file="${basedir}/../../src/site/resources/update/mirrors.xml"
-			tofile="${BUILD_DIR}/mirrors.xml" />
+		<copy file="${basedir}/src/main/resources/site.xml" tofile="${BUILD_DIR}/site.xml" />
 
 		<!-- Organise features -->
 		<delete dir="${BUILD_DIR}/features" />
@@ -49,14 +46,13 @@
 			<param name="SUB_DIR" value="plugins" />
 			<param name="MOVE_ARTIFACT_ID" value="net.officefloor.filingcabinet" />
 		</antcall>
-		
+
 		<!-- Only keep the necessary raw files -->
 		<delete>
 			<fileset dir="${BUILD_DIR}">
 				<exclude name="features/**" />
 				<exclude name="plugins/**" />
 				<exclude name="site.xml" />
-				<exclude name="mirrors.xml" />
 			</fileset>
 		</delete>
 
