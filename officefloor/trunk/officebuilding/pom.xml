@@ -89,6 +89,36 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy-release</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<echo>Deploying the OfficeBuliding release to SourceForge</echo>
+								<property name="deploy.content.dir" value="${project.build.directory}/sourceforge_deploy_content" />
+								<mkdir dir="${deploy.content.dir}/${pom.version}" />
+								<copy file="${project.build.directory}/officebuilding-${pom.version}-release.zip" todir="${deploy.content.dir}/${pom.version}" />
+								<exec dir="${deploy.content.dir}" executable="rsync" failonerror="true">
+									<arg line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/OfficeFloor/" />
+								</exec>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+	<distributionManagement>
+		<repository>
+			<id>Ignore</id>
+			<name>Ignore as using ant to deploy</name>
+			<url>file://${java.io.tmpdir}</url>
+		</repository>
+	</distributionManagement>
 </project>
