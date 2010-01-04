@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse Filing Cabinet
+Bundle-Name: OfficeFloor Eclipse Filing Cabinet
 Bundle-SymbolicName: net.officefloor.filingcabinet;singleton:=true
 Bundle-Version: 0.1.0
+Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: net.officefloor.core;bundle-version="0.1.0",
  net.officefloor.ui;bundle-version="0.1.0"

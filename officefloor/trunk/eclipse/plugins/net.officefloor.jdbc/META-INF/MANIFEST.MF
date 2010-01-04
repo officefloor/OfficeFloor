@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse JDBC
+Bundle-Name: OfficeFloor Eclipse JDBC
 Bundle-SymbolicName: net.officefloor.jdbc;singleton:=true
 Bundle-Version: 0.1.0
-Bundle-Vendor: Daniel Sagenschneider
+Bundle-Vendor: OfficeFloor
 Require-Bundle: net.officefloor.ui;bundle-version="0.1.0",
  net.officefloor.core;bundle-version="0.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
