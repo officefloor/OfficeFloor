@@ -2,7 +2,8 @@
 <feature
       id="net.officefloor.feature"
       label="OfficeFloor Feature"
-      version="0.1.0">
+      version="0.1.0"
+      provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
       OfficeFloor simplifies the development of high performance applications.

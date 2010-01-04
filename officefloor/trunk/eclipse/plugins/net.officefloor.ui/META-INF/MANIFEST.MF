@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse UI
+Bundle-Name: OfficeFloor Eclipse UI
 Bundle-SymbolicName: net.officefloor.ui;singleton:=true
 Bundle-Version: 0.1.0
+Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Import-Package: org.eclipse.core.commands.common,
