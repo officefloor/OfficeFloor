@@ -11,6 +11,28 @@
 	<name>Demo Tool</name>
 	<description>OfficeFloor tool for creating demo
 	</description>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Generates the release -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>release</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>release-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor</groupId>
