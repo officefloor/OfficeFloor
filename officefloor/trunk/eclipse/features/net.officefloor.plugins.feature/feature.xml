@@ -37,14 +37,14 @@
          download-size="0"
          install-size="0"
          version="0.1.0"
-         unpack="false"/>
+         unpack="true"/>
 
    <plugin
          id="net.officefloor.socket"
          download-size="0"
          install-size="0"
          version="0.1.0"
-         unpack="false"/>
+         unpack="true"/>
 
    <plugin
          id="net.officefloor.filingcabinet"
