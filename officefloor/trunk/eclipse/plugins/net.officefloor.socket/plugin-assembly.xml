@@ -19,4 +19,11 @@
 			</includes>
 		</fileSet>
 	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<includes>
+				<include>${pom.groupId}:officeplugin_socket</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
 </assembly>
