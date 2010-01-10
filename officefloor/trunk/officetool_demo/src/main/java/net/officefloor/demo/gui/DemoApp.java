@@ -36,6 +36,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import net.officefloor.demo.macro.DragMacro;
 import net.officefloor.demo.macro.InfoMacro;
 import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
@@ -140,6 +141,7 @@ public class DemoApp extends JFrame {
 		// Add the macro factories
 		recorder.addMacro(new LeftClickMacro());
 		recorder.addMacro(new RightClickMacro());
+		recorder.addMacro(new DragMacro());
 		recorder.addMacro(new InputTextMacro());
 		recorder.addMacro(new InfoMacro());
 
