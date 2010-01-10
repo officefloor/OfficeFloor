@@ -1,0 +1,6 @@
+<office>
+	<sections>
+		<section name="NEW_NAME" source="net.example.ExampleSectionSource"
+			location="LOCATION" />
+	</sections>
+</office>
