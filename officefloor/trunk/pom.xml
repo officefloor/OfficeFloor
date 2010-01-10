@@ -143,6 +143,44 @@
 					</headerDefinitions>
 				</configuration>
 			</plugin>
+			<!-- START: validate version -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/verifier
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/verifier</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-verifier-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<verificationFile>${project.build.directory}/verifier/verifications.xml
+							</verificationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- END: validate version -->
 		</plugins>
 	</build>
 	<reporting>
