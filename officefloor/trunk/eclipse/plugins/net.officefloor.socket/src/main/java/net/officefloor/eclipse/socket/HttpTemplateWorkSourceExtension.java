@@ -53,23 +53,21 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWorkSourceExtension implements
-		WorkSourceExtension<HttpTemplateWork, HttpTemplateWorkSource>,
-		ExtensionOpener {
+public class HttpTemplateWorkSourceExtension
+		extends
+		AbstractSocketWorkSourceExtension<HttpTemplateWork, HttpTemplateWorkSource>
+		implements ExtensionOpener {
+
+	/**
+	 * Initiate.
+	 */
+	public HttpTemplateWorkSourceExtension() {
+		super(HttpTemplateWorkSource.class, "Http Template");
+	}
 
 	/*
 	 * ================== WorkSourceExtension =================================
 	 */
-
-	@Override
-	public Class<HttpTemplateWorkSource> getWorkSourceClass() {
-		return HttpTemplateWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP Template";
-	}
 
 	@Override
 	public void createControl(Composite page,

@@ -26,9 +26,6 @@ import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
@@ -41,26 +38,22 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for the {@link HttpRouteWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class HttpRouteWorkSourceExtension implements
-		WorkSourceExtension<HttpRouteTask, HttpRouteWorkSource>,
-		ExtensionClasspathProvider {
+public class HttpRouteWorkSourceExtension extends
+		AbstractSocketWorkSourceExtension<HttpRouteTask, HttpRouteWorkSource> {
+
+	/**
+	 * Initiate.
+	 */
+	public HttpRouteWorkSourceExtension() {
+		super(HttpRouteWorkSource.class, "Http Route");
+	}
 
 	/*
-	 * ====================== WorkLoaderExtension =========================
+	 * ====================== WorkSourceExtension =========================
 	 */
-
-	@Override
-	public Class<HttpRouteWorkSource> getWorkSourceClass() {
-		return HttpRouteWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP Route";
-	}
 
 	@Override
 	public void createControl(Composite page,
@@ -117,11 +110,6 @@ public class HttpRouteWorkSourceExtension implements
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
-		return "HttpRouter";
-	}
-
-	@Override
 	public String getTaskDocumentation(TaskDocumentationContext context)
 			throws Throwable {
 
@@ -159,16 +147,6 @@ public class HttpRouteWorkSourceExtension implements
 		return doc.toString();
 	}
 
-	/*
-	 * =================== ExtensionClasspathProvider =====================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				HttpRouteWorkSource.class) };
-	}
-
 	/**
 	 * Entry in routing.
 	 */
@@ -192,7 +170,7 @@ public class HttpRouteWorkSourceExtension implements
 
 		/**
 		 * Initialise.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 * @param pattern
@@ -205,7 +183,7 @@ public class HttpRouteWorkSourceExtension implements
 
 		/**
 		 * Obtains the name identifying this {@link RoutingEntry}.
-		 *
+		 * 
 		 * @return Name.
 		 */
 		public String getName() {
@@ -214,7 +192,7 @@ public class HttpRouteWorkSourceExtension implements
 
 		/**
 		 * Specifies the name.
-		 *
+		 * 
 		 * @param name
 		 *            Name.
 		 */
@@ -224,7 +202,7 @@ public class HttpRouteWorkSourceExtension implements
 
 		/**
 		 * Obtains the pattern.
-		 *
+		 * 
 		 * @return Pattern.
 		 */
 		public String getPattern() {
@@ -233,7 +211,7 @@ public class HttpRouteWorkSourceExtension implements
 
 		/**
 		 * Specifies the pattern.
-		 *
+		 * 
 		 * @param pattern
 		 *            Pattern.
 		 */
@@ -244,7 +222,7 @@ public class HttpRouteWorkSourceExtension implements
 		/**
 		 * Loads the {@link Property} for this {@link RoutingEntry} to the
 		 * {@link PropertyList}.
-		 *
+		 * 
 		 * @param {@link PropertyList}.
 		 */
 		public void loadProperty(PropertyList propertyList) {
