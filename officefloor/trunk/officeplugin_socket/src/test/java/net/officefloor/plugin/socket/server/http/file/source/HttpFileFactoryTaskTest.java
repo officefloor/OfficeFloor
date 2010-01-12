@@ -21,19 +21,18 @@ package net.officefloor.plugin.socket.server.http.file.source;
 import java.io.File;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
+import net.officefloor.plugin.socket.server.http.file.HttpFileCreationListener;
 import net.officefloor.plugin.socket.server.http.file.HttpFileDescriber;
 import net.officefloor.plugin.socket.server.http.file.HttpFileFactory;
-import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask.HttpFileFactoryTaskFlows;
 
 /**
  * Tests the {@link HttpFileFactoryTask}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
@@ -47,7 +46,7 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link TaskContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpFileFactoryTask, Indexed, HttpFileFactoryTaskFlows> taskContext = this
+	private final TaskContext<HttpFileFactoryTask<Indexed>, Indexed, Indexed> taskContext = this
 			.createMock(TaskContext.class);
 
 	/**
@@ -67,6 +66,13 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	private final HttpFile httpFile = this.createMock(HttpFile.class);
 
 	/**
+	 * Mock {@link HttpFileCreationListener}.
+	 */
+	@SuppressWarnings("unchecked")
+	private final HttpFileCreationListener<Indexed> creationListener = this
+			.createMock(HttpFileCreationListener.class);
+
+	/**
 	 * Ensures handle if {@link HttpFile} exists.
 	 */
 	public void testFileExists() throws Throwable {
@@ -81,11 +87,13 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.request, this.request.getRequestURI(), PATH);
 		this.recordReturn(this.factory, this.factory.createHttpFile(null, PATH,
 				(HttpFileDescriber[]) null), this.httpFile);
-		this.recordReturn(this.httpFile, this.httpFile.isExist(), true);
+		this.creationListener.httpFileCreated(this.httpFile, this.connection,
+				this.taskContext);
 
 		// Test
 		this.replayMockObjects();
-		HttpFileFactoryTask task = new HttpFileFactoryTask(this.factory, -1);
+		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
+				this.factory, this.creationListener, -1);
 		HttpFile file = (HttpFile) task.doTask(this.taskContext);
 		this.verifyMockObjects();
 		assertEquals("Incorrect resulting HTTP file", this.httpFile, file);
@@ -97,7 +105,6 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	public void testFileNotExists() throws Throwable {
 
 		final String PATH = "/path";
-		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
 
 		// Record
 		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
@@ -107,14 +114,13 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.request, this.request.getRequestURI(), PATH);
 		this.recordReturn(this.factory, this.factory.createHttpFile(null, PATH,
 				(HttpFileDescriber[]) null), this.httpFile);
-		this.recordReturn(this.httpFile, this.httpFile.isExist(), false);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(
-				HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, this.httpFile),
-				flowFuture);
+		this.creationListener.httpFileCreated(this.httpFile, this.connection,
+				this.taskContext);
 
 		// Test
 		this.replayMockObjects();
-		HttpFileFactoryTask task = new HttpFileFactoryTask(this.factory, -1);
+		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
+				this.factory, this.creationListener, -1);
 		HttpFile file = (HttpFile) task.doTask(this.taskContext);
 		this.verifyMockObjects();
 		assertEquals("Incorrect resulting HTTP file", this.httpFile, file);
@@ -140,12 +146,13 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.factory, this.factory.createHttpFile(
 				contextDirectory, PATH, (HttpFileDescriber[]) null),
 				this.httpFile);
-		this.recordReturn(this.httpFile, this.httpFile.isExist(), true);
+		this.creationListener.httpFileCreated(this.httpFile, this.connection,
+				this.taskContext);
 
 		// Test
 		this.replayMockObjects();
-		HttpFileFactoryTask task = new HttpFileFactoryTask(this.factory,
-				contextDirectoryIndex);
+		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
+				this.factory, this.creationListener, contextDirectoryIndex);
 		HttpFile file = (HttpFile) task.doTask(this.taskContext);
 		this.verifyMockObjects();
 		assertEquals("Incorrect resulting HTTP file", this.httpFile, file);

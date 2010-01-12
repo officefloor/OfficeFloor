@@ -22,11 +22,11 @@ import java.io.IOException;
 
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -35,10 +35,10 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.file.AbstractHttpFileFactoryTestCase;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
-import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask.HttpFileFactoryTaskFlows;
+import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileFactoryWorkSource.HttpFileFactoryTaskFlows;
 
 /**
- * {@link WorkSource} to locate a {@link HttpFile} on the class path.
+ * Tests the {@link ClasspathHttpFileFactoryWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -59,10 +59,11 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 	/**
 	 * Validates the type.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testType() {
 
 		// Provide work type
-		HttpFileFactoryTask task = new HttpFileFactoryTask(null, -1);
+		HttpFileFactoryTask task = new HttpFileFactoryTask(null, null, -1);
 		WorkTypeBuilder<HttpFileFactoryTask> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 
@@ -111,7 +112,7 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 
 		// Load the work type
 		WorkType<HttpFileFactoryTask> workType = WorkLoaderUtil.loadWorkType(
-				ClasspathHttpFileFactoryWorkSource.class,
+				(Class) ClasspathHttpFileFactoryWorkSource.class,
 				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
 				AbstractHttpFileFactoryTestCase.class.getPackage().getName(),
 				ClasspathHttpFileFactoryWorkSource.PROPERTY_DEFAULT_FILE_NAME,
@@ -127,6 +128,51 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		assertEquals("Ensure correct file", "/index.html", httpFile.getPath());
 		assertEquals("Ensure default description", "text/html", httpFile
 				.getContentType());
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Handles the {@link HttpFile} not being found.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testHttpFileNotFound() throws Throwable {
+
+		TaskContext<HttpFileFactoryTask, Indexed, HttpFileFactoryTaskFlows> taskContext = this
+				.createMock(TaskContext.class);
+		ServerHttpConnection connection = this
+				.createMock(ServerHttpConnection.class);
+		HttpRequest request = this.createMock(HttpRequest.class);
+		FlowFuture flowFuture = this.createMock(FlowFuture.class);
+
+		// Record
+		this.recordReturn(taskContext, taskContext.getObject(0), connection);
+		this.recordReturn(connection, connection.getHttpRequest(), request);
+		this.recordReturn(request, request.getRequestURI(),
+				"/missing-file.html");
+		this
+				.recordReturn(taskContext, taskContext.doFlow(
+						HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null),
+						flowFuture);
+
+		// Test
+		this.replayMockObjects();
+
+		// Load the work type
+		WorkType<HttpFileFactoryTask> workType = WorkLoaderUtil.loadWorkType(
+				(Class) ClasspathHttpFileFactoryWorkSource.class,
+				ClasspathHttpFileFactoryWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				AbstractHttpFileFactoryTestCase.class.getPackage().getName(),
+				ClasspathHttpFileFactoryWorkSource.PROPERTY_DEFAULT_FILE_NAME,
+				"index.html");
+
+		// Create the task
+		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(
+				workType.getWorkFactory().createWork());
+
+		// Execute the task to handle not finding the HTTP file
+		HttpFile httpFile = (HttpFile) task.doTask(taskContext);
+		assertFalse("Ensure file is not found", httpFile.isExist());
 
 		this.verifyMockObjects();
 	}
