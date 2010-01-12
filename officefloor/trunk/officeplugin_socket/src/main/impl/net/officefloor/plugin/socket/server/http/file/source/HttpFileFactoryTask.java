@@ -30,28 +30,26 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.file.HttpFileDescriber;
 import net.officefloor.plugin.socket.server.http.file.HttpFileFactory;
+import net.officefloor.plugin.socket.server.http.file.HttpFileCreationListener;
 import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
 
 /**
  * {@link Task} to locate a {@link HttpFile} via a {@link HttpFileFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class HttpFileFactoryTask
-		extends
-		AbstractSingleTask<HttpFileFactoryTask, Indexed, HttpFileFactoryTask.HttpFileFactoryTaskFlows> {
-
-	/**
-	 * Enum of flows for the {@link HttpFileFactoryTask}.
-	 */
-	public static enum HttpFileFactoryTaskFlows {
-		HTTP_FILE_NOT_FOUND
-	}
+public class HttpFileFactoryTask<F extends Enum<F>> extends
+		AbstractSingleTask<HttpFileFactoryTask<F>, Indexed, F> {
 
 	/**
 	 * {@link HttpFileFactory}.
 	 */
 	private final HttpFileFactory httpFileFactory;
+
+	/**
+	 * {@link HttpFileCreationListener}.
+	 */
+	private final HttpFileCreationListener<F> httpFileCreationListener;
 
 	/**
 	 * Index to obtain the context directory from the {@link TaskContext}.
@@ -60,16 +58,20 @@ public class HttpFileFactoryTask
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param httpFileFactory
 	 *            {@link HttpFileFactory}.
+	 * @param httpFileCreationListener
+	 *            {@link HttpFileCreationListener}.
 	 * @param contextDirectoryIndex
 	 *            Index to obtain the context directory from the
 	 *            {@link TaskContext}.
 	 */
 	public HttpFileFactoryTask(HttpFileFactory httpFileFactory,
+			HttpFileCreationListener<F> httpFileCreationListener,
 			int contextDirectoryIndex) {
 		this.httpFileFactory = httpFileFactory;
+		this.httpFileCreationListener = httpFileCreationListener;
 		this.contextDirectoryIndex = contextDirectoryIndex;
 	}
 
@@ -78,8 +80,7 @@ public class HttpFileFactoryTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpFileFactoryTask, Indexed, HttpFileFactoryTaskFlows> context)
+	public Object doTask(TaskContext<HttpFileFactoryTask<F>, Indexed, F> context)
 			throws IOException, InvalidHttpRequestUriException {
 
 		// Obtain the HTTP request
@@ -102,12 +103,9 @@ public class HttpFileFactoryTask
 		HttpFile httpFile = this.httpFileFactory.createHttpFile(
 				contextDirectory, requestUriPath, describers);
 
-		// Handle based on whether exists
-		if (!httpFile.isExist()) {
-			// Not exists, so invoke flow to handle
-			context.doFlow(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND,
-					httpFile);
-		}
+		// Notify the HTTP file created
+		this.httpFileCreationListener.httpFileCreated(httpFile, connection,
+				context);
 
 		// Return the HTTP file
 		return httpFile;

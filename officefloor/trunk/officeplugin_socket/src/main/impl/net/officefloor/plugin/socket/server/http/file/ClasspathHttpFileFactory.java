@@ -29,10 +29,46 @@ import java.util.List;
 
 /**
  * Locates a {@link HttpFile} from a {@link ClassLoader}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClasspathHttpFileFactory implements HttpFileFactory {
+
+	/**
+	 * Convenience method to create a {@link HttpFile} for the class path
+	 * resource path.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader} to source the resource.
+	 * @param resourcePath
+	 *            Resource path.
+	 * @return {@link HttpFile}.
+	 * @throws InvalidHttpRequestUriException
+	 *             Should the resource path be invalid.
+	 * @throws IOException
+	 *             If fails to source the resource.
+	 */
+	public static HttpFile createHttpFile(ClassLoader classLoader,
+			String resourcePath) throws InvalidHttpRequestUriException,
+			IOException {
+
+		// Obtain the prefix as the first file segment. This allows it to be
+		// stripped off and added again as per logic of creating HTTP file.
+		String resourcePathPrefix = "";
+		int separatorIndex = resourcePath.indexOf('/');
+		if (separatorIndex > 0) {
+			resourcePathPrefix = resourcePath.substring(0, separatorIndex);
+		}
+
+		// Create the HTTP file factory
+		HttpFileFactory httpFileFactory = new ClasspathHttpFileFactory(
+				classLoader, resourcePathPrefix, "index.html");
+		final HttpFile httpFile = httpFileFactory.createHttpFile(null,
+				resourcePath);
+
+		// Return the HTTP file
+		return httpFile;
+	}
 
 	/**
 	 * {@link ClassLoader} to load the resource for the {@link HttpFile}.
@@ -68,7 +104,7 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param classLoader
 	 *            {@link ClassLoader} to load the resource for the
 	 *            {@link HttpFile}.
@@ -232,7 +268,7 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param extension
 		 *            {@link HttpFile} extension.
 		 * @param contents
@@ -245,7 +281,7 @@ public class ClasspathHttpFileFactory implements HttpFileFactory {
 
 		/**
 		 * Indicates if the {@link HttpFile} is described.
-		 *
+		 * 
 		 * @return <code>true</code> if the {@link HttpFile} is described.
 		 */
 		public boolean isDescribed() {
