@@ -18,11 +18,6 @@
 
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -33,39 +28,35 @@ import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWork;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWorkSource;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 /**
  * {@link WorkSourceExtension} for the {@link HttpResponseWriter}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseWriterWorkSourceExtension
-		implements
-		WorkSourceExtension<HttpResponseWriterWork, HttpResponseWriterWorkSource> {
+		extends
+		AbstractSocketWorkSourceExtension<HttpResponseWriterWork, HttpResponseWriterWorkSource> {
+
+	/**
+	 * Initiate.
+	 */
+	public HttpResponseWriterWorkSourceExtension() {
+		super(HttpResponseWriterWorkSource.class, "Http Response Writer");
+	}
 
 	/*
 	 * ==================== WorkSourceExtension ===========================
 	 */
 
 	@Override
-	public Class<HttpResponseWriterWorkSource> getWorkSourceClass() {
-		return HttpResponseWriterWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP Response Writer";
-	}
-
-	@Override
 	public void createControl(Composite page, WorkSourceExtensionContext context) {
 		// No specification required
 		SourceExtensionUtil.loadPropertyLayout(page);
 		new Label(page, SWT.NONE).setText("No properties required");
-	}
-
-	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
-		return "HttpResponseWriter";
 	}
 
 	@Override

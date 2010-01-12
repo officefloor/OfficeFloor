@@ -35,8 +35,15 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderWorkSourceExtension
-		implements
-		WorkSourceExtension<HttpParametersLoaderTask, HttpParametersLoaderWorkSource> {
+		extends
+		AbstractSocketWorkSourceExtension<HttpParametersLoaderTask, HttpParametersLoaderWorkSource> {
+
+	/**
+	 * Initiate.
+	 */
+	public HttpParametersLoaderWorkSourceExtension() {
+		super(HttpParametersLoaderWorkSource.class, "Http Parameters Loader");
+	}
 
 	/*
 	 * ================== WorkSourceExtension =================================
@@ -45,11 +52,6 @@ public class HttpParametersLoaderWorkSourceExtension
 	@Override
 	public Class<HttpParametersLoaderWorkSource> getWorkSourceClass() {
 		return HttpParametersLoaderWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP Parameters Loader";
 	}
 
 	@Override

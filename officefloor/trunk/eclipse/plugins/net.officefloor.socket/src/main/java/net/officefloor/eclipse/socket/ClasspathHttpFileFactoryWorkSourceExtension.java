@@ -18,10 +18,6 @@
 
 package net.officefloor.eclipse.socket;
 
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -30,6 +26,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.file.HttpFile;
 import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileFactoryWorkSource;
 import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask;
+import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileFactoryWorkSource.HttpFileFactoryTaskFlows;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -40,23 +37,19 @@ import org.eclipse.swt.widgets.Composite;
  * @author Daniel Sagenschneider
  */
 public class ClasspathHttpFileFactoryWorkSourceExtension
-		implements
-		WorkSourceExtension<HttpFileFactoryTask, ClasspathHttpFileFactoryWorkSource>,
-		ExtensionClasspathProvider {
+		extends
+		AbstractSocketWorkSourceExtension<HttpFileFactoryTask<HttpFileFactoryTaskFlows>, ClasspathHttpFileFactoryWorkSource> {
+
+	/**
+	 * Initiate.
+	 */
+	public ClasspathHttpFileFactoryWorkSourceExtension() {
+		super(ClasspathHttpFileFactoryWorkSource.class, "Get Http File");
+	}
 
 	/*
-	 * ================ WorkLoaderExtension ====================
+	 * ================ WorkSourceExtension ====================
 	 */
-
-	@Override
-	public Class<ClasspathHttpFileFactoryWorkSource> getWorkSourceClass() {
-		return ClasspathHttpFileFactoryWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP File";
-	}
 
 	@Override
 	public void createControl(Composite page,
@@ -70,11 +63,6 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 		SourceExtensionUtil.createPropertyText("Directory index file name",
 				ClasspathHttpFileFactoryWorkSource.PROPERTY_DEFAULT_FILE_NAME,
 				"index.html", page, context, null);
-	}
-
-	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
-		return "HttpFile";
 	}
 
 	@Override
@@ -100,16 +88,6 @@ public class ClasspathHttpFileFactoryWorkSourceExtension
 				+ "' is added to the "
 				+ HttpRequest.class.getSimpleName()
 				+ " request URI to restrict access to full class path resources.";
-	}
-
-	/*
-	 * =================== ExtensionClasspathProvider =====================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClasspathHttpFileFactoryWorkSource.class) };
 	}
 
 }

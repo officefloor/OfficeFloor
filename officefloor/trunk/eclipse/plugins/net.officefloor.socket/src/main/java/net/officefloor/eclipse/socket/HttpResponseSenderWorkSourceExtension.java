@@ -18,9 +18,6 @@
 
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.widgets.Composite;
-
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
@@ -29,27 +26,26 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
 
+import org.eclipse.swt.widgets.Composite;
+
 /**
  * {@link WorkSourceExtension} for the {@link HttpResponseSenderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpResponseSenderWorkSourceExtension implements
-		WorkSourceExtension<Work, HttpResponseSenderWorkSource> {
+public class HttpResponseSenderWorkSourceExtension extends
+		AbstractSocketWorkSourceExtension<Work, HttpResponseSenderWorkSource> {
+
+	/**
+	 * Initiate.
+	 */
+	public HttpResponseSenderWorkSourceExtension() {
+		super(HttpResponseSenderWorkSource.class, "Http Response Sender");
+	}
 
 	/*
 	 * ================ WorkSourceExtension ========================
 	 */
-
-	@Override
-	public Class<HttpResponseSenderWorkSource> getWorkSourceClass() {
-		return HttpResponseSenderWorkSource.class;
-	}
-
-	@Override
-	public String getWorkSourceLabel() {
-		return "HTTP Response Sender";
-	}
 
 	@Override
 	public void createControl(Composite page, WorkSourceExtensionContext context) {
@@ -64,11 +60,6 @@ public class HttpResponseSenderWorkSourceExtension implements
 						"HTTP Content File",
 						HttpResponseSenderWorkSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
 						"", page, context, null);
-	}
-
-	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
-		return "HTTP Response Sender";
 	}
 
 	@Override
