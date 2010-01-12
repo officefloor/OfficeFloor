@@ -58,6 +58,29 @@
 			</fileset>
 		</delete>
 
+		<!-- Download the existing release artifacts -->
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.core_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.ui_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.feature_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.filingcabinet_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.socket_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.jdbc_0.0.1.jar" />
+		</antcall>
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.plugins.feature_0.0.1.jar" />
+		</antcall>
+
 		<!-- Condition/Repack plug-in jars -->
 		<antcall target="repackArtifact">
 			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.core" />
@@ -128,6 +151,14 @@
 			<arg
 				line="${BUILD_DIR}/plugins/${CONDITION_ARTIFACT_ID}_${OFFICE_FLOOR_VERSION}.jar" />
 		</java>
+	</target>
+
+	<!-- Private task to download an existing released artifact -->
+	<target name="downloadReleaseArtifact">
+		<fail message="Must specify artifact to download" unless="DOWNLOAD_ARTIFACT" />
+		<get
+			src="http://downloads.sourceforge.net/project/officefloor/eclipse/update/${DOWNLOAD_ARTIFACT}"
+			dest="${BUILD_DIR}/${DOWNLOAD_ARTIFACT}" verbose="true" usetimestamp="true" />
 	</target>
 
 </project>
