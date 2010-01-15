@@ -25,7 +25,6 @@ import java.io.StringWriter;
 
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroFactoryContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -45,18 +44,9 @@ public class MacroStoreTest extends OfficeFrameTestCase {
 	 */
 	public void testStore() throws IOException {
 
-		// Create the mock
-		MacroFactoryContext context = this
-				.createMock(MacroFactoryContext.class);
-
-		// Record
-		this.recordReturn(context, context.getLocation(), new Point(1, 1));
-
-		// Test
-		this.replayMockObjects();
-
 		// Create the example macros to store
-		Macro leftClick = new LeftClickMacro().createMacro(context);
+		Macro leftClick = new LeftClickMacro();
+		leftClick.setConfigurationMemento("1,1");
 		Macro fullyQualified = new FullyQualifiedNameMacro();
 		fullyQualified.setConfigurationMemento("test");
 
@@ -70,7 +60,6 @@ public class MacroStoreTest extends OfficeFrameTestCase {
 		expected.append(FullyQualifiedNameMacro.class.getName() + ":test\n");
 
 		// Validate macro stored content
-		this.verifyMockObjects();
 		assertEquals("Incorrect stored content", expected.toString(), content
 				.toString());
 	}

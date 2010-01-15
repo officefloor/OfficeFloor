@@ -62,6 +62,17 @@ public class MacroStoreRetrieveTest extends TestCase {
 	}
 
 	/**
+	 * Tests the {@link DragMacro}.
+	 */
+	public void testDragMacro() {
+		DragMacro macro = this.storeRetrieveMacro(DragMacro.class, "1,2-10,20");
+		assertEquals("Incorrect starting location", new Point(1, 2), macro
+				.getStartingMouseLocation());
+		assertEquals("Incorrect target location", new Point(10, 20), macro
+				.getTargetLocation());
+	}
+
+	/**
 	 * Tests the {@link InfoMacro}.
 	 */
 	public void testInfoMacro() {

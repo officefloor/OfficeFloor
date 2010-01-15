@@ -45,8 +45,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import net.officefloor.demo.macro.Macro;
-import net.officefloor.demo.macro.MacroFactory;
-import net.officefloor.demo.macro.MacroFactoryContext;
+import net.officefloor.demo.macro.MacroSource;
+import net.officefloor.demo.macro.MacroSourceContext;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.demo.play.MacroPlayer;
@@ -95,6 +95,16 @@ public class RecordComponent extends JComponent {
 	private Point mouseLocationForNewMacro;
 
 	/**
+	 * Lock for working with the another location.
+	 */
+	private final Object anotherLocationLock = new Object();
+
+	/**
+	 * Another location.
+	 */
+	private Point anotherLocation = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param robot
@@ -126,13 +136,13 @@ public class RecordComponent extends JComponent {
 	}
 
 	/**
-	 * Adds a {@link MacroFactory}.
+	 * Adds a {@link MacroSource}.
 	 * 
 	 * @param macroFactory
-	 *            {@link MacroFactory}.
-	 * @return {@link JMenuItem} for the {@link MacroFactory}.
+	 *            {@link MacroSource}.
+	 * @return {@link JMenuItem} for the {@link MacroSource}.
 	 */
-	public JMenuItem addMacro(MacroFactory macroFactory) {
+	public JMenuItem addMacro(MacroSource macroFactory) {
 		// Always record added macros
 		return this.popupMenu.add(new MacroAction(macroFactory, true));
 	}
@@ -158,6 +168,19 @@ public class RecordComponent extends JComponent {
 
 		// Return the macro to show the frame
 		return new ShowFrameMacro(frameLocation);
+	}
+
+	/**
+	 * Obtains the relative location.
+	 * 
+	 * @param absoluteLocation
+	 *            Absolute location.
+	 * @return Relative location.
+	 */
+	public Point getRelativeLocation(Point absoluteLocation) {
+		Point offset = RecordComponent.this.frame.getLocationOnScreen();
+		return new Point(absoluteLocation.x - offset.x, absoluteLocation.y
+				- offset.y);
 	}
 
 	/**
@@ -201,13 +224,13 @@ public class RecordComponent extends JComponent {
 	 * {@link Action} for a {@link Macro}.
 	 */
 	private class MacroAction extends AbstractAction implements
-			MacroTaskContext, MacroFactoryContext {
+			MacroTaskContext, MacroSourceContext {
 
 		/**
-		 * {@link MacroFactory} to create the {@link Macro} for this
+		 * {@link MacroSource} to create the {@link Macro} for this
 		 * {@link Action}.
 		 */
-		private final MacroFactory macroFactory;
+		private final MacroSource macroFactory;
 
 		/**
 		 * Indicates if the {@link Macro} should be recorded.
@@ -223,11 +246,11 @@ public class RecordComponent extends JComponent {
 		 * Initiate.
 		 * 
 		 * @param macroFactory
-		 *            {@link MacroFactory}.
+		 *            {@link MacroSource}.
 		 * @param isRecord
 		 *            Indicates if the {@link Macro} should be recorded.
 		 */
-		public MacroAction(MacroFactory macroFactory, boolean isRecord) {
+		public MacroAction(MacroSource macroFactory, boolean isRecord) {
 			super(macroFactory.getDisplayName());
 			this.macroFactory = macroFactory;
 			this.isRecord = isRecord;
@@ -271,23 +294,8 @@ public class RecordComponent extends JComponent {
 		@Override
 		public synchronized void actionPerformed(ActionEvent e) {
 			try {
-
-				// Create the macro
-				final Macro macro = this.macroFactory.createMacro(this);
-
-				// Obtain location of frame for showing again after hiding
-				Point frameLocation = RecordComponent.this.frame.getLocation();
-
-				// Run the macro (hiding/showing frame)
-				new MacroPlayer(RecordComponent.this.robot, frameLocation)
-						.play(RecordComponent.this.getHideFrameMacro(), macro,
-								new ShowFrameMacro(frameLocation));
-
-				// Record the macro if required
-				if (this.isRecord) {
-					RecordComponent.this.recordListener.addMacro(macro);
-				}
-
+				// Source the macro
+				this.macroFactory.sourceMacro(this);
 			} catch (Throwable ex) {
 				System.err.println("Failed to add macro");
 				ex.printStackTrace();
@@ -295,13 +303,65 @@ public class RecordComponent extends JComponent {
 		}
 
 		/*
-		 * ===================== MacroFactoryContext ==================
+		 * ===================== MacroSourceContext ==================
 		 */
+
+		@Override
+		public synchronized void setNewMacro(Macro macro) {
+
+			// Obtain location of frame for showing again after hiding
+			Point frameLocation = RecordComponent.this.frame.getLocation();
+
+			// Run the macro (hiding/showing frame)
+			new MacroPlayer(RecordComponent.this.robot, frameLocation).play(
+					RecordComponent.this.getHideFrameMacro(), macro,
+					new ShowFrameMacro(frameLocation));
+
+			// Record the macro if required
+			if (this.isRecord) {
+				RecordComponent.this.recordListener.addMacro(macro);
+			}
+		}
 
 		@Override
 		public Point getLocation() {
 			return this
 					.getRelativeLocation(RecordComponent.this.mouseLocationForNewMacro);
+		}
+
+		@Override
+		public Point getAnotherLocation() {
+			synchronized (RecordComponent.this.anotherLocationLock) {
+
+				// Clear the existing another location
+				RecordComponent.this.anotherLocation = null;
+
+				// TODO Provide pop-up to specify another location
+
+				// Wait until new another location
+				final long startTime = System.currentTimeMillis();
+				for (;;) {
+
+					// Determine if have another location
+					if (RecordComponent.this.anotherLocation != null) {
+						// Return the another location
+						return RecordComponent.this.anotherLocation;
+					}
+
+					// Determine if waited too long (over 60 seconds)
+					final long currentTime = System.currentTimeMillis();
+					if ((currentTime - startTime) > (60 * 1000)) {
+						throw new Error("Waited too long for another location");
+					}
+
+					// Wait some time for another location
+					try {
+						RecordComponent.this.anotherLocationLock.wait(1000);
+					} catch (InterruptedException ex) {
+						// Carry on
+					}
+				}
+			}
 		}
 
 		@Override
@@ -484,9 +544,9 @@ public class RecordComponent extends JComponent {
 	}
 
 	/**
-	 * {@link MacroFactory} to refresh the display.
+	 * {@link MacroSource} to refresh the display.
 	 */
-	private class RefreshDisplayMacroFactory implements MacroFactory, Macro,
+	private class RefreshDisplayMacroFactory implements MacroSource, Macro,
 			MacroTask {
 
 		/*
@@ -499,8 +559,8 @@ public class RecordComponent extends JComponent {
 		}
 
 		@Override
-		public Macro createMacro(MacroFactoryContext context) {
-			return this;
+		public void sourceMacro(MacroSourceContext context) {
+			context.setNewMacro(this);
 		}
 
 		/*
@@ -571,11 +631,28 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+
+			// Specify another location if left click
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				synchronized (RecordComponent.this.anotherLocationLock) {
+
+					// Obtain the another location
+					Point eventLocation = e.getLocationOnScreen();
+					RecordComponent.this.anotherLocation = RecordComponent.this
+							.getRelativeLocation(eventLocation);
+
+					// Notify location provided
+					RecordComponent.this.anotherLocationLock.notify();
+				}
+			}
+
+			// Show pop-up menu
 			this.showPopupMenu(e);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
+			// Ensure show pop-up menu
 			this.showPopupMenu(e);
 		}
 	}
