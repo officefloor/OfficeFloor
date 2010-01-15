@@ -33,7 +33,7 @@ import javax.swing.PopupFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class InfoMacro implements MacroFactory, Macro {
+public class InfoMacro implements MacroSource, Macro {
 
 	/**
 	 * Location for the {@link Macro}.
@@ -64,7 +64,7 @@ public class InfoMacro implements MacroFactory, Macro {
 	}
 
 	/*
-	 * ================= MacroFactory =============================
+	 * ================= MacroSource =============================
 	 */
 
 	@Override
@@ -73,7 +73,7 @@ public class InfoMacro implements MacroFactory, Macro {
 	}
 
 	@Override
-	public Macro createMacro(MacroFactoryContext context) {
+	public void sourceMacro(MacroSourceContext context) {
 
 		// Obtain location for dialog
 		Point relativeLocation = context.getLocation();
@@ -98,7 +98,7 @@ public class InfoMacro implements MacroFactory, Macro {
 		macro.macroInfoText = infoText;
 
 		// Return the macro
-		return macro;
+		context.setNewMacro(macro);
 	}
 
 	/*

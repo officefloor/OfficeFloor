@@ -18,13 +18,12 @@
 
 package net.officefloor.demo.macro;
 
-
 /**
- * Factory for the creation of a {@link Macro}.
+ * Source for the creation of a {@link Macro}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MacroFactory {
+public interface MacroSource {
 
 	/**
 	 * Obtains the display name for the {@link Macro}.
@@ -34,12 +33,12 @@ public interface MacroFactory {
 	String getDisplayName();
 
 	/**
-	 * Creates the {@link Macro}.
+	 * Sources a new {@link Macro}.
 	 * 
 	 * @param context
-	 *            {@link MacroFactoryContext}.
+	 *            {@link MacroSourceContext}.
 	 * @return New {@link Macro}.
 	 */
-	Macro createMacro(MacroFactoryContext context);
+	void sourceMacro(MacroSourceContext context);
 
 }

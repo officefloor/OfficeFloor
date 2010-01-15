@@ -24,18 +24,40 @@ import java.awt.Point;
 import javax.swing.JDialog;
 
 /**
- * Context for the {@link MacroFactory}.
+ * Context for the {@link MacroSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MacroFactoryContext {
+public interface MacroSourceContext {
 
 	/**
-	 * Obtains the location.
+	 * Call back to specify the {@link Macro} being created.
+	 * 
+	 * @param macro
+	 *            {@link Macro} created.
+	 */
+	void setNewMacro(Macro macro);
+	
+	/**
+	 * Obtains the location for the {@link Macro}.
 	 * 
 	 * @return Location.
 	 */
 	Point getLocation();
+
+	/**
+	 * <p>
+	 * Obtains another location for the {@link Macro}.
+	 * <p>
+	 * An example use of this is dragging:
+	 * <ol>
+	 * <li>{@link #getLocation()} provides item location</li>
+	 * <li>use this method to obtain target location to drag item</li>
+	 * </ol>
+	 * 
+	 * @return Another location for the {@link Macro}.
+	 */
+	Point getAnotherLocation();
 
 	/**
 	 * Obtains the absolute location for the relative location.

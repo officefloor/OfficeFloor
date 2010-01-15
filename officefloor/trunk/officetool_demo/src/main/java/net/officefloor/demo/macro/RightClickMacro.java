@@ -26,7 +26,7 @@ import java.awt.event.InputEvent;
  * 
  * @author Daniel Sagenschneider
  */
-public class RightClickMacro implements MacroFactory, Macro, MacroTask {
+public class RightClickMacro implements MacroSource, Macro, MacroTask {
 
 	/**
 	 * Location.
@@ -34,7 +34,7 @@ public class RightClickMacro implements MacroFactory, Macro, MacroTask {
 	private Point location;
 
 	/*
-	 * ================ MacroFactory =================================
+	 * ================ MacroSource =================================
 	 */
 
 	@Override
@@ -43,10 +43,10 @@ public class RightClickMacro implements MacroFactory, Macro, MacroTask {
 	}
 
 	@Override
-	public Macro createMacro(MacroFactoryContext context) {
+	public void sourceMacro(MacroSourceContext context) {
 		RightClickMacro macro = new RightClickMacro();
 		macro.location = context.getLocation();
-		return macro;
+		context.setNewMacro(macro);
 	}
 
 	/*

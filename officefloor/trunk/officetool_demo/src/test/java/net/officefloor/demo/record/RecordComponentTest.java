@@ -19,6 +19,7 @@
 package net.officefloor.demo.record;
 
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
@@ -33,14 +34,13 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
 import junit.framework.TestCase;
+import net.officefloor.demo.macro.DragMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
+import net.officefloor.demo.macro.MacroSource;
+import net.officefloor.demo.macro.MacroSourceContext;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
-import net.officefloor.demo.macro.MacroFactory;
-import net.officefloor.demo.macro.MacroFactoryContext;
-import net.officefloor.demo.record.RecordComponent;
-import net.officefloor.demo.record.RecordListener;
 
 /**
  * Test the {@link RecordComponent}.
@@ -72,7 +72,7 @@ public class RecordComponentTest extends TestCase {
 	/**
 	 * Potential failure of {@link Macro}.
 	 */
-	private Throwable macroFailure = null;
+	private volatile Throwable macroFailure = null;
 
 	/**
 	 * {@link Robot} to aid in unit testing.
@@ -85,10 +85,43 @@ public class RecordComponentTest extends TestCase {
 	public void testSingleClick() throws Throwable {
 		final Point location = this
 				.getRelativeMouseLocation(this.mockFrame.button);
-		this.addExpectedMacro(LeftClickMacro.class, location.x + ","
+		this.addExpectedMacro(LeftClickMacro.class, location, location.x + ","
 				+ location.y);
 		this.runMacro(new LeftClickMacro(), this.mockFrame.button);
 		assertTrue("Should click button", this.mockFrame.isButtonClicked);
+	}
+
+	/**
+	 * Test get another location with {@link DragMacro}.
+	 */
+	public void testAnotherLocation() throws Throwable {
+
+		// Specify locations
+		final Point itemAbsoluteLocation = getMouseLocation(this.mockFrame.button);
+		final Point itemRelativeLocation = this
+				.getRelativeMouseLocation(itemAbsoluteLocation);
+		final Point targetAbsoluteLocation = new Point(
+				itemAbsoluteLocation.x - 10, itemAbsoluteLocation.y - 10);
+		final Point targetRelativeLocation = this
+				.getRelativeMouseLocation(targetAbsoluteLocation);
+
+		// Create the macro
+		this.addExpectedMacro(DragMacro.class, itemRelativeLocation,
+				itemRelativeLocation.x + "," + itemRelativeLocation.y + "-"
+						+ targetRelativeLocation.x + ","
+						+ targetRelativeLocation.y);
+		this.runMacro(new DragMacro(), this.mockFrame.button);
+
+		// Trigger click for another location
+		this.robot
+				.mouseMove(targetAbsoluteLocation.x, targetAbsoluteLocation.y);
+		this.robot.mousePress(InputEvent.BUTTON1_MASK);
+		this.robot.mouseRelease(InputEvent.BUTTON1_MASK);
+		this.robot.waitForIdle();
+
+		// Button should not be clicked
+		assertFalse("Button should not be clicked",
+				this.mockFrame.isButtonClicked);
 	}
 
 	/*
@@ -129,6 +162,22 @@ public class RecordComponentTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 
+		// Wait until all macro processing complete
+		synchronized (this) {
+			long startTime = System.currentTimeMillis();
+			while (this.recordListener.macroTypes.size() > 0) {
+
+				// Determine if time out
+				long currentTime = System.currentTimeMillis();
+				if ((currentTime - startTime) > 10 * 1000) {
+					fail("Timed out waiting for macro adding to complete");
+				}
+
+				// Wait some time for completion
+				Thread.sleep(100);
+			}
+		}
+
 		// Wait test completed
 		this.robot.waitForIdle();
 
@@ -141,9 +190,15 @@ public class RecordComponentTest extends TestCase {
 		// Wait until disposed
 		this.robot.waitForIdle();
 
-		// Ensure correctly recorded
-		assertEquals("Macro not recorded", 0, this.recordListener.macroTypes
-				.size());
+		// Propagate possible macro failure
+		if (this.macroFailure != null) {
+			if (this.macroFailure instanceof Exception) {
+				throw (Exception) this.macroFailure;
+			} else {
+				// Allow propagation
+				throw new Exception(this.macroFailure);
+			}
+		}
 	}
 
 	/*
@@ -154,11 +209,11 @@ public class RecordComponentTest extends TestCase {
 	 * Runs the input {@link Macro} on the {@link JComponent}.
 	 * 
 	 * @param macroFactory
-	 *            {@link MacroFactory} for the {@link Macro}.
+	 *            {@link MacroSource} for the {@link Macro}.
 	 * @param component
 	 *            {@link JComponent}.
 	 */
-	private void runMacro(MacroFactory macroFactory, JComponent component)
+	private void runMacro(MacroSource macroFactory, JComponent component)
 			throws Throwable {
 
 		// Add macro factory
@@ -185,8 +240,6 @@ public class RecordComponentTest extends TestCase {
 
 		// Allow processing of macro
 		Thread.sleep(100);
-
-		// Wait until processing of macro idle
 		this.robot.waitForIdle();
 
 		// Propagate possible macro failure
@@ -209,6 +262,18 @@ public class RecordComponentTest extends TestCase {
 		// Obtain the absolute location
 		Point absoluteLocation = getMouseLocation(component);
 
+		// Return the relative location
+		return this.getRelativeMouseLocation(absoluteLocation);
+	}
+
+	/**
+	 * Obtains the relative location for the absolute location.
+	 * 
+	 * @param absoluteLocation
+	 *            Absoluate location.
+	 * @return Relative location.
+	 */
+	private Point getRelativeMouseLocation(Point absoluteLocation) {
 		// Return relative location
 		Point frameLocation = this.mockFrame.getLocationOnScreen();
 		return new Point(absoluteLocation.x - frameLocation.x,
@@ -274,27 +339,27 @@ public class RecordComponentTest extends TestCase {
 	}
 
 	/**
-	 * Mock {@link MacroFactory} to report failures of {@link Macro}.
+	 * Mock {@link MacroSource} to report failures of {@link Macro}.
 	 */
-	private class MockMacroFactory implements MacroFactory {
+	private class MockMacroFactory implements MacroSource {
 
 		/**
-		 * Delegate {@link MacroFactory}.
+		 * Delegate {@link MacroSource}.
 		 */
-		private final MacroFactory delegate;
+		private final MacroSource delegate;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param delegate
-		 *            Delegate {@link MacroFactory}.
+		 *            Delegate {@link MacroSource}.
 		 */
-		public MockMacroFactory(MacroFactory delegate) {
+		public MockMacroFactory(MacroSource delegate) {
 			this.delegate = delegate;
 		}
 
 		/*
-		 * ==================== MacroFactory ===========================
+		 * ==================== MacroSource ===========================
 		 */
 
 		@Override
@@ -303,8 +368,63 @@ public class RecordComponentTest extends TestCase {
 		}
 
 		@Override
-		public Macro createMacro(MacroFactoryContext context) {
-			return new MockMacro(this.delegate.createMacro(context));
+		public void sourceMacro(MacroSourceContext context) {
+			this.delegate.sourceMacro(new MockMacroSourceContext(context));
+		}
+	}
+
+	/**
+	 * Mock {@link MacroSourceContext}.
+	 */
+	private class MockMacroSourceContext implements MacroSourceContext {
+
+		/**
+		 * Delegate.
+		 */
+		private final MacroSourceContext delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param delegate
+		 *            Delegate.
+		 */
+		public MockMacroSourceContext(MacroSourceContext delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ====================== MacroSourceContext =========================
+		 */
+
+		@Override
+		public Point getLocation() {
+			return this.delegate.getLocation();
+		}
+
+		@Override
+		public Point getAnotherLocation() {
+			return this.delegate.getAnotherLocation();
+		}
+
+		@Override
+		public Frame getOwnerFrame() {
+			return this.delegate.getOwnerFrame();
+		}
+
+		@Override
+		public Point getRelativeLocation(Point absoluteLocation) {
+			return this.delegate.getRelativeLocation(absoluteLocation);
+		}
+
+		@Override
+		public Point getAbsoluteLocation(Point relativeLocation) {
+			return this.delegate.getAbsoluteLocation(relativeLocation);
+		}
+
+		@Override
+		public void setNewMacro(Macro macro) {
+			this.delegate.setNewMacro(new MockMacro(macro));
 		}
 	}
 
@@ -418,12 +538,16 @@ public class RecordComponentTest extends TestCase {
 	 * 
 	 * @param macroType
 	 *            Expected {@link Macro} type.
+	 * @param macroLocation
+	 *            Expected {@link Macro} starting location.
 	 * @param macroConfiguration
 	 *            Expected {@link Macro} configuration.
 	 */
-	private void addExpectedMacro(Class<? extends Macro> macroType,
+	private synchronized void addExpectedMacro(
+			Class<? extends Macro> macroType, Point macroLocation,
 			String macroConfiguration) {
 		this.recordListener.macroTypes.add(macroType);
+		this.recordListener.macroLocations.add(macroLocation);
 		this.recordListener.macroConfigs.add(macroConfiguration);
 	}
 
@@ -435,7 +559,12 @@ public class RecordComponentTest extends TestCase {
 		/**
 		 * Listing of expected {@link Macro} classes.
 		 */
-		private final Deque<Class<?>> macroTypes = new LinkedList<Class<?>>();
+		private final Deque<Class<? extends Macro>> macroTypes = new LinkedList<Class<? extends Macro>>();
+
+		/**
+		 * Listing of {@link Macro} locations.
+		 */
+		private final Deque<Point> macroLocations = new LinkedList<Point>();
 
 		/**
 		 * Listing of expected {@link Macro} configurations.
@@ -449,31 +578,40 @@ public class RecordComponentTest extends TestCase {
 		@Override
 		public void addMacro(Macro macro) {
 			try {
-				// Obtain the macro
-				macro = ((MockMacro) macro).delegate;
 
-				// Ensure the expected macro type
-				Class<?> type = this.macroTypes.remove();
-				assertEquals("Incorrect macro type", type, macro.getClass());
+				// Add the macro
+				synchronized (RecordComponentTest.this) {
+					// Obtain the macro
+					macro = ((MockMacro) macro).delegate;
 
-				// Obtain expected start location
-				String configuration = this.macroConfigs.remove();
-				LeftClickMacro leftClick = new LeftClickMacro();
-				leftClick.setConfigurationMemento(configuration);
-				Point expectedStart = leftClick.getStartingMouseLocation();
+					// Ensure the expected macro type
+					Class<? extends Macro> type = this.macroTypes.remove();
+					assertEquals("Incorrect macro type", type, macro.getClass());
 
-				// Obtain the actual start location
-				configuration = macro.getConfigurationMemento();
-				leftClick.setConfigurationMemento(configuration);
-				Point actualStart = leftClick.getStartingMouseLocation();
+					// Ensure configuration is as expected
+					String expectedMemento = this.macroConfigs.remove();
+					String actualMemento = macro.getConfigurationMemento();
+					assertEquals("Incorrect configuration", expectedMemento,
+							actualMemento);
 
-				// Ensure same (given margin of error detecting location)
-				assertTrue("Incorrect macro x configuration (e="
-						+ expectedStart.x + ", a=" + actualStart.x + ")", (Math
-						.abs(expectedStart.x - actualStart.x) <= 1));
-				assertTrue("Incorrect macro y configuration (e="
-						+ expectedStart.y + ", a=" + actualStart.y + ")", (Math
-						.abs(expectedStart.y - actualStart.y) <= 1));
+					// Obtain expected start location
+					Point expectedStart = this.macroLocations.remove();
+
+					// Obtain the actual start location
+					Macro locationMacro = type.newInstance();
+					locationMacro.setConfigurationMemento(macro
+							.getConfigurationMemento());
+					Point actualStart = locationMacro
+							.getStartingMouseLocation();
+
+					// Ensure same (given margin of error detecting location)
+					assertTrue("Incorrect macro x configuration (e="
+							+ expectedStart.x + ", a=" + actualStart.x + ")",
+							(Math.abs(expectedStart.x - actualStart.x) <= 1));
+					assertTrue("Incorrect macro y configuration (e="
+							+ expectedStart.y + ", a=" + actualStart.y + ")",
+							(Math.abs(expectedStart.y - actualStart.y) <= 1));
+				}
 
 			} catch (Throwable ex) {
 				RecordComponentTest.this.macroFailure = ex;
