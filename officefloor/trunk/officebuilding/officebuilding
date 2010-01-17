@@ -10,7 +10,7 @@
 set -e
 
 # Version
-OFFICE_BUILDING_VERSION=0.1.0
+OFFICE_BUILDING_VERSION=0.1.1
 
 # Change to release directory package
 cd target/officebuilding-${OFFICE_BUILDING_VERSION}-release/officebuilding-${OFFICE_BUILDING_VERSION}/bin

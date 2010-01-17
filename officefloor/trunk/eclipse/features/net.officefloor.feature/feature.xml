@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.feature"
       label="OfficeFloor Feature"
-      version="0.1.0"
+      version="0.1.1"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -46,14 +46,14 @@
          id="net.officefloor.core"
          download-size="0"
          install-size="0"
-         version="0.1.0" 
+         version="0.1.1" 
          unpack="true"/>
 
    <plugin
          id="net.officefloor.ui"
          download-size="0"
          install-size="0"
-         version="0.1.0"
+         version="0.1.1"
          unpack="false"/>
 
 </feature>
