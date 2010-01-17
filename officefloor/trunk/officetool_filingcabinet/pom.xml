@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>officefloor</artifactId>
 		<groupId>net.officefloor</groupId>
-		<version>0.1.0</version>
+		<version>0.1.1</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>
 	<name>Filing Cabinet Tool</name>

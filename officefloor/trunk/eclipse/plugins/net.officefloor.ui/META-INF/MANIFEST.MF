@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Eclipse UI
 Bundle-SymbolicName: net.officefloor.ui;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.1.1
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
@@ -60,7 +60,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.plugin,
  org.eclipse.ui.views.navigator,
  org.osgi.framework;version="1.4.0"
-Require-Bundle: net.officefloor.core;bundle-version="0.1.0",
+Require-Bundle: net.officefloor.core;bundle-version="0.1.1",
  org.eclipse.jdt.ui,
  org.eclipse.core.resources
 Export-Package: net.officefloor.eclipse,
@@ -141,5 +141,5 @@ Export-Package: net.officefloor.eclipse,
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
 Bundle-ClassPath: .,
- junit-3.8.2.jar,
- net.officefloor.core-0.1.0.jar
+ net.officefloor.core-0.1.1.jar,
+ junit-3.8.2.jar
