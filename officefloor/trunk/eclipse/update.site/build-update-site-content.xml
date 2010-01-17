@@ -1,4 +1,4 @@
-<project name="Generate P2 Content">
+<project name="Generate P2 Content" default="build-update-site-content">
 
 	<target name="build-update-site-content"
 		description="Addition functionality on maven to generate p2 content of Eclipse update site">
@@ -7,6 +7,8 @@
 		<fail message="Must specify property BUILD_DIR" unless="BUILD_DIR" />
 		<fail message="Must provide P2 launcher jar location" unless="P2_LAUNCH_JAR" />
 		<fail message="Must provide OfficeFloor version" unless="OFFICE_FLOOR_VERSION" />
+		<fail message="Must provide artifact download cache location"
+			unless="DOWNLOAD_ARTIFACT_CACHE_DIR" />
 
 		<!-- Copy in site and documentation files from OfficeFloor project -->
 		<copy file="${basedir}/src/main/resources/site.xml" tofile="${BUILD_DIR}/site.xml" />
@@ -80,6 +82,9 @@
 			<param name="DOWNLOAD_RELEASE_VERSION" value="0.1.0" />
 		</antcall>
 		<antcall target="downloadRelease0.0.1" />
+		<copy todir="${BUILD_DIR}">
+			<fileset dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}" />
+		</copy>
 
 		<!-- Generate the digest and pack.jar.gz files -->
 		<echo>Generating digest.zip and *.jar.pack.gz files</echo>
@@ -140,6 +145,12 @@
 	<target name="downloadRelease">
 		<fail message="Must specify the version of release to download"
 			unless="DOWNLOAD_RELEASE_VERSION" />
+
+		<!-- Ensure cache directories exist -->
+		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/plugins" />
+		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/features" />
+
+		<!-- Download the release artifacts -->
 		<antcall target="downloadReleaseArtifact">
 			<param name="DOWNLOAD_ARTIFACT"
 				value="plugins/net.officefloor.core_${DOWNLOAD_RELEASE_VERSION}.jar" />
@@ -198,10 +209,20 @@
 	<!-- Private task to download an existing released artifact -->
 	<target name="downloadReleaseArtifact">
 		<fail message="Must specify artifact to download" unless="DOWNLOAD_ARTIFACT" />
-		<echo>${DOWNLOAD_ARTIFACT}</echo>
-		<get
-			src="http://downloads.sourceforge.net/project/officefloor/eclipse/update/${DOWNLOAD_ARTIFACT}"
-			dest="${BUILD_DIR}/${DOWNLOAD_ARTIFACT}" verbose="true" usetimestamp="true" />
+		<echo>Artifact: ${DOWNLOAD_ARTIFACT}</echo>
+		<if>
+			<available file="${DOWNLOAD_ARTIFACT_CACHE_DIR}/${DOWNLOAD_ARTIFACT}" />
+			<then>
+				<echo>Cached</echo>
+			</then>
+			<else>
+				<echo>Downloading into cache</echo>
+				<get
+					src="http://downloads.sourceforge.net/project/officefloor/eclipse/update/${DOWNLOAD_ARTIFACT}"
+					dest="${DOWNLOAD_ARTIFACT_CACHE_DIR}/${DOWNLOAD_ARTIFACT}" verbose="true"
+					usetimestamp="true" />
+			</else>
+		</if>
 	</target>
 
 </project>
