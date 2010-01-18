@@ -11,6 +11,10 @@
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
 		<worksource
+			class="net.officefloor.eclipse.socket.ClasspathHttpFileSenderWorkSourceExtension" />
+	</extension>
+	<extension point="net.officefloor.ui.worksources">
+		<worksource
 			class="net.officefloor.eclipse.socket.HttpParametersLoaderWorkSourceExtension" />
 	</extension>
 	<extension point="net.officefloor.ui.worksources">
