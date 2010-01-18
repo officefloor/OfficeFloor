@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="external flow name" />
+	<field type="TaskModel" name="previous task" end-field="next external flow" />
+	<field type="ExternalFlowModel" name="next external flow"
+		end-list="previous task" />
+</model>
