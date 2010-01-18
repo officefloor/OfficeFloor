@@ -37,12 +37,20 @@ public class MacroList implements RecordListener {
 	private final MacroListListener listener;
 
 	/**
+	 * {@link MacroIndexFactory}.
+	 */
+	private final MacroIndexFactory indexFactory;
+
+	/**
 	 * Initiate.
 	 * 
+	 * @param indexFactory
+	 *            {@link MacroIndexFactory}.
 	 * @param listener
 	 *            {@link MacroListListener}.
 	 */
-	public MacroList(MacroListListener listener) {
+	public MacroList(MacroIndexFactory indexFactory, MacroListListener listener) {
+		this.indexFactory = indexFactory;
 		this.listener = listener;
 	}
 
@@ -95,9 +103,18 @@ public class MacroList implements RecordListener {
 		// Create the item for the macro
 		MacroItem item = new MacroItemImpl(macro);
 
-		// Add macro to the list (keeping track of its index)
+		// Use default of append to list
 		int index = this.items.size();
-		this.items.add(item);
+		if (this.indexFactory != null) {
+			int specifiedIndex = this.indexFactory.createMacroIndex();
+			if (specifiedIndex >= 0) {
+				// Specify the index
+				index = specifiedIndex;
+			}
+		}
+
+		// Add macro to the list (keeping track of its index)
+		this.items.add(index, item);
 
 		// Notify macro added
 		this.listener.macroAdded(item, index);

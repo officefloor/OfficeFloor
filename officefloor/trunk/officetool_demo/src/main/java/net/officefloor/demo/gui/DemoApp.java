@@ -24,12 +24,15 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -42,18 +45,19 @@ import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.RightClickMacro;
+import net.officefloor.demo.macrolist.MacroIndexFactory;
 import net.officefloor.demo.macrolist.MacroItem;
 import net.officefloor.demo.macrolist.MacroList;
 import net.officefloor.demo.macrolist.MacroListListener;
 import net.officefloor.demo.record.RecordComponent;
 
-public class DemoApp extends JFrame {
+public class DemoApp extends JFrame implements MacroIndexFactory {
 
 	/**
 	 * Default recording size.
 	 */
-	private static final Dimension DEFAULT_RECORDING_SIZE = new Dimension(640,
-			420);
+	private static final Dimension DEFAULT_RECORDING_SIZE = new Dimension(1024,
+			550);
 
 	/**
 	 * Provides ability to run the Demo Tool from command line.
@@ -106,7 +110,7 @@ public class DemoApp extends JFrame {
 
 		// Create the macro listing (ensuring that they keep in sync)
 		final DefaultListModel macroListModel = new DefaultListModel();
-		this.macros = new MacroList(new MacroListListener() {
+		this.macros = new MacroList(this, new MacroListListener() {
 			@Override
 			public void macroAdded(MacroItem item, int index) {
 				macroListModel.add(index, item.getMacro().getClass()
@@ -158,6 +162,20 @@ public class DemoApp extends JFrame {
 		macroPanel.add(this.macroList);
 
 		// Provide buttons
+		controlPanel.add(Box.createVerticalStrut(20));
+
+		// Unselect button
+		JPanel unselectPanel = new ConfiguredPanel(true, controlPanel);
+		JButton unselectButton = new JButton("Unselect");
+		unselectButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DemoApp.this.macroList.clearSelection();
+			}
+		});
+		unselectPanel.add(unselectButton);
+		unselectPanel.add(Box.createHorizontalGlue());
+
 		controlPanel.add(Box.createVerticalStrut(20));
 
 		// Play button
@@ -246,6 +264,25 @@ public class DemoApp extends JFrame {
 			this.setLayout(layout);
 			container.add(this);
 		}
+	}
+
+	/*
+	 * ======================== MacroIndexFactory =======================
+	 */
+
+	@Override
+	public int createMacroIndex() {
+
+		// Determine if a selected index
+		int[] selectedIndices = DemoApp.this.getSelectedMacroIndices();
+		if (selectedIndices.length == 1) {
+			// Add the macro after the selected macro (+1 for after)
+			int index = selectedIndices[0] + 1;
+			return index;
+		}
+
+		// Nothing selected so no index specified
+		return -1;
 	}
 
 }

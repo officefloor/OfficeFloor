@@ -598,7 +598,8 @@ public class RecordComponent extends JComponent {
 
 		@Override
 		public long getPostRunWaitTime() {
-			return 0;
+			// Allow time for screen to refresh
+			return 500;
 		}
 	}
 
