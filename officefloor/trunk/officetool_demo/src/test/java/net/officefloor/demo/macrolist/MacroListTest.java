@@ -35,6 +35,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class MacroListTest extends OfficeFrameTestCase {
 
 	/**
+	 * Mock {@link MacroIndexFactory}.
+	 */
+	private final MacroIndexFactory indexFactory = this
+			.createMock(MacroIndexFactory.class);
+
+	/**
 	 * Mock {@link MacroListListener}.
 	 */
 	private final MacroListListener listener = this
@@ -43,7 +49,8 @@ public class MacroListTest extends OfficeFrameTestCase {
 	/**
 	 * {@link MacroList} to test.
 	 */
-	private final MacroList list = new MacroList(this.listener);
+	private final MacroList list = new MacroList(this.indexFactory,
+			this.listener);
 
 	/**
 	 * Mock {@link Macro} for testing.
@@ -51,11 +58,44 @@ public class MacroListTest extends OfficeFrameTestCase {
 	private final Macro macro = this.createMock(Macro.class);
 
 	/**
+	 * Tests appending a {@link MacroList}.
+	 */
+	public void testAppendMacro() {
+
+		// Record appending the macro (-1 created index)
+		this.recordReturn(this.indexFactory, this.indexFactory
+				.createMacroIndex(), -1);
+		this.listener.macroAdded(null, 0);
+		this.control(this.listener).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect macro", MacroListTest.this.macro,
+						((MacroItem) actual[0]).getMacro());
+				assertEquals("Incorrect index", expected[1], actual[1]);
+				return true;
+			}
+		});
+
+		// Add the macro
+		this.replayMockObjects();
+		this.list.addMacro(this.macro);
+		this.verifyMockObjects();
+
+		// Verify macro added to listing
+		assertEquals("Incorrect number of macros", 1, this.list.size());
+		MacroItem item = this.list.getItem(0);
+		assertNotNull("Should have macro");
+		assertEquals("Incorrect macro", this.macro, item.getMacro());
+	}
+
+	/**
 	 * Tests adding a {@link MacroList}.
 	 */
 	public void testAddMacro() {
 
 		// Record adding the macro
+		this.recordReturn(this.indexFactory, this.indexFactory
+				.createMacroIndex(), 0);
 		this.listener.macroAdded(null, 0);
 		this.control(this.listener).setMatcher(new AbstractMatcher() {
 			@Override
@@ -85,6 +125,8 @@ public class MacroListTest extends OfficeFrameTestCase {
 	public void testRemoveMacro() {
 
 		// Record adding then removing the macro
+		this.recordReturn(this.indexFactory, this.indexFactory
+				.createMacroIndex(), -1);
 		this.listener.macroAdded(null, 0);
 		this.control(this.listener).setMatcher(new AlwaysMatcher());
 		this.listener.macroRemoved(null, 0);
