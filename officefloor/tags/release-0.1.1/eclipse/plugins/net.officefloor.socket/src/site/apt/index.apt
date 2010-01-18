@@ -1,0 +1,7 @@
+                                       ---------------------------
+                                             Eclipse Socket
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  This module provides an Eclipse plugin to enable custom graphical configuration for the Socket (and HTTP) functionality.
