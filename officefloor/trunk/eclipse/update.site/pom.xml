@@ -18,6 +18,8 @@
 	<properties>
 		<update.site.package.dir>${project.build.directory}/update_site_package_dir
 		</update.site.package.dir>
+		<update.site.deploy.dir>${project.build.directory}/update_site_deploy_dir
+		</update.site.deploy.dir>
 	</properties>
 	<build>
 		<plugins>
@@ -119,8 +121,48 @@ Please ensure property 'equinox.version' is specified in an external active prof
 						</goals>
 						<configuration>
 							<tasks>
+								<!--
+									Collect only artifacts to deploy. Stops overwriting (and
+									potentially corrupting) existing released artifacts.
+								-->
+								<echo>Collecting update site content to deploy</echo>
+								<mkdir dir="${update.site.deploy.dir}" />
+								<copy todir="${update.site.deploy.dir}" overwrite="true">
+									<fileset dir="${update.site.package.dir}">
+										<!-- Reference files -->
+										<include name="index.html" />
+										<include name="site.xml" />
+										<include name="artifacts.jar" />
+										<include name="content.jar" />
+										<include name="digest.zip" />
+
+										<!-- Core feature and its Eclipse plug-ins -->
+										<include name="features/net.officefloor.feature_${pom.version}.jar" />
+										<include name="plugins/net.officefloor.core_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.core_${pom.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.ui_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.ui_${pom.version}.jar.pack.gz" />
+
+										<!-- Plug-ins feature and its Eclipse plug-ins -->
+										<include
+											name="features/net.officefloor.plugins.feature_${pom.version}.jar" />
+										<include name="plugins/net.officefloor.jdbc_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.jdbc_${pom.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.socket_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.socket_${pom.version}.jar.pack.gz" />
+										<include
+											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar.pack.gz" />
+									</fileset>
+								</copy>
+
 								<echo>Deploying the update site content to SourceForge</echo>
-								<exec dir="${update.site.package.dir}" executable="rsync"
+								<exec dir="${update.site.deploy.dir}" executable="rsync"
 									failonerror="true">
 									<arg
 										line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/eclipse/update" />
