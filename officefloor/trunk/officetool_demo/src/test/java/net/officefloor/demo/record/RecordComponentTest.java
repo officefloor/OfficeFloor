@@ -60,6 +60,11 @@ public class RecordComponentTest extends TestCase {
 	private final MockRecordListener recordListener = new MockRecordListener();
 
 	/**
+	 * Offset location.
+	 */
+	private Point offsetLocation;
+
+	/**
 	 * {@link MockFrame}.
 	 */
 	private MockFrame mockFrame;
@@ -101,7 +106,7 @@ public class RecordComponentTest extends TestCase {
 		final Point itemRelativeLocation = this
 				.getRelativeMouseLocation(itemAbsoluteLocation);
 		final Point targetAbsoluteLocation = new Point(
-				itemAbsoluteLocation.x - 10, itemAbsoluteLocation.y - 10);
+				itemAbsoluteLocation.x - 20, itemAbsoluteLocation.y - 20);
 		final Point targetRelativeLocation = this
 				.getRelativeMouseLocation(targetAbsoluteLocation);
 
@@ -157,6 +162,10 @@ public class RecordComponentTest extends TestCase {
 
 		// Bring record to the front
 		this.recordFrame.setVisible(true);
+		this.robot.waitForIdle();
+
+		// Obtain the offset location
+		this.offsetLocation = this.recordComponent.getLocationOnScreen();
 	}
 
 	@Override
@@ -275,9 +284,8 @@ public class RecordComponentTest extends TestCase {
 	 */
 	private Point getRelativeMouseLocation(Point absoluteLocation) {
 		// Return relative location
-		Point frameLocation = this.mockFrame.getLocationOnScreen();
-		return new Point(absoluteLocation.x - frameLocation.x,
-				absoluteLocation.y - frameLocation.y);
+		return new Point(absoluteLocation.x - this.offsetLocation.x,
+				absoluteLocation.y - this.offsetLocation.y);
 	}
 
 	/**
