@@ -117,11 +117,17 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 			public void macroAdded(MacroItem item, int index) {
 				macroListModel.add(index, item.getMacro().getClass()
 						.getSimpleName());
+				
+				// Macro may change width so pack screen
+				DemoApp.this.pack();
 			}
 
 			@Override
 			public void macroRemoved(MacroItem item, int index) {
 				macroListModel.remove(index);
+				
+				// Macro may change width so pack screen
+				DemoApp.this.pack();
 			}
 		});
 
@@ -142,7 +148,7 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 		JPanel markerPanel = new ConfiguredPanel(true, recordPanel);
 		markerPanel.add(Box.createHorizontalStrut(100));
 		markerPanel.add(new JLabel("|"));
-		markerPanel.add(Box.createGlue());
+		markerPanel.add(Box.createHorizontalGlue());
 
 		// Add the macro factories
 		recorder.addMacro(new LeftClickMacro());
