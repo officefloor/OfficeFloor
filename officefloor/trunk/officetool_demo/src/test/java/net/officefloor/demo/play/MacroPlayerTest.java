@@ -313,7 +313,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	 */
 	public void testContext_keyText() {
 
-		final String INPUT_TEXT = "Example Text";
+		final String INPUT_TEXT = "Example Text with special characters ./";
 
 		// Setup to input into the text
 		this.moveToComponentMiddle(this.text);

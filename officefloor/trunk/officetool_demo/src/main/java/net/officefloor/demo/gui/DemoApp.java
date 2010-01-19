@@ -37,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.LineBorder;
 
 import net.officefloor.demo.macro.DragMacro;
@@ -160,8 +161,9 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 		macroLabelPanel.add(new JLabel("Macros"));
 		macroPanel.add(Box.createVerticalStrut(5));
 		this.macroList = new JList(macroListModel);
-		this.macroList.setBorder(new LineBorder(Color.BLACK));
-		macroPanel.add(this.macroList);
+		JScrollPane macroScrollPane = new JScrollPane(this.macroList);
+		macroScrollPane.setBorder(new LineBorder(Color.BLACK));
+		macroPanel.add(macroScrollPane);
 
 		// Provide buttons
 		controlPanel.add(Box.createVerticalStrut(20));
