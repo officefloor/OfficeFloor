@@ -57,7 +57,7 @@ public class PlayButton extends JButton {
 					Macro[] macros = app.getSelectedMacros(true);
 
 					// Obtain the reference point for playing macros
-					Point offset = app.getLocationOnScreen();
+					Point offset = recordComponent.getLocationOnScreen();
 
 					// Obtain hide/show macros
 					Macro hideMacro = recordComponent.getHideFrameMacro();
