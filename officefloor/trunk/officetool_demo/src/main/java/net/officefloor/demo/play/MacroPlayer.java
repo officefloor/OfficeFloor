@@ -63,6 +63,10 @@ public class MacroPlayer implements MacroTaskContext {
 			switch (character) {
 			case ' ':
 				return new int[] { KeyEvent.VK_SPACE };
+			case '.':
+				return new int[] { KeyEvent.VK_PERIOD };
+			case '/':
+				return new int[] { KeyEvent.VK_SLASH };
 			default:
 				// Unknown character
 				throw new UnsupportedOperationException(
@@ -187,7 +191,7 @@ public class MacroPlayer implements MacroTaskContext {
 
 										// Run the task
 										task.runMacroTask(MacroPlayer.this);
-										
+
 									} finally {
 										// Flag task now run
 										synchronized (isRun) {
