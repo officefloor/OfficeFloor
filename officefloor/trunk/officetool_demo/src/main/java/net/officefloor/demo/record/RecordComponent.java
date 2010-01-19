@@ -178,7 +178,7 @@ public class RecordComponent extends JComponent {
 	 * @return Relative location.
 	 */
 	public Point getRelativeLocation(Point absoluteLocation) {
-		Point offset = RecordComponent.this.frame.getLocationOnScreen();
+		Point offset = this.getLocationOnScreen();
 		return new Point(absoluteLocation.x - offset.x, absoluteLocation.y
 				- offset.y);
 	}
@@ -265,7 +265,7 @@ public class RecordComponent extends JComponent {
 
 			// If window visible, reset reference point
 			if (RecordComponent.this.frame.isVisible()) {
-				this.referencePoint = RecordComponent.this.frame
+				this.referencePoint = RecordComponent.this
 						.getLocationOnScreen();
 			}
 
