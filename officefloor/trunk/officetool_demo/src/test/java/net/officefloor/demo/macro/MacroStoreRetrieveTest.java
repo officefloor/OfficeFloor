@@ -84,6 +84,16 @@ public class MacroStoreRetrieveTest extends TestCase {
 	}
 
 	/**
+	 * Tests the {@link MoveMouseMacro}.
+	 */
+	public void testMoveMouseMacro() {
+		MoveMouseMacro macro = this.storeRetrieveMacro(MoveMouseMacro.class,
+				"10,20");
+		assertEquals("Incorrect starting location", new Point(10, 20), macro
+				.getStartingMouseLocation());
+	}
+
+	/**
 	 * Stores the {@link Macro} and returns the retrieved {@link Macro}.
 	 * 
 	 * @param macro

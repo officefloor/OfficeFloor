@@ -44,6 +44,7 @@ import net.officefloor.demo.macro.InfoMacro;
 import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
+import net.officefloor.demo.macro.MoveMouseMacro;
 import net.officefloor.demo.macro.RightClickMacro;
 import net.officefloor.demo.macrolist.MacroIndexFactory;
 import net.officefloor.demo.macrolist.MacroItem;
@@ -145,6 +146,7 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 		// Add the macro factories
 		recorder.addMacro(new LeftClickMacro());
 		recorder.addMacro(new RightClickMacro());
+		recorder.addMacro(new MoveMouseMacro());
 		recorder.addMacro(new DragMacro());
 		recorder.addMacro(new InputTextMacro());
 		recorder.addMacro(new InfoMacro());
