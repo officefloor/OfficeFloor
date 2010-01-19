@@ -294,6 +294,9 @@ public class RecordComponent extends JComponent {
 		@Override
 		public synchronized void actionPerformed(ActionEvent e) {
 			try {
+				// Trigger for first reference point
+				this.getReferencePoint();
+
 				// Source the macro
 				this.macroFactory.sourceMacro(this);
 			} catch (Throwable ex) {
@@ -309,13 +312,13 @@ public class RecordComponent extends JComponent {
 		@Override
 		public synchronized void setNewMacro(Macro macro) {
 
-			// Obtain location of frame for showing again after hiding
-			Point frameLocation = RecordComponent.this.frame.getLocation();
+			// Obtain the reference point
+			Point referencePoint = this.getReferencePoint();
 
 			// Run the macro (hiding/showing frame)
-			new MacroPlayer(RecordComponent.this.robot, frameLocation).play(
+			new MacroPlayer(RecordComponent.this.robot, referencePoint).play(
 					RecordComponent.this.getHideFrameMacro(), macro,
-					new ShowFrameMacro(frameLocation));
+					RecordComponent.this.getShowFrameMacro());
 
 			// Record the macro if required
 			if (this.isRecord) {
