@@ -39,12 +39,13 @@
 		</module>
 
 		<!-- Plug-in eclipse functionality -->
-		<module>eclipse/plugins/net.officefloor.filingcabinet
+		<module>eclipse/plugins/net.officefloor.socket
 		</module>
 		<module>eclipse/plugins/net.officefloor.jdbc
 		</module>
-		<module>eclipse/plugins/net.officefloor.socket
+		<module>eclipse/plugins/net.officefloor.filingcabinet
 		</module>
+		<module>eclipse/features/net.officefloor.demo</module>
 		<module>eclipse/features/net.officefloor.plugins.feature
 		</module>
 
