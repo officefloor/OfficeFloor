@@ -19,6 +19,7 @@
 package net.officefloor.demo.gui;
 
 import java.awt.AWTException;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,12 +41,15 @@ public class PlayButton extends JButton {
 	/**
 	 * Initiate.
 	 * 
-	 * @param app
-	 *            {@link DemoApp}.
+	 * @param demo
+	 *            {@link DemoTool}.
+	 * @param frame
+	 *            {@link Frame}.
 	 * @param recordComponent
 	 *            {@link RecordComponent}.
 	 */
-	public PlayButton(final DemoApp app, final RecordComponent recordComponent) {
+	public PlayButton(final DemoTool demo, final Frame frame,
+			final RecordComponent recordComponent) {
 		super("Play");
 
 		// Run macros on clicking button
@@ -54,7 +58,7 @@ public class PlayButton extends JButton {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					// Obtain the listing of selected macros
-					Macro[] macros = app.getSelectedMacros(true);
+					Macro[] macros = demo.getSelectedMacros(true);
 
 					// Obtain the reference point for playing macros
 					Point offset = recordComponent.getLocationOnScreen();
@@ -77,7 +81,7 @@ public class PlayButton extends JButton {
 
 				} catch (AWTException ex) {
 					// Indicate failure to initiate playing macros
-					JOptionPane.showMessageDialog(app,
+					JOptionPane.showMessageDialog(frame,
 							"Failed to initiate player: " + ex.getMessage()
 									+ " [" + ex.getClass().getSimpleName()
 									+ "]", "Player error",

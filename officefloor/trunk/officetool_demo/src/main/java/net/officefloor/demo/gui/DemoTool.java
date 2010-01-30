@@ -20,12 +20,16 @@ package net.officefloor.demo.gui;
 
 import java.awt.AWTException;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +37,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -53,7 +56,7 @@ import net.officefloor.demo.macrolist.MacroList;
 import net.officefloor.demo.macrolist.MacroListListener;
 import net.officefloor.demo.record.RecordComponent;
 
-public class DemoApp extends JFrame implements MacroIndexFactory {
+public class DemoTool implements MacroIndexFactory {
 
 	/**
 	 * Default recording size.
@@ -69,12 +72,13 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 	 */
 	public static void main(String[] args) throws AWTException {
 
-		// Create the demo application frame
-		final DemoApp frame = new DemoApp();
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		// Create the frame
+		Frame frame = new Frame("Demo Tool");
+
+		// Attach the Demo components
+		new DemoTool().attachComponents(frame, frame);
 
 		// Run the application
-		frame.pack();
 		frame.setVisible(true);
 
 		// Position window in middle of screen
@@ -92,23 +96,40 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 	/**
 	 * {@link MacroList} containing the {@link Macro} items.
 	 */
-	private final MacroList macros;
+	private MacroList macros;
 
 	/**
 	 * {@link JList} for the {@link Macro} instances.
 	 */
-	private final JList macroList;
+	private JList macroList;
 
 	/**
-	 * Initiate.
+	 * Attaches the {@link Component} instances for demo generation.
 	 * 
+	 * @param frame
+	 *            {@link Frame} containing the {@link Container}.
+	 * @param container
+	 *            {@link Container} to attach the {@link Component} instances.
 	 * @throws AWTException
 	 *             If running in headless environment.
 	 */
-	public DemoApp() throws AWTException {
+	public void attachComponents(final Frame frame, Container container)
+			throws AWTException {
+
+		// Always dispose on closing window
+		frame.addWindowListener(new WindowAdapter() {
+			private boolean isDisposed = false;
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if (!this.isDisposed) {
+					frame.dispose();
+					this.isDisposed = true;
+				}
+			}
+		});
 
 		// Create the panel
-		JPanel panel = new ConfiguredPanel(true, this);
+		JPanel panel = new ConfiguredPanel(true, container);
 
 		// Create the macro listing (ensuring that they keep in sync)
 		final DefaultListModel macroListModel = new DefaultListModel();
@@ -117,17 +138,17 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 			public void macroAdded(MacroItem item, int index) {
 				macroListModel.add(index, item.getMacro().getClass()
 						.getSimpleName());
-				
+
 				// Macro may change width so pack screen
-				DemoApp.this.pack();
+				frame.pack();
 			}
 
 			@Override
 			public void macroRemoved(MacroItem item, int index) {
 				macroListModel.remove(index);
-				
+
 				// Macro may change width so pack screen
-				DemoApp.this.pack();
+				frame.pack();
 			}
 		});
 
@@ -135,7 +156,7 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 		JPanel recordPanel = new ConfiguredPanel(false, panel);
 
 		// Create the record component
-		RecordComponent recorder = new RecordComponent(new Robot(), this,
+		RecordComponent recorder = new RecordComponent(new Robot(), frame,
 				this.macros);
 		recorder.setBorder(new LineBorder(Color.RED));
 		Dimension recorderSize = DEFAULT_RECORDING_SIZE;
@@ -180,7 +201,7 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 		unselectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DemoApp.this.macroList.clearSelection();
+				DemoTool.this.macroList.clearSelection();
 			}
 		});
 		unselectPanel.add(unselectButton);
@@ -190,22 +211,25 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 
 		// Play button
 		JPanel playPanel = new ConfiguredPanel(true, controlPanel);
-		playPanel.add(new PlayButton(this, recorder));
+		playPanel.add(new PlayButton(this, frame, recorder));
 		playPanel.add(Box.createHorizontalGlue());
 
 		controlPanel.add(Box.createVerticalStrut(20));
 
 		// Save/Open buttons
 		JPanel saveOpenPanel = new ConfiguredPanel(true, controlPanel);
-		saveOpenPanel.add(new SaveButton(this));
-		saveOpenPanel.add(new OpenButton(this));
+		saveOpenPanel.add(new SaveButton(this, frame));
+		saveOpenPanel.add(new OpenButton(this, frame));
 
 		controlPanel.add(Box.createVerticalStrut(20));
 
 		// Delete button
 		JPanel deletePanel = new ConfiguredPanel(true, controlPanel);
-		deletePanel.add(new DeleteButton(this));
+		deletePanel.add(new DeleteButton(this, frame));
 		deletePanel.add(Box.createHorizontalGlue());
+
+		// Organise window
+		frame.pack();
 	}
 
 	/**
@@ -284,7 +308,7 @@ public class DemoApp extends JFrame implements MacroIndexFactory {
 	public int createMacroIndex() {
 
 		// Determine if a selected index
-		int[] selectedIndices = DemoApp.this.getSelectedMacroIndices();
+		int[] selectedIndices = DemoTool.this.getSelectedMacroIndices();
 		if (selectedIndices.length == 1) {
 			// Add the macro after the selected macro (+1 for after)
 			int index = selectedIndices[0] + 1;

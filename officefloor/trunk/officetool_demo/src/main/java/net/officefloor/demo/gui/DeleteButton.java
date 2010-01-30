@@ -18,6 +18,7 @@
 
 package net.officefloor.demo.gui;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -37,10 +38,12 @@ public class DeleteButton extends JButton {
 	/**
 	 * Initiate.
 	 * 
-	 * @param app
-	 *            {@link DemoApp}.
+	 * @param demo
+	 *            {@link DemoTool}.
+	 * @param frame
+	 *            {@link Frame}.
 	 */
-	public DeleteButton(final DemoApp app) {
+	public DeleteButton(final DemoTool demo, final Frame frame) {
 		super("Delete");
 
 		this.addActionListener(new ActionListener() {
@@ -48,9 +51,9 @@ public class DeleteButton extends JButton {
 			public void actionPerformed(ActionEvent e) {
 
 				// Obtain the indices of macros to delete
-				int[] indices = app.getSelectedMacroIndices();
+				int[] indices = demo.getSelectedMacroIndices();
 				if ((indices == null) || (indices.length == 0)) {
-					JOptionPane.showMessageDialog(app,
+					JOptionPane.showMessageDialog(frame,
 							"Please select macros for deletion");
 					return; // nothing to delete
 				}
@@ -62,10 +65,10 @@ public class DeleteButton extends JButton {
 					text.append(" ");
 					text.append(index);
 				}
-				switch (JOptionPane.showConfirmDialog(app, text.toString())) {
+				switch (JOptionPane.showConfirmDialog(frame, text.toString())) {
 				case JOptionPane.OK_OPTION:
 					// Delete the macros (in reverse order to maintain indices)
-					MacroList macros = app.getMacroList();
+					MacroList macros = demo.getMacroList();
 					for (int i = (indices.length - 1); i >= 0; i--) {
 						macros.removeItem(indices[i]);
 					}

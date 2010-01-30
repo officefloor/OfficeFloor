@@ -18,6 +18,7 @@
 
 package net.officefloor.demo.gui;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -42,10 +43,10 @@ public class OpenButton extends JButton {
 	/**
 	 * Initiate.
 	 * 
-	 * @param app
-	 *            {@link DemoApp}.
+	 * @param demo
+	 *            {@link DemoTool}.
 	 */
-	public OpenButton(final DemoApp app) {
+	public OpenButton(final DemoTool demo, final Frame frame) {
 		super("Open");
 
 		this.addActionListener(new ActionListener() {
@@ -55,10 +56,10 @@ public class OpenButton extends JButton {
 				// Select the file for opening
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileFilter(new FileNameExtensionFilter(
-						"Recording file", DemoApp.RECORDING_FILE_EXTENSION));
+						"Recording file", DemoTool.RECORDING_FILE_EXTENSION));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				switch (chooser.showSaveDialog(app)) {
+				switch (chooser.showSaveDialog(frame)) {
 				case JFileChooser.APPROVE_OPTION:
 					// Continue on to save macros
 					break;
@@ -77,14 +78,14 @@ public class OpenButton extends JButton {
 					macros = new MacroStore().retrieve(reader);
 					reader.close();
 				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(app,
+					JOptionPane.showMessageDialog(frame,
 							"Failed to load macros: " + ex.getMessage() + " ["
 									+ ex.getClass().getSimpleName() + "]");
 					return; // failed to load
 				}
 
 				// Load the macros
-				MacroList macroList = app.getMacroList();
+				MacroList macroList = demo.getMacroList();
 				for (Macro macro : macros) {
 					macroList.addMacro(macro);
 				}
