@@ -2,17 +2,17 @@
 <?eclipse version="3.0"?>
 <plugin>
     <extension point="org.eclipse.ui.actionSets">
-      <actionSet label="OfficeFloor Action Set" visible="true" id="net.officefloor.eclipse.actionSet">
+      <actionSet label="OfficeFloor FilingCabinet Action Set" visible="true" id="net.officefloor.eclipse.actionSet.filingCabinet">
          <menu label="OfficeFloor" id="officefloorMenu">
             <separator name="officefloorGroup"/>
          </menu>
          <action
-               label="Filing Cabinet"
-               icon="icons/FilingCabinet.png"
                class="net.officefloor.eclipse.tool.filingcabinet.FilingCabinetAction"
+               icon="icons/FilingCabinet.png"
+               id="net.officefloor.eclipse.actions.FilingCabinetAction"
+               label="Filing Cabinet"
                menubarPath="officefloorMenu/officefloorGroup"
-               toolbarPath="officefloorGroup"
-               id="net.officefloor.eclipse.actions.FilingCabinetAction">
+               toolbarPath="officefloorGroup">
          </action>
       </actionSet>
    </extension>
