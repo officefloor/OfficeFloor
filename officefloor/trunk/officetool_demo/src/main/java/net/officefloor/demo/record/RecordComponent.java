@@ -64,9 +64,13 @@ public class RecordComponent extends JComponent {
 	private final Toolkit toolKit = Toolkit.getDefaultToolkit();
 
 	/**
-	 * {@link JFrame} containing this {@link RecordComponent}.
+	 * <p>
+	 * {@link Frame} containing this {@link RecordComponent}.
+	 * <p>
+	 * {@link Frame} is used to allow <code>SWT_AWT</code> integration for
+	 * Eclipse.
 	 */
-	private final JFrame frame;
+	private final Frame frame;
 
 	/**
 	 * {@link JPopupMenu} to {@link Macro}.
@@ -110,13 +114,15 @@ public class RecordComponent extends JComponent {
 	 * @param robot
 	 *            {@link Robot}.
 	 * @param frame
-	 *            {@link JFrame} containing this {@link RecordComponent}.
+	 *            {@link Frame} containing this {@link RecordComponent}.
+	 *            {@link Frame} is used to allow <code>SWT_AWT</code>
+	 *            integration for Eclipse.
 	 * @param recordListener
 	 *            {@link RecordListener}.
 	 * @throws AWTException
 	 *             If fails to create necessary AWT components.
 	 */
-	public RecordComponent(Robot robot, JFrame frame,
+	public RecordComponent(Robot robot, Frame frame,
 			RecordListener recordListener) throws AWTException {
 		this.frame = frame;
 		this.recordListener = recordListener;

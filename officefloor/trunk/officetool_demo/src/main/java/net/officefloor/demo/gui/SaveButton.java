@@ -18,6 +18,7 @@
 
 package net.officefloor.demo.gui;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -45,10 +46,12 @@ public class SaveButton extends JButton {
 	/**
 	 * Initiate.
 	 * 
-	 * @param app
-	 *            {@link DemoApp}.
+	 * @param demo
+	 *            {@link DemoTool}.
+	 * @param frame
+	 *            {@link Frame}.
 	 */
-	public SaveButton(final DemoApp app) {
+	public SaveButton(final DemoTool demo, final Frame frame) {
 		super("Save");
 
 		this.addActionListener(new ActionListener() {
@@ -58,10 +61,10 @@ public class SaveButton extends JButton {
 				// Select the file for saving
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileFilter(new FileNameExtensionFilter(
-						"Recording file", DemoApp.RECORDING_FILE_EXTENSION));
+						"Recording file", DemoTool.RECORDING_FILE_EXTENSION));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				switch (chooser.showSaveDialog(app)) {
+				switch (chooser.showSaveDialog(frame)) {
 				case JFileChooser.APPROVE_OPTION:
 					// Continue on to save macros
 					break;
@@ -74,7 +77,7 @@ public class SaveButton extends JButton {
 				File saveFile = chooser.getSelectedFile();
 
 				// Ensure ends with recording file extension
-				String extension = "." + DemoApp.RECORDING_FILE_EXTENSION;
+				String extension = "." + DemoTool.RECORDING_FILE_EXTENSION;
 				if (!saveFile.getName().endsWith(extension)) {
 					saveFile = new File(saveFile.getParent(), saveFile
 							.getName()
@@ -83,7 +86,7 @@ public class SaveButton extends JButton {
 
 				// Determine if file exists
 				if (saveFile.exists()) {
-					switch (JOptionPane.showConfirmDialog(app,
+					switch (JOptionPane.showConfirmDialog(frame,
 							"Overwrite file?")) {
 					case JOptionPane.OK_OPTION:
 						// Continue on to save macros
@@ -96,7 +99,7 @@ public class SaveButton extends JButton {
 
 				// Obtain the listing of all macros
 				List<Macro> macros = new LinkedList<Macro>();
-				MacroList macroList = app.getMacroList();
+				MacroList macroList = demo.getMacroList();
 				for (int i = 0; i < macroList.size(); i++) {
 					macros.add(macroList.getItem(i).getMacro());
 				}
@@ -109,7 +112,7 @@ public class SaveButton extends JButton {
 					writer.close();
 				} catch (IOException ex) {
 					// Indicate failure storing to file
-					JOptionPane.showMessageDialog(app,
+					JOptionPane.showMessageDialog(frame,
 							"Failed to store recording to file: "
 									+ ex.getMessage() + " ["
 									+ ex.getClass().getSimpleName() + "]");
