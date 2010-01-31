@@ -33,7 +33,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
-import junit.framework.TestCase;
 import net.officefloor.demo.macro.DragMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
@@ -41,18 +40,25 @@ import net.officefloor.demo.macro.MacroSource;
 import net.officefloor.demo.macro.MacroSourceContext;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Test the {@link RecordComponent}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RecordComponentTest extends TestCase {
+public class RecordComponentTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link RecordComponent} being tested.
 	 */
 	private RecordComponent recordComponent;
+
+	/**
+	 * Mock {@link FrameVisibilityListener}.
+	 */
+	private final FrameVisibilityListener visibilityListener = this
+			.createSynchronizedMock(FrameVisibilityListener.class);
 
 	/**
 	 * Mock {@link RecordListener}.
@@ -136,6 +142,11 @@ public class RecordComponentTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 
+		// Record mock actions for recording
+		this.visibilityListener.notifyFrameVisibility(false);
+		this.visibilityListener.notifyFrameVisibility(true);
+		this.replayMockObjects();
+
 		// Create Robot to aid in testing
 		this.robot = new Robot();
 		this.robot.setAutoDelay(100); // allow invoking
@@ -152,7 +163,7 @@ public class RecordComponentTest extends TestCase {
 		this.recordFrame = new JFrame();
 		this.recordFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.recordComponent = new RecordComponent(new Robot(),
-				this.recordFrame, this.recordListener);
+				this.recordFrame, this.visibilityListener, this.recordListener);
 		this.recordFrame.setTitle("Recorder");
 		this.recordFrame.setLocation(100, 100);
 		this.recordFrame.setSize(400, 400);
@@ -171,6 +182,9 @@ public class RecordComponentTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 
+		// Allow some time for processing
+		Thread.sleep(100);
+		
 		// Wait until all macro processing complete
 		synchronized (this) {
 			long startTime = System.currentTimeMillis();
@@ -207,6 +221,12 @@ public class RecordComponentTest extends TestCase {
 				// Allow propagation
 				throw new Exception(this.macroFailure);
 			}
+		}
+
+		// Ensure thread safe verify
+		synchronized (this.control(this.visibilityListener)) {
+			// Verify functionality
+			this.verifyMockObjects();
 		}
 	}
 

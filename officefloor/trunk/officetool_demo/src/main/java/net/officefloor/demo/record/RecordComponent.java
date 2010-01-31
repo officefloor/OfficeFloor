@@ -73,6 +73,11 @@ public class RecordComponent extends JComponent {
 	private final Frame frame;
 
 	/**
+	 * {@link FrameVisibilityListener}.
+	 */
+	private final FrameVisibilityListener visibilityListener;
+
+	/**
 	 * {@link JPopupMenu} to {@link Macro}.
 	 */
 	private final JPopupMenu popupMenu = new JPopupMenu();
@@ -117,14 +122,18 @@ public class RecordComponent extends JComponent {
 	 *            {@link Frame} containing this {@link RecordComponent}.
 	 *            {@link Frame} is used to allow <code>SWT_AWT</code>
 	 *            integration for Eclipse.
+	 * @param visibilityListener
+	 *            {@link FrameVisibilityListener}. May be <code>null</code>.
 	 * @param recordListener
 	 *            {@link RecordListener}.
 	 * @throws AWTException
 	 *             If fails to create necessary AWT components.
 	 */
 	public RecordComponent(Robot robot, Frame frame,
+			FrameVisibilityListener visibilityListener,
 			RecordListener recordListener) throws AWTException {
 		this.frame = frame;
+		this.visibilityListener = visibilityListener;
 		this.recordListener = recordListener;
 		this.robot = robot;
 
@@ -481,6 +490,10 @@ public class RecordComponent extends JComponent {
 		public void runMacroTask(MacroTaskContext context) {
 			// Hide the frame
 			RecordComponent.this.frame.setVisible(false);
+			if (RecordComponent.this.visibilityListener != null) {
+				RecordComponent.this.visibilityListener
+						.notifyFrameVisibility(false);
+			}
 		}
 
 		@Override
@@ -542,6 +555,10 @@ public class RecordComponent extends JComponent {
 			// Show the frame
 			RecordComponent.this.updateBackgroundImage();
 			RecordComponent.this.frame.setVisible(true);
+			if (RecordComponent.this.visibilityListener != null) {
+				RecordComponent.this.visibilityListener
+						.notifyFrameVisibility(true);
+			}
 			RecordComponent.this.frame.setLocation(this.frameLocation);
 			RecordComponent.this.refreshBackground();
 		}
