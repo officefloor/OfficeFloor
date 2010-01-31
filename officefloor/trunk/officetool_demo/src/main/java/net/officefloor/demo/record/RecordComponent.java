@@ -151,6 +151,19 @@ public class RecordComponent extends JComponent {
 	}
 
 	/**
+	 * Obtains the {@link Rectangle} providing the absolute location of the
+	 * recording area.
+	 * 
+	 * @return {@link Rectangle} providing the absolute location of the
+	 *         recording area.
+	 */
+	public Rectangle getRecordingArea() {
+		Point location = this.getLocationOnScreen();
+		Dimension size = this.getSize();
+		return new Rectangle(location, size);
+	}
+
+	/**
 	 * Adds a {@link MacroSource}.
 	 * 
 	 * @param macroFactory

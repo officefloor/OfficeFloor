@@ -24,6 +24,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -96,6 +97,11 @@ public class DemoTool implements MacroIndexFactory {
 	public static final String RECORDING_FILE_EXTENSION = "rcd";
 
 	/**
+	 * {@link RecordComponent}.
+	 */
+	private RecordComponent recordComponent;
+
+	/**
 	 * {@link MacroList} containing the {@link Macro} items.
 	 */
 	private MacroList macros;
@@ -123,6 +129,12 @@ public class DemoTool implements MacroIndexFactory {
 			FrameVisibilityListener visibilityListener, Container container,
 			MacroSource... macroSources) throws AWTException {
 
+		// Ensure only attached once
+		if (this.recordComponent != null) {
+			throw new IllegalStateException(
+					"Can only attach once to a Frame.  Please create another instance for use.");
+		}
+
 		// Always dispose on closing window
 		frame.addWindowListener(new WindowAdapter() {
 			private boolean isDisposed = false;
@@ -130,6 +142,7 @@ public class DemoTool implements MacroIndexFactory {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if (!this.isDisposed) {
+					// Ensure only dispose once
 					frame.dispose();
 					this.isDisposed = true;
 				}
@@ -164,14 +177,14 @@ public class DemoTool implements MacroIndexFactory {
 		JPanel recordPanel = new ConfiguredPanel(false, panel);
 
 		// Create the record component
-		RecordComponent recorder = new RecordComponent(new Robot(), frame,
+		this.recordComponent = new RecordComponent(new Robot(), frame,
 				visibilityListener, this.macros);
-		recorder.setBorder(new LineBorder(Color.RED));
+		this.recordComponent.setBorder(new LineBorder(Color.RED));
 		Dimension recorderSize = DEFAULT_RECORDING_SIZE;
-		recorder.setMinimumSize(recorderSize);
-		recorder.setPreferredSize(recorderSize);
-		recorder.setMaximumSize(recorderSize);
-		recordPanel.add(recorder);
+		this.recordComponent.setMinimumSize(recorderSize);
+		this.recordComponent.setPreferredSize(recorderSize);
+		this.recordComponent.setMaximumSize(recorderSize);
+		recordPanel.add(this.recordComponent);
 
 		// Create marker for left menu
 		JPanel markerPanel = new ConfiguredPanel(true, recordPanel);
@@ -180,16 +193,16 @@ public class DemoTool implements MacroIndexFactory {
 		markerPanel.add(Box.createHorizontalGlue());
 
 		// Add the default macro sources
-		recorder.addMacro(new LeftClickMacro());
-		recorder.addMacro(new RightClickMacro());
-		recorder.addMacro(new MoveMouseMacro());
-		recorder.addMacro(new DragMacro());
-		recorder.addMacro(new InputTextMacro());
-		recorder.addMacro(new InfoMacro());
+		this.recordComponent.addMacro(new LeftClickMacro());
+		this.recordComponent.addMacro(new RightClickMacro());
+		this.recordComponent.addMacro(new MoveMouseMacro());
+		this.recordComponent.addMacro(new DragMacro());
+		this.recordComponent.addMacro(new InputTextMacro());
+		this.recordComponent.addMacro(new InfoMacro());
 
 		// Add the additional macro sources
 		for (MacroSource source : macroSources) {
-			recorder.addMacro(source);
+			this.recordComponent.addMacro(source);
 		}
 
 		// Add panel with listing of added macros
@@ -224,7 +237,7 @@ public class DemoTool implements MacroIndexFactory {
 
 		// Play button
 		JPanel playPanel = new ConfiguredPanel(true, controlPanel);
-		playPanel.add(new PlayButton(this, frame, recorder));
+		playPanel.add(new PlayButton(this, frame, this.recordComponent));
 		playPanel.add(Box.createHorizontalGlue());
 
 		controlPanel.add(Box.createVerticalStrut(20));
@@ -243,6 +256,17 @@ public class DemoTool implements MacroIndexFactory {
 
 		// Organise window
 		frame.pack();
+	}
+
+	/**
+	 * Obtains the {@link Rectangle} providing the absolute location of the
+	 * recording area.
+	 * 
+	 * @return {@link Rectangle} providing the absolute location of the
+	 *         recording area.
+	 */
+	public Rectangle getRecordingArea() {
+		return this.recordComponent.getRecordingArea();
 	}
 
 	/**
