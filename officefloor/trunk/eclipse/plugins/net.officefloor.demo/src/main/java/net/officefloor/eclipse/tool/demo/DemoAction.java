@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import net.officefloor.demo.gui.DemoTool;
+import net.officefloor.demo.record.FrameVisibilityListener;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -63,12 +64,12 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 
 			// Obtain the active window location
 			IWorkbench workbench = this.window.getWorkbench();
-			Display display = workbench.getDisplay();
+			final Display display = workbench.getDisplay();
 			Shell activeShell = display.getActiveShell();
 			Point activeWindowLocation = activeShell.toDisplay(1, 1);
 
 			// Create the Frame for the Demo
-			Shell demoShell = new Shell(display);
+			final Shell demoShell = new Shell(display);
 			demoShell.setLayout(new FillLayout());
 			Composite composite = new Composite(demoShell, SWT.EMBEDDED
 					| SWT.NO_BACKGROUND);
@@ -84,9 +85,23 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 			basePanel.add(rootPane);
 			frame.add(basePanel);
 
+			// Create frame visibility listener to tie into shell
+			FrameVisibilityListener visiblityListener = new FrameVisibilityListener() {
+				@Override
+				public void notifyFrameVisibility(final boolean isVisible) {
+					// Must be done on SWT thread
+					display.syncExec(new Runnable() {
+						@Override
+						public void run() {
+							demoShell.setVisible(isVisible);
+						}
+					});
+				}
+			};
+
 			// Create the Demo Tool
 			DemoTool demo = new DemoTool();
-			demo.attachComponents(frame, pane);
+			demo.attachComponents(frame, visiblityListener, pane);
 
 			// Show the Demo Tool
 			demoShell.setSize(1500, 700);

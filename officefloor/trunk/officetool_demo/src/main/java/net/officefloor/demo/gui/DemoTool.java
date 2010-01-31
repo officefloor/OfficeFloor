@@ -48,12 +48,14 @@ import net.officefloor.demo.macro.InfoMacro;
 import net.officefloor.demo.macro.InputTextMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
+import net.officefloor.demo.macro.MacroSource;
 import net.officefloor.demo.macro.MoveMouseMacro;
 import net.officefloor.demo.macro.RightClickMacro;
 import net.officefloor.demo.macrolist.MacroIndexFactory;
 import net.officefloor.demo.macrolist.MacroItem;
 import net.officefloor.demo.macrolist.MacroList;
 import net.officefloor.demo.macrolist.MacroListListener;
+import net.officefloor.demo.record.FrameVisibilityListener;
 import net.officefloor.demo.record.RecordComponent;
 
 public class DemoTool implements MacroIndexFactory {
@@ -76,7 +78,7 @@ public class DemoTool implements MacroIndexFactory {
 		Frame frame = new Frame("Demo Tool");
 
 		// Attach the Demo components
-		new DemoTool().attachComponents(frame, frame);
+		new DemoTool().attachComponents(frame, null, frame);
 
 		// Run the application
 		frame.setVisible(true);
@@ -108,17 +110,23 @@ public class DemoTool implements MacroIndexFactory {
 	 * 
 	 * @param frame
 	 *            {@link Frame} containing the {@link Container}.
+	 * @param visibilityListener
+	 *            {@link FrameVisibilityListener}. May be <code>null</code>.
 	 * @param container
 	 *            {@link Container} to attach the {@link Component} instances.
+	 * @param macroSources
+	 *            Optional additional {@link MacroSource} instances.
 	 * @throws AWTException
 	 *             If running in headless environment.
 	 */
-	public void attachComponents(final Frame frame, Container container)
-			throws AWTException {
+	public void attachComponents(final Frame frame,
+			FrameVisibilityListener visibilityListener, Container container,
+			MacroSource... macroSources) throws AWTException {
 
 		// Always dispose on closing window
 		frame.addWindowListener(new WindowAdapter() {
 			private boolean isDisposed = false;
+
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if (!this.isDisposed) {
@@ -157,7 +165,7 @@ public class DemoTool implements MacroIndexFactory {
 
 		// Create the record component
 		RecordComponent recorder = new RecordComponent(new Robot(), frame,
-				this.macros);
+				visibilityListener, this.macros);
 		recorder.setBorder(new LineBorder(Color.RED));
 		Dimension recorderSize = DEFAULT_RECORDING_SIZE;
 		recorder.setMinimumSize(recorderSize);
@@ -171,13 +179,18 @@ public class DemoTool implements MacroIndexFactory {
 		markerPanel.add(new JLabel("|"));
 		markerPanel.add(Box.createHorizontalGlue());
 
-		// Add the macro factories
+		// Add the default macro sources
 		recorder.addMacro(new LeftClickMacro());
 		recorder.addMacro(new RightClickMacro());
 		recorder.addMacro(new MoveMouseMacro());
 		recorder.addMacro(new DragMacro());
 		recorder.addMacro(new InputTextMacro());
 		recorder.addMacro(new InfoMacro());
+
+		// Add the additional macro sources
+		for (MacroSource source : macroSources) {
+			recorder.addMacro(source);
+		}
 
 		// Add panel with listing of added macros
 		JPanel controlPanel = new ConfiguredPanel(false, panel);
