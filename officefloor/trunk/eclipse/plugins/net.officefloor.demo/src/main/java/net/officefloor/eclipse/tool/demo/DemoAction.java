@@ -19,7 +19,9 @@ package net.officefloor.eclipse.tool.demo;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.Rectangle;
 
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -65,11 +67,13 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 			// Obtain the active window location
 			IWorkbench workbench = this.window.getWorkbench();
 			final Display display = workbench.getDisplay();
-			Shell activeShell = display.getActiveShell();
-			Point activeWindowLocation = activeShell.toDisplay(1, 1);
+
+			// Assume the active shell to be the Eclipse workbench
+			Shell eclipseShell = display.getActiveShell();
 
 			// Create the Frame for the Demo
 			final Shell demoShell = new Shell(display);
+			demoShell.setText("Demo Tool");
 			demoShell.setLayout(new FillLayout());
 			Composite composite = new Composite(demoShell, SWT.EMBEDDED
 					| SWT.NO_BACKGROUND);
@@ -85,6 +89,9 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 			basePanel.add(rootPane);
 			frame.add(basePanel);
 
+			// Always fix location of recording
+			final Point[] demoShellLocation = new Point[1];
+
 			// Create frame visibility listener to tie into shell
 			FrameVisibilityListener visiblityListener = new FrameVisibilityListener() {
 				@Override
@@ -93,7 +100,15 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 					display.syncExec(new Runnable() {
 						@Override
 						public void run() {
+							// Specify visibility of shell
 							demoShell.setVisible(isVisible);
+
+							// If visible, ensure always at same location
+							synchronized (demoShellLocation) {
+								if (demoShellLocation[0] != null) {
+									demoShell.setLocation(demoShellLocation[0]);
+								}
+							}
 						}
 					});
 				}
@@ -101,15 +116,37 @@ public class DemoAction implements IWorkbenchWindowActionDelegate {
 
 			// Create the Demo Tool
 			DemoTool demo = new DemoTool();
-			demo.attachComponents(frame, visiblityListener, pane);
+			demo.attachComponents(frame, visiblityListener, pane,
+					new MoveActiveShellMacro());
 
-			// Show the Demo Tool
-			demoShell.setSize(1500, 700);
+			// Ensure Shell appears
 			demoShell.setVisible(true);
+			display.syncExec(new Runnable() {
+				@Override
+				public void run() {
+					// Just waiting
+				}
+			});
 
-			// TODO remove
-			System.out.println("Active window location: "
-					+ activeWindowLocation.x + "," + activeWindowLocation.y);
+			// Ensure frame appears
+			frame.setVisible(true);
+			EventQueue.invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					// Just waiting
+				}
+			});
+
+			// Capture location of Demo Shell
+			synchronized (demoShellLocation) {
+				demoShellLocation[0] = demoShell.getLocation();
+			}
+
+			// Position eclipse shell within recording area
+			Rectangle recordingArea = demo.getRecordingArea();
+			eclipseShell.setMaximized(false);
+			eclipseShell.setBounds(recordingArea.x, recordingArea.y,
+					recordingArea.width, recordingArea.height);
 
 		} catch (Exception ex) {
 			// Indicate error
