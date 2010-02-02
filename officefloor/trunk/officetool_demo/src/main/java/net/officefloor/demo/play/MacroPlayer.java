@@ -379,4 +379,10 @@ public class MacroPlayer implements MacroTaskContext {
 				+ relativeLocation.y);
 	}
 
+	@Override
+	public Point getRelativeLocation(Point absoluteLocation) {
+		return new Point(absoluteLocation.x - this.offset.x, absoluteLocation.y
+				- this.offset.y);
+	}
+
 }

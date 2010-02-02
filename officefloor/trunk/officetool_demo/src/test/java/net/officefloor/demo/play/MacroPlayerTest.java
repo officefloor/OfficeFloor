@@ -327,6 +327,40 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correctly obtains absolute location.
+	 */
+	public void testContext_AbsoluteLocation() {
+
+		final Point relativeLocation = new Point(10, 10);
+
+		// Calculate the absolute location
+		final Point absoluteLocation = new Point(this.windowLocation.x
+				+ relativeLocation.x, this.windowLocation.y
+				+ relativeLocation.y);
+
+		// Verify absolute location
+		Point location = this.player.getAbsoluteLocation(relativeLocation);
+		assertEquals("Incorrect absolute location", absoluteLocation, location);
+	}
+
+	/**
+	 * Ensure correctly obtains relative location.
+	 */
+	public void testContext_RelativeLocation() {
+
+		final Point absoluteLocation = new Point(10, 10);
+
+		// Calculate the relative location
+		final Point relativeLocation = new Point(absoluteLocation.x
+				- this.windowLocation.x, absoluteLocation.y
+				- this.windowLocation.y);
+
+		// Verify relative location
+		Point location = this.player.getRelativeLocation(absoluteLocation);
+		assertEquals("Incorrect relative location", relativeLocation, location);
+	}
+
+	/**
 	 * Moves the mouse to the middle of the {@link Component}.
 	 * 
 	 * @param component

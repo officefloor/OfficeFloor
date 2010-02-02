@@ -123,4 +123,17 @@ public interface MacroTaskContext {
 	 */
 	Point getAbsoluteLocation(Point relativeLocation);
 
+	/**
+	 * <p>
+	 * Obtains the relative location for the absolute location.
+	 * <p>
+	 * This is useful for example to find the relative location for a mouse move
+	 * where the active window only provides an absolute location.
+	 * 
+	 * @param absoluteLocation
+	 *            Absolute location.
+	 * @return Relative location.
+	 */
+	Point getRelativeLocation(Point absoluteLocation);
+
 }
