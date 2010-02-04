@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Eclipse Socket
 Bundle-SymbolicName: net.officefloor.socket;singleton:=true
-Bundle-Version: 0.1.1
+Bundle-Version: 0.1.2
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="0.1.1",
- net.officefloor.ui;bundle-version="0.1.1"
+Require-Bundle: net.officefloor.core;bundle-version="0.1.2",
+ net.officefloor.ui;bundle-version="0.1.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
@@ -27,6 +27,6 @@ Bundle-ClassPath: .,
  commons-logging-1.0.4.jar,
  easymock-1.1.jar,
  junit-3.8.2.jar,
- net.officefloor.core-0.1.1.zip,
- net.officefloor.ui-0.1.1.zip,
- officeplugin_socket-0.1.1.jar
+ net.officefloor.core-0.1.2.zip,
+ net.officefloor.ui-0.1.2.zip,
+ officeplugin_socket-0.1.2.jar

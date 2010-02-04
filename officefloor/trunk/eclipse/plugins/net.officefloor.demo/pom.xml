@@ -9,7 +9,7 @@
 			changing version to include the correct jar dependencies in building
 			this plug-in.
 		-->
-		<version>0.1.1</version>
+		<version>0.1.2</version>
 		<relativePath>../../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.demo</artifactId>
@@ -96,6 +96,26 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 					-->
 					<skipTests>true</skipTests>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>plugin</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+							</archive>
+							<descriptors>
+								<descriptor>plugin-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-clean-plugin</artifactId>

@@ -7,7 +7,7 @@
 		<!--
 			Reminder: do not forget to update feature.xml with change in version.
 		-->
-		<version>0.1.1</version>
+		<version>0.1.2</version>
 		<relativePath>../../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.plugins.feature
@@ -114,6 +114,12 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>net.officefloor.filingcabinet</artifactId>
+			<version>${pom.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>net.officefloor.demo</artifactId>
 			<version>${pom.version}</version>
 			<scope>compile</scope>
 		</dependency>

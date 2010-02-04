@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Eclipse JDBC
 Bundle-SymbolicName: net.officefloor.jdbc;singleton:=true
-Bundle-Version: 0.1.1
+Bundle-Version: 0.1.2
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.ui;bundle-version="0.1.1",
- net.officefloor.core;bundle-version="0.1.1"
+Require-Bundle: net.officefloor.ui;bundle-version="0.1.2",
+ net.officefloor.core;bundle-version="0.1.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui
@@ -26,6 +26,6 @@ Bundle-ClassPath: .,
  hsqldb-1.8.0.7.jar,
  junit-3.8.2.jar,
  mysql-connector-java-5.1.6.jar,
- net.officefloor.core-0.1.1.jar,
- net.officefloor.ui-0.1.1.jar,
- officeplugin_jdbc-0.1.1.jar
+ net.officefloor.core-0.1.2.jar,
+ net.officefloor.ui-0.1.2.jar,
+ officeplugin_jdbc-0.1.2.jar

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>0.1.1</version>
+		<version>0.1.2</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.update.site
@@ -158,6 +158,10 @@ Please ensure property 'equinox.version' is specified in an external active prof
 											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar" />
 										<include
 											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar.pack.gz" />
+										<include
+											name="plugins/net.officefloor.demo_${pom.version}.jar" />
+										<include
+											name="plugins/net.officefloor.demo_${pom.version}.jar.pack.gz" />
 									</fileset>
 								</copy>
 
