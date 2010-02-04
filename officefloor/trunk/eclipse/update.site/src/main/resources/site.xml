@@ -7,6 +7,9 @@
 	</description>
 	
 	<!-- OfficeFloor feature -->
+	<feature url="features/net.officefloor.feature_0.1.2.jar" id="net.officefloor.feature" version="0.1.2">
+		<category name="officefloor_latest" />
+	</feature>
 	<feature url="features/net.officefloor.feature_0.1.1.jar" id="net.officefloor.feature" version="0.1.1">
 		<category name="officefloor_latest" />
 	</feature>
@@ -19,6 +22,9 @@
 	</feature>
 	
 	<!-- OfficeFloor plug-ins feature -->
+	<feature url="features/net.officefloor.plugins.feature_0.1.2.jar" id="net.officefloor.plugins.feature" version="0.1.2">
+		<category name="officefloor_plugin_latest" />
+	</feature>
 	<feature url="features/net.officefloor.plugins.feature_0.1.1.jar" id="net.officefloor.plugins.feature" version="0.1.1">
 		<category name="officefloor_plugin_latest" />
 	</feature>

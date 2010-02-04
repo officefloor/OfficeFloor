@@ -49,6 +49,10 @@
 			<param name="SUB_DIR" value="plugins" />
 			<param name="MOVE_ARTIFACT_ID" value="net.officefloor.filingcabinet" />
 		</antcall>
+		<antcall target="moveArtifact">
+			<param name="SUB_DIR" value="plugins" />
+			<param name="MOVE_ARTIFACT_ID" value="net.officefloor.demo" />
+		</antcall>
 
 		<!-- Only keep the necessary raw files -->
 		<delete>
@@ -76,12 +80,18 @@
 		<antcall target="repackArtifact">
 			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.filingcabinet" />
 		</antcall>
+		<antcall target="repackArtifact">
+			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.demo" />
+		</antcall>
 
 		<!-- Download existing releases for digest/content/artifacts jar -->
-		<antcall target="downloadRelease">
+		<antcall target="downloadReleaseFrom0.1.0">
+			<param name="DOWNLOAD_RELEASE_VERSION" value="0.1.1" />
+		</antcall>
+		<antcall target="downloadReleaseFrom0.1.0">
 			<param name="DOWNLOAD_RELEASE_VERSION" value="0.1.0" />
 		</antcall>
-		<antcall target="downloadRelease0.0.1" />
+		<antcall target="downloadReleaseFrom0.0.1" />
 		<copy todir="${BUILD_DIR}">
 			<fileset dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}" />
 		</copy>
@@ -141,14 +151,27 @@
 		</java>
 	</target>
 
-	<!-- Private task to download a release artifacts for contents.jar -->
-	<target name="downloadRelease">
+	<!-- Private task to download a release artifacts from 0.1.2 version -->
+	<target name="downloadReleaseFrom0.1.2">
 		<fail message="Must specify the version of release to download"
 			unless="DOWNLOAD_RELEASE_VERSION" />
 
-		<!-- Ensure cache directories exist -->
-		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/plugins" />
-		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/features" />
+		<!-- Download the release artifacts -->
+		<antcall target="downloadReleaseArtifact">
+			<param name="DOWNLOAD_ARTIFACT"
+				value="plugins/net.officefloor.demo_${DOWNLOAD_RELEASE_VERSION}.jar" />
+		</antcall>
+
+		<!-- Download remaining of release -->
+		<antcall target="downloadReleaseFrom0.1.0">
+			<param name="DOWNLOAD_RELEASE_VERSION" value="${DOWNLOAD_RELEASE_VERSION}" />
+		</antcall>
+	</target>
+
+	<!-- Private task to download a release artifacts from 0.1.0 version -->
+	<target name="downloadReleaseFrom0.1.0">
+		<fail message="Must specify the version of release to download"
+			unless="DOWNLOAD_RELEASE_VERSION" />
 
 		<!-- Download the release artifacts -->
 		<antcall target="downloadReleaseArtifact">
@@ -181,8 +204,8 @@
 		</antcall>
 	</target>
 
-	<!-- Private task to download 0.0.1 release of different structure -->
-	<target name="downloadRelease0.0.1">
+	<!-- Private task to download a release artifacts from 0.0.1 version -->
+	<target name="downloadReleaseFrom0.0.1">
 		<antcall target="downloadReleaseArtifact">
 			<param name="DOWNLOAD_ARTIFACT" value="net.officefloor.core_0.0.1.jar" />
 		</antcall>
@@ -210,6 +233,12 @@
 	<target name="downloadReleaseArtifact">
 		<fail message="Must specify artifact to download" unless="DOWNLOAD_ARTIFACT" />
 		<echo>Artifact: ${DOWNLOAD_ARTIFACT}</echo>
+
+		<!-- Ensure cache directories exist -->
+		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/plugins" />
+		<mkdir dir="${DOWNLOAD_ARTIFACT_CACHE_DIR}/features" />
+
+		<!-- Download artifact only if not available in cache -->
 		<if>
 			<available file="${DOWNLOAD_ARTIFACT_CACHE_DIR}/${DOWNLOAD_ARTIFACT}" />
 			<then>

@@ -22,7 +22,11 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.filingcabinet"[^_]*version="${pom.version}"[^_]*/>]]></contains>
+			<contains><![CDATA[id="net.officefloor.filingcabinet"[^_]*version="${pom.version}"[^_]*id="net.officefloor.demo]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.demo"[^_]*version="${pom.version}"[^_]*/>]]></contains>
 		</file>
 	</files>
 </verifications>
