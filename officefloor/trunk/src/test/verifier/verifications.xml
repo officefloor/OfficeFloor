@@ -80,6 +80,10 @@
 			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
 		</file>
 		<file>
+			<location>eclipse/plugins/net.officefloor.demo/pom.xml</location>
+			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+		</file>
+		<file>
 			<location>eclipse/plugins/net.officefloor.jdbc/pom.xml</location>
 			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
 		</file>
