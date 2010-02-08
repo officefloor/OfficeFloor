@@ -20,4 +20,12 @@
 			</includes>
 		</fileSet>
 	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<!-- Runtime dependencies -->
+			<includes>
+				<include>${pom.groupId}:officetool_filingcabinet</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
 </assembly>
