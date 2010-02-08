@@ -293,7 +293,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to trigger key stroke.
 	 */
-	public void testContext_keyStroke() {
+	public void testContext_keyStroke() throws Exception {
 
 		// Setup to input into the text
 		this.moveToComponentMiddle(this.text);
@@ -301,6 +301,10 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 
 		// Enter the key stroke
 		this.player.keyStroke(KeyEvent.VK_A);
+
+		// Allow some time for registering key entered
+		Thread.sleep(100);
+		this.robot.waitForIdle();
 
 		// Ensure key stroke entered
 		String enteredKey = this.text.getText();
