@@ -86,6 +86,11 @@ public class MoveActiveShellMacro implements MacroSource, Macro {
 	 */
 
 	@Override
+	public String getDisplayLabel() {
+		return null;
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		// Only move if necessary (handled by tasks)
 		return null;
