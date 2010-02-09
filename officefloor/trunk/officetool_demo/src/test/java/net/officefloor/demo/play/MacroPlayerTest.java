@@ -278,13 +278,17 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to trigger mouse click from the {@link MacroTaskContext}.
 	 */
-	public void testContext_mouseClick() {
+	public void testContext_mouseClick() throws Exception {
 
 		// Move to button middle
 		this.moveToComponentMiddle(this.button);
 
 		// Trigger clicking the mouse
 		this.player.mouseClick(InputEvent.BUTTON1_MASK);
+
+		// Allow some time for registering key entered
+		Thread.sleep(100);
+		this.robot.waitForIdle();
 
 		// Ensure that button was clicked
 		assertTrue("Button should be clicked", this.isButtonClicked);

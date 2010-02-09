@@ -72,6 +72,11 @@ public class WaitMacro implements Macro, MacroTask {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return null;
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		// No mouse interaction as only to invoking block thread
 		return null;

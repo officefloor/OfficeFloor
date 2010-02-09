@@ -68,6 +68,11 @@ public class LeftClickMacro implements MacroSource, Macro, MacroTask {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return "LeftClick (" + this.location.x + "," + this.location.y + ")";
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		return this.location;
 	}

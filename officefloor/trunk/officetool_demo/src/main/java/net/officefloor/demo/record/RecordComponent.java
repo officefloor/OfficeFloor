@@ -486,6 +486,12 @@ public class RecordComponent extends JComponent {
 		}
 
 		@Override
+		public String getDisplayLabel() {
+			throw new IllegalStateException(
+					"Should not be requiring display label");
+		}
+
+		@Override
 		public Point getStartingMouseLocation() {
 			return null;
 		}
@@ -547,6 +553,12 @@ public class RecordComponent extends JComponent {
 		@Override
 		public void setConfigurationMemento(String memento) {
 			throw new IllegalStateException("Should not be initiating");
+		}
+
+		@Override
+		public String getDisplayLabel() {
+			throw new IllegalStateException(
+					"Should not be requiring display label");
 		}
 
 		@Override
@@ -614,6 +626,12 @@ public class RecordComponent extends JComponent {
 		@Override
 		public String getConfigurationMemento() {
 			return "";
+		}
+
+		@Override
+		public String getDisplayLabel() {
+			throw new IllegalStateException(
+					"Should not be requiring display label");
 		}
 
 		@Override

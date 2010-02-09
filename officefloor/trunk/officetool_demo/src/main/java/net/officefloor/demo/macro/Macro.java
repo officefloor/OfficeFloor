@@ -44,6 +44,14 @@ public interface Macro {
 	String getConfigurationMemento();
 
 	/**
+	 * Obtains the label for displaying this {@link Macro}.
+	 * 
+	 * @return Label for displaying this {@link Macro}. May return
+	 *         <code>null</code> for label based on type.
+	 */
+	String getDisplayLabel();
+
+	/**
 	 * <p>
 	 * Obtains the {@link Point} where the mouse cursor must be to start this
 	 * {@link Macro}.

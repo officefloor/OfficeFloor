@@ -44,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.LineBorder;
 
+import net.officefloor.demo.macro.CommentMacro;
 import net.officefloor.demo.macro.DragMacro;
 import net.officefloor.demo.macro.InfoMacro;
 import net.officefloor.demo.macro.InputTextMacro;
@@ -157,8 +158,18 @@ public class DemoTool implements MacroIndexFactory {
 		this.macros = new MacroList(this, new MacroListListener() {
 			@Override
 			public void macroAdded(MacroItem item, int index) {
-				macroListModel.add(index, item.getMacro().getClass()
-						.getSimpleName());
+
+				// Obtain the display label for the macro
+				Macro macro = item.getMacro();
+				String displayLabel = macro.getDisplayLabel();
+				if ((displayLabel == null)
+						|| (displayLabel.trim().length() == 0)) {
+					// Default to simple name
+					displayLabel = macro.getClass().getSimpleName();
+				}
+
+				// Add the macro
+				macroListModel.add(index, displayLabel);
 
 				// Macro may change width so pack screen
 				frame.pack();
@@ -193,6 +204,7 @@ public class DemoTool implements MacroIndexFactory {
 		markerPanel.add(Box.createHorizontalGlue());
 
 		// Add the default macro sources
+		this.recordComponent.addMacro(new CommentMacro());
 		this.recordComponent.addMacro(new LeftClickMacro());
 		this.recordComponent.addMacro(new RightClickMacro());
 		this.recordComponent.addMacro(new MoveMouseMacro());

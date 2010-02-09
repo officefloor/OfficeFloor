@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.demo.macro;
 
 import java.awt.Point;
@@ -23,24 +22,24 @@ import java.awt.Point;
 import javax.swing.JOptionPane;
 
 /**
- * {@link Macro} to input text.
+ * Comment {@link MacroSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class InputTextMacro implements MacroSource, Macro, MacroTask {
+public class CommentMacro implements MacroSource, Macro {
 
 	/**
-	 * Text to input.
+	 * Comment.
 	 */
-	private String text;
+	private String comment;
 
 	/**
-	 * Obtains the text to input.
+	 * Obtains the comment.
 	 * 
-	 * @return Text to input.
+	 * @return Comment.
 	 */
-	public String getInputText() {
-		return this.text;
+	public String getComment() {
+		return this.comment;
 	}
 
 	/*
@@ -49,18 +48,18 @@ public class InputTextMacro implements MacroSource, Macro, MacroTask {
 
 	@Override
 	public String getDisplayName() {
-		return "Input text";
+		return "Comment";
 	}
 
 	@Override
 	public void sourceMacro(MacroSourceContext context) {
 
 		// Obtain text to input
-		String inputText = JOptionPane.showInputDialog("Input text:");
+		String inputText = JOptionPane.showInputDialog("Comment:");
 
 		// Create and return the macro
-		InputTextMacro macro = new InputTextMacro();
-		macro.text = inputText;
+		CommentMacro macro = new CommentMacro();
+		macro.comment = inputText;
 		context.setNewMacro(macro);
 	}
 
@@ -70,12 +69,12 @@ public class InputTextMacro implements MacroSource, Macro, MacroTask {
 
 	@Override
 	public String getConfigurationMemento() {
-		return this.text;
+		return this.comment;
 	}
 
 	@Override
 	public void setConfigurationMemento(String memento) {
-		this.text = memento;
+		this.comment = memento;
 	}
 
 	@Override
@@ -83,13 +82,13 @@ public class InputTextMacro implements MacroSource, Macro, MacroTask {
 
 		final int MAX_TEXT_LENGTH = 20;
 
-		// Trim input text
-		String input = this.text;
-		input = (input.length() > MAX_TEXT_LENGTH ? input.substring(0,
-				MAX_TEXT_LENGTH) : input);
+		// Trim comment
+		String label = this.comment;
+		label = (label.length() > MAX_TEXT_LENGTH ? label.substring(0,
+				MAX_TEXT_LENGTH) : label);
 
 		// Return the display label
-		return "Input: " + input;
+		return "[" + label + "]";
 	}
 
 	@Override
@@ -100,22 +99,8 @@ public class InputTextMacro implements MacroSource, Macro, MacroTask {
 
 	@Override
 	public MacroTask[] getMacroTasks() {
-		return new MacroTask[] { this };
-	}
-
-	/*
-	 * ====================== MacroTask ================================
-	 */
-
-	@Override
-	public void runMacroTask(MacroTaskContext context) {
-		// Input the text
-		context.keyText(this.text);
-	}
-
-	@Override
-	public long getPostRunWaitTime() {
-		return 0;
+		// No tasks as comment
+		return new MacroTask[0];
 	}
 
 }

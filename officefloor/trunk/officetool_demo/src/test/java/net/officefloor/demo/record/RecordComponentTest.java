@@ -184,7 +184,7 @@ public class RecordComponentTest extends OfficeFrameTestCase {
 
 		// Allow some time for processing
 		Thread.sleep(100);
-		
+
 		// Wait until all macro processing complete
 		synchronized (this) {
 			long startTime = System.currentTimeMillis();
@@ -493,6 +493,16 @@ public class RecordComponentTest extends OfficeFrameTestCase {
 			} catch (Throwable ex) {
 				RecordComponentTest.this.macroFailure = ex;
 				return "";
+			}
+		}
+
+		@Override
+		public String getDisplayLabel() {
+			try {
+				return this.delegate.getDisplayLabel();
+			} catch (Throwable ex) {
+				RecordComponentTest.this.macroFailure = ex;
+				return null;
 			}
 		}
 

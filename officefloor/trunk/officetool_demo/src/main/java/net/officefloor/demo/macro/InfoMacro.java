@@ -18,6 +18,7 @@
 
 package net.officefloor.demo.macro;
 
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.WindowAdapter;
@@ -27,6 +28,7 @@ import javax.swing.JDialog;
 import javax.swing.JTextArea;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
+import javax.swing.border.LineBorder;
 
 /**
  * {@link Macro} to display information.
@@ -128,6 +130,20 @@ public class InfoMacro implements MacroSource, Macro {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+
+		final int MAX_TEXT_LENGTH = 20;
+
+		// Trim information for display
+		String information = this.macroInfoText;
+		information = (information.length() > MAX_TEXT_LENGTH ? information
+				.substring(0, MAX_TEXT_LENGTH) : information);
+
+		// Return the display label
+		return "Info: " + information;
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		// No starting mouse location as only information to display
 		return null;
@@ -195,6 +211,8 @@ public class InfoMacro implements MacroSource, Macro {
 			// Create text area to display information
 			JTextArea information = new JTextArea(this.information);
 			information.setEditable(false);
+			information.setBorder(new LineBorder(Color.LIGHT_GRAY));
+			information.setBackground(new Color(255, 255, 180));
 
 			// Create the popup to show the information
 			final Point absoluteLocation = context

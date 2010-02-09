@@ -52,6 +52,11 @@ public class FullyQualifiedNameMacro implements Macro {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return null;
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		return null;
 	}
