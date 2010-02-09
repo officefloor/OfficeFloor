@@ -115,6 +115,13 @@ public class DragMacro implements MacroSource, Macro {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return "Drag (" + this.itemPosition.x + "," + this.itemPosition.y
+				+ " - " + this.targetPosition.x + "," + this.targetPosition.y
+				+ ")";
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		return this.itemPosition;
 	}

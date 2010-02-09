@@ -68,6 +68,11 @@ public class RightClickMacro implements MacroSource, Macro, MacroTask {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return "RightClick (" + this.location.x + "," + this.location.y + ")";
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		return this.location;
 	}

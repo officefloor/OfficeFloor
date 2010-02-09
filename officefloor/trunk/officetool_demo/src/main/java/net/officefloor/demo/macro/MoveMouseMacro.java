@@ -67,6 +67,11 @@ public class MoveMouseMacro implements MacroSource, Macro, MacroTask {
 	}
 
 	@Override
+	public String getDisplayLabel() {
+		return "MouseMove (" + this.location.x + "," + this.location.y + ")";
+	}
+
+	@Override
 	public Point getStartingMouseLocation() {
 		return this.location;
 	}

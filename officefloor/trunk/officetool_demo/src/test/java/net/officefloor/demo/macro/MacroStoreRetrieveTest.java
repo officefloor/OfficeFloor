@@ -33,6 +33,15 @@ import junit.framework.TestCase;
 public class MacroStoreRetrieveTest extends TestCase {
 
 	/**
+	 * Tests the {@link CommentMacro}.
+	 */
+	public void testCommentMacro() {
+		CommentMacro macro = this.storeRetrieveMacro(CommentMacro.class,
+				"comment");
+		assertEquals("Incorrect comment", "comment", macro.getComment());
+	}
+
+	/**
 	 * Tests the {@link LeftClickMacro}.
 	 */
 	public void testLeftClickMacro() {
