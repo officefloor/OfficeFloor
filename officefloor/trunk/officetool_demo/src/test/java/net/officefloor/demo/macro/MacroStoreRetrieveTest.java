@@ -103,6 +103,14 @@ public class MacroStoreRetrieveTest extends TestCase {
 	}
 
 	/**
+	 * Tests the {@link PauseMacro}.
+	 */
+	public void testPauseMacro() {
+		PauseMacro macro = this.storeRetrieveMacro(PauseMacro.class, "2000");
+		assertEquals("Incorrect pause time", 2000, macro.getPauseTime());
+	}
+
+	/**
 	 * Stores the {@link Macro} and returns the retrieved {@link Macro}.
 	 * 
 	 * @param macro
