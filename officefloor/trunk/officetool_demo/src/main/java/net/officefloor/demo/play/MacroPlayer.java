@@ -67,6 +67,8 @@ public class MacroPlayer implements MacroTaskContext {
 				return new int[] { KeyEvent.VK_PERIOD };
 			case '/':
 				return new int[] { KeyEvent.VK_SLASH };
+			case ':':
+				return new int[] { KeyEvent.VK_SHIFT, KeyEvent.VK_COLON };
 			default:
 				// Unknown character
 				throw new UnsupportedOperationException(
