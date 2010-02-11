@@ -52,6 +52,7 @@ import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroSource;
 import net.officefloor.demo.macro.MoveMouseMacro;
+import net.officefloor.demo.macro.PauseMacro;
 import net.officefloor.demo.macro.RightClickMacro;
 import net.officefloor.demo.macrolist.MacroIndexFactory;
 import net.officefloor.demo.macrolist.MacroItem;
@@ -211,6 +212,7 @@ public class DemoTool implements MacroIndexFactory {
 		this.recordComponent.addMacro(new DragMacro());
 		this.recordComponent.addMacro(new InputTextMacro());
 		this.recordComponent.addMacro(new InfoMacro());
+		this.recordComponent.addMacro(new PauseMacro());
 
 		// Add the additional macro sources
 		for (MacroSource source : macroSources) {
