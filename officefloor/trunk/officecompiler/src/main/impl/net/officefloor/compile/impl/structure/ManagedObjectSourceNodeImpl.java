@@ -39,6 +39,7 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -506,10 +507,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
 						.setInputManagedObjectName(inputBoundManagedObjectName);
 
-				// TODO load input dependencies
-				System.err
-						.println("TODO implement loading input dependency mappings: "
-								+ inputDependencyMappings);
+				// Determine if dependencies
+				ManagedObjectDependencyType<?>[] dependencyTypes = managedObjectType
+						.getDependencyTypes();
+				if (dependencyTypes.length > 0) {
+					// TODO load input dependencies
+					System.err
+							.println("TODO implement loading input dependency mappings: "
+									+ inputDependencyMappings);
+				}
 			}
 		}
 
