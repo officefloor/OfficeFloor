@@ -9,23 +9,24 @@
 
 	<body>
 		<section name="Hello World Demo">
-			<p>The 5 minute demo below shows the graphical configuration of
-				OfficeFloor and how POJO methods can be connected together. This is
-				a simple demo and more functional components for working with HTTP
-				and HTML content can be found in the Socket Plugin.
+			<p>The 9 minute demo below shows the graphical configuration of
+				OfficeFloor.
 		    </p>
 
-            <input name="comment" type="hidden" value="Thanks to Nick Sertis for below on how to render flash without embed tag to work in IE"></input>
-			<script type="text/javascript" src="flashobject.js"></script>
-			<div id="flashcontent" style="width: 1020px; height: 614px"></div>
-			<script type="text/javascript" src="HelloWorldConfigurationDemo.js"></script>
+			<p>
+				<object type="video/ogg" width="1024" height="528"
+					data="http://www.officefloor.net/HelloWorldDemo.ogv">
+					Please see
+					<a href="http://theora.org/">theora</a>
+					to download a codec for ogv files for your system.
+				</object>
+			</p>
 
 			<p>
-				The source code and configuration created in the demo can be
-				downloaded at
+				Should the demo not display in your browser momentarily you can
+				obtain the raw content at
 				<a
-					href="http://sourceforge.net/project/downloading.php?group_id=156349&amp;filename=HelloWorldConfigurationDemo.zip">HelloWorldConfigurationDemo.zip
-				</a>
+					href="http://downloads.sourceforge.net/project/officefloor/demo/OfficeFloor/HelloWorldDemo.ogv">HelloWorldDemo.ogv</a>
 			</p>
 		</section>
 	</body>
