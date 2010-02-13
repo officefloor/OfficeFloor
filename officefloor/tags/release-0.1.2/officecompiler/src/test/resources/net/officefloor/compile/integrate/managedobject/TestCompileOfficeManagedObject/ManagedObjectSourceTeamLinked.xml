@@ -1,0 +1,27 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="${testcase}$TeamManagedObject">
+				<team name="MANAGED_OBJECT_SOURCE_TEAM">
+					<office-team name="OFFICE_TEAM" />
+				</team>
+			</managed-object-source>
+		</managed-object-sources>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+	</office>
+</context>
