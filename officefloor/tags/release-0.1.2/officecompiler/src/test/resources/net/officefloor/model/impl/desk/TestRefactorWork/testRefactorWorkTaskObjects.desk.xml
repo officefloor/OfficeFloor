@@ -1,0 +1,34 @@
+<desk>
+    <external-managed-objects>
+        <external-managed-object name="MO_REMOVE" />
+        <external-managed-object name="MO_CHANGE_DETAILS" />
+        <external-managed-object name="MO_RENAME" />
+        <external-managed-object name="MO_REORDER_A" />
+        <external-managed-object name="MO_REORDER_B" />
+    </external-managed-objects>
+    <works>
+        <work name="WORK" source="net.example.ExampleWorkSource">
+            <work-task name="TASK">
+                <task-object name="CHANGE_DETAILS" key="KEY_TWO"
+                    object-type="java.lang.String">
+                    <external-managed-object
+                        name="MO_CHANGE_DETAILS" />
+                </task-object>
+                <task-object name="ADDED" object-type="java.lang.Integer" />
+                <task-object name="RENAME_NEW" parameter="true"
+                    object-type="java.lang.String">
+                    <external-managed-object
+                        name="MO_RENAME" />
+                </task-object>
+                <task-object name="REORDER_B" object-type="java.lang.Double">
+                    <external-managed-object
+                        name="MO_REORDER_B" />
+                </task-object>
+                <task-object name="REORDER_A" object-type="java.lang.Float">
+                    <external-managed-object
+                        name="MO_REORDER_A" />
+                </task-object>
+            </work-task>
+        </work>
+    </works>
+</desk>
