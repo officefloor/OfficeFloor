@@ -15,15 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.lookup;
+package net.officefloor.plugin.jndi.objectfactory;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
+
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link ManagedObjectSource} that provides an Object via a JNDI lookup.
+ * {@link ObjectFactory} for creating an {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSource {
+public class OfficeFloorObjectFactory implements ObjectFactory {
+
+	/*
+	 * =================== ObjectFactory ==============================
+	 */
+
+	@Override
+	public Object getObjectInstance(Object obj, Name name, Context nameCtx,
+			Hashtable<?, ?> environment) throws Exception {
+		// TODO implement ObjectFactory.getObjectInstance
+		throw new UnsupportedOperationException(
+				"TODO implement ObjectFactory.getObjectInstance");
+	}
 
 }
