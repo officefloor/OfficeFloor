@@ -16,34 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import javax.sql.ConnectionPoolDataSource;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+
 /**
- * Provides access to obtain the {@link ConnectionPoolDataSource} from the
- * {@link JdbcManagedObjectSource}.
+ * Factory for the creation of a {@link ConnectionPoolDataSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JdbcDataSourceAccess {
+public interface ConnectionPoolDataSourceFactory {
 
 	/**
-	 * Obtains the {@link ConnectionPoolDataSource} from the
-	 * {@link JdbcManagedObjectSource}.
+	 * Creates the {@link ConnectionPoolDataSourceFactory}.
 	 * 
-	 * @param jdbcManagedObjectSource
-	 *            {@link JdbcManagedObjectSource}.
+	 * @param context
+	 *            {@link ManagedObjectSourceContext}.
 	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws Exception
+	 *             If fails to create the {@link ConnectionPoolDataSource}.
 	 */
-	public static ConnectionPoolDataSource obtainConnectionPoolDataSource(
-			JdbcManagedObjectSource jdbcManagedObjectSource) {
-		return jdbcManagedObjectSource.dataSource;
-	}
+	ConnectionPoolDataSource createConnectionPoolDataSource(
+			ManagedObjectSourceContext<?> context) throws Exception;
 
-	/**
-	 * All access via static methods.
-	 */
-	private JdbcDataSourceAccess() {
-	}
 }

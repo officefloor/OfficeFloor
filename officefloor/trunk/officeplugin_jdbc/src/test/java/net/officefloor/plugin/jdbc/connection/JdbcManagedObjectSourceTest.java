@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -32,6 +32,9 @@ import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
+import net.officefloor.plugin.jdbc.ConnectionValidator;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObject;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 
 /**
  * Tests the {@link JdbcManagedObjectSource}.

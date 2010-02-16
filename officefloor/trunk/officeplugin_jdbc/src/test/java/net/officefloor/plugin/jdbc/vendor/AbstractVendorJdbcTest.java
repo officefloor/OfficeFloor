@@ -34,9 +34,9 @@ import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
-import net.officefloor.plugin.jdbc.JdbcDataSourceAccess;
-import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
-import net.officefloor.plugin.jdbc.JdbcTask;
+import net.officefloor.plugin.jdbc.connection.JdbcDataSourceAccess;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
+import net.officefloor.plugin.jdbc.connection.JdbcTask;
 
 /**
  * Provides the abstract functionality for testing the

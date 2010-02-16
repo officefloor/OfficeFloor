@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.TaskContext;

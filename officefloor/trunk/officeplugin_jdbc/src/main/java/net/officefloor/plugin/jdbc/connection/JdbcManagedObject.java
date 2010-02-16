@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ import javax.sql.PooledConnection;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * JDBC {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * JDBC {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,7 +49,7 @@ public class JdbcManagedObject implements ManagedObject,
 	 * Failure of the {@link PooledConnection}.
 	 */
 	private SQLException failure = null;
-	
+
 	/**
 	 * Initiate.
 	 * 
@@ -71,16 +71,16 @@ public class JdbcManagedObject implements ManagedObject,
 	 */
 	protected void recycle() throws SQLException {
 		synchronized (this.pooledConnection) {
-			
+
 			// Determine if failure of pooled connection
 			if (this.failure != null) {
 				// Close the pooled connection
 				this.pooledConnection.close();
-				
+
 				// Escalate failure
 				throw this.failure;
 			}
-			
+
 			// Close the connection if created
 			if (this.connection != null) {
 				this.connection.close();
@@ -90,17 +90,12 @@ public class JdbcManagedObject implements ManagedObject,
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObject
-	 * ====================================================================
+	 * ====================== ManagedObject ===============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-	 */
+	@Override
 	public Object getObject() throws Exception {
+
 		// Lazy create the connection
 		synchronized (this.pooledConnection) {
 			if (this.connection == null) {
@@ -113,16 +108,10 @@ public class JdbcManagedObject implements ManagedObject,
 	}
 
 	/*
-	 * ====================================================================
-	 * ConnectionEventListener
-	 * ====================================================================
+	 * ======================= ConnectionEventListener ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.ConnectionEventListener#connectionClosed(javax.sql.ConnectionEvent)
-	 */
+	@Override
 	public void connectionClosed(ConnectionEvent event) {
 		// Flag the connection closed
 		synchronized (this.pooledConnection) {
@@ -130,14 +119,10 @@ public class JdbcManagedObject implements ManagedObject,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.ConnectionEventListener#connectionErrorOccurred(javax.sql.ConnectionEvent)
-	 */
+	@Override
 	public void connectionErrorOccurred(ConnectionEvent event) {
 		// Indicate failure of pooled connection
-		synchronized(this.pooledConnection) {
+		synchronized (this.pooledConnection) {
 			this.failure = event.getSQLException();
 		}
 	}
