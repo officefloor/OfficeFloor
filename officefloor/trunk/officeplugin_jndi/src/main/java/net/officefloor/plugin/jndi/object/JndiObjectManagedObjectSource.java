@@ -15,20 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.lookup;
+package net.officefloor.plugin.jndi.object;
 
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Tests the {@link JndiObjectManagedObjectSource}.
+ * {@link ManagedObjectSource} that provides an Object via a JNDI lookup.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
-
-	public void testTODO() {
-		fail("TODO implement test");
-	}
+public class JndiObjectManagedObjectSource {
 
 }
