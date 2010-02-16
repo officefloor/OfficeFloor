@@ -29,6 +29,10 @@
 
 		<!-- Plug-in functionality -->
 		<file>
+			<location>officeplugin_jndi/pom.xml</location>
+			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+		</file>
+		<file>
 			<location>officeplugin_jdbc/pom.xml</location>
 			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
 		</file>

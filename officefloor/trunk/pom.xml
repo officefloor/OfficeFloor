@@ -20,6 +20,7 @@
 		<module>officebuilding</module>
 
 		<!-- Plug-in functionality -->
+		<module>officeplugin_jndi</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
 		<module>officeplugin_socket</module>
