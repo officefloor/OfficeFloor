@@ -22,7 +22,7 @@ import java.util.Properties;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
-import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest;
 
 /**

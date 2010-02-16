@@ -19,7 +19,7 @@
 /*
  * Created on Jan 25, 2006
  */
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -41,7 +41,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
-import net.officefloor.plugin.jdbc.util.Setter;
 
 /**
  * {@link ManagedObjectSource} for JDBC.
@@ -66,70 +65,6 @@ public class JdbcManagedObjectSource extends
 	 * {@link DataSource}.
 	 */
 	public static final String DATA_SOURCE_INITIALISE_SCRIPT = "initialise.script";
-
-	/**
-	 * Creates the {@link ConnectionPoolDataSource}.
-	 * 
-	 * @param dataSourceClassName
-	 *            Name of the {@link ConnectionPoolDataSource} {@link Class}.
-	 * @param classLoader
-	 *            {@link ClassLoader} to use to obtain the
-	 *            {@link ConnectionPoolDataSource} {@link Class}.
-	 * @param properties
-	 *            Properties to configure the {@link ConnectionPoolDataSource}.
-	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws Exception
-	 *             If fails to create and configure the
-	 *             {@link ConnectionPoolDataSource}.
-	 */
-	@SuppressWarnings("unchecked")
-	public static ConnectionPoolDataSource createConnectionPoolDataSource(
-			String dataSourceClassName, ClassLoader classLoader,
-			Properties properties) throws Exception {
-
-		// Obtain the connection pool data source class
-		Class clazz = classLoader.loadClass(dataSourceClassName);
-
-		// Obtain and return the connection pool
-		return createConnectionPoolDataSource(clazz, properties);
-	}
-
-	/**
-	 * Creates the {@link ConnectionPoolDataSource}.
-	 * 
-	 * @param dataSourceClass
-	 *            {@link Class} of the {@link ConnectionPoolDataSource}.
-	 * @param properties
-	 *            Properties to configure the {@link ConnectionPoolDataSource}.
-	 * @return {@link ConnectionPoolDataSource}.
-	 * @throws Exception
-	 *             If fails to create and configure the
-	 *             {@link ConnectionPoolDataSource}.
-	 */
-	public static <DS extends ConnectionPoolDataSource> DS createConnectionPoolDataSource(
-			Class<DS> dataSourceClass, Properties properties) throws Exception {
-
-		// Create an instance of the data source
-		DS dataSource = dataSourceClass.newInstance();
-
-		// Load the properties for the data source
-		for (Setter<DS> setter : ReflectionUtil.getSetters(dataSourceClass)) {
-
-			// Obtain the property value
-			String propertyName = setter.getPropertyName();
-			String propertyValue = properties.getProperty(propertyName);
-			if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
-				// Property not configured, so do not load
-				continue;
-			}
-
-			// Load the property value
-			setter.setPropertyValue(dataSource, propertyValue);
-		}
-
-		// Return the configured data source
-		return dataSource;
-	}
 
 	/**
 	 * {@link ConnectionPoolDataSource}.
@@ -180,8 +115,8 @@ public class JdbcManagedObjectSource extends
 		Properties properties = context.getProperties();
 
 		// Create and return the connection pool data source
-		return createConnectionPoolDataSource(className, this.getClass()
-				.getClassLoader(), properties);
+		return ReflectionUtil.createInitialisedBean(className, context
+				.getClassLoader(), ConnectionPoolDataSource.class, properties);
 	}
 
 	/*

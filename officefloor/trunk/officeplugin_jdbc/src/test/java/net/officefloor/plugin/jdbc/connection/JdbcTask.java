@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.connection;
 
 import java.sql.Connection;
 
@@ -32,6 +32,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.plugin.jdbc.ConnectionValidator;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 
 /**
  * {@link Task} providing testing of a {@link Connection} from a

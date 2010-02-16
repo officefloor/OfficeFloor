@@ -23,7 +23,7 @@ import java.util.Properties;
 import org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS;
 import org.hsqldb.jdbcDriver;
 
-import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest;
 
 /**
