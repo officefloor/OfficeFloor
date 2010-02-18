@@ -17,6 +17,12 @@
  */
 package net.officefloor.plugin.jndi.objectfactory;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -26,8 +32,35 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 
-	public void testTODO() {
-		fail("TODO implement test");
+	/**
+	 * Package name for this class.
+	 */
+	private final String packageName = this.getClass().getPackage().getName();
+
+	/**
+	 * Ensure that able to use JNDI to instantiate an {@link OfficeFloor}
+	 * instance by referencing the configuration file directly.
+	 */
+	public void testInstantiateOfficeFloorDirectly() throws Exception {
+
+		// Create the initial context
+		Context context = new InitialContext();
+
+		// Specify name of OfficeFloor
+		String name = "officefloor:" + this.packageName + "/direct";
+
+		// Obtain the OfficeFloor
+		Object object = context.lookup(name);
+		assertNotNull("No object looked up", object);
+		assertTrue("Incorrect object type", object instanceof OfficeFloor);
+		OfficeFloor officeFloor = (OfficeFloor) object;
+
+		// Invoke the work to ensure correct OfficeFloor
+		ValidateWork.reset();
+		Office office = officeFloor.getOffice("OFFICE");
+		WorkManager workManager = office.getWorkManager("SECTION.WORK");
+		workManager.invokeWork(null);
+		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
 	}
 
 }
