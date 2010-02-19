@@ -17,22 +17,18 @@
  */
 package net.officefloor.plugin.jndi.context;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import javax.naming.Binding;
+import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameClassPair;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.spi.ObjectFactory;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -48,21 +44,9 @@ public class OfficeFloorContext implements Context {
 	public static final String SCHEMA = "officefloor";
 
 	/**
-	 * File extension for an {@link OfficeFloor} configuration file.
+	 * {@link ObjectFactory} to create the {@link OfficeFloor} instances.
 	 */
-	public static final String OFFICE_FLOOR_CONFIGURATION_FILE_EXTENSION = ".officefloor";
-
-	/**
-	 * File extension for a properties file containing the properties to run an
-	 * {@link OfficeFloor}.
-	 */
-	public static final String OFFICE_FLOOR_PROPERTIES_FILE_EXTENSION = ".properties";
-
-	/**
-	 * Property identifying the resource path to the {@link OfficeFloor}
-	 * configuration file within the {@link ClassLoader}.
-	 */
-	public static final String PROPERTY_OFFICE_FLOOR_CONFIGURATION_PATH = "officefloor.configuration.path";
+	private static final OfficeFloorObjectFactory objectFactory = new OfficeFloorObjectFactory();
 
 	/*
 	 * ======================= Context ============================
@@ -70,122 +54,11 @@ public class OfficeFloorContext implements Context {
 
 	@Override
 	public Object lookup(Name name) throws NamingException {
-		// TODO implement Context.lookup
-		throw new UnsupportedOperationException("TODO implement Context.lookup");
-	}
-
-	@Override
-	public Object lookup(String name) throws NamingException {
 		try {
-			// Ensure have name
-			if (name == null) {
-				return null; // no object if no name
-			}
 
-			// Strip off the schema
-			int schemaEndIndex = name.indexOf(':');
-			if (schemaEndIndex >= 0) {
-				name = name.substring(schemaEndIndex + ".".length());
-			}
-
-			// Ensure non-blank name provided
-			if (name.trim().length() == 0) {
-				return null; // no object if no name
-			}
-
-			// Transform name to resource name
-			String resourceName = name.replace('.', '/');
-
-			// Obtain the class loader
-			ClassLoader classLoader = Thread.currentThread()
-					.getContextClassLoader();
-
-			// First attempt for direct OfficeFloor configuration
-			String officeFloorConfigurationPath = resourceName
-					+ OFFICE_FLOOR_CONFIGURATION_FILE_EXTENSION;
-			URL resourceUrl = classLoader
-					.getResource(officeFloorConfigurationPath);
-			if (resourceUrl == null) {
-				// Next attempt for properties to run OfficeFloor
-				String officeFloorPropertiesPath = resourceName
-						+ OFFICE_FLOOR_PROPERTIES_FILE_EXTENSION;
-				resourceUrl = classLoader
-						.getResource(officeFloorPropertiesPath);
-				if (resourceUrl != null) {
-					// Load properties for OfficeFloor
-					Properties properties = new Properties();
-					InputStream propertyContent = resourceUrl.openStream();
-					properties.load(propertyContent);
-					propertyContent.close();
-
-					// Obtain the OfficeFloor configuration path
-					officeFloorConfigurationPath = properties
-							.getProperty(PROPERTY_OFFICE_FLOOR_CONFIGURATION_PATH);
-
-				} else {
-					// Unknown resource
-					throw new NamingException("Unknown "
-							+ OfficeFloor.class.getSimpleName() + " resource '"
-							+ name + "'");
-				}
-			}
-
-			// Create the OfficeFloor compiler
-			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler();
-			final StringBuilder issues = new StringBuilder();
-			compiler.setCompilerIssues(new CompilerIssues() {
-				@Override
-				public void addIssue(LocationType locationType,
-						String location, AssetType assetType, String assetName,
-						String issueDescription) {
-					this.addIssue(locationType, location, assetType, assetName,
-							issueDescription, null);
-				}
-
-				@Override
-				public void addIssue(LocationType locationType,
-						String location, AssetType assetType, String assetName,
-						String issueDescription, Throwable cause) {
-					issues.append("\n\t");
-					issues.append(issueDescription);
-					issues.append(" [");
-					if (locationType != null) {
-						issues.append(locationType + ":" + location);
-					}
-					if (assetType != null) {
-						issues.append(", " + assetType + ":" + assetName);
-					}
-					issues.append("]");
-					if (cause != null) {
-						issues.append(" - " + cause.getMessage() + " ["
-								+ cause.getClass().getSimpleName() + "]");
-					}
-				}
-			});
-
-			// Obtain issue text
-			String issuesText = issues.toString();
-
-			// Compile the OfficeFloor
-			OfficeFloor officeFloor = compiler
-					.compile(officeFloorConfigurationPath);
-			if (officeFloor == null) {
-				// Failed to compile OfficeFloor
-				throw new NamingException("Failed to load "
-						+ OfficeFloor.class.getSimpleName() + ": '"
-						+ officeFloorConfigurationPath + "' for name '" + name
-						+ "'" + issuesText);
-			} else if ((issuesText != null) && (issuesText.trim().length() > 0)) {
-				// Issues in compiling OfficeFloor
-				throw new NamingException("Issue in loading "
-						+ OfficeFloor.class.getSimpleName() + ": '"
-						+ officeFloorConfigurationPath + "' for name '" + name
-						+ "'" + issuesText);
-			}
-
-			// Open the OfficeFloor
-			officeFloor.openOfficeFloor();
+			// Obtain the OfficeFloor
+			Object officeFloor = objectFactory.getObjectInstance(null, name,
+					this, null);
 
 			// Return the OfficeFloor
 			return officeFloor;
@@ -200,6 +73,32 @@ public class OfficeFloorContext implements Context {
 				throw exception;
 			}
 		}
+	}
+
+	@Override
+	public Object lookup(String name) throws NamingException {
+
+		// Ensure have name
+		if (name == null) {
+			return null; // no object if no name
+		}
+
+		// Strip off the schema
+		int schemaEndIndex = name.indexOf(':');
+		if (schemaEndIndex >= 0) {
+			name = name.substring(schemaEndIndex + ".".length());
+		}
+
+		// Ensure non-blank name provided
+		if (name.trim().length() == 0) {
+			return null; // no object if no name
+		}
+
+		// Create the name object
+		Name nameObject = new CompositeName(name);
+
+		// Return the OfficeFloor
+		return this.lookup(nameObject);
 	}
 
 	@Override
