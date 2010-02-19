@@ -17,8 +17,9 @@
  */
 package net.officefloor.plugin.jndi.context;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import javax.naming.CompositeName;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -26,11 +27,16 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Test the {@link OfficeFloorContext}, specifically with JNDI.
+ * Tests the {@link OfficeFloorObjectFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorContextTest extends OfficeFrameTestCase {
+public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link OfficeFloorObjectFactory} to test.
+	 */
+	private final ObjectFactory officeFloorOfficeFactory = new OfficeFloorObjectFactory();
 
 	/**
 	 * Package name for this class.
@@ -43,17 +49,13 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 	 */
 	public void testInstantiateOfficeFloorDirectly() throws Exception {
 
-		// Create the initial context
-		Context context = new InitialContext();
-
 		// Specify name of OfficeFloor
-		String name = "officefloor:" + this.packageName + "/direct";
+		Name name = new CompositeName(this.packageName + "/direct");
 
 		// Obtain the OfficeFloor
-		Object object = context.lookup(name);
-		assertNotNull("No object looked up", object);
-		assertTrue("Incorrect object type", object instanceof OfficeFloor);
-		OfficeFloor officeFloor = (OfficeFloor) object;
+		OfficeFloor officeFloor = (OfficeFloor) this.officeFloorOfficeFactory
+				.getObjectInstance(null, name, null, null);
+		assertNotNull("No OfficeFloor created", officeFloor);
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
@@ -70,17 +72,13 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 	 */
 	public void testInstantiateOfficeFloorIndirectly() throws Exception {
 
-		// Create the initial context
-		Context context = new InitialContext();
-
 		// Specify name of OfficeFloor
-		String name = "officefloor:" + this.packageName + "/indirect";
+		Name name = new CompositeName(this.packageName + "/indirect");
 
 		// Obtain the OfficeFloor
-		Object object = context.lookup(name);
-		assertNotNull("No object looked up", object);
-		assertTrue("Incorrect object type", object instanceof OfficeFloor);
-		OfficeFloor officeFloor = (OfficeFloor) object;
+		OfficeFloor officeFloor = (OfficeFloor) this.officeFloorOfficeFactory
+				.getObjectInstance(null, name, null, null);
+		assertNotNull("No OfficeFloor created", officeFloor);
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
@@ -95,20 +93,17 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 	 */
 	public void testInstantiateSameOfficeFloor() throws Exception {
 
-		// Create the initial context
-		Context context = new InitialContext();
-
 		// Obtain the OfficeFloor directly
-		String directName = "officefloor:" + this.packageName + "/direct";
-		OfficeFloor directOfficeFloor = (OfficeFloor) context
-				.lookup(directName);
-		assertNotNull("Did not obtain directly", directOfficeFloor);
+		Name directName = new CompositeName(this.packageName + "/direct");
+		OfficeFloor directOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
+				.getObjectInstance(null, directName, null, null);
+		assertNotNull("No OfficeFloor created", directOfficeFloor);
 
 		// Obtain the OfficeFloor indirectly
-		String indirectName = "officefloor:" + this.packageName + "/indirect";
-		OfficeFloor indirectOfficeFloor = (OfficeFloor) context
-				.lookup(indirectName);
-		assertNotNull("Did not obtain indirectly", indirectOfficeFloor);
+		Name indirectName = new CompositeName(this.packageName + "/direct");
+		OfficeFloor indirectOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
+				.getObjectInstance(null, indirectName, null, null);
+		assertNotNull("No OfficeFloor created", directOfficeFloor);
 
 		// Should be the same OfficeFloor instance
 		assertSame("Should be same OfficeFloor instance", directOfficeFloor,

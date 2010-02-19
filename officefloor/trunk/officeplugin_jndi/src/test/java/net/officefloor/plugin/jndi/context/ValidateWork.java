@@ -15,33 +15,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.objectfactory;
+package net.officefloor.plugin.jndi.context;
 
-import java.util.Hashtable;
-
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.spi.ObjectFactory;
-
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link ObjectFactory} for creating an {@link OfficeFloor}.
+ * Invoked within {@link OfficeFloor} instance to ensure the {@link OfficeFloor}
+ * is correctly instantiated by the {@link OfficeFloorObjectFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorObjectFactory implements ObjectFactory {
+public class ValidateWork {
 
-	/*
-	 * =================== ObjectFactory ==============================
+	/**
+	 * Flag indicating if this {@link Task} was invoked.
 	 */
+	private static volatile boolean isTaskInvoked = false;
 
-	@Override
-	public Object getObjectInstance(Object obj, Name name, Context nameCtx,
-			Hashtable<?, ?> environment) throws Exception {
-		// TODO implement ObjectFactory.getObjectInstance
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectFactory.getObjectInstance");
+	/**
+	 * Resets state.
+	 */
+	public static void reset() {
+		isTaskInvoked = false;
+	}
+
+	/**
+	 * Indicates if the {@link Task} was invoked.
+	 * 
+	 * @return <code>true</code> if the {@link Task} was invoked.
+	 */
+	public static boolean isTaskInvoked() {
+		return isTaskInvoked;
+	}
+
+	/**
+	 * Task to be executed.
+	 */
+	public void task() {
+		// Flag the task invoked
+		isTaskInvoked = true;
 	}
 
 }

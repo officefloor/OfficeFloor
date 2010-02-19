@@ -3,7 +3,7 @@
         <team name="OFFICE_TEAM"/>
     </teams>
     <sections>
-        <section name="SECTION" source="DESK" location="net/officefloor/plugin/jndi/objectfactory/test.desk">
+        <section name="SECTION" source="DESK" location="net/officefloor/plugin/jndi/context/test.desk">
             <responsibility name="RESPONSIBILITY">
                 <team name="OFFICE_TEAM"/>
             </responsibility>
