@@ -21,9 +21,7 @@ import javax.naming.CompositeName;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -39,18 +37,14 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	private final ObjectFactory officeFloorOfficeFactory = new OfficeFloorObjectFactory();
 
 	/**
-	 * Package name for this class.
-	 */
-	private final String packageName = this.getClass().getPackage().getName();
-
-	/**
 	 * Ensure that able to use JNDI to instantiate an {@link OfficeFloor}
 	 * instance by referencing the configuration file directly.
 	 */
 	public void testInstantiateOfficeFloorDirectly() throws Exception {
 
 		// Specify name of OfficeFloor
-		Name name = new CompositeName(this.packageName + "/direct");
+		Name name = new CompositeName(ValidateWork
+				.getOfficeFloorJndiResourceName(true));
 
 		// Obtain the OfficeFloor
 		OfficeFloor officeFloor = (OfficeFloor) this.officeFloorOfficeFactory
@@ -59,9 +53,7 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
-		Office office = officeFloor.getOffice("OFFICE");
-		WorkManager workManager = office.getWorkManager("SECTION.WORK");
-		workManager.invokeWork(null);
+		ValidateWork.invokeWork(officeFloor, null);
 		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
 	}
 
@@ -73,7 +65,8 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	public void testInstantiateOfficeFloorIndirectly() throws Exception {
 
 		// Specify name of OfficeFloor
-		Name name = new CompositeName(this.packageName + "/indirect");
+		Name name = new CompositeName(ValidateWork
+				.getOfficeFloorJndiResourceName(false));
 
 		// Obtain the OfficeFloor
 		OfficeFloor officeFloor = (OfficeFloor) this.officeFloorOfficeFactory
@@ -82,9 +75,7 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
-		Office office = officeFloor.getOffice("OFFICE");
-		WorkManager workManager = office.getWorkManager("SECTION.WORK");
-		workManager.invokeWork(null);
+		ValidateWork.invokeWork(officeFloor, null);
 		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
 	}
 
@@ -94,13 +85,15 @@ public class OfficeFloorObjectFactoryTest extends OfficeFrameTestCase {
 	public void testInstantiateSameOfficeFloor() throws Exception {
 
 		// Obtain the OfficeFloor directly
-		Name directName = new CompositeName(this.packageName + "/direct");
+		Name directName = new CompositeName(ValidateWork
+				.getOfficeFloorJndiResourceName(true));
 		OfficeFloor directOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
 				.getObjectInstance(null, directName, null, null);
 		assertNotNull("No OfficeFloor created", directOfficeFloor);
 
 		// Obtain the OfficeFloor indirectly
-		Name indirectName = new CompositeName(this.packageName + "/direct");
+		Name indirectName = new CompositeName(ValidateWork
+				.getOfficeFloorJndiResourceName(false));
 		OfficeFloor indirectOfficeFloor = (OfficeFloor) this.officeFloorOfficeFactory
 				.getObjectInstance(null, indirectName, null, null);
 		assertNotNull("No OfficeFloor created", directOfficeFloor);

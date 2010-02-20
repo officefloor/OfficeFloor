@@ -17,36 +17,25 @@
  */
 package net.officefloor.plugin.jndi.ejb;
 
-import java.util.Properties;
+import javax.ejb.Local;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
-import junit.framework.TestCase;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
-import org.apache.openejb.client.LocalInitialContextFactory;
-
 /**
- * Ensure that {@link OfficeFloor} can be integrated into EJB.
+ * Local interface for the mock EJB.
  * 
  * @author Daniel Sagenschneider
  */
-public class EjbInterationTest extends TestCase {
+@Local
+public interface MockEjbLocal {
 
 	/**
-	 * Ensure that able to lookup an {@link OfficeFloor} from within an EJB.
+	 * Runs the {@link OfficeFloor}.
+	 * 
+	 * @return Information from running the {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails.
 	 */
-	public void testObtainOfficeFloorWithinEjb() throws Exception {
-
-		// Create the initial context
-		Properties properties = new Properties();
-		properties.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-				LocalInitialContextFactory.class.getName());
-		Context initialContext = new InitialContext(properties);
-
-		// TODO obtain EJB that uses OfficeFloor
-		fail("TODO obtain EJB that uses OfficeFloor");
-	}
+	public boolean runOfficeFloor() throws Exception;
 
 }
