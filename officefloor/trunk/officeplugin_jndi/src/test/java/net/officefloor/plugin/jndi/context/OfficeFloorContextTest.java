@@ -20,9 +20,7 @@ package net.officefloor.plugin.jndi.context;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -31,11 +29,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorContextTest extends OfficeFrameTestCase {
-
-	/**
-	 * Package name for this class.
-	 */
-	private final String packageName = this.getClass().getPackage().getName();
 
 	/**
 	 * Ensure that able to use JNDI to instantiate an {@link OfficeFloor}
@@ -47,7 +40,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Specify name of OfficeFloor
-		String name = "officefloor:" + this.packageName + "/direct";
+		String name = ValidateWork.getOfficeFloorJndiName(true);
 
 		// Obtain the OfficeFloor
 		Object object = context.lookup(name);
@@ -57,9 +50,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
-		Office office = officeFloor.getOffice("OFFICE");
-		WorkManager workManager = office.getWorkManager("SECTION.WORK");
-		workManager.invokeWork(null);
+		ValidateWork.invokeWork(officeFloor, null);
 		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
 	}
 
@@ -74,7 +65,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Specify name of OfficeFloor
-		String name = "officefloor:" + this.packageName + "/indirect";
+		String name = ValidateWork.getOfficeFloorJndiName(false);
 
 		// Obtain the OfficeFloor
 		Object object = context.lookup(name);
@@ -84,9 +75,7 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 
 		// Invoke the work to ensure correct OfficeFloor
 		ValidateWork.reset();
-		Office office = officeFloor.getOffice("OFFICE");
-		WorkManager workManager = office.getWorkManager("SECTION.WORK");
-		workManager.invokeWork(null);
+		ValidateWork.invokeWork(officeFloor, null);
 		assertTrue("Task should be invoked", ValidateWork.isTaskInvoked());
 	}
 
@@ -99,13 +88,13 @@ public class OfficeFloorContextTest extends OfficeFrameTestCase {
 		Context context = new InitialContext();
 
 		// Obtain the OfficeFloor directly
-		String directName = "officefloor:" + this.packageName + "/direct";
+		String directName = ValidateWork.getOfficeFloorJndiName(true);
 		OfficeFloor directOfficeFloor = (OfficeFloor) context
 				.lookup(directName);
 		assertNotNull("Did not obtain directly", directOfficeFloor);
 
 		// Obtain the OfficeFloor indirectly
-		String indirectName = "officefloor:" + this.packageName + "/indirect";
+		String indirectName = ValidateWork.getOfficeFloorJndiName(false);
 		OfficeFloor indirectOfficeFloor = (OfficeFloor) context
 				.lookup(indirectName);
 		assertNotNull("Did not obtain indirectly", indirectOfficeFloor);
