@@ -28,16 +28,17 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import org.apache.openejb.client.LocalInitialContextFactory;
 
 /**
- * Ensure that {@link OfficeFloor} can be integrated into EJB.
+ * Ensure that {@link OfficeFloor} can be integrated into an EJB.
  * 
  * @author Daniel Sagenschneider
  */
 public class EjbIntegrationTest extends TestCase {
 
 	/**
-	 * Ensure that able to lookup an {@link OfficeFloor} from within an EJB.
+	 * Ensure that able to lookup and run {@link OfficeFloor} from within an
+	 * EJB.
 	 */
-	public void testObtainOfficeFloorWithinEjb() throws Exception {
+	public void testOfficeFloorWithinEjb() throws Exception {
 
 		// Create the initial context
 		Properties properties = new Properties();
