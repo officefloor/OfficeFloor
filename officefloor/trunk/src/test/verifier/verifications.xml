@@ -111,6 +111,12 @@
 			<location>maven/maven-officefloor-skin/pom.xml</location>
 			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
 		</file>
+		
+		<!-- OfficeFloor site -->
+		<file>
+			<location>src/site/site.xml</location>
+			<contains><![CDATA[<skin>[^_]*<version>${pom.version}</version>[^_]*</skin>]]></contains>
+		</file>
 
 	</files>
 </verifications>
