@@ -40,7 +40,7 @@ import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link Flow}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
@@ -68,7 +68,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param threadState
 	 *            {@link ThreadState} containing this {@link Flow}.
 	 */
@@ -100,11 +100,16 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 		// Create the work container for a new work
 		/*
 		 * TODO provide scopes for Work (task, thread, process).
-		 *
+		 * 
 		 * DETAILS: Currently a new Work is created for each Task and the Work
 		 * is not shared between Tasks. The focus of the Work was to allow
 		 * sharing of state between Tasks. Bounding the Work to a scope and
 		 * re-using at that scope will allow this sharing.
+		 * 
+		 * CONCERN: ManagedObjects provide state management and having Work do
+		 * this may become confusing. Also attempting to debug problems may also
+		 * be more difficult. It is therefore necessary to base this
+		 * functionality on "real world" scenarios.
 		 */
 		WorkContainer workContainer = workMetaData
 				.createWorkContainer(this.threadState.getProcessState());
@@ -152,7 +157,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 
 	/**
 	 * Loads the {@link DutyJob} instances.
-	 *
+	 * 
 	 * @param firstLastJobs
 	 *            First and last {@link JobNode} instances.
 	 * @param taskDutyAssociations
@@ -227,7 +232,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 
 	/**
 	 * Loads the {@link Job} to the listing of {@link Job} instances.
-	 *
+	 * 
 	 * @param firstLastJobs
 	 *            Array containing two elements, first and last {@link Job}
 	 *            instances.

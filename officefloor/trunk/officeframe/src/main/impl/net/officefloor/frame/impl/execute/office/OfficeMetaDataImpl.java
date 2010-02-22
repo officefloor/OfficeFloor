@@ -37,10 +37,11 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * {@link OfficeMetaData} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
@@ -68,6 +69,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ProcessMetaData processMetaData;
 
 	/**
+	 * {@link ProcessContextListener} instances.
+	 */
+	private final ProcessContextListener[] processContextListeners;
+
+	/**
 	 * {@link OfficeStartupTask} instances.
 	 */
 	private final OfficeStartupTask[] startupTasks;
@@ -84,7 +90,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @param officeManager
@@ -95,6 +101,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} of the {@link ProcessState} instances
 	 *            created within this {@link Office}.
+	 * @param processContextListeners
+	 *            {@link ProcessContextListener} instances.
 	 * @param startupTasks
 	 *            {@link OfficeStartupTask} instances.
 	 * @param escalationProcedure
@@ -104,6 +112,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager,
 			WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
+			ProcessContextListener[] processContextListeners,
 			OfficeStartupTask[] startupTasks,
 			EscalationProcedure escalationProcedure,
 			EscalationFlow officeFloorEscalation) {
@@ -111,6 +120,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.officeManager = officeManager;
 		this.workMetaDatas = workMetaDatas;
 		this.processMetaData = processMetaData;
+		this.processContextListeners = processContextListeners;
 		this.startupTasks = startupTasks;
 		this.escalationProcedure = escalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
@@ -168,12 +178,14 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this,
+			processState = new ProcessStateImpl(this.processMetaData,
+					this.processContextListeners, this,
 					this.officeFloorEscalation);
 
 		} else {
 			// Create Process with the Input Managed Object
-			processState = new ProcessStateImpl(this.processMetaData, this,
+			processState = new ProcessStateImpl(this.processMetaData,
+					this.processContextListeners, this,
 					this.officeFloorEscalation, inputManagedObject,
 					inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject,
@@ -189,6 +201,12 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the Job Node for the initial job
 		JobNode jobNode = flow.createJobNode(taskMetaData, null, parameter);
+
+		// Notify of created process context
+		Object processIdentifier = processState.getProcessIdentifier();
+		for (int i = 0; i < this.processContextListeners.length; i++) {
+			this.processContextListeners[i].processCreated(processIdentifier);
+		}
 
 		// Return the Job Node
 		return jobNode;

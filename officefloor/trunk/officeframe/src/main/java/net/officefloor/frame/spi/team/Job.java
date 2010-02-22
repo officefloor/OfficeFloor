@@ -18,6 +18,10 @@
 
 package net.officefloor.frame.spi.team;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
+
 /**
  * {@link Job} executed by a {@link Team}.
  * 
@@ -39,6 +43,26 @@ public interface Job {
 	 * @return <code>true</code> if the {@link Job} has completed.
 	 */
 	boolean doJob(JobContext executionContext);
+
+	/**
+	 * <p>
+	 * Obtains the identifier for the {@link ProcessState} containing this
+	 * {@link Job}.
+	 * <p>
+	 * This allows the {@link Team} executing the {@link Job} to be aware of the
+	 * {@link ProcessState} context in which the {@link Job} is to be executed.
+	 * <p>
+	 * An example use would be embedding {@link OfficeFloor} within an
+	 * Application Server and using this identifier and a
+	 * {@link ProcessContextListener} to know the invoking {@link Thread} for
+	 * interaction with JNDI.
+	 * 
+	 * @return Identifier for the {@link ProcessState} containing this
+	 *         {@link Job}
+	 * 
+	 * @see ProcessContextListener
+	 */
+	Object getProcessIdentifier();
 
 	/**
 	 * <p>

@@ -36,11 +36,11 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -81,6 +81,7 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
@@ -90,7 +91,7 @@ import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Tests the {@link RawOfficeMetaDataImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
@@ -258,6 +259,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -295,6 +297,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -332,6 +335,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -373,6 +377,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -397,6 +402,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -426,6 +432,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -459,6 +466,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -490,6 +498,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -525,6 +534,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -563,6 +573,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -600,6 +611,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -641,6 +653,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -671,6 +684,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -701,6 +715,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"BOUND_MO");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -753,6 +768,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -785,6 +801,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(threadManagedObjects,
 				"BOUND_MO");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -820,6 +837,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"THREAD");
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"PROCESS");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -856,6 +874,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"BOUND_ADMIN");
 		this.record_linkTasksForAdministrators(processAdministrators,
 				"BOUND_ADMIN");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -900,6 +919,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"BOUND_ADMIN");
 		this.record_linkTasksForAdministrators(threadAdministrators,
 				"BOUND_ADMIN");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -919,6 +939,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work((RawWorkMetaData<?>) null);
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -945,6 +966,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
 				new TaskMetaData[0]);
 		this.record_linkTasksForWork(rawWorkMetaData);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -988,6 +1010,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getWorkName(), null); // no work name to not find
 		this.record_issue("No work name provided for Startup Task 0");
 		this.record_linkTasksForWork(rawWorkMetaData);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1036,6 +1059,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getArgumentType(), null);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
 		this.record_linkTasksForWork(rawWorkMetaData);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1078,6 +1102,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), null);
 		this.record_issue("Type of cause not provided for office escalation 0");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1116,6 +1141,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskReference, taskReference.getTaskName(), "TASK");
 		this
 				.record_issue("Can not find task meta-data (work=WORK, task=TASK) for Office Escalation 0");
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1169,6 +1195,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
 				Exception.class);
 		this.record_linkTasksForWork(rawWorkMetaData);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1239,6 +1266,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(workContainer, workContainer.getWork(null), work,
 				new TypeMatcher(ThreadState.class));
 		this.recordReturn(taskFactory, taskFactory.createTask(work), task);
+		this.record_processContextListeners();
 
 		// Construct the office
 		this.replayMockObjects();
@@ -1252,6 +1280,95 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect office floor escalation",
 				this.officeFloorEscalation, node.getFlow().getThreadState()
 						.getProcessState().getOfficeFloorEscalation());
+	}
+
+	/**
+	 * Enable able to include {@link ProcessContextListener} instances.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testRegisteredProcessContextListener() {
+
+		final ProcessContextListener listener = this
+				.createMock(ProcessContextListener.class);
+		final FlowMetaData<?> flowMetaData = this
+				.createMock(FlowMetaData.class);
+		final AssetManager flowManager = this.createMock(AssetManager.class);
+		final TaskMetaData<?, ?, ?> taskMetaData = this
+				.createMock(TaskMetaData.class);
+		final WorkMetaData<?> workMetaData = this
+				.createMock(WorkMetaData.class);
+		final WorkContainer<?> workContainer = this
+				.createMock(WorkContainer.class);
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMock(TaskFactory.class);
+		final Work work = this.createMock(Work.class);
+		final Task<?, ?, ?> task = this.createMock(Task.class);
+
+		// Record registering Process Context Listener
+		this.record_enhanceOffice();
+		this.record_teams();
+		this.record_noManagedObjectsAndAdministrators();
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners(listener);
+
+		// Record creating Process to validate Process Context Listener
+		this.recordReturn(flowMetaData, flowMetaData.getFlowManager(),
+				flowManager);
+		this.recordReturn(flowMetaData, flowMetaData.getInitialTaskMetaData(),
+				taskMetaData);
+		this.recordReturn(taskMetaData, taskMetaData.getWorkMetaData(),
+				workMetaData);
+
+		// Obtain ProcessState (for Process Identifier)
+		final ProcessState[] processState = new ProcessState[1];
+		this.recordReturn(workMetaData, workMetaData.createWorkContainer(null),
+				workContainer, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						processState[0] = (ProcessState) actual[0];
+						return true;
+					}
+				});
+
+		this.recordReturn(taskMetaData, taskMetaData
+				.getPreAdministrationMetaData(), new TaskDutyAssociation[0]);
+		this.recordReturn(taskMetaData, taskMetaData
+				.getPostAdministrationMetaData(), new TaskDutyAssociation[0]);
+		this.recordReturn(taskMetaData, taskMetaData
+				.getRequiredManagedObjects(), new ManagedObjectIndex[0]);
+		this.recordReturn(taskMetaData, taskMetaData.getTaskFactory(),
+				taskFactory);
+		this.recordReturn(workContainer, workContainer.getWork(null), work,
+				new TypeMatcher(ThreadState.class));
+		this.recordReturn(taskFactory, taskFactory.createTask(work), task);
+
+		// Obtain Process Identifier
+		final Object[] processIdentifier = new Object[1];
+		listener.processCreated(null);
+		this.control(listener).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				processIdentifier[0] = actual[0];
+				return true;
+			}
+		});
+
+		// Construct the office
+		this.replayMockObjects();
+		RawOfficeMetaData metaData = this.constructRawOfficeMetaData(true);
+
+		// Verify registered Process Context Listener by creating Process
+		metaData.getOfficeMetaData().createProcess(flowMetaData, null);
+
+		// Verify functionality
+		this.verifyMockObjects();
+
+		// Verify process identifiers
+		assertNotNull("Must have Process Identifier", processIdentifier[0]);
+		assertEquals("Incorrect Process Identifier", processState[0]
+				.getProcessIdentifier(), processIdentifier[0]);
 	}
 
 	/**
@@ -1269,7 +1386,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records no {@link Team} instances.
-	 *
+	 * 
 	 * @param teamNames
 	 *            Names of the {@link Team} instances bound to the
 	 *            {@link Office}.
@@ -1317,7 +1434,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records registering {@link RawManagedObjectMetaData} instances to the
 	 * {@link Office}.
-	 *
+	 * 
 	 * @param managedObjectNames
 	 *            Names that the {@link RawManagedObjectMetaData} instances are
 	 *            registered under.
@@ -1366,7 +1483,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records obtaining {@link BoundInputManagedObjectConfiguration}.
-	 *
+	 * 
 	 * @param inputSourceNamePairs
 	 *            Input {@link ManagedObject} to {@link ManagedObjectSource}
 	 *            name pairs.
@@ -1404,7 +1521,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records constructing {@link ProcessState} bound {@link ManagedObject}
 	 * instances.
-	 *
+	 * 
 	 * @param registeredManagedObjectSources
 	 *            Registered {@link RawManagedObjectMetaData} instances to the
 	 *            {@link Office}.
@@ -1485,7 +1602,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records constructing {@link ThreadState} bound {@link ManagedObject}
 	 * instances.
-	 *
+	 * 
 	 * @param registeredManagedObjectSources
 	 *            Registered {@link RawManagedObjectMetaData} instances to the
 	 *            {@link Office}.
@@ -1544,7 +1661,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records constructing {@link ProcessState} bound {@link Administrator}
 	 * instances.
-	 *
+	 * 
 	 * @param teams
 	 *            {@link Team} instances by their {@link Office} bound names.
 	 * @param processManagedObjects
@@ -1600,7 +1717,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records constructing {@link ThreadState} bound {@link Administrator}
 	 * instances.
-	 *
+	 * 
 	 * @param teams
 	 *            {@link Team} instances by their {@link Office} bound names.
 	 * @param scopeManagedObjects
@@ -1667,7 +1784,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records constructing the default {@link ManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param boundManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances by their bound
 	 *            names.
@@ -1704,7 +1821,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records constructing the {@link AdministratorMetaData}.
-	 *
+	 * 
 	 * @param boundAdministrators
 	 *            {@link RawBoundAdministratorMetaData} instances by their bound
 	 *            names.
@@ -1729,7 +1846,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Links the {@link Task} instances for the {@link Administrator} instances.
-	 *
+	 * 
 	 * @param boundAdministrators
 	 *            {@link RawBoundAdministratorMetaData} instances by their bound
 	 *            names.
@@ -1753,8 +1870,21 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records obtaining the {@link ProcessContextListener} instances.
+	 * 
+	 * @param listeners
+	 *            {@link ProcessContextListener} instances.
+	 */
+	private void record_processContextListeners(
+			ProcessContextListener... listeners) {
+		this.recordReturn(this.rawOfficeFloorMetaData,
+				this.rawOfficeFloorMetaData.getProcessContextListeners(),
+				listeners);
+	}
+
+	/**
 	 * Records construction of {@link Work} instances.
-	 *
+	 * 
 	 * @param rawWorkMetaDatas
 	 *            {@link RawWorkMetaData} instances. Provide <code>null</code>
 	 *            for a value should not construct that {@link Work}.
@@ -1827,7 +1957,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Links the {@link Task} instances for the {@link Work} instances.
-	 *
+	 * 
 	 * @param rawWorkMetaDatas
 	 *            {@link RawWorkMetaData} instances.
 	 */
@@ -1864,7 +1994,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
@@ -1874,7 +2004,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records an issue.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
@@ -1887,7 +2017,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawOfficeMetaData}.
-	 *
+	 * 
 	 * @param isExpectConstruct
 	 *            Flag indicating if should be constructed.
 	 * @return Constructed {@link RawOfficeMetaData}.
@@ -1955,7 +2085,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Adds details for an expected match.
-		 *
+		 * 
 		 * @param moConfigurations
 		 *            {@link ManagedObjectConfiguration} array.
 		 * @param managedObjectScope

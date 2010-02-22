@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Context for the {@link TeamSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface TeamSourceContext {
@@ -32,7 +32,7 @@ public interface TeamSourceContext {
 	/**
 	 * Obtains the name of the {@link Team} to be created from the
 	 * {@link TeamSource}.
-	 *
+	 * 
 	 * @return Name of the {@link Team} to be created from the
 	 *         {@link TeamSource}.
 	 */
@@ -40,7 +40,7 @@ public interface TeamSourceContext {
 
 	/**
 	 * Obtains a required property value.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the property.
 	 * @return Value of the property.
@@ -52,7 +52,7 @@ public interface TeamSourceContext {
 
 	/**
 	 * Obtains the property value or subsequently the default value.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the property.
 	 * @param defaultValue
@@ -63,9 +63,18 @@ public interface TeamSourceContext {
 
 	/**
 	 * Properties to configure the {@link TeamSource}.
-	 *
+	 * 
 	 * @return Properties specific for the {@link TeamSource}.
 	 */
 	Properties getProperties();
+
+	/**
+	 * Registers a {@link ProcessContextListener}.
+	 * 
+	 * @param processContextListener
+	 *            {@link ProcessContextListener}.
+	 */
+	void registerProcessContextListener(
+			ProcessContextListener processContextListener);
 
 }

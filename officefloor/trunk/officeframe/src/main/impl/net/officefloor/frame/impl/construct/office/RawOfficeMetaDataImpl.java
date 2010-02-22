@@ -38,11 +38,11 @@ import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -53,8 +53,8 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMet
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
+import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
@@ -78,10 +78,11 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * {@link RawOfficeMetaData} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
@@ -89,7 +90,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 	/**
 	 * Obtains the {@link RawOfficeMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawOfficeMetaDataFactory}.
 	 */
 	public static RawOfficeMetaDataFactory getFactory() {
@@ -157,7 +158,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeName
 	 *            {@link Office} names.
 	 * @param rawOfficeFloorMetaData
@@ -509,11 +510,15 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				this.constructAdministratorMetaData(processBoundAdministrators),
 				threadMetaData);
 
+		// Obtain the Process Context Listeners
+		ProcessContextListener[] processContextListeners = rawOfficeFloorMetaData
+				.getProcessContextListeners();
+
 		// Create the office meta-data
 		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(officeName,
 				officeManager, workMetaDatas.toArray(new WorkMetaData[0]),
-				processMetaData, startupTasks, officeEscalationProcedure,
-				officeFloorEscalation);
+				processMetaData, processContextListeners, startupTasks,
+				officeEscalationProcedure, officeFloorEscalation);
 
 		// Create the meta-data locator
 		OfficeMetaDataLocator metaDataLocator = new OfficeMetaDataLocatorImpl(
@@ -606,7 +611,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	/**
 	 * Constructs the default {@link ManagedObjectMetaData} listing from the
 	 * input {@link RawBoundManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param rawBoundManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances.
 	 * @return Default {@link ManagedObjectMetaData} instances.
@@ -636,7 +641,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	/**
 	 * Constructs the {@link AdministratorMetaData} listing from the input
 	 * {@link RawBoundAdministratorMetaData} instances.
-	 *
+	 * 
 	 * @param rawBoundAdministratorMetaData
 	 *            {@link RawBoundAdministratorMetaData} instances.
 	 * @return {@link AdministratorMetaData} instances.
@@ -654,7 +659,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	/**
 	 * Links the {@link TaskMetaData} instances into the
 	 * {@link RawBoundAdministratorMetaData} instances.
-	 *
+	 * 
 	 * @param taskMetaDataLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory

@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * Raw meta-data for the {@link OfficeFloor}.
@@ -41,6 +42,15 @@ public interface RawOfficeFloorMetaData {
 	 *         name.
 	 */
 	RawTeamMetaData getRawTeamMetaData(String teamName);
+
+	/**
+	 * Obtains the {@link ProcessContextListener} instances for the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @return {@link ProcessContextListener} instances for the
+	 *         {@link OfficeFloor}.
+	 */
+	ProcessContextListener[] getProcessContextListeners();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} for the

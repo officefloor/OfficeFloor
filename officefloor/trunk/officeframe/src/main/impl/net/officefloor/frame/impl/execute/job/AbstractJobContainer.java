@@ -150,6 +150,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		return this.nextJob;
 	}
 
+	@Override
+	public Object getProcessIdentifier() {
+		return this.flow.getThreadState().getProcessState()
+				.getProcessIdentifier();
+	}
+
 	/**
 	 * Flag indicating if the {@link Job} is complete. This indicates only when
 	 * the {@link Job} is not yet complete.

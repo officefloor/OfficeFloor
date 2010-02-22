@@ -45,7 +45,7 @@ import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Contains functionality for testing the {@link AbstractJobContainer}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
@@ -211,7 +211,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * <p>
 	 * This is always the first steps of executing a
 	 * {@link AbstractJobContainer}.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param threadFailure
@@ -245,7 +245,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records loading the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 */
@@ -258,7 +258,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records checking {@link ManagedObject} instances are ready.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param isReady
@@ -276,7 +276,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records coordinating the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param isCoordinated
@@ -294,7 +294,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records obtaining a {@link ManagedObject} object.
-	 *
+	 * 
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} of the {@link ManagedObject}.
 	 * @param moObject
@@ -308,7 +308,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records doing a sequential {@link Flow}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param sequentialFlowParameter
@@ -336,7 +336,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records doing a parallel {@link Flow}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param parallelFlowParameter
@@ -364,7 +364,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining the {@link TaskMetaData} of the next {@link Task} to
 	 * execute.
-	 *
+	 * 
 	 * @param hasNextJob
 	 *            Flag indicating if have next {@link Job}.
 	 */
@@ -379,7 +379,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining the parallel {@link JobNode} from the parallel
 	 * {@link Job}.
-	 *
+	 * 
 	 * @param parallelNode
 	 *            Parallel's {@link Job} parallel {@link JobNode}.
 	 */
@@ -390,7 +390,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records activating the parallel {@link Job}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param isComplete
@@ -424,7 +424,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records doing an asynchronous {@link Flow}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param asynchronousFlowParameter
@@ -467,7 +467,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records handling an {@link EscalationFlow}.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param failure
@@ -517,7 +517,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records handling an {@link EscalationFlow}.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param failure
@@ -568,7 +568,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the creation of the {@link EscalationFlow} {@link JobNode}.
-	 *
+	 * 
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
 	 * @param parallelOwner
@@ -592,7 +592,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records waiting on a joined {@link Flow}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param instigationStrategy
@@ -637,7 +637,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records creating a {@link Job}.
-	 *
+	 * 
 	 * @param currentJob
 	 *            Current {@link Job} creating the new {@link Job}.
 	 * @param nextJobParameter
@@ -667,7 +667,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records completing the {@link Job}.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job} being completed.
 	 */
@@ -687,7 +687,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link Job} for the {@link JobFunctionality}.
-	 *
+	 * 
 	 * @param hasParallelOwnerJob
 	 *            Flag indicating if to have a parallel owner {@link JobNode}.
 	 * @param jobFunctionality
@@ -702,7 +702,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link Job} for the {@link JobFunctionality}.
-	 *
+	 * 
 	 * @param hasParallelOwnerJob
 	 *            Flag indicating if to have a parallel owner {@link JobNode}.
 	 * @param requiredManagedObjects
@@ -731,7 +731,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Executes the {@link FunctionalityJob}.
-	 *
+	 * 
 	 * @param job
 	 *            {@link FunctionalityJob}.
 	 * @param isExpectedComplete
@@ -745,7 +745,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Asserts that the {@link Job} was executed.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job} to assert was executed.
 	 */
@@ -757,7 +757,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Asserts that the {@link Job} is not executed.
-	 *
+	 * 
 	 * @param job
 	 *            {@link Job} to assert is not executed.
 	 */
@@ -797,7 +797,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param parallelOwnerJob
 		 *            Parallel Owner {@link JobNode}.
 		 * @param requiredManagedObjectIndexes
@@ -890,7 +890,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Executes the functionality for the {@link Job}.
-		 *
+		 * 
 		 * @param context
 		 *            {@link JobFunctionalityContext}.
 		 * @return Result of functionality, that is used as a parameter to the
@@ -909,7 +909,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Obtains the {@link ManagedObject} instance's object.
-		 *
+		 * 
 		 * @param managedObjectIndex
 		 *            {@link ManagedObjectIndex} of the {@link ManagedObject}.
 		 * @return Object of the {@link ManagedObject}.
@@ -918,7 +918,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Invokes a {@link Flow}.
-		 *
+		 * 
 		 * @param flowIndex
 		 *            Index of the {@link Flow} to invoke.
 		 * @param instigationStrategy
@@ -934,7 +934,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Joins on the {@link FlowFuture}.
-		 *
+		 * 
 		 * @param flowFuture
 		 *            {@link FlowFuture}.
 		 * @param timeout
@@ -948,7 +948,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		/**
 		 * Flags whether the {@link Job} is complete, or requires re-invoking.
-		 *
+		 * 
 		 * @param isComplete
 		 *            <code>true</code> if complete.
 		 */

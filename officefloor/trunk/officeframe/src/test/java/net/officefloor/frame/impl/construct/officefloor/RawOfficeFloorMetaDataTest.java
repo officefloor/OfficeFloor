@@ -52,6 +52,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.AbstractMatcher;
@@ -205,6 +206,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamName(),
 				DUPLICATE_TEAM_NAME);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeam(), teamOne);
+		this.recordReturn(rawTeamOne, rawTeamOne.getProcessContextListeners(),
+				new ProcessContextListener[0]);
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
 				.constructRawTeamMetaData(teamConfigurationTwo, this.issues),
 				rawTeamTwo);
@@ -252,12 +255,68 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull(metaData.getRawTeamMetaData("TWO"));
 		assertNotNull(metaData.getRawTeamMetaData("THREE"));
 
+		// Should have no Process Context Listeners
+		assertEquals("Should not have Process Context Listeners", 0, metaData
+				.getProcessContextListeners().length);
+
 		// Validate the teams
 		assertEquals("Incorrect number of teams", 3, actualTeams.length);
 		for (int i = 0; i < 3; i++) {
 			assertEquals("Incorrect team " + i, expectedTeams[i],
 					actualTeams[i]);
 		}
+	}
+
+	/**
+	 * Ensures successfully construct a {@link Team} with a
+	 * {@link ProcessContextListener}.
+	 */
+	public void testConstructTeamWithProcessContextListener() {
+
+		// Mock Process Context Listener
+		final ProcessContextListener listener = this
+				.createMock(ProcessContextListener.class);
+		final TeamConfiguration<?> teamConfiguration = this
+				.createMock(TeamConfiguration.class);
+		final RawTeamMetaData rawTeamMetaData = this
+				.createMock(RawTeamMetaData.class);
+		final String TEAM_NAME = "TEAM";
+		final Team team = this.createMock(Team.class);
+
+		// Record constructing team registering Process Context Listener
+		this.record_officeFloorName();
+		this.recordReturn(this.configuration, this.configuration
+				.getTeamConfiguration(),
+				new TeamConfiguration[] { teamConfiguration });
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
+				.constructRawTeamMetaData(teamConfiguration, this.issues),
+				rawTeamMetaData);
+		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
+				TEAM_NAME);
+		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
+		this.recordReturn(rawTeamMetaData, rawTeamMetaData
+				.getProcessContextListeners(),
+				new ProcessContextListener[] { listener });
+		this.record_constructManagedObjectSources("OFFICE");
+		this.record_constructEscalation();
+		this.record_constructOffices();
+
+		// Attempt to construct office floor
+		this.replayMockObjects();
+		RawOfficeFloorMetaData metaData = this
+				.constructRawOfficeFloorMetaData();
+		this.verifyMockObjects();
+
+		// Ensure team registered
+		assertNotNull(metaData.getRawTeamMetaData("TEAM"));
+
+		// Should have a Process Context Listener
+		ProcessContextListener[] listeners = metaData
+				.getProcessContextListeners();
+		assertEquals("Should have Process Context Listeners", 1,
+				listeners.length);
+		assertEquals("Incorrect registered Process Context Listener", listener,
+				listeners[0]);
 	}
 
 	/**
@@ -622,6 +681,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 					teamName);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
+			this.recordReturn(rawTeamMetaData, rawTeamMetaData
+					.getProcessContextListeners(),
+					new ProcessContextListener[0]);
 		}
 
 		// Return the constructed teams

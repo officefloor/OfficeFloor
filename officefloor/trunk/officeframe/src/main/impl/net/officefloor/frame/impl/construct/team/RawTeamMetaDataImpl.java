@@ -28,13 +28,13 @@ import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * Raw {@link Team} meta-data implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
@@ -42,11 +42,11 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 
 	/**
 	 * Obtains the {@link RawTeamMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawTeamMetaDataFactory}.
 	 */
 	public static RawTeamMetaDataFactory getFactory() {
-		return new RawTeamMetaDataImpl(null, null);
+		return new RawTeamMetaDataImpl(null, null, null);
 	}
 
 	/**
@@ -60,16 +60,25 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	private final Team team;
 
 	/**
+	 * {@link ProcessContextListener} instances for the {@link Team}.
+	 */
+	private final ProcessContextListener[] processContextListeners;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of {@link Team}.
 	 * @param team
 	 *            {@link Team}.
+	 * @param processContextListeners
+	 *            {@link ProcessContextListener} instances for the {@link Team}.
 	 */
-	private RawTeamMetaDataImpl(String teamName, Team team) {
+	private RawTeamMetaDataImpl(String teamName, Team team,
+			ProcessContextListener[] processContextListeners) {
 		this.teamName = teamName;
 		this.team = team;
+		this.processContextListeners = processContextListeners;
 	}
 
 	/*
@@ -104,12 +113,17 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			return null; // can not carry one
 		}
 
+		ProcessContextListener[] processContextListeners;
 		try {
 			// Initialise the team source
 			Properties properties = configuration.getProperties();
-			TeamSourceContext context = new TeamSourceContextImpl(teamName,
+			TeamSourceContextImpl context = new TeamSourceContextImpl(teamName,
 					properties);
 			teamSource.init(context);
+
+			// Obtain the Process Context Listeners
+			processContextListeners = context
+					.lockAndGetProcessContextListeners();
 
 		} catch (TeamSourceUnknownPropertyError ex) {
 			// Indicate an unknown property
@@ -143,7 +157,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 		}
 
 		// Return the raw meta-data
-		return new RawTeamMetaDataImpl(teamName, team);
+		return new RawTeamMetaDataImpl(teamName, team, processContextListeners);
 	}
 
 	/*
@@ -158,6 +172,11 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	@Override
 	public Team getTeam() {
 		return this.team;
+	}
+
+	@Override
+	public ProcessContextListener[] getProcessContextListeners() {
+		return this.processContextListeners;
 	}
 
 }

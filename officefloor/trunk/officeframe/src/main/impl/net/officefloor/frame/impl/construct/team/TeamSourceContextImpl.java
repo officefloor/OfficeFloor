@@ -18,16 +18,19 @@
 
 package net.officefloor.frame.impl.construct.team;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * {@link TeamSourceContext} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TeamSourceContextImpl implements TeamSourceContext {
@@ -43,8 +46,17 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 	private final Properties properties;
 
 	/**
+	 * <p>
+	 * Registered {@link ProcessContextListener} instances.
+	 * <p>
+	 * <code>volatile</code> to ensure threading of {@link Team} sees the lock
+	 * (null list).
+	 */
+	private volatile List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
+
+	/**
 	 * Initialise.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
@@ -54,6 +66,27 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 	public TeamSourceContextImpl(String teamName, Properties properties) {
 		this.teamName = teamName;
 		this.properties = properties;
+	}
+
+	/**
+	 * Locks from adding further {@link ProcessContextListener} instances and
+	 * returns the listing of the registered {@link ProcessContextListener}
+	 * instances.
+	 * 
+	 * @return Listing of the registered {@link ProcessContextListener}
+	 *         instances.
+	 */
+	public ProcessContextListener[] lockAndGetProcessContextListeners() {
+
+		// Obtain the registered Process Context Listeners
+		ProcessContextListener[] registeredListeners = this.processContextListeners
+				.toArray(new ProcessContextListener[0]);
+
+		// Lock by releasing list
+		this.processContextListeners = null;
+
+		// Return the registered listeners
+		return registeredListeners;
 	}
 
 	/*
@@ -92,6 +125,21 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 
 		// Return value (or default if no value)
 		return (value != null ? value : defaultValue);
+	}
+
+	@Override
+	public void registerProcessContextListener(
+			ProcessContextListener processContextListener) {
+
+		// Ensure not locked
+		if (this.processContextListeners == null) {
+			throw new IllegalStateException("May only register "
+					+ ProcessContextListener.class.getSimpleName()
+					+ " instances during init (team " + this.teamName + ")");
+		}
+
+		// Register the listener
+		this.processContextListeners.add(processContextListener);
 	}
 
 }
