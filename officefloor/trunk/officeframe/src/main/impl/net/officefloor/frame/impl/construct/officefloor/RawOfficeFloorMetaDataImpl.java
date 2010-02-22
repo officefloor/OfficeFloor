@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.impl.construct.officefloor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,9 +42,9 @@ import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFac
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
@@ -57,6 +58,7 @@ import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * Raw {@link OfficeFloorMetaData} implementation.
@@ -72,13 +74,18 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	 * @return {@link RawOfficeFloorMetaDataFactory}.
 	 */
 	public static RawOfficeFloorMetaDataFactory getFactory() {
-		return new RawOfficeFloorMetaDataImpl(null, null, null);
+		return new RawOfficeFloorMetaDataImpl(null, null, null, null);
 	}
 
 	/**
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
 	 */
 	private final Map<String, RawTeamMetaData> teamRegistry;
+
+	/**
+	 * {@link ProcessContextListener} instances.
+	 */
+	private final ProcessContextListener[] processContextListeners;
 
 	/**
 	 * Registry of {@link RawManagedObjectMetaData} by the
@@ -101,6 +108,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	 * 
 	 * @param teamRegistry
 	 *            Registry of {@link RawTeamMetaData} by the {@link Team} name.
+	 * @param processContextListeners
+	 *            {@link ProcessContextListener} instances.
 	 * @param mosRegistry
 	 *            Registry of {@link RawManagedObjectMetaData} by the
 	 *            {@link ManagedObjectSource} name.
@@ -109,9 +118,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	 */
 	private RawOfficeFloorMetaDataImpl(
 			Map<String, RawTeamMetaData> teamRegistry,
+			ProcessContextListener[] processContextListeners,
 			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
 			EscalationFlow officeFloorEscalation) {
 		this.teamRegistry = teamRegistry;
+		this.processContextListeners = processContextListeners;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -144,6 +155,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
+		List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
 		List<Team> teamListing = new LinkedList<Team>();
 		for (TeamConfiguration<?> teamConfiguration : configuration
 				.getTeamConfiguration()) {
@@ -170,6 +182,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			// Register the team
 			teamRegistry.put(teamName, rawTeamMetaData);
 			teamListing.add(team);
+
+			// Obtain and register the Process Context Listeners
+			ProcessContextListener[] listeners = rawTeamMetaData
+					.getProcessContextListeners();
+			processContextListeners.addAll(Arrays.asList(listeners));
 		}
 
 		// Construct the managed object sources
@@ -243,7 +260,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(
-				teamRegistry, mosRegistry, officeFloorEscalation);
+				teamRegistry, processContextListeners
+						.toArray(new ProcessContextListener[0]), mosRegistry,
+				officeFloorEscalation);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -329,6 +348,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	@Override
 	public RawTeamMetaData getRawTeamMetaData(String teamName) {
 		return this.teamRegistry.get(teamName);
+	}
+
+	@Override
+	public ProcessContextListener[] getProcessContextListeners() {
+		return this.processContextListeners;
 	}
 
 	@Override

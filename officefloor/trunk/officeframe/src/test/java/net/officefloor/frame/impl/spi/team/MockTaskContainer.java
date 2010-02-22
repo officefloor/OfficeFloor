@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Mock implementation of the {@link Job} for testing.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 class MockTaskContainer implements Job {
@@ -57,7 +57,7 @@ class MockTaskContainer implements Job {
 
 	/**
 	 * Obtains the lock for conditional waits.
-	 *
+	 * 
 	 * @return Lock for conditional waits.
 	 */
 	public Object getLock() {
@@ -66,7 +66,7 @@ class MockTaskContainer implements Job {
 
 	/**
 	 * Assigns this {@link MockTaskContainer} to a {@link Team}.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to assign this.
 	 * @param waitTime
@@ -134,6 +134,11 @@ class MockTaskContainer implements Job {
 	@Override
 	public Job getNextJob() {
 		return this.nextJob;
+	}
+
+	@Override
+	public Object getProcessIdentifier() {
+		return this;
 	}
 
 }

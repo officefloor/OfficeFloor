@@ -210,6 +210,11 @@ public abstract class MockStressJob implements Job {
 	 */
 	protected abstract boolean runJob();
 
+	@Override
+	public Object getProcessIdentifier() {
+		return this;
+	}
+
 	/**
 	 * Next {@link Job}.
 	 */

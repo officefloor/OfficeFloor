@@ -129,7 +129,7 @@ public abstract class AbstractTeamSource implements TeamSource {
 	}
 
 	/**
-	 * {@link Team].
+	 * {@link Team}.
 	 */
 	private Team team;
 

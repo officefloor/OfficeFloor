@@ -44,6 +44,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface ProcessState extends FlowFuture {
 
 	/**
+	 * Obtains the identifier for this {@link ProcessState}.
+	 * 
+	 * @return Identifier for this {@link ProcessState}.
+	 */
+	Object getProcessIdentifier();
+
+	/**
 	 * Obtains the lock for this {@link ProcessState}.
 	 * 
 	 * @return Lock of this {@link ProcessState}.
@@ -104,8 +111,8 @@ public interface ProcessState extends FlowFuture {
 	AdministratorContainer<?, ?> getAdministratorContainer(int index);
 
 	/**
-	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler} provided
-	 * by the {@link ManagedObjectSource}.
+	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler}
+	 * provided by the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link EscalationFlow} or <code>null</code> if
 	 *         {@link ManagedObjectSource} did not provide a

@@ -26,13 +26,14 @@ import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link RawTeamMetaDataImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawTeamMetaDataTest extends OfficeFrameTestCase {
@@ -126,7 +127,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 		/**
 		 * Constructor that will fail instantiation.
-		 *
+		 * 
 		 * @throws Exception
 		 *             Failure to instantiate.
 		 */
@@ -317,7 +318,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link TeamSource} that validates {@link Team} name is available.
-	 *
+	 * 
 	 * @author Daniel Sagenschneider
 	 */
 	@TestSource
@@ -377,6 +378,8 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		// Ensure meta-data is correct
 		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
 		assertEquals("Incorrect team", team, metaData.getTeam());
+		assertEquals("Should be no listeners", 0, metaData
+				.getProcessContextListeners().length);
 	}
 
 	/**
@@ -397,8 +400,63 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to register a {@link ProcessContextListener}.
+	 */
+	public void testRegisterProcessContextListener() {
+
+		final ProcessContextListener listener = this
+				.createMock(ProcessContextListener.class);
+		final Team team = this.createMock(Team.class);
+
+		// Record constructing team
+		this.recordReturn(this.configuration, this.configuration.getTeamName(),
+				TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration
+				.getTeamSourceClass(), ProcessContextListenerTeamSource.class);
+		this.recordReturn(this.configuration, this.configuration
+				.getProperties(), new Properties());
+
+		// Attempt to construct team
+		this.replayMockObjects();
+		ProcessContextListenerTeamSource.listener = listener;
+		ProcessContextListenerTeamSource.team = team;
+		RawTeamMetaData metaData = this.constructRawTeamMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure meta-data is correct
+		assertEquals("Incorrect team name", TEAM_NAME, metaData.getTeamName());
+		assertEquals("Incorrect team", team, metaData.getTeam());
+		ProcessContextListener[] listeners = metaData
+				.getProcessContextListeners();
+		assertEquals("Should be a listener", 1, listeners.length);
+		assertEquals("Incorrect listener", listener, listeners[0]);
+	}
+
+	/**
+	 * {@link TeamSource} that registers a {@link ProcessContextListener}.
+	 */
+	@TestSource
+	public static class ProcessContextListenerTeamSource extends
+			SourceTeamSource {
+
+		/**
+		 * {@link ProcessContextListener}.
+		 */
+		public static ProcessContextListener listener;
+
+		@Override
+		public void init(TeamSourceContext context) throws Exception {
+			// Register the listener
+			context.registerProcessContextListener(listener);
+
+			// Do super functions
+			super.init(context);
+		}
+	}
+
+	/**
 	 * Constructs the {@link RawTeamMetaDataImpl} with the mock objects.
-	 *
+	 * 
 	 * @return {@link RawTeamMetaDataImpl}.
 	 */
 	private RawTeamMetaData constructRawTeamMetaData(
