@@ -17,10 +17,13 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.api.execute.FlowFuture;
+import org.easymock.AbstractMatcher;
+
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -42,6 +45,8 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 			// Propagate threaded failure of test
 			if (this.failure instanceof Exception) {
 				throw (Exception) this.failure;
+			} else if (this.failure instanceof Error) {
+				throw (Error) this.failure;
 			} else {
 				throw new Exception(this.failure);
 			}
@@ -77,17 +82,23 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	 */
 	public void testExecuteJobWithContextThread() throws Exception {
 
+		// Create the team
+		final ProcessContextTeam team = new ProcessContextTeam();
+
 		// Mocks
 		final WorkManager workManager = this
 				.createSynchronizedMock(WorkManager.class);
 
-		// Objects to invoke work and block context thread for use
+		// Helper Objects
+		final Object processIdentifier = "ProcessIdentifier";
 		final String parameter = "Parameter";
+
+		// Objects to invoke work and block context thread for use
 		final boolean[] isProcessingStarted = new boolean[1];
 		isProcessingStarted[0] = false; // processing not yet started
 		final boolean[] isProcessComplete = new boolean[1];
 		isProcessComplete[0] = false; // not yet complete
-		final FlowFuture flowFuture = new FlowFuture() {
+		final ProcessFuture processFuture = new ProcessFuture() {
 			@Override
 			public boolean isComplete() {
 
@@ -97,7 +108,7 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 					isProcessingStarted.notify();
 				}
 
-				// Return whether complete processing
+				// Return whether completed processing
 				synchronized (isProcessComplete) {
 					return isProcessComplete[0];
 				}
@@ -106,25 +117,32 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 
 		// Record invoking work
 		this.recordReturn(workManager, workManager.invokeWork(parameter),
-				flowFuture);
+				processFuture, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect parameter", parameter,
+								actual[0]);
 
-		// Create the process identifier
-		final Object processIdentifier = "ProcessIdentifier";
+						// Associate Thread to process identifier.
+						// This would occur during the creation of the Process
+						// for the invoked work.
+						team.processCreated(processIdentifier);
 
-		// Create the team
-		final ProcessContextTeam team = new ProcessContextTeam();
+						return true;
+					}
+				});
+
+		// Run test
+		this.replayMockObjects();
+
+		// Start the team
+		team.startWorking();
 
 		// Do work with the context thread
-		Thread contextThread = new Thread(new Runnable() {
+		final Thread contextThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-
-					// Associate Thread to process identifier.
-					// This would actually occur during the doWork call, however
-					// as it is blocking need to do beforehand.
-					team.processCreated(processIdentifier);
-
 					// Do the work (blocking call)
 					ProcessContextTeam.doWork(workManager, parameter);
 
@@ -133,18 +151,77 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 					ProcessContextTeamTest.this.failure = ex;
 				}
 			}
-		});
+		}, "CONTEXT_THREAD");
 		contextThread.start();
 
 		// Wait until processing starts
 		synchronized (isProcessingStarted) {
 			if (!isProcessingStarted[0]) {
-				isProcessingStarted.wait(1000);
+				isProcessingStarted.wait(10000);
 			}
 			assertTrue("Processing should be started", isProcessingStarted[0]);
 		}
 
-		// TODO complete test as verify correct context Thread executing Task
-		fail("TODO complete test as verify correct context Thread executing Task");
+		// Have Team execute Job with context Thread
+		final boolean[] isJobExecuted = new boolean[1];
+		isJobExecuted[0] = false;
+		team.assignJob(new Job() {
+			@Override
+			public Object getProcessIdentifier() {
+				return processIdentifier;
+			}
+
+			@Override
+			public boolean doJob(JobContext executionContext) {
+				try {
+					// Obtain the Thread executing this job
+					Thread executingThread = Thread.currentThread();
+
+					// Ensure same as context Thread
+					assertEquals("Incorrect executing Thread", contextThread,
+							executingThread);
+
+				} catch (Throwable ex) {
+					ProcessContextTeamTest.this.failure = ex;
+				}
+
+				// Notify Job executed
+				synchronized (isJobExecuted) {
+					isJobExecuted[0] = true;
+					isJobExecuted.notify();
+				}
+
+				// Job complete
+				return true;
+			}
+
+			private Job nextJob;
+
+			@Override
+			public Job getNextJob() {
+				return this.nextJob;
+			}
+
+			@Override
+			public void setNextJob(Job job) {
+				this.nextJob = job;
+			}
+		});
+
+		// Ensure Job to be executed
+		synchronized (isJobExecuted) {
+			isJobExecuted.wait(10000);
+			assertTrue("Job should be executed", isJobExecuted[0]);
+		}
+
+		// Flag process complete
+		team.processCompleted(processIdentifier);
+
+		// Stop team
+		team.stopWorking();
+
+		// Verify functionality
+		this.verifyMockObjects();
 	}
+
 }

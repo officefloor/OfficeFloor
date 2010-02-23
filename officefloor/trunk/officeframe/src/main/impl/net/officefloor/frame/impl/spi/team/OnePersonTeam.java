@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Team having only one {@link Thread}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeam implements Team {
@@ -45,13 +45,13 @@ public class OnePersonTeam implements Team {
 	protected OnePerson person = null;
 
 	/**
-	 * {@link TaskQueue}.
+	 * {@link JobQueue}.
 	 */
-	private TaskQueue taskQueue;
+	private JobQueue taskQueue;
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of this {@link Team}.
 	 * @param waitTime
@@ -74,7 +74,7 @@ public class OnePersonTeam implements Team {
 		}
 
 		// Create the queue of tasks
-		this.taskQueue = new TaskQueue();
+		this.taskQueue = new JobQueue();
 
 		// Hire the person for the team
 		this.person = new OnePerson(this.taskQueue, this.waitTime);
@@ -123,9 +123,9 @@ public class OnePersonTeam implements Team {
 		private static final long NO_TIME = 0;
 
 		/**
-		 * {@link TaskQueue}.
+		 * {@link JobQueue}.
 		 */
-		private final TaskQueue taskQueue;
+		private final JobQueue taskQueue;
 
 		/**
 		 * Time to wait in milliseconds for a {@link Job}.
@@ -149,13 +149,13 @@ public class OnePersonTeam implements Team {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param taskQueue
-		 *            {@link TaskQueue}.
+		 *            {@link JobQueue}.
 		 * @param waitTime
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
-		public OnePerson(TaskQueue taskQueue, long waitTime) {
+		public OnePerson(JobQueue taskQueue, long waitTime) {
 			this.taskQueue = taskQueue;
 			this.waitTime = waitTime;
 		}
@@ -173,7 +173,7 @@ public class OnePersonTeam implements Team {
 					this.time = NO_TIME;
 
 					// Obtain the next job
-					Job job = this.taskQueue.dequeue(this, this.waitTime);
+					Job job = this.taskQueue.dequeue(this.waitTime);
 					if (job != null) {
 						// Have job therefore execute it
 						if (!job.doJob(this)) {

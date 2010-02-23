@@ -53,6 +53,17 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
 public class ProcessContextTeam implements Team, ProcessContextListener {
 
 	/**
+	 * Initial capacity of contexts.
+	 */
+	private static final int CONTEXT_THREAD_INITIAL_CAPACITY = 50;
+
+	/**
+	 * Mapping of {@link Thread} to {@link JobQueueExecutor}.
+	 */
+	private static final Map<Thread, JobQueueExecutor> threadToExecutor = new HashMap<Thread, JobQueueExecutor>(
+			CONTEXT_THREAD_INITIAL_CAPACITY);
+
+	/**
 	 * <p>
 	 * Wrap invoking {@link Work} on the {@link WorkManager} to allow the
 	 * {@link Thread} to be available to execute the {@link Task} instances of
@@ -68,30 +79,49 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} of the {@link WorkManager} has no initial
 	 *             {@link Task}.
+	 * @throws InterruptedException
+	 *             Should this blocking call be interrupted.
 	 */
 	public static void doWork(WorkManager workManager, Object parameter)
-			throws NoInitialTaskException {
+			throws NoInitialTaskException, InterruptedException {
 
-		// Invoke the work
-		ProcessFuture future = workManager.invokeWork(parameter);
+		// Obtain the current Thread
+		Thread currentThread = Thread.currentThread();
+		try {
 
-		// Loop until processing complete
-		while (!future.isComplete()) {
+			// Register the Job Queue Executor for the Thread.
+			// Must be done before invoking work to ensure available.
+			JobQueueExecutor executor = new JobQueueExecutor();
+			synchronized (threadToExecutor) {
+				threadToExecutor.put(currentThread, executor);
+			}
 
-			// TODO determine how know immediately that processing completes
+			// Invoke the work
+			ProcessFuture future = workManager.invokeWork(parameter);
+
+			// Blocking call to execute the Jobs
+			executor.executeJobs(future);
+
+		} finally {
+			// Ensure unregister current Thread
+			synchronized (threadToExecutor) {
+				threadToExecutor.remove(currentThread);
+			}
+
+			// All Jobs should be completed with completion of Process
 		}
 	}
 
 	/**
 	 * {@link JobExecutor} to be used if no context {@link Thread} available.
 	 */
-	private final JobExecutor passiveJobExecutor = new JobExecutor();
+	private final JobExecutor passiveJobExecutor = new JobExecutor(this);
 
 	/**
 	 * Mapping of Process Identifier to its context {@link Thread}.
 	 */
 	private final Map<Object, Thread> processContextThreads = new HashMap<Object, Thread>(
-			50);
+			CONTEXT_THREAD_INITIAL_CAPACITY);
 
 	/**
 	 * Flag indicating whether to continue execution of {@link Job} instances.
@@ -110,14 +140,50 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	@Override
 	public void assignJob(Job job) {
 
-		// Execute the job
-		this.passiveJobExecutor.doJob(job);
+		// Obtain the process identifier
+		Object processIdentifier = job.getProcessIdentifier();
 
+		// Obtain the context Thread for the Process
+		Thread contextThread;
+		synchronized (processContextThreads) {
+			contextThread = processContextThreads.get(processIdentifier);
+		}
+
+		// Determine if have context Thread
+		if (contextThread != null) {
+			// Obtain the Job Queue Executor
+			JobQueueExecutor executor;
+			synchronized (threadToExecutor) {
+				executor = threadToExecutor.get(contextThread);
+			}
+
+			// Determine if have Job Queue Executor
+			if (executor != null) {
+				// Assign Job to executor
+				executor.assignJob(job);
+				return; // Job assigned
+			}
+		}
+
+		// No context executor, so execute passively
+		this.passiveJobExecutor.doJob(job);
 	}
 
 	@Override
 	public void stopWorking() {
-		// TODO once using context threads, likely need to clean up here
+		// Flag to stop executing
+		this.isContinueExecution = false;
+
+		// Wait until all process contexts are completed
+		synchronized (this.processContextThreads) {
+			while (this.processContextThreads.size() > 0) {
+				try {
+					this.processContextThreads.wait(100);
+				} catch (InterruptedException ex) {
+					// Keep waiting until all contexts complete
+				}
+			}
+		}
 	}
 
 	/*
@@ -134,24 +200,138 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		synchronized (this.processContextThreads) {
 			this.processContextThreads.put(processIdentifier, contextThread);
 		}
+
+		// Register this Team with the Executor
+		JobQueueExecutor executor;
+		synchronized (threadToExecutor) {
+			executor = threadToExecutor.get(contextThread);
+		}
+		if (executor != null) {
+			// Context Thread available to execute Jobs
+			executor.setTeamInstance(this);
+		}
 	}
 
 	@Override
 	public void processCompleted(Object processIdentifier) {
-		// TODO implement ProcessContextListener.processCompleted
-		throw new UnsupportedOperationException(
-				"TODO implement ProcessContextListener.processCompleted");
+		// Remove the context thread
+		synchronized (this.processContextThreads) {
+			this.processContextThreads.remove(processIdentifier);
+		}
+	}
+
+	/**
+	 * Executes {@link Job} instances from the {@link JobQueue}.
+	 */
+	private static class JobQueueExecutor {
+
+		/**
+		 * {@link ProcessContextTeam} instance.
+		 */
+		private ProcessContextTeam instance;
+
+		/**
+		 * <p>
+		 * {@link JobQueue}. Initial instance until {@link ProcessFuture}
+		 * instance becomes available.
+		 * <p>
+		 * Locking on <code>this</code> until {@link ProcessFuture} available.
+		 */
+		private JobQueue jobQueue = new JobQueue(this);
+
+		/**
+		 * Specifies the {@link ProcessContextTeam} instance.
+		 * 
+		 * @param instance
+		 *            {@link ProcessContextTeam} instance.
+		 */
+		public synchronized void setTeamInstance(ProcessContextTeam instance) {
+			this.instance = instance;
+			this.notify(); // start executing Jobs immediately
+		}
+
+		/**
+		 * Assigns a {@link Job} to be executed.
+		 * 
+		 * @param job
+		 *            {@link Job}.
+		 * @param instance
+		 *            {@link ProcessContextTeam}.
+		 */
+		public synchronized void assignJob(Job job) {
+			this.jobQueue.enqueue(job);
+		}
+
+		/**
+		 * Blocking call to execute the {@link Job} instances until completion
+		 * of the {@link ProcessFuture}.
+		 * 
+		 * @param future
+		 *            {@link ProcessFuture}.
+		 */
+		public void executeJobs(ProcessFuture future) {
+
+			// Ensure coordinate with assigning Jobs
+			JobExecutor executor;
+			synchronized (this) {
+
+				// Create queue and load existing Jobs
+				JobQueue queue = new JobQueue(future);
+				for (Job job = this.jobQueue.dequeue(); job != null; job = this.jobQueue
+						.dequeue()) {
+					queue.enqueue(job);
+				}
+
+				// Use queue for Process Future
+				this.jobQueue = queue;
+
+				// Wait until the Team instance available or Process complete
+				while ((this.instance == null) && (!future.isComplete())) {
+					try {
+						this.wait(100);
+					} catch (InterruptedException ex) {
+						// Continue waiting
+					}
+				}
+
+				// Create the executor for the Jobs
+				executor = new JobExecutor(this.instance);
+			}
+
+			// Execute Jobs until Process complete
+			while (!future.isComplete()) {
+				Job job = this.jobQueue.dequeue(100);
+				if (job != null) {
+					executor.doJob(job);
+				}
+			}
+		}
 	}
 
 	/**
 	 * Executes {@link Job} instances.
 	 */
-	private class JobExecutor implements JobContext {
+	private static class JobExecutor implements JobContext {
+
+		/**
+		 * {@link ProcessContextTeam}.
+		 */
+		private final ProcessContextTeam instance;
 
 		/**
 		 * Cached time.
 		 */
 		private long time = -1;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param instance
+		 *            {@link ProcessContextTeam}.
+		 */
+		public JobExecutor(ProcessContextTeam instance) {
+			this.instance = instance;
+		}
 
 		/**
 		 * Executes the {@link Job}.
@@ -191,7 +371,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 		@Override
 		public boolean continueExecution() {
-			return ProcessContextTeam.this.isContinueExecution;
+			return this.instance.isContinueExecution;
 		}
 	}
 

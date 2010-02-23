@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.team.Team;
 /**
  * {@link Team} implementation of many {@link Thread} instances that follow the
  * leader follower pattern.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeam extends ThreadGroup implements Team {
@@ -41,9 +41,9 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	private final TeamMemberStack teamMemberStack;
 
 	/**
-	 * {@link TaskQueue}.
+	 * {@link JobQueue}.
 	 */
-	private final TaskQueue taskQueue = new TaskQueue();
+	private final JobQueue taskQueue = new JobQueue();
 
 	/**
 	 * Flag indicating to continue to work.
@@ -52,7 +52,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 	/**
 	 * Initiate with the name of team.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of team.
 	 * @param teamMemberCount
@@ -152,7 +152,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		/**
 		 * Queue of {@link Job} instances to execute.
 		 */
-		private final TaskQueue taskQueue;
+		private final JobQueue taskQueue;
 
 		/**
 		 * Time to wait in milliseconds for a {@link Job}.
@@ -176,16 +176,16 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Initiate the {@link TeamMember}.
-		 *
+		 * 
 		 * @param teamMemberStack
 		 *            {@link TeamMemberStack} for the {@link TeamMember}
 		 *            instances of this {@link Team}.
 		 * @param taskQueue
-		 *            {@link TaskQueue} of {@link Job} instances.
+		 *            {@link JobQueue} of {@link Job} instances.
 		 * @param waitTime
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
-		public TeamMember(TeamMemberStack teamMemberStack, TaskQueue taskQueue,
+		public TeamMember(TeamMemberStack teamMemberStack, JobQueue taskQueue,
 				long waitTime) {
 			this.teamMemberStack = teamMemberStack;
 			this.taskQueue = taskQueue;
@@ -201,7 +201,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 			try {
 				for (;;) {
 					// Obtain the next job to run
-					Job job = this.taskQueue.dequeue(this, this.waitTime);
+					Job job = this.taskQueue.dequeue(this.waitTime);
 					if (job == null) {
 						// No job, so check if continue working
 						if (!LeaderFollowerTeam.this.continueWorking) {
@@ -277,7 +277,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param teamMemberCount
 		 *            Number of {@link TeamMember} instances.
 		 */
@@ -287,7 +287,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Blocks the {@link TeamMember} until promoted to leader.
-		 *
+		 * 
 		 * @param teamMember
 		 *            {@link TeamMember} waiting to be promoted to leader.
 		 */
@@ -330,7 +330,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		/**
 		 * Promotes the next leader.
-		 *
+		 * 
 		 * @param teamMember
 		 *            {@link TeamMember} that is current leader.
 		 */

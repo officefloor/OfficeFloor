@@ -18,57 +18,31 @@
 
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.TaskQueue;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.impl.spi.team.TaskQueue}.
+ * Tests the {@link net.officefloor.frame.impl.spi.team.JobQueue}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskQueueTest extends OfficeFrameTestCase implements
-		JobContext {
+public class JobQueueTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link TaskQueue} to test.
+	 * {@link JobQueue} to test.
 	 */
-	protected TaskQueue taskQueue = new TaskQueue();
+	private JobQueue taskQueue = new JobQueue();
 
 	/**
-	 * Time waiting.
+	 * Time.
 	 */
-	protected volatile long time;
-
-	/**
-	 * Flag to continue working (testing).
-	 */
-	protected volatile boolean continueWorking = true;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-	 */
-	public long getTime() {
-		return System.currentTimeMillis();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-	 */
-	public boolean continueExecution() {
-		return this.continueWorking;
-	}
+	private long time;
 
 	/**
 	 * Ensure able to dequeue <code>null</code> from empty queue.
 	 */
 	public void testEmptyDequeue() {
-		Job returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue();
 
 		// Validate
 		assertNull("Incorrect task returned", returnedTask);
@@ -80,7 +54,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	public void testSingleEnqueueDequeue() {
 		Job task = new MockTaskContainer();
 		this.taskQueue.enqueue(task);
-		Job returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue();
 
 		// Validate
 		assertSame("Incorrect task returned", task, returnedTask);
@@ -101,7 +75,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 		assertSame("Incorrect link", taskTwo, taskOne.getNextJob());
 		assertNull("Incorrect end", taskTwo.getNextJob());
 
-		Job returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue();
 
 		// Validate state
 		assertSame("Incorrect return", taskOne, returnedTask);
@@ -197,7 +171,6 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	 */
 	public void testWaitForDequeue() {
 
-		final JobContext context = this;
 		final long WAIT_TIME = 10000;
 
 		// Lock
@@ -222,10 +195,11 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 					}
 
 					// Wait on task to be added
-					Job task = taskQueue.dequeue(context, WAIT_TIME);
+					Job task = JobQueueTest.this.taskQueue.dequeue(WAIT_TIME);
 
 					// Specify time waited
-					time = System.currentTimeMillis() - startTime;
+					JobQueueTest.this.time = System.currentTimeMillis()
+							- startTime;
 
 					// Flag returned
 					synchronized (lock) {

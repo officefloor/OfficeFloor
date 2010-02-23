@@ -18,7 +18,6 @@
 
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -26,12 +25,12 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskQueue {
+public class JobQueue {
 
 	/**
 	 * Object to lock and wait on.
 	 */
-	protected final Object lock = new Object();
+	protected final Object lock;
 
 	/**
 	 * Head {@link Job} of the queue.
@@ -42,6 +41,23 @@ public class TaskQueue {
 	 * Tail {@link Job} of the queue.
 	 */
 	protected Job tail = null;
+
+	/**
+	 * Initiate with private lock.
+	 */
+	public JobQueue() {
+		this(new Object());
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param lock
+	 *            Lock for coordinating this {@link JobQueue}.
+	 */
+	public JobQueue(Object lock) {
+		this.lock = lock;
+	}
 
 	/**
 	 * Thread-safe enqueues a {@link Job} to the queue.
@@ -73,13 +89,12 @@ public class TaskQueue {
 	/**
 	 * Thread-safe dequeuing the next {@link Job} to execute.
 	 * 
-	 * @param executionContext
-	 *            {@link JobContext} to determine if {@link Job} is ready.
-	 * @return Next {@link Job} to execute.
+	 * @return Next {@link Job} to execute or <code>null</code> if no
+	 *         {@link Job} currently available.
 	 */
-	public Job dequeue(JobContext executionContext) {
+	public Job dequeue() {
 		synchronized (this.lock) {
-			return this.dequeue0(executionContext);
+			return this.dequeue0();
 		}
 	}
 
@@ -88,18 +103,19 @@ public class TaskQueue {
 	 * for <code>timeout</code> milliseconds for a {@link Job} to become
 	 * available.
 	 * 
-	 * @param executionContext
-	 *            {@link JobContext} to determine if {@link Job} is ready.
-	 * @return Next {@link Job} to execute.
+	 * @param timeout
+	 *            Timeout to wait for dequeuing a {@link Job}.
+	 * @return Next {@link Job} to execute or <code>null</code> if timed out
+	 *         waiting for next {@link Job}.
 	 */
-	public Job dequeue(JobContext executionContext, long timeout) {
+	public Job dequeue(long timeout) {
 		synchronized (this.lock) {
 
 			// Wait on a job to be in queue
 			this.waitForTask0(timeout);
 
 			// Attempt to dequeue a job
-			return this.dequeue0(executionContext);
+			return this.dequeue0();
 		}
 	}
 
@@ -138,11 +154,10 @@ public class TaskQueue {
 	/**
 	 * Dequeues the next {@link Job} to execute.
 	 * 
-	 * @param executionContext
-	 *            {@link JobContext} to determine if {@link Job} is ready.
-	 * @return Next {@link Job} to execute.
+	 * @return Next {@link Job} to execute or <code>null</code> if no
+	 *         {@link Job} to execute.
 	 */
-	private Job dequeue0(JobContext executionContext) {
+	private Job dequeue0() {
 
 		// Check if contains any jobs
 		if (this.head == null) {
