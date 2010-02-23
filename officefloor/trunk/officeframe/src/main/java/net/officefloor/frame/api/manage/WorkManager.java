@@ -18,10 +18,9 @@
 
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * Interface to manage a particular type of {@link Work}.
@@ -36,26 +35,11 @@ public interface WorkManager {
 	 * 
 	 * @param parameter
 	 *            Parameter for the first {@link Task} of the {@link Work}.
+	 * @return {@link ProcessFuture} to indicate when the {@link ProcessState}
+	 *         executing the {@link Work} has completed.
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} does not have an initial {@link Task}.
 	 */
-	FlowFuture invokeWork(Object parameter) throws NoInitialTaskException;
-
-	/**
-	 * <p>
-	 * Obtains a {@link ManagedObject} within the {@link Work} scope by the
-	 * input name.
-	 * <p>
-	 * As {@link ManagedObject} instances may be dependent on other
-	 * {@link ManagedObject} instances, they require the {@link Work} to specify
-	 * these dependencies.
-	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @return {@link ManagedObject} for the input name.
-	 * @throws Throwable
-	 *             If fails to obtain the {@link ManagedObject}.
-	 */
-	ManagedObject getManagedObject(String managedObjectName) throws Throwable;
+	ProcessFuture invokeWork(Object parameter) throws NoInitialTaskException;
 
 }

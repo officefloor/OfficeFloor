@@ -35,11 +35,11 @@ import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -54,7 +54,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Abstract {@link TestCase} for construction testing of an Office.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeConstructTestCase extends
@@ -125,7 +125,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -181,7 +181,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	@Override
@@ -220,7 +220,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Obtains the {@link OfficeFloorBuilder}.
-	 *
+	 * 
 	 * @return {@link OfficeFloorBuilder}.
 	 */
 	protected OfficeFloorBuilder getOfficeFloorBuilder() {
@@ -229,7 +229,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Obtains the {@link OfficeBuilder}.
-	 *
+	 * 
 	 * @return {@link OfficeBuilder}.
 	 */
 	protected OfficeBuilder getOfficeBuilder() {
@@ -238,7 +238,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Obtains the name of the {@link OfficeFloor} currently being constructed.
-	 *
+	 * 
 	 * @return Name of the {@link OfficeFloor} currently being constructed.
 	 */
 	protected String getOfficeFloorName() {
@@ -247,7 +247,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Obtains the name of the {@link Office} currently being constructed.
-	 *
+	 * 
 	 * @return Name of the {@link Office} currently being constructed.
 	 */
 	protected String getOfficeName() {
@@ -256,7 +256,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link Work}.
-	 *
+	 * 
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -275,7 +275,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link Work}.
-	 *
+	 * 
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -302,7 +302,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Constructs the {@link ReflectiveWorkBuilder}.
-	 *
+	 * 
 	 * @param workObject
 	 *            Work object.
 	 * @param workName
@@ -329,7 +329,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * executed be recorded.
 	 * <p>
 	 * By default this is <code>false</code> to not record.
-	 *
+	 * 
 	 * @param isRecord
 	 *            <code>true</code> to record the {@link Task} instances
 	 *            invoked.
@@ -342,7 +342,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Invoked by the {@link ReflectiveTaskBuilder} when it executes the method.
-	 *
+	 * 
 	 * @param methodName
 	 *            Name of method being invoked.
 	 */
@@ -357,7 +357,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Validates the order the {@link ReflectiveTaskBuilder} invoked the
 	 * methods.
-	 *
+	 * 
 	 * @param methodNames
 	 *            Order that the reflective methods should be invoked.
 	 * @see #setRecordReflectiveTaskMethodInvoked(boolean)
@@ -386,7 +386,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link Task}.
-	 *
+	 * 
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -414,7 +414,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link Task}.
-	 *
+	 * 
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -548,7 +548,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to create a {@link Team}.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param team
@@ -573,7 +573,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to create a {@link Team}.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
@@ -599,7 +599,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to create a {@link Administrator}.
-	 *
+	 * 
 	 * @param adminName
 	 *            Name of the {@link Administrator}.
 	 * @param administrator
@@ -630,7 +630,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to construct an {@link Administrator}.
-	 *
+	 * 
 	 * @param adminName
 	 *            Name of the {@link Administrator}.
 	 * @param adminSource
@@ -656,7 +656,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to create the {@link OfficeFloor}.
-	 *
+	 * 
 	 * @return {@link OfficeFloor}.
 	 */
 	protected OfficeFloor constructOfficeFloor() throws Exception {
@@ -681,7 +681,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to invoke work of an office. It will create the
 	 * {@link OfficeFloor} if necessary and times out after 3 seconds if invoked
 	 * {@link Work} is not complete.
-	 *
+	 * 
 	 * @param workName
 	 *            Name of the work to invoke.
 	 * @param parameter
@@ -697,7 +697,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to invoke work of an office. It will create the office
 	 * floor if necessary.
-	 *
+	 * 
 	 * @param workName
 	 *            Name of the work to invoke.
 	 * @param parameter
@@ -725,15 +725,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Invoke the work
 		Office office = this.officeFloor.getOffice(officeName);
 		WorkManager workManager = office.getWorkManager(workName);
-		FlowFuture flowFuture = workManager.invokeWork(parameter);
+		ProcessFuture processFuture = workManager.invokeWork(parameter);
 
 		// Block until flow is complete (or times out)
 		int iteration = 0;
 		long startBlockTime = System.currentTimeMillis();
-		while (!flowFuture.isComplete()) {
-
-			// Wait some time as still executing
-			Thread.sleep(100);
+		while (!processFuture.isComplete()) {
 
 			// Only timeout if positive time to run
 			if (secondsToRun > 0) {
@@ -746,6 +743,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 			if ((iteration % 30) == 0) {
 				iteration = 0;
 				this.printHeapMemoryDiagnostics();
+			}
+
+			// Wait some time as still executing
+			synchronized (processFuture) {
+				processFuture.wait(100);
 			}
 		}
 	}

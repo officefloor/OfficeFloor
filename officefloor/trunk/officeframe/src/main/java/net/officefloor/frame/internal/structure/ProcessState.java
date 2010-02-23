@@ -24,6 +24,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -41,7 +42,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProcessState extends FlowFuture {
+public interface ProcessState {
 
 	/**
 	 * Obtains the identifier for this {@link ProcessState}.
@@ -51,7 +52,18 @@ public interface ProcessState extends FlowFuture {
 	Object getProcessIdentifier();
 
 	/**
+	 * Obtains the {@link ProcessFuture} for this {@link ProcessState}.
+	 * 
+	 * @return {@link ProcessFuture} for this {@link ProcessState}.
+	 */
+	ProcessFuture getProcessFuture();
+
+	/**
+	 * <p>
 	 * Obtains the lock for this {@link ProcessState}.
+	 * <p>
+	 * This is the internal lock to the {@link OfficeFloor} engine and should
+	 * not be used outside of the {@link OfficeFloor} engine.
 	 * 
 	 * @return Lock of this {@link ProcessState}.
 	 */
