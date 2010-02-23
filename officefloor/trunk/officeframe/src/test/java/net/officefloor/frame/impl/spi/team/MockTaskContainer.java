@@ -53,7 +53,7 @@ class MockTaskContainer implements Job {
 	/**
 	 * Number of invocations of {@link #doJob(JobContext)}.
 	 */
-	public volatile int doTaskInvocationCount;
+	public volatile int doTaskInvocationCount = 0;
 
 	/**
 	 * Obtains the lock for conditional waits.

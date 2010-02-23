@@ -18,20 +18,20 @@
 
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Implementation of the {@link WorkManager}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkManagerImpl implements WorkManager {
@@ -49,7 +49,7 @@ public class WorkManagerImpl implements WorkManager {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param officeMetaData
@@ -66,7 +66,7 @@ public class WorkManagerImpl implements WorkManager {
 	 */
 
 	@Override
-	public FlowFuture invokeWork(Object parameter)
+	public ProcessFuture invokeWork(Object parameter)
 			throws NoInitialTaskException {
 
 		// Obtain the Initial Flow meta-data
@@ -86,17 +86,12 @@ public class WorkManagerImpl implements WorkManager {
 		// Assign the job node to the Team
 		jobNode.activateJob();
 
-		// Indicate when process of work complete
-		return jobNode.getFlow().getThreadState().getProcessState();
-	}
+		// Obtain the ProcessState
+		ProcessState processState = jobNode.getFlow().getThreadState()
+				.getProcessState();
 
-	@Override
-	public ManagedObject getManagedObject(String managedObjectName)
-			throws Throwable {
-		// TODO implement obtaining managed object externally from WorkManager
-		throw new UnsupportedOperationException(
-				"TODO still considering how to provide management of a ManagedObject once outside OfficeFrame "
-						+ "(should this just be a factory method? if so what about pooling? open for ideas");
+		// Indicate when process of work complete
+		return processState.getProcessFuture();
 	}
 
 }

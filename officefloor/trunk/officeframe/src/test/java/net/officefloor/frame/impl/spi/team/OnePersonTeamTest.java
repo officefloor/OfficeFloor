@@ -23,7 +23,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OnePersonTeam}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OnePersonTeamTest extends OfficeFrameTestCase {
@@ -56,6 +56,10 @@ public class OnePersonTeamTest extends OfficeFrameTestCase {
 
 		// Ensure person stopped working
 		assertTrue("Person should be stopped working", person.finished);
+
+		// Should have execute the task at least once
+		assertTrue("Should have execute the task at least once",
+				task.doTaskInvocationCount >= 1);
 	}
 
 }

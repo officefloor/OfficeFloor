@@ -23,7 +23,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link LeaderFollowerTeam}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
@@ -70,7 +70,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 
 	/**
 	 * Runs the test on the {@link LeaderFollowerTeam}.
-	 *
+	 * 
 	 * @param teamMemberCount
 	 *            Count of workers in the team.
 	 */
@@ -112,6 +112,12 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		for (int i = 0; i < teamMembers.length; i++) {
 			assertTrue("Team member " + i + " should be finished working",
 					teamMembers[i].finished);
+		}
+
+		// Should have invoked each task at least once
+		for (int i = 0; i < tasks.length; i++) {
+			assertTrue("Should have invoked task " + i + " at least once",
+					tasks[i].doTaskInvocationCount >= 1);
 		}
 	}
 

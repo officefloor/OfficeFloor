@@ -26,6 +26,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
@@ -61,6 +62,16 @@ public class ProcessStateImpl implements ProcessState {
 	 * Identifier for this {@link ProcessState}.
 	 */
 	private final Object processIdentifier = new Object();
+
+	/**
+	 * {@link ProcessFuture} for this {@link ProcessState}.
+	 */
+	private final ProcessFuture processFuture = new ProcessFuture() {
+		@Override
+		public boolean isComplete() {
+			return ProcessStateImpl.this.isComplete;
+		}
+	};
 
 	/**
 	 * <p>
@@ -224,6 +235,11 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
+	public ProcessFuture getProcessFuture() {
+		return this.processFuture;
+	}
+
+	@Override
 	public Object getProcessLock() {
 		return this.processLock;
 	}
@@ -254,6 +270,7 @@ public class ProcessStateImpl implements ProcessState {
 			JobNodeActivateSet activateSet) {
 
 		// Removing completed thread so must obtain process lock
+		boolean isProcessComplete = false;
 		synchronized (this.getProcessLock()) {
 
 			// Remove thread from active thread listing
@@ -279,6 +296,14 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Flag the process now complete
 				this.isComplete = true;
+				isProcessComplete = true;
+			}
+		}
+
+		// Notify if process is complete
+		if (isProcessComplete) {
+			synchronized (this.processFuture) {
+				this.processFuture.notifyAll();
 			}
 		}
 	}
@@ -330,15 +355,6 @@ public class ProcessStateImpl implements ProcessState {
 	public void registerProcessCompletionListener(
 			ProcessCompletionListener listener) {
 		this.completionListeners.add(listener);
-	}
-
-	/*
-	 * ==================== FlowFuture ======================================
-	 */
-
-	@Override
-	public boolean isComplete() {
-		return this.isComplete;
 	}
 
 }
