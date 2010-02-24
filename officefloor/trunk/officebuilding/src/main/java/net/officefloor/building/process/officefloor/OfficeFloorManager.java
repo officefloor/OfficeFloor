@@ -28,11 +28,11 @@ import javax.management.ObjectName;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessFuture;
 
 /**
  * {@link ManagedProcess} for an {@link OfficeFloor} {@link Process}.
@@ -226,9 +226,9 @@ public class OfficeFloorManager implements ManagedProcess,
 		private final Object parameter;
 
 		/**
-		 * {@link FlowFuture} for invoking the {@link Work}.
+		 * {@link ProcessFuture} for invoking the {@link Work}.
 		 */
-		private FlowFuture invokedFlowFuture = null;
+		private ProcessFuture invokedProcessFuture = null;
 
 		/**
 		 * Initiate.
@@ -255,8 +255,8 @@ public class OfficeFloorManager implements ManagedProcess,
 		 *             If fails to invoke the {@link Work}.
 		 */
 		public void invoke(OfficeFloor officeFloor) throws Exception {
-			// Invoke the work keeping track of its flow future
-			this.invokedFlowFuture = officeFloor.getOffice(this.officeName)
+			// Invoke the work keeping track of its process future
+			this.invokedProcessFuture = officeFloor.getOffice(this.officeName)
 					.getWorkManager(this.workName).invokeWork(this.parameter);
 		}
 
@@ -266,7 +266,7 @@ public class OfficeFloorManager implements ManagedProcess,
 		 * @return <code>true</code> if complete.
 		 */
 		public boolean isComplete() {
-			return this.invokedFlowFuture.isComplete();
+			return this.invokedProcessFuture.isComplete();
 		}
 	}
 
