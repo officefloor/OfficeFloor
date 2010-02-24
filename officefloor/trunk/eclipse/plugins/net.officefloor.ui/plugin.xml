@@ -165,4 +165,10 @@
 			id="net.officefloor.eclipse.OFFICE_FLOOR">
 		</classpathContainerInitializer>
 	</extension>
+ <extension
+       point="net.officefloor.ui.teamsources">
+    <teamsource
+          class="net.officefloor.eclipse.extension.teamsource.teams.ProcessContextTeamSourceExtension">
+    </teamsource>
+ </extension>
 </plugin>
