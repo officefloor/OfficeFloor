@@ -105,6 +105,31 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * <p>
+	 * Propagates the {@link Throwable} as either:
+	 * <ol>
+	 * <li>downcast {@link Exception}</li>
+	 * <li>downcast {@link Error}</li>
+	 * <li>{@link Throwable} wrapped with an {@link Exception}</li>
+	 * </ol>
+	 * <p>
+	 * This is useful for such methods as {@link TestCase#tearDown()} that do
+	 * not allow throwing {@link Throwable}.
+	 * 
+	 * @param ex
+	 *            {@link Throwable} to propagate as an {@link Exception}.
+	 */
+	public static void throwException(Throwable ex) throws Exception {
+		if (ex instanceof Exception) {
+			throw (Exception) ex;
+		} else if (ex instanceof Error) {
+			throw (Error) ex;
+		} else {
+			throw new Exception(ex);
+		}
+	}
+
+	/**
 	 * Displays the graph of objects starting at root.
 	 * 
 	 * @param root
