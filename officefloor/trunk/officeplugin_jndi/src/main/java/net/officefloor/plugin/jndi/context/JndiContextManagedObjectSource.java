@@ -17,15 +17,120 @@
  */
 package net.officefloor.plugin.jndi.context;
 
-import javax.naming.Context;
+import java.util.Properties;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} to provide a JNDI {@link Context}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiContextManagedObjectSource {
+public class JndiContextManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
+
+	/**
+	 * Property specifying the sub {@link Context}. Providing this property is
+	 * optional.
+	 */
+	public static final String PROPERTY_SUB_CONTEXT_NAME = "jndi.sub.context";
+
+	/**
+	 * {@link Properties} for creating the {@link Context}.
+	 */
+	private Properties properties;
+
+	/**
+	 * <p>
+	 * Name of the sub {@link Context} to return.
+	 * <p>
+	 * May be <code>null</code> to return the {@link InitialContext} - however
+	 * clients should not program against {@link InitialContext} as a
+	 * {@link SynchronisedContext} is always returned.
+	 */
+	private String subContextName = null;
+
+	/*
+	 * ==================== ManagedObjectSource ========================
+	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// No required properties
+	}
+
+	@Override
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the properties
+		this.properties = mosContext.getProperties();
+
+		// Obtain the sub context name (ensuring not blank)
+		this.subContextName = this.properties
+				.getProperty(PROPERTY_SUB_CONTEXT_NAME);
+		if ((this.subContextName == null)
+				|| (this.subContextName.trim().length() == 0)) {
+			// No/blank sub context name
+			this.subContextName = null;
+		}
+
+		// Obtain the Managed Object to validate Context
+		this.getManagedObject();
+	}
+
+	@Override
+	protected ManagedObject getManagedObject() throws Exception {
+
+		// Obtain the InitialContext
+		Context context = new InitialContext(this.properties);
+
+		// Obtain the sub context (if required)
+		if (this.subContextName != null) {
+			context = (Context) context.lookup(this.subContextName);
+		}
+
+		// Create and return the Managed Object
+		return new JndiContextManagedObject(new SynchronisedContext(context));
+	}
+
+	/**
+	 * {@link ManagedObject} for the JNDI {@link Context}.
+	 */
+	private class JndiContextManagedObject implements ManagedObject {
+
+		/**
+		 * {@link SynchronisedContext}.
+		 */
+		private final SynchronisedContext context;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link SynchronisedContext}.
+		 */
+		public JndiContextManagedObject(SynchronisedContext context) {
+			this.context = context;
+		}
+
+		/*
+		 * ======================= ManagedObject ============================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this.context;
+		}
+	}
 
 }

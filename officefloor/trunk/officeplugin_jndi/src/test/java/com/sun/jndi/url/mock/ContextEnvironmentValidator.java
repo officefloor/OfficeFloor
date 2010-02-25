@@ -15,21 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.jndi.object;
+package com.sun.jndi.url.mock;
 
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource;
+import java.util.Hashtable;
+
+import javax.naming.Context;
 
 /**
- * Tests the {@link JndiObjectManagedObjectSource}.
+ * Validates the environment for creating a {@link Context}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public interface ContextEnvironmentValidator {
 
-	public void testTODO() {
-		System.err.println("TODO implement test");
-	}
+	/**
+	 * Validates the environment.
+	 * 
+	 * @param environment
+	 *            Environment.
+	 */
+	void validateEnvironment(Hashtable<?, ?> environment);
 
 }
