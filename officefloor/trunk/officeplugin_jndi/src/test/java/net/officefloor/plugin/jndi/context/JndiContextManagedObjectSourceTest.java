@@ -22,8 +22,10 @@ import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
@@ -35,8 +37,30 @@ import com.sun.jndi.url.mock.mockURLContextFactory;
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiContextManagedObjectSourceTest extends
-		AbstractOfficeConstructTestCase {
+public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
+
+	/**
+	 * Validates the specification.
+	 */
+	public void testSpecification() {
+		ManagedObjectLoaderUtil
+				.validateSpecification(JndiContextManagedObjectSource.class);
+	}
+
+	/**
+	 * Validates the type.
+	 */
+	public void testType() {
+
+		// Create expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
+				.createManagedObjectTypeBuilder();
+		type.setObjectClass(Context.class);
+
+		// Validate the type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type,
+				JndiContextManagedObjectSource.class);
+	}
 
 	/**
 	 * Ensure able to obtain the {@link Context} (specifically the

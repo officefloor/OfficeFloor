@@ -17,13 +17,118 @@
  */
 package net.officefloor.plugin.jndi.object;
 
+import javax.naming.Context;
+
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} that provides an Object via a JNDI lookup.
  * 
  * @author Daniel Sagenschneider
  */
-public class JndiObjectManagedObjectSource {
+public class JndiObjectManagedObjectSource
+		extends
+		AbstractManagedObjectSource<JndiObjectManagedObjectSource.JndiObjectDependency, None> {
+
+	/**
+	 * Name of property providing the JNDI name of the Object to return.
+	 */
+	public static final String PROPERTY_JNDI_NAME = "jndi.name";
+
+	/**
+	 * Name of property providing the type of Object being returned.
+	 */
+	public static final String PROPERTY_OBJECT_TYPE = "object.type";
+
+	/**
+	 * Dependencies.
+	 */
+	public static enum JndiObjectDependency {
+		CONTEXT
+	}
+
+	/**
+	 * JNDI name.
+	 */
+	private String jndiName;
+
+	/*
+	 * ====================== ManagedObjectSource =======================
+	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(PROPERTY_JNDI_NAME, "JNDI Name");
+		context.addProperty(PROPERTY_OBJECT_TYPE, "Object Type");
+	}
+
+	@Override
+	protected void loadMetaData(
+			MetaDataContext<JndiObjectDependency, None> context)
+			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the JNDI name
+		this.jndiName = mosContext.getProperty(PROPERTY_JNDI_NAME);
+
+		// Obtain the Object Type
+		String objectTypeName = mosContext.getProperty(PROPERTY_OBJECT_TYPE);
+		Class<?> objectType = mosContext.getClassLoader().loadClass(
+				objectTypeName);
+
+		// Load the meta-data
+		context.setManagedObjectClass(JndiObjectManagedObject.class);
+		context.setObjectClass(objectType);
+
+		// Specify depends on Context
+		context.addDependency(JndiObjectDependency.CONTEXT, Context.class);
+	}
+
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		return new JndiObjectManagedObject();
+	}
+
+	/**
+	 * {@link ManagedObject} to return the JNDI Object.
+	 */
+	private class JndiObjectManagedObject implements
+			CoordinatingManagedObject<JndiObjectDependency> {
+
+		/**
+		 * {@link Context} to obtain the Object from.
+		 */
+		private Context context;
+
+		/*
+		 * =================== CoordinatingManagedObject ==================
+		 */
+
+		@Override
+		public void loadObjects(ObjectRegistry<JndiObjectDependency> registry)
+				throws Throwable {
+			// Obtain the Context
+			this.context = (Context) registry
+					.getObject(JndiObjectDependency.CONTEXT);
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+
+			// Obtain the Object from JNDI Context
+			Object object = this.context
+					.lookup(JndiObjectManagedObjectSource.this.jndiName);
+
+			// Return the Object
+			return object;
+		}
+	}
 
 }

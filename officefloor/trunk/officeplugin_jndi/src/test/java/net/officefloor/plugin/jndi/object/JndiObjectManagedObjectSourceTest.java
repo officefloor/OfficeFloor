@@ -17,8 +17,16 @@
  */
 package net.officefloor.plugin.jndi.object;
 
+import javax.naming.Context;
+import javax.sql.DataSource;
+
+import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
+import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
+import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource.JndiObjectDependency;
 
 /**
  * Tests the {@link JndiObjectManagedObjectSource}.
@@ -28,8 +36,75 @@ import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource;
 public class JndiObjectManagedObjectSourceTest extends
 		AbstractOfficeConstructTestCase {
 
-	public void testTODO() {
-		System.err.println("TODO implement test");
+	/**
+	 * Validates the specification.
+	 */
+	public void testSpecification() {
+		ManagedObjectLoaderUtil.validateSpecification(
+				JndiObjectManagedObjectSource.class,
+				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME, "JNDI Name",
+				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
+				"Object Type");
+	}
+
+	/**
+	 * Validates the type.
+	 */
+	public void testType() {
+
+		// Create the expected type
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
+				.createManagedObjectTypeBuilder();
+		type.setObjectClass(DataSource.class);
+		type.addDependency(JndiObjectDependency.CONTEXT, Context.class);
+
+		// Validate type
+		ManagedObjectLoaderUtil.validateManagedObjectType(type,
+				JndiObjectManagedObjectSource.class,
+				JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME,
+				"java:comp/env/jdbc/DataSourceName",
+				JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
+				DataSource.class.getName());
+	}
+
+	/**
+	 * Tests sourcing an Object from JNDI.
+	 */
+	public void testSourcingObjectFromJndi() throws Throwable {
+
+		// Objects for testing
+		final Context context = this.createMock(Context.class);
+		final String jndiName = "java:/comp/env/jdbc/DataSourceName";
+		final DataSource object = this.createMock(DataSource.class);
+
+		// Record obtaining the Object from JNDI
+		this.recordReturn(context, context.lookup(jndiName), object);
+
+		// Test
+		this.replayMockObjects();
+
+		// Obtain the JNDI Context Managed Object Source
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
+		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_JNDI_NAME,
+				jndiName);
+		loader.addProperty(JndiObjectManagedObjectSource.PROPERTY_OBJECT_TYPE,
+				DataSource.class.getName());
+		JndiObjectManagedObjectSource mos = loader
+				.loadManagedObjectSource(JndiObjectManagedObjectSource.class);
+
+		// Obtain the Managed Object
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(JndiObjectDependency.CONTEXT, context);
+		ManagedObject mo = user.sourceManagedObject(mos);
+
+		// Obtain the Object
+		Object retrievedObject = mo.getObject();
+
+		// Verify functionality
+		this.verifyMockObjects();
+
+		// Ensure correct retrieved Object
+		assertEquals("Incorrect retrieved Object", object, retrievedObject);
 	}
 
 }
