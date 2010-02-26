@@ -72,6 +72,10 @@ public class JndiContextManagedObjectSource extends
 		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
 
+		// Provide meta-data
+		context.setManagedObjectClass(JndiContextManagedObject.class);
+		context.setObjectClass(Context.class);
+
 		// Obtain the properties
 		this.properties = mosContext.getProperties();
 
