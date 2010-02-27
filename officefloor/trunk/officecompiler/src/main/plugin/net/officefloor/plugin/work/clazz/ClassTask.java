@@ -20,6 +20,7 @@ package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
@@ -32,6 +33,111 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel Sagenschneider
  */
 public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
+
+	/**
+	 * <p>
+	 * Invokes the {@link Method} as the {@link Task} on a type.
+	 * <p>
+	 * As the Object could be of any child of the type, the {@link Method} may
+	 * need to be derived from the input instance.
+	 * <p>
+	 * Before the input instance is interrogated the {@link Method} is attempted
+	 * to be retrieved from the <code>cache</code>. Should the {@link Method}
+	 * not be in the <code>cache</code> it is derived and loaded into the
+	 * <code>cache</code>.
+	 * 
+	 * @param instance
+	 *            Instance. May be <code>null</code> if static {@link Method}.
+	 * @param method
+	 *            {@link Method} template. Typically the {@link Method} from the
+	 *            type.
+	 * @param parameters
+	 *            Parameters.
+	 * @param cache
+	 *            Cache of the concrete {@link Class} to its corresponding
+	 *            {@link Method}.
+	 * @return {@link Method} return value.
+	 * @throws Throwable
+	 *             Failure invoking the {@link Method}.
+	 */
+	public static Object invokeMethod(Object instance, Method method,
+			Object[] parameters, Map<Class<?>, Method> cache) throws Throwable {
+
+		// Obtain the appropriate method
+		Method task = method;
+		if (instance != null) {
+
+			// Not static method, so lazy obtain instance method
+			synchronized (cache) {
+				Class<?> concreteClass = instance.getClass();
+				task = cache.get(concreteClass);
+				if (task == null) {
+					task = concreteClass.getMethod(method.getName(), method
+							.getParameterTypes());
+					cache.put(concreteClass, task);
+				}
+			}
+		}
+
+		// Invoke the method
+		return invokeMethod(instance, task, parameters);
+	}
+
+	/**
+	 * Invokes the {@link Method} as the {@link Task} directly on the
+	 * {@link Object}.
+	 * 
+	 * @param instance
+	 *            Instance. May be <code>null</code> if static {@link Method}.
+	 * @param method
+	 *            {@link Method}.
+	 * @param parameters
+	 *            Parameters.
+	 * @return {@link Method} return value.
+	 * @throws Throwable
+	 *             Failure invoking the {@link Method}.
+	 */
+	public static Object invokeMethod(Object instance, Method method,
+			Object[] parameters) throws Throwable {
+
+		// Invoke the task
+		try {
+			return method.invoke(instance, parameters);
+		} catch (InvocationTargetException ex) {
+			// Propagate failure of task
+			throw ex.getCause();
+		} catch (IllegalArgumentException ex) {
+
+			// Provide detail of illegal argument
+			StringBuilder message = new StringBuilder();
+			message.append("Task failure invoking ");
+			message.append(method.getName());
+			message.append("(");
+			boolean isFirst = true;
+			for (Class<?> parameterType : method.getParameterTypes()) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					message.append(", ");
+				}
+				message.append(parameterType.getName());
+			}
+			message.append(") with arguments ");
+			isFirst = true;
+			for (Object parameter : parameters) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					message.append(", ");
+				}
+				message.append(parameter == null ? "null" : parameter
+						.getClass().getName());
+			}
+
+			// Propagate illegal argument issue
+			throw new IllegalArgumentException(message.toString());
+		}
+	}
 
 	/**
 	 * Method to invoke for this {@link Task}.
@@ -92,42 +198,8 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 			params[i] = this.parameterFactories[i].createParameter(context);
 		}
 
-		// Invoke the task
-		try {
-			return this.method.invoke(instance, params);
-		} catch (InvocationTargetException ex) {
-			// Propagate failure of task
-			throw ex.getCause();
-		} catch (IllegalArgumentException ex) {
-			// Provide detail of illegal argument
-			StringBuilder message = new StringBuilder();
-			message.append("Task failure invoking ");
-			message.append(this.method.getName());
-			message.append("(");
-			boolean isFirst = true;
-			for (Class<?> parameterType : this.method.getParameterTypes()) {
-				if (isFirst) {
-					isFirst = false;
-				} else {
-					message.append(", ");
-				}
-				message.append(parameterType.getName());
-			}
-			message.append(") with arguments ");
-			isFirst = true;
-			for (Object parameter : params) {
-				if (isFirst) {
-					isFirst = false;
-				} else {
-					message.append(", ");
-				}
-				message.append(parameter == null ? "null" : parameter
-						.getClass().getName());
-			}
-
-			// Propagate illegal argument issue
-			throw new IllegalArgumentException(message.toString());
-		}
+		// Invoke the method as the task
+		return invokeMethod(instance, this.method, params);
 	}
 
 }
