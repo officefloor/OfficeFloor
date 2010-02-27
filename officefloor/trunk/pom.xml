@@ -20,9 +20,10 @@
 		<module>officebuilding</module>
 
 		<!-- Plug-in functionality -->
-		<module>officeplugin_jndi</module>
+		<module>officeplugin_jndi</module>		
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
+		<module>officeplugin_ejb</module>
 		<module>officeplugin_socket</module>
 		<module>officeplugin_spring</module>
 		<module>officeplugin_hibernate</module>
