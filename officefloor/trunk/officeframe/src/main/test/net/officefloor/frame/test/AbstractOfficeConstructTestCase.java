@@ -391,16 +391,35 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	@SuppressWarnings("unchecked")
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
-			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
-			String moName, Class<?> moType, String nextTaskName,
-			Class<?> nextTaskArgumentType) {
+			String taskName, TaskFactory<W, D, F> taskFactory, String teamName) {
 
 		// Create the Task Builder
 		TaskBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addTask(
 				taskName, taskFactory);
 
-		// Construct the task
+		// Link to Team
 		taskBuilder.setTeam(teamName);
+
+		// Return the Task Builder
+		return taskBuilder;
+	}
+
+	/**
+	 * Facade method to register a {@link Task}.
+	 * 
+	 * @return {@link TaskBuilder} for the {@link Task}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
+			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
+			String moName, Class<?> moType, String nextTaskName,
+			Class<?> nextTaskArgumentType) {
+
+		// Create the Task Builder
+		TaskBuilder taskBuilder = this.constructTask(taskName, taskFactory,
+				teamName);
+
+		// Register the next task and managed object
 		if (nextTaskName != null) {
 			taskBuilder.setNextTaskInFlow(nextTaskName, nextTaskArgumentType);
 		}
