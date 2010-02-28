@@ -27,11 +27,8 @@ import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 import javax.naming.spi.ObjectFactory;
 
-import net.officefloor.plugin.jndi.context.JndiContextManagedObjectSource;
-
 /**
- * Mock URL Context Factory for testing the
- * {@link JndiContextManagedObjectSource}.
+ * Mock URL Context Factory for testing,
  * 
  * @author Daniel Sagenschneider
  */
