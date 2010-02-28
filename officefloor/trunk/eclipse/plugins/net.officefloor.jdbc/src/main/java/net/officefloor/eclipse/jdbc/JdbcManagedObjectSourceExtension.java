@@ -37,7 +37,7 @@ import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
+import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
 import net.officefloor.plugin.jdbc.util.Setter;
 
@@ -239,10 +239,10 @@ public class JdbcManagedObjectSourceExtension implements
 				try {
 					// Create the connection pool data source
 					ClassLoader classLoader = context.getClassLoader();
-					ConnectionPoolDataSource dataSource = JdbcManagedObjectSource
-							.createConnectionPoolDataSource(
-									dataSourceClassName, classLoader,
-									properties);
+					ConnectionPoolDataSource dataSource = ReflectionUtil
+							.createInitialisedBean(dataSourceClassName,
+									classLoader,
+									ConnectionPoolDataSource.class, properties);
 
 					// Obtain connection from pool to validate
 					PooledConnection connection = dataSource

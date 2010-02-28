@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OfficeFloor Eclipse JDBC
+Bundle-Name: Eclipse JDBC
 Bundle-SymbolicName: net.officefloor.jdbc;singleton:=true
 Bundle-Version: 0.1.2
 Bundle-Vendor: OfficeFloor
@@ -17,7 +17,8 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.widgets,
  org.eclipse.ui
 Export-Package: net.officefloor.eclipse.jdbc,
- net.officefloor.plugin.jdbc,
+ net.officefloor.plugin.jdbc.connection,
+ net.officefloor.plugin.jdbc.datasource,
  net.officefloor.plugin.jdbc.util
 Bundle-ClassPath: .,
  commons-dbcp-1.2.2.jar,
@@ -26,6 +27,8 @@ Bundle-ClassPath: .,
  hsqldb-1.8.0.7.jar,
  junit-3.8.2.jar,
  mysql-connector-java-5.1.6.jar,
- net.officefloor.core-0.1.2.jar,
- net.officefloor.ui-0.1.2.jar,
- officeplugin_jdbc-0.1.2.jar
+ officecompiler-0.1.2.jar,
+ officeframe-0.1.2.jar,
+ officemodelgen-0.1.2.jar,
+ officeplugin_jdbc-0.1.2.jar,
+ officexml-0.1.2.jar
