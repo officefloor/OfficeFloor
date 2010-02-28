@@ -17,9 +17,7 @@
  */
 package net.officefloor.plugin.jndi.object;
 
-import javax.jms.Queue;
 import javax.naming.Context;
-import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -33,7 +31,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * <p>
  * {@link ManagedObjectSource} that provides an Object via a JNDI lookup.
  * <p>
- * This allows use of JNDI Objects such as a {@link DataSource} or {@link Queue}.
+ * This allows use of JNDI Objects such as a {@link javax.sql.DataSource} or
+ * {@link javax.jms.Queue}.
  * 
  * @author Daniel Sagenschneider
  */
