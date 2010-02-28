@@ -20,7 +20,7 @@
 		<module>officebuilding</module>
 
 		<!-- Plug-in functionality -->
-		<module>officeplugin_jndi</module>		
+		<module>officeplugin_jndi</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
 		<module>officeplugin_ejb</module>
@@ -99,6 +99,18 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Allow for quick build by ignoring stress tests -->
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>ignore.stress.tests</name>
+							<value>${ignore.stress.tests}</value>
+						</property>
+					</systemProperties>
 				</configuration>
 			</plugin>
 			<plugin>
