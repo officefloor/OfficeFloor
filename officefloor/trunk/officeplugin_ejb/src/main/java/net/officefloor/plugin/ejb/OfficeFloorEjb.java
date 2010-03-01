@@ -74,6 +74,33 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
  * &lt;/ejb-jar>
  * </pre>
  * 
+ * <p>
+ * The {@link EjbOrchestrator} and {@link EjbOrchestratorRemote} provide a
+ * generic interface for orchestration. It is also possible to extend this class
+ * to provide a typed interface:
+ * <p>
+ * Local interface:
+ * 
+ * <pre>
+ * &#064;Local
+ * public interface TypedEjbOrchestrator {
+ * 	public void typedOrchestration(String parameter) throws NamingException;
+ * }
+ * </pre>
+ * 
+ * <p>
+ * Bean implementation:
+ * 
+ * <pre>
+ * &#064;Stateless
+ * public class TypedOfficeFloorEjb extends OfficeFloorEjb implements
+ * 		TypedEjbOrchestrator {
+ * 	public void typedOrchestration(String parameter) throws NamingException {
+ * 		this.orchestrate(parameter);
+ * 	}
+ * }
+ * </pre>
+ * 
  * @author Daniel Sagenschneider
  */
 @Stateless
@@ -82,22 +109,74 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 
 	/**
+	 * Does the orchestration.
+	 * 
+	 * @param officeFloorJndiName
+	 *            {@link OfficeFloor} JNDI name.
+	 * @param officeName
+	 *            Name of the {@link Office} within the {@link OfficeFloor}.
+	 * @param workName
+	 *            Name of {@link Work} within the {@link Office}.
+	 * @param parameter
+	 *            Parameter for the {@link Work}.
+	 * @throws NamingException
+	 *             If fails to instigate the orchestration.
+	 */
+	public static void doOrchestration(String officeFloorJndiName,
+			String officeName, String workName, Object parameter)
+			throws NamingException {
+
+		// Obtain the Initial Context
+		Context initialContext = new InitialContext();
+
+		// Lookup the OfficeFloor
+		Object object = initialContext.lookup(officeFloorJndiName);
+		if ((object == null) || (!(object instanceof OfficeFloor))) {
+			throw new NamingException("Lookup by jndi-name '"
+					+ officeFloorJndiName
+					+ "' did not find a "
+					+ OfficeFloor.class.getSimpleName()
+					+ (object == null ? "" : " (Looked up " + object + " ["
+							+ object.getClass().getName() + "])"));
+		}
+		OfficeFloor officeFloor = (OfficeFloor) object;
+
+		try {
+			// Obtain the Work Manager
+			Office office = officeFloor.getOffice(officeName);
+			WorkManager workManager = office.getWorkManager(workName);
+
+			// Do the work
+			ProcessContextTeam.doWork(workManager, parameter);
+
+		} catch (InterruptedException ex) {
+			return;
+
+		} catch (UnknownWorkException ex) {
+			throw new NamingException(ex.getMessage());
+
+		} catch (NoInitialTaskException ex) {
+			throw new NamingException(ex.getMessage());
+		}
+	}
+
+	/**
 	 * JDNI name for the {@link OfficeFloor}.
 	 */
 	@Resource(name = "officeFloorJndiName")
-	private String officeFloorJndiName;
+	protected String officeFloorJndiName;
 
 	/**
 	 * Name of the {@link Office} within the {@link OfficeFloor}.
 	 */
 	@Resource(name = "officeName")
-	private String officeName;
+	protected String officeName;
 
 	/**
 	 * Name of the {@link Work} to be invoked.
 	 */
 	@Resource(name = "workName")
-	private String workName;
+	protected String workName;
 
 	/**
 	 * Validates the dependency injection of configuration available.
@@ -150,43 +229,8 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 
 	@Override
 	public void orchestrate(Object parameter) throws NamingException {
-
-		// TODO remove
-		System.out.println("OfficeFloor=" + this.officeFloorJndiName
-				+ ", Office=" + this.officeName + ", Work=" + this.workName);
-
-		// Obtain the Initial Context
-		Context initialContext = new InitialContext();
-
-		// Lookup the OfficeFloor
-		Object object = initialContext.lookup(this.officeFloorJndiName);
-		if ((object == null) || (!(object instanceof OfficeFloor))) {
-			throw new NamingException("Lookup by jndi-name '"
-					+ this.officeFloorJndiName
-					+ "' did not find a "
-					+ OfficeFloor.class.getSimpleName()
-					+ (object == null ? "" : " (Looked up " + object + " ["
-							+ object.getClass().getName() + "])"));
-		}
-		OfficeFloor officeFloor = (OfficeFloor) object;
-
-		try {
-			// Obtain the Work Manager
-			Office office = officeFloor.getOffice(this.officeName);
-			WorkManager workManager = office.getWorkManager(this.workName);
-
-			// Do the work
-			ProcessContextTeam.doWork(workManager, parameter);
-
-		} catch (InterruptedException ex) {
-			return;
-
-		} catch (UnknownWorkException ex) {
-			throw new NamingException(ex.getMessage());
-
-		} catch (NoInitialTaskException ex) {
-			throw new NamingException(ex.getMessage());
-		}
+		doOrchestration(this.officeFloorJndiName, this.officeName,
+				this.workName, parameter);
 	}
 
 }
