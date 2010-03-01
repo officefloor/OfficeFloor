@@ -45,6 +45,7 @@
 		</module>
 		<module>eclipse/plugins/net.officefloor.jdbc
 		</module>
+		<module>eclipse/plugins/net.officefloor.jndi</module>
 		<module>eclipse/plugins/net.officefloor.filingcabinet
 		</module>
 		<module>eclipse/plugins/net.officefloor.demo</module>
