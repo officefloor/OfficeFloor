@@ -31,7 +31,6 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource;
 import net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource.JndiObjectDependency;
-import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -110,7 +109,7 @@ public class JndiObjectManagedObjectSourceExtension
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
 		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClassManagedObjectSource.class) };
+				JndiObjectManagedObjectSource.class) };
 	}
 
 	/*
@@ -126,7 +125,7 @@ public class JndiObjectManagedObjectSourceExtension
 
 		// Ensure have object type
 		if (EclipseUtil.isBlank(objectTypeName)) {
-			throw new Exception("No class name provided");
+			throw new Exception("No object type provided");
 		}
 
 		// Translate object type name to resource name

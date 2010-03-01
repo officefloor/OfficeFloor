@@ -13,4 +13,10 @@
             class="net.officefloor.eclipse.jndi.JndiObjectManagedObjectSourceExtension">
       </managedobjectsource>
    </extension>
+   <extension
+         point="net.officefloor.ui.worksources">
+      <worksource
+            class="net.officefloor.eclipse.jndi.JndiWorkSourceExtension">
+      </worksource>
+   </extension>
 </plugin>
