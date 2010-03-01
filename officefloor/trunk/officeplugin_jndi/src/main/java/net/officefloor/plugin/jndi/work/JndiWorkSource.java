@@ -116,6 +116,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		// Determine if have facade
 		String facadeClassName = context.getProperty(PROPERTY_FACADE_CLASS,
 				null);
+
 		Class<?> facadeClass = null;
 		if ((facadeClassName != null) && (facadeClassName.trim().length() > 0)) {
 
@@ -235,7 +236,9 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		if (workType != null) {
 			boolean hasWorkTypeParameter = false;
 			for (Class<?> paramType : paramTypes) {
-				if (workType.equals(paramType)) {
+				// (qualified name match due to class loader issues)
+				if (workType.equals(paramType)
+						|| (workType.getName().equals(paramType.getName()))) {
 					hasWorkTypeParameter = true;
 				}
 			}
@@ -285,9 +288,11 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 				continue;
 			}
 
-			// Determine if work type
+			// Determine if work type.
+			// (qualified name match due to class loader issues)
 			if (workType != null) {
-				if (workType.equals(paramType)) {
+				if (workType.equals(paramType)
+						|| (workType.getName().equals(paramType.getName()))) {
 					// Parameter is the work type.
 					parameters[i] = new JndiWorkParameterFactory();
 					continue;
