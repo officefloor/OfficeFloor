@@ -343,7 +343,7 @@ public class SourceExtensionUtil {
 		// Default the property value if blank
 		String propertyValue = property.getValue();
 		if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
-			property.setValue(defaultValue);
+			property.setValue(defaultValue == null ? "" : defaultValue);
 		}
 
 		// Provide the label

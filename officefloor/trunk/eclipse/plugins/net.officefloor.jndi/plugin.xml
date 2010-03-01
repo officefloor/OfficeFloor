@@ -7,4 +7,10 @@
             class="net.officefloor.eclipse.jndi.JndiContextManagedObjectSourceExtension">
       </managedobjectsource>
    </extension>
+   <extension
+         point="net.officefloor.ui.managedobjectsources">
+      <managedobjectsource
+            class="net.officefloor.eclipse.jndi.JndiObjectManagedObjectSourceExtension">
+      </managedobjectsource>
+   </extension>
 </plugin>

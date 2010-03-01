@@ -74,12 +74,12 @@ public class JndiContextManagedObjectSourceExtension
 		SourceExtensionUtil.loadPropertyLayout(subContextPanel);
 
 		// Add the Sub Context Name
-		SourceExtensionUtil.createPropertyText("Sub-context JNDI name:",
+		SourceExtensionUtil.createPropertyText("Sub-context JNDI name",
 				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
 				"java:comp/env", subContextPanel, context, null);
 
 		// Add checkbox to validate Context
-		SourceExtensionUtil.createPropertyCheckbox("Validate:",
+		SourceExtensionUtil.createPropertyCheckbox("Validate",
 				JndiContextManagedObjectSource.PROPERTY_VALIDATE, false,
 				"true", "false", subContextPanel, context, null);
 
