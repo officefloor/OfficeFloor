@@ -16,8 +16,9 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.eclipse.ui
-Export-Package: net.officefloor.eclipse.jndi.context,
- net.officefloor.eclipse.jndi.object
+Export-Package: net.officefloor.plugin.jndi.context,
+ net.officefloor.plugin.jndi.object,
+ net.officefloor.plugin.jndi.work
 Bundle-ClassPath: .,
  easymock-1.1.jar,
  junit-3.8.2.jar,
