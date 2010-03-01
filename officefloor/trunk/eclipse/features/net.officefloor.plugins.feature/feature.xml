@@ -38,6 +38,13 @@
          install-size="0"
          version="0.1.2"
          unpack="true"/>
+         
+   <plugin
+         id="net.officefloor.jndi"
+         download-size="0"
+         install-size="0"
+         version="0.1.2"
+         unpack="true"/>
 
    <plugin
          id="net.officefloor.socket"

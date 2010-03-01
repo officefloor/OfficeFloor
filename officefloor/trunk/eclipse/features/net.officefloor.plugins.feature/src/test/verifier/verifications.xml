@@ -14,7 +14,11 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jdbc"[^_]*version="${pom.version}"[^_]*id="net.officefloor.socket"]]></contains>
+			<contains><![CDATA[id="net.officefloor.jdbc"[^_]*version="${pom.version}"[^_]*id="net.officefloor.jndi"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.jndi"[^_]*version="${pom.version}"[^_]*id="net.officefloor.socket"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>

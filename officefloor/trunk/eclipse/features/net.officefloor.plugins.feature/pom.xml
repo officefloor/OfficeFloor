@@ -107,6 +107,12 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
+			<artifactId>net.officefloor.jndi</artifactId>
+			<version>${pom.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
 			<artifactId>net.officefloor.socket</artifactId>
 			<version>${pom.version}</version>
 			<scope>compile</scope>
