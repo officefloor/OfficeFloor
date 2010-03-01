@@ -23,7 +23,6 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
@@ -157,14 +156,6 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		// Attempt to load the work type
 		this.workType = this.workLoader.loadWorkType(this.workSourceClass,
 				this.properties);
-
-		// TODO remove
-		if (this.workType != null) {
-			System.out.println("Loaded WORK TYPE");
-			for (TaskType<?, ?, ?> task : this.workType.getTaskTypes()) {
-				System.out.println("   " + task.getTaskName());
-			}
-		}
 	}
 
 	/**
