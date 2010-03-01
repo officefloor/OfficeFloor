@@ -90,11 +90,6 @@ public class WorkSourceTasksWizardPage extends WizardPage {
 	 */
 	public void loadWorkSourceInstance(WorkSourceInstance workSourceInstance) {
 
-		// Do nothing if same work source
-		if (this.workSourceInstance == workSourceInstance) {
-			return;
-		}
-
 		// Specify the work source instance and obtain work type (may be null)
 		this.workSourceInstance = workSourceInstance;
 		WorkType<?> workType = (this.workSourceInstance != null ? this.workSourceInstance
