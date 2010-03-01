@@ -43,6 +43,10 @@
 		</antcall>
 		<antcall target="moveArtifact">
 			<param name="SUB_DIR" value="plugins" />
+			<param name="MOVE_ARTIFACT_ID" value="net.officefloor.jndi" />
+		</antcall>
+		<antcall target="moveArtifact">
+			<param name="SUB_DIR" value="plugins" />
 			<param name="MOVE_ARTIFACT_ID" value="net.officefloor.socket" />
 		</antcall>
 		<antcall target="moveArtifact">
@@ -73,6 +77,9 @@
 		</antcall>
 		<antcall target="repackArtifact">
 			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.jdbc" />
+		</antcall>
+		<antcall target="repackArtifact">
+			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.jndi" />
 		</antcall>
 		<antcall target="repackArtifact">
 			<param name="CONDITION_ARTIFACT_ID" value="net.officefloor.socket" />
