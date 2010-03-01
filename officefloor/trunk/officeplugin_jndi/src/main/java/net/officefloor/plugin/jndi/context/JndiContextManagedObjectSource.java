@@ -43,6 +43,16 @@ public class JndiContextManagedObjectSource extends
 	public static final String PROPERTY_SUB_CONTEXT_NAME = "jndi.sub.context";
 
 	/**
+	 * <p>
+	 * Validating the {@link Context} may only work within the appropriate
+	 * environment.
+	 * <p>
+	 * For example the schema <code>java</code> (for <code>java:comp/env</code>)
+	 * is typically only available when executing within an Application Server.
+	 */
+	public static final String PROPERTY_VALIDATE = "officefloor.validate.context";
+
+	/**
 	 * {@link Properties} for creating the {@link Context}.
 	 */
 	private Properties properties;
@@ -80,16 +90,20 @@ public class JndiContextManagedObjectSource extends
 		this.properties = mosContext.getProperties();
 
 		// Obtain the sub context name (ensuring not blank)
-		this.subContextName = this.properties
-				.getProperty(PROPERTY_SUB_CONTEXT_NAME);
+		this.subContextName = this.properties.getProperty(
+				PROPERTY_SUB_CONTEXT_NAME, null);
 		if ((this.subContextName == null)
 				|| (this.subContextName.trim().length() == 0)) {
 			// No/blank sub context name
 			this.subContextName = null;
 		}
 
-		// Obtain the Managed Object to validate Context
-		this.getManagedObject();
+		// Determine if validate context
+		String validate = mosContext.getProperty(PROPERTY_VALIDATE, "false");
+		if (Boolean.parseBoolean(validate)) {
+			// Obtain the Managed Object to validate Context
+			this.getManagedObject();
+		}
 	}
 
 	@Override

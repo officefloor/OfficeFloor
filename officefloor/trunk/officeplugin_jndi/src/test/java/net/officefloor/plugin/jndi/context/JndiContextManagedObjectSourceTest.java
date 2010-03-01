@@ -98,9 +98,38 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to obtain sub {@link Context}.
+	 * Ensure able to obtain sub {@link Context} without validation.
 	 */
-	public void testObtainSubContext() throws Throwable {
+	public void testObtainSubContextWithoutValidation() throws Throwable {
+
+		// Mocks
+		final Context context = this.createMock(Context.class);
+		final Context subContext = this.createMock(Context.class);
+
+		// Record create and return Context
+		this.recordReturn(context, context.lookup("test"), subContext);
+
+		// Replay
+		this.replayMockObjects();
+
+		// Source the Context
+		Context sourcedContext = this.sourceContext(context,
+				Context.INITIAL_CONTEXT_FACTORY, mockURLContextFactory.class
+						.getName(),
+				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
+				"test");
+
+		// Ensure correct Context
+		assertEquals("Incorrect Context", subContext, sourcedContext);
+
+		// Verify functionality
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to obtain sub {@link Context} with validation.
+	 */
+	public void testObtainSubContextWithValidation() throws Throwable {
 
 		// Mocks
 		final Context context = this.createMock(Context.class);
@@ -120,7 +149,8 @@ public class JndiContextManagedObjectSourceTest extends OfficeFrameTestCase {
 				Context.INITIAL_CONTEXT_FACTORY, mockURLContextFactory.class
 						.getName(),
 				JndiContextManagedObjectSource.PROPERTY_SUB_CONTEXT_NAME,
-				"test");
+				"test", JndiContextManagedObjectSource.PROPERTY_VALIDATE,
+				"true");
 
 		// Ensure correct Context
 		assertEquals("Incorrect Context", subContext, sourcedContext);
