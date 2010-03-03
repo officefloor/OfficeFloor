@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.officefloor.tool</groupId>
+	<artifactId>latest</artifactId>
+	<version>SNAPSHOT</version>
+	<name>OfficeFloor Tool Latest Artifacts</name>
+	<description>Dependency grouping to allow inclusion of latest tool artifacts</description>
+	<dependencies>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>officetool_demo</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>${pom.groupId}</groupId>
+			<artifactId>officetool_filingcabinet</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+	</dependencies>
+</project>

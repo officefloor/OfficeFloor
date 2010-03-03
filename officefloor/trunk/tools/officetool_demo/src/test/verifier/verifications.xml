@@ -1,10 +1,13 @@
 <verifications>
 	<files>
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<!-- Ensure releasing latest version -->
+			<location>${basedir}/../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>${pom.artifactId}</artifactId>(\s)*<version>${pom.version}</version>]]></contains>
 		</file>
+
 		<file>
+			<!-- Ensure run correct version of demo -->
 			<location>officedemo</location>
 			<contains>OFFICE_DEMO_VERSION=${pom.version}</contains>
 		</file>
