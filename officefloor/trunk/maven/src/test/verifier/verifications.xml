@@ -1,0 +1,9 @@
+<verifications>
+	<files>
+		<!-- Skin for Maven Site Generation is same version -->
+		<file>
+			<location>maven/maven-officefloor-skin/pom.xml</location>
+			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+		</file>
+	</files>
+</verifications>
