@@ -13,8 +13,9 @@
 	<name>Tool</name>
 	<description>Tools for OfficeFloor</description>
 	<modules>
-		<module>officetool_filingcabinet</module>
 		<module>officetool_demo</module>
+		<module>officetool_filingcabinet</module>
+		<module>latest</module>
 	</modules>
 	<build>
 		<plugins>
@@ -36,8 +37,8 @@
 		<!-- OfficeFloor core functionality -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>core</artifactId>
-			<version>${pom.version}</version>
+			<artifactId>latest</artifactId>
+			<version>SNAPSHOT</version>
 		</dependency>
 		<!-- Testing -->
 		<dependency>

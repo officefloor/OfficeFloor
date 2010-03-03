@@ -7,7 +7,7 @@
 		</file>
 		
 		<file>
-			<!-- Ensure run correct version on building -->
+			<!-- Ensure run correct version of building -->
 			<location>officebuilding</location>
 			<contains>OFFICE_BUILDING_VERSION=${pom.version}</contains>
 		</file>
