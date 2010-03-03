@@ -33,31 +33,26 @@
 		<module>officetool_demo</module>
 
 		<!-- Core eclipse functionality -->
-		<module>eclipse/plugins/net.officefloor.core
-		</module>
-		<module>eclipse/plugins/net.officefloor.ui
-		</module>
-		<module>eclipse/features/net.officefloor.feature
-		</module>
+		<module>eclipse/plugins/net.officefloor.core</module>
+		<module>eclipse/plugins/net.officefloor.ui</module>
+		<module>eclipse/features/net.officefloor.feature</module>
 
 		<!-- Plug-in eclipse functionality -->
-		<module>eclipse/plugins/net.officefloor.socket
-		</module>
-		<module>eclipse/plugins/net.officefloor.jdbc
-		</module>
+		<module>eclipse/plugins/net.officefloor.socket</module>
+		<module>eclipse/plugins/net.officefloor.jdbc</module>
 		<module>eclipse/plugins/net.officefloor.jndi</module>
-		<module>eclipse/plugins/net.officefloor.filingcabinet
-		</module>
+		<module>eclipse/plugins/net.officefloor.filingcabinet</module>
 		<module>eclipse/plugins/net.officefloor.demo</module>
-		<module>eclipse/features/net.officefloor.plugins.feature
-		</module>
+		<module>eclipse/features/net.officefloor.plugins.feature</module>
 
 		<!-- Eclipse update site -->
 		<module>eclipse/update.site</module>
 
 		<!-- Skin for Maven Site Generation -->
-		<module>maven/maven-officefloor-skin
-		</module>
+		<module>maven/maven-officefloor-skin</module>
+		
+		<!-- Examples -->
+		<module>examples/EjbOrchestration</module>
 
 	</modules>
 	<url>http://www.officefloor.net</url>
