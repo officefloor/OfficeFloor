@@ -9,58 +9,18 @@
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
 	<modules>
-
-		<!-- Core functionality -->
-		<module>officeframe</module>
-		<module>officexml</module>
-		<module>officemodelgen</module>
-		<module>officecompiler</module>
-
-		<!-- Run functionality -->
-		<module>officebuilding</module>
-
-		<!-- Plug-in functionality -->
-		<module>officeplugin_jndi</module>
-		<module>officeplugin_jdbc</module>
-		<module>officeplugin_jms</module>
-		<module>officeplugin_ejb</module>
-		<module>officeplugin_socket</module>
-		<module>officeplugin_spring</module>
-		<module>officeplugin_hibernate</module>
-
-		<!-- Tool functionality -->
-		<module>officetool_filingcabinet</module>
-		<module>officetool_demo</module>
-
-		<!-- Core eclipse functionality -->
-		<module>eclipse/plugins/net.officefloor.core</module>
-		<module>eclipse/plugins/net.officefloor.ui</module>
-		<module>eclipse/features/net.officefloor.feature</module>
-
-		<!-- Plug-in eclipse functionality -->
-		<module>eclipse/plugins/net.officefloor.socket</module>
-		<module>eclipse/plugins/net.officefloor.jdbc</module>
-		<module>eclipse/plugins/net.officefloor.jndi</module>
-		<module>eclipse/plugins/net.officefloor.filingcabinet</module>
-		<module>eclipse/plugins/net.officefloor.demo</module>
-		<module>eclipse/features/net.officefloor.plugins.feature</module>
-
-		<!-- Eclipse update site -->
-		<module>eclipse/update.site</module>
-
-		<!-- Skin for Maven Site Generation -->
-		<module>maven/maven-officefloor-skin</module>
-		
-		<!-- Examples -->
-		<module>examples/EjbOrchestration</module>
-
+		<module>core</module>
+		<module>plugins</module>
+		<module>eclipse</module>
+		<module>tools</module>
+		<module>maven</module>
+		<module>examples</module>
 	</modules>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
 	<issueManagement>
-		<system>Trac</system>
-		<url>http://apps.sourceforge.net/trac/officefloor
-		</url>
+		<system>Tracker</system>
+		<url>http://sourceforge.net/tracker/?atid=799427&group_id=156349</url>
 	</issueManagement>
 	<developers>
 		<developer>
@@ -91,6 +51,7 @@
 	<build>
 		<plugins>
 			<plugin>
+				<!-- Keep standard JVM for compilation -->
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>1.6</source>
@@ -98,24 +59,15 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Allow for quick build by ignoring stress tests -->
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemProperties>
-						<property>
-							<name>ignore.stress.tests</name>
-							<value>${ignore.stress.tests}</value>
-						</property>
-					</systemProperties>
-				</configuration>
-			</plugin>
-			<plugin>
+				<!-- Always include sources and javadoc for Eclipse -->
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
 			</plugin>
 			<plugin>
+				<!-- Ensure correct licensing -->
 				<groupId>com.mycila.maven-license-plugin
 				</groupId>
 				<artifactId>maven-license-plugin</artifactId>
@@ -154,7 +106,7 @@
 					</headerDefinitions>
 				</configuration>
 			</plugin>
-			<!-- START: validate version -->
+			<!-- START: project validation -->
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
@@ -191,7 +143,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- END: validate version -->
+			<!-- END: project validation -->
 		</plugins>
 	</build>
 	<reporting>
