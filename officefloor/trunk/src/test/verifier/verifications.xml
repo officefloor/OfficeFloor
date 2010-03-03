@@ -5,5 +5,31 @@
 			<location>src/site/site.xml</location>
 			<contains><![CDATA[<skin>[^_]*<version>${pom.version}</version>[^_]*</skin>]]></contains>
 		</file>
+
+		<!-- Ensure all the modules inheriting latest -->
+		<file>
+			<location>core/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>plugins/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>tools/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>eclipse/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>maven/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>deploy/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
 	</files>
 </verifications>

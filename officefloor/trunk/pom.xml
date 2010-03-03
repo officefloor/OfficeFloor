@@ -11,8 +11,8 @@
 	<modules>
 		<module>core</module>
 		<module>plugins</module>
-		<module>eclipse</module>
 		<module>tools</module>
+		<module>eclipse</module>
 		<module>maven</module>
 		<module>examples</module>
 		<module>deploy</module>
