@@ -15,12 +15,13 @@
 		<module>tools</module>
 		<module>maven</module>
 		<module>examples</module>
+		<module>deploy</module>
 	</modules>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
 	<issueManagement>
 		<system>Tracker</system>
-		<url>http://sourceforge.net/tracker/?atid=799427&group_id=156349</url>
+		<url>http://sourceforge.net/tracker/?atid=799427&amp;group_id=156349</url>
 	</issueManagement>
 	<developers>
 		<developer>
