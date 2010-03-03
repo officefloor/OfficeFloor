@@ -17,6 +17,8 @@
 		<module>officexml</module>
 		<module>officemodelgen</module>
 		<module>officecompiler</module>
+		<module>officebuilding</module>
+		<module>latest</module>
 	</modules>
 	<build>
 		<plugins>
