@@ -35,18 +35,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>net.officefloor.core</artifactId>
-			<version>${pom.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>net.officefloor.ui</artifactId>
-			<version>${pom.version}</version>
-			<scope>compile</scope>
-		</dependency>
-	</dependencies>
 </project>
