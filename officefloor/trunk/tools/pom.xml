@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>officefloor</artifactId>
+		<version>0.1.2</version>
+	</parent>
+	<groupId>net.officefloor.tool</groupId>
+	<artifactId>tool</artifactId>
+	<packaging>pom</packaging>
+	<name>Tool</name>
+	<description>Tools for OfficeFloor</description>
+	<modules>
+		<module>officetool_filingcabinet</module>
+		<module>officetool_demo</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Allow for quick build by ignoring stress tests -->
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>ignore.stress.tests</name>
+							<value>${ignore.stress.tests}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- OfficeFloor core functionality -->
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>core</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+		<!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.2</version>
+		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>1.1</version>
+		</dependency>
+	</dependencies>
+</project>

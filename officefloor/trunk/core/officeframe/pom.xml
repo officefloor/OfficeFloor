@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor</groupId>
-		<artifactId>officefloor</artifactId>
+		<groupId>net.officefloor.core</groupId>
+		<artifactId>core</artifactId>
 		<version>0.1.2</version>
 	</parent>
 	<artifactId>officeframe</artifactId>
@@ -33,16 +33,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
-		</dependency>
-		<dependency>
-			<groupId>easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<version>1.1</version>
-		</dependency>
-	</dependencies>
 </project>
