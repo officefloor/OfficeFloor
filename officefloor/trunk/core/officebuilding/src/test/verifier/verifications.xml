@@ -1,10 +1,13 @@
 <verifications>
 	<files>
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<!-- Ensure releasing latest version -->
+			<location>${basedir}/../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>${pom.artifactId}</artifactId>(\s)*<version>${pom.version}</version>]]></contains>
 		</file>
+		
 		<file>
+			<!-- Ensure run correct version on building -->
 			<location>officebuilding</location>
 			<contains>OFFICE_BUILDING_VERSION=${pom.version}</contains>
 		</file>
