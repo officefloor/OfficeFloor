@@ -1,10 +1,10 @@
 
-Manual setup steps to compile net.officefloor.core
+Manual setup steps to compile net.officefloor.eclipse
 
 
 
 BACKGROUND
-net.officefloor.core requires an Eclipse install to access the necessary
+net.officefloor.eclipse requires an Eclipse install to access the necessary
 plugin jars to run various aspects of PDE (including build scripts). Maven
 currently (version 2.x, though coming 3.x) can not interrogate Eclipse
 plugin repositories to obtain the necessary dependencies.  

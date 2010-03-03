@@ -1,36 +1,33 @@
 <verifications>
 	<files>
+		<!-- Ensure correct versions in Eclipse plugin -->
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains>Bundle-Version: ${project.version}</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>Bundle-Version: ${pom.version}</contains>
+			<contains>officeframe-@{officeframe_version}.jar</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>officeframe-${pom.version}.jar</contains>
+			<contains>officexml-@{officexml_version}.jar</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>officexml-${pom.version}.jar</contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains>officecompiler-${pom.version}.jar</contains>
+			<contains>officecompiler-@{officecompiler_version}.jar</contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains>officeframe-${pom.version}.jar</contains>
+			<contains>officeframe-@{officeframe_version}.jar</contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains>officexml-${pom.version}.jar</contains>
+			<contains>officexml-@{officexml_version}.jar</contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains>officecompiler-${pom.version}.jar</contains>
+			<contains>officecompiler-@{officecompiler_version}.jar</contains>
 		</file>
 	</files>
 </verifications>

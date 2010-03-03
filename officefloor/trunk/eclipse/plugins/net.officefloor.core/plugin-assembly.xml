@@ -8,9 +8,9 @@
 		<dependencySet>
 			<!-- Core dependencies -->
 			<includes>
-				<include>${pom.groupId}:officeframe</include>
-				<include>${pom.groupId}:officexml</include>
-				<include>${pom.groupId}:officecompiler</include>
+				<include>net.officefloor.core:officeframe</include>
+				<include>net.officefloor.core:officexml</include>
+				<include>net.officefloor.core:officecompiler</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
