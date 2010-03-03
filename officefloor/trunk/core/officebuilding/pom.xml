@@ -11,7 +11,6 @@
 	<name>OfficeBuilding</name>
 	<description>Building to contain the OfficeFloors</description>
 	<dependencies>
-		<!-- Build dependencies -->
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>officecompiler</artifactId>
@@ -24,88 +23,5 @@
 			<version>3.0.1</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- Additional release dependencies -->
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_hibernate</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_jdbc</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_jms</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_socket</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_spring</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Generates the release -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>release</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>release-assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>deploy-release</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<echo>Deploying the OfficeBuilding release to SourceForge</echo>
-								<property name="deploy.content.dir" value="${project.build.directory}/sourceforge_deploy_content" />
-								<mkdir dir="${deploy.content.dir}/${pom.version}" />
-								<copy file="${project.build.directory}/officebuilding-${pom.version}-release.zip" todir="${deploy.content.dir}/${pom.version}" />
-								<exec dir="${deploy.content.dir}" executable="rsync" failonerror="true">
-									<arg line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/OfficeFloor/" />
-								</exec>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	<distributionManagement>
-		<repository>
-			<id>Ignore</id>
-			<name>Ignore as using ant to deploy</name>
-			<url>file://${java.io.tmpdir}</url>
-		</repository>
-	</distributionManagement>
 </project>
