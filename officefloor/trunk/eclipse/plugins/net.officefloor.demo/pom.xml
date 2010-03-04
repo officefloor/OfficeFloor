@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
+		<relativePath>../../pom.xml</relativePath>
 		<!--
 			Reminder: do not forget to update bin.include of build.properties on
 			changing version to include the correct jar dependencies in building
 			this plug-in.
 		-->
 		<version>0.1.2</version>
-		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.demo</artifactId>
 	<name>Eclipse OfficeFloor Demo</name>

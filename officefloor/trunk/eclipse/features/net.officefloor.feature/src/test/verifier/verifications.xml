@@ -1,16 +1,17 @@
 <verifications>
 	<files>
+		<!-- Ensure correct versions -->
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.feature"[^_]*version="${pom.version}"[^_]*provider-name="OfficeFloor"]]></contains>
+			<contains><![CDATA[id="net.officefloor.feature"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.core"[^_]*version="${pom.version}"[^_]*id="net.officefloor.ui"]]></contains>
+			<contains><![CDATA[id="net.officefloor.core"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.ui"[^_]*version="${pom.version}"[^_]*/>]]></contains>
+			<contains><![CDATA[id="net.officefloor.ui"(\s+)version="${project.version}"]]></contains>
 		</file>
 	</files>
 </verifications>

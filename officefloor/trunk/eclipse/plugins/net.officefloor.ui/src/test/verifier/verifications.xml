@@ -1,16 +1,13 @@
 <verifications>
 	<files>
+		<!-- Ensure correct versions -->
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains>Bundle-Version: ${project.version}</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>Bundle-Version: ${pom.version}</contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core;bundle-version="${pom.version}"</contains>
+			<contains>net.officefloor.core;bundle-version="${project.version}"</contains>
 		</file>
 	</files>
 </verifications>

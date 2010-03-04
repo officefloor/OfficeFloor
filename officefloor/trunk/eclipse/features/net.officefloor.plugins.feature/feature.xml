@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="net.officefloor.plugins.feature"
       label="OfficeFloor Plugins Feature"
+      id="net.officefloor.plugins.feature"
       version="0.1.2"
       provider-name="OfficeFloor">
 
@@ -34,37 +34,37 @@
 
    <plugin
          id="net.officefloor.jdbc"
+         version="0.1.2"
          download-size="0"
          install-size="0"
-         version="0.1.2"
          unpack="true"/>
          
    <plugin
          id="net.officefloor.jndi"
+         version="0.1.2"
          download-size="0"
          install-size="0"
-         version="0.1.2"
          unpack="true"/>
 
    <plugin
          id="net.officefloor.socket"
+         version="0.1.2"
          download-size="0"
          install-size="0"
-         version="0.1.2"
          unpack="true"/>
 
    <plugin
          id="net.officefloor.filingcabinet"
+         version="0.1.2"
          download-size="0"
          install-size="0"
-         version="0.1.2"
          unpack="false"/>
 
    <plugin
          id="net.officefloor.demo"
+         version="0.1.2"
          download-size="0"
          install-size="0"
-         version="0.1.2"
          unpack="false"/>
 
 </feature>
