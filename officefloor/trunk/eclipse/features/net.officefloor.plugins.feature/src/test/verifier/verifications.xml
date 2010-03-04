@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<file>
+			<!-- Ensure releasing latest version -->
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
+		</file>
+
 		<!-- Ensure correct version -->
 		<file>
 			<location>feature.xml</location>
@@ -7,27 +13,53 @@
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="${project.version}"]]></contains>
+			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="@{net.officefloor.feature_version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jdbc"(\s+)version="${project.version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.jdbc"(\s+)version="@{net.officefloor.jdbc_version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jndi"(\s+)version="${project.version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.jndi"(\s+)version="@{net.officefloor.jndi_version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.socket"(\s+)version="${project.version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.socket"(\s+)version="@{net.officefloor.socket_version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.filingcabinet"(\s+)version="${project.version}"]]></contains>
+			<contains><![CDATA[id="net.officefloor.filingcabinet"(\s+)version="@{net.officefloor.filingcabinet_version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.demo"(\s+)version="${project.version}]]></contains>
+			<contains><![CDATA[id="net.officefloor.demo"(\s+)version="@{net.officefloor.demo_version}]]></contains>
+		</file>
+
+		<!-- Ensure latest version of dependencies -->
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.feature</artifactId>(\s*)<version>@{net.officefloor.feature_version}</version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.jdbc</artifactId>(\s*)<version>@{net.officefloor.jdbc_version}</version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.jndi</artifactId>(\s*)<version>@{net.officefloor.jndi_version}</version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.socket</artifactId>(\s*)<version>@{net.officefloor.socket_version}</version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.filingcabinet</artifactId>(\s*)<version>@{net.officefloor.filingcabinet_version}</version>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.demo</artifactId>(\s*)<version>@{net.officefloor.demo_version}</version>]]></contains>
 		</file>
 	</files>
 </verifications>

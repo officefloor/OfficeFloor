@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<file>
+			<!-- Ensure releasing latest version -->
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
+		</file>
+
 		<!-- Ensure correct versions -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
@@ -7,11 +13,11 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core;bundle-version="${project.version}"</contains>
+			<contains>net.officefloor.core;bundle-version="@{net.officefloor.core_version}"</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.ui;bundle-version="${project.version}"</contains>
+			<contains>net.officefloor.ui;bundle-version="@{net.officefloor.ui_version}"</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
@@ -20,6 +26,12 @@
 		<file>
 			<location>build.properties</location>
 			<contains>officeplugin_jndi-@{officeplugin_jndi_version}.jar</contains>
+		</file>
+
+		<!-- Ensure using latest dependency version -->
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.feature</artifactId>(\s*)<version>@{net.officefloor.feature_version}</version>]]></contains>
 		</file>
 	</files>
 </verifications>

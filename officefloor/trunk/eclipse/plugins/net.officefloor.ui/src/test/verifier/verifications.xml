@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<file>
+			<!-- Ensure releasing latest version -->
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
+		</file>
+
 		<!-- Ensure correct versions -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
@@ -7,7 +13,13 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core;bundle-version="${project.version}"</contains>
+			<contains>net.officefloor.core;bundle-version="@{net.officefloor.core_version}"</contains>
+		</file>
+		
+		<!-- Ensure using latest dependency version -->
+		<file>
+			<location>${basedir}/../../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>net.officefloor.core</artifactId>(\s*)<version>@{net.officefloor.core_version}</version>]]></contains>
 		</file>
 	</files>
 </verifications>

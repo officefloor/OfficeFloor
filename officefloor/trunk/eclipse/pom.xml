@@ -25,6 +25,9 @@
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
+		
+		<!-- Latest -->
+		<module>latest</module>
 	</modules>
 	<build>
 		<plugins>
@@ -70,6 +73,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
+							<excludeTransitive>false</excludeTransitive>
 						</configuration>
 					</execution>
 				</executions>
@@ -123,6 +127,8 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 								<include>*.zip</include>
 								<include>javaCompiler...args</include>
 								<include>build.xml</include>
+								<include>assemble.net.officefloor.*.xml</include>
+								<include>package.net.officefloor.*.xml</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
