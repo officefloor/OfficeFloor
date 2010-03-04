@@ -35,4 +35,16 @@
 			</plugin>
 		</plugins>
 	</build>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.core</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.ui</artifactId>
+			<version>0.1.2</version>
+		</dependency>
+	</dependencies>
 </project>
