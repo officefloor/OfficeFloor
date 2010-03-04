@@ -5,5 +5,11 @@
 			<location>${basedir}/../latest/pom.xml</location>
 			<contains><![CDATA[<artifactId>${pom.artifactId}</artifactId>(\s)*<version>${pom.version}</version>]]></contains>
 		</file>
+		
+		<!-- Ensure using latest dependencies -->
+		<file>
+			<location>${basedir}/../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>officeplugin_jndi</artifactId>(\s*)<version>@{officeplugin_jndi_version}</version>]]></contains>
+		</file>
 	</files>
 </verifications>
