@@ -11,5 +11,11 @@
 			<location>officebuilding</location>
 			<contains>OFFICE_BUILDING_VERSION=${pom.version}</contains>
 		</file>
+		
+		<!-- Ensure using latest dependencies -->
+		<file>
+			<location>${basedir}/../latest/pom.xml</location>
+			<contains><![CDATA[<artifactId>officecompiler</artifactId>(\s*)<version>@{officecompiler_version}</version>]]></contains>
+		</file>
 	</files>
 </verifications>
