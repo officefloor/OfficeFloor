@@ -7,53 +7,51 @@
 		<!-- Provide directory for testing -->
 		<format>dir</format>
 	</formats>
-	<fileSets>
-		<fileSet>
-			<!-- Executable files -->
-			<directory>src/main/resources</directory>
-			<outputDirectory>.</outputDirectory>
-			<includes>
-				<include>bin/*</include>
-			</includes>
-			<fileMode>0755</fileMode>
-		</fileSet>
-		<fileSet>
-			<!-- Remaining files -->
-			<directory>src/main/resources</directory>
-			<outputDirectory>.</outputDirectory>
-			<excludes>
-				<exclude>bin/*</exclude>
-			</excludes>
-			<fileMode>0644</fileMode>
-		</fileSet>
-	</fileSets>
 	<dependencySets>
 		<dependencySet>
-			<!-- OfficeBuilding -->
-			<outputDirectory>lib/core</outputDirectory>
-			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}
-			</outputFileNameMapping>
+			<!-- OfficeBuilding Layout -->
+			<outputDirectory>/</outputDirectory>
+			<unpack>true</unpack>
+			<unpackOptions>
+				<excludes>
+					<!-- Exclude class code and META-INF information -->
+					<exclude>net/**</exclude>
+					<exclude>META-INF/**</exclude>
+				</excludes>
+			</unpackOptions>
 			<includes>
-				<include>${pom.groupId}:${pom.artifactId}</include>
-				<include>mx4j:mx4j-tools</include>
+				<include>net.officefloor.core:officebuilding:jar</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<!-- OfficeBuilding jar -->
+			<outputDirectory>lib/core</outputDirectory>
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+			<includes>
+				<include>net.officefloor.core:officebuilding:jar</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
 			<!-- OfficeFloor core jars -->
 			<outputDirectory>lib/core</outputDirectory>
 			<includes>
-				<include>${pom.groupId}:officeframe</include>
-				<include>${pom.groupId}:officexml</include>
-				<include>${pom.groupId}:officecompiler</include>
+				<include>net.officefloor.core:*:jar</include>
+				<include>mx4j:mx4j-tools</include>
 			</includes>
+			<excludes>
+				<exclude>net.officefloor.core:officebuilding:jar</exclude>
+				<exclude>net.officefloor.core:latest:jar</exclude>
+			</excludes>
 		</dependencySet>
 		<dependencySet>
 			<!-- OfficeFloor plug-ins -->
 			<outputDirectory>lib/plugins</outputDirectory>
-			<scope>runtime</scope>
 			<includes>
-				<include>*:officeplugin_*:jar</include>
+				<include>net.officefloor.plugin:*:jar</include>
 			</includes>
+			<excludes>
+				<exclude>net.officefloor.plugin:latest:jar</exclude>
+			</excludes>
 		</dependencySet>
 	</dependencySets>
 </assembly>

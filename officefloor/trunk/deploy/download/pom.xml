@@ -7,55 +7,9 @@
 		<artifactId>deploy</artifactId>
 		<version>0.1.2</version>
 	</parent>
-	<artifactId>download</artifactId>
+	<artifactId>officefloor</artifactId>
 	<name>OfficeFloor Download Deployment</name>
 	<description>Generates and does the deployment of the OfficeFloor download release</description>
-	<dependencies>
-		<!-- Build dependencies -->
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officecompiler</artifactId>
-			<version>${pom.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>mx4j</groupId>
-			<artifactId>mx4j-tools</artifactId>
-			<version>3.0.1</version>
-			<scope>compile</scope>
-		</dependency>
-		<!-- Additional release dependencies -->
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_hibernate</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_jdbc</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_jms</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_socket</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>officeplugin_spring</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -87,10 +41,10 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<echo>Deploying the OfficeBuilding release to SourceForge</echo>
+								<echo>Deploying the Download release to SourceForge</echo>
 								<property name="deploy.content.dir" value="${project.build.directory}/sourceforge_deploy_content" />
-								<mkdir dir="${deploy.content.dir}/${pom.version}" />
-								<copy file="${project.build.directory}/officebuilding-${pom.version}-release.zip" todir="${deploy.content.dir}/${pom.version}" />
+								<mkdir dir="${deploy.content.dir}/${project.version}" />
+								<copy file="${project.build.directory}/${project.artifactId}-${project.version}-release.zip" todir="${deploy.content.dir}/${project.version}" />
 								<exec dir="${deploy.content.dir}" executable="rsync" failonerror="true">
 									<arg line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/OfficeFloor/" />
 								</exec>
