@@ -140,12 +140,14 @@
 					</goals>
 					<configuration>
 						<tasks>
-							<!-- Obtain the raw class path (plus ensures a property is always available) -->
-							<property name="maven_compile_classpath" refid="maven.compile.classpath"/>
-							<echo file="${project.build.directory}/verifier/dependencies.raw" message="${maven_compile_classpath}${path.separator}property${file.separator}version-available.jar" />
+							<!-- Obtain the raw test class path which has greatest number of dependencies 
+							(plus ensure a property is always available for replacefilterfile functionality to not fail) -->
+							<property name="maven_classpath" refid="maven.test.classpath"/>
+							<echo file="${project.build.directory}/verifier/dependencies.raw" message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
 							
-							<!-- Remove the ${basedir}/target/classes from the class path -->
+							<!-- Remove the compile and test classes directory from the class path -->
 							<replace file="${project.build.directory}/verifier/dependencies.raw" token="${project.build.outputDirectory}" value="" />
+							<replace file="${project.build.directory}/verifier/dependencies.raw" token="${project.build.testOutputDirectory}" value="" />
 							
 							<!-- Transform into properties file of: ${artifactId}_version=${version} -->
 							<copy file="${project.build.directory}/verifier/dependencies.raw" tofile="${project.build.directory}/verifier/dependencies.properties">
