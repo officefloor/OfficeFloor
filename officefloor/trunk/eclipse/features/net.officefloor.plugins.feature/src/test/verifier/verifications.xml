@@ -1,36 +1,33 @@
 <verifications>
 	<files>
+		<!-- Ensure correct version -->
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.plugins.feature"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.plugins.feature"[^_]*version="${pom.version}"[^_]*provider-name="OfficeFloor"]]></contains>
+			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[<requires>[^_]*feature="net.officefloor.feature" version="${pom.version}"[^_]*</requires>]]></contains>
+			<contains><![CDATA[id="net.officefloor.jdbc"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jdbc"[^_]*version="${pom.version}"[^_]*id="net.officefloor.jndi"]]></contains>
+			<contains><![CDATA[id="net.officefloor.jndi"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.jndi"[^_]*version="${pom.version}"[^_]*id="net.officefloor.socket"]]></contains>
+			<contains><![CDATA[id="net.officefloor.socket"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.socket"[^_]*version="${pom.version}"[^_]*id="net.officefloor.filingcabinet"]]></contains>
+			<contains><![CDATA[id="net.officefloor.filingcabinet"(\s+)version="${project.version}"]]></contains>
 		</file>
 		<file>
 			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.filingcabinet"[^_]*version="${pom.version}"[^_]*id="net.officefloor.demo]]></contains>
-		</file>
-		<file>
-			<location>feature.xml</location>
-			<contains><![CDATA[id="net.officefloor.demo"[^_]*version="${pom.version}"[^_]*/>]]></contains>
+			<contains><![CDATA[id="net.officefloor.demo"(\s+)version="${project.version}]]></contains>
 		</file>
 	</files>
 </verifications>

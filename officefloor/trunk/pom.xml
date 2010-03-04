@@ -142,7 +142,7 @@
 						<tasks>
 							<!-- Obtain the raw class path (plus ensures a property is always available) -->
 							<property name="maven_compile_classpath" refid="maven.compile.classpath"/>
-							<echo file="${project.build.directory}/verifier/dependencies.raw" message="${maven_compile_classpath}:ensure/property-version.available" />
+							<echo file="${project.build.directory}/verifier/dependencies.raw" message="${maven_compile_classpath}${path.separator}property${file.separator}version-available.jar" />
 							
 							<!-- Remove the ${basedir}/target/classes from the class path -->
 							<replace file="${project.build.directory}/verifier/dependencies.raw" token="${project.build.outputDirectory}" value="" />
@@ -151,8 +151,8 @@
 							<copy file="${project.build.directory}/verifier/dependencies.raw" tofile="${project.build.directory}/verifier/dependencies.properties">
 								<filterchain>
 									<tokenfilter>
-										<stringtokenizer delims=":" suppressdelims="true" />
-										<replaceregex pattern="(.+)${file.separator}(.+)-(.+)\.jar" replace="@{\2_version}=\3${line.separator}" /> 
+										<stringtokenizer delims="${path.separator}" suppressdelims="true" />
+										<replaceregex pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" replace="@{\2_version}=\3${line.separator}" /> 
 									</tokenfilter>
 								</filterchain>
 							</copy>

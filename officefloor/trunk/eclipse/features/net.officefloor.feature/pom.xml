@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
+		<relativePath>../../pom.xml</relativePath>
 		<!--
 			Reminder: do not forget to update feature.xml with change in version.
 		-->
 		<version>0.1.2</version>
-		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>net.officefloor.feature</artifactId>
 	<name>Eclipse Feature</name>

@@ -1,36 +1,33 @@
 <verifications>
 	<files>
+		<!-- Ensure correct versions -->
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains>Bundle-Version: ${project.version}</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>Bundle-Version: ${pom.version}</contains>
+			<contains>net.officefloor.core;bundle-version="${project.version}"</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core;bundle-version="${pom.version}"</contains>
+			<contains>net.officefloor.ui;bundle-version="${project.version}"</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.ui;bundle-version="${pom.version}"</contains>
+			<contains>net.officefloor.core-${project.version}.jar</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core-${pom.version}.jar</contains>
+			<contains>net.officefloor.ui-${project.version}.jar</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.ui-${pom.version}.jar</contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains>officetool_demo-${pom.version}.jar</contains>
+			<contains>officetool_demo-@{officetool_demo_version}.jar</contains>
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains>officetool_demo-${pom.version}.jar</contains>
+			<contains>officetool_demo-@{officetool_demo_version}.jar</contains>
 		</file>
 	</files>
 </verifications>

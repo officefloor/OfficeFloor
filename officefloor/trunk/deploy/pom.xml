@@ -14,6 +14,6 @@
 	<description>Handles deployment of OfficeFloor releases</description>
 	<modules>
 		<module>download</module>
-		<module>eclipse.update.site</module>
+		<module>update.site</module>
 	</modules>
 </project>
