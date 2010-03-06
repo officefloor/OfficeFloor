@@ -41,6 +41,6 @@ public interface EjbOrchestratorRemote {
 	 *         input parameter is returned to allow changes to the parameter to
 	 *         be obtained by the caller.
 	 */
-	Object orchestrateRemotely(Object parameter) throws NamingException;
+	<P> P orchestrateRemotely(P parameter) throws NamingException;
 
 }

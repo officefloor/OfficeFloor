@@ -137,7 +137,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 		final WorkManager workManager = this.createMock(WorkManager.class);
 		final ProcessFuture processFuture = this
 				.createMock(ProcessFuture.class);
-		final Object parameter = "PARAMETER";
+		final String parameter = "PARAMETER";
 
 		// Register the context
 		mockURLContextFactory.reset();
@@ -160,7 +160,7 @@ public class OfficeFloorEjbTest extends OfficeFrameTestCase {
 				.lookup("ConfiguredRemote");
 
 		// Orchestrate the EJBs
-		Object returnValue = orchestrator.orchestrateRemotely(parameter);
+		String returnValue = orchestrator.orchestrateRemotely(parameter);
 
 		// Ensure return value is parameter
 		assertEquals("Return value should be the parameter", parameter,
