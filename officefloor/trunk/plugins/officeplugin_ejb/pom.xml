@@ -15,7 +15,7 @@
 			<groupId>org.apache.openejb</groupId>
 			<artifactId>openejb-core</artifactId>
 			<version>3.1.2</version>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>

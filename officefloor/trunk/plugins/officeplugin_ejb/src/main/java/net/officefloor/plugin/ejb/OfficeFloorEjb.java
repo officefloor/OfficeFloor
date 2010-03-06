@@ -214,7 +214,7 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 	 */
 
 	@Override
-	public Object orchestrateRemotely(Object parameter) throws NamingException {
+	public <P> P orchestrateRemotely(P parameter) throws NamingException {
 
 		// Do the orchestration
 		this.orchestrate(parameter);
