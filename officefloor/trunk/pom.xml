@@ -113,7 +113,7 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -134,7 +134,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-					<phase>validate</phase>
+					<phase>compile</phase>
 					<goals>
 						<goal>run</goal>
 					</goals>
@@ -179,7 +179,7 @@
 				<artifactId>maven-verifier-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>verify</goal>
 						</goals>
