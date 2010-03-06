@@ -1,29 +1,32 @@
 <verifications>
 	<files>
-		<!-- Ensure correct version -->
+		<!-- Ensure correct versions in Eclipse plugin -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
 			<contains>Bundle-Version: ${project.version}</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.core;bundle-version="@{net.officefloor.core_version}"
+			<contains>Require-Bundle:([^:]*)net.officefloor.core;bundle-version="@{net.officefloor.core_version}"
 			</contains>
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>net.officefloor.ui;bundle-version="@{net.officefloor.ui_version}"
+			<contains>Require-Bundle:([^:]*)net.officefloor.ui;bundle-version="@{net.officefloor.ui_version}"
 			</contains>
 		</file>
+
+		<!-- Ensure correct versions on build class path -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains>officetool_filingcabinet-@{officetool_filingcabinet_version}.jar
+			<contains>Bundle-ClassPath:([^:]*)officetool_filingcabinet-@{officetool_filingcabinet_version}.jar
 			</contains>
 		</file>
+
+		<!-- Ensure correct versions included for build -->
 		<file>
 			<location>build.properties</location>
-			<contains>officetool_filingcabinet-@{officetool_filingcabinet_version}.jar
-			</contains>
+			<contains>bin.includes =([^=]*)officetool_filingcabinet-@{officetool_filingcabinet_version}.jar</contains>
 		</file>
 	</files>
 </verifications>
