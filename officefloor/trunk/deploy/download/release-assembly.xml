@@ -20,7 +20,7 @@
 				</excludes>
 			</unpackOptions>
 			<includes>
-				<include>net.officefloor.core:officebuilding:jar</include>
+				<include>net.officefloor.core:officebuilding</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
@@ -28,29 +28,29 @@
 			<outputDirectory>lib/core</outputDirectory>
 			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
 			<includes>
-				<include>net.officefloor.core:officebuilding:jar</include>
+				<include>net.officefloor.core:officebuilding</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
 			<!-- OfficeFloor core jars -->
 			<outputDirectory>lib/core</outputDirectory>
 			<includes>
-				<include>net.officefloor.core:*:jar</include>
+				<include>net.officefloor.core:*</include>
 				<include>mx4j:mx4j-tools</include>
 			</includes>
 			<excludes>
-				<exclude>net.officefloor.core:officebuilding:jar</exclude>
-				<exclude>net.officefloor.core:latest:jar</exclude>
+				<exclude>net.officefloor.core:officebuilding</exclude>
+				<exclude>net.officefloor.core:latest</exclude>
 			</excludes>
 		</dependencySet>
 		<dependencySet>
 			<!-- OfficeFloor plug-ins -->
 			<outputDirectory>lib/plugins</outputDirectory>
 			<includes>
-				<include>net.officefloor.plugin:*:jar</include>
+				<include>net.officefloor.plugin:*</include>
 			</includes>
 			<excludes>
-				<exclude>net.officefloor.plugin:latest:jar</exclude>
+				<exclude>net.officefloor.plugin:latest</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.eclipse</groupId>
-		<artifactId>eclipse</artifactId>
+		<groupId>net.officefloor.deploy</groupId>
+		<artifactId>deploy</artifactId>
 		<version>0.1.2</version>
 	</parent>
-	<artifactId>net.officefloor.update.site</artifactId>
+	<artifactId>update.site</artifactId>
 	<name>Eclipse Update Site</name>
 	<description>
 		Generates update site content for OfficeFloor in Eclipse.
@@ -69,7 +69,7 @@
 									<property name="BUILD_DIR" value="${update.site.package.dir}" />
 									<property name="P2_LAUNCH_JAR"
 										value="${eclipse.install.dir}/plugins/org.eclipse.equinox.launcher_${equinox.version}.jar" />
-									<property name="OFFICE_FLOOR_VERSION" value="${pom.version}" />
+									<property name="OFFICE_FLOOR_VERSION" value="${project.version}" />
 									<property name="DOWNLOAD_ARTIFACT_CACHE_DIR" value="${DOWNLOAD_ARTIFACT_CACHE_DIR}" />
 								</ant>
 							</tasks>
@@ -161,18 +161,14 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>net.officefloor.feature
-			</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
+			<groupId>net.officefloor.eclipse</groupId>
+			<artifactId>net.officefloor.feature</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
-			<artifactId>net.officefloor.plugins.feature
-			</artifactId>
-			<version>${pom.version}</version>
-			<scope>runtime</scope>
+			<groupId>net.officefloor.eclipse</groupId>
+			<artifactId>net.officefloor.plugins.feature</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ant-contrib</groupId>

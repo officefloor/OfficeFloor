@@ -1,16 +1,13 @@
 <verifications>
 	<files>
+		<!-- Ensure releasing new version -->
 		<file>
-			<location>pom.xml</location>
-			<contains><![CDATA[<parent>[^_]*<version>${pom.version}</version>[^_]*</parent>]]></contains>
+			<location>src/main/resources/site.xml</location>
+			<contains><![CDATA[<feature url="features/net.officefloor.feature_${project.version}.jar" id="net.officefloor.feature" version="${project.version}">]]></contains>
 		</file>
 		<file>
 			<location>src/main/resources/site.xml</location>
-			<contains><![CDATA[<feature url="features/net.officefloor.feature_${pom.version}.jar" id="net.officefloor.feature" version="${pom.version}">]]></contains>
-		</file>
-		<file>
-			<location>src/main/resources/site.xml</location>
-			<contains><![CDATA[<feature url="features/net.officefloor.plugins.feature_${pom.version}.jar" id="net.officefloor.plugins.feature" version="${pom.version}">]]></contains>
+			<contains><![CDATA[<feature url="features/net.officefloor.plugins.feature_${project.version}.jar" id="net.officefloor.plugins.feature" version="${project.version}">]]></contains>
 		</file>
 	</files>
 </verifications>
