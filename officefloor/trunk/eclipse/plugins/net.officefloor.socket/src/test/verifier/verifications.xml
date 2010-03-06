@@ -1,11 +1,5 @@
 <verifications>
 	<files>
-		<file>
-			<!-- Ensure releasing latest version -->
-			<location>${basedir}/../../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
-		</file>
-
 		<!-- Ensure correct versions -->
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
@@ -30,12 +24,6 @@
 			<location>build.properties</location>
 			<contains>officeplugin_socket-@{officeplugin_socket_version}.jar
 			</contains>
-		</file>
-
-		<!-- Ensure using latest dependency version -->
-		<file>
-			<location>${basedir}/../../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>net.officefloor.feature</artifactId>(\s*)<version>@{net.officefloor.feature_version}</version>]]></contains>
 		</file>
 	</files>
 </verifications>

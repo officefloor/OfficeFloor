@@ -24,7 +24,7 @@
 		<dependencySet>
 			<!-- Runtime dependencies -->
 			<includes>
-				<include>${pom.groupId}:officetool_demo</include>
+				<include>net.officefloor.tool:officetool_demo</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>

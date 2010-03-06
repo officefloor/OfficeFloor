@@ -1,11 +1,5 @@
 <verifications>
 	<files>
-		<file>
-			<!-- Ensure releasing latest version -->
-			<location>${basedir}/../../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
-		</file>
-
 		<!-- Ensure correct versions -->
 		<file>
 			<location>feature.xml</location>
@@ -18,16 +12,6 @@
 		<file>
 			<location>feature.xml</location>
 			<contains><![CDATA[id="net.officefloor.ui"(\s+)version="@{net.officefloor.ui_version}"]]></contains>
-		</file>
-		
-		<!-- Ensure latest version of dependencies -->
-		<file>
-			<location>${basedir}/../../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>net.officefloor.core</artifactId>(\s*)<version>@{net.officefloor.core_version}</version>]]></contains>
-		</file>
-		<file>
-			<location>${basedir}/../../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>net.officefloor.ui</artifactId>(\s*)<version>@{net.officefloor.ui_version}</version>]]></contains>
 		</file>
 	</files>
 </verifications>

@@ -22,7 +22,7 @@
 	<dependencySets>
 		<dependencySet>
 			<includes>
-				<include>${pom.groupId}:officeplugin_socket</include>
+				<include>net.officefloor.plugin:officeplugin_socket</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>

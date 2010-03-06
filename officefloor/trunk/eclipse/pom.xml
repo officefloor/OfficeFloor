@@ -25,9 +25,11 @@
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
-		
-		<!-- Latest -->
-		<module>latest</module>
+
+		<!--
+			No latest module as always releasing version as per
+			net.officefloor:officefloor
+		-->
 	</modules>
 	<build>
 		<plugins>
@@ -59,12 +61,20 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Make dependencies available for PDE -->
+				<!-- All projects are PDEs -->
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<pde>true</pde>
+					<!-- useProjectReferences = false ? -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Work around as PDE headless build not using linked resources -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>initialize</phase>
+						<phase>process-sources</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -73,18 +83,9 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
-							<excludeTransitive>false</excludeTransitive>
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<!-- All projects are PDEs -->
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<pde>true</pde>
-					<!-- useProjectReferences = false ? -->
-				</configuration>
 			</plugin>
 			<plugin>
 				<!-- Allow compilation as PDE projects -->
@@ -159,7 +160,6 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.2</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
