@@ -22,7 +22,7 @@
 	<dependencySets>
 		<dependencySet>
 			<includes>
-				<include>${pom.groupId}:officeplugin_jdbc</include>
+				<include>net.officefloor.plugin:officeplugin_jdbc</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
