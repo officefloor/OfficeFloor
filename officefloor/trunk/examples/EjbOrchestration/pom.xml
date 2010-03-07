@@ -13,4 +13,16 @@
 		<module>EjbOrchestration-war</module>
 		<module>EjbOrchestration-ear</module>
 	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>latest_core</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>latest_plugins</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 </project>
