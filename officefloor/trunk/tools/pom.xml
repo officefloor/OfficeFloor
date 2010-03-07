@@ -37,7 +37,7 @@
 		<!-- OfficeFloor core functionality -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest</artifactId>
+			<artifactId>latest_core</artifactId>
 			<version>SNAPSHOT</version>
 		</dependency>
 		<!-- Testing -->

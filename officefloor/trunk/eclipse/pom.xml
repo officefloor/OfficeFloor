@@ -142,17 +142,17 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 		<!-- OfficeFloor dependencies -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest</artifactId>
+			<artifactId>latest_core</artifactId>
 			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>latest</artifactId>
+			<artifactId>latest_plugins</artifactId>
 			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.tool</groupId>
-			<artifactId>latest</artifactId>
+			<artifactId>latest_tools</artifactId>
 			<version>SNAPSHOT</version>
 		</dependency>
 		<!-- Testing -->
