@@ -1,0 +1,11 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	version="1.0">
+	<persistence-unit name="product-unit">
+		<jta-data-source>productDatabase</jta-data-source>
+		<class>net.officefloor.example.ejborchestration.Product</class>
+		<class>net.officefloor.example.ejborchestration.ProductAvailability</class>
+		<properties>
+			<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)" />
+		</properties>
+	</persistence-unit>
+</persistence>
