@@ -30,6 +30,17 @@ import javax.ejb.Local;
 public interface ProductCatalogLocal {
 
 	/**
+	 * Creates a {@link Product} in the catalog.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param price
+	 *            Price for a single {@link Product}.
+	 * @return {@link Product}.
+	 */
+	Product createProduct(String name, double price);
+
+	/**
 	 * Obtains the {@link Product} by its identifier.
 	 * 
 	 * @param productId
@@ -53,13 +64,5 @@ public interface ProductCatalogLocal {
 	 * @return {@link Product} listing.
 	 */
 	List<Product> retrieveProductList();
-
-	/**
-	 * Creates a {@link Product} in the catalog.
-	 * 
-	 * @param product
-	 *            {@link Product}.
-	 */
-	void createProduct(Product product);
 
 }

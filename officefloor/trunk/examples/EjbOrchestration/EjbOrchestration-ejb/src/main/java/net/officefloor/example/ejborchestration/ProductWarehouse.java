@@ -17,6 +17,9 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -56,16 +59,75 @@ public class ProductWarehouse implements ProductWarehouseLocal {
 	}
 
 	@Override
-	public void incrementProductAvailability(Product product,
-			int numberAvailable) {
+	public List<ProductOrder> allocateProduct(Invoice invoice) {
 
+		// Create list of potential product orders
+		List<ProductOrder> orders = new LinkedList<ProductOrder>();
+
+		// Allocate products
+		for (InvoiceLineItem lineItem : invoice.getInvoiceLineItems()) {
+
+			// Obtain quantity required
+			int quantityRequired = lineItem.getQuantity();
+
+			// Determine line item allocation
+			ProductAllocation allocation = lineItem.getProductAllocation();
+			if (allocation == null) {
+				// Ensure have allocation
+				allocation = new ProductAllocation(0);
+				lineItem.setProductAllocation(allocation);
+			}
+			int quantityAllocated = allocation.getQuantityAllocated();
+
+			// Determine difference in quantity
+			int quantityDifference = quantityRequired - quantityAllocated;
+			if (quantityDifference == 0) {
+				continue; // line item allocated
+			}
+
+			// Obtain the quantity availability
+			Product product = lineItem.getProduct();
+			ProductAvailability availability = this
+					.retrieveProductAvailability(product);
+			int quantityAvailable = availability.getQuantityAvailable();
+
+			// Determine amount to allocate
+			int quantityToAllocate = Math.min(quantityDifference,
+					quantityAvailable);
+
+			// Determine if require to order more product
+			if (quantityToAllocate < quantityDifference) {
+				int quantityToOrder = quantityDifference - quantityToAllocate;
+				orders.add(new ProductOrder(product, quantityToOrder));
+			}
+
+			// Allocate the product
+			allocation.setQuantityAllocated(allocation.getQuantityAllocated()
+					+ quantityToAllocate);
+			availability.setQuantityAvailable(availability
+					.getQuantityAvailable()
+					- quantityToAllocate);
+		}
+
+		// Store changes to Invoice
+		this.entityManager.merge(invoice);
+
+		// Return the orders
+		return (orders.size() == 0 ? null : orders);
+	}
+
+	@Override
+	public List<Invoice> productDelivered(Product product, int quantityDelivered) {
 		// Retrieve the Product Availability
 		ProductAvailability availability = this
 				.retrieveProductAvailability(product);
 
 		// Increment the availability
-		availability.setNumberAvailable(availability.getNumberAvailable()
-				+ numberAvailable);
+		availability.setQuantityAvailable(availability.getQuantityAvailable()
+				+ quantityDelivered);
+
+		// TODO implement identifying invoices to full fill
+		return null;
 	}
 
 }

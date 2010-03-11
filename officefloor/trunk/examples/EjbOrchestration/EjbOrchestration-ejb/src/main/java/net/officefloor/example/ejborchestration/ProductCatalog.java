@@ -33,6 +33,35 @@ import javax.persistence.Query;
 public class ProductCatalog implements ProductCatalogLocal {
 
 	/**
+	 * Seed to create a {@link Product}.
+	 */
+	public static class ProductSeed {
+
+		/**
+		 * Name.
+		 */
+		public final String name;
+
+		/**
+		 * Price.
+		 */
+		public final double price;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param price
+		 *            Price.
+		 */
+		private ProductSeed(String name, double price) {
+			this.name = name;
+			this.price = price;
+		}
+	}
+
+	/**
 	 * {@link EntityManager}.
 	 */
 	@PersistenceContext(unitName = "product-unit")
@@ -41,6 +70,14 @@ public class ProductCatalog implements ProductCatalogLocal {
 	/*
 	 * ==================== ProductCatalogLocal ==================
 	 */
+
+	@Override
+	public Product createProduct(String name, double price) {
+		// Create and return the Product
+		Product product = new Product(new ProductSeed(name, price));
+		this.entityManager.persist(product);
+		return product;
+	}
 
 	@Override
 	public Product retrieveProduct(Long productId) {
@@ -59,11 +96,6 @@ public class ProductCatalog implements ProductCatalogLocal {
 	public List<Product> retrieveProductList() {
 		Query query = this.entityManager.createQuery("SELECT p FROM Product p");
 		return this.retrieveProducts(query);
-	}
-
-	@Override
-	public void createProduct(Product product) {
-		this.entityManager.persist(product);
 	}
 
 	/**

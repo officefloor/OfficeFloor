@@ -17,6 +17,8 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.List;
+
 /**
  * Tests {@link Sales}.
  * 
@@ -85,79 +87,72 @@ public class SalesTest extends EjbTestCase {
 	}
 
 	/**
-	 * Ensure able to create and retrieve a {@link PurchaseOrder}.
+	 * Ensure able to create and retrieve a {@link ShoppingCart}.
 	 */
-	public void testCreateAndRetrievePurchaseOrder() throws Exception {
+	public void testCreateAndRetrieveShoppingCart() throws Exception {
 
 		// Create the Customer
 		Customer customer = this.sales.createCustomer("test@officefloor.net",
 				"Daniel");
 
-		// Create the Purchase Order
-		PurchaseOrder createdPurchaseOrder = new PurchaseOrder(customer);
-		this.sales.createPurchaseOrder(createdPurchaseOrder);
-		assertNotNull("Ensure received Id", createdPurchaseOrder
-				.getPurchaseOrderId());
+		// Retrieve the Shopping Cart
+		ShoppingCart createdShoppingCart = this.sales
+				.retrieveShoppingCart(customer);
+		assertNotNull("Ensure have Id", createdShoppingCart.getShoppingCartId());
 
-		// Retrieve the Purchase Order
-		PurchaseOrder retrievedPurchaseOrder = this.sales
-				.retrievePurchaseOrder(createdPurchaseOrder
-						.getPurchaseOrderId());
-		assertEquals("Incorrect purchase order retrieved", createdPurchaseOrder
-				.getPurchaseOrderId(), retrievedPurchaseOrder
-				.getPurchaseOrderId());
+		// Retrieve the Shopping Cart again
+		ShoppingCart retrievedShoppingCart = this.sales
+				.retrieveShoppingCart(customer);
+		assertEquals("Incorrect shopping cart retrieved", createdShoppingCart
+				.getShoppingCartId(), retrievedShoppingCart.getShoppingCartId());
 		assertNotSame("Should be different instance retrieved",
-				createdPurchaseOrder, retrievedPurchaseOrder);
+				createdShoppingCart, retrievedShoppingCart);
 		assertEquals("Incorrect customer", customer.getCustomerId(),
-				retrievedPurchaseOrder.getCustomer().getCustomerId());
+				retrievedShoppingCart.getCustomer().getCustomerId());
 	}
 
 	/**
-	 * Ensure able to add {@link PurchaseOrderLineItem} to the
-	 * {@link PurchaseOrder}.
+	 * Ensure able to add {@link ShoppingCartItem} to the {@link ShoppingCart}.
 	 */
-	public void testAddLineItem() throws Exception {
+	public void testAddItem() throws Exception {
 
 		// Create the Customer
 		Customer customer = this.sales.createCustomer("test@officefloor.net",
 				"Daniel");
 
 		// Create the Product
-		Product product = new Product("test");
-		this.catalog.createProduct(product);
+		Product product = this.catalog.createProduct("test", 1.00);
 
 		final int quantity = 12;
 
-		// Create the Purchase Order with a line item
-		PurchaseOrder createdPurchaseOrder = new PurchaseOrder(customer);
-		PurchaseOrderLineItem createdLineItem = new PurchaseOrderLineItem(
-				product, quantity);
-		createdPurchaseOrder.getPurchaseOrderLineItems().add(createdLineItem);
-		this.sales.createPurchaseOrder(createdPurchaseOrder);
-		assertNotNull("Ensure line item id provided", createdLineItem
-				.getPurchaseOrderLineItemId());
+		// Create the Shopping Cart with one item
+		ShoppingCart createdShoppingCart = this.sales
+				.retrieveShoppingCart(customer);
+		ShoppingCartItem createdItem = new ShoppingCartItem(product, quantity);
+		createdShoppingCart.getShoppingCartItems().add(createdItem);
 
-		// Retrieve the Purchase Order with the line item
-		PurchaseOrder retrievedPurchaseOrder = this.sales
-				.retrievePurchaseOrder(createdPurchaseOrder
-						.getPurchaseOrderId());
-		assertEquals("Incorrect purchase order retrieved", createdPurchaseOrder
-				.getPurchaseOrderId(), retrievedPurchaseOrder
-				.getPurchaseOrderId());
-		assertNotSame("Should not be same purchase order instance",
-				createdPurchaseOrder, retrievedPurchaseOrder);
-		assertEquals("Incorrect number of line items", 1,
-				retrievedPurchaseOrder.getPurchaseOrderLineItems().size());
-		PurchaseOrderLineItem retrievedLineItem = retrievedPurchaseOrder
-				.getPurchaseOrderLineItems().get(0);
-		assertEquals("Incorrect line item", createdLineItem
-				.getPurchaseOrderLineItemId(), retrievedLineItem
-				.getPurchaseOrderLineItemId());
-		assertNotSame("Should not be same line item instance", createdLineItem,
-				retrievedLineItem);
-		assertEquals("Incorrect product", product.getProductId(),
-				retrievedLineItem.getProduct().getProductId());
-		assertEquals("Incorrect quantity", quantity, retrievedLineItem
+		// Store changes to the Shopping Cart
+		this.sales.storeShoppingCart(createdShoppingCart);
+
+		// Retrieve the Shopping Cart with one item
+		ShoppingCart retrievedShoppingCart = this.sales
+				.retrieveShoppingCart(customer);
+		assertEquals("Incorrect shopping cart retrieved", createdShoppingCart
+				.getShoppingCartId(), retrievedShoppingCart.getShoppingCartId());
+		assertNotSame("Should not be same shopping cart instance",
+				createdShoppingCart, retrievedShoppingCart);
+
+		// Validate item added to Shopping Cart
+		List<ShoppingCartItem> items = retrievedShoppingCart
+				.getShoppingCartItems();
+		assertEquals("Incorrect number of line items", 1, items.size());
+		ShoppingCartItem retrievedItem = items.get(0);
+		assertNotNull("Should have item", retrievedItem);
+		assertNotSame("Should not be same item instance", createdItem,
+				retrievedItem);
+		assertEquals("Incorrect product", createdItem.getProduct()
+				.getProductId(), retrievedItem.getProduct().getProductId());
+		assertEquals("Incorrect quantity", quantity, retrievedItem
 				.getQuantity());
 	}
 

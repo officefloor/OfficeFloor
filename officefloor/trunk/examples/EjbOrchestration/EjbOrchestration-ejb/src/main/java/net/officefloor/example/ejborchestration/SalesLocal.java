@@ -51,21 +51,20 @@ public interface SalesLocal {
 	Customer retrieveCustomer(String email);
 
 	/**
-	 * Creates the {@link PurchaseOrder}.
+	 * Retrieves the {@link ShoppingCart} for a {@link Customer}.
 	 * 
-	 * @param purchaseOrder
-	 *            {@link PurchaseOrder} to create.
+	 * @param customer
+	 *            {@link Customer}.
+	 * @return {@link ShoppingCart}.
 	 */
-	void createPurchaseOrder(PurchaseOrder purchaseOrder);
+	ShoppingCart retrieveShoppingCart(Customer customer);
 
 	/**
-	 * Retrieves the {@link PurchaseOrder}.
+	 * Stores the {@link ShoppingCart}.
 	 * 
-	 * @param purchaseOrderId
-	 *            {@link PurchaseOrder} identifier.
-	 * @return {@link PurchaseOrder} or <code>null</code> if no
-	 *         {@link PurchaseOrder}.
+	 * @param shoppingCart
+	 *            {@link ShoppingCart}.
 	 */
-	PurchaseOrder retrievePurchaseOrder(Long purchaseOrderId);
+	void storeShoppingCart(ShoppingCart shoppingCart);
 
 }
