@@ -19,7 +19,6 @@ package net.officefloor.example.ejborchestration;
 
 import java.util.List;
 
-
 /**
  * Tests the {@link ProductCatalog}.
  * 
@@ -39,8 +38,7 @@ public class ProductCatalogTest extends EjbTestCase {
 	public void testCreateAndRetrieveProduct() {
 
 		// Create a product
-		Product createdProduct = new Product("test");
-		this.catalog.createProduct(createdProduct);
+		Product createdProduct = this.catalog.createProduct("test", 1.00);
 		assertNotNull("Should have identifier for product", createdProduct
 				.getProductId());
 
@@ -59,8 +57,7 @@ public class ProductCatalogTest extends EjbTestCase {
 	public void testRetrieveProductsByName() {
 
 		// Create a product
-		Product createdProduct = new Product("test");
-		this.catalog.createProduct(createdProduct);
+		Product createdProduct = this.catalog.createProduct("test", 1.00);
 
 		// Ensure can retrieve the product
 		List<Product> products = this.catalog.retrieveProductsByName("test");
@@ -80,8 +77,8 @@ public class ProductCatalogTest extends EjbTestCase {
 	public void testRetrieveProductList() {
 
 		// Create some products
-		this.catalog.createProduct(new Product("One"));
-		this.catalog.createProduct(new Product("Two"));
+		this.catalog.createProduct("One", 1.00);
+		this.catalog.createProduct("Two", 2.00);
 
 		// Ensure can retrieve listing of products
 		List<Product> products = this.catalog.retrieveProductList();

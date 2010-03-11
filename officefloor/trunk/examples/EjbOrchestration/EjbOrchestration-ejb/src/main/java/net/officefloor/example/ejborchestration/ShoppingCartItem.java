@@ -21,24 +21,26 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 
 /**
- * Line item {@link Entity} within a {@link PurchaseOrder}.
+ * Item within a {@link ShoppingCart}.
  * 
  * @author Daniel Sagenschneider
  */
 @Entity
-public class PurchaseOrderLineItem {
+public class ShoppingCartItem implements InvoiceableItem {
 
 	/**
 	 * Line item Id.
 	 */
 	@Id
 	@GeneratedValue
+	@SuppressWarnings("unused")
 	private Long lineItemId;
 
 	/**
-	 * {@link Product} for this {@link PurchaseOrderLineItem}.
+	 * {@link Product} for this {@link ShoppingCartItem}.
 	 */
 	@ManyToOne
 	private Product product;
@@ -49,9 +51,16 @@ public class PurchaseOrderLineItem {
 	private int quantity;
 
 	/**
+	 * {@link Version}.
+	 */
+	@Version
+	@SuppressWarnings("unused")
+	private long version;
+
+	/**
 	 * Default constructor for the {@link Entity}.
 	 */
-	public PurchaseOrderLineItem() {
+	public ShoppingCartItem() {
 	}
 
 	/**
@@ -62,18 +71,9 @@ public class PurchaseOrderLineItem {
 	 * @param quantity
 	 *            Quantity of the {@link Product}.
 	 */
-	public PurchaseOrderLineItem(Product product, int quantity) {
+	public ShoppingCartItem(Product product, int quantity) {
 		this.product = product;
 		this.quantity = quantity;
-	}
-
-	/**
-	 * Obtains the identifier for this {@link PurchaseOrderLineItem}.
-	 * 
-	 * @return Identifier for this {@link PurchaseOrderLineItem}.
-	 */
-	public Long getPurchaseOrderLineItemId() {
-		return this.lineItemId;
 	}
 
 	/**

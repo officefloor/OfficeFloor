@@ -44,9 +44,9 @@ public class ProductAvailability {
 	private Product product;
 
 	/**
-	 * Number of {@link Product} instances available.
+	 * Quantity of {@link Product} instances available.
 	 */
-	private int numberAvailable;
+	private int quantityAvailable;
 
 	/**
 	 * Default constructor for {@link Entity}.
@@ -59,13 +59,13 @@ public class ProductAvailability {
 	 * 
 	 * @param product
 	 *            {@link Product}.
-	 * @param numberAvailable
+	 * @param quantityAvailable
 	 *            Number of {@link Product} instances available.
 	 */
-	public ProductAvailability(Product product, int numberAvailable) {
+	public ProductAvailability(Product product, int quantityAvailable) {
 		this.productId = product.getProductId();
 		this.product = product;
-		this.numberAvailable = numberAvailable;
+		this.quantityAvailable = quantityAvailable;
 	}
 
 	/**
@@ -78,22 +78,22 @@ public class ProductAvailability {
 	}
 
 	/**
-	 * Obtains the number available.
+	 * Obtains the quantity available.
 	 * 
-	 * @return Number available.
+	 * @return Quantity available.
 	 */
-	public int getNumberAvailable() {
-		return this.numberAvailable;
+	public int getQuantityAvailable() {
+		return this.quantityAvailable;
 	}
 
 	/**
-	 * Specifies the number available.
+	 * Specifies the quantity available.
 	 * 
-	 * @param numberAvailable
-	 *            Number available.
+	 * @param quantityAvailable
+	 *            Quantity available.
 	 */
-	public void setNumberAvailable(int numberAvailable) {
-		this.numberAvailable = numberAvailable;
+	public void setQuantityAvailable(int quantityAvailable) {
+		this.quantityAvailable = quantityAvailable;
 	}
 
 }

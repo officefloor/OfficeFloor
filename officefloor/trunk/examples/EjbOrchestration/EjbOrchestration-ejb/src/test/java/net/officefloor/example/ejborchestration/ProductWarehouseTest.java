@@ -17,6 +17,9 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Tests the {@link ProductWarehouse}.
  * 
@@ -37,26 +40,46 @@ public class ProductWarehouseTest extends EjbTestCase {
 			.lookup(ProductCatalogLocal.class);
 
 	/**
+	 * {@link Sales}.
+	 */
+	private SalesLocal sales = this.lookup(SalesLocal.class);
+
+	/**
+	 * {@link Accounts}.
+	 */
+	private AccountsLocal accounts = this.lookup(AccountsLocal.class);
+
+	/**
 	 * Test able to obtain zero availability on no entry.
 	 */
 	public void testNoAvailabilityEntry() {
 
 		// Create the product
-		Product product = new Product("Test");
-		this.catalog.createProduct(product);
+		Product product = this.catalog.createProduct("Test", 1.00);
 
-		// Should have no availability for product
-		ProductAvailability availability = this.warehouse
+		// Create the availability
+		ProductAvailability createdAvailability = this.warehouse
 				.retrieveProductAvailability(product);
-		assertEquals("Incorrect product", product, availability.getProduct());
-		assertEquals("Incorrect number available", 0, availability
-				.getNumberAvailable());
+		this.validateProductAvailability(createdAvailability, product, 0);
 
-		// Attempt to obtain again
-		ProductAvailability another = this.warehouse
+		// Retrieve the availability
+		ProductAvailability retrievedAvailability = this.warehouse
 				.retrieveProductAvailability(product);
-		assertNotSame("Should be another instance", availability, another);
-		assertEquals("Should still be zero", 0, another.getNumberAvailable());
+		this.validateProductAvailability(retrievedAvailability, product, 0);
+		assertNotSame("Should be another instance", createdAvailability,
+				retrievedAvailability);
+	}
+
+	/**
+	 * Validates the {@link ProductAvailability}.
+	 */
+	private void validateProductAvailability(ProductAvailability availability,
+			Product product, int quantity) {
+		assertNotNull("Must have availability", availability);
+		assertEquals("Incorrect product", product.getProductId(), availability
+				.getProduct().getProductId());
+		assertEquals("Incorrect number available", quantity, availability
+				.getQuantityAvailable());
 	}
 
 	/**
@@ -65,29 +88,89 @@ public class ProductWarehouseTest extends EjbTestCase {
 	public void testAvailability() {
 
 		// Create the product availability
-		Product product = new Product("Test");
-		this.catalog.createProduct(product);
-		this.warehouse.incrementProductAvailability(product, 1);
+		Product product = this.catalog.createProduct("Test", 1.00);
+		final int quantity = 1;
+		this.warehouse.productDelivered(product, quantity);
 
 		// Ensure have an available product
 		ProductAvailability availability = this.warehouse
 				.retrieveProductAvailability(product);
-		assertEquals("Should have a product available", 1, availability
-				.getNumberAvailable());
-
-		// Ensure persisted
-		ProductAvailability another = this.warehouse
-				.retrieveProductAvailability(product);
-		assertNotSame("Should be another instance", availability, another);
-		assertEquals("Should still be available", 1, another
-				.getNumberAvailable());
+		this.validateProductAvailability(availability, product, quantity);
 	}
 
 	/**
-	 * Allocates {@link Product}
+	 * Tests allocating {@link Product}.
 	 */
-	public void testAllocateProduct() {
-		fail("TODO test once have PurchaseOrderLineItem working");
+	public void testAllocateProduct() throws Exception {
+
+		// Create the Product
+		Product product = this.catalog.createProduct("Test", 1.00);
+
+		// Create the Invoice
+		Customer customer = this.sales.createCustomer("test@officefloor.net",
+				"Daniel");
+		final int quantity = 1;
+		Quote quote = this.accounts.createQuote(customer, Arrays
+				.asList(new ShoppingCartItem(product, quantity)));
+		Invoice invoice = this.accounts.createInvoice(quote);
+
+		// Deliver product to warehouse
+		this.warehouse.productDelivered(product, 10);
+
+		// Allocate product to Invoice
+		List<ProductOrder> orders = this.warehouse.allocateProduct(invoice);
+		assertNull("All product should be available so no order required",
+				orders);
+
+		// Retrieve invoice to ensure product allocated
+		invoice = this.accounts.retrieveInvoice(invoice.getInvoiceId());
+		InvoiceLineItem lineItem = invoice.getInvoiceLineItems().get(0);
+		ProductAllocation allocation = lineItem.getProductAllocation();
+		assertNotNull("Must have allocation", allocation);
+		assertEquals("Incorrect quantity allocated", 1, allocation
+				.getQuantityAllocated());
+
+		// Ensure available products decremented
+		ProductAvailability availability = this.warehouse
+				.retrieveProductAvailability(product);
+		assertEquals("Incorrect products available", 9, availability
+				.getQuantityAvailable());
+	}
+
+	/**
+	 * Tests {@link ProductOrder} is returned as {@link Product} not available.
+	 */
+	public void testOrderProduct() throws Exception {
+
+		// Create the Product
+		Product product = this.catalog.createProduct("Test", 1.00);
+
+		// Create the Invoice
+		Customer customer = this.sales.createCustomer("test@officefloor.net",
+				"Daniel");
+		final int quantity = 1;
+		Quote quote = this.accounts.createQuote(customer, Arrays
+				.asList(new ShoppingCartItem(product, quantity)));
+		Invoice invoice = this.accounts.createInvoice(quote);
+
+		// Allocate product to Invoice
+		List<ProductOrder> orders = this.warehouse.allocateProduct(invoice);
+		assertNotNull("Product not available so order required", orders);
+		assertEquals("Incorrect number of orders", 1, orders.size());
+		ProductOrder order = orders.get(0);
+		assertEquals("Incorrect product", product.getProductId(), order
+				.getProduct().getProductId());
+		assertEquals("Incorrect quantity", quantity, order.getQuantity());
+
+		// Deliver the product order and ensure Invoice full filled
+		List<Invoice> fullFilledInvoices = this.warehouse.productDelivered(
+				product, quantity);
+		assertNotNull("Should have full filled invoices", fullFilledInvoices);
+		assertEquals("Should have a full filled invoice", 1, fullFilledInvoices
+				.size());
+		Invoice fullFilledInvoice = fullFilledInvoices.get(0);
+		assertEquals("Incorrect full filled invoice", invoice.getInvoiceId(),
+				fullFilledInvoice.getInvoiceId());
 	}
 
 }

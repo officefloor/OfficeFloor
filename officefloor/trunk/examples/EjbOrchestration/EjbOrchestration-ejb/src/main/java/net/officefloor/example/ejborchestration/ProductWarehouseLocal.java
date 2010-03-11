@@ -17,6 +17,8 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.List;
+
 import javax.ejb.Local;
 
 /**
@@ -37,13 +39,28 @@ public interface ProductWarehouseLocal {
 	ProductAvailability retrieveProductAvailability(Product product);
 
 	/**
-	 * Increments the number of {@link Product} instances available.
+	 * Allocates the {@link Product} instances from this
+	 * {@link ProductWarehouse}.
+	 * 
+	 * @param invoice
+	 *            {@link Invoice}.
+	 * @return {@link ProductOrder} instances. Returns <code>null</code> if
+	 *         {@link Invoice} was fulfilled.
+	 */
+	List<ProductOrder> allocateProduct(Invoice invoice);
+
+	/**
+	 * {@link Product} has been delivered to the {@link ProductWarehouse} and
+	 * therefore more of the {@link Product} is available.
 	 * 
 	 * @param product
 	 *            {@link Product}.
-	 * @param numberAvailable
-	 *            Number to increment availability.
+	 * @param quantityDelivered
+	 *            Quantity of {@link Product} delivered to the
+	 *            {@link ProductWarehouse}.
+	 * @return Potential {@link Invoice} instances that are now fulfilled by
+	 *         delivery of the {@link Product} instances.
 	 */
-	void incrementProductAvailability(Product product, int numberAvailable);
+	List<Invoice> productDelivered(Product product, int quantityDelivered);
 
 }

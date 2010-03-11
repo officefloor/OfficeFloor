@@ -25,7 +25,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 /**
- * Purchasing {@link Stateless} bean.
+ * Sales {@link Stateless} bean.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,13 +43,42 @@ public class Sales implements SalesLocal {
 		public final String email;
 
 		/**
+		 * Name.
+		 */
+		public final String name;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param email
 		 *            Email.
+		 * @param name
+		 *            Name.
 		 */
-		public CustomerSeed(String email) {
+		public CustomerSeed(String email, String name) {
 			this.email = email;
+			this.name = name;
+		}
+	}
+
+	/**
+	 * Seed to create the {@link ShoppingCart}.
+	 */
+	public static class ShoppingCartSeed {
+
+		/**
+		 * {@link Customer}.
+		 */
+		public final Customer customer;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param customer
+		 *            {@link Customer}.
+		 */
+		public ShoppingCartSeed(Customer customer) {
+			this.customer = customer;
 		}
 	}
 
@@ -73,9 +102,7 @@ public class Sales implements SalesLocal {
 		}
 
 		// Create the Customer
-		CustomerSeed seed = new CustomerSeed(email);
-		Customer customer = new Customer(seed);
-		customer.setName(name);
+		Customer customer = new Customer(new CustomerSeed(email, name));
 
 		// Make available to the database
 		this.entityManager.persist(customer);
@@ -97,13 +124,29 @@ public class Sales implements SalesLocal {
 	}
 
 	@Override
-	public void createPurchaseOrder(PurchaseOrder purchaseOrder) {
-		this.entityManager.persist(purchaseOrder);
+	public ShoppingCart retrieveShoppingCart(Customer customer) {
+		// Obtain shopping cart for customer
+		Query query = this.entityManager
+				.createQuery("SELECT s FROM ShoppingCart s WHERE s.customer = :customer");
+		query.setParameter("customer", customer);
+		List<ShoppingCart> shoppingCarts = this.retrieveShoppingCarts(query);
+
+		// Use existing shopping cart
+		if (shoppingCarts.size() > 0) {
+			return shoppingCarts.get(0);
+		}
+
+		// No shopping cart, so create and return
+		ShoppingCart shoppingCart = new ShoppingCart(new ShoppingCartSeed(
+				customer));
+		this.entityManager.persist(shoppingCart);
+		return shoppingCart;
 	}
 
 	@Override
-	public PurchaseOrder retrievePurchaseOrder(Long purchaseOrderId) {
-		return this.entityManager.find(PurchaseOrder.class, purchaseOrderId);
+	public void storeShoppingCart(ShoppingCart shoppingCart) {
+		// Merge in changes
+		this.entityManager.merge(shoppingCart);
 	}
 
 	/**
@@ -116,6 +159,18 @@ public class Sales implements SalesLocal {
 	@SuppressWarnings("unchecked")
 	private List<Customer> retrieveCustomers(Query query) {
 		return (List<Customer>) query.getResultList();
+	}
+
+	/**
+	 * Obtains the {@link ShoppingCart} instances for the {@link Query}.
+	 * 
+	 * @param query
+	 *            {@link Query}.
+	 * @return {@link ShoppingCart} instances.
+	 */
+	@SuppressWarnings("unchecked")
+	private List<ShoppingCart> retrieveShoppingCarts(Query query) {
+		return (List<ShoppingCart>) query.getResultList();
 	}
 
 }

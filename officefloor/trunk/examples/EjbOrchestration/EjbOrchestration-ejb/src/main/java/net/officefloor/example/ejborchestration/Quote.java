@@ -28,20 +28,22 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import net.officefloor.example.ejborchestration.Accounts.QuoteSeed;
+
 /**
- * Purchase Order.
+ * Quote.
  * 
  * @author Daniel Sagenschneider
  */
 @Entity
-public class PurchaseOrder {
+public class Quote {
 
 	/**
-	 * Identifier for this {@link PurchaseOrder}.
+	 * {@link Quote} identifier.
 	 */
 	@Id
 	@GeneratedValue
-	private Long purchaseOrderId;
+	private Long quoteId;
 
 	/**
 	 * {@link Customer}.
@@ -50,34 +52,34 @@ public class PurchaseOrder {
 	private Customer customer;
 
 	/**
-	 * {@link PurchaseOrderLineItem} instances for this {@link PurchaseOrder}.
+	 * {@link QuoteItem} instances.
 	 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<PurchaseOrderLineItem> lineItems;
+	private List<QuoteItem> quoteItems;
 
 	/**
 	 * Default constructor for {@link Entity}.
 	 */
-	public PurchaseOrder() {
+	public Quote() {
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param customer
-	 *            {@link Customer}.
+	 * @param seed
+	 *            {@link QuoteSeed}.
 	 */
-	public PurchaseOrder(Customer customer) {
-		this.customer = customer;
+	public Quote(QuoteSeed seed) {
+		this.customer = seed.customer;
 	}
 
 	/**
-	 * Obtains the identifier for this {@link PurchaseOrder}.
+	 * Obtains the {@link Long}.
 	 * 
-	 * @return {@link PurchaseOrder} Id.
+	 * @return {@link Long}.
 	 */
-	public Long getPurchaseOrderId() {
-		return this.purchaseOrderId;
+	public Long getQuoteId() {
+		return this.quoteId;
 	}
 
 	/**
@@ -90,19 +92,19 @@ public class PurchaseOrder {
 	}
 
 	/**
-	 * Obtains the {@link PurchaseOrderLineItem} instances.
+	 * Obtains the {@link List<QuoteItem>}.
 	 * 
-	 * @return {@link PurchaseOrderLineItem} instances.
+	 * @return {@link List<QuoteItem>}.
 	 */
-	public List<PurchaseOrderLineItem> getPurchaseOrderLineItems() {
+	public List<QuoteItem> getQuoteItems() {
 
-		// Lazy create to allow adding while create
-		if (this.lineItems == null) {
-			this.lineItems = new LinkedList<PurchaseOrderLineItem>();
+		// Lazy create the items
+		if (this.quoteItems == null) {
+			this.quoteItems = new LinkedList<QuoteItem>();
 		}
 
-		// Return the line items
-		return this.lineItems;
+		// Return the items
+		return this.quoteItems;
 	}
 
 }

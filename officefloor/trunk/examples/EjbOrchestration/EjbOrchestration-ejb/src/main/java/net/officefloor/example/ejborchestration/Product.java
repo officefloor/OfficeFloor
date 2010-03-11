@@ -21,6 +21,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import net.officefloor.example.ejborchestration.ProductCatalog.ProductSeed;
+
 /**
  * Product.
  * 
@@ -39,7 +41,12 @@ public class Product {
 	/**
 	 * Name of the {@link Product}.
 	 */
-	public String name;
+	private String name;
+
+	/**
+	 * Price of the {@link Product}.
+	 */
+	private double price;
 
 	/**
 	 * Default constructor for {@link Entity}.
@@ -50,11 +57,12 @@ public class Product {
 	/**
 	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link Product}.
+	 * @param seed
+	 *            {@link ProductSeed}.
 	 */
-	public Product(String name) {
-		this.name = name;
+	public Product(ProductSeed seed) {
+		this.name = seed.name;
+		this.price = seed.price;
 	}
 
 	/**
@@ -76,13 +84,12 @@ public class Product {
 	}
 
 	/**
-	 * Specifies the {@link Product} name.
+	 * Obtains the price for a single {@link Product}.
 	 * 
-	 * @param name
-	 *            {@link Product} name.
+	 * @return Price for a single {@link Product}.
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public double getPrice() {
+		return this.price;
 	}
 
 }

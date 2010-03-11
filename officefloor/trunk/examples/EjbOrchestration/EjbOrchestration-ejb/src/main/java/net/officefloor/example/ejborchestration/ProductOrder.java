@@ -17,41 +17,60 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.Entity;
 
 /**
- * Provides functionality to reset for testing.
+ * Order for {@link Product}.
  * 
  * @author Daniel Sagenschneider
  */
-@Stateless
-public class TestReset implements TestResetLocal {
+public class ProductOrder {
 
 	/**
-	 * {@link EntityManager}.
+	 * {@link Product} to order.
 	 */
-	@PersistenceContext(unitName = "product-unit")
-	private EntityManager entityManager;
+	private Product product;
 
-	/*
-	 * ===================== TestResetLocal ===========================
+	/**
+	 * Quantity to order.
 	 */
+	private int quantity;
 
-	@Override
-	public void reset() {
-		this.clearEntities(ShoppingCartItem.class,
-				ProductAvailability.class, ShoppingCart.class, Product.class,
-				Account.class, Customer.class);
+	/**
+	 * Default constructor for {@link Entity}.
+	 */
+	public ProductOrder() {
 	}
 
-	private void clearEntities(Class<?>... entityTypes) {
-		for (Class<?> entityType : entityTypes) {
-			this.entityManager.createQuery(
-					"DELETE FROM " + entityType.getSimpleName())
-					.executeUpdate();
-		}
+	/**
+	 * Initiate.
+	 * 
+	 * @param product
+	 *            {@link Product} to order.
+	 * @param quantity
+	 *            Quantity to order.
+	 */
+	public ProductOrder(Product product, int quantity) {
+		this.product = product;
+		this.quantity = quantity;
+	}
+
+	/**
+	 * Obtains the {@link Product} to order.
+	 * 
+	 * @return {@link Product} to order.
+	 */
+	public Product getProduct() {
+		return this.product;
+	}
+
+	/**
+	 * Obtains the quantity of the {@link Product} to order.
+	 * 
+	 * @return Quantity of the {@link Product} to order.
+	 */
+	public int getQuantity() {
+		return this.quantity;
 	}
 
 }

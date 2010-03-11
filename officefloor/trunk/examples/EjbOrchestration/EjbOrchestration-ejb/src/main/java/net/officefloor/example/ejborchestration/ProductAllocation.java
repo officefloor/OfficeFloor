@@ -21,78 +21,68 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import net.officefloor.example.ejborchestration.Sales.CustomerSeed;
-
 /**
- * Customer.
+ * {@link Product} allocation.
  * 
  * @author Daniel Sagenschneider
  */
 @Entity
-public class Customer {
+public class ProductAllocation {
 
 	/**
-	 * {@link Customer} Id.
+	 * {@link ShoppingCartItem} weak reference.
 	 */
 	@Id
 	@GeneratedValue
-	private Long customerId;
+	private Long allocationId;
 
 	/**
-	 * Email address.
+	 * Quantity allocated.
 	 */
-	private String email;
-
-	/**
-	 * Name.
-	 */
-	private String name;
+	private int quantityAllocated;
 
 	/**
 	 * Default constructor for {@link Entity}.
 	 */
-	public Customer() {
+	public ProductAllocation() {
 	}
 
 	/**
-	 * Allow {@link Sales} to create a {@link Customer}.
+	 * Initiate.
 	 * 
-	 * @param seed
-	 *            {@link CustomerSeed}.
+	 * @param quantityAllocated
+	 *            Quantity allocated.
 	 */
-	public Customer(CustomerSeed seed) {
-		this.email = seed.email;
-		this.name = seed.name;
+	public ProductAllocation(int quantityAllocated) {
+		this.quantityAllocated = quantityAllocated;
 	}
 
 	/**
-	 * Obtains the {@link Customer} Id.
+	 * Obtains the identifier for this {@link ProductAllocation}.
 	 * 
-	 * @return {@link Customer} Id.
+	 * @return Identifier for this {@link ProductAllocation}.
 	 */
-	public Long getCustomerId() {
-		return this.customerId;
+	public Long getProductAllocationId() {
+		return this.allocationId;
 	}
 
 	/**
-	 * <p>
-	 * Obtains the email.
-	 * <p>
-	 * As the email identifies the {@link Customer}, it can not be changed.
+	 * Obtains the quantity allocated.
 	 * 
-	 * @return Email.
+	 * @return Quantity allocated.
 	 */
-	public String getEmail() {
-		return this.email;
+	public int getQuantityAllocated() {
+		return this.quantityAllocated;
 	}
 
 	/**
-	 * Obtains the name.
+	 * Specifies the quantity allocated.
 	 * 
-	 * @return Name.
+	 * @param quantityAllocated
+	 *            Quantity allocated.
 	 */
-	public String getName() {
-		return this.name;
+	public void setQuantityAllocated(int quantityAllocated) {
+		this.quantityAllocated = quantityAllocated;
 	}
 
 }

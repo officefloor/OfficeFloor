@@ -17,41 +17,25 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 /**
- * Provides functionality to reset for testing.
+ * Item that may be invoiced.
  * 
  * @author Daniel Sagenschneider
  */
-@Stateless
-public class TestReset implements TestResetLocal {
+public interface InvoiceableItem {
 
 	/**
-	 * {@link EntityManager}.
+	 * Obtains the {@link Product} for this {@link InvoiceableItem}.
+	 * 
+	 * @return {@link Product} for this {@link InvoiceableItem}.
 	 */
-	@PersistenceContext(unitName = "product-unit")
-	private EntityManager entityManager;
+	Product getProduct();
 
-	/*
-	 * ===================== TestResetLocal ===========================
+	/**
+	 * Obtains the quantity of the {@link Product}.
+	 * 
+	 * @return Quantity of the {@link Product}.
 	 */
-
-	@Override
-	public void reset() {
-		this.clearEntities(ShoppingCartItem.class,
-				ProductAvailability.class, ShoppingCart.class, Product.class,
-				Account.class, Customer.class);
-	}
-
-	private void clearEntities(Class<?>... entityTypes) {
-		for (Class<?> entityType : entityTypes) {
-			this.entityManager.createQuery(
-					"DELETE FROM " + entityType.getSimpleName())
-					.executeUpdate();
-		}
-	}
+	int getQuantity();
 
 }
