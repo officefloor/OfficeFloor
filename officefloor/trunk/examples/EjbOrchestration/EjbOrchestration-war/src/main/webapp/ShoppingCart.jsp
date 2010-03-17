@@ -4,9 +4,8 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>EJB Orchestration Example</h1>
+		<h1>Shopping Cart</h1>
 		<br />
-		<br />
-		<a href="<s:url action='shoppingcart'/>">Shopping Cart</a>
+		<p>Customer: <s:property value="shoppingCart.customer" /></p>
 	</body>
 </html>

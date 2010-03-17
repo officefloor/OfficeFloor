@@ -3,38 +3,20 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>EJB Orchestration Example</display-name>
-<!--  
+
+	<!-- Struts -->
 	<filter>
-		<filter-name>ServletMappedDoFilter_Filter</filter-name>
-		<filter-class>tests.Filter.DoFilter_Filter</filter-class>
-		<init-param>
-			<param-name>attribute</param-name>
-			<param-value>tests.Filter.DoFilter_Filter.SERVLET_MAPPED</param-value>
-		</init-param>
+		<filter-name>struts2</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>ServletMappedDoFilter_Filter</filter-name>
-		<url-pattern>/DoFilterTest</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
+		<filter-name>struts2</filter-name>
+		<url-pattern>/*</url-pattern>
 	</filter-mapping>
--->
-<!--  
-	<servlet>
-		<servlet-name>welcome</servlet-name>
-		<servlet-class>WelcomeServlet</servlet-class>
-	</servlet>
--->
+
+	<!-- Welcome Page -->
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
-<!--  
-	<error-page>
-		<exception-type>java.lang.ArrayIndexOutOfBoundsException</exception-type>
-		<location>/ServletErrorPage</location>
-	</error-page>
-	<error-page>
-		<error-code>404</error-code>
-		<location>/error404.html</location>
-	</error-page>
--->
+
 </web-app>
