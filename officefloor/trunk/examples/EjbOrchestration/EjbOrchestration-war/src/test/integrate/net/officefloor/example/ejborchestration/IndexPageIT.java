@@ -31,14 +31,30 @@ import com.meterware.httpunit.WebResponse;
 public class IndexPageIT extends TestCase {
 
 	/**
-	 * Ensure able to obtain index page.
+	 * Ensure able to obtain index directly.
 	 */
-	public void testIndexPage() throws Exception {
+	public void testIndexJsp() throws Exception {
+		this.doTest("http://localhost:8080/index.jsp");
+	}
+
+	/**
+	 * Ensure able to obtain index indirectly (via an action).
+	 */
+	public void testIndexAction() throws Exception {
+		this.doTest("http://localhost:8080/index.action");
+	}
+
+	/**
+	 * Does the test.
+	 * 
+	 * @param url
+	 *            URL to the index page.
+	 */
+	private void doTest(String url) throws Exception {
 
 		// Request the index page
 		WebConversation conversation = new WebConversation();
-		WebResponse response = conversation
-				.getResponse("http://localhost:8080/index.jsp");
+		WebResponse response = conversation.getResponse(url);
 
 		// Ensure correct page
 		HTMLElement[] h1Elements = response.getElementsByTagName("h1");
