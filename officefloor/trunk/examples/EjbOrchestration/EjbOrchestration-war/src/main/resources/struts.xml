@@ -8,8 +8,24 @@
 		<action name="index">
 			<result>/index.jsp</result>
 		</action>
-		<action name="shoppingcart" class="net.officefloor.example.ejborchestration.ShowShoppingCartAction">
-			<result name="success">/ShoppingCart.jsp</result>
+		<action name="login"
+			class="net.officefloor.example.ejborchestration.LoginAction">
+			<result name="logout">/logout.jsp</result>
+			<result name="re-login">/login.jsp</result>
+			<result name="success">/index.jsp</result>
+		</action>
+		<action name="logout"
+			class="net.officefloor.example.ejborchestration.LogoutAction">
+			<result name="success">/index.jsp</result>
+		</action>
+		<action name="createCustomer"
+			class="net.officefloor.example.ejborchestration.CreateCustomerAction">
+			<result name="re-create">/createCustomer.jsp</result>
+			<result name="success">/index.jsp</result>
+		</action>
+		<action name="shoppingCart"
+			class="net.officefloor.example.ejborchestration.ShowShoppingCartAction">
+			<result name="success">/shoppingCart.jsp</result>
 		</action>
 	</package>
 
