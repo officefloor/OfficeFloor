@@ -5,9 +5,9 @@
 	</head>
 	<body>
 		<h1>EJB Orchestration Example</h1>
-		<br />
-		<br />
-		<a href="<s:url action='login'/>"/>Login</a>
-		<a href="<s:url action='shoppingCart'/>">Shopping Cart</a>
+		<p>Logout</p>
+		<s:form action="logout">
+			<s:submit value="Logout" />
+        </s:form>
 	</body>
 </html>
