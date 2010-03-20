@@ -11,16 +11,41 @@
 	<packaging>ear</packaging>
 	<name>EjbOrchestration-ear</name>
 	<description>EAR generation of the EJB Orchestration Example</description>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-ear-plugin</artifactId>
+				<configuration>
+					<modules>
+						<webModule>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>EjbOrchestration-war</artifactId>
+							<contextRoot>/</contextRoot>
+						</webModule>
+						<ejbModule>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>EjbOrchestration-ejb</artifactId>
+						</ejbModule>
+					</modules>
+					<artifactTypeMappings>
+						<artifactTypeMapping type="test-jar" mapping="jar" />
+					</artifactTypeMappings>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>EjbOrchestration-war</artifactId>
 			<version>${pom.version}</version>
+			<type>war</type>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>EjbOrchestration-ejb</artifactId>
 			<version>${pom.version}</version>
+			<type>ejb</type>
 		</dependency>
 	</dependencies>
 </project>
