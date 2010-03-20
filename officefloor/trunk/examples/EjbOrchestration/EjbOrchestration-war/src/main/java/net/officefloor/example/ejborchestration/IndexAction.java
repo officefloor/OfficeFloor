@@ -1,0 +1,57 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2010 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.example.ejborchestration;
+
+import java.util.Map;
+
+import org.apache.struts2.interceptor.SessionAware;
+
+import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionSupport;
+
+/**
+ * {@link Action} for index.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class IndexAction extends ActionSupport implements SessionAware {
+
+	/**
+	 * Session.
+	 */
+	private Map<String, Object> session;
+
+	/**
+	 * Obtains the {@link Customer} logged in.
+	 * 
+	 * @return {@link Customer} logged in.
+	 */
+	public Customer getCustomer() {
+		return ActionUtil.getCustomer(this.session);
+	}
+
+	/*
+	 * ================== SessionAware =========================
+	 */
+
+	@Override
+	public void setSession(Map<String, Object> session) {
+		this.session = session;
+	}
+
+}
