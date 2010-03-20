@@ -10,7 +10,7 @@
 			<s:textfield name="name" label="Name" />
 			<s:textfield name="email" label="Email" />
 			<s:password name="password" label="Password" />
-			<s:submit value="Create" />
+			<s:submit name="create" value="Create" />
         </s:form>
 		<p><s:property value="error"/></p>
 	</body>
