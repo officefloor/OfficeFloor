@@ -30,15 +30,34 @@ import junit.framework.TestCase;
 public abstract class SeleniumTestCase extends TestCase {
 
 	/**
+	 * {@link Customer} name.
+	 */
+	private static String customerName;
+
+	/**
+	 * {@link Customer} email.
+	 */
+	private static String customerEmail;
+
+	/**
+	 * Creates the {@link DefaultSelenium} client.
+	 * 
+	 * @return {@link DefaultSelenium} client.
+	 */
+	private static DefaultSelenium createSeleniumClient() {
+		return new DefaultSelenium("localhost", 4444, "*firefox",
+				"http://localhost:8080/");
+	}
+
+	/**
 	 * {@link Selenium} client.
 	 */
-	protected final DefaultSelenium selenium = new DefaultSelenium("localhost",
-			4444, "*firefox", "http://localhost:8080/");
+	protected DefaultSelenium selenium;
 
 	/**
 	 * Time to wait for page to load.
 	 */
-	private long pageLoadWaitTime = 30000;
+	private long pageLoadWaitTime = 5000;
 
 	/**
 	 * Starting URL.
@@ -62,17 +81,66 @@ public abstract class SeleniumTestCase extends TestCase {
 		this.startingUrl = startingUrl;
 	}
 
+	/**
+	 * Obtains the {@link Customer} email.
+	 * 
+	 * @return {@link Customer} email.
+	 */
+	public String getCustomerEmail() {
+		return customerEmail;
+	}
+
+	/**
+	 * Obtains the {@link Customer} name.
+	 * 
+	 * @return {@link Customer} name.
+	 */
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	/**
+	 * Obtains the password for the {@link Customer}.
+	 * 
+	 * @return Password for the {@link Customer}.
+	 */
+	public String getCustomerPassword() {
+		return "AnyPasswordWillDo";
+	}
+
 	/*
 	 * ==================== TestCase =========================
 	 */
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Lazy load the setup state
+		if (ActionUtil.isBlank(customerName)) {
+			DefaultSelenium initiate = createSeleniumClient();
+			initiate.start();
+			try {
+				initiate.open("/initialState.action");
+				customerName = initiate.getText("id=name");
+				customerEmail = initiate.getText("id=email");
+			} finally {
+				initiate.stop();
+			}
+
+			// Indicated loaded initial state
+			System.out.println("Initial State\n" + "\tName: " + customerName
+					+ "\n\tEmail: " + customerEmail);
+		}
+
 		// Start selenium client
+		this.selenium = createSeleniumClient();
 		this.selenium.start();
 
 		// Open the starting URL
 		this.selenium.open(this.startingUrl);
+		
+		// Ensure not logged in
+		this.assertTextPresent("Hello(\\s+)Welcome");
 	}
 
 	@Override
