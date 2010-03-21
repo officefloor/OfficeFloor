@@ -17,31 +17,32 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionSupport;
+
 /**
- * Test to create a {@link Customer}.
+ * {@link Action} for initial state.
  * 
  * @author Daniel Sagenschneider
  */
-public class CreateCustomerIT extends SeleniumTestCase {
+public class InitialStateAction extends ActionSupport {
 
 	/**
-	 * Ensure able to create a {@link Customer}.
+	 * Obtains the {@link Customer} name.
+	 * 
+	 * @return {@link Customer} name.
 	 */
-	public void testCreateCustomer() {
+	public String getCustomerName() {
+		return StartupServlet.customer.getName();
+	}
 
-		// Ensure no customer
-		this.assertTextPresent("Hello(\\s+)Welcome");
-
-		// Create the customer
-		this.clickLink("Login");
-		this.clickLink("create login");
-		this.inputText("name", "Daniel");
-		this.inputText("email", "daniel@officefloor.net");
-		this.inputText("password", "password");
-		this.submit("create");
-
-		// Ensure logged in as the customer
-		this.assertTextPresent("Hello Daniel(\\s+)Welcome");
+	/**
+	 * Obtains the {@link Customer} email.
+	 * 
+	 * @return {@link Customer} email.
+	 */
+	public String getCustomerEmail() {
+		return StartupServlet.customer.getEmail();
 	}
 
 }

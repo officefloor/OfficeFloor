@@ -5,6 +5,10 @@
 <struts>
 
 	<package name="default" extends="struts-default">
+		<action name="initialState"
+			class="net.officefloor.example.ejborchestration.InitialStateAction">
+			<result>/initialState.jsp</result>
+		</action>
 		<action name=""
 			class="net.officefloor.example.ejborchestration.IndexAction">
 			<result>/index.jsp</result>

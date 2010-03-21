@@ -13,5 +13,12 @@
 		<filter-name>struts2</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	
+	<!-- Initiate State -->
+	<servlet>
+		<servlet-name>Startup</servlet-name>
+		<servlet-class>net.officefloor.example.ejborchestration.StartupServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
 
 </web-app>
