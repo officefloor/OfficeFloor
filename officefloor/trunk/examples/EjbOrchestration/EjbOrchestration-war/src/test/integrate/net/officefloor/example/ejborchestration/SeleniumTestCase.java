@@ -17,6 +17,9 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
 
@@ -28,6 +31,26 @@ import junit.framework.TestCase;
  * @author Daniel Sagenschneider
  */
 public abstract class SeleniumTestCase extends TestCase {
+
+	/**
+	 * Shirt {@link Product} name.
+	 */
+	public static String PRODUCT_SHIRT = "Shirt";
+
+	/**
+	 * Trousers {@link Product} name.
+	 */
+	public static String PRODUCT_TROUSERS = "Trousers";
+
+	/**
+	 * Hat {@link Product} name.
+	 */
+	public static String PRODUCT_HAT = "Hat";
+
+	/**
+	 * {@link Product} identifiers.
+	 */
+	private static Map<String, Long> productIdentifiers = new HashMap<String, Long>();
 
 	/**
 	 * {@link Customer} name.
@@ -119,17 +142,33 @@ public abstract class SeleniumTestCase extends TestCase {
 		if (ActionUtil.isBlank(customerName)) {
 			DefaultSelenium initiate = createSeleniumClient();
 			initiate.start();
+
 			try {
 				initiate.open("/initialState.action");
+
+				// Load the customer details
 				customerName = initiate.getText("id=name");
 				customerEmail = initiate.getText("id=email");
+
+				// Load the products
+				this.loadProduct(PRODUCT_SHIRT, initiate);
+				this.loadProduct(PRODUCT_TROUSERS, initiate);
+				this.loadProduct(PRODUCT_HAT, initiate);
+
 			} finally {
 				initiate.stop();
 			}
 
 			// Indicated loaded initial state
-			System.out.println("Initial State\n" + "\tName: " + customerName
-					+ "\n\tEmail: " + customerEmail);
+			System.out.println("Initial State");
+			System.out.println("\tCUSTOMER");
+			System.out.println("\t\tname: " + customerName + ", email: "
+					+ customerEmail);
+			System.out.println("\tPRODUCTS");
+			for (String productName : productIdentifiers.keySet()) {
+				System.out.println("\t\tproduct: " + productName + " (id="
+						+ productIdentifiers.get(productName) + ")");
+			}
 		}
 
 		// Start selenium client
@@ -138,15 +177,37 @@ public abstract class SeleniumTestCase extends TestCase {
 
 		// Open the starting URL
 		this.selenium.open(this.startingUrl);
-		
+
 		// Ensure not logged in
 		this.assertTextPresent("Hello(\\s+)Welcome");
+	}
+
+	/**
+	 * Loads the {@link Product}.
+	 */
+	private void loadProduct(String productName, DefaultSelenium initiate) {
+		String productId = initiate.getText("id=product-" + productName);
+		productIdentifiers.put(productName, Long.valueOf(productId));
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop selenium client
 		this.selenium.stop();
+	}
+
+	/**
+	 * Logs in.
+	 */
+	public void login() {
+		// Ensure on index and not logged in
+		this.assertTextPresent("Hello(\\s+)Welcome");
+
+		// Login (expecting to start from index page)
+		this.clickLink("Login");
+		this.inputText("email", this.getCustomerEmail());
+		this.inputText("password", "password");
+		this.submit("loginCustomer");
 	}
 
 	/**

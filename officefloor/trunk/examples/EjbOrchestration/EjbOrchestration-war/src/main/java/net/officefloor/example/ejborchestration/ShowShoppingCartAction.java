@@ -17,9 +17,6 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -30,28 +27,15 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class ShowShoppingCartAction extends ActionSupport {
 
-	@Override
-	public String execute() throws Exception {
-
-		// TODO remove
-		Context context = new InitialContext();
-		Object object = context.lookup(ProductCatalogLocal.class
-				.getSimpleName());
-		System.out.println("Looked up object: " + object);
-		ProductCatalogLocal catalog = (ProductCatalogLocal) object;
-		System.out.println("Obtained Product Catalog: " + catalog);
-
-		// Successful
-		return SUCCESS;
-	}
-
 	/**
 	 * Obtains the {@link ShoppingCart}.
 	 * 
 	 * @return {@link ShoppingCart}.
 	 */
 	public ShoppingCart getShoppingCart() {
-		return new ShoppingCart();
+		Customer loggedInCustomer = ActionUtil.getLoggedInCustomer();
+		SalesLocal sales = ActionUtil.lookupService(SalesLocal.class);
+		return sales.retrieveShoppingCart(loggedInCustomer);
 	}
 
 }

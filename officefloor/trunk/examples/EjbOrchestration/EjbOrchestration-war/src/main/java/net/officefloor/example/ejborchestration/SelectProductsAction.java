@@ -17,27 +17,42 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * {@link Action} to logout.
+ * {@link Action} to select {@link Product} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class LogoutAction extends ActionSupport {
+public class SelectProductsAction extends ActionSupport {
 
-	/*
-	 * =========================== Action =========================
+	/**
+	 * {@link ProductQuantity} instances.
 	 */
+	private List<ProductQuantity> products = new LinkedList<ProductQuantity>();
 
-	@Override
-	public String execute() throws Exception {
-		// Log out by clearing the customer
-		ActionUtil.setLoggedInCustomer(null);
+	/**
+	 * Obtains the {@link ProductQuantity} instances.
+	 * 
+	 * @return {@link ProductQuantity} instances.
+	 */
+	public List<ProductQuantity> getProducts() {
 
-		// Successfully logged out
-		return SUCCESS;
+		// Load products from database if not provided by form
+		if (this.products.size() == 0) {
+			ProductCatalogLocal catalog = ActionUtil
+					.lookupService(ProductCatalogLocal.class);
+			for (Product product : catalog.retrieveProductList()) {
+				this.products.add(new ProductQuantity(product));
+			}
+		}
+
+		// Return the products
+		return this.products;
 	}
 
 }

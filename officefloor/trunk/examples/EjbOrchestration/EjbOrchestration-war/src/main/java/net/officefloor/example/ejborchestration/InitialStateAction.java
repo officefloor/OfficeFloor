@@ -17,6 +17,8 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.List;
+
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -43,6 +45,15 @@ public class InitialStateAction extends ActionSupport {
 	 */
 	public String getCustomerEmail() {
 		return StartupServlet.customer.getEmail();
+	}
+
+	/**
+	 * Obtains the {@link Product} listing.
+	 * 
+	 * @return {@link Product} listing.
+	 */
+	public List<Product> getProducts() {
+		return StartupServlet.products;
 	}
 
 }
