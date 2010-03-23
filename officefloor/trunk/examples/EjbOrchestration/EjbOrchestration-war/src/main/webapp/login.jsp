@@ -4,8 +4,7 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>EJB Orchestration Example</h1>
-		<p>Login</p>
+		<h1>Login</h1>
 		<s:form action="login">
 			<s:textfield name="email" label="Email" />
 			<s:password name="password" label="Password" />

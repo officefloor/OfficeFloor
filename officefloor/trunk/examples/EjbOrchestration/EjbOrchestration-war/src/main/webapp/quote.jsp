@@ -4,24 +4,24 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>Shopping Cart</h1>
+		<h1>Quote</h1>
 		<br />
-		<p>Customer: <s:property value="shoppingCart.customer.name" /></p>
+		<p>Customer: <s:property value="quote.customer.name" /></p>
 		<table id="items">
 			<tr>
 				<th>Product</th>
-				<th>Quantity</th>
 				<th>Price per item</th>
+				<th>Quantity</th>
+				<th>Line Price</th>
 			</tr>
-			<s:iterator value="shoppingCart.shoppingCartItems">
+			<s:iterator value="quote.quoteItems">
 				<tr>						
 					<td><s:property value="product.name"/></td>
+					<td><s:property value="productPrice"/></td>
 					<td><s:property value="quantity"/></td>
-					<td><s:property value="product.price"/></td>
+					<td><s:property value="quoteItemPrice"/></td>
 				</tr>
 			</s:iterator>
 		</table>
-		<a href="<s:url action='selectProducts'/>">Continue Shopping</a>
-		<a href="<s:url action='quote'/>">Quote</a>
 	</body>
 </html>

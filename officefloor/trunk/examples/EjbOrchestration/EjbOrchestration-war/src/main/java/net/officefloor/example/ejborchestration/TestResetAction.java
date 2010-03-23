@@ -17,43 +17,52 @@
  */
 package net.officefloor.example.ejborchestration;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * {@link Action} for initial state.
+ * {@link Action} to reset the state for next test.
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialStateAction extends ActionSupport {
+public class TestResetAction extends ActionSupport {
 
 	/**
-	 * Obtains the {@link Customer} name.
-	 * 
-	 * @return {@link Customer} name.
+	 * {@link Customer}.
 	 */
-	public String getCustomerName() {
-		return TestResetAction.customer.getName();
-	}
+	public static Customer customer;
 
 	/**
-	 * Obtains the {@link Customer} email.
-	 * 
-	 * @return {@link Customer} email.
+	 * {@link Product} instances.
 	 */
-	public String getCustomerEmail() {
-		return TestResetAction.customer.getEmail();
-	}
+	public static List<Product> products = new LinkedList<Product>();
 
-	/**
-	 * Obtains the {@link Product} listing.
-	 * 
-	 * @return {@link Product} listing.
+	/*
+	 * ================= ActionSupport =======================
 	 */
-	public List<Product> getProducts() {
-		return TestResetAction.products;
+
+	@Override
+	public String execute() throws Exception {
+
+		// Reset the for testing
+		ActionUtil.lookupService(TestResetLocal.class).reset();
+
+		// Create customer
+		SalesLocal sales = ActionUtil.lookupService(SalesLocal.class);
+		customer = sales.createCustomer("daniel@officefloor.net", "Daniel");
+
+		// Create the products
+		ProductCatalogLocal catalog = ActionUtil
+				.lookupService(ProductCatalogLocal.class);
+		products.add(catalog.createProduct("Shirt", 19.00));
+		products.add(catalog.createProduct("Trousers", 25.00));
+		products.add(catalog.createProduct("Hat", 7.00));
+
+		// Successful
+		return SUCCESS;
 	}
 
 }

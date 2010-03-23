@@ -4,8 +4,7 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>EJB Orchestration Example</h1>
-		<p>Logout</p>
+		<h1>Logout</h1>
 		<s:form action="logout">
 			<s:submit value="Logout" />
         </s:form>

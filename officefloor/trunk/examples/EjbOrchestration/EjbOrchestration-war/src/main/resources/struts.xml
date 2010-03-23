@@ -9,6 +9,10 @@
 			class="net.officefloor.example.ejborchestration.InitialStateAction">
 			<result>/initialState.jsp</result>
 		</action>
+		<action name="testReset"
+			class="net.officefloor.example.ejborchestration.TestResetAction">
+			<result>/index.jsp</result>
+		</action>
 		<action name=""
 			class="net.officefloor.example.ejborchestration.IndexAction">
 			<result>/index.jsp</result>
@@ -46,6 +50,11 @@
 			<result name="login">/login.jsp</result>
 			<result name="error">/selectProducts.jsp</result>
 			<result name="success" type="chain">shoppingCart</result>
+		</action>
+		<action name="quote"
+			class="net.officefloor.example.ejborchestration.QuoteAction">
+			<result name="login">/login.jsp</result>
+			<result name="success">/quote.jsp</result>
 		</action>
 	</package>
 

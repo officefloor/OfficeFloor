@@ -131,6 +131,42 @@ public abstract class SeleniumTestCase extends TestCase {
 		return "AnyPasswordWillDo";
 	}
 
+	/**
+	 * Aligns the state of this test to the server state.
+	 */
+	public void alignTestState() {
+		DefaultSelenium initiate = createSeleniumClient();
+		initiate.start();
+
+		try {
+			initiate.open("/initialState.action");
+
+			// Load the customer details
+			customerName = initiate.getText("id=name");
+			customerEmail = initiate.getText("id=email");
+
+			// Load fresh set of products
+			productIdentifiers.clear();
+			this.loadProduct(PRODUCT_SHIRT, initiate);
+			this.loadProduct(PRODUCT_TROUSERS, initiate);
+			this.loadProduct(PRODUCT_HAT, initiate);
+
+		} finally {
+			initiate.stop();
+		}
+
+		// Indicated loaded initial state
+		System.out.println("Initial State");
+		System.out.println("\tCUSTOMER");
+		System.out.println("\t\tname: " + customerName + ", email: "
+				+ customerEmail);
+		System.out.println("\tPRODUCTS");
+		for (String productName : productIdentifiers.keySet()) {
+			System.out.println("\t\tproduct: " + productName + " (id="
+					+ productIdentifiers.get(productName) + ")");
+		}
+	}
+
 	/*
 	 * ==================== TestCase =========================
 	 */
@@ -140,40 +176,15 @@ public abstract class SeleniumTestCase extends TestCase {
 
 		// Lazy load the setup state
 		if (ActionUtil.isBlank(customerName)) {
-			DefaultSelenium initiate = createSeleniumClient();
-			initiate.start();
-
-			try {
-				initiate.open("/initialState.action");
-
-				// Load the customer details
-				customerName = initiate.getText("id=name");
-				customerEmail = initiate.getText("id=email");
-
-				// Load the products
-				this.loadProduct(PRODUCT_SHIRT, initiate);
-				this.loadProduct(PRODUCT_TROUSERS, initiate);
-				this.loadProduct(PRODUCT_HAT, initiate);
-
-			} finally {
-				initiate.stop();
-			}
-
-			// Indicated loaded initial state
-			System.out.println("Initial State");
-			System.out.println("\tCUSTOMER");
-			System.out.println("\t\tname: " + customerName + ", email: "
-					+ customerEmail);
-			System.out.println("\tPRODUCTS");
-			for (String productName : productIdentifiers.keySet()) {
-				System.out.println("\t\tproduct: " + productName + " (id="
-						+ productIdentifiers.get(productName) + ")");
-			}
+			this.alignTestState();
 		}
 
 		// Start selenium client
 		this.selenium = createSeleniumClient();
 		this.selenium.start();
+
+		// Reset for next test
+		this.selenium.open("/testReset.action");
 
 		// Open the starting URL
 		this.selenium.open(this.startingUrl);
@@ -249,6 +260,26 @@ public abstract class SeleniumTestCase extends TestCase {
 	public void assertTextPresent(String regexp) {
 		assertTrue("Expecting text: " + regexp, this.selenium
 				.isTextPresent("regexp:" + regexp));
+	}
+
+	/**
+	 * Assets that the table cell value is as expected.
+	 * 
+	 * @param tableIdentifier
+	 *            Identifier of the table.
+	 * @param row
+	 *            Index of row containing the cell.
+	 * @param column
+	 *            Index of column containing the cell.
+	 * @param expectedCellValue
+	 *            Expected value for the cell.
+	 */
+	public void assertTableCellValue(String tableIdentifier, int row,
+			int column, String expectedCellValue) {
+		assertEquals("Incorrect value for cell " + row + "," + column
+				+ " of table " + tableIdentifier, expectedCellValue,
+				this.selenium.getTable(tableIdentifier + "." + row + "."
+						+ column));
 	}
 
 	/**

@@ -4,8 +4,7 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>EJB Orchestration Example</h1>
-		<p>Create Customer</p>
+		<h1>Create Customer</h1>
 		<s:form action="createCustomer">
 			<s:textfield name="name" label="Name" />
 			<s:textfield name="email" label="Email" />
