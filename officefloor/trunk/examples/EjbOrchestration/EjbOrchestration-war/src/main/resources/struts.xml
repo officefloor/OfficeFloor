@@ -34,7 +34,18 @@
 		</action>
 		<action name="shoppingCart"
 			class="net.officefloor.example.ejborchestration.ShowShoppingCartAction">
+			<result name="login">/login.jsp</result>
 			<result name="success">/shoppingCart.jsp</result>
+		</action>
+		<action name="selectProducts"
+			class="net.officefloor.example.ejborchestration.SelectProductsAction">
+			<result name="success">/selectProducts.jsp</result>
+		</action>
+		<action name="productsSelected"
+			class="net.officefloor.example.ejborchestration.ProductsSelectedAction">
+			<result name="login">/login.jsp</result>
+			<result name="error">/selectProducts.jsp</result>
+			<result name="success" type="chain">shoppingCart</result>
 		</action>
 	</package>
 

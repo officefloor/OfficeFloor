@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 
 import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionContext;
 
 /**
  * Utility functions for an {@link Action}.
@@ -39,13 +40,23 @@ public class ActionUtil {
 	private static final String SESSION_CUSTOMER = "customer";
 
 	/**
+	 * Determines if the {@link Customer} is logged in.
+	 * 
+	 * @return <code>true</code> if the {@link Customer} is logged in.
+	 */
+	public static boolean isCustomerLoggedIn() {
+		return (getLoggedInCustomer() != null);
+	}
+
+	/**
 	 * Obtains the {@link Customer}.
 	 * 
 	 * @param session
 	 *            Session map.
 	 * @return {@link Customer} or <code>null</code> if not logged in.
 	 */
-	public static Customer getCustomer(Map<String, Object> session) {
+	public static Customer getLoggedInCustomer() {
+		Map<String, Object> session = ActionContext.getContext().getSession();
 		return (Customer) session.get(SESSION_CUSTOMER);
 	}
 
@@ -54,10 +65,9 @@ public class ActionUtil {
 	 * 
 	 * @param customer
 	 *            {@link Customer}.
-	 * @param session
-	 *            Session map.
 	 */
-	public static void setCustomer(Customer customer, Map<String, Object> session) {
+	public static void setLoggedInCustomer(Customer customer) {
+		Map<String, Object> session = ActionContext.getContext().getSession();
 		session.put(SESSION_CUSTOMER, customer);
 	}
 

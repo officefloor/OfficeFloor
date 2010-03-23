@@ -53,10 +53,7 @@ public class CustomerIT extends SeleniumTestCase {
 		this.assertTextPresent("Hello(\\s+)Welcome");
 
 		// Login
-		this.clickLink("Login");
-		this.inputText("email", this.getCustomerEmail());
-		this.inputText("password", "password");
-		this.submit("loginCustomer");
+		this.login();
 
 		// Ensure logged in
 		this.assertTextPresent("Hello " + this.getCustomerName()

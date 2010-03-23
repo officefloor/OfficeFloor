@@ -17,10 +17,6 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import java.util.Map;
-
-import org.apache.struts2.interceptor.SessionAware;
-
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -29,12 +25,7 @@ import com.opensymphony.xwork2.ActionSupport;
  * 
  * @author Daniel Sagenschneider
  */
-public class CreateCustomerAction extends ActionSupport implements SessionAware {
-
-	/**
-	 * Session.
-	 */
-	private Map<String, Object> session;
+public class CreateCustomerAction extends ActionSupport {
 
 	/**
 	 * Name.
@@ -120,19 +111,10 @@ public class CreateCustomerAction extends ActionSupport implements SessionAware 
 		customer = sales.createCustomer(this.email, this.name);
 
 		// Register the customer
-		ActionUtil.setCustomer(customer, session);
+		ActionUtil.setLoggedInCustomer(customer);
 
 		// Successfully created the customer
 		return SUCCESS;
-	}
-
-	/*
-	 * =================== SessionAware =========================
-	 */
-
-	@Override
-	public void setSession(Map<String, Object> session) {
-		this.session = session;
 	}
 
 }
