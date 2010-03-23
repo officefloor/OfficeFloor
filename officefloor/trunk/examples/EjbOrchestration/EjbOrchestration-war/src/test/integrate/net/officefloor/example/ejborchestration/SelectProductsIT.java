@@ -37,11 +37,9 @@ public class SelectProductsIT extends SeleniumTestCase {
 		this.submit("addProducts");
 
 		// Ensure show error messages
-		assertEquals("Incorrect invalid error", "Must be an integer value",
-				this.selenium.getTable("products.1.3"));
-		assertEquals("Incorrect negative error",
-				"Must be a positive integer value", this.selenium
-						.getTable("products.2.3"));
+		this.assertTableCellValue("products", 1, 3, "Must be an integer value");
+		this.assertTableCellValue("products", 2, 3,
+				"Must be a positive integer value");
 	}
 
 	/**
@@ -56,8 +54,7 @@ public class SelectProductsIT extends SeleniumTestCase {
 		this.submit("addProducts");
 
 		// Ensure show Item in Shopping Cart
-		assertEquals("Incorrect item quantity", "3", this.selenium
-				.getTable("items.1.1"));
+		this.assertTableCellValue("items", 1, 1, "3");
 	}
 
 	/**

@@ -19,8 +19,6 @@ package net.officefloor.example.ejborchestration;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -35,16 +33,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class StartupServlet extends HttpServlet {
 
-	/**
-	 * {@link Customer}.
-	 */
-	public static Customer customer;
-
-	/**
-	 * {@link Product} instances.
-	 */
-	public static List<Product> products = new LinkedList<Product>();
-
 	/*
 	 * ======================= HttpServlet =========================
 	 */
@@ -56,21 +44,12 @@ public class StartupServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-
-		// Create customer
 		try {
-			SalesLocal sales = ActionUtil.lookupService(SalesLocal.class);
-			customer = sales.createCustomer("daniel@officefloor.net", "Daniel");
-		} catch (CustomerExistsException ex) {
+			// Run reset to setup state
+			new TestResetAction().execute();
+		} catch (Exception ex) {
 			throw new ServletException(ex);
 		}
-
-		// Create the products
-		ProductCatalogLocal catalog = ActionUtil
-				.lookupService(ProductCatalogLocal.class);
-		products.add(catalog.createProduct("Shirt", 19.00));
-		products.add(catalog.createProduct("Trousers", 25.00));
-		products.add(catalog.createProduct("Hat", 7.00));
 	}
 
 	@Override

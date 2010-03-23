@@ -17,43 +17,32 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import java.util.List;
-
-import com.opensymphony.xwork2.Action;
-import com.opensymphony.xwork2.ActionSupport;
-
 /**
- * {@link Action} for initial state.
+ * Tests a {@link Quote}.
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialStateAction extends ActionSupport {
+public class QuoteIT extends SeleniumTestCase {
 
 	/**
-	 * Obtains the {@link Customer} name.
-	 * 
-	 * @return {@link Customer} name.
+	 * Ensure can create {@link Quote}.
 	 */
-	public String getCustomerName() {
-		return TestResetAction.customer.getName();
-	}
+	public void testCreateQuote() {
+		this.login();
 
-	/**
-	 * Obtains the {@link Customer} email.
-	 * 
-	 * @return {@link Customer} email.
-	 */
-	public String getCustomerEmail() {
-		return TestResetAction.customer.getEmail();
-	}
+		// Select Products for Quote
+		this.clickLink("Select Products");
+		this.inputText("products[0].quantity", "10");
+		this.submit("addProducts");
 
-	/**
-	 * Obtains the {@link Product} listing.
-	 * 
-	 * @return {@link Product} listing.
-	 */
-	public List<Product> getProducts() {
-		return TestResetAction.products;
+		// Ensure correct quantity on Shopping Cart
+		this.assertTableCellValue("items", 1, 1, "10");
+
+		// Create the Quote
+		this.clickLink("Quote");
+
+		// Verify Quote
+		this.assertTableCellValue("items", 1, 2, "10");
 	}
 
 }

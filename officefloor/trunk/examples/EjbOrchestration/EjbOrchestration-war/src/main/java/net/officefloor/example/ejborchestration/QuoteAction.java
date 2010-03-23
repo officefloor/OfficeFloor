@@ -17,43 +17,55 @@
  */
 package net.officefloor.example.ejborchestration;
 
-import java.util.List;
-
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
 
 /**
- * {@link Action} for initial state.
+ * {@link Action} to create a {@link Quote} for the {@link ShoppingCart}.
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialStateAction extends ActionSupport {
+public class QuoteAction extends ActionSupport {
 
 	/**
-	 * Obtains the {@link Customer} name.
-	 * 
-	 * @return {@link Customer} name.
+	 * {@link Quote}.
 	 */
-	public String getCustomerName() {
-		return TestResetAction.customer.getName();
+	private Quote quote;
+
+	/**
+	 * Obtains the {@link Quote}.
+	 * 
+	 * @return {@link Quote}.
+	 */
+	public Quote getQuote() {
+		return this.quote;
 	}
 
-	/**
-	 * Obtains the {@link Customer} email.
-	 * 
-	 * @return {@link Customer} email.
+	/*
+	 * ==================== ActionSupport ===================
 	 */
-	public String getCustomerEmail() {
-		return TestResetAction.customer.getEmail();
-	}
 
-	/**
-	 * Obtains the {@link Product} listing.
-	 * 
-	 * @return {@link Product} listing.
-	 */
-	public List<Product> getProducts() {
-		return TestResetAction.products;
+	@Override
+	public String execute() throws Exception {
+
+		// Ensure logged in
+		if (!ActionUtil.isCustomerLoggedIn()) {
+			return LOGIN;
+		}
+		Customer loggedInCustomer = ActionUtil.getLoggedInCustomer();
+
+		// Obtain the Shopping Cart
+		SalesLocal sales = ActionUtil.lookupService(SalesLocal.class);
+		ShoppingCart shoppingCart = sales
+				.retrieveShoppingCart(loggedInCustomer);
+
+		// Quote the Shopping Cart
+		AccountsLocal accounts = ActionUtil.lookupService(AccountsLocal.class);
+		this.quote = accounts.createQuote(loggedInCustomer, shoppingCart
+				.getShoppingCartItems());
+
+		// Successful
+		return SUCCESS;
 	}
 
 }
