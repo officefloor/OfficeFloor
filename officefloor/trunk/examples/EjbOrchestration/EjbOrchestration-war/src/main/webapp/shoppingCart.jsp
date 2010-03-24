@@ -23,5 +23,8 @@
 		</table>
 		<a href="<s:url action='selectProducts'/>">Continue Shopping</a>
 		<a href="<s:url action='quote'/>">Quote</a>
+		<s:form action="purchaseShoppingCart">
+			<s:submit name="purchase" value="Purchase" />
+        </s:form>
 	</body>
 </html>

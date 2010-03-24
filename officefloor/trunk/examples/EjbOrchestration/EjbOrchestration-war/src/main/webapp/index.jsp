@@ -10,5 +10,6 @@
 		<a href="<s:url action='login'/>"/>Login</a>
 		<a href="<s:url action='shoppingCart'/>">Shopping Cart</a>
 		<a href="<s:url action='selectProducts'/>">Select Products</a>
+		<a href="<s:url action='deliverProducts'/>">Deliver Products</a>
 	</body>
 </html>
