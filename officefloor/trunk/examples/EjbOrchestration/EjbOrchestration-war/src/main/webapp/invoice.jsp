@@ -4,28 +4,27 @@
 		<title>EJB Orchestration Example</title>
 	</head>
 	<body>
-		<h1>Quote</h1>
+		<h1>Invoice</h1>
 		<br />
-		<p>Customer: <s:property value="quote.customer.name" /></p>
-		<table id="items">
+		<p>Customer: <s:property value="invoice.customer.name" /></p>
+		<table id="lineItems">
 			<tr>
 				<th>Product</th>
 				<th>Price per item</th>
 				<th>Quantity</th>
+				<th>Allocated</th>
 				<th>Line Price</th>
 			</tr>
-			<s:iterator value="quote.quoteItems">
+			<s:iterator value="invoice.invoiceLineItems">
 				<tr>						
 					<td><s:property value="product.name"/></td>
 					<td><s:property value="productPrice"/></td>
 					<td><s:property value="quantity"/></td>
-					<td><s:property value="quoteItemPrice"/></td>
+					<td><s:property value="productAllocation.quantityAllocated"/></td>
+					<td><s:property value="invoiceLineItemPrice"/></td>
 				</tr>
 			</s:iterator>
 		</table>
-		<s:form action="purchaseQuote">
-			<input type="hidden" name="quoteId" value="<s:property value='quote.quoteId'/>" />
-			<s:submit name="purchase" value="Purchase" />
-		</s:form>
+		<a href="<s:url action='index'/>">Home</a>
 	</body>
 </html>

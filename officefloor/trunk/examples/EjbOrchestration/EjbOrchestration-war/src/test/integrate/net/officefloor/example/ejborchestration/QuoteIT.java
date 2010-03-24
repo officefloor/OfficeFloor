@@ -30,19 +30,54 @@ public class QuoteIT extends SeleniumTestCase {
 	public void testCreateQuote() {
 		this.login();
 
-		// Select Products for Quote
-		this.clickLink("Select Products");
-		this.inputText("products[0].quantity", "10");
-		this.submit("addProducts");
-
-		// Ensure correct quantity on Shopping Cart
-		this.assertTableCellValue("items", 1, 1, "10");
+		// Select the Products
+		this.selectProducts(10);
 
 		// Create the Quote
 		this.clickLink("Quote");
 
 		// Verify Quote
 		this.assertTableCellValue("items", 1, 2, "10");
+	}
+
+	/**
+	 * Ensure able to create an {@link Invoice} from the {@link Quote}.
+	 */
+	public void testInvoiceQuote() {
+		this.login();
+
+		// Select Products for Quote
+		this.selectProducts(10);
+
+		// Create the Quote
+		this.clickLink("Quote");
+		this.assertTableCellValue("items", 1, 2, "10");
+
+		// Create the Invoice
+		this.submit("purchase");
+
+		// Ensure invoice created
+		this.assertTableCellValue("lineItems", 1, 2, "10");
+
+		// Ensure nothing allocated
+		this.assertTableCellValue("lineItems", 1, 3, "0");
+	}
+
+	/**
+	 * Select the {@link Product} instances.
+	 * 
+	 * @param quantity
+	 *            Quantity.
+	 */
+	private void selectProducts(int quantity) {
+
+		// Select Products for Quote
+		this.clickLink("Select Products");
+		this.inputText("products[0].quantity", String.valueOf(quantity));
+		this.submit("addProducts");
+
+		// Ensure correct quantity on Shopping Cart
+		this.assertTableCellValue("items", 1, 1, String.valueOf(quantity));
 	}
 
 }

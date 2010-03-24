@@ -56,6 +56,11 @@
 			<result name="login">/login.jsp</result>
 			<result name="success">/quote.jsp</result>
 		</action>
+		<action name="purchaseQuote"
+			class="net.officefloor.example.ejborchestration.PurchaseQuoteAction">
+			<result name="login">/login.jsp</result>
+			<result name="success">/invoice.jsp</result>
+		</action>
 	</package>
 
 </struts>
