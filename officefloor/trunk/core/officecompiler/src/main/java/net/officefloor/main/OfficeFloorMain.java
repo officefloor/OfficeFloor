@@ -22,9 +22,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 
@@ -95,11 +97,14 @@ public class OfficeFloorMain {
 					+ officeName + "'");
 
 			// Obtain the Office
-			Office office = officeFloor.getOffice(officeName);
-			if (office == null) {
+			Office office;
+			try {
+				office = officeFloor.getOffice(officeName);
+			} catch (UnknownOfficeException ex) {
 				System.err.println("ERROR: No office by name '" + officeName
 						+ "'");
 				System.exit(1);
+				return; // required for compilation
 			}
 
 			// Obtain the Work
@@ -120,6 +125,10 @@ public class OfficeFloorMain {
 			} catch (NoInitialTaskException ex) {
 				System.err.println("ERROR: No initial task on work " + workName
 						+ " of office " + officeName);
+				System.exit(1);
+			} catch (InvalidParameterTypeException ex) {
+				System.err.println("ERROR: Invalid parameter type for work "
+						+ workName + " of office " + officeName);
 				System.exit(1);
 			}
 		}

@@ -31,9 +31,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
@@ -152,10 +154,13 @@ public class OfficeFloorEjb implements EjbOrchestrator, EjbOrchestratorRemote {
 		} catch (InterruptedException ex) {
 			return;
 
+		} catch (UnknownOfficeException ex) {
+			throw new NamingException(ex.getMessage());
 		} catch (UnknownWorkException ex) {
 			throw new NamingException(ex.getMessage());
-
 		} catch (NoInitialTaskException ex) {
+			throw new NamingException(ex.getMessage());
+		} catch (InvalidParameterTypeException ex) {
 			throw new NamingException(ex.getMessage());
 		}
 	}
