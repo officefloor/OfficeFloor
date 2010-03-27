@@ -51,6 +51,20 @@ public class OfficeImpl implements Office {
 	 */
 
 	@Override
+	public String[] getWorkNames() {
+
+		// Obtain the work names
+		WorkMetaData<?>[] workMetaData = this.metaData.getWorkMetaData();
+		String[] workNames = new String[workMetaData.length];
+		for (int i = 0; i < workNames.length; i++) {
+			workNames[i] = workMetaData[i].getWorkName();
+		}
+
+		// Return the work names
+		return workNames;
+	}
+
+	@Override
 	public WorkManager getWorkManager(String workName)
 			throws UnknownWorkException {
 

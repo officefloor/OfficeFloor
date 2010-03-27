@@ -39,7 +39,7 @@ public class UnknownWorkException extends Exception {
 	 *            Name of the unknown {@link Work}.
 	 */
 	public UnknownWorkException(String unknownWorkName) {
-		super("Unknown work '" + unknownWorkName + "'");
+		super("Unknown Work '" + unknownWorkName + "'");
 		this.unknownWorkName = unknownWorkName;
 	}
 

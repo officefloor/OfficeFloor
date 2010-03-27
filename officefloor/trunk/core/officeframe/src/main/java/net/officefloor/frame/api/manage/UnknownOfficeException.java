@@ -18,36 +18,36 @@
 
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Work;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Indicates an unknown {@link Office} was requested.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Office {
+public class UnknownOfficeException extends Exception {
 
 	/**
-	 * <p>
-	 * Obtains the names of the {@link WorkManager} instances within this
-	 * {@link Office}.
-	 * <p>
-	 * This allows to dynamically manage this {@link Office}.
-	 * 
-	 * @return Names of the {@link WorkManager} instances within this
-	 *         {@link Office}.
+	 * Name of the unknown {@link Office}.
 	 */
-	String[] getWorkNames();
+	private final String unknownOfficeName;
 
 	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
+	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	 * @param unknownOfficeName
+	 *            Name of the unknown {@link Office}.
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+	public UnknownOfficeException(String unknownOfficeName) {
+		super("Unknown Office '" + unknownOfficeName + "'");
+		this.unknownOfficeName = unknownOfficeName;
+	}
 
+	/**
+	 * Obtains the name of the unknown {@link Office}.
+	 * 
+	 * @return Name of the unknown {@link Office}.
+	 */
+	public String getUnknownOfficeName() {
+		return this.unknownOfficeName;
+	}
 }

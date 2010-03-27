@@ -19,9 +19,12 @@
 package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -45,6 +48,57 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * @author Daniel Sagenschneider
  */
 public class OfficeMetaDataImpl implements OfficeMetaData {
+
+	/**
+	 * <p>
+	 * Convenience method to invoke a {@link Process}.
+	 * <p>
+	 * This is used by the {@link WorkManagerImpl} and {@link TaskManagerImpl}
+	 * for invoking a {@link ProcessState}.
+	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 * @return {@link ProcessFuture} for the invoked {@link ProcessState}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter type be incorrect the {@link Task}.
+	 */
+	public static ProcessFuture invokeProcess(OfficeMetaData officeMetaData,
+			FlowMetaData<?> flowMetaData, Object parameter)
+			throws InvalidParameterTypeException {
+
+		// Ensure correct parameter type
+		if (parameter != null) {
+			Class<?> taskParameterType = flowMetaData.getInitialTaskMetaData()
+					.getParameterType();
+			if (taskParameterType != null) {
+				Class<?> inputParameterType = parameter.getClass();
+				if (!taskParameterType.isAssignableFrom(inputParameterType)) {
+					throw new InvalidParameterTypeException(
+							"Invalid parameter type (input="
+									+ inputParameterType.getName()
+									+ ", required="
+									+ taskParameterType.getName() + ")");
+				}
+			}
+		}
+
+		// Create the job node within a new process
+		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter);
+
+		// Assign the job node to the Team
+		jobNode.activateJob();
+
+		// Obtain the ProcessState
+		ProcessState processState = jobNode.getFlow().getThreadState()
+				.getProcessState();
+
+		// Indicate when process of work complete
+		return processState.getProcessFuture();
+	}
 
 	/**
 	 * Name of the {@link Office}.

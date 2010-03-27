@@ -18,36 +18,23 @@
 
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Indicates parameter type to {@link Task} is invalid.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Office {
+public class InvalidParameterTypeException extends Exception {
 
 	/**
-	 * <p>
-	 * Obtains the names of the {@link WorkManager} instances within this
-	 * {@link Office}.
-	 * <p>
-	 * This allows to dynamically manage this {@link Office}.
+	 * Initiate.
 	 * 
-	 * @return Names of the {@link WorkManager} instances within this
-	 *         {@link Office}.
+	 * @param message
+	 *            Message.
 	 */
-	String[] getWorkNames();
-
-	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
-	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+	public InvalidParameterTypeException(String message) {
+		super(message);
+	}
 
 }

@@ -18,36 +18,37 @@
 
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Indicates an unknown {@link Task} was requested.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Office {
+public class UnknownTaskException extends Exception {
 
 	/**
-	 * <p>
-	 * Obtains the names of the {@link WorkManager} instances within this
-	 * {@link Office}.
-	 * <p>
-	 * This allows to dynamically manage this {@link Office}.
-	 * 
-	 * @return Names of the {@link WorkManager} instances within this
-	 *         {@link Office}.
+	 * Name of the unknown {@link Task}.
 	 */
-	String[] getWorkNames();
+	private final String unknownTaskName;
 
 	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
+	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	 * @param unknownTaskName
+	 *            Name of the unknown {@link Task}.
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+	public UnknownTaskException(String unknownTaskName) {
+		super("Unknown Task '" + unknownTaskName + "'");
+		this.unknownTaskName = unknownTaskName;
+	}
 
+	/**
+	 * Obtains the name of the unknown {@link Task}.
+	 * 
+	 * @return Name of the unknown {@link Task}.
+	 */
+	public String getUnknownTaskName() {
+		return this.unknownTaskName;
+	}
 }
