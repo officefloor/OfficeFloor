@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -79,11 +80,14 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} of the {@link WorkManager} has no initial
 	 *             {@link Task}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter type be invalid for the {@link Task}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
 	public static void doWork(WorkManager workManager, Object parameter)
-			throws NoInitialTaskException, InterruptedException {
+			throws NoInitialTaskException, InvalidParameterTypeException,
+			InterruptedException {
 
 		// Obtain the current Thread
 		Thread currentThread = Thread.currentThread();

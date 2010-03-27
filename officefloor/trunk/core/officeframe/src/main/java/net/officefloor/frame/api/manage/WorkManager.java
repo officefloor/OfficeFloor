@@ -23,11 +23,21 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Interface to manage a particular type of {@link Work}.
+ * Interface to manage a particular {@link Work}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface WorkManager {
+
+	/**
+	 * Obtains the parameter type for invoking the {@link Work}.
+	 * 
+	 * @return Parameter type for invoking the {@link Work}. Will be
+	 *         <code>null</code> if no parameter to the {@link Work}.
+	 * @throws NoInitialTaskException
+	 *             If {@link Work} does not have an initial {@link Task}.
+	 */
+	Class<?> getWorkParameterType() throws NoInitialTaskException;
 
 	/**
 	 * Invokes a new instance of {@link Work} which is done within the
@@ -39,7 +49,34 @@ public interface WorkManager {
 	 *         executing the {@link Work} has completed.
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} does not have an initial {@link Task}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter be of incorrect type for the initial
+	 *             {@link Task}.
 	 */
-	ProcessFuture invokeWork(Object parameter) throws NoInitialTaskException;
+	ProcessFuture invokeWork(Object parameter) throws NoInitialTaskException,
+			InvalidParameterTypeException;
+
+	/**
+	 * <p>
+	 * Obtains the names of the {@link TaskManager} instances managed by this
+	 * {@link WorkManager}.
+	 * <p>
+	 * This allows to dynamically manage this {@link WorkManager}.
+	 * 
+	 * @return Names of the {@link TaskManager} instances managed by this
+	 *         {@link WorkManager}.
+	 */
+	String[] getTaskNames();
+
+	/**
+	 * Obtains the {@link TaskManager} for the named {@link Task}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Task}.
+	 * @return {@link TaskManager} for the named {@link Task}.
+	 * @throws UnknownTaskException
+	 *             If unknown {@link Task} name.
+	 */
+	TaskManager getTaskManager(String taskName) throws UnknownTaskException;
 
 }

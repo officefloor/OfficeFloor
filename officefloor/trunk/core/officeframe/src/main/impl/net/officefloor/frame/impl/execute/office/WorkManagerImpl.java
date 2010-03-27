@@ -18,15 +18,18 @@
 
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
@@ -66,7 +69,70 @@ public class WorkManagerImpl implements WorkManager {
 	 */
 
 	@Override
+	public Class<?> getWorkParameterType() throws NoInitialTaskException {
+
+		// Obtain the Initial Flow meta-data
+		FlowMetaData<?> flowMetaData = this.getInitialFlowMetaData();
+
+		// Return the parameter type for the initial task
+		return flowMetaData.getInitialTaskMetaData().getParameterType();
+	}
+
+	@Override
 	public ProcessFuture invokeWork(Object parameter)
+			throws NoInitialTaskException, InvalidParameterTypeException {
+
+		// Obtain the Initial Flow meta-data
+		FlowMetaData<?> flowMetaData = this.getInitialFlowMetaData();
+
+		// Invoke the process for the work
+		ProcessFuture future = OfficeMetaDataImpl.invokeProcess(
+				this.officeMetaData, flowMetaData, parameter);
+
+		// Indicate when process of work complete
+		return future;
+	}
+
+	@Override
+	public String[] getTaskNames() {
+
+		// Create the listing of task names
+		TaskMetaData<?, ?, ?>[] taskMetaData = this.workMetaData
+				.getTaskMetaData();
+		String[] taskNames = new String[taskMetaData.length];
+		for (int i = 0; i < taskNames.length; i++) {
+			taskNames[i] = taskMetaData[i].getTaskName();
+		}
+
+		// Return the task names
+		return taskNames;
+	}
+
+	@Override
+	public TaskManager getTaskManager(String taskName)
+			throws UnknownTaskException {
+
+		// Obtain the task meta-data for the task
+		for (TaskMetaData<?, ?, ?> taskMetaData : this.workMetaData
+				.getTaskMetaData()) {
+			if (taskMetaData.getTaskName().equals(taskName)) {
+				// Have the task meta-data, so return a task manager for it
+				return new TaskManagerImpl(taskMetaData, this.officeMetaData);
+			}
+		}
+
+		// Unknown task if at this point
+		throw new UnknownTaskException(taskName);
+	}
+
+	/**
+	 * Obtains the initial {@link FlowMetaData}.
+	 * 
+	 * @return Initial {@link FlowMetaData}.
+	 * @throws NoInitialTaskException
+	 *             If no initial {@link Task}.
+	 */
+	private FlowMetaData<?> getInitialFlowMetaData()
 			throws NoInitialTaskException {
 
 		// Obtain the Initial Flow meta-data
@@ -79,19 +145,8 @@ public class WorkManagerImpl implements WorkManager {
 					+ this.workMetaData.getWorkName() + "'");
 		}
 
-		// Create the job node within a new process
-		JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
-				parameter);
-
-		// Assign the job node to the Team
-		jobNode.activateJob();
-
-		// Obtain the ProcessState
-		ProcessState processState = jobNode.getFlow().getThreadState()
-				.getProcessState();
-
-		// Indicate when process of work complete
-		return processState.getProcessFuture();
+		// Returns the Initial Flow meta-data
+		return flowMetaData;
 	}
 
 }

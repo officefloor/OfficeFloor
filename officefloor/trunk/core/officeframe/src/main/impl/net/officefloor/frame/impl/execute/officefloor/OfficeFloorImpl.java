@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
@@ -35,7 +36,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorImpl implements OfficeFloor {
@@ -52,7 +53,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeFloorMetaData
 	 *            {@link OfficeFloorMetaData}.
 	 */
@@ -69,7 +70,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		// Ensure not already open
 		if (this.offices != null) {
-			throw new IllegalStateException("Office floor is already open");
+			throw new IllegalStateException("OfficeFloor is already open");
 		}
 
 		// Create the offices to open floor for work
@@ -116,7 +117,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
 	 * Starts the {@link ManagedObjectSourceInstance}.
-	 *
+	 * 
 	 * @param mosInstance
 	 *            {@link ManagedObjectSourceInstance}.
 	 * @throws Exception
@@ -148,7 +149,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		/*
 		 * TODO provide notification to managed objects to stop working.
-		 *
+		 * 
 		 * DETAILS: Likely candidate for this is to add a stop() method to the
 		 * ManagedObjectSource interface. The requirements of this method would
 		 * be to stop ManagedObjectSource instances invoking further
@@ -162,14 +163,14 @@ public class OfficeFloorImpl implements OfficeFloor {
 		// Stop the teams working as closing
 		/*
 		 * FIXME stopping teams must tie in with stopping ManagedObjectSources.
-		 *
+		 * 
 		 * DETAILS: Stopping a team when has no further Jobs does not lead to
 		 * closing as another Team may require handing it another Job for
 		 * completion. As the Team is no longer processing the Job does not get
 		 * completed leaving OfficeFloor hanging waiting for the Job to
 		 * complete. This is not so much of an issues as OfficeFloor is closing
 		 * but would be nice to have graceful close.
-		 *
+		 * 
 		 * MITIGATION: Will still close OfficeFloor (just some ProcessStates may
 		 * end up half processed giving a not so graceful close).
 		 */
@@ -188,16 +189,43 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public synchronized Office getOffice(String officeName) {
+	public synchronized String[] getOfficeNames() {
 
-		// Ensure is open
+		// Ensure open
+		this.ensureOfficeFloorOpen();
+
+		// Return the listing of office names
+		return this.offices.keySet().toArray(new String[0]);
+	}
+
+	@Override
+	public synchronized Office getOffice(String officeName)
+			throws UnknownOfficeException {
+
+		// Ensure open
+		this.ensureOfficeFloorOpen();
+
+		// Ensure Office is available
+		Office office = this.offices.get(officeName);
+		if (office == null) {
+			throw new UnknownOfficeException(officeName);
+		}
+
+		// Return the Office
+		return office;
+	}
+
+	/**
+	 * Ensures open.
+	 * 
+	 * @throws IllegalStateException
+	 *             If not open.
+	 */
+	private void ensureOfficeFloorOpen() throws IllegalStateException {
 		if (this.offices == null) {
 			throw new IllegalStateException(
 					"Must open the Office Floor before obtaining Offices");
 		}
-
-		// Return the office (if available)
-		return this.offices.get(officeName);
 	}
 
 }
