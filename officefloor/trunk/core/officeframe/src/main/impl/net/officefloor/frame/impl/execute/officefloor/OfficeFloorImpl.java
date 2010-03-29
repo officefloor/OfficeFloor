@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -98,6 +99,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 							.getWorkName());
 				}
 
+				// Handle if Office aware
+				if (workFactory instanceof OfficeAwareWorkFactory<?>) {
+					OfficeAwareWorkFactory<?> officeAwareWorkFactory = (OfficeAwareWorkFactory<?>) workFactory;
+					officeAwareWorkFactory.setOffice(office);
+				}
 			}
 
 			// Maintain reference to office for returning

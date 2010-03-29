@@ -28,6 +28,7 @@ import net.officefloor.frame.api.execute.Work;
  * interfaces:
  * <ol>
  * <li>{@link NameAwareWorkFactory}</li>
+ * <li>{@link OfficeAwareWorkFactory}</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider

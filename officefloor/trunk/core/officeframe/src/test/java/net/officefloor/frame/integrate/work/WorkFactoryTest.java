@@ -18,9 +18,14 @@
 package net.officefloor.frame.integrate.work;
 
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Ensures the additional managed interface functionality is provided to the
@@ -72,6 +77,91 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 		// Verify functionality
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure {@link Office} aware functionality is provided for the
+	 * {@link OfficeAwareWorkFactory}.
+	 */
+	public void testOfficeAwareWorkFactory() throws Exception {
+
+		// Mock
+		final String WORK_NAME = "WORK";
+		final OfficeAwareWorkFactory<?> workFactory = this
+				.createMock(OfficeAwareWorkFactory.class);
+
+		// Record providing Office
+		workFactory.setOffice(null);
+		final Office[] office = new Office[1];
+		this.control(workFactory).setDefaultMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				office[0] = (Office) actual[0];
+				return true;
+			}
+		});
+
+		// Test
+		this.replayMockObjects();
+		this.constructWork(WORK_NAME, workFactory);
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+
+		// Verify functionality
+		this.verifyMockObjects();
+
+		// Ensure Office available
+		assertNotNull("Ensure Office provided", office[0]);
+
+		// Ensure correct Office (contains WorkFactory)
+		assertEquals("Incorrect Office", WORK_NAME, office[0].getWorkNames()[0]);
+	}
+
+	/**
+	 * Ensure both name and {@link Office} aware functionality is provided for
+	 * the {@link MockNameAndOfficeAwareWorkFactory}.
+	 */
+	public void testNameAndOfficeAwareWorkFactory() throws Exception {
+
+		// Mock
+		final String WORK_NAME = "WORK";
+		final MockNameAndOfficeAwareWorkFactory workFactory = this
+				.createMock(MockNameAndOfficeAwareWorkFactory.class);
+
+		// Record providing name and Office
+		workFactory.setBoundWorkName(WORK_NAME);
+		workFactory.setOffice(null);
+		final Office[] office = new Office[1];
+		this.control(workFactory).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				office[0] = (Office) actual[0];
+				return true;
+			}
+		});
+
+		// Test
+		this.replayMockObjects();
+		this.constructWork(WORK_NAME, workFactory);
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+
+		// Verify functionality
+		this.verifyMockObjects();
+
+		// Ensure Office available
+		assertNotNull("Ensure Office provided", office[0]);
+
+		// Ensure correct Office (contains WorkFactory)
+		assertEquals("Incorrect Office", WORK_NAME, office[0].getWorkNames()[0]);
+	}
+
+	/**
+	 * Interface for mock objects that implements both
+	 * {@link NameAwareWorkFactory} and {@link OfficeAwareWorkFactory}.
+	 */
+	public static interface MockNameAndOfficeAwareWorkFactory extends
+			NameAwareWorkFactory<Work>, OfficeAwareWorkFactory<Work> {
 	}
 
 }
