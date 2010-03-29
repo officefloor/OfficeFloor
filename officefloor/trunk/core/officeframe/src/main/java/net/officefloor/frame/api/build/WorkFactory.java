@@ -21,7 +21,14 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Work;
 
 /**
+ * <p>
  * Creates {@link Work} to be done.
+ * <p>
+ * Additional managed functionality is available by implementing the following
+ * interfaces:
+ * <ol>
+ * <li>{@link NameAwareWorkFactory}</li>
+ * </ol>
  * 
  * @author Daniel Sagenschneider
  */
