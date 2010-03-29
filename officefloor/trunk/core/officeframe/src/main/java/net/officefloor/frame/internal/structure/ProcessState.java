@@ -19,8 +19,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -32,13 +30,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * <p>
  * State of a process within the {@link Office}.
  * <p>
- * {@link ProcessState} instances can not interact with each other. The reason
- * this extends {@link FlowFuture} is to allow invocations of {@link Work}
- * outside the {@link Office} to check when the {@link ProcessState} of the
- * invoked {@link Work} has completed.
- * <p>
- * Passing this to {@link TaskContext#join(FlowFuture)} will result in an
- * exception.
+ * {@link ProcessState} instances can not interact with each other, much like
+ * processes within an Operating System can not directly interact (e.g. share
+ * process space) with each other.
  * 
  * @author Daniel Sagenschneider
  */

@@ -21,6 +21,8 @@ package net.officefloor.frame.impl.execute.officefloor;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.NameAwareWorkFactory;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
@@ -30,6 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -82,6 +85,20 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Create the office
 			String officeName = officeMetaData.getOfficeName();
 			Office office = new OfficeImpl(officeMetaData);
+
+			// Iterate over Office meta-data providing additional functionality
+			for (WorkMetaData<?> workMetaData : officeMetaData
+					.getWorkMetaData()) {
+				WorkFactory<?> workFactory = workMetaData.getWorkFactory();
+
+				// Handle if name aware
+				if (workFactory instanceof NameAwareWorkFactory<?>) {
+					NameAwareWorkFactory<?> nameAwareWorkFactory = (NameAwareWorkFactory<?>) workFactory;
+					nameAwareWorkFactory.setBoundWorkName(workMetaData
+							.getWorkName());
+				}
+
+			}
 
 			// Maintain reference to office for returning
 			this.offices.put(officeName, office);

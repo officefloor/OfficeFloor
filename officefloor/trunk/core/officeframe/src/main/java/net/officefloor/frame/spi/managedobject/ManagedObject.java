@@ -19,15 +19,24 @@
 package net.officefloor.frame.spi.managedobject;
 
 /**
- * Root interface of a Managed Object.
- *
+ * <p>
+ * Core interface of a Managed Object.
+ * <p>
+ * Additional managed functionality is available by implementing the following
+ * interfaces:
+ * <ol>
+ * <li>{@link AsynchronousManagedObject}</li>
+ * <li>{@link CoordinatingManagedObject}</li>
+ * <li>{@link NameAwareManagedObject}</li>
+ * </ol>
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObject {
 
 	/**
 	 * Obtains the object being managed.
-	 *
+	 * 
 	 * @return Object being managed.
 	 * @throws Throwable
 	 *             Indicating failed to obtain the object for use.
