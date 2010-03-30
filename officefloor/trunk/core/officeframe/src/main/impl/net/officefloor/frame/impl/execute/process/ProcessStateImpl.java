@@ -27,6 +27,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
@@ -45,7 +47,9 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -247,6 +251,31 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public ProcessMetaData getProcessMetaData() {
 		return this.processMetaData;
+	}
+
+	@Override
+	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName,
+			String taskName) throws UnknownWorkException, UnknownTaskException {
+
+		// Look for work
+		for (WorkMetaData<?> work : this.officeMetaData.getWorkMetaData()) {
+			if (work.getWorkName().equals(workName)) {
+
+				// Found work, look for task
+				for (TaskMetaData<?, ?, ?> task : work.getTaskMetaData()) {
+					if (task.getTaskName().equals(taskName)) {
+						// Found the task
+						return task;
+					}
+				}
+
+				// Task not found on matching work
+				throw new UnknownTaskException(taskName);
+			}
+		}
+
+		// Work not found
+		throw new UnknownWorkException(workName);
 	}
 
 	@Override

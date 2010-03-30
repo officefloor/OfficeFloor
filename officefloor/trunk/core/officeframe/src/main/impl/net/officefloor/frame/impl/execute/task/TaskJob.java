@@ -22,14 +22,20 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -164,6 +170,41 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 			FlowMetaData<?> flowMetaData = TaskJob.this.nodeMetaData
 					.getFlow(flowIndex);
 			return TaskJob.this.doFlow(flowMetaData, parameter);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void doFlow(String workName, String taskName, Object parameter)
+				throws UnknownWorkException, UnknownTaskException,
+				InvalidParameterTypeException {
+
+			// Obtain the Process State
+			ProcessState processState = TaskJob.this.flow.getThreadState()
+					.getProcessState();
+
+			// Obtain the Task meta-data
+			final TaskMetaData<?, ?, ?> taskMetaData = processState
+					.getTaskMetaData(workName, taskName);
+
+			// Invoke the Flow
+			TaskJob.this.doFlow(new FlowMetaData() {
+				@Override
+				public TaskMetaData<?, ?, ?> getInitialTaskMetaData() {
+					return taskMetaData;
+				}
+
+				@Override
+				public FlowInstigationStrategyEnum getInstigationStrategy() {
+					// Always instigated in parallel
+					return FlowInstigationStrategyEnum.PARALLEL;
+				}
+
+				@Override
+				public AssetManager getFlowManager() {
+					// Asset Manager not required
+					return null;
+				}
+			}, parameter);
 		}
 
 		@Override

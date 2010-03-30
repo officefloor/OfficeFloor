@@ -19,10 +19,13 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -69,6 +72,23 @@ public interface ProcessState {
 	 * @return {@link ProcessMetaData} for this {@link ProcessState}.
 	 */
 	ProcessMetaData getProcessMetaData();
+
+	/**
+	 * Obtains the {@link TaskMetaData} for the {@link Work} and {@link Task}
+	 * within the {@link Office} containing this {@link ProcessState}.
+	 * 
+	 * @param workName
+	 *            {@link Work} name containing the {@link Task}.
+	 * @param taskName
+	 *            {@link Task} name within the {@link Work}.
+	 * @return {@link TaskMetaData}.
+	 * @throws UnknownWorkException
+	 *             If no {@link Work} by name within the {@link Office}.
+	 * @throws UnknownTaskException
+	 *             If no {@link Task} by name within the {@link Work}.
+	 */
+	TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
+			throws UnknownWorkException, UnknownTaskException;
 
 	/**
 	 * <p>

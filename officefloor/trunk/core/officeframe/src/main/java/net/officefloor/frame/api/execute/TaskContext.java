@@ -18,8 +18,14 @@
 
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -121,6 +127,43 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	 *         has completed.
 	 */
 	FlowFuture doFlow(int flowIndex, Object parameter);
+
+	/**
+	 * <p>
+	 * Invokes a {@link Flow} by dynamically naming the initial {@link Task} of
+	 * the {@link Flow}.
+	 * <p>
+	 * This method should not be preferred, as the other
+	 * <code>doFlow(...)</code> methods are compile safe. This method however
+	 * provides the similar functionality as per reflection - powerful yet
+	 * compile unsafe.
+	 * <p>
+	 * The {@link Work} and {@link Task} reflective meta-data may be obtained
+	 * from the {@link Office} made available via the
+	 * {@link OfficeAwareWorkFactory}.
+	 * <p>
+	 * This method does not return a {@link FlowFuture} as all invocations are
+	 * instigated in {@link FlowInstigationStrategyEnum#PARALLEL}.
+	 * 
+	 * @param workName
+	 *            Name of {@link Work} containing the {@link Task}.
+	 * @param taskName
+	 *            Name of {@link Task} within the {@link Work}.
+	 * @param parameter
+	 *            Parameter to the task. May be <code>null</code>.
+	 * @throws UnknownWorkException
+	 *             Should no {@link Work} be known by the name.
+	 * @throws UnknownTaskException
+	 *             Should no {@link Task} by the name be contained under the
+	 *             {@link Work}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter be an invalid type for the {@link Task}.
+	 * 
+	 * @see OfficeAwareWorkFactory
+	 */
+	void doFlow(String workName, String taskName, Object parameter)
+			throws UnknownWorkException, UnknownTaskException,
+			InvalidParameterTypeException;
 
 	/**
 	 * <p>
