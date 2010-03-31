@@ -28,7 +28,7 @@ import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
 /**
  * Tests the {@link HttpTemplateParser}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateParserTest extends OfficeFrameTestCase {
@@ -69,6 +69,20 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load link content.
+	 */
+	public void testLink() throws Exception {
+		this.doTest("Link");
+	}
+
+	/**
+	 * Ensure can load multiple links.
+	 */
+	public void testMultipleLinks() throws Exception {
+		this.doTest("MultipleLinks");
+	}
+
+	/**
 	 * Ensure can list beans (provide section to be repeated for each bean
 	 * listed).
 	 */
@@ -78,7 +92,7 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the test.
-	 *
+	 * 
 	 * @param templateFileName
 	 *            Name of template file.
 	 */
@@ -151,6 +165,17 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 							+ " content " + c, expectedReferenceContent.key,
 							referenceContent.getKey());
 
+				} else if (expectedContent instanceof LinkTemplateSectionContentConfig) {
+					// Link content
+					assertTrue("Section " + s + " content " + c
+							+ " is expected to be a link",
+							content instanceof LinkHttpTemplateSectionContent);
+					LinkTemplateSectionContentConfig expectedLinkContent = (LinkTemplateSectionContentConfig) expectedContent;
+					LinkHttpTemplateSectionContent linkContent = (LinkHttpTemplateSectionContent) content;
+					assertEquals("Incorrect link name for section " + s
+							+ " content " + c, expectedLinkContent.name,
+							linkContent.getName());
+
 				} else {
 					// Unknown content
 					fail("Unkonwn content type "
@@ -159,5 +184,4 @@ public class HttpTemplateParserTest extends OfficeFrameTestCase {
 			}
 		}
 	}
-
 }

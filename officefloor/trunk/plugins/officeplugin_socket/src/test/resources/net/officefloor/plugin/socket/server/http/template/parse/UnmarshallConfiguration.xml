@@ -11,5 +11,9 @@
 			class="net.officefloor.plugin.socket.server.http.template.parse.ReferenceTemplateSectionContentConfig">
 			<value method="setKey" node="reference@key" />
 		</object>
+		<object method="addContent" node="link"
+			class="net.officefloor.plugin.socket.server.http.template.parse.LinkTemplateSectionContentConfig">
+			<value method="setName" node="link@name" />
+		</object>
 	</object>
 </unmarshall>

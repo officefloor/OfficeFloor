@@ -25,14 +25,14 @@ import java.util.List;
 
 /**
  * {@link HttpTemplateParser} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateParserImpl implements HttpTemplateParser {
 
 	/**
 	 * Parses the {@link HttpTemplate} from the raw template content.
-	 *
+	 * 
 	 * @param rawTemplateContent
 	 *            Raw template content.
 	 * @return {@link HttpTemplate}.
@@ -91,7 +91,7 @@ public class HttpTemplateParserImpl implements HttpTemplateParser {
 
 	/**
 	 * Parses the section content to obtain its name and raw content.
-	 *
+	 * 
 	 * @param rawSectionContent
 	 *            Raw section content.
 	 * @return {@link SectionStruct} or <code>null</code> if input not complete
@@ -169,8 +169,20 @@ public class HttpTemplateParserImpl implements HttpTemplateParser {
 	}
 
 	/**
+	 * Parse state of a {@link HttpTemplateSection} into
+	 * {@link HttpTemplateSectionContent} instances.
+	 */
+	private enum SectionParseState {
+		STATIC,
+
+		REFERENCE_PREFIX, REFERENCE,
+
+		LINK_PREFIX, LINK
+	}
+
+	/**
 	 * Parses the raw content into {@link HttpTemplateSectionContent} instances.
-	 *
+	 * 
 	 * @param rawContent
 	 *            Raw content.
 	 * @return {@link HttpTemplateSectionContent} instances.
@@ -178,52 +190,207 @@ public class HttpTemplateParserImpl implements HttpTemplateParser {
 	public static HttpTemplateSectionContent[] parseHttpTemplateSectionContent(
 			String rawContent) {
 
-		// Split the section by reference
+		// Listing of contents
 		List<HttpTemplateSectionContent> contents = new LinkedList<HttpTemplateSectionContent>();
-		String[] contentsSplit = rawContent.split("[$][{]");
 
-		// First split is always static content
-		String firstContent = contentsSplit[0];
-		if (firstContent.length() > 0) {
-			contents
-					.add(new StaticHttpTemplateSectionContentImpl(firstContent));
+		// Parse the raw content
+		StringBuilder buffer = new StringBuilder();
+		SectionParseState parseState = SectionParseState.STATIC;
+		for (int i = 0; i < rawContent.length(); i++) {
+			char character = rawContent.charAt(i);
+
+			// Process based on state
+			switch (parseState) {
+			case STATIC:
+				// Determine if starting reference/link
+				switch (character) {
+				case '$':
+					// Possibly starting reference
+					parseState = SectionParseState.REFERENCE_PREFIX;
+					break;
+				case '#':
+					parseState = SectionParseState.LINK_PREFIX;
+					break;
+				default:
+					// Add static content to buffer
+					buffer.append(character);
+					break;
+				}
+				break;
+
+			case REFERENCE_PREFIX:
+				// Determine if starting reference
+				if (character == '{') {
+					// Add the static content and parsing reference
+					buffer = addStatic(contents, buffer);
+					parseState = SectionParseState.REFERENCE;
+				} else {
+					// Not parsing reference, so add back content
+					buffer.append('$');
+					buffer.append(character);
+					parseState = SectionParseState.STATIC;
+				}
+				break;
+
+			case REFERENCE:
+				// Determine if complete reference
+				if (character == '}') {
+					// Add the reference and now parsing static
+					buffer = addReference(contents, buffer);
+					parseState = SectionParseState.STATIC;
+				} else {
+					// Add content for key
+					buffer.append(character);
+				}
+				break;
+
+			case LINK_PREFIX:
+				// Determine if starting link
+				if (character == '{') {
+					// Add the static content and parsing link
+					buffer = addStatic(contents, buffer);
+					parseState = SectionParseState.LINK;
+				} else {
+					// Not parsing link, so add back content
+					buffer.append('#');
+					buffer.append(character);
+					parseState = SectionParseState.STATIC;
+				}
+				break;
+
+			case LINK:
+				// Determine if complete link
+				if (character == '}') {
+					// Add the link and now parsing static
+					buffer = addLink(contents, buffer);
+					parseState = SectionParseState.STATIC;
+				} else {
+					// Add content for key
+					buffer.append(character);
+				}
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown parse state: "
+						+ parseState);
+			}
 		}
 
-		// Add remaining content
-		for (int i = 1; i < contentsSplit.length; i++) {
-			String contentSplit = contentsSplit[i];
+		// End of parsing so set remaining static content
+		switch (parseState) {
+		case STATIC:
+			// Do nothing and take as is
+			break;
 
-			// Find location of closing bracket to reference key
-			int keyCloseBracket = contentSplit.indexOf("}");
+		case REFERENCE_PREFIX:
+			// Ending with prefix
+			buffer.append('$');
+			break;
+		case REFERENCE:
+			// Partial reference content
+			String referenceContent = "${" + buffer.toString();
+			buffer = new StringBuilder(referenceContent);
+			break;
 
-			// Obtain the key and following static content
-			String key;
-			String staticContent;
-			if (keyCloseBracket < 0) {
-				// No closing bracket found, so all static content
-				key = "";
-				staticContent = "${" + contentSplit;
-			} else {
-				// Closing bracket so have key
-				key = contentSplit.substring(0, keyCloseBracket);
-				staticContent = contentSplit.substring(keyCloseBracket
-						+ "}".length());
-			}
+		case LINK_PREFIX:
+			// Ending with prefix
+			buffer.append('#');
+			break;
+		case LINK:
+			// Partial link content
+			String linkContent = "#{" + buffer.toString();
+			buffer = new StringBuilder(linkContent);
+			break;
 
-			// Load the key content
-			if (key.length() > 0) {
-				contents.add(new ReferenceHttpTemplateSectionContentImpl(key));
-			}
-
-			// Load the static content
-			if (staticContent.length() > 0) {
-				contents.add(new StaticHttpTemplateSectionContentImpl(
-						staticContent));
-			}
+		default:
+			throw new IllegalStateException("Unknown parse state: "
+					+ parseState);
 		}
+
+		// Add the remaining static content
+		addStatic(contents, buffer);
 
 		// Return the contents
 		return contents.toArray(new HttpTemplateSectionContent[0]);
+	}
+
+	/**
+	 * Adds the {@link StaticHttpTemplateSectionContent} to the contents.
+	 * 
+	 * @param contents
+	 *            Contents.
+	 * @param staticContent
+	 *            Static content.
+	 * @return New {@link StringBuilder} instance.
+	 */
+	private static StringBuilder addStatic(
+			List<HttpTemplateSectionContent> contents,
+			StringBuilder staticContent) {
+
+		// Determine if last content is also static
+		String prefixStaticContent = "";
+		if (contents.size() > 0) {
+			// Obtain last content
+			HttpTemplateSectionContent httpContent = contents.get(contents
+					.size() - 1);
+			if (httpContent instanceof StaticHttpTemplateSectionContent) {
+				// Last content is static, so add only a single static
+				StaticHttpTemplateSectionContent staticHttpContent = (StaticHttpTemplateSectionContent) httpContent;
+				prefixStaticContent = staticHttpContent.getStaticContent();
+
+				// Remove last content, so add with additional static content
+				contents.remove(httpContent);
+			}
+		}
+
+		// Only add if have static content
+		String content = staticContent.toString();
+		if ((prefixStaticContent.length() + content.length()) > 0) {
+			contents.add(new StaticHttpTemplateSectionContentImpl(
+					prefixStaticContent + content));
+		}
+
+		// Return new buffer
+		return new StringBuilder();
+	}
+
+	/**
+	 * Adds the {@link ReferenceHttpTemplateSectionContent} to the contents.
+	 * 
+	 * @param contents
+	 *            Contents.
+	 * @param referenceKey
+	 *            Reference key.
+	 * @return New {@link StringBuilder} instance.
+	 */
+	private static StringBuilder addReference(
+			List<HttpTemplateSectionContent> contents,
+			StringBuilder referenceKey) {
+		// Always add reference
+		String key = referenceKey.toString();
+		contents.add(new ReferenceHttpTemplateSectionContentImpl(key));
+
+		// Return new buffer
+		return new StringBuilder();
+	}
+
+	/**
+	 * Adds the {@link LinkHttpTemplateSectionContent} to the contents.
+	 * 
+	 * @param contents
+	 *            Contents.
+	 * @param referenceKey
+	 *            Reference key.
+	 * @return New {@link StringBuilder} instance.
+	 */
+	private static StringBuilder addLink(
+			List<HttpTemplateSectionContent> contents, StringBuilder linkName) {
+		// Always add link
+		String name = linkName.toString();
+		contents.add(new LinkHttpTemplateSectionContentImpl(name));
+
+		// Return new buffer
+		return new StringBuilder();
 	}
 
 	/*
