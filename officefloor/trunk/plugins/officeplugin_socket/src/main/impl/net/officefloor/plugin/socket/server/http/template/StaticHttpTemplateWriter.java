@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.template.parse.StaticHttpTempla
 
 /**
  * {@link HttpTemplateWriter} to write static content.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StaticHttpTemplateWriter implements HttpTemplateWriter {
@@ -57,7 +57,7 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param staticContent
 	 *            {@link StaticHttpTemplateSectionContent} to write.
 	 * @param contentType
@@ -94,7 +94,7 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, Object bean)
+	public void write(HttpResponseWriter writer, String workName, Object bean)
 			throws IOException {
 		writer.write(NO_CONTENT_ENCODING, this.contentType, this.charset,
 				this.content);

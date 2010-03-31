@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTem
 
 /**
  * {@link HttpTemplateWriter} to write a bean property.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
@@ -53,7 +53,7 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param content
 	 *            {@link ReferenceHttpTemplateSectionContent}.
 	 * @param beanType
@@ -108,7 +108,7 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
 	 * Obtains the {@link Method} to obtain the value to write from the bean.
-	 *
+	 * 
 	 * @param beanClass
 	 *            {@link Class} of the bean to find the {@link Method}.
 	 * @return {@link Method} to obtain the value to write from the bean.
@@ -137,7 +137,7 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(HttpResponseWriter writer, Object bean)
+	public void write(HttpResponseWriter writer, String workName, Object bean)
 			throws IOException {
 
 		// Obtain the property text value

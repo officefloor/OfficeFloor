@@ -3,7 +3,7 @@
 Template ${TemplateName}
 <br />
 <br />
-with a listing of beans:
+with a listing of <a href="#{beans}">beans</a>:
 <br />
 <table>
     <tr>
@@ -17,5 +17,8 @@ with a listing of beans:
     </tr>
     <!-- [Tail] -->
 </table>
+<form action="#{submit}">
+    <input type="submit" />
+</form>
 </body>
 </html>

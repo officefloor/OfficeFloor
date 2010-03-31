@@ -23,12 +23,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
@@ -173,11 +177,24 @@ public class HttpTemplateWorkSource extends
 		workTypeBuilder.setWorkFactory(new HttpTemplateWork());
 
 		// Define the tasks
+		Set<String> linkNameSet = new HashSet<String>();
 		for (HttpTemplateSection section : template.getSections()) {
 
 			// Load the task to write the section
-			HttpTemplateTask.loadTaskType(section, contentType, charset,
-					writerFactory, workTypeBuilder, context);
+			String[] linkNames = HttpTemplateTask.loadTaskType(section,
+					contentType, charset, writerFactory, workTypeBuilder,
+					context);
+
+			// Keep track of the unique set of link names
+			linkNameSet.addAll(Arrays.asList(linkNames));
+		}
+
+		// Add the request handler tasks in order
+		String[] requestHandlerTaskNames = linkNameSet.toArray(new String[0]);
+		Arrays.sort(requestHandlerTaskNames);
+		for (String requestHandlerTaskName : requestHandlerTaskNames) {
+			workTypeBuilder.addTaskType(requestHandlerTaskName,
+					new RequestHandlerTask(), None.class, None.class);
 		}
 	}
 

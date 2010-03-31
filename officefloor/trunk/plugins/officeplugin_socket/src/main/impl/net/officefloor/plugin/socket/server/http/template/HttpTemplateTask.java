@@ -20,8 +20,10 @@ package net.officefloor.plugin.socket.server.http.template;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -35,14 +37,16 @@ import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
+import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.socket.server.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTemplateSectionContent;
 import net.officefloor.plugin.socket.server.http.template.parse.StaticHttpTemplateSectionContent;
 
 /**
  * {@link Task} to write the {@link HttpTemplateSection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateTask extends
@@ -55,7 +59,7 @@ public class HttpTemplateTask extends
 
 	/**
 	 * Loads the {@link TaskType} for to write the {@link HttpTemplateSection}.
-	 *
+	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
 	 * @param contentType
@@ -68,6 +72,8 @@ public class HttpTemplateTask extends
 	 *            {@link WorkTypeBuilder}.
 	 * @param context
 	 *            {@link WorkSourceContext}.
+	 * @return Listing of {@link Task} names to handle {@link HttpTemplate} link
+	 *         requests.
 	 * @throws IOException
 	 *             If fails to prepare the template.
 	 * @throws ClassNotFoundException
@@ -75,7 +81,7 @@ public class HttpTemplateTask extends
 	 * @throws NoSuchMethodException
 	 *             If property can not be found on bean type.
 	 */
-	public static void loadTaskType(HttpTemplateSection section,
+	public static String[] loadTaskType(HttpTemplateSection section,
 			String contentType, Charset charset,
 			HttpResponseWriterFactory writerFactory,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
@@ -84,6 +90,9 @@ public class HttpTemplateTask extends
 
 		// Obtain the section and task name
 		String sectionAndTaskName = section.getSectionName();
+
+		// Set of link task names
+		Set<String> linkTaskNames = new HashSet<String>();
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -117,6 +126,15 @@ public class HttpTemplateTask extends
 				contentWriterList.add(new BeanPropertyHttpTemplateWriter(
 						referenceContent, beanClass, contentType));
 
+			} else if (content instanceof LinkHttpTemplateSectionContent) {
+				// Add the link template writer
+				LinkHttpTemplateSectionContent linkContent = (LinkHttpTemplateSectionContent) content;
+				contentWriterList.add(new LinkHttpTemplateWriter(linkContent,
+						contentType));
+
+				// Track the link tasks
+				linkTaskNames.add(linkContent.getName());
+
 			} else {
 				// Unknown content
 				throw new IllegalStateException("Unknown content type '"
@@ -142,6 +160,9 @@ public class HttpTemplateTask extends
 			taskBuilder.addObject(beanClass).setLabel("OBJECT");
 		}
 		taskBuilder.addEscalation(IOException.class);
+
+		// Return the link task names
+		return linkTaskNames.toArray(new String[0]);
 	}
 
 	/**
@@ -161,7 +182,7 @@ public class HttpTemplateTask extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param contentWriters
 	 *            {@link HttpTemplateWriter} instances to write the content.
 	 * @param isRequireBean
@@ -193,9 +214,12 @@ public class HttpTemplateTask extends
 		HttpResponseWriter writer = this.writerFactory
 				.createHttpResponseWriter(connection);
 
+		// Obtain the work name
+		String workName = context.getWork().getWorkName();
+
 		// Write the contents
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
-			contentWriter.write(writer, bean);
+			contentWriter.write(writer, workName, bean);
 		}
 
 		// Template written, nothing to return
