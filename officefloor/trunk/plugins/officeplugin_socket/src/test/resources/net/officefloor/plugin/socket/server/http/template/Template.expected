@@ -3,7 +3,7 @@
 Template Test
 <br />
 <br />
-with a listing of beans:
+with a listing of <a href="/WORK/beans.task">beans</a>:
 <br />
 <table>
     <tr>
@@ -22,5 +22,8 @@ with a listing of beans:
     </tr>
     
 </table>
+<form action="/WORK/submit.task">
+    <input type="submit" />
+</form>
 </body>
 </html>

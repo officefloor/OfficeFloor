@@ -35,7 +35,7 @@ import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 
 /**
  * Tests the {@link HttpTemplateWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
@@ -82,11 +82,13 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(workFactory);
 
 		// Create the task factory
-		HttpTemplateTask taskFactory = new HttpTemplateTask(null, false, null);
+		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null,
+				false, null);
+		RequestHandlerTask requestHandlerTaskFactory = new RequestHandlerTask();
 
 		// 'template' task
 		TaskTypeBuilder<Indexed, None> template = work.addTaskType("template",
-				taskFactory, Indexed.class, None.class);
+				httpTemplateTaskFactory, Indexed.class, None.class);
 		template.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
@@ -94,7 +96,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// 'List' task
 		TaskTypeBuilder<Indexed, None> list = work.addTaskType("List",
-				taskFactory, Indexed.class, None.class);
+				httpTemplateTaskFactory, Indexed.class, None.class);
 		list.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
 		list.addObject(TableRowBean.class).setLabel("OBJECT");
@@ -102,10 +104,18 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// 'Tail' task
 		TaskTypeBuilder<Indexed, None> tail = work.addTaskType("Tail",
-				taskFactory, Indexed.class, None.class);
+				httpTemplateTaskFactory, Indexed.class, None.class);
 		tail.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
 		tail.addEscalation(IOException.class);
+
+		// Handle link 'beans' task
+		work.addTaskType("beans", requestHandlerTaskFactory, None.class,
+				None.class);
+
+		// Handle link 'submit' task
+		work.addTaskType("submit", requestHandlerTaskFactory, None.class,
+				None.class);
 
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
@@ -126,6 +136,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Create the HTTP response to record output
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
+		// Load the work type
+		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
+				HttpTemplateWorkSource.class, this.properties);
+
+		// Create the work and provide name
+		HttpTemplateWork work = workType.getWorkFactory().createWork();
+		work.setBoundWorkName("WORK");
+
 		// Record actions for each task:
 		// - 'template'
 		// - 'List' task with table row bean
@@ -145,17 +163,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				this.recordReturn(taskContext, taskContext.getObject(1),
 						beans[i]);
 			}
+			this.recordReturn(taskContext, taskContext.getWork(), work);
 		}
-
-		// Load the work type
-		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
-				HttpTemplateWorkSource.class, this.properties);
 
 		// Replay mocks
 		this.replayMockObjects();
-
-		// Create the work type
-		HttpTemplateWork work = workType.getWorkFactory().createWork();
 
 		// Execute the 'template' task
 		this.doTask("template", work, workType, taskContext);
@@ -186,7 +198,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the {@link Task} on the {@link WorkType}.
-	 *
+	 * 
 	 * @param taskName
 	 *            Name of {@link Task} on {@link WorkType} to execute.
 	 * @param work
