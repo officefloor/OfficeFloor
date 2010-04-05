@@ -28,13 +28,16 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
+import net.officefloor.plugin.socket.server.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
@@ -68,6 +71,11 @@ public class HttpTemplateWorkSource extends
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
 	 */
 	public static final String PROPERTY_BEAN_PREFIX = HttpTemplateTask.PROPERTY_BEAN_PREFIX;
+
+	/**
+	 * Extension on a link URL.
+	 */
+	public static final String LINK_URL_EXTENSION = ".task";
 
 	/**
 	 * Obtains the {@link HttpTemplate}.
@@ -193,8 +201,15 @@ public class HttpTemplateWorkSource extends
 		String[] requestHandlerTaskNames = linkNameSet.toArray(new String[0]);
 		Arrays.sort(requestHandlerTaskNames);
 		for (String requestHandlerTaskName : requestHandlerTaskNames) {
-			workTypeBuilder.addTaskType(requestHandlerTaskName,
-					new RequestHandlerTask(), None.class, None.class);
+
+			// Add request handler task
+			TaskTypeBuilder<Indexed, None> task = workTypeBuilder.addTaskType(
+					requestHandlerTaskName, new RequestHandlerTask(),
+					Indexed.class, None.class);
+
+			// Add marker object to allow it to be found for routing.
+			// (Should be configured as parameter and may be passed null)
+			task.addObject(RequestHandlerIdentifier.class);
 		}
 	}
 

@@ -17,11 +17,14 @@
  */
 package net.officefloor.plugin.socket.server.http.template;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource;
 
 /**
  * <p>
@@ -33,14 +36,24 @@ import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
  * @author Daniel Sagenschneider
  */
 public class RequestHandlerTask extends
-		AbstractSingleTask<HttpTemplateWork, None, None> {
+		AbstractSingleTask<HttpTemplateWork, Indexed, None> {
+
+	/**
+	 * <p>
+	 * Identifier class that is only dependency for {@link Task}.
+	 * <p>
+	 * This allows for the {@link HttpTemplateRouteWorkSource} to find these
+	 * {@link RequestHandlerTask} instances within the {@link Office}.
+	 */
+	public static final class RequestHandlerIdentifier {
+	}
 
 	/*
 	 * ================== Task =============================
 	 */
 
 	@Override
-	public Object doTask(TaskContext<HttpTemplateWork, None, None> context)
+	public Object doTask(TaskContext<HttpTemplateWork, Indexed, None> context)
 			throws Throwable {
 		// Only a place holder task to start processing so do nothing
 		return null;
