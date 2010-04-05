@@ -22,6 +22,9 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.ConnectionHandler;
 import net.officefloor.plugin.socket.server.impl.ConnectionImpl;
 import net.officefloor.plugin.socket.server.impl.ConnectionManager;
@@ -29,7 +32,7 @@ import net.officefloor.plugin.socket.server.impl.SocketListener.SocketListenerDe
 
 /**
  * Test {@link TaskContext}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MockTaskContext
@@ -48,7 +51,7 @@ public class MockTaskContext
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param connectionManager
 	 *            {@link ConnectionManager}.
 	 * @param parameter
@@ -80,6 +83,13 @@ public class MockTaskContext
 	public FlowFuture doFlow(int flowIndex, Object parameter) {
 		TestCase.fail("Should not be invoked");
 		return null;
+	}
+
+	@Override
+	public void doFlow(String workName, String taskName, Object parameter)
+			throws UnknownWorkException, UnknownTaskException,
+			InvalidParameterTypeException {
+		TestCase.fail("Should not be invoked");
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.socket.server.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 
 /**
  * Tests the {@link HttpTemplateWorkSource}.
@@ -110,12 +111,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		tail.addEscalation(IOException.class);
 
 		// Handle link 'beans' task
-		work.addTaskType("beans", requestHandlerTaskFactory, None.class,
-				None.class);
+		TaskTypeBuilder<Indexed, None> beans = work.addTaskType("beans",
+				requestHandlerTaskFactory, Indexed.class, None.class);
+		beans.addObject(RequestHandlerIdentifier.class);
 
 		// Handle link 'submit' task
-		work.addTaskType("submit", requestHandlerTaskFactory, None.class,
-				None.class);
+		TaskTypeBuilder<Indexed, None> submit = work.addTaskType("submit",
+				requestHandlerTaskFactory, Indexed.class, None.class);
+		submit.addObject(RequestHandlerIdentifier.class);
 
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
