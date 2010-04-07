@@ -18,6 +18,9 @@
 
 package net.officefloor.plugin.socket.server.http.source;
 
+import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -27,11 +30,27 @@ import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObje
 
 /**
  * {@link ManagedObjectSource} for a {@link ServerHttpConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpServerSocketManagedObjectSource extends
-		AbstractServerSocketManagedObjectSource<HttpConnectionHandler> {
+		AbstractServerSocketManagedObjectSource<HttpConnectionHandler>
+		implements
+		ManagedObjectSourceService<None, Indexed, HttpServerSocketManagedObjectSource> {
+
+	/*
+	 * ==================== ManagedObjectSourceService ====================
+	 */
+
+	@Override
+	public String getManagedObjectSourceAlias() {
+		return "HTTP_SERVER";
+	}
+
+	@Override
+	public Class<HttpServerSocketManagedObjectSource> getManagedObjectSourceClass() {
+		return HttpServerSocketManagedObjectSource.class;
+	}
 
 	/*
 	 * ============= AbstractServerSocketManagedObjectSource ===============

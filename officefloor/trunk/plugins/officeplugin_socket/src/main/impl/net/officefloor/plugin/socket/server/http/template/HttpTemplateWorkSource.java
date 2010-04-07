@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -50,7 +51,8 @@ import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTem
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWorkSource extends
-		AbstractWorkSource<HttpTemplateWork> {
+		AbstractWorkSource<HttpTemplateWork> implements
+		WorkSourceService<HttpTemplateWork, HttpTemplateWorkSource> {
 
 	/**
 	 * Property to specify the {@link HttpTemplate} file.
@@ -156,6 +158,20 @@ public class HttpTemplateWorkSource extends
 	}
 
 	/*
+	 * ====================== WorkSourceService ===========================
+	 */
+
+	@Override
+	public String getWorkSourceAlias() {
+		return "HTTP_TEMPLATE";
+	}
+
+	@Override
+	public Class<HttpTemplateWorkSource> getWorkSourceClass() {
+		return HttpTemplateWorkSource.class;
+	}
+
+	/*
 	 * =================== AbstractWorkSource =========================
 	 */
 
@@ -167,6 +183,9 @@ public class HttpTemplateWorkSource extends
 	@Override
 	public void sourceWork(WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
+
+		// Ensure the template is available
+		context.getProperty(PROPERTY_TEMPLATE_FILE);
 
 		// Obtain the template
 		Properties properties = context.getProperties();
