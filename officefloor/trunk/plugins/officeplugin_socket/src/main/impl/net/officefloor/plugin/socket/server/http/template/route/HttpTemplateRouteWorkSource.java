@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.template.route;
 
+import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -39,7 +40,22 @@ import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRout
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateRouteWorkSource extends
-		AbstractWorkSource<HttpTemplateRouteTask> {
+		AbstractWorkSource<HttpTemplateRouteTask> implements
+		WorkSourceService<HttpTemplateRouteTask, HttpTemplateRouteWorkSource> {
+
+	/*
+	 * ===================== WorkSourceService =========================
+	 */
+
+	@Override
+	public String getWorkSourceAlias() {
+		return "HTTP_TEMPLATE_ROUTER";
+	}
+
+	@Override
+	public Class<HttpTemplateRouteWorkSource> getWorkSourceClass() {
+		return HttpTemplateRouteWorkSource.class;
+	}
 
 	/*
 	 * ======================== WorkSource ============================

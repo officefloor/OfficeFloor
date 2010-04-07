@@ -223,7 +223,7 @@ public class HttpTemplateWorkSourceExtension
 		}
 
 		// Return the name
-		return "Http Template " + templateName;
+		return "HttpTemplate-" + templateName;
 	}
 
 	@Override

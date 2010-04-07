@@ -61,6 +61,18 @@ public class SourceExtensionUtil {
 	}
 
 	/**
+	 * Creates the display to inform that no {@link Property} instances are
+	 * required.
+	 * 
+	 * @param container
+	 *            {@link Composite} to provide display on.
+	 */
+	public static void informNoPropertiesRequired(Composite container) {
+		container.setLayout(new GridLayout(1, false));
+		new Label(container, SWT.NONE).setText("No properties required");
+	}
+
+	/**
 	 * Creates the display for the input {@link Property}.
 	 * 
 	 * @param label

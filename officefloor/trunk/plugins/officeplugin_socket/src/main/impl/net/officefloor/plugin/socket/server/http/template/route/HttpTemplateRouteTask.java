@@ -91,8 +91,9 @@ public class HttpTemplateRouteTask
 
 				// Determine if handler task based on parameter type
 				Class<?> parameterType = taskManager.getParameterType();
-				if (RequestHandlerIdentifier.class
-						.isAssignableFrom(parameterType)) {
+				if ((parameterType != null)
+						&& (RequestHandlerIdentifier.class
+								.isAssignableFrom(parameterType))) {
 					// Handler task so include for work
 					handlerTaskNames.add(taskName);
 				}
