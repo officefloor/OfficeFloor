@@ -9,6 +9,6 @@
 	<name>Example</name>
 	<description>Example uses of OfficeFloor</description>
 	<modules>
-		<module>EjbOrchestration</module>
+		<module>WebOrchestration</module>
 	</modules>
 </project>
