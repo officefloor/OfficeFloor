@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.example.ejborchestration</groupId>
-		<artifactId>EjbOrchestration</artifactId>
+		<groupId>net.officefloor.example.weborchestration</groupId>
+		<artifactId>WebOrchestration</artifactId>
 		<version>0.0.1</version>
 	</parent>
-	<artifactId>EjbOrchestration-ejb</artifactId>
+	<artifactId>WebOrchestration-ejb</artifactId>
 	<packaging>ejb</packaging>
-	<name>EjbOrchestration-ejb</name>
-	<description>EJB components of the EJB Orchestration Example</description>
+	<name>WebOrchestration-ejb</name>
+	<description>EJB components of the Web Orchestration Examples</description>
 	<build>
 		<plugins>
 			<plugin>

@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.example.ejborchestration</groupId>
-		<artifactId>EjbOrchestration</artifactId>
+		<groupId>net.officefloor.example.weborchestration</groupId>
+		<artifactId>WebOrchestration</artifactId>
 		<version>0.0.1</version>
 	</parent>
-	<artifactId>EjbOrchestration-ear</artifactId>
+	<artifactId>WebStruts-ear</artifactId>
 	<packaging>ear</packaging>
-	<name>EjbOrchestration-ear</name>
-	<description>EAR generation of the EJB Orchestration Example</description>
+	<name>WebStruts-ear</name>
+	<description>EAR generation of the Web Struts Example</description>
 	<build>
 		<plugins>
 			<plugin>
@@ -19,12 +19,12 @@
 					<modules>
 						<webModule>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>EjbOrchestration-war</artifactId>
+							<artifactId>WebStruts-war</artifactId>
 							<contextRoot>/</contextRoot>
 						</webModule>
 						<ejbModule>
 							<groupId>${project.groupId}</groupId>
-							<artifactId>EjbOrchestration-ejb</artifactId>
+							<artifactId>WebOrchestration-ejb</artifactId>
 						</ejbModule>
 					</modules>
 					<artifactTypeMappings>
@@ -37,13 +37,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>EjbOrchestration-war</artifactId>
+			<artifactId>WebStruts-war</artifactId>
 			<version>${pom.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>EjbOrchestration-ejb</artifactId>
+			<artifactId>WebOrchestration-ejb</artifactId>
 			<version>${pom.version}</version>
 			<type>ejb</type>
 		</dependency>

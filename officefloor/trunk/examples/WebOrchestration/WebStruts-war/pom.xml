@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.example.ejborchestration</groupId>
-		<artifactId>EjbOrchestration</artifactId>
+		<groupId>net.officefloor.example.weborchestration</groupId>
+		<artifactId>WebOrchestration</artifactId>
 		<version>0.0.1</version>
 	</parent>
-	<artifactId>EjbOrchestration-war</artifactId>
+	<artifactId>WebStruts-war</artifactId>
 	<packaging>war</packaging>
-	<name>EjbOrchestration-war</name>
-	<description>Web components of the EJB Orchestration Example</description>
+	<name>WebStruts-war</name>
+	<description>Web components of the Web Struts Example</description>
 	<build>
 		<plugins>
 			<plugin>
@@ -92,7 +92,7 @@
 					</dependency>
 					<dependency>
 						<groupId>${project.groupId}</groupId>
-						<artifactId>EjbOrchestration-ejb</artifactId>
+						<artifactId>WebOrchestration-ejb</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
@@ -110,7 +110,7 @@
 						</systemProperty>
 						<systemProperty>
 							<name>openejb.deployments.classpath.include</name>
-							<value>.*EjbOrchestration.*</value>
+							<value>.*WebOrchestration.*</value>
 						</systemProperty>
 					</systemProperties>
 				</configuration>
@@ -140,7 +140,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>EjbOrchestration-ejb</artifactId>
+			<artifactId>WebOrchestration-ejb</artifactId>
 			<version>${pom.version}</version>
 			<scope>provided</scope>
 		</dependency>
