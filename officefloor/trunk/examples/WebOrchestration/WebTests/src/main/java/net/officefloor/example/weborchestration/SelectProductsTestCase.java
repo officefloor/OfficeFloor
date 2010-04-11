@@ -17,14 +17,12 @@
  */
 package net.officefloor.example.weborchestration;
 
-import net.officefloor.example.weborchestration.Product;
-
 /**
- * Tests to select {@link Product} instances.
+ * Tests to select Products.
  * 
  * @author Daniel Sagenschneider
  */
-public class SelectProductsIT extends SeleniumTestCase {
+public class SelectProductsTestCase extends AbstractSeleniumTestCase {
 
 	/**
 	 * Ensure errors on invalid input.

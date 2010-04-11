@@ -17,16 +17,12 @@
  */
 package net.officefloor.example.weborchestration;
 
-import net.officefloor.example.weborchestration.Invoice;
-import net.officefloor.example.weborchestration.Product;
-import net.officefloor.example.weborchestration.Quote;
-
 /**
- * Tests a {@link Quote}.
+ * Tests a Quote.
  * 
  * @author Daniel Sagenschneider
  */
-public class QuoteIT extends SeleniumTestCase {
+public class QuoteTestCase extends AbstractSeleniumTestCase {
 
 	/**
 	 * Ensure can create {@link Quote}.
