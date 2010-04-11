@@ -17,16 +17,12 @@
  */
 package net.officefloor.example.weborchestration;
 
-import net.officefloor.example.weborchestration.Invoice;
-import net.officefloor.example.weborchestration.Product;
-import net.officefloor.example.weborchestration.ShoppingCart;
-
 /**
- * Tests creating an {@link Invoice}.
+ * Tests creating an Invoice.
  * 
  * @author Daniel Sagenschneider
  */
-public class InvoiceIT extends SeleniumTestCase {
+public class InvoiceTestCase extends AbstractSeleniumTestCase {
 
 	/**
 	 * Ensure able to create {@link Invoice} from {@link ShoppingCart}.

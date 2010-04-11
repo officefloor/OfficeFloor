@@ -17,14 +17,12 @@
  */
 package net.officefloor.example.weborchestration;
 
-import net.officefloor.example.weborchestration.Customer;
-
 /**
- * Tests regarding {@link Customer}.
+ * Tests regarding Customer.
  * 
  * @author Daniel Sagenschneider
  */
-public class CustomerIT extends SeleniumTestCase {
+public class CustomerTestCase extends AbstractSeleniumTestCase {
 
 	/**
 	 * Ensure able to create a {@link Customer}.

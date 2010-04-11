@@ -20,21 +20,17 @@ package net.officefloor.example.weborchestration;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.example.weborchestration.ActionUtil;
-import net.officefloor.example.weborchestration.Customer;
-import net.officefloor.example.weborchestration.Product;
+import junit.framework.TestCase;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
-
-import junit.framework.TestCase;
 
 /**
  * Selenium {@link TestCase}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class SeleniumTestCase extends TestCase {
+public abstract class AbstractSeleniumTestCase extends TestCase {
 
 	/**
 	 * Shirt {@link Product} name.
@@ -94,7 +90,7 @@ public abstract class SeleniumTestCase extends TestCase {
 	/**
 	 * Initiate with starting URL - /.
 	 */
-	public SeleniumTestCase() {
+	public AbstractSeleniumTestCase() {
 		this("/");
 	}
 
@@ -104,7 +100,7 @@ public abstract class SeleniumTestCase extends TestCase {
 	 * @param startingUrl
 	 *            Starting URL.
 	 */
-	public SeleniumTestCase(String startingUrl) {
+	public AbstractSeleniumTestCase(String startingUrl) {
 		this.startingUrl = startingUrl;
 	}
 
@@ -179,7 +175,7 @@ public abstract class SeleniumTestCase extends TestCase {
 	protected void setUp() throws Exception {
 
 		// Lazy load the setup state
-		if (ActionUtil.isBlank(customerName)) {
+		if ((customerName == null) || (customerName.trim().length() == 0)) {
 			this.alignTestState();
 		}
 
