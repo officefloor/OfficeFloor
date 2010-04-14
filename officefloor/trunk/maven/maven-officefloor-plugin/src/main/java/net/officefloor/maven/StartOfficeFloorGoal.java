@@ -17,11 +17,11 @@
  */
 package net.officefloor.maven;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Maven goal to start the {@link OfficeFloor}.
@@ -38,7 +38,7 @@ public class StartOfficeFloorGoal extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
+		
 		// TODO implement starting OfficeFloor
 		this.getLog().info("TODO: implement starting OfficeFloor");
 
