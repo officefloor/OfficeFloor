@@ -12,6 +12,7 @@
 				<groupId>@project.groupId@</groupId>
 				<artifactId>@project.artifactId@</artifactId>
 				<configuration>
+					<port>10102</port>
 				</configuration>
 				<executions>
 					<execution>
