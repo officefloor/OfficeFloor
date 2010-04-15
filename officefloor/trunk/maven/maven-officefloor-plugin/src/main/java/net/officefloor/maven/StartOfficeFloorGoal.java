@@ -17,6 +17,9 @@
  */
 package net.officefloor.maven;
 
+import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -32,16 +35,60 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class StartOfficeFloorGoal extends AbstractMojo {
 
+	/**
+	 * Port to run the {@link OfficeBuilding} on.
+	 * 
+	 * @parameter
+	 * @required
+	 */
+	private Integer port;
+
 	/*
 	 * ======================== Mojo ==========================
 	 */
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		
-		// TODO implement starting OfficeFloor
-		this.getLog().info("TODO: implement starting OfficeFloor");
 
+		// Ensure have configured values
+		assertNotNull("Port not configured for the "
+				+ OfficeBuilding.class.getSimpleName(), this.port);
+
+		// Start the OfficeBuilding
+		OfficeBuildingManagerMBean officeBuilding;
+		try {
+			officeBuilding = OfficeBuildingManager
+					.startOfficeBuilding(this.port.intValue());
+		} catch (Throwable ex) {
+			throw new MojoExecutionException("Failed starting the "
+					+ OfficeBuilding.class.getSimpleName(), ex);
+		}
+
+		// Open the OfficeFloor
+		// String name = officeBuilding.openOfficeFloor("MavenTestOfficeFloor",
+		// jarName,
+		// officeFloorLocation, jvmOptions);
+
+		// Log the started OfficeFloor by process name
+		this.getLog().info(
+				"Started " + OfficeFloor.class.getSimpleName() + " '");
+	}
+
+	/**
+	 * Ensure the value is not <code>null</code>.
+	 * 
+	 * @param message
+	 *            Message to report if value is <code>null</code>.
+	 * @param value
+	 *            Value to check.
+	 * @throws MojoFailureException
+	 *             If value is <code>null</code>.
+	 */
+	private static void assertNotNull(String message, Object value)
+			throws MojoFailureException {
+		if (value == null) {
+			throw new MojoFailureException(message);
+		}
 	}
 
 }
