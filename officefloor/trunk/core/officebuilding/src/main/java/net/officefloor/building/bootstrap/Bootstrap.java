@@ -58,13 +58,9 @@ public class Bootstrap {
 		File currentDirectory = new File(currentDirectoryPath);
 		ensureDirectoryExists(currentDirectory);
 
-		// Add the core jars
-		File libCoreDir = new File(currentDirectory, "lib/core");
-		entries.loadDirectoryClassPathEntries(libCoreDir, true, false);
-
-		// Add the plug-in jars and directories
-		File libPluginsDir = new File(currentDirectory, "lib/plugins");
-		entries.loadDirectoryClassPathEntries(libPluginsDir, true, true);
+		// Add the lib class path entries
+		File libCoreDir = new File(currentDirectory, "lib");
+		entries.loadDirectoryClassPathEntries(libCoreDir, true, true);
 
 		// Specify the java class path
 		String javaClassPath = entries.getClassPath();

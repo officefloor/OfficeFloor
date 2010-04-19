@@ -6,7 +6,8 @@ set -e
 # Default OFFICE_BUILDING_HOME to bin/..
 if [ -z ${OFFICE_BUILDING_HOME} ]; then
 	# Move to OFFICE_BUILDING_HOME directory
-	BIN_DIR=`dirname $0`
+	SCRIPT=`readlink -f $0`
+	BIN_DIR=`dirname $SCRIPT`
 	cd ${BIN_DIR}/..
 
 	# Obtain the OFFICE_BUILDING_HOME location
@@ -19,7 +20,7 @@ cd ${OFFICE_BUILDING_HOME}
 # Run OfficeBuilding
 java \
 	${OFFICE_BUILDING_JVM_OPTIONS} \
-	-cp lib/core/officebuilding.jar \
+	-cp lib/officebuilding.jar \
 	net.officefloor.building.bootstrap.Bootstrap \
 	net.officefloor.building.OfficeBuilding \
 	$@

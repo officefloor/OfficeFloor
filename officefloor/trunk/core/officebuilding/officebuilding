@@ -9,11 +9,8 @@
 # Fail immediately
 set -e
 
-# Version
-OFFICE_BUILDING_VERSION=0.1.2
-
-# Change to release directory package
-cd target/officebuilding-${OFFICE_BUILDING_VERSION}-release/officebuilding-${OFFICE_BUILDING_VERSION}/bin
+# Change to release directory package ('*' to match current version as should only be one version being built)
+cd target/officebuilding-*-release/officebuilding-*/bin
 
 # Delegate to the bin executable
-./officebuilding $@
+. ./officebuilding $@

@@ -41,6 +41,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 * Ensure no issues arise in dynamic flow stressing for a
 	 * {@link OnePersonTeam}.
 	 */
+	@StressTest
 	public void test_StressDynamicFlow_OnePersonTeam() throws Exception {
 		this.doTest(new OnePersonTeam("TEST", 100));
 	}
@@ -49,6 +50,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 * Ensure no issues arise in dynamic flow stressing for a
 	 * {@link LeaderFollowerTeam}.
 	 */
+	@StressTest
 	public void test_StressDynamicFlow_LeaderFollowerTeam() throws Exception {
 		this.doTest(new LeaderFollowerTeam("TEST", 3, 100));
 	}

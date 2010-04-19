@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import javax.management.remote.JMXServiceURL;
 
+import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 
@@ -57,6 +58,16 @@ public class OfficeBuilding {
 	 * to run or is running on.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_PORT = "office.building.port";
+
+	/**
+	 * Name of the property defining the path to the local repository.
+	 */
+	public static final String PROPERTY_LOCAL_REPOSITORY_PATH = "local.repository.path";
+
+	/**
+	 * Name of the property defining the URL to the remote repository.
+	 */
+	public static final String PROPERTY_REMOTE_REPOSITORY_URL = "remote.repository.url";
 
 	/**
 	 * Wait time to stop the {@link OfficeBuilding}.
@@ -133,9 +144,37 @@ public class OfficeBuilding {
 
 		// Handle the command
 		if ("start".equalsIgnoreCase(command)) {
+
+			// Obtain the local repository directory
+			String localRepositoryPath = properties.getProperty(
+					PROPERTY_LOCAL_REPOSITORY_PATH, null);
+			if (isBlank(localRepositoryPath)) {
+				// Use temporary directory
+				localRepositoryPath = System.getProperty("java.io.tmpdir")
+						+ "/officebuilding-repository";
+			}
+			File localRepositoryDirectory = new File(localRepositoryPath);
+			if (!localRepositoryDirectory.exists()) {
+				// Ensure directory is available
+				if (!localRepositoryDirectory.mkdirs()) {
+					errorAndExit("Failed creating local repository "
+							+ localRepositoryDirectory.getPath());
+				}
+			}
+
+			// Obtain the remote repository URL
+			String remoteRepositoryUrl = properties
+					.getProperty("remote.repository.url");
+
+			// Create the class path builder factory
+			ClassPathBuilderFactory classPathBuilderFactory = new ClassPathBuilderFactory(
+					localRepositoryDirectory);
+			classPathBuilderFactory.addRemoteRepositoryUrl(remoteRepositoryUrl);
+
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
-					.startOfficeBuilding(officeBuildingPort);
+					.startOfficeBuilding(officeBuildingPort,
+							classPathBuilderFactory);
 
 			// Indicate started and location
 			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();
