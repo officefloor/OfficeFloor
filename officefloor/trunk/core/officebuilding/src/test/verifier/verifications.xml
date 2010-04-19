@@ -5,13 +5,7 @@
 			<location>${basedir}/../latest/pom.xml</location>
 			<contains><![CDATA[<artifactId>${pom.artifactId}</artifactId>(\s)*<version>${pom.version}</version>]]></contains>
 		</file>
-		
-		<file>
-			<!-- Ensure run correct version of building -->
-			<location>officebuilding</location>
-			<contains>OFFICE_BUILDING_VERSION=${pom.version}</contains>
-		</file>
-		
+				
 		<!-- Ensure using latest dependencies -->
 		<file>
 			<location>${basedir}/../latest/pom.xml</location>

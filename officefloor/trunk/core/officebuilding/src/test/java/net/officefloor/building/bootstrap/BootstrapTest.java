@@ -79,8 +79,26 @@ public class BootstrapTest extends TestCase {
 	 */
 	public void testBootstrapResources() throws Throwable {
 
+		// Write the Java source of class to bootstrap.
+		// This provides the object with the appropriate class loader.
+		final String CLASS_NAME = "MockBootstrapFor" + this.getName();
+		final StringWriter source = new StringWriter();
+		PrintWriter s = new PrintWriter(source);
+		s.println("import " + this.getClass().getName() + ".MockMain;");
+		s.println("public class " + CLASS_NAME + " extends MockMain {");
+		s
+				.println("  public static void main(String[] arguments) throws Throwable {");
+		s.println("    classLoaderObject = new " + CLASS_NAME + "();");
+		s.println("    MockMain.main(arguments);");
+		s.println("  }");
+		s.println("}");
+		s.close();
+
+		// Compile the source
+		this.compileSourceToClass(CLASS_NAME, source.toString());
+
 		// Bootstrap the mock main
-		Bootstrap.main(MockMain.class.getName(), "test");
+		Bootstrap.main(CLASS_NAME, "test");
 
 		// Ensure main invoked
 		assertTrue("Main method should be invoked", MockMain.isMainInvoked);
@@ -97,10 +115,18 @@ public class BootstrapTest extends TestCase {
 		public static boolean isMainInvoked = false;
 
 		/**
+		 * Specified from the extending class only available via bootstrapping.
+		 * This results in the {@link ClassLoader} for the object being the
+		 * bootstrapped {@link ClassLoader}.
+		 */
+		protected static Object classLoaderObject;
+
+		/**
 		 * Resets for testing.
 		 */
 		public static void reset() {
 			isMainInvoked = false;
+			classLoaderObject = null;
 		}
 
 		/**
@@ -122,16 +148,22 @@ public class BootstrapTest extends TestCase {
 			assertEquals("Incorrect command line argument", "test",
 					arguments[0]);
 
-			// Ensure able to obtain file from class path directory
-			InputStream dirFile = Thread.currentThread()
-					.getContextClassLoader().getResourceAsStream(
-							"DirectoryFile.txt");
-			assertStreamContent("Directory File", "Directory File", dirFile);
+			// Ensure able to obtain file from class path directory.
+			// (Both from thread and class ClassLoaders)
+			assertStreamContent("Directory File", "Directory File", Thread
+					.currentThread().getContextClassLoader()
+					.getResourceAsStream("DirectoryFile.txt"));
+			assertStreamContent("Directory File", "Directory File",
+					classLoaderObject.getClass().getClassLoader()
+							.getResourceAsStream("DirectoryFile.txt"));
 
 			// Ensure able to obtain file from jar
-			InputStream jarFile = Thread.currentThread()
-					.getContextClassLoader().getResourceAsStream("JarFile.txt");
-			assertStreamContent("Jar File", "Jar File", jarFile);
+			// (Both from thread and class ClassLoaders)
+			assertStreamContent("Jar File", "Jar File", Thread.currentThread()
+					.getContextClassLoader().getResourceAsStream("JarFile.txt"));
+			assertStreamContent("Jar File", "Jar File", classLoaderObject
+					.getClass().getClassLoader().getResourceAsStream(
+							"JarFile.txt"));
 		}
 	}
 
@@ -143,11 +175,8 @@ public class BootstrapTest extends TestCase {
 		// Create temporary file
 		File temporaryFile = OfficeBuildingTestUtil.createTempFile(this);
 
-		// Create the class to bootstrap
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
 		// Write the Java source of class to bootstrap
-		final String CLASS_NAME = "MockBootstrappedClass";
+		final String CLASS_NAME = "MockBootstrapFor" + this.getName();
 		final StringWriter source = new StringWriter();
 		PrintWriter s = new PrintWriter(source);
 		s.println("import " + Writer.class.getName() + ";");
@@ -164,25 +193,8 @@ public class BootstrapTest extends TestCase {
 		s.println("}");
 		s.close();
 
-		// Create the Java source file
-		URI sourceUri = URI.create("string:///" + CLASS_NAME
-				+ Kind.SOURCE.extension);
-		JavaFileObject sourceFile = new SimpleJavaFileObject(sourceUri,
-				Kind.SOURCE) {
-			@Override
-			public CharSequence getCharContent(boolean ignoreEncodingErrors)
-					throws IOException {
-				return source.toString();
-			}
-		};
-
-		// Compile the Java source file to class file
-		String destDir = System.getProperty("user.dir")
-				+ "/lib/plugins/directory";
-		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-		CompilationTask task = compiler.getTask(null, null, diagnostics, Arrays
-				.asList("-d", destDir), null, Arrays.asList(sourceFile));
-		assertTrue("Failed to compile source class", task.call());
+		// Compile the source
+		this.compileSourceToClass(CLASS_NAME, source.toString());
 
 		// Bootstrap the generated source class
 		Bootstrap.main(CLASS_NAME, "test");
@@ -191,6 +203,39 @@ public class BootstrapTest extends TestCase {
 		OfficeBuildingTestUtil.validateFileContent(
 				"Bootstrapped file should write content to file", "test",
 				temporaryFile);
+	}
+
+	/**
+	 * Compiles the source to a class.
+	 * 
+	 * @param className
+	 *            Name of the class.
+	 * @param source
+	 *            Source to be compiled for the class.
+	 */
+	private void compileSourceToClass(String className, final String source) {
+
+		// Create the class to bootstrap
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+		// Create the Java source file
+		URI sourceUri = URI.create("string:///" + className
+				+ Kind.SOURCE.extension);
+		JavaFileObject sourceFile = new SimpleJavaFileObject(sourceUri,
+				Kind.SOURCE) {
+			@Override
+			public CharSequence getCharContent(boolean ignoreEncodingErrors)
+					throws IOException {
+				return source;
+			}
+		};
+
+		// Compile the Java source file to class file
+		String destDir = System.getProperty("user.dir") + "/lib/directory";
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+		CompilationTask task = compiler.getTask(null, null, diagnostics, Arrays
+				.asList("-d", destDir), null, Arrays.asList(sourceFile));
+		assertTrue("Failed to compile source class", task.call());
 	}
 
 	/**

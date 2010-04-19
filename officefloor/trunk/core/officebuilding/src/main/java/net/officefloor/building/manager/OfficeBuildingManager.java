@@ -18,6 +18,7 @@
 
 package net.officefloor.building.manager;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -40,6 +41,8 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.classpath.ClassPathBuilder;
+import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
@@ -86,13 +89,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * 
 	 * @param port
 	 *            Port for the {@link OfficeBuilding}.
+	 * @param classPathBuilderFactory
+	 *            {@link ClassPathBuilderFactory}.
 	 * @return {@link OfficeBuildingManager} managing the started Office
 	 *         Building.
 	 * @throws Exception
 	 *             If fails to start the {@link OfficeBuilding}.
 	 */
-	public static OfficeBuildingManager startOfficeBuilding(int port)
-			throws Exception {
+	public static OfficeBuildingManager startOfficeBuilding(int port,
+			ClassPathBuilderFactory classPathBuilderFactory) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -118,7 +123,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer);
+				serviceUrl, connectorServer, classPathBuilderFactory);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -339,6 +344,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	private final JMXConnectorServer connectorServer;
 
 	/**
+	 * {@link ClassPathBuilderFactory}.
+	 */
+	private final ClassPathBuilderFactory classPathBuilderFactory;
+
+	/**
 	 * May only create by starting.
 	 * 
 	 * @param startTime
@@ -347,13 +357,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link OfficeBuilding} {@link JMXServiceURL}.
 	 * @param connectorServer
 	 *            {@link JMXConnectorServer} for the {@link OfficeBuilding}.
+	 * @param classPathBuilderFactory
+	 *            {@link ClassPathBuilderFactory}.
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
-			JMXConnectorServer connectorServer) {
+			JMXConnectorServer connectorServer,
+			ClassPathBuilderFactory classPathBuilderFactory) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
+		this.classPathBuilderFactory = classPathBuilderFactory;
 	}
 
 	/*
@@ -381,19 +395,68 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	@Override
-	public synchronized String openOfficeFloor(String processName,
+	public String openOfficeFloor(String processName, String groupId,
+			String artifactId, String version, String type, String classifier,
+			String officeFloorLocation, String jvmOptions) throws Exception {
+
+		// Build the class path for the jar
+		ClassPathBuilder builder = this.classPathBuilderFactory
+				.createClassPathBuilder();
+		builder.includeArtifact(groupId, artifactId, version, type, classifier);
+
+		// Open the OfficeFloor
+		return this.openOfficeFloor(processName, builder, officeFloorLocation,
+				jvmOptions);
+	}
+
+	@Override
+	public String openOfficeFloor(String processName,
 			String jarName, String officeFloorLocation, String jvmOptions)
 			throws Exception {
+
+		// Build the class path for the jar
+		File jarFile = new File(jarName);
+		ClassPathBuilder builder = this.classPathBuilderFactory
+				.createClassPathBuilder();
+		builder.includeJar(jarFile);
+
+		// Open the OfficeFloor
+		return this.openOfficeFloor(processName, builder, officeFloorLocation,
+				jvmOptions);
+	}
+
+	/**
+	 * Opens the {@link OfficeFloor}.
+	 * 
+	 * @param processName
+	 *            Process name.
+	 * @param classPathBuilder
+	 *            {@link ClassPathBuilder} containing the additional class path.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} on the class path.
+	 * @param jvmOptions
+	 *            JVM options.
+	 * @return Process namespace.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 */
+	private synchronized String openOfficeFloor(String processName,
+			ClassPathBuilder classPathBuilder, String officeFloorLocation,
+			String jvmOptions) throws Exception {
 
 		// Ensure the OfficeBuilding is open
 		if (!this.isOfficeBuildingOpen) {
 			throw new IllegalStateException("OfficeBuilding closed");
 		}
 
+		// Obtain the class path
+		String classPath = classPathBuilder.getBuiltClassPath();
+		classPathBuilder.close();
+
 		// Create the configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
 		configuration.setProcessName(processName);
-		configuration.setAdditionalClassPath(jarName);
+		configuration.setAdditionalClassPath(classPath);
 		configuration.setJvmOptions(jvmOptions);
 
 		// Create the OfficeFloor managed process

@@ -29,6 +29,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
+import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -53,6 +54,17 @@ public class OfficeBuildingManagerTest extends TestCase {
 	private static int PORT = 13778;
 
 	/**
+	 * {@link ClassPathBuilderFactory}.
+	 */
+	private ClassPathBuilderFactory classPathBuilderFactory;
+
+	@Override
+	protected void setUp() throws Exception {
+		this.classPathBuilderFactory = OfficeBuildingTestUtil
+				.getClassPathBuilderFactory();
+	}
+
+	/**
 	 * Ensure able to start the Office Building.
 	 */
 	public void testRunningOfficeBuilding() throws Exception {
@@ -60,7 +72,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 		// Start the Office Building (recording times before/after)
 		long beforeTime = System.currentTimeMillis();
 		OfficeBuildingManager manager = OfficeBuildingManager
-				.startOfficeBuilding(PORT);
+				.startOfficeBuilding(PORT, this.classPathBuilderFactory);
 		long afterTime = System.currentTimeMillis();
 
 		// Ensure correct JMX Service URL
@@ -114,12 +126,76 @@ public class OfficeBuildingManagerTest extends TestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor}.
+	 * Ensure able to open the {@link OfficeFloor} with a Jar.
 	 */
-	public void testOfficeFloorManagement() throws Exception {
+	public void testOfficeFloorJarManagement() throws Exception {
+		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
+			@Override
+			public String openOfficeFloor(String processName,
+					String officeFloorLocation,
+					OfficeBuildingManagerMBean buildingManager)
+					throws Exception {
+				String jarName = OfficeBuildingTestUtil
+						.retrieveOfficeFloorJar("officecompiler");
+				return buildingManager.openOfficeFloor(processName, jarName,
+						officeFloorLocation, null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor} with a Artifact.
+	 */
+	public void testOfficeFloorArtifactManagement() throws Exception {
+		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
+			@Override
+			public String openOfficeFloor(String processName,
+					String officeFloorLocation,
+					OfficeBuildingManagerMBean buildingManager)
+					throws Exception {
+				return buildingManager.openOfficeFloor(processName,
+						"net.officefloor.core", "officecompiler",
+						OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar",
+						null, officeFloorLocation, null);
+			}
+		});
+	}
+
+	/**
+	 * Opens the {@link OfficeFloor}.
+	 */
+	private static interface OfficeFloorOpener {
+
+		/**
+		 * Opens the {@link OfficeFloor} via the
+		 * {@link OfficeBuildingManagerMBean}.
+		 * 
+		 * @param processName
+		 *            Process name.
+		 * @param officeFloorLocation
+		 *            {@link OfficeFloor} location.
+		 * @param buildingManager
+		 *            {@link OfficeBuildingManagerMBean}.
+		 * @return Process namespace.
+		 * @throws Exception
+		 *             If fails to open.
+		 */
+		String openOfficeFloor(String processName, String officeFloorLocation,
+				OfficeBuildingManagerMBean buildingManager) throws Exception;
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor}.
+	 * 
+	 * @param opener
+	 *            {@link OfficeFloorOpener}.
+	 */
+	private void doOfficeFloorManagementTest(OfficeFloorOpener opener)
+			throws Exception {
 
 		// Start the OfficeBuilding
-		OfficeBuildingManager.startOfficeBuilding(PORT);
+		OfficeBuildingManager.startOfficeBuilding(PORT,
+				this.classPathBuilderFactory);
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
@@ -127,8 +203,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
-		String processNamespace = buildingManager.openOfficeFloor(this
-				.getName(), "not-needed.jar", officeFloorLocation, null);
+		String processNamespace = opener.openOfficeFloor(this.getName(),
+				officeFloorLocation, buildingManager);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
@@ -205,7 +281,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 	public void testCloseOfficeFloor() throws Exception {
 
 		// Start the OfficeBuilding
-		OfficeBuildingManager.startOfficeBuilding(PORT);
+		OfficeBuildingManager.startOfficeBuilding(PORT,
+				this.classPathBuilderFactory);
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
@@ -214,7 +291,9 @@ public class OfficeBuildingManagerTest extends TestCase {
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
 		String processNamespace = buildingManager.openOfficeFloor(this
-				.getName(), "not-needed.jar", officeFloorLocation, null);
+				.getName(), "net.officefloor.core", "officecompiler",
+				OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar", null,
+				officeFloorLocation, null);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager

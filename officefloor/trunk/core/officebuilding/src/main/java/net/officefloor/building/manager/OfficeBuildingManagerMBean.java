@@ -94,6 +94,38 @@ public interface OfficeBuildingManagerMBean {
 			String officeFloorLocation, String jvmOptions) throws Exception;
 
 	/**
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}.
+	 * 
+	 * @param processName
+	 *            Name identifying the {@link Process} for the
+	 *            {@link OfficeFloor}.
+	 * @param groupId
+	 *            Group identifier of the {@link OfficeFloor} artifact.
+	 * @param artifactId
+	 *            Artifact identifier of the {@link OfficeFloor} artifact.
+	 * @param version
+	 *            Version of the {@link OfficeFloor} artifact.
+	 * @param type
+	 *            Type of the {@link OfficeFloor} artifact.
+	 * @param classifier
+	 *            Classifier of the {@link OfficeFloor} artifact. May be
+	 *            <code>null</code> if no classifier.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor} within the artifact to
+	 *            open.
+	 * @param jvmOptions
+	 *            Options for the JVM of the {@link Process} to contain the
+	 *            {@link OfficeFloor}.
+	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 * @see ProcessManagerMBean#getProcessNamespace()
+	 */
+	String openOfficeFloor(String processName, String groupId,
+			String artifactId, String version, String type, String classifier,
+			String officeFloorLocation, String jvmOptions) throws Exception;
+
+	/**
 	 * Closes the {@link OfficeFloor}.
 	 * 
 	 * @param processNamespace
