@@ -1,15 +1,9 @@
 <verifications>
 	<files>
+		<!-- Ensure releasing latest version -->
 		<file>
-			<!-- Ensure releasing latest version -->
-			<location>${basedir}/../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>${pom.artifactId}</artifactId>(\s)*<version>${pom.version}</version>]]></contains>
-		</file>
-
-		<file>
-			<!-- Ensure run correct version of demo -->
-			<location>officedemo</location>
-			<contains>OFFICE_DEMO_VERSION=${pom.version}</contains>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
 	</files>
 </verifications>

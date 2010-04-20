@@ -15,7 +15,6 @@
 	<modules>
 		<module>officetool_demo</module>
 		<module>officetool_filingcabinet</module>
-		<module>latest</module>
 	</modules>
 	<build>
 		<plugins>
@@ -37,19 +36,16 @@
 		<!-- OfficeFloor core functionality -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest_core</artifactId>
-			<version>SNAPSHOT</version>
+			<artifactId>officebuilding</artifactId>
 		</dependency>
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
-			<version>1.1</version>
 		</dependency>
 	</dependencies>
 </project>
