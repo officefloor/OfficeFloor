@@ -20,7 +20,6 @@
 		<module>officeplugin_socket</module>
 		<module>officeplugin_spring</module>
 		<module>officeplugin_hibernate</module>
-		<module>latest</module>
 	</modules>
 	<build>
 		<plugins>
@@ -50,25 +49,21 @@
 		<!-- OfficeFloor core functionality -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest_core</artifactId>
-			<version>SNAPSHOT</version>
+			<artifactId>officebuilding</artifactId>
 		</dependency>
 		<!-- JEE API available -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<version>6.0</version>
 		</dependency>
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
-			<version>1.1</version>
 		</dependency>
 	</dependencies>
 </project>
