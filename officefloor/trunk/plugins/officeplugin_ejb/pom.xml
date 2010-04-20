@@ -18,9 +18,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_jndi</artifactId>
-			<version>${pom.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
