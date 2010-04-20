@@ -8,15 +8,6 @@
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
-	<modules>
-		<module>core</module>
-		<module>plugins</module>
-		<module>tools</module>
-		<module>eclipse</module>
-		<module>maven</module>
-		<module>examples</module>
-		<module>deploy</module>
-	</modules>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
 	<issueManagement>
@@ -27,8 +18,7 @@
 		<developer>
 			<id>sagenschneider</id>
 			<name>Daniel Sagenschneider</name>
-			<email>sagenschneider@users.sourceforge.net
-			</email>
+			<email>sagenschneider@users.sourceforge.net</email>
 			<roles>
 				<role>Administrator</role>
 				<role>Developer</role>
@@ -37,22 +27,90 @@
 		<developer>
 			<id>melanies</id>
 			<name>Melanie Sagenschneider</name>
-			<email>melanies@users.sourceforge.net
-			</email>
+			<email>melanies@users.sourceforge.net</email>
 		</developer>
 	</developers>
 	<scm>
-		<connection>
-			scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk
-		</connection>
-		<url>
-			http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk
-		</url>
+		<connection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
+		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk</url>
 	</scm>
+	<distributionManagement>
+		<site>
+			<id>officefloor.sf.net</id>
+			<url>
+				scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
+			</url>
+		</site>
+<!-- TODO determine if put something in settings.xml  
+		<repository>
+			<id>sourceforge</id>
+			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
+		</repository>
+-->
+	</distributionManagement>
+	<reporting>
+		<plugins />
+	</reporting>
+	<modules>
+		<module>core</module>
+		<module>plugins</module>
+		<module>tools</module>
+		<module>eclipse</module>
+		<module>maven</module>
+		<module>examples</module>
+		<module>deploy</module>
+	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Core artifacts -->
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>core</artifactId>
+				<version>0.1.2</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officeframe</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officexml</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officemodelgen</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officecompiler</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officebuilding</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<!-- Test Dependencies -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>3.8.2</version>
+			</dependency>
+			<dependency>
+				<groupId>easymock</groupId>
+				<artifactId>easymock</artifactId>
+				<version>1.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Keep standard JVM for compilation -->
+				<!-- Standard JVM for compilation -->
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>1.6</source>
@@ -113,7 +171,7 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>verify</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -134,7 +192,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-					<phase>verify</phase>
+					<phase>validate</phase>
 					<goals>
 						<goal>run</goal>
 					</goals>
@@ -179,7 +237,7 @@
 				<artifactId>maven-verifier-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>verify</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>verify</goal>
 						</goals>
@@ -192,16 +250,4 @@
 			<!-- END: project validation -->
 		</plugins>
 	</build>
-	<reporting>
-		<plugins>
-		</plugins>
-	</reporting>
-	<distributionManagement>
-		<site>
-			<id>officefloor.sf.net</id>
-			<url>
-				scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
-			</url>
-		</site>
-	</distributionManagement>
 </project>

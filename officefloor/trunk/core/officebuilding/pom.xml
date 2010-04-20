@@ -34,9 +34,8 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officecompiler</artifactId>
-			<version>${pom.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

@@ -14,14 +14,12 @@
 	</description>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officexml</artifactId>
-			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeframe</artifactId>
-			<version>${pom.version}</version>
 		</dependency>
 	</dependencies>
 </project>

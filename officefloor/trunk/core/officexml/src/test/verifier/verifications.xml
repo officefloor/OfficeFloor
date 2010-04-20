@@ -2,13 +2,8 @@
 	<files>
 		<file>
 			<!-- Ensure releasing latest version -->
-			<location>${basedir}/../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>${project.artifactId}</artifactId>(\s*)<version>${project.version}</version>]]></contains>
-		</file>
-		<!-- Ensure using latest dependencies -->
-		<file>
-			<location>${basedir}/../latest/pom.xml</location>
-			<contains><![CDATA[<artifactId>officeframe</artifactId>(\s*)<version>@{officeframe_version}</version>]]></contains>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
 	</files>
 </verifications>
