@@ -9,11 +9,8 @@
 # Fail immediately
 set -e
 
-# Version
-OFFICE_DEMO_VERSION=0.1.2
-
-# Change to release directory package
-cd target/officetool_demo-${OFFICE_DEMO_VERSION}/officetool_demo-${OFFICE_DEMO_VERSION}/bin
+# Change to release directory package ('*' to handle version)
+cd target/officetool_demo-*/officetool_demo-*/bin
 
 # Delegate to the bin executable
 ./officedemo $@

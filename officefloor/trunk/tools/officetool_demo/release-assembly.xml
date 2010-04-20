@@ -16,8 +16,7 @@
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
-			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}
-			</outputFileNameMapping>
+			<outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
 			<outputDirectory>lib</outputDirectory>
 			<includes>
 				<include>${pom.groupId}:${pom.artifactId}</include>

@@ -136,6 +136,17 @@
 				<artifactId>officeplugin_spring</artifactId>
 				<version>0.1.2</version>
 			</dependency>
+			<!-- ===================== Tools ==================== -->
+			<dependency>
+				<groupId>net.officefloor.tool</groupId>
+				<artifactId>officetool_demo</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.tool</groupId>
+				<artifactId>officetool_filingcabinet</artifactId>
+				<version>0.1.2</version>
+			</dependency>
 			<!-- ================ Additional dependencies ======= -->
 			<dependency>
 				<groupId>javax</groupId>
