@@ -97,7 +97,7 @@ public class OfficeBuilding {
 	 *             If fails.
 	 */
 	public static void main(String... arguments) throws Throwable {
-
+		
 		// Obtain the Office Building Home (property then environment)
 		String officeBuildingHomeValue = System
 				.getProperty(OFFICE_BUILDING_HOME);
@@ -145,22 +145,9 @@ public class OfficeBuilding {
 		// Handle the command
 		if ("start".equalsIgnoreCase(command)) {
 
-			// Obtain the local repository directory
+			// Obtain the local repository path
 			String localRepositoryPath = properties.getProperty(
 					PROPERTY_LOCAL_REPOSITORY_PATH, null);
-			if (isBlank(localRepositoryPath)) {
-				// Use temporary directory
-				localRepositoryPath = System.getProperty("java.io.tmpdir")
-						+ "/officebuilding-repository";
-			}
-			File localRepositoryDirectory = new File(localRepositoryPath);
-			if (!localRepositoryDirectory.exists()) {
-				// Ensure directory is available
-				if (!localRepositoryDirectory.mkdirs()) {
-					errorAndExit("Failed creating local repository "
-							+ localRepositoryDirectory.getPath());
-				}
-			}
 
 			// Obtain the remote repository URL
 			String remoteRepositoryUrl = properties
@@ -168,8 +155,7 @@ public class OfficeBuilding {
 
 			// Create the class path builder factory
 			ClassPathBuilderFactory classPathBuilderFactory = new ClassPathBuilderFactory(
-					localRepositoryDirectory);
-			classPathBuilderFactory.addRemoteRepositoryUrl(remoteRepositoryUrl);
+					localRepositoryPath, remoteRepositoryUrl);
 
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
