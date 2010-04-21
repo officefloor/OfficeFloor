@@ -36,17 +36,17 @@
 	</scm>
 	<distributionManagement>
 		<site>
-			<id>officefloor.sf.net</id>
+			<id>site.officefloor.sf.net</id>
+			<name>Site on SourceForge - http://www.officefloor.net</name>
 			<url>
 				scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
 			</url>
 		</site>
-<!-- TODO determine if put something in settings.xml  
 		<repository>
-			<id>sourceforge</id>
-			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
+			<id>repo.officefloor.sf.net</id>
+			<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
+			<url>sftp://sagenschneider,officefloor@frs.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
 		</repository>
--->
 	</distributionManagement>
 	<reporting>
 		<plugins />
