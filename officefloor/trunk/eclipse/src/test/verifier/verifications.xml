@@ -1,5 +1,11 @@
 <verifications>
-	<files>		
+	<files>
+		<!-- Ensure releasing latest version -->
+		<file>
+			<location>${basedir}/../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
 		<!-- Core eclipse modules are inheriting correct version -->
 		<file>
 			<location>plugins/net.officefloor.core/pom.xml</location>

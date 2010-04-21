@@ -62,7 +62,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.core</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>
