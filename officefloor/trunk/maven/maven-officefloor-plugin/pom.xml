@@ -46,9 +46,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest_core</artifactId>
-			<version>SNAPSHOT</version>
-			<scope>compile</scope>
+			<artifactId>officebuilding</artifactId>
 		</dependency>
 	</dependencies>
 </project>
