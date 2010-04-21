@@ -25,11 +25,6 @@
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
-
-		<!--
-			No latest module as always releasing version as per
-			net.officefloor:officefloor
-		-->
 	</modules>
 	<build>
 		<plugins>
@@ -142,24 +137,12 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 		<!-- OfficeFloor dependencies -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest_core</artifactId>
-			<version>SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>latest_plugins</artifactId>
-			<version>SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.tool</groupId>
-			<artifactId>latest_tools</artifactId>
-			<version>SNAPSHOT</version>
+			<artifactId>officebuilding</artifactId>
 		</dependency>
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.2</version>
 		</dependency>
 	</dependencies>
 </project>
