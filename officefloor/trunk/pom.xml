@@ -208,6 +208,12 @@
 			<!-- ======================= Maven ================== -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven</artifactId>
+				<version>0.1.2</version>
+				<type>version</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-officefloor-plugin</artifactId>
 				<version>0.1.2</version>
 			</dependency>

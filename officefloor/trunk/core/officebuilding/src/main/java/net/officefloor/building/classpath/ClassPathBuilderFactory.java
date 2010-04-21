@@ -18,8 +18,7 @@
 package net.officefloor.building.classpath;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.FileNotFoundException;
 
 /**
  * Factory for the creation of a {@link ClassPathBuilder}.
@@ -36,26 +35,42 @@ public class ClassPathBuilderFactory {
 	/**
 	 * Listing of the remote repository URLs.
 	 */
-	private List<String> remoteRepositoryUrls = new LinkedList<String>();
+	private final String[] remoteRepositoryUrls;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param localRepositoryDirectory
-	 *            Local repository directory.
+	 * @param localRepositoryPath
+	 *            Local repository path. May be <code>null</code> to default to
+	 *            temporary directory.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs.
+	 * @throws FileNotFoundException
+	 *             If can not find local repository.
 	 */
-	public ClassPathBuilderFactory(File localRepositoryDirectory) {
-		this.localRepositoryDirectory = localRepositoryDirectory;
-	}
+	public ClassPathBuilderFactory(String localRepositoryPath,
+			String... remoteRepositoryUrls) throws FileNotFoundException {
 
-	/**
-	 * Adds a remote repository URL.
-	 * 
-	 * @param remoteRepositoryUrl
-	 *            Remote repository URL.
-	 */
-	public void addRemoteRepositoryUrl(String remoteRepositoryUrl) {
-		this.remoteRepositoryUrls.add(remoteRepositoryUrl);
+		// Ensure have local repository
+		if ((localRepositoryPath == null)
+				|| (localRepositoryPath.trim().length() == 0)) {
+			// Use temporary directory
+			localRepositoryPath = System.getProperty("java.io.tmpdir")
+					+ "/officebuilding-repository";
+		}
+		File localRepositoryDirectory = new File(localRepositoryPath);
+		if (!localRepositoryDirectory.exists()) {
+			// Ensure directory is available
+			if (!localRepositoryDirectory.mkdirs()) {
+				throw new FileNotFoundException(
+						"Failed creating local repository "
+								+ localRepositoryDirectory.getPath());
+			}
+		}
+
+		// Specify values
+		this.localRepositoryDirectory = localRepositoryDirectory;
+		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 
 	/**
@@ -67,7 +82,7 @@ public class ClassPathBuilderFactory {
 	 */
 	public ClassPathBuilder createClassPathBuilder() throws Exception {
 		return new ClassPathBuilder(this.localRepositoryDirectory,
-				this.remoteRepositoryUrls.toArray(new String[0]));
+				this.remoteRepositoryUrls);
 	}
 
 }

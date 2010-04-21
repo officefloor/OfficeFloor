@@ -41,5 +41,9 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.feature</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_jndi</artifactId>
+		</dependency>
 	</dependencies>
 </project>

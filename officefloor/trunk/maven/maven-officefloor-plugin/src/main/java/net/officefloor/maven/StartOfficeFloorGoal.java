@@ -17,7 +17,10 @@
  */
 package net.officefloor.maven;
 
+import java.io.File;
+
 import net.officefloor.building.OfficeBuilding;
+import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -54,11 +57,20 @@ public class StartOfficeFloorGoal extends AbstractMojo {
 		assertNotNull("Port not configured for the "
 				+ OfficeBuilding.class.getSimpleName(), this.port);
 
+		// Create the Class Path Builder
+		ClassPathBuilderFactory classPathBuilderFactory;
+		try {
+			classPathBuilderFactory = new ClassPathBuilderFactory(null);
+		} catch (Throwable ex) {
+			throw new MojoExecutionException("Failed resolving the class path",
+					ex);
+		}
+
 		// Start the OfficeBuilding
 		OfficeBuildingManagerMBean officeBuilding;
 		try {
-			officeBuilding = OfficeBuildingManager
-					.startOfficeBuilding(this.port.intValue());
+			officeBuilding = OfficeBuildingManager.startOfficeBuilding(
+					this.port.intValue(), classPathBuilderFactory);
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed starting the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
@@ -72,6 +84,19 @@ public class StartOfficeFloorGoal extends AbstractMojo {
 		// Log the started OfficeFloor by process name
 		this.getLog().info(
 				"Started " + OfficeFloor.class.getSimpleName() + " '");
+
+		// TODO remove - implement by starting an OfficeFloor
+		this.getLog().error("TODO: implement");
+		try {
+			this.getLog().error(
+					" creating file in directory"
+							+ new File(".").getAbsolutePath());
+			new File(".", "target").mkdir();
+			new File(".", "target/OfficeFloorRun.txt").createNewFile();
+			this.getLog().error("TODO: remove - file created");
+		} catch (Throwable ex) {
+			this.getLog().error("TODO: remove - failed create file", ex);
+		}
 	}
 
 	/**

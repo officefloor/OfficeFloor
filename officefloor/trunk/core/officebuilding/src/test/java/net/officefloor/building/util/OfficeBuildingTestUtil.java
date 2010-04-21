@@ -174,8 +174,7 @@ public class OfficeBuildingTestUtil {
 
 		// Create the class path builder factory
 		classPathBuilderFactory = new ClassPathBuilderFactory(
-				localRepositoryDirectory);
-		classPathBuilderFactory.addRemoteRepositoryUrl(mavenRepositoryUrl);
+				localRepositoryDirectory.getAbsolutePath(), mavenRepositoryUrl);
 	}
 
 	/**

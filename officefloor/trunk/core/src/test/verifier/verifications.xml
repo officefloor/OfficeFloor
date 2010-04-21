@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<!-- Ensure releasing latest version -->
+		<file>
+			<location>${basedir}/../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
 			<location>officeframe/pom.xml</location>
@@ -20,12 +26,6 @@
 		<file>
 			<location>officebuilding/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		
-		<!-- Ensure releasing latest version -->
-		<file>
-			<location>${basedir}/../pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>.*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>.*</dependencyManagement>]]></contains>
 		</file>
 	</files>
 </verifications>
