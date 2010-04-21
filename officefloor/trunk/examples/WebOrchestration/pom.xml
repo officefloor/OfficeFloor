@@ -2,6 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.example</groupId>
+		<artifactId>example</artifactId>
+		<version>1.0.0</version>
+	</parent>
 	<groupId>net.officefloor.example.weborchestration</groupId>
 	<artifactId>WebOrchestration</artifactId>
 	<version>0.0.1</version>
@@ -92,16 +97,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>latest_core</artifactId>
-			<version>SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>latest_plugins</artifactId>
-			<version>SNAPSHOT</version>
-		</dependency>
-	</dependencies>
 </project>
