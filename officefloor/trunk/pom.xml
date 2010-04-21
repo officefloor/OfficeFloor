@@ -205,6 +205,17 @@
 				<artifactId>net.officefloor.ui</artifactId>
 				<version>0.1.2</version>
 			</dependency>
+			<!-- ======================= Maven ================== -->
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-officefloor-plugin</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-officefloor-skin</artifactId>
+				<version>0.1.2</version>
+			</dependency>
 			<!-- ================ Additional dependencies ======= -->
 			<dependency>
 				<groupId>javax</groupId>
