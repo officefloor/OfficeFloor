@@ -25,6 +25,9 @@
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
+		
+		<!-- Deploy to Update Site -->
+		<module>update.site</module>
 	</modules>
 	<build>
 		<plugins>

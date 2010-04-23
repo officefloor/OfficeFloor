@@ -58,7 +58,6 @@
 		<module>eclipse</module>
 		<module>maven</module>
 		<module>examples</module>
-		<module>deploy</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
