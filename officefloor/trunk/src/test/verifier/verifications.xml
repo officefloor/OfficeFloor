@@ -27,9 +27,5 @@
 			<location>maven/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
-		<file>
-			<location>deploy/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
 	</files>
 </verifications>
