@@ -13,6 +13,26 @@
 	<build>
 		<plugins>
 			<plugin>
+				<!-- Generate the boot jar -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>boot-jar</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<jar basedir="${project.build.outputDirectory}" 
+									destFile="${project.build.directory}/boot.jar" 
+									includes="net/officefloor/building/bootstrap/*" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<!-- Generates the release -->
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>

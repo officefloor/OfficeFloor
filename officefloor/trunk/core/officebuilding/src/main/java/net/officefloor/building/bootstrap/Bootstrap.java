@@ -59,8 +59,8 @@ public class Bootstrap {
 		ensureDirectoryExists(currentDirectory);
 
 		// Add the lib class path entries
-		File libCoreDir = new File(currentDirectory, "lib");
-		entries.loadDirectoryClassPathEntries(libCoreDir, true, true);
+		File libDir = new File(currentDirectory, "lib");
+		entries.loadDirectoryClassPathEntries(libDir, true, true);
 
 		// Specify the java class path
 		String javaClassPath = entries.getClassPath();

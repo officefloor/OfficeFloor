@@ -452,38 +452,55 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @throws Exception
 	 *             If fails to open the {@link OfficeFloor}.
 	 */
-	private synchronized String openOfficeFloor(String processName,
+	private String openOfficeFloor(String processName,
 			ClassPathBuilder classPathBuilder, String officeFloorLocation,
 			String jvmOptions) throws Exception {
 
-		// Ensure the OfficeBuilding is open
-		if (!this.isOfficeBuildingOpen) {
-			throw new IllegalStateException("OfficeBuilding closed");
+		ProcessConfiguration configuration;
+		OfficeFloorManager managedProcess;
+		synchronized (this) {
+
+			// Ensure the OfficeBuilding is open
+			if (!this.isOfficeBuildingOpen) {
+				throw new IllegalStateException("OfficeBuilding closed");
+			}
+
+			// Obtain the class path
+			String classPath = classPathBuilder.getBuiltClassPath();
+			classPathBuilder.close();
+
+			// Create the configuration
+			configuration = new ProcessConfiguration();
+			configuration.setProcessName(processName);
+			configuration.setAdditionalClassPath(classPath);
+			configuration.setJvmOptions(jvmOptions);
+			configuration.setProcessCompletionListener(this);
+
+			// Create the OfficeFloor managed process
+			managedProcess = new OfficeFloorManager(officeFloorLocation);
 		}
 
-		// Obtain the class path
-		String classPath = classPathBuilder.getBuiltClassPath();
-		classPathBuilder.close();
-
-		// Create the configuration
-		ProcessConfiguration configuration = new ProcessConfiguration();
-		configuration.setProcessName(processName);
-		configuration.setAdditionalClassPath(classPath);
-		configuration.setJvmOptions(jvmOptions);
-
-		// Create the OfficeFloor managed process
-		OfficeFloorManager managedProcess = new OfficeFloorManager(
-				officeFloorLocation);
-
-		// Run the OfficeFloor
+		// Run the OfficeFloor.
+		// (outside lock as completion listener on failure requires locking)
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
 				configuration);
 
-		// Register the manager for the running process
-		this.processManagers.add(manager);
+		// Determine if process already complete
+		boolean isProcessComplete;
+		synchronized (manager) {
+			isProcessComplete = manager.isProcessComplete();
+		}
 
-		// Return the process name space
-		return manager.getProcessNamespace();
+		synchronized (this) {
+			// Only register if process not already complete
+			if (!isProcessComplete) {
+				// Register the manager for the running process
+				this.processManagers.add(manager);
+			}
+
+			// Return the process name space
+			return manager.getProcessNamespace();
+		}
 	}
 
 	@Override
