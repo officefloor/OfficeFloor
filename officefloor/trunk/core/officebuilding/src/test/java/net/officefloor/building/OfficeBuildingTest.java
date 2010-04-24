@@ -27,9 +27,11 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.UndeclaredThrowableException;
 
+import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.officefloor.MockWork;
+import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -76,6 +78,17 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		System.setProperty(OfficeBuilding.OFFICE_BUILDING_HOME,
 				officeBuildingHomeDir.getAbsolutePath());
 
+		// Provide the local repository
+		System.setProperty(OfficeBuilding.PROPERTY_LOCAL_REPOSITORY_PATH,
+				OfficeBuildingTestUtil.getLocalRepositoryDirectory()
+						.getAbsolutePath());
+
+		// Provide remote repository path (use local to stop download)
+		String localRepositoryUrl = new File(ClassPathBuilderFactory
+				.getLocalRepositoryPath()).toURI().toURL().toString();
+		System.setProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL,
+				localRepositoryUrl);
+
 		// Collect output
 		this._stdout = System.out;
 		System.setOut(new PrintStream(this.stdout));
@@ -92,8 +105,9 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		} catch (Throwable ex) {
 		}
 
-		// Clear the OfficeBuilding Home
+		// Clear the system properties specified for test
 		System.clearProperty(OfficeBuilding.OFFICE_BUILDING_HOME);
+		System.clearProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL);
 
 		// Reinstate output streams
 		System.setOut(this._stdout);
@@ -233,6 +247,9 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		OfficeBuilding.main("list", PROCESS_NAME);
 		validateStreamContent("Incorrect task listing", tasks.toString(),
 				this.stdout);
+
+		// Stop the OfficeBuilding
+		OfficeBuilding.main("stop");
 	}
 
 	/**
@@ -241,21 +258,39 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 	public void testOpenOfficeFloor_Artifact() throws Throwable {
 
 		final String PROCESS_NAME = this.getName();
+		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
+				.getOfficeFloorVersion();
 
+		// Start the OfficeBuilding
 		OfficeBuilding.main("start");
+		this.stdout.reset(); // ignore output
 
-		// TODO open OfficeFloor from Artifact
+		// Open the OfficeFloor (via an Artifact)
+		OfficeBuilding
+				.main("open", PROCESS_NAME,
+						"net.officefloor.core:officecompiler:"
+								+ OFFICE_FLOOR_VERSION,
+						"net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor");
+		validateStreamContent("Should be no error output", "", this.stderr);
+		validateStreamContent("OfficeFloor should be opened",
+				"OfficeFloor open under process name space '" + PROCESS_NAME
+						+ "'\n", this.stdout);
 
-		OfficeBuilding.main("stop");
+		// File
+		File tempFile = File.createTempFile(this.getName(), "txt");
 
-		// TODO remove once implemented
-		fail("TODO implement test");
-
-		// Run the Task (to ensure OfficeFloor is open)
+		// Run the Task (to ensure OfficeFloor is open by writing to file)
 		OfficeBuilding.main("invoke", PROCESS_NAME, "OFFICE", "SECTION.WORK",
-				"writeMessage");
-		validateStreamContent("Should output message on running task",
-				MockWork.MESSAGE, this.stdout);
+				"writeMessage", tempFile.getAbsolutePath());
+		validateStreamContent("Should be no errors", "", this.stderr);
+
+		// Ensure message written to file
+		String fileContent = this.getFileContents(tempFile).trim();
+		assertEquals("Message should be written to file", MockWork.MESSAGE,
+				fileContent);
+
+		// Stop the OfficeBuilding
+		OfficeBuilding.main("stop");
 	}
 
 	/**
@@ -272,6 +307,17 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 			String expectedContent, ByteArrayOutputStream stream)
 			throws Exception {
 		String actualContent = getStreamContent(stream);
+
+		// Ignore [WARNING]...IGNORING lines about no checksums
+		int startPos = actualContent.indexOf("[WARNING]");
+		if (startPos >= 0) {
+			int endPos = actualContent.lastIndexOf("IGNORING")
+					+ "IGNORING\n".length();
+			actualContent = actualContent.substring(0, startPos)
+					+ actualContent.substring(endPos);
+		}
+
+		// Ensure content matches
 		assertEquals(message, expectedContent, actualContent);
 	}
 

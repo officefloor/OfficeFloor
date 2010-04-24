@@ -89,7 +89,7 @@ public class OfficeBuilding {
 			+ "\topen <process name> <jar name> <office floor location> [<JVM options>]\tOpens the OfficeFloor\n"
 			+ "\tclose <process name space>\tCloses the OfficeFloor\n"
 			+ "\tlist [<process name space>]\tLists the process name spaces or if process name space provided the tasks of the corresponding OfficeFloor\n"
-			+ "\tinvoke <process name space> <office name> <work name> [<task name>]\tInvokes the Task within the OfficeFloor\n";
+			+ "\tinvoke <process name space> <office name> <work name> [<task name>] [<parameter>]\tInvokes the Task within the OfficeFloor\n";
 
 	/**
 	 * Main method for running the {@link OfficeBuilding}.
@@ -215,16 +215,45 @@ public class OfficeBuilding {
 				errorAndExit("ERROR: must provide details of OfficeFloor for 'open' command");
 			}
 			String processName = arguments[1];
-			String jarName = arguments[2];
+			String componentName = arguments[2];
 			String officeFloorLocation = arguments[3];
 			String jvmOptions = (arguments.length > 4 ? arguments[4] : "");
 
-			// Open the OfficeFloor
+			// Obtain the OfficeBuilding manager
 			OfficeBuildingManagerMBean manager = OfficeBuildingManager
 					.getOfficeBuildingManager(officeBuildingHost,
 							officeBuildingPort);
-			String processNameSpace = manager.openOfficeFloor(processName,
-					jarName, officeFloorLocation, jvmOptions);
+			String processNameSpace;
+
+			// Determine if Jar or Artifact
+			if (new File(componentName).exists()) {
+				// Open as Jar
+				processNameSpace = manager.openOfficeFloor(processName,
+						componentName, officeFloorLocation, jvmOptions);
+
+			} else if (componentName.contains(":")) {
+				// Open as Artifact, so obtain fragments of artifact name
+				String[] fragments = componentName.split(":");
+				if (fragments.length < 3) {
+					errorAndExit("ERROR: artifact must be named in form 'groupId:artifactId:version[:type[:classifier]]");
+				}
+				String groupId = fragments[0];
+				String artifactId = fragments[1];
+				String version = fragments[2];
+				String type = (fragments.length > 3 ? fragments[3] : "jar");
+				String classifier = (fragments.length > 4 ? fragments[4] : null);
+				
+				// Open as Artifact
+				processNameSpace = manager.openOfficeFloor(processName,
+						groupId, artifactId, version, type, classifier,
+						officeFloorLocation, jvmOptions);
+
+			} else {
+				// Unknown component
+				errorAndExit("Unknown component to open OfficeFloor: '"
+						+ componentName + "'");
+				processNameSpace = null;
+			}
 
 			// Provide details of starting OfficeFloor
 			System.out.println("OfficeFloor open under process name space '"
@@ -294,6 +323,7 @@ public class OfficeBuilding {
 			String officeName = arguments[2];
 			String workName = arguments[3];
 			String taskName = (arguments.length > 4 ? arguments[4] : null);
+			String parameter = (arguments.length > 5 ? arguments[5] : null);
 
 			// Obtain the OfficeFloor manager
 			OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
@@ -301,7 +331,8 @@ public class OfficeBuilding {
 							officeBuildingPort, processNamespace);
 
 			// Invoke the Task within the OfficeFloor
-			officeFloorManager.invokeTask(officeName, workName, taskName, null);
+			officeFloorManager.invokeTask(officeName, workName, taskName,
+					parameter);
 
 		} else {
 			// Unknown or no command

@@ -19,6 +19,7 @@
 package net.officefloor.building.manager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -402,7 +403,19 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Build the class path for the jar
 		ClassPathBuilder builder = this.classPathBuilderFactory
 				.createClassPathBuilder();
-		builder.includeArtifact(groupId, artifactId, version, type, classifier);
+		try {
+			builder.includeArtifact(groupId, artifactId, version, type,
+					classifier);
+		} catch (Exception ex) {
+			// Construct artifact reference
+			String reference = groupId + ":" + artifactId + ":" + version + ":"
+					+ type + (classifier == null ? "" : ":" + classifier);
+
+			// Propagate failure to include artifact.
+			// (Necessary as thrown exception may not be serialisable)
+			throw new FileNotFoundException("Unable to include artifact '"
+					+ reference + "' on class path\n\n" + ex.getMessage());
+		}
 
 		// Open the OfficeFloor
 		return this.openOfficeFloor(processName, builder, officeFloorLocation,
