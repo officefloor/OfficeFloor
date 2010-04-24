@@ -410,9 +410,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	@Override
-	public String openOfficeFloor(String processName,
-			String jarName, String officeFloorLocation, String jvmOptions)
-			throws Exception {
+	public String openOfficeFloor(String processName, String jarName,
+			String officeFloorLocation, String jvmOptions) throws Exception {
 
 		// Build the class path for the jar
 		File jarFile = new File(jarName);
@@ -472,6 +471,24 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Return the process name space
 		return manager.getProcessNamespace();
+	}
+
+	@Override
+	public synchronized String listProcessNamespaces() {
+		// Create listing of process name spaces
+		StringBuilder namespaces = new StringBuilder();
+		boolean isFirst = true;
+		for (ProcessManager manager : this.processManagers) {
+			String namespace = manager.getProcessNamespace();
+			namespaces.append(namespace);
+			if (!isFirst) {
+				namespaces.append("\n");
+			}
+			isFirst = false;
+		}
+
+		// Return the listing of process name spaces
+		return namespaces.toString();
 	}
 
 	@Override

@@ -106,6 +106,10 @@ public class OfficeBuildingManagerTest extends TestCase {
 		int mbeanReportedPort = managerMBean.getOfficeBuildingPort();
 		assertEquals("Incorrect MBean port", PORT, mbeanReportedPort);
 
+		// Ensure no processes running
+		String processNamespaces = managerMBean.listProcessNamespaces();
+		assertEquals("Should be no processes running", "", processNamespaces);
+
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
 		assertEquals("Incorrect stop details", "OfficeBuilding stopped\n",
@@ -206,6 +210,11 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String processNamespace = opener.openOfficeFloor(this.getName(),
 				officeFloorLocation, buildingManager);
 
+		// Ensure process running
+		String processNamespaces = buildingManager.listProcessNamespaces();
+		assertEquals("Should be process running", processNamespace,
+				processNamespaces);
+
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
 				.getOfficeFloorManager(null, PORT, processNamespace);
@@ -239,9 +248,18 @@ public class OfficeBuildingManagerTest extends TestCase {
 				remoteMBeanServer.isRegistered(OfficeFloorManager
 						.getOfficeFloorManagerObjectName()));
 
+		// Ensure the tasks are available
+		StringBuilder taskListing = new StringBuilder();
+		taskListing.append("OFFICE\n");
+		taskListing.append("\tSECTION.WORK\n");
+		taskListing.append("\t\twriteMessage (" + String.class.getSimpleName()
+				+ ")");
+		assertEquals("Incorrect task listing", taskListing.toString(),
+				localFloorManager.listTasks());
+
 		// Invoke the work
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		localFloorManager.invokeWork("OFFICE", "SECTION.WORK", file
+		localFloorManager.invokeTask("OFFICE", "SECTION.WORK", null, file
 				.getAbsolutePath());
 
 		// Ensure work invoked (content in file)
