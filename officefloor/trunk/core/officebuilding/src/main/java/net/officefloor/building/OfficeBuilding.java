@@ -86,7 +86,7 @@ public class OfficeBuilding {
 			+ "\tstart\tStarts OfficeBuilding\n"
 			+ "\tstop [<timeout>]\tStops the OfficeBuilding\n"
 			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n"
-			+ "\topen <process name> <jar name> <office floor location> [<JVM options>]\tOpens the OfficeFloor\n"
+			+ "\topen <process name> <component name> <office floor location> [<JVM options>]\tOpens the OfficeFloor\n"
 			+ "\tclose <process name space>\tCloses the OfficeFloor\n"
 			+ "\tlist [<process name space>]\tLists the process name spaces or if process name space provided the tasks of the corresponding OfficeFloor\n"
 			+ "\tinvoke <process name space> <office name> <work name> [<task name>] [<parameter>]\tInvokes the Task within the OfficeFloor\n";
@@ -155,10 +155,14 @@ public class OfficeBuilding {
 			// Obtain the remote repository URL
 			String remoteRepositoryUrl = properties
 					.getProperty("remote.repository.url");
+			String[] remoteRepositoryUrls = remoteRepositoryUrl.split(",");
+			for (int i = 0; i < remoteRepositoryUrls.length; i++) {
+				remoteRepositoryUrls[i] = remoteRepositoryUrls[i].trim();
+			}
 
 			// Create the class path builder factory
 			ClassPathBuilderFactory classPathBuilderFactory = new ClassPathBuilderFactory(
-					localRepositoryPath, remoteRepositoryUrl);
+					localRepositoryPath, remoteRepositoryUrls);
 
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
@@ -242,7 +246,7 @@ public class OfficeBuilding {
 				String version = fragments[2];
 				String type = (fragments.length > 3 ? fragments[3] : "jar");
 				String classifier = (fragments.length > 4 ? fragments[4] : null);
-				
+
 				// Open as Artifact
 				processNameSpace = manager.openOfficeFloor(processName,
 						groupId, artifactId, version, type, classifier,
