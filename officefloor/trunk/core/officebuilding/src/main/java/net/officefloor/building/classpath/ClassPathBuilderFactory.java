@@ -20,12 +20,44 @@ package net.officefloor.building.classpath;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import org.apache.maven.embedder.MavenEmbedder;
+
 /**
  * Factory for the creation of a {@link ClassPathBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassPathBuilderFactory {
+
+	/**
+	 * Obtains the default configured local repository path.
+	 * 
+	 * @return Local repository path.
+	 */
+	public static String getLocalRepositoryPath() {
+		try {
+
+			// Obtain the configured local repository directory
+			MavenEmbedder embedder = new MavenEmbedder();
+			embedder.setClassLoader(ClassPathBuilderFactory.class
+					.getClassLoader());
+			embedder.setAlignWithUserInstallation(true);
+			embedder.start();
+			String localRepositoryPath = embedder.getLocalRepository()
+					.getBasedir();
+			embedder.stop();
+
+			// Use the configured local repository directory
+			return localRepositoryPath;
+
+		} catch (Throwable ex) {
+			// Ignore as continue on to use temporary path
+		}
+
+		// Use temporary local repository path
+		return System.getProperty("java.io.tmpdir")
+				+ "/officebuilding-repository";
+	}
 
 	/**
 	 * Local repository directory.
@@ -54,9 +86,8 @@ public class ClassPathBuilderFactory {
 		// Ensure have local repository
 		if ((localRepositoryPath == null)
 				|| (localRepositoryPath.trim().length() == 0)) {
-			// Use temporary directory
-			localRepositoryPath = System.getProperty("java.io.tmpdir")
-					+ "/officebuilding-repository";
+			// Obtain the default configured local repository path
+			localRepositoryPath = getLocalRepositoryPath();
 		}
 		File localRepositoryDirectory = new File(localRepositoryPath);
 		if (!localRepositoryDirectory.exists()) {
