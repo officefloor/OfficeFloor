@@ -20,7 +20,7 @@ cd ${OFFICE_BUILDING_HOME}
 # Run OfficeBuilding
 java \
 	${OFFICE_BUILDING_JVM_OPTIONS} \
-	-cp lib/officebuilding.jar \
+	-cp lib/boot.jar \
 	net.officefloor.building.bootstrap.Bootstrap \
 	net.officefloor.building.OfficeBuilding \
 	$@

@@ -30,6 +30,8 @@ import javax.management.ObjectName;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -198,6 +200,25 @@ public class OfficeFloorManager implements ManagedProcess,
 		compiler.addEnvProperties();
 		compiler.addSystemProperties();
 		compiler.addSourceAliases();
+		compiler.setCompilerIssues(new CompilerIssues() {
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription) {
+				this.addIssue(locationType, location, assetType, assetName,
+						issueDescription, null);
+			}
+
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription, Throwable cause) {
+				throw new OfficeFloorCompileException(issueDescription + " ["
+						+ locationType + ":" + location + ", " + assetType
+						+ ":" + assetName + "] - "
+						+ (cause == null ? "" : cause.getMessage()), cause);
+			}
+		});
 
 		// Compile the OfficeFloor
 		this.officeFloor = compiler.compile(this.officeFloorLocation);
