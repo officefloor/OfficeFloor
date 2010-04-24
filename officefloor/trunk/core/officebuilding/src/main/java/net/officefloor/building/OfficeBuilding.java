@@ -28,6 +28,7 @@ import javax.management.remote.JMXServiceURL;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 
 /**
  * <p>
@@ -86,7 +87,9 @@ public class OfficeBuilding {
 			+ "\tstop [<timeout>]\tStops the OfficeBuilding\n"
 			+ "\turl <host> <port>\tOutputs the URL for an OfficeBuilding at the host and port\n"
 			+ "\topen <process name> <jar name> <office floor location> [<JVM options>]\tOpens the OfficeFloor\n"
-			+ "\tclose <process name space>\tCloses the OfficeFloor\n";
+			+ "\tclose <process name space>\tCloses the OfficeFloor\n"
+			+ "\tlist [<process name space>]\tLists the process name spaces or if process name space provided the tasks of the corresponding OfficeFloor\n"
+			+ "\tinvoke <process name space> <office name> <work name> [<task name>]\tInvokes the Task within the OfficeFloor\n";
 
 	/**
 	 * Main method for running the {@link OfficeBuilding}.
@@ -97,7 +100,7 @@ public class OfficeBuilding {
 	 *             If fails.
 	 */
 	public static void main(String... arguments) throws Throwable {
-		
+
 		// Obtain the Office Building Home (property then environment)
 		String officeBuildingHomeValue = System
 				.getProperty(OFFICE_BUILDING_HOME);
@@ -260,6 +263,46 @@ public class OfficeBuilding {
 			System.out.println("OfficeFloor under process name space '"
 					+ processNameSpace + "' closed");
 
+		} else if ("list".equalsIgnoreCase(command)) {
+			// Listing so determine if processes or tasks
+			String processNamespace = (arguments.length > 1 ? arguments[1]
+					: null);
+			String listing;
+			if (processNamespace == null) {
+				// List the processes
+				OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
+						.getOfficeBuildingManager(officeBuildingHost,
+								officeBuildingPort);
+				listing = officeBuildingManager.listProcessNamespaces();
+			} else {
+				// List the tasks of the process name space
+				OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
+						.getOfficeFloorManager(officeBuildingHost,
+								officeBuildingPort, processNamespace);
+				listing = officeFloorManager.listTasks();
+			}
+
+			// Output the listing
+			System.out.println(listing);
+
+		} else if ("invoke".equalsIgnoreCase(command)) {
+			// Invoking task so obtain arguments
+			if (arguments.length < 4) {
+				errorAndExit("ERROR: must provide details of Task to invoke");
+			}
+			String processNamespace = arguments[1];
+			String officeName = arguments[2];
+			String workName = arguments[3];
+			String taskName = (arguments.length > 4 ? arguments[4] : null);
+
+			// Obtain the OfficeFloor manager
+			OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
+					.getOfficeFloorManager(officeBuildingHost,
+							officeBuildingPort, processNamespace);
+
+			// Invoke the Task within the OfficeFloor
+			officeFloorManager.invokeTask(officeName, workName, taskName, null);
+
 		} else {
 			// Unknown or no command
 			StringBuilder message = new StringBuilder();
@@ -307,7 +350,7 @@ public class OfficeBuilding {
 
 		// Handle if testing
 		if (isTesting) {
-			throw new Error("Exit");
+			throw new Error("Exit: " + message);
 		}
 
 		// Not testing so exit process

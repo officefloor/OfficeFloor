@@ -27,16 +27,23 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import junit.framework.TestCase;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.process.officefloor.MockWork;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OfficeBuilding}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingTest extends TestCase {
+public class OfficeBuildingTest extends OfficeFrameTestCase {
+
+	/**
+	 * Default {@link OfficeBuilding} port.
+	 */
+	public static final int DEFAULT_OFFICE_BUILDING_PORT = 13778;
 
 	/**
 	 * Capture of <code>stdout</code>.
@@ -60,8 +67,14 @@ public class OfficeBuildingTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+
 		// Flag that testing
 		OfficeBuilding.isTesting = true;
+
+		// Provide OfficeBuilding Home
+		File officeBuildingHomeDir = new File(".", "src/main/resources");
+		System.setProperty(OfficeBuilding.OFFICE_BUILDING_HOME,
+				officeBuildingHomeDir.getAbsolutePath());
 
 		// Collect output
 		this._stdout = System.out;
@@ -72,6 +85,16 @@ public class OfficeBuildingTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Ensure stop the OfficeFloor
+		try {
+			OfficeBuilding.main("stop");
+		} catch (Throwable ex) {
+		}
+
+		// Clear the OfficeBuilding Home
+		System.clearProperty(OfficeBuilding.OFFICE_BUILDING_HOME);
+
 		// Reinstate output streams
 		System.setOut(this._stdout);
 		System.setErr(this._stderr);
@@ -82,11 +105,6 @@ public class OfficeBuildingTest extends TestCase {
 	 */
 	public void testOfficeBuildingLifecycle_start_stop() throws Throwable {
 
-		// Provide Office Building Home
-		File officeBuildingHomeDir = new File(".", "src/main/resources");
-		System.setProperty(OfficeBuilding.OFFICE_BUILDING_HOME,
-				officeBuildingHomeDir.getAbsolutePath());
-
 		// Start the Office Building
 		long beforeStartTime = System.currentTimeMillis();
 		OfficeBuilding.main("start");
@@ -94,7 +112,7 @@ public class OfficeBuildingTest extends TestCase {
 
 		// Ensure started
 		OfficeBuildingManagerMBean manager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, 13778);
+				.getOfficeBuildingManager(null, DEFAULT_OFFICE_BUILDING_PORT);
 		long startTime = manager.getStartTime().getTime();
 		assertTrue(
 				"Office Building should be just started",
@@ -120,14 +138,15 @@ public class OfficeBuildingTest extends TestCase {
 	public void testUrl() throws Throwable {
 
 		final String HOST = "server";
-		final int PORT = 13778;
 
 		// Obtain the URL
-		OfficeBuilding.main("url", HOST, String.valueOf(PORT));
+		OfficeBuilding.main("url", HOST, String
+				.valueOf(DEFAULT_OFFICE_BUILDING_PORT));
 
 		// Validate output URL
 		String expectedUrl = OfficeBuildingManager
-				.getOfficeBuildingJmxServiceUrl(HOST, PORT).toString()
+				.getOfficeBuildingJmxServiceUrl(HOST,
+						DEFAULT_OFFICE_BUILDING_PORT).toString()
 				+ "\n";
 		validateStreamContent("Incorrect URL", expectedUrl, this.stdout);
 	}
@@ -144,8 +163,8 @@ public class OfficeBuildingTest extends TestCase {
 		} catch (Error ex) {
 			validateStreamContent("Should provide usage message",
 					OfficeBuilding.USAGE_MESSAGE + "\n", this.stderr);
-			assertEquals("Incorrect requires command cause", "Exit", ex
-					.getMessage());
+			assertEquals("Incorrect requires command cause", "Exit: "
+					+ OfficeBuilding.USAGE_MESSAGE, ex.getMessage());
 		}
 	}
 
@@ -163,9 +182,80 @@ public class OfficeBuildingTest extends TestCase {
 					+ OfficeBuilding.USAGE_MESSAGE + "\n";
 			validateStreamContent("Should provide usage message", errorMessage,
 					this.stderr);
-			assertEquals("Incorrect unknown command cause", "Exit", ex
-					.getMessage());
+			assertEquals("Incorrect unknown command cause",
+					"Exit: ERROR: unknown command 'unknown'\n\n"
+							+ OfficeBuilding.USAGE_MESSAGE, ex.getMessage());
 		}
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor} from a Jar.
+	 */
+	public void testOpenOfficeFloor_Jar() throws Throwable {
+
+		final String PROCESS_NAME = this.getName();
+
+		// Obtain location of Jar file
+		File jarFilePath = this.findFile("lib/MockCore.jar");
+
+		// Start the OfficeBuilding
+		OfficeBuilding.main("start");
+		this.stdout.reset(); // ignore output
+
+		// Open the OfficeFloor (via a Jar)
+		OfficeBuilding
+				.main("open", PROCESS_NAME, jarFilePath.getAbsolutePath(),
+						"net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor");
+		validateStreamContent("Should be no error output", "", this.stderr);
+		validateStreamContent("OfficeFloor should be opened",
+				"OfficeFloor open under process name space '" + PROCESS_NAME
+						+ "'\n", this.stdout);
+		this.stdout.reset(); // reset for listing
+
+		// Create the expected listing of processes
+		StringBuilder processes = new StringBuilder();
+		processes.append(PROCESS_NAME + "\n");
+
+		// List the tasks for the OfficeFloor
+		OfficeBuilding.main("list");
+		validateStreamContent("Incorrect process listing",
+				processes.toString(), this.stdout);
+		this.stdout.reset(); // reset for next listing
+
+		// Create the expected listing of tasks
+		StringBuilder tasks = new StringBuilder();
+		tasks.append("OFFICE\n");
+		tasks.append("\tSECTION.WORK\n");
+		tasks.append("\t\twriteMessage (" + String.class.getSimpleName()
+				+ ")\n");
+
+		// List the tasks for the OfficeFloor
+		OfficeBuilding.main("list", PROCESS_NAME);
+		validateStreamContent("Incorrect task listing", tasks.toString(),
+				this.stdout);
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor} from an artifact.
+	 */
+	public void testOpenOfficeFloor_Artifact() throws Throwable {
+
+		final String PROCESS_NAME = this.getName();
+
+		OfficeBuilding.main("start");
+
+		// TODO open OfficeFloor from Artifact
+
+		OfficeBuilding.main("stop");
+
+		// TODO remove once implemented
+		fail("TODO implement test");
+
+		// Run the Task (to ensure OfficeFloor is open)
+		OfficeBuilding.main("invoke", PROCESS_NAME, "OFFICE", "SECTION.WORK",
+				"writeMessage");
+		validateStreamContent("Should output message on running task",
+				MockWork.MESSAGE, this.stdout);
 	}
 
 	/**

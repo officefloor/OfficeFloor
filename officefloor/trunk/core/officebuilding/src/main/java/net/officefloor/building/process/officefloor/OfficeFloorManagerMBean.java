@@ -38,18 +38,30 @@ public interface OfficeFloorManagerMBean {
 	String getOfficeFloorLocation();
 
 	/**
+	 * Obtains the listing of the {@link Task} instances within the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @return Listing of the {@link Task} instances within the
+	 *         {@link OfficeFloor}.
+	 */
+	String listTasks();
+
+	/**
 	 * Invokes {@link Work} within the {@link OfficeFloor}.
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office} containing the {@link Work}.
 	 * @param workName
 	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}. May be <code>null</code> to invoke
+	 *            the initial {@link Task} for the {@link Work}.
 	 * @param parameter
 	 *            Parameter for the initial {@link Task}.
 	 * @throws Exception
 	 *             If fails to invoke the {@link Work}.
 	 */
-	void invokeWork(String officeName, String workName, String parameter)
-			throws Exception;
+	void invokeTask(String officeName, String workName, String taskName,
+			String parameter) throws Exception;
 
 }

@@ -18,7 +18,9 @@
 
 package net.officefloor.building.process.officefloor;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +35,8 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.WorkManager;
 
 /**
  * {@link ManagedProcess} for an {@link OfficeFloor} {@link Process}.
@@ -86,6 +90,12 @@ public class OfficeFloorManager implements ManagedProcess,
 	private transient OfficeFloor officeFloor = null;
 
 	/**
+	 * Flag indicating if the {@link OfficeFloor} is open and available to have
+	 * {@link Task} instances invoked.
+	 */
+	private boolean isOpen = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorLocation
@@ -105,18 +115,71 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	@Override
-	public synchronized void invokeWork(String officeName, String workName,
-			String parameter) throws Exception {
+	public synchronized String listTasks() {
+
+		// Ensure open
+		if (!this.isOpen) {
+			return "OfficeFloor not open";
+		}
+
+		// Create the listing of tasks
+		StringBuilder tasks = new StringBuilder();
+		try {
+			boolean isFirst = true;
+			for (String officeName : this.officeFloor.getOfficeNames()) {
+
+				// Separator
+				if (!isFirst) {
+					tasks.append("\n");
+				}
+				isFirst = false;
+
+				// Listing offices
+				tasks.append(officeName);
+
+				// List work of the office
+				Office office = this.officeFloor.getOffice(officeName);
+				for (String workName : office.getWorkNames()) {
+					tasks.append("\n\t" + workName);
+
+					// List tasks of work
+					WorkManager work = office.getWorkManager(workName);
+					for (String taskName : work.getTaskNames()) {
+						TaskManager task = work.getTaskManager(taskName);
+						Class<?> parameterType = task.getParameterType();
+						tasks.append("\n\t\t"
+								+ taskName
+								+ " ("
+								+ (parameterType == null ? "" : parameterType
+										.getSimpleName()
+										+ ")"));
+					}
+				}
+			}
+		} catch (Exception ex) {
+			StringWriter trace = new StringWriter();
+			ex.printStackTrace(new PrintWriter(trace));
+			tasks.append("\n" + trace.toString());
+		}
+
+		// Return the listing of tasks
+		return tasks.toString();
+	}
+
+	@Override
+	public synchronized void invokeTask(String officeName, String workName,
+			String taskName, String parameter) throws Exception {
 
 		// Determine if already opened the OfficeFloor
-		if (this.officeFloor != null) {
+		if (this.isOpen) {
 			// OfficeFloor running so invoke immediately
-			new WorkState(officeName, workName, parameter)
+			new WorkState(officeName, workName, taskName, parameter)
 					.invoke(this.officeFloor);
 
 		} else {
 			// Register the work to be invoked inside the main
-			this.workStates.add(new WorkState(officeName, workName, parameter));
+			this.workStates.add(new WorkState(officeName, workName, taskName,
+					parameter));
 		}
 	}
 
@@ -144,10 +207,13 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	@Override
-	public void main() throws Throwable {
+	public synchronized void main() throws Throwable {
 
 		// Open the OfficeFloor
 		this.officeFloor.openOfficeFloor();
+
+		// OfficeFloor now open
+		this.isOpen = true;
 
 		// Ensure close OfficeFloor
 		try {
@@ -163,7 +229,7 @@ public class OfficeFloorManager implements ManagedProcess,
 					}
 
 					// Wait some time for trigger to stop
-					Thread.sleep(1000);
+					this.wait(1000);
 				}
 
 			} else {
@@ -190,7 +256,7 @@ public class OfficeFloorManager implements ManagedProcess,
 					}
 
 					// Wait some time for work to complete
-					Thread.sleep(1000);
+					this.wait(1000);
 				}
 			}
 
@@ -201,6 +267,7 @@ public class OfficeFloorManager implements ManagedProcess,
 		} finally {
 			// Close the OfficeFloor
 			this.officeFloor.closeOfficeFloor();
+			this.isOpen = false;
 		}
 	}
 
@@ -221,6 +288,12 @@ public class OfficeFloorManager implements ManagedProcess,
 		private final String workName;
 
 		/**
+		 * Name of the {@link Task}. May be <code>null</code> to invoke initial
+		 * {@link Task} of {@link Work}.
+		 */
+		private final String taskName;
+
+		/**
 		 * Parameter for the initial {@link Task} of the {@link Work}.
 		 */
 		private final Object parameter;
@@ -237,12 +310,17 @@ public class OfficeFloorManager implements ManagedProcess,
 		 *            Name of the {@link Office} containing the {@link Work}.
 		 * @param workName
 		 *            Name of the {@link Work}.
+		 * @param taskName
+		 *            Name of the {@link Task}. May be <code>null</code> to
+		 *            invoke initial {@link Task} of {@link Work}.
 		 * @param parameter
 		 *            Parameter for the initial {@link Task}.
 		 */
-		public WorkState(String officeName, String workName, Object parameter) {
+		public WorkState(String officeName, String workName, String taskName,
+				Object parameter) {
 			this.officeName = officeName;
 			this.workName = workName;
+			this.taskName = taskName;
 			this.parameter = parameter;
 		}
 
@@ -255,9 +333,19 @@ public class OfficeFloorManager implements ManagedProcess,
 		 *             If fails to invoke the {@link Work}.
 		 */
 		public void invoke(OfficeFloor officeFloor) throws Exception {
-			// Invoke the work keeping track of its process future
-			this.invokedProcessFuture = officeFloor.getOffice(this.officeName)
-					.getWorkManager(this.workName).invokeWork(this.parameter);
+
+			// Obtain the work manager
+			WorkManager workManager = officeFloor.getOffice(this.officeName)
+					.getWorkManager(this.workName);
+			if (this.taskName == null) {
+				// Invoke initial task of work
+				this.invokedProcessFuture = workManager
+						.invokeWork(this.parameter);
+			} else {
+				// Invoke the specific task
+				this.invokedProcessFuture = workManager.getTaskManager(
+						this.taskName).invokeTask(this.parameter);
+			}
 		}
 
 		/**

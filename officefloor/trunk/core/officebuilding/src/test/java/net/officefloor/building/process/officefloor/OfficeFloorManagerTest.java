@@ -69,7 +69,7 @@ public class OfficeFloorManagerTest extends TestCase {
 		OfficeBuildingTestUtil.validateFileContent("Expecting content written",
 				MockWork.MESSAGE, file);
 	}
-	
+
 	/**
 	 * Ensure can start the {@link OfficeFloor} {@link Process} and invoke
 	 * {@link Work}.
@@ -80,8 +80,8 @@ public class OfficeFloorManagerTest extends TestCase {
 		File file = OfficeBuildingTestUtil.createTempFile(this);
 		OfficeFloorManager managedProcess = new OfficeFloorManager(this
 				.getOfficeFloorLocation());
-		managedProcess.invokeWork("OFFICE", "SECTION.WORK", file
-				.getAbsolutePath());
+		managedProcess.invokeTask("OFFICE", "SECTION.WORK", "writeMessage",
+				file.getAbsolutePath());
 
 		// Run process ensuring it completes
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
@@ -123,7 +123,9 @@ public class OfficeFloorManagerTest extends TestCase {
 				mbeanName, OfficeFloorManagerMBean.class);
 
 		// Invoke the work
-		mbean.invokeWork("OFFICE", "SECTION.WORK", file.getAbsolutePath());
+		mbean
+				.invokeTask("OFFICE", "SECTION.WORK", null, file
+						.getAbsolutePath());
 
 		// Stop the managed process
 		manager.triggerStopProcess();

@@ -126,6 +126,15 @@ public interface OfficeBuildingManagerMBean {
 			String officeFloorLocation, String jvmOptions) throws Exception;
 
 	/**
+	 * Provides a listing of the {@link Process} name spaces currently running
+	 * within the {@link OfficeBuilding}.
+	 * 
+	 * @return Listing of the {@link Process} name spaces currently running
+	 *         within the {@link OfficeBuilding}.
+	 */
+	String listProcessNamespaces();
+
+	/**
 	 * Closes the {@link OfficeFloor}.
 	 * 
 	 * @param processNamespace
