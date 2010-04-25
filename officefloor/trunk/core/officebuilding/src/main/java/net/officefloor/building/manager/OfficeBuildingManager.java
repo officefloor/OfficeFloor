@@ -445,7 +445,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Build the class path for the seed
 		ClassPathBuilder builder = this.classPathBuilderFactory
 				.createClassPathBuilder();
-		builder.includeSeed(seed);
+		try {
+			builder.includeSeed(seed);
+		} catch (Exception ex) {
+			// Propagate failure to seed.
+			// (Necessary as thrown exception may not be serialisable)
+			throw new FileNotFoundException("Unable to seed class path\n\n"
+					+ ex.getMessage());
+		}
 
 		// Open the OfficeFloor
 		return this.openOfficeFloor(processName, builder, officeFloorLocation,
