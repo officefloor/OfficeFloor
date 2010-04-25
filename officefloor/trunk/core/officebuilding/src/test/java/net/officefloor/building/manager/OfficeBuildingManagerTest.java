@@ -30,6 +30,7 @@ import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
+import net.officefloor.building.classpath.ClassPathSeed;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -161,6 +162,26 @@ public class OfficeBuildingManagerTest extends TestCase {
 						"net.officefloor.core", "officecompiler",
 						OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar",
 						null, officeFloorLocation, null);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor} with a {@link ClassPathSeed}.
+	 */
+	public void testOfficeFloorSeedManagement() throws Exception {
+		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
+			@Override
+			public String openOfficeFloor(String processName,
+					String officeFloorLocation,
+					OfficeBuildingManagerMBean buildingManager)
+					throws Exception {
+				ClassPathSeed seed = new ClassPathSeed();
+				seed.includeArtifact("net.officefloor.core", "officecompiler",
+						OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar",
+						null);
+				return buildingManager.openOfficeFloor(processName, seed,
+						officeFloorLocation, null);
 			}
 		});
 	}

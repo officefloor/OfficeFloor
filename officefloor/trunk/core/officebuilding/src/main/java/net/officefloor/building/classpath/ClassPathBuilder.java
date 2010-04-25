@@ -242,6 +242,38 @@ public class ClassPathBuilder {
 	}
 
 	/**
+	 * Includes the directory in the class path.
+	 * 
+	 * @param directory
+	 *            Directory.
+	 * @throws Exception
+	 *             If fails to include the directory.
+	 */
+	public void includeDirectory(File directory) throws Exception {
+
+		// Ensure the exists and a directory
+		if (!directory.isDirectory()) {
+			throw new FileNotFoundException("Directory not exists: '"
+					+ directory.getPath() + "'");
+		}
+
+		// Include the directory
+		this.includeClassPathEntry(directory);
+	}
+
+	/**
+	 * Includes the {@link ClassPathSeed} entries.
+	 * 
+	 * @param seed
+	 *            {@link ClassPathSeed}.
+	 * @throws Exception
+	 *             If fails to include the seeding.
+	 */
+	public void includeSeed(ClassPathSeed seed) throws Exception {
+		seed.include(this);
+	}
+
+	/**
 	 * Includes the entry in the built class path.
 	 * 
 	 * @param classPathEntry
