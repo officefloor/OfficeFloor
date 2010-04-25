@@ -44,6 +44,7 @@ import javax.management.remote.JMXServiceURL;
 import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilder;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
+import net.officefloor.building.classpath.ClassPathSeed;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
@@ -431,6 +432,20 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		ClassPathBuilder builder = this.classPathBuilderFactory
 				.createClassPathBuilder();
 		builder.includeJar(jarFile);
+
+		// Open the OfficeFloor
+		return this.openOfficeFloor(processName, builder, officeFloorLocation,
+				jvmOptions);
+	}
+
+	@Override
+	public String openOfficeFloor(String processName, ClassPathSeed seed,
+			String officeFloorLocation, String jvmOptions) throws Exception {
+
+		// Build the class path for the seed
+		ClassPathBuilder builder = this.classPathBuilderFactory
+				.createClassPathBuilder();
+		builder.includeSeed(seed);
 
 		// Open the OfficeFloor
 		return this.openOfficeFloor(processName, builder, officeFloorLocation,
