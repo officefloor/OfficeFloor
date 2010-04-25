@@ -154,7 +154,7 @@ public class OfficeBuilding {
 
 			// Obtain the remote repository URL
 			String remoteRepositoryUrl = properties
-					.getProperty("remote.repository.url");
+					.getProperty(PROPERTY_REMOTE_REPOSITORY_URL);
 			String[] remoteRepositoryUrls = remoteRepositoryUrl.split(",");
 			for (int i = 0; i < remoteRepositoryUrls.length; i++) {
 				remoteRepositoryUrls[i] = remoteRepositoryUrls[i].trim();
