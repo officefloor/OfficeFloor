@@ -43,13 +43,24 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 	/**
 	 * Artifacts in order of typical class path.
 	 */
-	private static final String[] ARTIFACTS = new String[] { "officecompiler",
-			"officeframe", "officexml", "officemodelgen" };
+	private static final String[] ARTIFACTS = new String[] {
+			OfficeBuildingTestUtil.CLASS_PATH_TEST_ARTIFACT_ID, "officeframe",
+			"officexml", "officemodelgen", "officecompiler" };
 
 	/**
-	 * Version of the officecompiler.
+	 * Group Id.
 	 */
-	private String officeCompilerVersion;
+	private static final String GROUP_ID = OfficeBuildingTestUtil.GROUP_ID;
+
+	/**
+	 * Artifact Id.
+	 */
+	private String testArtifactId;
+
+	/**
+	 * Version.
+	 */
+	private String testVersion;
 
 	/**
 	 * {@link ClassPathBuilder} to test.
@@ -63,20 +74,19 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		this.builder = OfficeBuildingTestUtil.getClassPathBuilderFactory()
 				.createClassPathBuilder();
 
-		// Obtain the officecompiler version
-		this.officeCompilerVersion = OfficeBuildingTestUtil
-				.getOfficeFloorArtifactVersion("officecompiler");
+		// Obtain the test
+		this.testArtifactId = OfficeBuildingTestUtil.CLASS_PATH_TEST_ARTIFACT_ID;
+		this.testVersion = OfficeBuildingTestUtil.CLASS_PATH_TEST_ARTIFACT_VERSION;
 
-		// Initiate to ensure download
-		OfficeBuildingTestUtil.clearRepositoryArchive();
-		OfficeBuildingTestUtil.archiveOfficeFloorArtifact("officecompiler");
+		// Initiate to ensure download of test artifact
+		OfficeBuildingTestUtil.setupClassPathTestArtifactForDownload();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Ensure reinstate artifacts
-		OfficeBuildingTestUtil.reinstateOfficeFloorArtifact("officecompiler");
+		// Clean up
+		OfficeBuildingTestUtil.cleanupClassPathTestArtifactInLocalRepository();
 
 		// Ensure clean up
 		this.builder.close();
@@ -88,8 +98,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 	public void testIncludeArtifact() throws Exception {
 
 		// Build the class path for the artifact
-		this.builder.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeCompilerVersion, "jar", null);
+		this.builder.includeArtifact(GROUP_ID, this.testArtifactId,
+				this.testVersion, "jar", null);
 
 		// Ensure correct class path
 		this.assertClassPath(ARTIFACTS);
@@ -102,8 +112,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Create the seed
 		ClassPathSeed seed = new ClassPathSeed();
-		seed.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeCompilerVersion, "jar", null);
+		seed.includeArtifact(GROUP_ID, this.testArtifactId, this.testVersion,
+				"jar", null);
 
 		// Build the class path for the seed
 		this.builder.includeSeed(seed);
@@ -122,8 +132,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		for (String artifactId : ARTIFACTS) {
 			String version = OfficeBuildingTestUtil
 					.getOfficeFloorArtifactVersion(artifactId);
-			this.builder.includeArtifact("net.officefloor.core", artifactId,
-					version, "jar", null);
+			this.builder.includeArtifact(GROUP_ID, artifactId, version, "jar",
+					null);
 		}
 
 		// Ensure correct class path (no duplicate artifacts)
@@ -141,8 +151,7 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		for (String artifactId : ARTIFACTS) {
 			String version = OfficeBuildingTestUtil
 					.getOfficeFloorArtifactVersion(artifactId);
-			seed.includeArtifact("net.officefloor.core", artifactId, version,
-					"jar", null);
+			seed.includeArtifact(GROUP_ID, artifactId, version, "jar", null);
 		}
 
 		// Build the class path for the seed
@@ -160,14 +169,14 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Different order of artifacts
 		String[] artifactIds = new String[] { "officeframe", "officexml",
-				"officemodelgen", "officecompiler" };
+				"officemodelgen", "officecompiler", this.testArtifactId };
 
 		// Include multiple similar artifacts (in terms of dependencies)
 		for (String artifactId : artifactIds) {
 			String version = OfficeBuildingTestUtil
 					.getOfficeFloorArtifactVersion(artifactId);
-			this.builder.includeArtifact("net.officefloor.core", artifactId,
-					version, "jar", null);
+			this.builder.includeArtifact(GROUP_ID, artifactId, version, "jar",
+					null);
 		}
 
 		// Ensure correct class path (no duplicate artifacts)
@@ -181,15 +190,14 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Different order of artifacts
 		String[] artifactIds = new String[] { "officeframe", "officexml",
-				"officemodelgen", "officecompiler" };
+				"officemodelgen", "officecompiler", this.testArtifactId };
 
 		// Include multiple similar artifacts (in terms of dependencies)
 		ClassPathSeed seed = new ClassPathSeed();
 		for (String artifactId : artifactIds) {
 			String version = OfficeBuildingTestUtil
 					.getOfficeFloorArtifactVersion(artifactId);
-			seed.includeArtifact("net.officefloor.core", artifactId, version,
-					"jar", null);
+			seed.includeArtifact(GROUP_ID, artifactId, version, "jar", null);
 		}
 
 		// Build the class path for the seed
@@ -211,7 +219,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		this.builder.includeJar(jarFile);
 
 		// Ensure correct class path
-		this.assertClassPath(ARTIFACTS);
+		this.assertClassPath("officecompiler", "officeframe", "officexml",
+				"officemodelgen");
 	}
 
 	/**
@@ -245,7 +254,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		this.builder.includeSeed(seed);
 
 		// Ensure correct class path
-		this.assertClassPath(ARTIFACTS);
+		this.assertClassPath("officecompiler", "officeframe", "officexml",
+				"officemodelgen");
 	}
 
 	/**
@@ -309,8 +319,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Create seed with the various includes
 		ClassPathSeed seed = new ClassPathSeed();
-		seed.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeCompilerVersion, "jar", null);
+		seed.includeArtifact(GROUP_ID, this.testArtifactId, this.testVersion,
+				"jar", null);
 		seed.includeJar(this.getJarFile());
 		seed.includeDirectory(new File("."));
 
