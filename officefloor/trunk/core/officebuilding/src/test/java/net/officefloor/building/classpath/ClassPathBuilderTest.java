@@ -35,31 +35,49 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 	/**
+	 * Artifacts to ignore in validating the class path.
+	 */
+	private static final String[] IGNORE_ARTIFACTS = new String[] { "junit",
+			"easymock" };
+
+	/**
 	 * Artifacts in order of typical class path.
 	 */
-	private static String[] ARTIFACTS = new String[] { "officecompiler",
+	private static final String[] ARTIFACTS = new String[] { "officecompiler",
 			"officeframe", "officexml", "officemodelgen" };
+
+	/**
+	 * Version of the officecompiler.
+	 */
+	private String officeCompilerVersion;
 
 	/**
 	 * {@link ClassPathBuilder} to test.
 	 */
 	private ClassPathBuilder builder;
 
-	/**
-	 * {@link OfficeFloor} version.
-	 */
-	private String officeFloorVersion;
-
 	@Override
 	protected void setUp() throws Exception {
-		this.officeFloorVersion = OfficeBuildingTestUtil
-				.getOfficeFloorVersion();
+
+		// Create the builder to test
 		this.builder = OfficeBuildingTestUtil.getClassPathBuilderFactory()
 				.createClassPathBuilder();
+
+		// Obtain the officecompiler version
+		this.officeCompilerVersion = OfficeBuildingTestUtil
+				.getOfficeFloorArtifactVersion("officecompiler");
+
+		// Initiate to ensure download
+		OfficeBuildingTestUtil.clearRepositoryArchive();
+		OfficeBuildingTestUtil.archiveOfficeFloorArtifact("officecompiler");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Ensure reinstate artifacts
+		OfficeBuildingTestUtil.reinstateOfficeFloorArtifact("officecompiler");
+
 		// Ensure clean up
 		this.builder.close();
 	}
@@ -71,7 +89,7 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Build the class path for the artifact
 		this.builder.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeFloorVersion, "jar", null);
+				this.officeCompilerVersion, "jar", null);
 
 		// Ensure correct class path
 		this.assertClassPath(ARTIFACTS);
@@ -85,7 +103,7 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		// Create the seed
 		ClassPathSeed seed = new ClassPathSeed();
 		seed.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeFloorVersion, "jar", null);
+				this.officeCompilerVersion, "jar", null);
 
 		// Build the class path for the seed
 		this.builder.includeSeed(seed);
@@ -102,8 +120,10 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Include multiple similar artifacts (in terms of dependencies)
 		for (String artifactId : ARTIFACTS) {
+			String version = OfficeBuildingTestUtil
+					.getOfficeFloorArtifactVersion(artifactId);
 			this.builder.includeArtifact("net.officefloor.core", artifactId,
-					this.officeFloorVersion, "jar", null);
+					version, "jar", null);
 		}
 
 		// Ensure correct class path (no duplicate artifacts)
@@ -119,8 +139,10 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		// Seed multiple similar artifacts (in terms of dependencies)
 		ClassPathSeed seed = new ClassPathSeed();
 		for (String artifactId : ARTIFACTS) {
-			seed.includeArtifact("net.officefloor.core", artifactId,
-					this.officeFloorVersion, "jar", null);
+			String version = OfficeBuildingTestUtil
+					.getOfficeFloorArtifactVersion(artifactId);
+			seed.includeArtifact("net.officefloor.core", artifactId, version,
+					"jar", null);
 		}
 
 		// Build the class path for the seed
@@ -142,8 +164,10 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Include multiple similar artifacts (in terms of dependencies)
 		for (String artifactId : artifactIds) {
+			String version = OfficeBuildingTestUtil
+					.getOfficeFloorArtifactVersion(artifactId);
 			this.builder.includeArtifact("net.officefloor.core", artifactId,
-					this.officeFloorVersion, "jar", null);
+					version, "jar", null);
 		}
 
 		// Ensure correct class path (no duplicate artifacts)
@@ -162,8 +186,10 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		// Include multiple similar artifacts (in terms of dependencies)
 		ClassPathSeed seed = new ClassPathSeed();
 		for (String artifactId : artifactIds) {
-			seed.includeArtifact("net.officefloor.core", artifactId,
-					this.officeFloorVersion, "jar", null);
+			String version = OfficeBuildingTestUtil
+					.getOfficeFloorArtifactVersion(artifactId);
+			seed.includeArtifact("net.officefloor.core", artifactId, version,
+					"jar", null);
 		}
 
 		// Build the class path for the seed
@@ -189,6 +215,21 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to include jar without its dependencies.
+	 */
+	public void testIncludeJarNoDependencies() throws Exception {
+
+		// Obtain location of jar
+		File jarFile = this.getJarFile();
+
+		// Build the class path for the jar
+		this.builder.includeJar(jarFile, false);
+
+		// Ensure correct class path
+		this.assertClassPath("officecompiler");
+	}
+
+	/**
 	 * Ensure able to seed by jar.
 	 */
 	public void testSeedJar() throws Exception {
@@ -205,6 +246,25 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 
 		// Ensure correct class path
 		this.assertClassPath(ARTIFACTS);
+	}
+
+	/**
+	 * Ensure able to seed by jar with no dependencies.
+	 */
+	public void testSeedJarNoDependencies() throws Exception {
+
+		// Obtain location of jar
+		File jarFile = this.getJarFile();
+
+		// Create the seed
+		ClassPathSeed seed = new ClassPathSeed();
+		seed.includeJar(jarFile, false);
+
+		// Include seed
+		this.builder.includeSeed(seed);
+
+		// Ensure correct class path
+		this.assertClassPath("officecompiler");
 	}
 
 	/**
@@ -250,7 +310,7 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 		// Create seed with the various includes
 		ClassPathSeed seed = new ClassPathSeed();
 		seed.includeArtifact("net.officefloor.core", "officecompiler",
-				this.officeFloorVersion, "jar", null);
+				this.officeCompilerVersion, "jar", null);
 		seed.includeJar(this.getJarFile());
 		seed.includeDirectory(new File("."));
 
@@ -286,18 +346,53 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 	 * Asserts the built class path is correct.
 	 * 
 	 * @param officeFloorArtifactIds
-	 *            {@link OfficeFloor} artifact ids.
+	 *            {@link OfficeFloor} artifact Ids.
 	 * @throws Exception
 	 *             If fails to determine class path.
 	 */
 	private void assertClassPath(String... officeFloorArtifactIds)
 			throws Exception {
+
 		// Create the expected class path
-		String expectedClassPath = OfficeBuildingTestUtil
-				.getOfficeFloorClassPath(officeFloorArtifactIds);
+		StringBuilder path = new StringBuilder();
+		boolean isFirst = true;
+		for (String artifactId : officeFloorArtifactIds) {
+			File artifactJar = OfficeBuildingTestUtil
+					.getOfficeFloorArtifactJar(artifactId);
+			if (!isFirst) {
+				path.append(File.pathSeparator);
+			}
+			isFirst = false;
+			path.append(artifactJar.getCanonicalPath());
+		}
+		String expectedClassPath = path.toString();
 
 		// Obtain the actual class path
 		String actualClassPath = this.builder.getBuiltClassPath();
+
+		// Remove ignored artifacts from class path
+		String[] entries = actualClassPath.split(File.pathSeparator);
+		path = new StringBuilder();
+		isFirst = true;
+		NEXT_ENTRY: for (String entry : entries) {
+			// Obtain name
+			String name = new File(entry).getName();
+
+			// Determine if ignore entry
+			for (String ignoreArtifact : IGNORE_ARTIFACTS) {
+				if (name.contains(ignoreArtifact)) {
+					continue NEXT_ENTRY; // ignore entry
+				}
+			}
+
+			// Include the artifact entry
+			if (!isFirst) {
+				path.append(File.pathSeparator);
+			}
+			isFirst = false;
+			path.append(entry);
+		}
+		actualClassPath = path.toString();
 
 		// Ensure correct class path
 		assertEquals(expectedClassPath, actualClassPath);
@@ -312,9 +407,8 @@ public class ClassPathBuilderTest extends OfficeFrameTestCase {
 	 */
 	private File getJarFile() throws Exception {
 		// Obtain location of jar
-		String jarPath = OfficeBuildingTestUtil
-				.getOfficeFloorClassPath("officecompiler");
-		File jarFile = new File(jarPath);
+		File jarFile = OfficeBuildingTestUtil
+				.getOfficeFloorArtifactJar("officecompiler");
 		assertTrue("Ensure jar exists", jarFile.isFile());
 		return jarFile;
 	}

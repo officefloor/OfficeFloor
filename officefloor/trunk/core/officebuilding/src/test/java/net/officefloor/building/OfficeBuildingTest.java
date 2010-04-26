@@ -74,7 +74,9 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		OfficeBuilding.isTesting = true;
 
 		// Provide OfficeBuilding Home
-		File officeBuildingHomeDir = new File(".", "src/main/resources");
+		File officeBuildingHomeDir = this.findFile(
+				OfficeBuilding.PROPERTIES_FILE_RELATIVE_PATH).getParentFile()
+				.getParentFile();
 		System.setProperty(OfficeBuilding.OFFICE_BUILDING_HOME,
 				officeBuildingHomeDir.getAbsolutePath());
 
@@ -84,8 +86,8 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 						.getAbsolutePath());
 
 		// Provide remote repository path (use local to stop download)
-		String localRepositoryUrl = new File(ClassPathBuilderFactory
-				.getLocalRepositoryPath()).toURI().toURL().toString();
+		String localRepositoryUrl = ClassPathBuilderFactory
+				.getLocalRepositoryDirectory(null).toURI().toURL().toString();
 		System.setProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL,
 				localRepositoryUrl);
 
@@ -107,6 +109,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 
 		// Clear the system properties specified for test
 		System.clearProperty(OfficeBuilding.OFFICE_BUILDING_HOME);
+		System.clearProperty(OfficeBuilding.PROPERTY_LOCAL_REPOSITORY_PATH);
 		System.clearProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL);
 
 		// Reinstate output streams
@@ -259,7 +262,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 
 		final String PROCESS_NAME = this.getName();
 		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
-				.getOfficeFloorVersion();
+				.getOfficeFloorArtifactVersion("officecompiler");
 
 		// Start the OfficeBuilding
 		OfficeBuilding.main("start");

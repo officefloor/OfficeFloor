@@ -20,6 +20,8 @@ package net.officefloor.building.classpath;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import net.officefloor.building.OfficeBuilding;
+
 import org.apache.maven.embedder.MavenEmbedder;
 
 /**
@@ -30,33 +32,98 @@ import org.apache.maven.embedder.MavenEmbedder;
 public class ClassPathBuilderFactory {
 
 	/**
-	 * Obtains the default configured local repository path.
+	 * Obtains the User specific local repository directory.
 	 * 
-	 * @return Local repository path.
+	 * @return User specific local repository directory.
 	 */
-	public static String getLocalRepositoryPath() {
+	public static File getUserSpecificLocalRepositoryDirectory() {
+
+		// Determine local repository from user configuration
+		String localRepositoryPath = null;
 		try {
-
-			// Obtain the configured local repository directory
 			MavenEmbedder embedder = new MavenEmbedder();
-			embedder.setClassLoader(ClassPathBuilderFactory.class
-					.getClassLoader());
-			embedder.setAlignWithUserInstallation(true);
-			embedder.start();
-			String localRepositoryPath = embedder.getLocalRepository()
-					.getBasedir();
-			embedder.stop();
-
-			// Use the configured local repository directory
-			return localRepositoryPath;
-
+			try {
+				embedder.setClassLoader(ClassPathBuilderFactory.class
+						.getClassLoader());
+				embedder.setAlignWithUserInstallation(true);
+				embedder.start();
+				localRepositoryPath = embedder.getLocalRepository()
+						.getBasedir();
+			} finally {
+				embedder.stop();
+			}
 		} catch (Throwable ex) {
-			// Ignore as continue on to use temporary path
+			// Ignore and continue on with no user configured path
 		}
 
-		// Use temporary local repository path
-		return System.getProperty("java.io.tmpdir")
-				+ "/officebuilding-repository";
+		// Return if have local repository
+		return (localRepositoryPath == null ? null : new File(
+				localRepositoryPath));
+	}
+
+	/**
+	 * <p>
+	 * Obtains the default configured local repository directory.
+	 * <p>
+	 * Path is determined as follows:
+	 * <ol>
+	 * <li>{@link #getUserSpecificLocalRepositoryDirectory()}</li>
+	 * <li><code>defaultPath</code></li>
+	 * <li>temporary directory</li>
+	 * </ol>
+	 * <p>
+	 * This method also ensures the directory is available by creating it if
+	 * necessary.
+	 * 
+	 * @param defaultPath
+	 *            Default path if not configured for user. May be
+	 *            <code>null</code> to use temporary directory.
+	 * @return Local repository directory.
+	 */
+	public static File getLocalRepositoryDirectory(String defaultPath)
+			throws FileNotFoundException {
+
+		// Attempt first with user specified
+		File localRepositoryDirectory = getUserSpecificLocalRepositoryDirectory();
+		if (localRepositoryDirectory != null) {
+			ensureDirectoryExists(localRepositoryDirectory);
+			return localRepositoryDirectory;
+		}
+
+		// Fall back to default path (if provided)
+		if ((defaultPath != null) && (defaultPath.trim().length() > 0)) {
+			localRepositoryDirectory = new File(defaultPath);
+			ensureDirectoryExists(localRepositoryDirectory);
+			return localRepositoryDirectory;
+		}
+
+		// No fall back path so use temporary directory
+		localRepositoryDirectory = new File(System
+				.getProperty("java.io.tmpdir"), OfficeBuilding.class
+				.getSimpleName()
+				+ "Repository");
+		ensureDirectoryExists(localRepositoryDirectory);
+		return localRepositoryDirectory;
+	}
+
+	/**
+	 * Ensures the directory exists.
+	 * 
+	 * @param directory
+	 *            Directory to ensure exists.
+	 * @throws FileNotFoundException
+	 *             If fails to ensure directory exists.
+	 */
+	private static void ensureDirectoryExists(File directory)
+			throws FileNotFoundException {
+		if (!directory.exists()) {
+			// Ensure directory is available
+			if (!directory.mkdirs()) {
+				throw new FileNotFoundException(
+						"Failed creating local repository "
+								+ directory.getPath());
+			}
+		}
 	}
 
 	/**
@@ -72,35 +139,18 @@ public class ClassPathBuilderFactory {
 	/**
 	 * Initiate.
 	 * 
-	 * @param localRepositoryPath
-	 *            Local repository path. May be <code>null</code> to default to
-	 *            temporary directory.
+	 * @param defaultLocalRepositoryPath
+	 *            Default local repository path should not be configured for
+	 *            user. May be <code>null</code> to default to temporary
+	 *            directory.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
 	 * @throws FileNotFoundException
 	 *             If can not find local repository.
 	 */
-	public ClassPathBuilderFactory(String localRepositoryPath,
+	public ClassPathBuilderFactory(String defaultLocalRepositoryPath,
 			String... remoteRepositoryUrls) throws FileNotFoundException {
-
-		// Ensure have local repository
-		if ((localRepositoryPath == null)
-				|| (localRepositoryPath.trim().length() == 0)) {
-			// Obtain the default configured local repository path
-			localRepositoryPath = getLocalRepositoryPath();
-		}
-		File localRepositoryDirectory = new File(localRepositoryPath);
-		if (!localRepositoryDirectory.exists()) {
-			// Ensure directory is available
-			if (!localRepositoryDirectory.mkdirs()) {
-				throw new FileNotFoundException(
-						"Failed creating local repository "
-								+ localRepositoryDirectory.getPath());
-			}
-		}
-
-		// Specify values
-		this.localRepositoryDirectory = localRepositoryDirectory;
+		this.localRepositoryDirectory = getLocalRepositoryDirectory(defaultLocalRepositoryPath);
 		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 

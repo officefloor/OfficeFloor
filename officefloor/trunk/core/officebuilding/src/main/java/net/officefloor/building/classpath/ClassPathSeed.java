@@ -55,13 +55,25 @@ public class ClassPathSeed implements Serializable {
 	}
 
 	/**
-	 * Includes the Jar file.
+	 * Includes the Jar file and its dependencies..
 	 * 
 	 * @param jarFile
 	 *            Jar file.
 	 */
 	public void includeJar(File jarFile) {
-		this.inclusions.add(new JarInclusion(jarFile));
+		this.includeJar(jarFile, true);
+	}
+
+	/**
+	 * Includes the Jar file.
+	 * 
+	 * @param jarFile
+	 *            Jar file.
+	 * @param isIncludeDependencies
+	 *            Flag to include dependencies for the Jar.
+	 */
+	public void includeJar(File jarFile, boolean isIncludeDependencies) {
+		this.inclusions.add(new JarInclusion(jarFile, isIncludeDependencies));
 	}
 
 	/**
@@ -179,13 +191,21 @@ public class ClassPathSeed implements Serializable {
 		private final String jarLocation;
 
 		/**
+		 * Flag to include dependencies for the Jar.
+		 */
+		private final boolean isIncludeDependencies;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param jarFile
 		 *            Jar file.
+		 * @param isIncludeDependencies
+		 *            Flag to include dependencies for the Jar.
 		 */
-		public JarInclusion(File jarFile) {
+		public JarInclusion(File jarFile, boolean isIncludeDependencies) {
 			this.jarLocation = jarFile.getPath();
+			this.isIncludeDependencies = isIncludeDependencies;
 		}
 
 		/*
@@ -194,7 +214,8 @@ public class ClassPathSeed implements Serializable {
 
 		@Override
 		public void include(ClassPathBuilder builder) throws Exception {
-			builder.includeJar(new File(this.jarLocation));
+			builder.includeJar(new File(this.jarLocation),
+					this.isIncludeDependencies);
 		}
 	}
 

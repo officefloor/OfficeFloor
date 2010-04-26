@@ -22,17 +22,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+
 import junit.framework.TestCase;
 import net.officefloor.building.OfficeBuilding;
-import net.officefloor.building.classpath.ClassPathBuilder;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 /**
  * Utility methods for testing the {@link OfficeBuilding} functionality.
@@ -42,19 +39,28 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 public class OfficeBuildingTestUtil {
 
 	/**
-	 * {@link ClassPathBuilderFactory}.
+	 * Location of repository archive.
 	 */
-	private static ClassPathBuilderFactory classPathBuilderFactory;
+	private static final File REPOSITORY_ARCHIVE = new File(".",
+			"target/localRepository");
 
 	/**
-	 * Local repository directory.
+	 * Obtains the local repository directory.
+	 * 
+	 * @return Local repository directory.
 	 */
-	private static File localRepositoryDirectory;
+	public static File getLocalRepositoryDirectory() throws Exception {
+		return ClassPathBuilderFactory.getLocalRepositoryDirectory(null);
+	}
 
 	/**
-	 * Version of {@link OfficeFloor}.
+	 * Obtains the remote repository URLs.
+	 * 
+	 * @return Remote repository URLs.
 	 */
-	private static String officeFloorVersion;
+	public static String[] getRemoteRepositoryUrls() throws Exception {
+		return new String[] { REPOSITORY_ARCHIVE.toURI().toURL().toString() };
+	}
 
 	/**
 	 * Obtains the test {@link ClassPathBuilderFactory}.
@@ -63,118 +69,165 @@ public class OfficeBuildingTestUtil {
 	 */
 	public static ClassPathBuilderFactory getClassPathBuilderFactory()
 			throws Exception {
-		init();
-		return classPathBuilderFactory;
+		return new ClassPathBuilderFactory(null, getRemoteRepositoryUrls());
 	}
 
 	/**
-	 * Obtains the local repository directory.
-	 * 
-	 * @return Local repository directory.
-	 */
-	public static File getLocalRepositoryDirectory() throws Exception {
-		init();
-		return localRepositoryDirectory;
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloor} version.
-	 * 
-	 * @return {@link OfficeFloor} version.
-	 */
-	public static String getOfficeFloorVersion() throws Exception {
-		init();
-		return officeFloorVersion;
-	}
-
-	/**
-	 * Obtains the class path for the {@link OfficeFloor} artifacts.
-	 * 
-	 * @param artifactIds
-	 *            Listing of {@link OfficeFloor} artifacts.
-	 * @return Class path with capitalised tags for replacement.
-	 */
-	public static String getOfficeFloorClassPath(String... artifactIds)
-			throws Exception {
-
-		// Initialise
-		init();
-
-		// Build the class path
-		StringBuilder path = new StringBuilder();
-		for (String artifactId : artifactIds) {
-			path.append("MAVEN_REPO/net/officefloor/core/" + artifactId
-					+ "/VERSION/" + artifactId + "-VERSION.jar:");
-		}
-		String classPath = path.toString();
-		classPath = classPath.substring(0, classPath.length() - ":".length());
-
-		// Replace tags in the class path
-		classPath = classPath.replace("MAVEN_REPO", localRepositoryDirectory
-				.getCanonicalPath());
-		classPath = classPath.replace("VERSION", officeFloorVersion);
-		classPath = classPath.replace(":", File.pathSeparator);
-
-		// Return the class path
-		return classPath;
-	}
-
-	/**
-	 * Retrieves the {@link OfficeFloor} Jar.
+	 * Obtains the version for the {@link OfficeFloor} artifact.
 	 * 
 	 * @param artifactId
-	 *            Artifact Id.
-	 * @return Location of the retrieved Jar.
+	 *            Id of the {@link OfficeFloor} artifact.
+	 * @return Version of the {@link OfficeFloor} artifact.
 	 */
-	public static String retrieveOfficeFloorJar(String artifactId)
+	public static String getOfficeFloorArtifactVersion(String artifactId)
 			throws Exception {
-		ClassPathBuilder builder = getClassPathBuilderFactory()
-				.createClassPathBuilder();
-		builder.includeArtifact("net.officefloor.core", artifactId,
-				getOfficeFloorVersion());
-		String classPath = builder.getBuiltClassPath();
-		builder.close();
-		String jarPath = classPath.split(File.pathSeparator)[0];
-		return jarPath;
+
+		// Extract the artifact version from the class path
+		String classPath = System.getProperty("java.class.path");
+		String[] classPathEntries = classPath.split(File.pathSeparator);
+		for (String entry : classPathEntries) {
+
+			// Determine if entry
+			String name = new File(entry).getName();
+			if ((name.endsWith("jar")) && (name.startsWith(artifactId))) {
+				// Found the artifact, so extract version
+				String version = name.substring(artifactId.length()
+						+ "-".length());
+				version = version.substring(0, version.length()
+						- ".jar".length());
+
+				// Return the version
+				return version;
+			}
+		}
+
+		// Not found, likely running in Eclipse with directory
+		MavenXpp3Reader reader = new MavenXpp3Reader();
+		for (String entry : classPathEntries) {
+
+			// Ignore non-directories
+			File directory = new File(entry);
+			if (!directory.isDirectory()) {
+				continue;
+			}
+
+			// Search upwards for the pom.xml file
+			File pomFile = new File(directory, "pom.xml");
+			while ((!pomFile.exists()) && (directory != null)) {
+				// pom.xml not exists, so try parent directory
+				directory = directory.getParentFile();
+				pomFile = new File(directory, "pom.xml");
+			}
+
+			// Ignore if no pom.xml file found
+			if (!pomFile.exists()) {
+				continue;
+			}
+
+			// Read in the pom.xml file for the version
+			Model pom = reader.read(new FileReader(pomFile));
+
+			// Ignore if not correct artifact
+			String pomArtifactId = pom.getArtifactId();
+			if (!pomArtifactId.equals(artifactId)) {
+				continue;
+			}
+
+			// Obtain the version
+			String version = pom.getVersion();
+			if (version == null) {
+				version = pom.getParent().getVersion();
+			}
+
+			// Return the version
+			return version;
+		}
+
+		// Not able to obtain the version
+		TestCase.fail("Unable to extract version for artifact '" + artifactId
+				+ "' from class path: " + classPath);
+		return null; // fail to throw exception
 	}
 
 	/**
-	 * Initialises the {@link ClassPathBuilderFactory} and associated
-	 * configuration.
+	 * Obtains the {@link File} to the {@link OfficeFloor} artifact Jar.
+	 * 
+	 * @param artifactId
+	 *            Id of the {@link OfficeFloor} artifact.
+	 * @return {@link File} to the the {@link OfficeFloor} artifact Jar.
 	 */
-	private static void init() throws Exception {
+	public static File getOfficeFloorArtifactJar(String artifactId)
+			throws Exception {
 
-		// Lazy initialise
-		if (classPathBuilderFactory != null) {
-			return; // already initialised
+		// Obtain version for artifact
+		String version = getOfficeFloorArtifactVersion(artifactId);
+
+		// Create the path to the Jar
+		File jarFile = new File(getLocalRepositoryDirectory(),
+				"net/officefloor/core");
+		jarFile = new File(jarFile, artifactId);
+		jarFile = new File(jarFile, version);
+		jarFile = new File(jarFile, artifactId + "-" + version + ".jar");
+
+		// Return Jar file
+		return jarFile;
+	}
+
+	/**
+	 * Clears the repository store.
+	 */
+	public static void clearRepositoryArchive() {
+		deleteDirectory(REPOSITORY_ARCHIVE);
+	}
+
+	/**
+	 * Archives the {@link OfficeFloor} artifact to the repository archive.
+	 * 
+	 * @param artifactId
+	 *            Id for the {@link OfficeFloor} artifact to be archived.
+	 */
+	public static void archiveOfficeFloorArtifact(String artifactId) {
+
+	}
+
+	/**
+	 * Reinstates the {@link OfficeFloor} artifact from the repository archive.
+	 * 
+	 * @param artifactId
+	 *            Id for the {@link OfficeFloor} artifact to be reinstated.
+	 */
+	public static void reinstateOfficeFloorArtifact(String artifactId) {
+
+	}
+
+	/**
+	 * Deletes the directory.
+	 * 
+	 * @param directory
+	 *            Directory to be deleted.
+	 */
+	private static void deleteDirectory(File directory) {
+
+		// Ensure exists
+		if (!directory.exists()) {
+			return; // not exists so do not delete
 		}
 
-		// Obtain the directory for the local repository
-		localRepositoryDirectory = new File(".", "target/localRepository");
-		if (!localRepositoryDirectory.exists()) {
-			localRepositoryDirectory.mkdir();
+		// Delete the child files
+		for (File child : directory.listFiles()) {
+			if (child.isDirectory()) {
+				// Recursively delete the directory
+				deleteDirectory(child);
+			} else {
+				// Delete the file
+				TestCase.assertTrue("Failed to clear file: " + child, child
+						.delete());
+			}
 		}
 
-		// Obtain the current OfficeBuilding version
-		Model project = new MavenXpp3Reader().read(new FileReader(new File(".",
-				"pom.xml")));
-		officeFloorVersion = project.getParent().getVersion();
-		TestCase.assertNotNull("Must have version", officeFloorVersion);
-
-		// Obtain the Maven local repository as the remote repository.
-		// (Stops download of artifacts and has latest OfficeFloor)
-		MavenEmbedder maven = new MavenEmbedder();
-		maven.setClassLoader(OfficeBuildingTestUtil.class.getClassLoader());
-		maven.start();
-		ArtifactRepository mavenRepository = maven.getLocalRepository();
-		String mavenRepositoryUrl = mavenRepository.getUrl();
-		maven.stop();
-		TestCase.assertNotNull("Must have maven repository URL",
-				mavenRepositoryUrl);
-
-		// Create the class path builder factory
-		classPathBuilderFactory = new ClassPathBuilderFactory(
-				localRepositoryDirectory.getAbsolutePath(), mavenRepositoryUrl);
+		// Child files deleted, so now delete the directory
+		TestCase.assertTrue("Failed to clear directory: " + directory,
+				directory.delete());
 	}
 
 	/**

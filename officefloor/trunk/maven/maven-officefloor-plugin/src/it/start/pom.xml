@@ -13,12 +13,15 @@
 				<artifactId>@project.artifactId@</artifactId>
 				<configuration>
 					<port>10102</port>
+					<officeFloorLocation>net/officefloor/maven/TestOfficeFloor.officefloor</officeFloorLocation>
 				</configuration>
 				<executions>
 					<execution>
 						<phase>test</phase>
 						<goals>
 							<goal>start</goal>
+							<goal>open</goal>
+							<goal>stop</goal>
 						</goals>
 					</execution>
 				</executions>
