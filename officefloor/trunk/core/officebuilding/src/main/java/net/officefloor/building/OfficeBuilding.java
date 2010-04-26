@@ -48,6 +48,12 @@ public class OfficeBuilding {
 	public static final String OFFICE_BUILDING_HOME = "OFFICE_BUILDING_HOME";
 
 	/**
+	 * Relative path from the {@link #OFFICE_BUILDING_HOME} to find the
+	 * properties file.
+	 */
+	public static final String PROPERTIES_FILE_RELATIVE_PATH = "config/OfficeBuilding.properties";
+
+	/**
 	 * Name of the property defining the host that the {@link OfficeBuilding} is
 	 * residing on. This property is ignored if starting the
 	 * {@link OfficeBuilding} as always run on localhost.
@@ -123,7 +129,7 @@ public class OfficeBuilding {
 
 		// Create the property locator
 		File propertiesFile = new File(officeBuildingHome,
-				"config/OfficeBuilding.properties");
+				PROPERTIES_FILE_RELATIVE_PATH);
 		PropertyLocator properties = new PropertyLocator(propertiesFile);
 
 		// Obtain the Office Building host.

@@ -141,7 +141,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
 				String jarName = OfficeBuildingTestUtil
-						.retrieveOfficeFloorJar("officecompiler");
+						.getOfficeFloorArtifactJar("officecompiler")
+						.getAbsolutePath();
 				return buildingManager.openOfficeFloor(processName, jarName,
 						officeFloorLocation, null);
 			}
@@ -158,10 +159,14 @@ public class OfficeBuildingManagerTest extends TestCase {
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				return buildingManager.openOfficeFloor(processName,
-						"net.officefloor.core", "officecompiler",
-						OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar",
-						null, officeFloorLocation, null);
+				return buildingManager
+						.openOfficeFloor(
+								processName,
+								"net.officefloor.core",
+								"officecompiler",
+								OfficeBuildingTestUtil
+										.getOfficeFloorArtifactVersion("officecompiler"),
+								"jar", null, officeFloorLocation, null);
 			}
 		});
 	}
@@ -177,9 +182,13 @@ public class OfficeBuildingManagerTest extends TestCase {
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
 				ClassPathSeed seed = new ClassPathSeed();
-				seed.includeArtifact("net.officefloor.core", "officecompiler",
-						OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar",
-						null);
+				seed
+						.includeArtifact(
+								"net.officefloor.core",
+								"officecompiler",
+								OfficeBuildingTestUtil
+										.getOfficeFloorArtifactVersion("officecompiler"),
+								"jar", null);
 				return buildingManager.openOfficeFloor(processName, seed,
 						officeFloorLocation, null);
 			}
@@ -331,8 +340,9 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String officeFloorLocation = this.getOfficeFloorLocation();
 		String processNamespace = buildingManager.openOfficeFloor(this
 				.getName(), "net.officefloor.core", "officecompiler",
-				OfficeBuildingTestUtil.getOfficeFloorVersion(), "jar", null,
-				officeFloorLocation, null);
+				OfficeBuildingTestUtil
+						.getOfficeFloorArtifactVersion("officecompiler"),
+				"jar", null, officeFloorLocation, null);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager

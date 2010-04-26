@@ -17,26 +17,33 @@
  */
 package net.officefloor.maven;
 
-import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
-import net.officefloor.building.manager.OfficeBuildingManagerMBean;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
-import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 
 /**
- * Maven goal to start the {@link OfficeFloor}.
+ * Maven goal to start the {@link OfficeBuilding}.
  * 
  * @goal start
  * 
  * @author Daniel Sagenschneider
  */
-public class StartOfficeFloorGoal extends AbstractMojo {
+public class StartOfficeBuildingGoal extends AbstractGoal {
+
+	/**
+	 * {@link MavenProject}.
+	 * 
+	 * @parameter expression="${project}"
+	 */
+	private MavenProject project;
 
 	/**
 	 * Port to run the {@link OfficeBuilding} on.
@@ -54,66 +61,47 @@ public class StartOfficeFloorGoal extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have configured values
+		assertNotNull("Must have project", this.project);
 		assertNotNull("Port not configured for the "
 				+ OfficeBuilding.class.getSimpleName(), this.port);
+
+		// Obtain the remote repository URLs
+		String[] remoteRepositoryURLs;
+		try {
+			List<String> urls = new LinkedList<String>();
+			for (Object object : this.project.getRemoteArtifactRepositories()) {
+				ArtifactRepository repository = (ArtifactRepository) object;
+				urls.add(repository.getUrl());
+			}
+			remoteRepositoryURLs = urls.toArray(new String[0]);
+		} catch (Throwable ex) {
+			throw new MojoExecutionException(
+					"Failed obtaining Remote Repository URLs", ex);
+		}
 
 		// Create the Class Path Builder
 		ClassPathBuilderFactory classPathBuilderFactory;
 		try {
-			classPathBuilderFactory = new ClassPathBuilderFactory(null);
+			// Creating defaulting the local repository
+			classPathBuilderFactory = new ClassPathBuilderFactory(null,
+					remoteRepositoryURLs);
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed resolving the class path",
 					ex);
 		}
 
 		// Start the OfficeBuilding
-		OfficeBuildingManagerMBean officeBuilding;
 		try {
-			officeBuilding = OfficeBuildingManager.startOfficeBuilding(
-					this.port.intValue(), classPathBuilderFactory);
+			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
+					classPathBuilderFactory);
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed starting the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
-		// Open the OfficeFloor
-		// String name = officeBuilding.openOfficeFloor("MavenTestOfficeFloor",
-		// jarName,
-		// officeFloorLocation, jvmOptions);
-
-		// Log the started OfficeFloor by process name
+		// Log started OfficeBuilding
 		this.getLog().info(
-				"Started " + OfficeFloor.class.getSimpleName() + " '");
-
-		// TODO remove - implement by starting an OfficeFloor
-		this.getLog().error("TODO: implement");
-		try {
-			this.getLog().error(
-					" creating file in directory"
-							+ new File(".").getAbsolutePath());
-			new File(".", "target").mkdir();
-			new File(".", "target/OfficeFloorRun.txt").createNewFile();
-			this.getLog().error("TODO: remove - file created");
-		} catch (Throwable ex) {
-			this.getLog().error("TODO: remove - failed create file", ex);
-		}
+				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
+						+ this.port.intValue());
 	}
-
-	/**
-	 * Ensure the value is not <code>null</code>.
-	 * 
-	 * @param message
-	 *            Message to report if value is <code>null</code>.
-	 * @param value
-	 *            Value to check.
-	 * @throws MojoFailureException
-	 *             If value is <code>null</code>.
-	 */
-	private static void assertNotNull(String message, Object value)
-			throws MojoFailureException {
-		if (value == null) {
-			throw new MojoFailureException(message);
-		}
-	}
-
 }

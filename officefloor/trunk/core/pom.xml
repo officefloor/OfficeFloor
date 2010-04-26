@@ -19,22 +19,6 @@
 		<module>officecompiler</module>
 		<module>officebuilding</module>
 	</modules>
-	<build>
-		<plugins>
-			<plugin>
-				<!-- Allow for quick build by ignoring stress tests -->
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemProperties>
-						<property>
-							<name>ignore.stress.tests</name>
-							<value>${ignore.stress.tests}</value>
-						</property>
-					</systemProperties>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

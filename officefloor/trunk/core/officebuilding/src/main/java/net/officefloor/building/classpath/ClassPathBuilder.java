@@ -20,15 +20,17 @@ package net.officefloor.building.classpath;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -38,12 +40,11 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.DistributionManagement;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectSorter;
 
 /**
  * Builds the class path for running the {@link OfficeFloor}.
@@ -101,13 +102,12 @@ public class ClassPathBuilder {
 		// Create the Maven Embedder
 		this.maven = new MavenEmbedder();
 		this.maven.setClassLoader(this.getClass().getClassLoader());
-		this.maven.setGlobalChecksumPolicy(null);
+		this.maven.setLocalRepositoryDirectory(localRepositoryDirectory);
 		this.maven.start();
 		try {
 
-			// Create the local repository
-			this.localRepository = this.maven
-					.createLocalRepository(localRepositoryDirectory);
+			// Obtain the local repository
+			this.localRepository = this.maven.getLocalRepository();
 
 			// Create the listing of remote repositories
 			this.remoteRepositories = new ArrayList<ArtifactRepository>(
@@ -179,16 +179,15 @@ public class ClassPathBuilder {
 		}
 
 		// Obtain the POM model for the artifact
-		Artifact pomArtifact = this.retrieveResolvedArtifact(groupId,
-				artifactId, version, "pom", classifier);
-		Model pom = this.maven.readModel(pomArtifact.getFile());
+		MavenProject pom = this.retrieveResolvedPom(groupId, artifactId,
+				version);
 
 		// Include the dependencies for the artifact (as per POM)
 		this.includePomDependencies(pom);
 	}
 
 	/**
-	 * Includes the Jar file in the class path.
+	 * Includes the Jar file and its dependencies on the class path.
 	 * 
 	 * @param jarFile
 	 *            Jar file.
@@ -196,9 +195,30 @@ public class ClassPathBuilder {
 	 *             If fails to include the Jar file.
 	 */
 	public void includeJar(File jarFile) throws Exception {
+		this.includeJar(jarFile, true);
+	}
+
+	/**
+	 * Includes the Jar file in the class path.
+	 * 
+	 * @param jarFile
+	 *            Jar file.
+	 * @param isIncludeDependencies
+	 *            Flag indicating to include the dependencies referenced by the
+	 *            Jar file.
+	 * @throws Exception
+	 *             If fails to include the Jar file.
+	 */
+	public void includeJar(File jarFile, boolean isIncludeDependencies)
+			throws Exception {
 
 		// Include the Jar
 		this.includeClassPathEntry(jarFile);
+
+		// Determine if include dependencies
+		if (!isIncludeDependencies) {
+			return; // not include dependencies
+		}
 
 		// Obtain the pom.xml file from within the Jar
 		JarEntry pom = null;
@@ -235,10 +255,11 @@ public class ClassPathBuilder {
 		pomContents.close();
 
 		// Read in the POM
-		Model pomModel = this.maven.readModel(pomFile);
+		MavenProject pomProject = this.maven
+				.readProjectWithDependencies(pomFile);
 
 		// Include the dependencies within POM
-		this.includePomDependencies(pomModel);
+		this.includePomDependencies(pomProject);
 	}
 
 	/**
@@ -308,9 +329,6 @@ public class ClassPathBuilder {
 	 */
 	public String getBuiltClassPath() {
 
-		// Obtain the path separator
-		String separator = System.getProperty("path.separator");
-
 		// Build the class path
 		StringBuilder path = new StringBuilder();
 		boolean isFirst = true;
@@ -318,7 +336,7 @@ public class ClassPathBuilder {
 
 			// Provide separator between entries
 			if (!isFirst) {
-				path.append(separator);
+				path.append(File.pathSeparator);
 			}
 			isFirst = false; // for next iteration
 
@@ -338,123 +356,47 @@ public class ClassPathBuilder {
 	}
 
 	/**
-	 * Includes the dependencies identified in the POM {@link Model}.
+	 * Includes the dependencies identified in the POM.
 	 * 
 	 * @param pom
-	 *            POM {@link Model}.
+	 *            {@link MavenProject} POM.
 	 * @throws Exception
 	 *             If fails to include the dependencies.
 	 */
-	private void includePomDependencies(Model pom) throws Exception {
+	private void includePomDependencies(MavenProject pom) throws Exception {
 
-		// Include the dependencies identified in the POM
-		List<?> dependencies = pom.getDependencies();
-		for (Object item : dependencies) {
-			Dependency dependency = (Dependency) item;
+		// Obtain the artifacts
+		@SuppressWarnings("unchecked")
+		List<Artifact> artifacts = (List<Artifact>) pom.getRuntimeArtifacts();
 
-			// Retrieve the dependency artifact for inclusion on class path
-			Artifact dependencyArtifact = this.retrieveResolvedDependency(
-					dependency, pom);
+		// Load mapping of POM to artifact
+		Map<MavenProject, Artifact> pomToArtifact = new HashMap<MavenProject, Artifact>();
+		for (Artifact artifact : artifacts) {
 
-			// Include the dependency artifact (and its dependencies)
-			this.includeArtifact(dependencyArtifact.getGroupId(),
-					dependencyArtifact.getArtifactId(), dependencyArtifact
-							.getVersion(), dependencyArtifact.getType(),
-					dependencyArtifact.getClassifier());
-		}
-	}
+			// Obtain details of artifact
+			String groupId = artifact.getGroupId();
+			String artifactId = artifact.getArtifactId();
+			String version = artifact.getVersion();
 
-	/**
-	 * Retrieves the resolved {@link Artifact} for the {@link Dependency}.
-	 * 
-	 * @param dependency
-	 *            {@link Dependency}.
-	 * @param pom
-	 *            POM {@link Model} containing the {@link Dependency}.
-	 * @return Resolved {@link Artifact} for the dependency.
-	 * @throws Exception
-	 *             If fails to resolve the version.
-	 */
-	private Artifact retrieveResolvedDependency(Dependency dependency, Model pom)
-			throws Exception {
+			// Obtain the POM for the artifact
+			MavenProject dependencyPom = this.retrieveResolvedPom(groupId,
+					artifactId, version);
 
-		// Obtain details of dependency
-		String groupId = this.translate(dependency.getGroupId(), pom);
-		String artifactId = this.translate(dependency.getArtifactId(), pom);
-		String version = this.translate(dependency.getVersion(), pom);
-		String type = this.translate(dependency.getType(), pom);
-		String classifier = this.translate(dependency.getClassifier(), pom);
-
-		// Determine if have version
-		if ((version == null) || (version.trim().length() == 0)) {
-			// Resolve version from dependency management
-			version = this.resolveVersion(groupId, artifactId, pom);
+			// Map the artifact by its POM
+			pomToArtifact.put(dependencyPom, artifact);
 		}
 
-		// Retrieve the resolved dependency artifact
-		Artifact artifact = this.retrieveResolvedArtifact(groupId, artifactId,
-				version, type, classifier);
+		// Sort the dependencies for correct class path order
+		@SuppressWarnings("unchecked")
+		List<MavenProject> sortedPoms = (List<MavenProject>) new ProjectSorter(
+				new ArrayList<MavenProject>(pomToArtifact.keySet()))
+				.getSortedProjects();
 
-		// Return the resolved dependency artifact
-		return artifact;
-	}
-
-	/**
-	 * Resolves the version for the {@link Artifact} via
-	 * {@link DependencyManagement}.
-	 * 
-	 * @param groupId
-	 *            Group Id.
-	 * @param artifactId
-	 *            Artifact Id.
-	 * @param pom
-	 *            {@link Model} to be used for {@link DependencyManagement}.
-	 * @return Resolved version.
-	 * @throws Exception
-	 *             If fails to resolve the version.
-	 */
-	private String resolveVersion(String groupId, String artifactId, Model pom)
-			throws Exception {
-
-		// Ensure have POM otherwise no further parent to resolve version
-		if (pom == null) {
-			throw new ArtifactResolutionException(
-					"Can not determine version for artifact '" + groupId + ":"
-							+ artifactId + "'", groupId, artifactId, null,
-					null, null);
+		// Include the artifacts in sorted order
+		for (MavenProject project : sortedPoms) {
+			Artifact artifact = pomToArtifact.get(project);
+			this.includeClassPathEntry(artifact.getFile());
 		}
-
-		// Determine if dependency management in POM
-		DependencyManagement management = pom.getDependencyManagement();
-		if (management != null) {
-			for (Object object : management.getDependencies()) {
-				Dependency dependency = (Dependency) object;
-
-				// Determine if matching artifact
-				if ((dependency.getGroupId().equals(groupId))
-						&& (dependency.getArtifactId().equals(artifactId))) {
-					// Obtain version via dependency management
-					String version = dependency.getVersion();
-
-					// Return the translated version
-					return this.translate(version, pom);
-				}
-			}
-		}
-
-		// No dependency management, try parent
-		Parent parent = pom.getParent();
-		Model parentPom = null;
-		if (parent != null) {
-			// Have parent so obtain its model
-			Artifact parentArtifact = this.retrieveResolvedArtifact(parent
-					.getGroupId(), parent.getArtifactId(), parent.getVersion(),
-					"pom", null);
-			parentPom = this.maven.readModel(parentArtifact.getFile());
-		}
-
-		// Attempt parent POM for version
-		return this.resolveVersion(groupId, artifactId, parentPom);
 	}
 
 	/**
@@ -485,46 +427,48 @@ public class ClassPathBuilder {
 	}
 
 	/**
-	 * Translates the value.
+	 * Retrieves the resolved POM {@link MavenProject}.
 	 * 
-	 * @param value
-	 *            Value.
-	 * @param properties
-	 *            Properties.
-	 * @return Translated value.
+	 * @param groupId
+	 *            Group Id.
+	 * @param artifactId
+	 *            Artifact Id.
+	 * @param version
+	 *            Version.
+	 * @return Resolved POM {@link MavenProject}.
+	 * @throws Exception
+	 *             If fails to retrieve the resolve POM {@link MavenProject}.
 	 */
-	private String translate(String value, Model pom) throws Exception {
-		if (value == null) {
-			return value;
+	private MavenProject retrieveResolvedPom(String groupId, String artifactId,
+			String version) throws Exception {
+
+		// Obtain the POM file
+		Artifact pomArtifact = this.retrieveResolvedArtifact(groupId,
+				artifactId, version, "pom", null);
+		File pomFile = pomArtifact.getFile();
+
+		// Read as Model (to determine if distribution status)
+		Model model = this.maven.readModel(pomFile);
+		DistributionManagement distribution = model.getDistributionManagement();
+		if ((distribution != null) && (distribution.getStatus() != null)) {
+
+			// Can not read Maven Project with distribution management status
+			distribution.setStatus(null);
+
+			// Create another POM file without the status
+			File tempPomFile = File.createTempFile(OfficeBuilding.class
+					.getSimpleName(), "pom");
+			FileWriter writer = new FileWriter(tempPomFile);
+			this.maven.writeModel(writer, model);
+			writer.close();
+
+			// Use the altered POM file
+			pomFile = tempPomFile;
 		}
 
-		// Obtain the properties
-		Properties properties = pom.getProperties();
-
-		// Add groupId
-		String groupId = pom.getGroupId();
-		if (groupId == null) {
-			groupId = pom.getParent().getGroupId();
-		}
-		properties.setProperty("project.groupId", groupId);
-		properties.setProperty("pom.groupId", groupId);
-
-		// Add version
-		String version = pom.getVersion();
-		if (version == null) {
-			version = pom.getParent().getVersion();
-		}
-		properties.setProperty("project.version", version);
-		properties.setProperty("pom.version", version);
-
-		// Transform the value
-		for (String name : properties.stringPropertyNames()) {
-			String property = properties.getProperty(name);
-			value = value.replace("${" + name + "}", property);
-		}
-
-		// Return the value
-		return value;
+		// Read in the Maven Project
+		MavenProject pom = this.maven.readProjectWithDependencies(pomFile);
+		return pom;
 	}
 
 }
