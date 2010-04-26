@@ -20,16 +20,18 @@ package net.officefloor.building.util;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 /**
  * Utility methods for testing the {@link OfficeBuilding} functionality.
@@ -39,10 +41,24 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeBuildingTestUtil {
 
 	/**
-	 * Location of repository archive.
+	 * Group Id for {@link OfficeFloor} core.
 	 */
-	private static final File REPOSITORY_ARCHIVE = new File(".",
-			"target/localRepository");
+	public static final String GROUP_ID = "net.officefloor.core";
+
+	/**
+	 * Path for the Group Id of the {@link OfficeFloor} core.
+	 */
+	private static final String GROUP_ID_PATH = GROUP_ID.replace('.', '/');
+
+	/**
+	 * Artifact Id for ClassPathTestArtifact.
+	 */
+	public static final String CLASS_PATH_TEST_ARTIFACT_ID = "ClassPathTestArtifact";
+
+	/**
+	 * Version for ClassPathTestArtifact.
+	 */
+	public static final String CLASS_PATH_TEST_ARTIFACT_VERSION = "1.0.0";
 
 	/**
 	 * Obtains the local repository directory.
@@ -54,12 +70,25 @@ public class OfficeBuildingTestUtil {
 	}
 
 	/**
+	 * Obtains the Remote repository directory.
+	 * 
+	 * @return Remote repository directory.
+	 */
+	private static File getRemoteRepositoryDirectory() {
+		File directory = new File(".", "target/test-classes/remoteRepository");
+		TestCase.assertTrue("Remote repository directory not available: "
+				+ directory.getAbsolutePath(), directory.exists());
+		return directory;
+	}
+
+	/**
 	 * Obtains the remote repository URLs.
 	 * 
 	 * @return Remote repository URLs.
 	 */
 	public static String[] getRemoteRepositoryUrls() throws Exception {
-		return new String[] { REPOSITORY_ARCHIVE.toURI().toURL().toString() };
+		return new String[] { "file://"
+				+ getRemoteRepositoryDirectory().getCanonicalPath() };
 	}
 
 	/**
@@ -81,6 +110,11 @@ public class OfficeBuildingTestUtil {
 	 */
 	public static String getOfficeFloorArtifactVersion(String artifactId)
 			throws Exception {
+
+		// Determine if class path test artifact
+		if (CLASS_PATH_TEST_ARTIFACT_ID.equals(artifactId)) {
+			return CLASS_PATH_TEST_ARTIFACT_VERSION;
+		}
 
 		// Extract the artifact version from the class path
 		String classPath = System.getProperty("java.class.path");
@@ -163,8 +197,7 @@ public class OfficeBuildingTestUtil {
 		String version = getOfficeFloorArtifactVersion(artifactId);
 
 		// Create the path to the Jar
-		File jarFile = new File(getLocalRepositoryDirectory(),
-				"net/officefloor/core");
+		File jarFile = new File(getLocalRepositoryDirectory(), GROUP_ID_PATH);
 		jarFile = new File(jarFile, artifactId);
 		jarFile = new File(jarFile, version);
 		jarFile = new File(jarFile, artifactId + "-" + version + ".jar");
@@ -174,30 +207,51 @@ public class OfficeBuildingTestUtil {
 	}
 
 	/**
-	 * Clears the repository store.
+	 * Remove the ClassPathTestArtifact from local repository.
 	 */
-	public static void clearRepositoryArchive() {
-		deleteDirectory(REPOSITORY_ARCHIVE);
+	public static void cleanupClassPathTestArtifactInLocalRepository()
+			throws Exception {
+		File classPathTestArtifactDir = new File(new File(
+				getLocalRepositoryDirectory(), GROUP_ID_PATH),
+				CLASS_PATH_TEST_ARTIFACT_ID);
+		deleteDirectory(classPathTestArtifactDir);
 	}
 
 	/**
-	 * Archives the {@link OfficeFloor} artifact to the repository archive.
-	 * 
-	 * @param artifactId
-	 *            Id for the {@link OfficeFloor} artifact to be archived.
+	 * Setup for ClassPathTestArtifact for download.
 	 */
-	public static void archiveOfficeFloorArtifact(String artifactId) {
+	public static void setupClassPathTestArtifactForDownload() throws Exception {
 
-	}
+		// Clean up
+		cleanupClassPathTestArtifactInLocalRepository();
 
-	/**
-	 * Reinstates the {@link OfficeFloor} artifact from the repository archive.
-	 * 
-	 * @param artifactId
-	 *            Id for the {@link OfficeFloor} artifact to be reinstated.
-	 */
-	public static void reinstateOfficeFloorArtifact(String artifactId) {
+		// Obtain location of POM file
+		File pom = new File(getRemoteRepositoryDirectory(), GROUP_ID_PATH + "/"
+				+ CLASS_PATH_TEST_ARTIFACT_ID + "/"
+				+ CLASS_PATH_TEST_ARTIFACT_VERSION + "/"
+				+ CLASS_PATH_TEST_ARTIFACT_ID + "-"
+				+ CLASS_PATH_TEST_ARTIFACT_VERSION + ".pom");
+		TestCase.assertTrue(CLASS_PATH_TEST_ARTIFACT_ID + "-"
+				+ CLASS_PATH_TEST_ARTIFACT_VERSION
+				+ ".pom not available in remote repository: "
+				+ getRemoteRepositoryDirectory(), pom.exists());
 
+		// Read in POM contents
+		StringWriter writer = new StringWriter();
+		FileReader reader = new FileReader(pom);
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			writer.write(value);
+		}
+		reader.close();
+
+		// Replace officecompiler version in POM file
+		String officeCompilerVersion = getOfficeFloorArtifactVersion("officecompiler");
+		String contents = writer.toString();
+		contents = contents.replace("${officecompiler.version}",
+				officeCompilerVersion);
+		FileWriter pomWriter = new FileWriter(pom, false);
+		pomWriter.write(contents);
+		pomWriter.close();
 	}
 
 	/**
