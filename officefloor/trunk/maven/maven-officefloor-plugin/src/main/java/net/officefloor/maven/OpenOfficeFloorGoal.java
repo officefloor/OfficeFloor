@@ -40,6 +40,11 @@ import org.apache.maven.project.MavenProject;
 public class OpenOfficeFloorGoal extends AbstractGoal {
 
 	/**
+	 * Default process name.
+	 */
+	public static final String DEFAULT_PROCESS_NAME = "maven-officefloor-plugin";
+
+	/**
 	 * {@link MavenProject}.
 	 * 
 	 * @parameter expression="${project}"
@@ -92,8 +97,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				this.officeFloorLocation);
 
 		// Ensure default non-required values
-		this.processName = defaultValue(this.processName, this.getClass()
-				.getSimpleName());
+		this.processName = defaultValue(this.processName, DEFAULT_PROCESS_NAME);
 		this.jvmOptions = defaultValue(this.jvmOptions, null);
 
 		// Obtain the OfficeBuilding manager
@@ -105,7 +109,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			throw new MojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
-		
+
 		// Create the Seed
 		ClassPathSeed seed = new ClassPathSeed();
 		try {
@@ -116,7 +120,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				if (file.isDirectory()) {
 					seed.includeDirectory(file);
 				} else if (file.exists()) {
-					seed.includeJar(file);
+					seed.includeJar(file, false);
 				} else {
 					// Ignore as not exists
 					this.getLog().warn(
