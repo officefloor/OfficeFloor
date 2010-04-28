@@ -85,9 +85,8 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>WebOrchestration-ejb</artifactId>
-			<version>${pom.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -97,9 +96,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>WebTests</artifactId>
-			<version>${pom.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
