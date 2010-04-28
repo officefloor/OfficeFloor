@@ -112,43 +112,48 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(
 				fromParentPipe);
 
-		// Obtain the Managed Process (always first)
-		Object object = fromParentObjectPipe.readObject();
-		if (!(object instanceof ManagedProcess)) {
-			throw new IllegalArgumentException("First object must be a "
-					+ ManagedProcess.class.getName());
-		}
-		ManagedProcess managedProcess = (ManagedProcess) object;
-
-		// Connect to parent to send notifications
-		int parentPort = fromParentObjectPipe.readInt();
-		Socket parentSocket = new Socket();
-		parentSocket.connect(new InetSocketAddress(parentPort));
-		ObjectOutputStream toParentPipe = new ObjectOutputStream(parentSocket
-				.getOutputStream());
-
-		// Create the MBean Server
-		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
-
-		// Create the server socket for the JMX Connector Server
-		final ServerSocket serverSocket = new ServerSocket();
-		serverSocket.bind(null); // Any available port
-		int serverPort = serverSocket.getLocalPort();
-
-		// Set up environment for JMX Connector Server
-		Map<String, Object> environment = new HashMap<String, Object>();
-		environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
-				new RMIServerSocketFactory() {
-					@Override
-					public ServerSocket createServerSocket(int port)
-							throws IOException {
-						return serverSocket;
-					}
-				});
-
-		// Create and start the JMX Connecter Server (also ensure shut down)
+		// Attempt to run managed process
 		JMXConnectorServer connectorServer = null;
+		ObjectOutputStream toParentPipe = null;
 		try {
+
+			// Obtain the Managed Process (always first)
+			Object object = fromParentObjectPipe.readObject();
+			if (!(object instanceof ManagedProcess)) {
+				throw new IllegalArgumentException("First object must be a "
+						+ ManagedProcess.class.getName());
+			}
+			ManagedProcess managedProcess = (ManagedProcess) object;
+
+			// Connect to parent to send notifications
+			int parentPort = fromParentObjectPipe.readInt();
+			Socket parentSocket = new Socket();
+			parentSocket.connect(new InetSocketAddress(parentPort));
+			toParentPipe = new ObjectOutputStream(parentSocket
+					.getOutputStream());
+
+			// Create the MBean Server
+			MBeanServer mbeanServer = ManagementFactory
+					.getPlatformMBeanServer();
+
+			// Create the server socket for the JMX Connector Server
+			final ServerSocket serverSocket = new ServerSocket();
+			serverSocket.bind(null); // Any available port
+			int serverPort = serverSocket.getLocalPort();
+
+			// Set up environment for JMX Connector Server
+			Map<String, Object> environment = new HashMap<String, Object>();
+			environment.put(
+					RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+					new RMIServerSocketFactory() {
+						@Override
+						public ServerSocket createServerSocket(int port)
+								throws IOException {
+							return serverSocket;
+						}
+					});
+
+			// Create and start the JMX Connecter Server (also ensure shut down)
 			connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
 					new JMXServiceURL(JMX_COMMUNICATION_PROTOCOL, null,
 							serverPort), environment, mbeanServer);
@@ -166,6 +171,26 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 
 			// Run the managed process
 			managedProcess.main();
+
+		} catch (Throwable ex) {
+			// Notify Process Manager of failure
+			if (toParentPipe != null) {
+				try {
+					toParentPipe.writeObject(ex);
+					toParentPipe.flush();
+				} catch (Throwable notifyEx) {
+					// Indicate failure to notify.
+					System.err.println("Failed to notify "
+							+ ProcessManager.class.getSimpleName()
+							+ " of failure:");
+					notifyEx.printStackTrace();
+
+					// Carry on the propagate actual failure
+				}
+			}
+
+			// Propagate the failure
+			throw ex;
 
 		} finally {
 			// Ensure shut down JMX connector server

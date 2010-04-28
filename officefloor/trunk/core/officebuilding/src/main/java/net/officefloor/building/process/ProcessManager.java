@@ -43,9 +43,8 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.OfficeBuilding;
-
 import mx4j.tools.remote.proxy.RemoteMBeanProxy;
+import net.officefloor.building.OfficeBuilding;
 
 /**
  * Manages a {@link Process}.
@@ -165,6 +164,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			activeMBeanNamespaces.add(mbeanNamespace);
 		}
 
+		ProcessManager processManager;
 		try {
 			// Create the from process communication pipe
 			ServerSocket fromProcessServerSocket = new ServerSocket();
@@ -186,12 +186,12 @@ public class ProcessManager implements ProcessManagerMBean {
 			}
 
 			// Create the process manager for the process
-			ProcessManager processManager = new ProcessManager(processName,
-					mbeanNamespace, process, completionListener, mbeanServer);
+			processManager = new ProcessManager(processName, mbeanNamespace,
+					process, completionListener, mbeanServer);
 
 			// Gobble the process's stdout and stderr
-			new StreamGobbler(process.getInputStream(), processManager).start();
-			new StreamGobbler(process.getErrorStream(), processManager).start();
+			new StreamGobbler(process.getInputStream()).start();
+			new StreamGobbler(process.getErrorStream()).start();
 
 			// Handle process responses
 			new ProcessNotificationHandler(processManager,
@@ -204,25 +204,35 @@ public class ProcessManager implements ProcessManagerMBean {
 			toProcessPipe.writeInt(fromProcessPort);
 			toProcessPipe.flush();
 
-			try {
-				// Wait until process is initialised (or complete)
-				synchronized (processManager) {
-					while ((!processManager.isInitialised)
-							&& (!processManager.isComplete)) {
-						processManager.wait(100);
-					}
-				}
-			} catch (InterruptedException ex) {
-				// Continue on as interrupted
-			}
-
-			// Return the manager for the process
-			return processManager;
-
 		} catch (IOException ex) {
 			// Propagate failure
 			throw new ProcessException(ex);
 		}
+
+		try {
+			synchronized (processManager) {
+				// Wait until process is initialised (or complete)
+				while ((!processManager.isInitialised)
+						&& (!processManager.isComplete)) {
+					processManager.wait(100);
+				}
+
+				// Determine if failure in running ProcessShell
+				if (!processManager.isInitialised) {
+					// Failed to start the ProcessShell
+					throw new ProcessException("Failed to start "
+							+ ProcessShell.class.getSimpleName() + " for "
+							+ managedProcess + " ["
+							+ managedProcess.getClass().getName() + "]",
+							processManager.processShellFailure);
+				}
+			}
+		} catch (InterruptedException ex) {
+			// Continue on as interrupted
+		}
+
+		// Return the manager for the process
+		return processManager;
 	}
 
 	/**
@@ -291,12 +301,17 @@ public class ProcessManager implements ProcessManagerMBean {
 	/**
 	 * Flag indicating if the {@link Process} has been initialised.
 	 */
-	private volatile boolean isInitialised = false;
+	private boolean isInitialised = false;
+
+	/**
+	 * Failure of {@link ProcessShell} running the {@link ManagedProcess}.
+	 */
+	private Throwable processShellFailure = null;
 
 	/**
 	 * Flag indicating if the {@link Process} is complete.
 	 */
-	private volatile boolean isComplete = false;
+	private boolean isComplete = false;
 
 	/**
 	 * Initiate.
@@ -399,17 +414,25 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
+	 * Flags a failure in running the {@link ProcessShell}.
+	 * 
+	 * @param failure
+	 *            Failure in running the {@link ProcessShell}.
+	 */
+	private synchronized void setProcessShellFailure(Throwable failure) {
+		this.processShellFailure = failure;
+	}
+
+	/**
 	 * Flags the {@link Process} is initialised.
 	 */
-	private void flagInitialised() {
+	private synchronized void flagInitialised() {
 
 		// Flag initialised
 		this.isInitialised = true;
 
 		// Notify immediately that initialised
-		synchronized (this) {
-			this.notify();
-		}
+		this.notify();
 	}
 
 	/**
@@ -498,7 +521,7 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	@Override
-	public boolean isProcessComplete() {
+	public synchronized boolean isProcessComplete() {
 		// Return whether process complete
 		return this.isComplete;
 	}
@@ -560,11 +583,24 @@ public class ProcessManager implements ProcessManagerMBean {
 				ObjectInputStream fromProcessPipe = new ObjectInputStream(
 						socket.getInputStream());
 
-				// Loop while still processing
-				while (!this.processManager.isProcessComplete()) {
+				// Loop until pipe closes
+				for (;;) {
 
-					// Read in the notification
+					// Read in next Object
 					Object object = fromProcessPipe.readObject();
+
+					// Determine if exception
+					if (object instanceof Throwable) {
+						// Flag process shell failure
+						Throwable failure = (Throwable) object;
+						this.processManager.setProcessShellFailure(failure);
+
+						// Failure indicates process complete.
+						// (finally block handles completion)
+						return;
+					}
+
+					// Determine if notification
 					if (!(object instanceof MBeanRegistrationNotification)) {
 						throw new IllegalArgumentException("Unknown response: "
 								+ object
@@ -587,31 +623,23 @@ public class ProcessManager implements ProcessManagerMBean {
 										.getPort());
 
 						// Connect to the process
-						JMXConnector connector;
 						try {
-							connector = JMXConnectorFactory
+							JMXConnector connector = JMXConnectorFactory
 									.connect(processServiceUrl);
+							this.connection = connector
+									.getMBeanServerConnection();
 						} catch (Exception ex) {
-							// Likely that process completed quickly.
-							// Wait some time to detect process completion.
-							Thread.sleep(100);
-
-							// Check if process is complete
-							if (this.processManager.isProcessComplete()) {
-								// Process complete, so stop
-								return;
-							} else {
-								// Propagate the failure
-								throw ex;
-							}
+							// Ignore failure to connect.
+							// (Likely process completed quickly)
 						}
-						this.connection = connector.getMBeanServerConnection();
 					}
 
 					// Register the remote MBean locally
 					ObjectName remoteMBeanName = registration.getMBeanName();
-					this.processManager.registerRemoteMBeanLocally(
-							remoteMBeanName, connection);
+					if (this.connection != null) {
+						this.processManager.registerRemoteMBeanLocally(
+								remoteMBeanName, this.connection);
+					}
 
 					// Determine if process shell MBean.
 					// Must be done after registering to ensure available.
@@ -622,14 +650,17 @@ public class ProcessManager implements ProcessManagerMBean {
 					}
 				}
 			} catch (EOFException ex) {
-				// Process completed
-				this.processManager.flagComplete();
+				// Process completed, as from process pipe closed.
+				// finally block flags process complete.
 
 			} catch (Throwable ex) {
-				// Indicate failure
+				// Indicate failure, as not process complete
 				ex.printStackTrace();
 
 			} finally {
+				// Flag that process is now complete
+				this.processManager.flagComplete();
+
 				// Close the socket as no longer listening
 				try {
 					this.fromProcessServerSocket.close();
@@ -651,22 +682,13 @@ public class ProcessManager implements ProcessManagerMBean {
 		private final InputStream stream;
 
 		/**
-		 * {@link ProcessManager} to flag if complete. May be <code>null</code>.
-		 */
-		private final ProcessManager processManager;
-
-		/**
 		 * Initiate.
 		 * 
 		 * @param stream
 		 *            {@link InputStream} to gobble.
-		 * @param processManager
-		 *            {@link ProcessManager} to flag if complete. May be
-		 *            <code>null</code>.
 		 */
-		public StreamGobbler(InputStream stream, ProcessManager processManager) {
+		public StreamGobbler(InputStream stream) {
 			this.stream = stream;
-			this.processManager = processManager;
 
 			// Flag as deamon (should not stop process finishing)
 			this.setDaemon(true);
@@ -687,9 +709,6 @@ public class ProcessManager implements ProcessManagerMBean {
 			} catch (Throwable ex) {
 				// Provide stack trace and exit
 				ex.printStackTrace();
-			} finally {
-				// Flag process is complete
-				this.processManager.flagComplete();
 			}
 		}
 	}

@@ -45,4 +45,16 @@ public class ProcessException extends Exception {
 		super(cause);
 	}
 
+	/**
+	 * Initiate.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param cause
+	 *            Cause.
+	 */
+	public ProcessException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }
