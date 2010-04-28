@@ -18,6 +18,7 @@
 		<module>WebTests</module>
 		<module>WebStruts-war</module>
 		<module>WebStruts-ear</module>
+		<module>WebOfficeFloor</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -28,13 +29,21 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>WebOrchestration-ejb</artifactId>
+				<version>0.0.1</version>
+				<type>ejb</type>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>WebStruts-ear</artifactId>
 				<version>0.0.1</version>
+				<type>ear</type>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>WebStruts-war</artifactId>
 				<version>0.0.1</version>
+				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
