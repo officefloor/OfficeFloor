@@ -45,7 +45,9 @@ public class ProcessManagerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure process is stopped
-		this.manager.destroyProcess();
+		if (this.manager != null) {
+			this.manager.destroyProcess();
+		}
 	}
 
 	/**
@@ -161,6 +163,70 @@ public class ProcessManagerTest extends TestCase {
 		// Ensure listener notified of process stopped
 		synchronized (isStopped) {
 			assertTrue("Listener must be notified", isStopped[0]);
+		}
+	}
+
+	/**
+	 * Ensure on failing to init the {@link ManagedProcess} that the exception
+	 * is feed back.
+	 */
+	public void testFailInitProcess() throws Exception {
+
+		final String FAILURE_MESSAGE = "TEST FAILURE";
+		final Throwable failure = new Throwable(FAILURE_MESSAGE);
+
+		// Should fail to start
+		ManagedProcess managedProcess = new FailInitProcess(failure);
+		try {
+			ProcessManager.startProcess(managedProcess, null);
+			fail("Should fail to start");
+		} catch (ProcessException ex) {
+			// Ensure correct message
+			assertEquals("Incorrect failure message",
+					"Failed to start ProcessShell for " + managedProcess + " ["
+							+ FailInitProcess.class.getName() + "]", ex
+							.getMessage());
+
+			// Ensure correct cause
+			Throwable cause = ex.getCause();
+			assertEquals("Incorrect exception", FAILURE_MESSAGE, cause
+					.getMessage());
+		}
+	}
+
+	/**
+	 * {@link ManagedProcess} to fail init.
+	 */
+	private static class FailInitProcess implements ManagedProcess {
+
+		/**
+		 * Failure to propagate from the init method.
+		 */
+		private final Throwable failure;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param failure
+		 *            Failure to propagate from the init method.
+		 */
+		public FailInitProcess(Throwable failure) {
+			this.failure = failure;
+		}
+
+		/*
+		 * =================== ManagedProcess =============================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			// Propagate failure to init
+			throw this.failure;
+		}
+
+		@Override
+		public void main() throws Throwable {
+			fail("Should not be invoked");
 		}
 	}
 

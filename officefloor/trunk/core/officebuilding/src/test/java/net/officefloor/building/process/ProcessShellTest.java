@@ -41,6 +41,16 @@ import junit.framework.TestCase;
 public class ProcessShellTest extends TestCase {
 
 	/**
+	 * Flags whether the init for the {@link ManagedProcess} run.
+	 */
+	private static volatile boolean isInitRun = false;
+
+	/**
+	 * Flags whether the main for the {@link ManagedProcess} run.
+	 */
+	private static volatile boolean isMainRun = false;
+
+	/**
 	 * Ensure able to run {@link ProcessShell}.
 	 */
 	public void testRunProcess() throws Throwable {
@@ -62,8 +72,16 @@ public class ProcessShellTest extends TestCase {
 		InputStream fromParentPipe = new ByteArrayInputStream(buffer
 				.toByteArray());
 
+		// Ensure flagged not run
+		isInitRun = false;
+		isMainRun = false;
+
 		// Run the process
 		ProcessShell.main(fromParentPipe);
+
+		// Ensure the methods run
+		assertTrue("init() method should be invoked", isInitRun);
+		assertTrue("main() method should be inovked", isMainRun);
 	}
 
 	/**
@@ -85,6 +103,9 @@ public class ProcessShellTest extends TestCase {
 			// Register the MBean
 			this.mockObjectName = new ObjectName("test", "type", "mock");
 			context.registerMBean(new Mock(), this.mockObjectName);
+
+			// Flag run
+			isInitRun = true;
 		}
 
 		@Override
@@ -103,6 +124,9 @@ public class ProcessShellTest extends TestCase {
 			ObjectInstance processShellInstance = mbeanServer
 					.getObjectInstance(ProcessShell.PROCESS_SHELL_OBJECT_NAME);
 			assertNotNull("Must have Process Shell MBean", processShellInstance);
+
+			// Flag run
+			isMainRun = true;
 		}
 	}
 
