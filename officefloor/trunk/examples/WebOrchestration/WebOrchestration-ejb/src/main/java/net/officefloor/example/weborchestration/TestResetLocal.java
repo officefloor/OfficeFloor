@@ -17,7 +17,10 @@
  */
 package net.officefloor.example.weborchestration;
 
+import java.util.List;
+
 import javax.ejb.Local;
+import javax.naming.NamingException;
 
 /**
  * {@link Local} interface for {@link TestReset}.
@@ -31,5 +34,25 @@ public interface TestResetLocal {
 	 * Resets for next test.
 	 */
 	void reset();
+
+	/**
+	 * Sets up the {@link Customer}.
+	 * 
+	 * @return {@link Customer}.
+	 * @throws NamingException
+	 *             If fails to setup {@link Customer}.
+	 * @throws CustomerExistsException
+	 *             If {@link Customer} already setup.
+	 */
+	Customer setupCustomer() throws NamingException, CustomerExistsException;
+
+	/**
+	 * Sets up the {@link Product} instances.
+	 * 
+	 * @return {@link Product} instances.
+	 * @throws NamingException
+	 *             If fails to setup {@link Product} instances.
+	 */
+	List<Product> setupProducts() throws NamingException;
 
 }
