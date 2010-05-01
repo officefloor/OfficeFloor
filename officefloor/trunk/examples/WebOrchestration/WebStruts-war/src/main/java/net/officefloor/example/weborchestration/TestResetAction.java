@@ -17,14 +17,7 @@
  */
 package net.officefloor.example.weborchestration;
 
-import java.util.LinkedList;
 import java.util.List;
-
-import net.officefloor.example.weborchestration.Customer;
-import net.officefloor.example.weborchestration.Product;
-import net.officefloor.example.weborchestration.ProductCatalogLocal;
-import net.officefloor.example.weborchestration.SalesLocal;
-import net.officefloor.example.weborchestration.TestResetLocal;
 
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionSupport;
@@ -44,7 +37,7 @@ public class TestResetAction extends ActionSupport {
 	/**
 	 * {@link Product} instances.
 	 */
-	public static List<Product> products = new LinkedList<Product>();
+	public static List<Product> products;
 
 	/*
 	 * ================= ActionSupport =======================
@@ -54,18 +47,14 @@ public class TestResetAction extends ActionSupport {
 	public String execute() throws Exception {
 
 		// Reset the for testing
-		ActionUtil.lookupService(TestResetLocal.class).reset();
+		TestResetLocal setup = ActionUtil.lookupService(TestResetLocal.class);
+		setup.reset();
 
 		// Create customer
-		SalesLocal sales = ActionUtil.lookupService(SalesLocal.class);
-		customer = sales.createCustomer("daniel@officefloor.net", "Daniel");
+		customer = setup.setupCustomer();
 
 		// Create the products
-		ProductCatalogLocal catalog = ActionUtil
-				.lookupService(ProductCatalogLocal.class);
-		products.add(catalog.createProduct("Shirt", 19.00));
-		products.add(catalog.createProduct("Trousers", 25.00));
-		products.add(catalog.createProduct("Hat", 7.00));
+		products = setup.setupProducts();
 
 		// Successful
 		return SUCCESS;

@@ -17,7 +17,13 @@
  */
 package net.officefloor.example.weborchestration;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.ejb.Stateless;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -41,11 +47,52 @@ public class TestReset implements TestResetLocal {
 
 	@Override
 	public void reset() {
-		this.clearEntities(ShoppingCartItem.class,
-				ProductAvailability.class, ShoppingCart.class, Product.class,
-				Account.class, Customer.class);
+		this.clearEntities(ShoppingCartItem.class, ProductAvailability.class,
+				ShoppingCart.class, Product.class, Account.class,
+				Customer.class);
 	}
 
+	@Override
+	public Customer setupCustomer() throws NamingException,
+			CustomerExistsException {
+
+		// Obtain the Sales
+		Context context = new InitialContext();
+		SalesLocal sales = (SalesLocal) context.lookup(SalesLocal.class
+				.getSimpleName());
+
+		// Create customer
+		Customer customer = sales.createCustomer("daniel@officefloor.net",
+				"Daniel");
+
+		// Return the customer
+		return customer;
+	}
+
+	@Override
+	public List<Product> setupProducts() throws NamingException {
+
+		// Obtain the Sales
+		Context context = new InitialContext();
+		ProductCatalogLocal catalog = (ProductCatalogLocal) context
+				.lookup(ProductCatalogLocal.class.getSimpleName());
+
+		// Create products
+		List<Product> products = new LinkedList<Product>();
+		products.add(catalog.createProduct("Shirt", 19.00));
+		products.add(catalog.createProduct("Trousers", 25.00));
+		products.add(catalog.createProduct("Hat", 7.00));
+
+		// Return the products
+		return products;
+	}
+
+	/**
+	 * Clears the entities.
+	 * 
+	 * @param entityTypes
+	 *            Types of entities to be cleared.
+	 */
 	private void clearEntities(Class<?>... entityTypes) {
 		for (Class<?> entityType : entityTypes) {
 			this.entityManager.createQuery(
