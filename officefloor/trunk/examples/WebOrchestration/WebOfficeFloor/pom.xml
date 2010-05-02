@@ -11,15 +11,66 @@
 	<packaging>jar</packaging>
 	<name>WebOfficeFloor</name>
 	<description>Web components of the OfficeFloor Example</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-officefloor-plugin</artifactId>
+				<configuration>
+					<port>13778</port>
+					<processName>example</processName>
+					<officeFloorLocation>net/officefloor/example/weborchestration/WebOfficeFloor.officefloor</officeFloorLocation>
+					<jvmOptions>-Djava.naming.factory.initial=org.apache.openejb.client.LocalInitialContextFactory
+						-Dopenejb.deployments.classpath.include=.*WebOrchestration.*</jvmOptions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-OfficeFloor</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+							<goal>open</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-OfficeFloor</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
+		<dependency>
+			<!-- OpenEJB must be placed first due to classpath issues -->
+			<groupId>org.apache.openejb</groupId>
+			<artifactId>openejb-core</artifactId>
+			<version>3.1.2</version>
+		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>WebOrchestration-ejb</artifactId>
-			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_socket</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>WebTests</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

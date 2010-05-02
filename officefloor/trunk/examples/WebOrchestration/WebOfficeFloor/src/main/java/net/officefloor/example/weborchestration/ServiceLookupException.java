@@ -18,12 +18,20 @@
 package net.officefloor.example.weborchestration;
 
 /**
- * Integration tests for Web Orchestration examples.
+ * Indicates failure to lookup a service.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebOrchestrationIT extends CustomerTestCase /*
-														 * TODO use:
-														 * WebOrchestrationTestCases
-														 */{
+public class ServiceLookupException extends RuntimeException {
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param cause
+	 *            Cause of service lookup failure.
+	 */
+	public ServiceLookupException(Throwable cause) {
+		super(cause);
+	}
+
 }

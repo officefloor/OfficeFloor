@@ -1,0 +1,57 @@
+<desk>
+  <external-managed-objects>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="738" y="407"/>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <external-flows>
+    <external-flow name="Exception" argument-type="java.lang.Exception" x="740" y="157"/>
+    <external-flow name="head" argument-type="java.lang.Void" x="735" y="75"/>
+    <external-flow name="initialState" argument-type="java.lang.Void" x="716" y="107"/>
+  </external-flows>
+  <works>
+    <work name="HeadMethodHandler" source="net.officefloor.plugin.work.clazz.ClassWorkSource" x="128" y="286">
+      <properties>
+        <property name="class.name" value="net.officefloor.example.weborchestration.HeadMethodHandler"/>
+      </properties>
+      <work-task name="handleHead">
+        <task-object name="ServerHttpConnection" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+      </work-task>
+    </work>
+    <work name="HttpRoute" source="net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource" x="402" y="286">
+      <properties>
+        <property name="route.initialState" value="initialState.action"/>
+      </properties>
+      <work-task name="route">
+        <task-object name="SERVER_HTTP_CONNECTION" key="SERVER_HTTP_CONNECTION" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+      </work-task>
+    </work>
+  </works>
+  <tasks>
+    <task name="handleRequest" public="true" work="HeadMethodHandler" task="handleHead" return-type="" x="110" y="96">
+      <task-flow name="doHead" key="" argument-type="">
+        <external-flow name="head" link="SEQUENTIAL"/>
+      </task-flow>
+      <task-flow name="doOther" key="" argument-type="">
+        <task name="route" link="SEQUENTIAL"/>
+      </task-flow>
+    </task>
+    <task name="route" public="false" work="HttpRoute" task="route" return-type="" x="327" y="124">
+      <task-flow name="initialState" key="" argument-type="">
+        <external-flow name="initialState" link="SEQUENTIAL"/>
+      </task-flow>
+      <task-flow name="default" key="" argument-type="">
+        <external-flow name="initialState" link="SEQUENTIAL"/>
+      </task-flow>
+      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException">
+        <external-flow name="Exception"/>
+      </task-escalation>
+    </task>
+  </tasks>
+</desk>

@@ -127,7 +127,11 @@
 						<configuration>
 							<background>true</background>
 							<logOutput>true</logOutput>
-							<multiWindow>true</multiWindow>
+<!--  
+							<debug>true</debug>
+-->
+							<browserSideLog>true</browserSideLog>
+							<singleWindow>true</singleWindow>
 						</configuration>
 					</execution>
 					<execution>
