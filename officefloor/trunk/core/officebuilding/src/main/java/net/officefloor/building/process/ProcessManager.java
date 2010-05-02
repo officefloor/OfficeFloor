@@ -28,6 +28,7 @@ import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -133,12 +134,12 @@ public class ProcessManager implements ProcessManagerMBean {
 		String[] jvmOptions = new String[0];
 		String jvmOptionText = configuration.getJvmOptions();
 		if (!OfficeBuilding.isBlank(jvmOptionText)) {
-			// Split the options for the command
-			jvmOptions = jvmOptionText.split(" ");
+			// Split the options for the command (by white spacing)
+			jvmOptions = jvmOptionText.split("(\\s)+");
 		}
 
 		// Create the command to invoke process
-		List<String> command = new LinkedList<String>();
+		List<String> command = new ArrayList<String>(4 + jvmOptions.length);
 		command.add(javaExecutable.getAbsolutePath());
 		command.add("-cp");
 		command.add(classPath);
