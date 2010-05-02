@@ -1,0 +1,67 @@
+<office>
+  <external-managed-objects>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="834" y="435">
+    </external-managed-object>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <teams>
+    <team name="Servicer" x="796" y="484"/>
+  </teams>
+  <escalations>
+  </escalations>
+  <administrators>
+  </administrators>
+  <sections>
+    <section name="InitialState" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/initialstate/InitialState.desk" x="395" y="156">
+      <properties>
+      </properties>
+      <input name="display" parameter-type=""/>
+      <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/route/Route.desk" x="128" y="226">
+      <properties>
+      </properties>
+      <input name="handleRequest" parameter-type=""/>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <output name="head" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="initialState" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="InitialState" input="display"/>
+      </output>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/send/Send.desk" x="757" y="181">
+      <properties>
+      </properties>
+      <input name="SEND" parameter-type=""/>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+  </sections>
+</office>

@@ -137,6 +137,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	public void alignTestState() {
 		DefaultSelenium initiate = createSeleniumClient();
 		initiate.start();
+		initiate.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		try {
 			initiate.open("/initialState.action");
@@ -182,6 +183,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		// Start selenium client
 		this.selenium = createSeleniumClient();
 		this.selenium.start();
+		this.selenium.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		// Reset for next test
 		this.selenium.open("/testReset.action");
@@ -219,6 +221,19 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		this.inputText("email", this.getCustomerEmail());
 		this.inputText("password", "password");
 		this.submit("loginCustomer");
+	}
+
+	/**
+	 * Sets the time to wait on loading a page before timing out.
+	 * 
+	 * @param pageLoadWaitTime
+	 *            Time to wait on loading a page before timing out.
+	 */
+	public void setLoadPageWaitTime(long pageLoadWaitTime) {
+		this.pageLoadWaitTime = pageLoadWaitTime;
+		if (this.selenium != null) {
+			this.selenium.setTimeout(String.valueOf(this.pageLoadWaitTime));
+		}
 	}
 
 	/**
