@@ -231,6 +231,85 @@ public class ProcessManagerTest extends TestCase {
 	}
 
 	/**
+	 * Ensure JVM options set for process.
+	 */
+	public void testJvmOptions() throws Exception {
+
+		// Obtain temporary file to write content
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+
+		// Provide the JVM options
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration
+				.setJvmOptions("-Dtest.property1=One -Dtest.property2=Two");
+
+		// Ensure properties not available
+		System.clearProperty("test.property1");
+		System.clearProperty("test.property2");
+
+		// Start the process
+		this.manager = ProcessManager.startProcess(new JvmOptionsProcess(file
+				.getAbsolutePath()), configuration);
+
+		// Wait until process writes content to file
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+
+		// Ensure content in file
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				"Two", file);
+	}
+
+	/**
+	 * {@link ManagedProcess} to check that JVM options available.
+	 */
+	private static class JvmOptionsProcess implements ManagedProcess {
+
+		/**
+		 * Location of file to write System property value.
+		 */
+		private final String filePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param filePath
+		 *            Location of file to write System property value.
+		 */
+		public JvmOptionsProcess(String filePath) {
+			this.filePath = filePath;
+		}
+
+		/*
+		 * =================== ManagedProcess =============================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+
+			// Ensure the System property is specified
+			String property = System.getProperty("test.property1");
+
+			// Ensure correct property value
+			assertEquals("Incorrect system property value", "One", property);
+		}
+
+		@Override
+		public void main() throws Throwable {
+
+			// Obtain the file
+			File file = new File(this.filePath);
+
+			// Obtain System property
+			String property = System.getProperty("test.property2");
+
+			// Write the value to the file
+			Writer writer = new FileWriter(file);
+			writer.write(property);
+			writer.close();
+		}
+	}
+
+	/**
 	 * Ensure able to destroy the {@link Process}.
 	 */
 	public void testDestroyProcess() throws Exception {
