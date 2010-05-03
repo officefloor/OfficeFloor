@@ -29,6 +29,16 @@ import junit.framework.TestSuite;
 public class WebOrchestrationTestCases extends TestCase {
 
 	/**
+	 * Initiate.
+	 * 
+	 * @param urlFileExtension
+	 *            URL file extension.
+	 */
+	public WebOrchestrationTestCases(String urlFileExtension) {
+		AbstractSeleniumTestCase.urlFileExtension = urlFileExtension;
+	}
+
+	/**
 	 * Creates the {@link TestSuite} of web example integration tests.
 	 * 
 	 * @return {@link TestSuite} of web example integration tests.
