@@ -35,22 +35,27 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	/**
 	 * Shirt {@link Product} name.
 	 */
-	public static String PRODUCT_SHIRT = "Shirt";
+	public static final String PRODUCT_SHIRT = "Shirt";
 
 	/**
 	 * Trousers {@link Product} name.
 	 */
-	public static String PRODUCT_TROUSERS = "Trousers";
+	public static final String PRODUCT_TROUSERS = "Trousers";
 
 	/**
 	 * Hat {@link Product} name.
 	 */
-	public static String PRODUCT_HAT = "Hat";
+	public static final String PRODUCT_HAT = "Hat";
 
 	/**
 	 * {@link Product} identifiers.
 	 */
-	private static Map<String, Long> productIdentifiers = new HashMap<String, Long>();
+	private static final Map<String, Long> productIdentifiers = new HashMap<String, Long>();
+
+	/**
+	 * URL file extension.
+	 */
+	public static String urlFileExtension = ".action";
 
 	/**
 	 * {@link Customer} name.
@@ -140,7 +145,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		initiate.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		try {
-			initiate.open("/initialState.action");
+			initiate.open("/initialState" + urlFileExtension);
 
 			// Load the customer details
 			customerName = initiate.getText("id=name");
@@ -186,7 +191,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		this.selenium.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		// Reset for next test
-		this.selenium.open("/testReset.action");
+		this.selenium.open("/testReset" + urlFileExtension);
 
 		// Open the starting URL
 		this.selenium.open(this.startingUrl);

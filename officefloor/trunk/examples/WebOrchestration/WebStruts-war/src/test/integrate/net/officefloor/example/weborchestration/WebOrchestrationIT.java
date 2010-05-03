@@ -23,4 +23,12 @@ package net.officefloor.example.weborchestration;
  * @author Daniel Sagenschneider
  */
 public class WebOrchestrationIT extends WebOrchestrationTestCases {
+
+	/**
+	 * Initiate.
+	 */
+	public WebOrchestrationIT() {
+		super(".action");
+	}
+
 }
