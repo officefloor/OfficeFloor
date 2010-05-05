@@ -23,20 +23,17 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
 
 /**
  * {@link ManagedObject} for the {@link HttpSession} Object.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
-		CoordinatingManagedObject<HttpSessionObjectDependencies> {
-
-	/**
-	 * {@link Class} of the Object.
-	 */
-	private final Class<?> clazz;
+		CoordinatingManagedObject<HttpSessionObjectDependencies>,
+		HttpSessionObject<Object> {
 
 	/**
 	 * Bound name to register the Object with the {@link HttpSession}.
@@ -47,21 +44,6 @@ public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 	 * {@link HttpSession}.
 	 */
 	private HttpSession httpSession;
-
-	/**
-	 * Object.
-	 */
-	private Object object;
-
-	/**
-	 * Initiate.
-	 *
-	 * @param clazz
-	 *            {@link Class} of the Object.
-	 */
-	public HttpSessionObjectManagedObject(Class<?> clazz) {
-		this.clazz = clazz;
-	}
 
 	/*
 	 * ===================== NameAwareManagedObject ===========================
@@ -84,14 +66,6 @@ public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 		// Obtain the HTTP Session
 		this.httpSession = (HttpSession) registry
 				.getObject(HttpSessionObjectDependencies.HTTP_SESSION);
-
-		// Obtain the object
-		this.object = this.httpSession.getAttribute(this.boundName);
-		if (this.object == null) {
-			// Not in HTTP Session, so create and register
-			this.object = this.clazz.newInstance();
-			this.httpSession.setAttribute(this.boundName, this.object);
-		}
 	}
 
 	/*
@@ -100,7 +74,24 @@ public class HttpSessionObjectManagedObject implements NameAwareManagedObject,
 
 	@Override
 	public Object getObject() throws Throwable {
-		return this.object;
+		return this;
+	}
+
+	/*
+	 * ========================= HttpSession ================================
+	 */
+
+	@Override
+	public Object getSessionObject() {
+		// Return the object from the Session.
+		// (always go to session in case may have changed by other means)
+		return this.httpSession.getAttribute(this.boundName);
+	}
+
+	@Override
+	public void setSessionObject(Object sessionObject) {
+		// Load object into the session
+		this.httpSession.setAttribute(this.boundName, sessionObject);
 	}
 
 }

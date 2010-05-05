@@ -15,57 +15,70 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package net.officefloor.plugin.socket.server.http.session.object.source;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject;
 
 /**
- * {@link ManagedObjectSource} to obtain an {@link HttpSessionObject} for an
- * Object in the {@link HttpSession}.
+ * {@link ManagedObjectSource} that retrieves the {@link Object} from the
+ * {@link HttpSessionObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectSource
+public class HttpSessionObjectRetrieverManagedObjectSource
 		extends
-		AbstractManagedObjectSource<HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies, None> {
+		AbstractManagedObjectSource<HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies, None> {
 
 	/**
-	 * Dependency keys for the {@link HttpSessionObjectManagedObjectSource}.
+	 * Property to specify the {@link Class} name of the {@link Object}.
 	 */
-	public static enum HttpSessionObjectDependencies {
-		HTTP_SESSION
+	public static final String PROPERTY_TYPE_NAME = "type.name";
+
+	/**
+	 * Dependency keys for the
+	 * {@link HttpSessionObjectRetrieverManagedObjectSource}.
+	 */
+	public static enum HttpSessionObjectRetrieverDependencies {
+		HTTP_SESSION_OBJECT
 	}
 
 	/*
-	 * ==================== AbstractManagedObjectSource =====================
+	 * ================== ManagedObjectSource ====================
 	 */
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// No specification
+		context.addProperty(PROPERTY_TYPE_NAME);
 	}
 
 	@Override
 	protected void loadMetaData(
-			MetaDataContext<HttpSessionObjectDependencies, None> context)
+			MetaDataContext<HttpSessionObjectRetrieverDependencies, None> context)
 			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the type for being returned
+		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
+		Class<?> type = mosContext.getClassLoader().loadClass(typeName);
 
 		// Load the meta-data
-		context.setManagedObjectClass(HttpSessionObjectManagedObject.class);
-		context.setObjectClass(HttpSessionObject.class);
-		context.addDependency(HttpSessionObjectDependencies.HTTP_SESSION,
-				HttpSession.class);
+		context
+				.setManagedObjectClass(HttpSessionObjectRetrieverManagedObject.class);
+		context.setObjectClass(type);
+		context.addDependency(
+				HttpSessionObjectRetrieverDependencies.HTTP_SESSION_OBJECT,
+				HttpSessionObject.class);
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionObjectManagedObject();
+		return new HttpSessionObjectRetrieverManagedObject();
 	}
 
 }

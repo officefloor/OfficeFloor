@@ -18,16 +18,15 @@
 
 package net.officefloor.plugin.socket.server.http.session.object.source;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
 
 /**
  * Tests the {@link HttpSessionObjectManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
@@ -40,8 +39,7 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpSessionObjectManagedObject} to test.
 	 */
-	private final HttpSessionObjectManagedObject mo = new HttpSessionObjectManagedObject(
-			MockHttpSessionObject.class);
+	private final HttpSessionObjectManagedObject mo = new HttpSessionObjectManagedObject();
 
 	/**
 	 * Mock {@link ObjectRegistry}.
@@ -58,9 +56,10 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain the object from the {@link HttpSession}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testObtainObjectFromHttpSession() throws Throwable {
 
-		MockHttpSessionObject availableObject = new MockHttpSessionObject();
+		Object availableObject = "Available Object";
 
 		// Record loading the managed object
 		this.recordReturn(this.objectRegistry, this.objectRegistry
@@ -73,7 +72,10 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		Object object = this.mo.getObject();
+		HttpSessionObject<Object> sessionObject = (HttpSessionObject<Object>) this.mo
+				.getObject();
+		Object object = sessionObject.getSessionObject();
+
 		this.verifyMockObjects();
 
 		// Ensure the correct object
@@ -81,10 +83,12 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to instantiate and register object if not available in the
-	 * {@link HttpSession}.
+	 * Ensure able to load an object into the {@link HttpSession}.
 	 */
-	public void testObjectNoAvailableInHttpSession() throws Throwable {
+	@SuppressWarnings("unchecked")
+	public void testLoadObjectIntoHttpSession() throws Throwable {
+
+		final Object SESSION_OBJECT = "Session Object";
 
 		// Record loading the managed object
 		this.recordReturn(this.objectRegistry, this.objectRegistry
@@ -92,34 +96,27 @@ public class HttpSessionObjectManagedObjectTest extends OfficeFrameTestCase {
 				this.httpSession);
 		this.recordReturn(this.httpSession, this.httpSession
 				.getAttribute(BOUND_NAME), null);
-		this.httpSession.setAttribute(BOUND_NAME, new MockHttpSessionObject());
-		final MockHttpSessionObject[] registeredObject = new MockHttpSessionObject[1];
-		this.control(this.httpSession).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect attribute name", BOUND_NAME, actual[0]);
-				assertTrue("Must have object",
-						(actual[1] instanceof MockHttpSessionObject));
-				registeredObject[0] = (MockHttpSessionObject) actual[1];
-				return true;
-			}
-		});
+		this.httpSession.setAttribute(BOUND_NAME, SESSION_OBJECT);
+		this.recordReturn(this.httpSession, this.httpSession
+				.getAttribute(BOUND_NAME), SESSION_OBJECT);
 
 		// Test
 		this.replayMockObjects();
 		this.mo.setBoundManagedObjectName(BOUND_NAME);
 		this.mo.loadObjects(this.objectRegistry);
-		Object object = this.mo.getObject();
+		HttpSessionObject<Object> sessionObject = (HttpSessionObject<Object>) this.mo
+				.getObject();
+
+		// Ensure not set in Session
+		assertNull("No object should be in session", sessionObject
+				.getSessionObject());
+
+		// Ensure can load object into Session
+		sessionObject.setSessionObject(SESSION_OBJECT);
+		assertEquals("Incorrect loaded session object", SESSION_OBJECT,
+				sessionObject.getSessionObject());
+
 		this.verifyMockObjects();
-
-		// Ensure the correct object
-		assertSame("Incorrect object", registeredObject[0], object);
-	}
-
-	/**
-	 * Class to be instantiated from the {@link HttpSessionObjectManagedObject}.
-	 */
-	public static class MockHttpSessionObject {
 	}
 
 }
