@@ -21,10 +21,7 @@ package net.officefloor.eclipse.socket;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
-import net.officefloor.eclipse.extension.open.ExtensionOpener;
-import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource.HttpSessionObjectDependencies;
@@ -39,8 +36,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class HttpSessionObjectManagedObjectSourceExtension
 		implements
-		ManagedObjectSourceExtension<HttpSessionObjectDependencies, None, HttpSessionObjectManagedObjectSource>,
-		ExtensionOpener {
+		ManagedObjectSourceExtension<HttpSessionObjectDependencies, None, HttpSessionObjectManagedObjectSource> {
 
 	/*
 	 * ================== ManagedObjectSourceExtension ========================
@@ -59,47 +55,14 @@ public class HttpSessionObjectManagedObjectSourceExtension
 	@Override
 	public void createControl(Composite page,
 			ManagedObjectSourceExtensionContext context) {
-		// Provide properties
-		SourceExtensionUtil.loadPropertyLayout(page);
-		SourceExtensionUtil.createPropertyClass("Object class",
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, page,
-				context, null);
+		// No properties necessary
+		SourceExtensionUtil.informNoPropertiesRequired(page);
 	}
 
 	@Override
 	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
-
-		// Obtain the object class
-		String className = properties.getProperty(
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
-				.getValue();
-		int simpleNameIndex = className.lastIndexOf('.');
-		if (simpleNameIndex >= 0) {
-			// Strip to simple name (+1 to ignore '.')
-			className = className.substring(simpleNameIndex + 1);
-		}
-
 		// Return the name
-		return "Http Session Object " + className;
-	}
-
-	/*
-	 * ====================== ExtensionOpener ==================================
-	 */
-
-	@Override
-	public void openSource(ExtensionOpenerContext context) throws Exception {
-
-		// Obtain the class
-		String className = context.getPropertyList().getPropertyValue(
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, null);
-		if (EclipseUtil.isBlank(className)) {
-			throw new Exception("Class name not specified");
-		}
-
-		// Transform class name to resource name and open
-		String resourceName = className.replace('.', '/') + ".class";
-		context.openClasspathResource(resourceName);
+		return "HttpSessionObject";
 	}
 
 }
