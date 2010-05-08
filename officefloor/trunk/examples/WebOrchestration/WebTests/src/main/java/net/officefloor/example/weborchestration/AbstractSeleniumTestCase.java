@@ -194,6 +194,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		this.selenium.open("/testReset" + urlFileExtension);
 
 		// Open the starting URL
+		System.out.println("OPEN: " + this.startingUrl);
 		this.selenium.open(this.startingUrl);
 
 		// Ensure not logged in
@@ -255,8 +256,17 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Link to click.
 	 */
 	public void clickLink(String link) {
+
+		// Log the click
+		System.out.println("CLICK: " + link);
+
+		// Click on the link
 		this.selenium.click("link=" + link);
 		this.waitForPageToLoad();
+
+		// Log page received
+		System.out.println("RESPONSE PAGE:");
+		System.out.println(this.selenium.getHtmlSource());
 	}
 
 	/**
@@ -278,6 +288,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Text regular expression.
 	 */
 	public void assertTextPresent(String regexp) {
+		// Asset content available
 		assertTrue("Expecting text: " + regexp, this.selenium
 				.isTextPresent("regexp:" + regexp));
 	}
@@ -309,8 +320,17 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Identifier of submit input to submit form.
 	 */
 	public void submit(String identifier) {
+
+		// Log submit
+		System.out.println("SUBMIT: " + identifier);
+
+		// Submit
 		this.selenium.click(identifier);
 		this.waitForPageToLoad();
+
+		// Log page received
+		System.out.println("RESPONSE PAGE:");
+		System.out.println(this.selenium.getHtmlSource());
 	}
 
 }
