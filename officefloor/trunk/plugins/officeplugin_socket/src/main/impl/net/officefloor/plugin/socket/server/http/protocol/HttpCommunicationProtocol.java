@@ -40,7 +40,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * HTTP {@link CommunicationProtocol}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpCommunicationProtocol implements
@@ -48,27 +48,83 @@ public class HttpCommunicationProtocol implements
 		ServerSocketHandler<HttpConnectionHandler> {
 
 	/**
+	 * Name of property to determine if send stack trace on failure.
+	 */
+	public static final String PROPERTY_IS_SEND_STACK_TRACE_ON_FAILURE = "is.send.stack.trace.on.failure";
+
+	/**
+	 * Default value for property
+	 * {@link #PROPERTY_IS_SEND_STACK_TRACE_ON_FAILURE}.
+	 */
+	public static final boolean DEFAULT_VALUE_IS_SEND_STACK_TRACE_ON_FAILURE = false;
+
+	/**
+	 * Flags whether to send the stack trace on a failure.
+	 */
+	private boolean isSendStackTraceOnFailure;
+
+	/**
+	 * Name of property to indicate the maximum number of {@link HttpHeader}
+	 * instances per {@link HttpRequest}.
+	 */
+	public static final String PROPERTY_MAXIMUM_HTTP_REQUEST_HEADERS = "max.http.request.headers";
+
+	/**
+	 * Default value for the property
+	 * {@link #PROPERTY_MAXIMUM_HTTP_REQUEST_HEADERS}.
+	 */
+	public static final int DEFAULT_VALUE_MAXIMUM_HTTP_REQUEST_HEADERS = 255;
+
+	/**
 	 * Maximum number of {@link HttpHeader} instances per {@link HttpRequest}.
 	 */
-	// TODO provide via property
-	private int maximumHttpRequestHeaders = 255;
+	private int maximumHttpRequestHeaders;
+
+	/**
+	 * Property name for the maximum length in bytes of the {@link HttpRequest}
+	 * body.
+	 */
+	public static final String PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH = "max.http.request.body.length";
+
+	/**
+	 * Default value for property {@link #PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH}.
+	 */
+	public static final long DEFAULT_VALUE_MAXIMUM_REQUEST_BODY_LENGTH = (1024 * 1024);
 
 	/**
 	 * Maximum length in bytes of the {@link HttpRequest} body.
 	 */
-	// TODO provide via property
-	private long maximumRequestBodyLength = (1024 * 1024);
+	private long maximumRequestBodyLength;
+
+	/**
+	 * Property name for the connection timeout.
+	 */
+	public static final String PROPERTY_CONNECTION_TIMEOUT = "connection.timeout";
+
+	/**
+	 * Default value for property {@link #PROPERTY_CONNECTION_TIMEOUT}.
+	 */
+	public static final long DEFAULT_VALUE_CONNECTION_TIMEOUT = 5 * 60 * 1000;
 
 	/**
 	 * Timeout of the {@link Connection} in milliseconds.
 	 */
-	// TODO provide via property
-	private long connectionTimeout = 5 * 60 * 1000;
+	private long connectionTimeout;
+
+	/**
+	 * Property name for the maximum length of a text part for the
+	 * {@link HttpRequest}.
+	 */
+	public static final String PROPERTY_MAXIMUM_TEXT_PART_LENGTH = "max.text.part.length";
+
+	/**
+	 * Default value for property {@link #PROPERTY_MAXIMUM_TEXT_PART_LENGTH}.
+	 */
+	public static final int DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH = 255;
 
 	/**
 	 * Maximum length of text part for {@link HttpRequest}.
 	 */
-	// TODO provide via property
 	private int maxTextPartLength = 255;
 
 	/**
@@ -87,7 +143,7 @@ public class HttpCommunicationProtocol implements
 
 	@Override
 	public void loadSpecification(SpecificationContext context) {
-		// TODO add the fields as specifications
+		// All properties are optional
 	}
 
 	@Override
@@ -97,6 +153,26 @@ public class HttpCommunicationProtocol implements
 		ManagedObjectSourceContext<Indexed> mosContext = context
 				.getManagedObjectSourceContext();
 		this.bufferSquirtFactory = bufferSquirtFactory;
+
+		// Obtain properties
+		this.isSendStackTraceOnFailure = Boolean
+				.parseBoolean(mosContext
+						.getProperty(
+								PROPERTY_IS_SEND_STACK_TRACE_ON_FAILURE,
+								String
+										.valueOf(DEFAULT_VALUE_IS_SEND_STACK_TRACE_ON_FAILURE)));
+		this.maximumHttpRequestHeaders = Integer.parseInt(mosContext
+				.getProperty(PROPERTY_MAXIMUM_HTTP_REQUEST_HEADERS, String
+						.valueOf(DEFAULT_VALUE_MAXIMUM_HTTP_REQUEST_HEADERS)));
+		this.maximumRequestBodyLength = Long.parseLong(mosContext.getProperty(
+				PROPERTY_MAXIMUM_REQUEST_BODY_LENGTH, String
+						.valueOf(DEFAULT_VALUE_MAXIMUM_REQUEST_BODY_LENGTH)));
+		this.connectionTimeout = Long.parseLong(mosContext.getProperty(
+				PROPERTY_CONNECTION_TIMEOUT, String
+						.valueOf(DEFAULT_VALUE_CONNECTION_TIMEOUT)));
+		this.maxTextPartLength = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_MAXIMUM_TEXT_PART_LENGTH, String
+						.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
 		// Specify types
 		context.setManagedObjectClass(HttpManagedObjectImpl.class);
@@ -126,7 +202,7 @@ public class HttpCommunicationProtocol implements
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
 		HttpConversation conversation = new HttpConversationImpl(connection,
-				this.bufferSquirtFactory);
+				this.bufferSquirtFactory, this.isSendStackTraceOnFailure);
 		HttpRequestParser parser = new HttpRequestParserImpl(
 				this.maximumHttpRequestHeaders, this.maximumRequestBodyLength);
 		return new HttpConnectionHandler(conversation, parser,

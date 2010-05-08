@@ -20,6 +20,8 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -33,7 +35,9 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.BufferSquirtFactory;
 import net.officefloor.plugin.stream.BufferStream;
@@ -44,10 +48,15 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link HttpResponseImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseTest extends OfficeFrameTestCase {
+
+	/**
+	 * End of line token.
+	 */
+	private static final String EOLN_TOKEN = "${EOLN}";
 
 	/**
 	 * US-ASCII {@link Charset}.
@@ -63,13 +72,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpConversation} to create the {@link HttpResponse}.
 	 */
-	private final HttpConversation conversation = new HttpConversationImpl(
-			new MockConnection(), new BufferSquirtFactory() {
-				@Override
-				public BufferSquirt createBufferSquirt() {
-					return new MockBufferSquirt();
-				}
-			});
+	private HttpConversation conversation = this.createHttpConversation(false);
 
 	/**
 	 * Listing of {@link MockBufferSquirt} instances.
@@ -137,13 +140,97 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 				.getHeader("test"));
 	}
 
+	/**
+	 * Ensures provides parse failure details.
+	 */
+	public void testSendParseFailure() throws IOException {
+
+		final Throwable FAILURE = new HttpRequestParseException(
+				HttpStatus.SC_BAD_REQUEST, "Fail Parse Test");
+
+		this.sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 400 Bad Request\n"
+				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Length: 15\n\n" + "Fail Parse Test");
+	}
+
+	/**
+	 * Ensures provides failure message.
+	 */
+	public void testSendServerFailure() throws IOException {
+
+		final Throwable FAILURE = new Exception("Failure Test");
+
+		this.sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Length: 12\n\n" + "Failure Test");
+	}
+
+	/**
+	 * Ensures provides failure details should the exception have no message.
+	 */
+	public void testSendServerFailureWithNoMessage() throws IOException {
+
+		final Throwable FAILURE = new Exception();
+
+		this.sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Length: 9\n\n" + Exception.class.getSimpleName());
+	}
+
+	/**
+	 * Ensures able to obtain stack trace for testing and debugging purposes.
+	 */
+	public void testSendServerFailureWithStackTrace() throws IOException {
+
+		final Throwable FAILURE = new Exception("Test");
+
+		// Obtain the expected stack trace
+		StringWriter buffer = new StringWriter();
+		FAILURE.printStackTrace(new PrintWriter(buffer));
+		String stackTrace = buffer.toString();
+
+		// Determine the expected content and its length
+		String content = "Test\n\n" + stackTrace;
+		int contentLength = content.length();
+		content = content.replace("\n", EOLN_TOKEN);
+
+		// Create conversation to send stack trace on failure
+		this.conversation = this.createHttpConversation(true);
+
+		// Run test
+		this.sendFailure(FAILURE);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Length: " + contentLength + "\n\n" + content);
+	}
+
 	/*
 	 * ===================== Helper methods ==============================
 	 */
 
 	/**
+	 * Creates a {@link HttpConversation} for testing.
+	 * 
+	 * @param isSendStackTraceOnFailure
+	 *            Flags whether to send the stack trace on failure.
+	 */
+	private HttpConversation createHttpConversation(
+			boolean isSendStackTraceOnFailure) {
+		return new HttpConversationImpl(new MockConnection(),
+				new BufferSquirtFactory() {
+					@Override
+					public BufferSquirt createBufferSquirt() {
+						return new MockBufferSquirt();
+					}
+				}, isSendStackTraceOnFailure);
+	}
+
+	/**
 	 * Creates a {@link HttpResponse} to be tested.
-	 *
+	 * 
 	 * @return New {@link HttpResponse}.
 	 */
 	private HttpResponse createHttpResponse() {
@@ -165,7 +252,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 
 	/**
 	 * Writes the content to the body.
-	 *
+	 * 
 	 * @param response
 	 *            {@link HttpResponse}.
 	 * @param bodyContent
@@ -188,8 +275,22 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Sends the failure.
+	 * 
+	 * @param failure
+	 *            Failure.
+	 * @throws IOException
+	 *             If fails to send failure.
+	 */
+	private void sendFailure(Throwable failure) throws IOException {
+		HttpResponseImpl response = (HttpResponseImpl) this
+				.createHttpResponse();
+		response.sendFailure(failure);
+	}
+
+	/**
 	 * Asserts the content on the wire is as expected.
-	 *
+	 * 
 	 * @param expectedContent
 	 *            Expected content on the wire.
 	 */
@@ -198,6 +299,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		// Transform expected content to wire format
 		String expectedHttpContent = UsAsciiUtil.convertToString(UsAsciiUtil
 				.convertToHttp(expectedContent));
+		expectedHttpContent = expectedHttpContent.replace(EOLN_TOKEN, "\n");
 
 		// Obtain the response on the wire
 		InputBufferStream wireInput = this.wire.getInputBufferStream();
@@ -215,7 +317,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 
 	/**
 	 * Asserts the {@link HttpHeader} is correct.
-	 *
+	 * 
 	 * @param name
 	 *            Expected name.
 	 * @param value

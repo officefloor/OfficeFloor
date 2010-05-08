@@ -20,6 +20,8 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Iterator;
@@ -44,7 +46,7 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 
 /**
  * {@link HttpResponse}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpResponseImpl implements HttpResponse {
@@ -133,7 +135,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Initiate by defaulting from the {@link HttpRequest}.
-	 *
+	 * 
 	 * @param conversation
 	 *            {@link HttpConversationImpl}.
 	 * @param connection
@@ -167,7 +169,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Flags failure in processing the {@link HttpRequest}.
-	 *
+	 * 
 	 * @param failure
 	 *            Failure in processing the {@link HttpRequest}.
 	 * @throws IOException
@@ -183,7 +185,7 @@ public class HttpResponseImpl implements HttpResponse {
 			InputBufferStream bodyInput = this.body.getInputBufferStream();
 			bodyInput.skip(bodyInput.available());
 
-			// Write the failure response
+			// Write the failure header details
 			if (failure instanceof HttpRequestParseException) {
 				// Parse request failure
 				HttpRequestParseException parseFailure = (HttpRequestParseException) failure;
@@ -193,14 +195,26 @@ public class HttpResponseImpl implements HttpResponse {
 				this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			}
 			this.addHeader("Content-Type", PARSE_FAILURE_CONTENT_TYPE);
+
+			// Write the failure response
+			OutputBufferStream body = this.getBody();
 			String failMessage = failure.getMessage();
 			if (failMessage == null) {
 				// No message so provide type of error
 				failMessage = failure.getClass().getSimpleName();
 			}
-			this.getBody().write(
-					failMessage
-							.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+			body.write(failMessage
+					.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+			if (this.conversation.isSendStackTraceOnFailure()) {
+				// Provide the stack trace
+				body.write("\n\n"
+						.getBytes(PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+				PrintWriter stackTraceWriter = new PrintWriter(
+						new OutputStreamWriter(body.getOutputStream(),
+								PARSE_FAILURE_CONTENT_ENCODING_CHARSET));
+				failure.printStackTrace(stackTraceWriter);
+				stackTraceWriter.flush();
+			}
 
 			// Complete the response (triggers sending the failure)
 			this.getBody().close();
@@ -209,7 +223,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Sends the {@link HttpResponse} if it is completed.
-	 *
+	 * 
 	 * @return <code>true</code> if {@link HttpResponse} is completed and was
 	 *         added to the {@link Connection} output to be sent.
 	 * @throws IOException
@@ -230,7 +244,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Flags the {@link HttpResponse} as complete and triggers sending.
-	 *
+	 * 
 	 * @throws IOException
 	 *             If fails to send complete {@link HttpResponse} instances.
 	 */
@@ -245,7 +259,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Writes the {@link HttpResponse} to the {@link Connection}.
-	 *
+	 * 
 	 * @throws IOException
 	 *             If fails to load the content.
 	 */
@@ -309,7 +323,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 	/**
 	 * Writes the text as US-ASCII to the {@link OutputBufferStream}.
-	 *
+	 * 
 	 * @param outputBufferStream
 	 *            {@link OutputBufferStream}.
 	 * @param tempBuffer
@@ -462,7 +476,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param backingStream
 		 *            Backing {@link OutputBufferStream}.
 		 */
@@ -527,7 +541,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param backingStream
 		 *            Backing {@link OutputStream}.
 		 */
