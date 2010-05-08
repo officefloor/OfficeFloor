@@ -80,7 +80,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * {@link HttpConversation} to test.
 	 */
 	private final HttpConversation conversation = new HttpConversationImpl(
-			new MockConnection(), this.squirtFactory);
+			new MockConnection(), this.squirtFactory, false);
 
 	/**
 	 * {@link BufferStream} containing the data output to the wire.
