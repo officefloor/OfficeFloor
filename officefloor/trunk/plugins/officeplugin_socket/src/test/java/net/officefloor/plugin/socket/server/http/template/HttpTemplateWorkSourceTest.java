@@ -51,7 +51,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public HttpTemplateWorkSourceTest() {
 		// Create the properties
-		this.properties = new String[6];
+		this.properties = new String[8];
 		this.properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
 		this.properties[1] = this.getClass().getPackage().getName().replace(
 				'.', '/')
@@ -60,8 +60,11 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				+ "template";
 		this.properties[3] = TemplateBean.class.getName();
 		this.properties[4] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
+				+ "NullBean";
+		this.properties[5] = TemplateBean.class.getName();
+		this.properties[6] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
 				+ "List";
-		this.properties[5] = TableRowBean.class.getName();
+		this.properties[7] = TableRowBean.class.getName();
 	}
 
 	/**
@@ -94,6 +97,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				"SERVER_HTTP_CONNECTION");
 		template.addObject(TemplateBean.class).setLabel("OBJECT");
 		template.addEscalation(IOException.class);
+
+		// 'NullBean' task
+		TaskTypeBuilder<Indexed, None> nullBean = work.addTaskType("NullBean",
+				httpTemplateTaskFactory, Indexed.class, None.class);
+		nullBean.addObject(ServerHttpConnection.class).setLabel(
+				"SERVER_HTTP_CONNECTION");
+		nullBean.addObject(TemplateBean.class).setLabel("OBJECT");
+		nullBean.addEscalation(IOException.class);
 
 		// 'List' task
 		TaskTypeBuilder<Indexed, None> list = work.addTaskType("List",
@@ -149,20 +160,23 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Record actions for each task:
 		// - 'template'
+		// - 'NullBean'
 		// - 'List' task with table row bean
 		// - 'List' task with child row bean
 		// - 'Tail'
-		Object[] beans = new Object[4];
+		Object[] beans = new Object[5];
 		beans[0] = new TemplateBean("Test");
-		beans[1] = new TableRowBean("one", "Same");
-		beans[2] = new ChildTableRowBean("two", "Child");
-		beans[3] = null;
-		for (int i = 0; i < 4; i++) {
+		final int NULL_BEAN_INDEX = 1;
+		beans[NULL_BEAN_INDEX] = null; // 'NullBean' template
+		beans[2] = new TableRowBean("one", "Same");
+		beans[3] = new ChildTableRowBean("two", "Child");
+		beans[4] = null;
+		for (int i = 0; i < beans.length; i++) {
 			this.recordReturn(taskContext, taskContext.getObject(0),
 					httpConnection);
 			this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 					httpResponse);
-			if (beans[i] != null) {
+			if ((beans[i] != null) || (i == NULL_BEAN_INDEX)) {
 				this.recordReturn(taskContext, taskContext.getObject(1),
 						beans[i]);
 			}
@@ -174,6 +188,9 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Execute the 'template' task
 		this.doTask("template", work, workType, taskContext);
+
+		// Execute the 'NullBean' task
+		this.doTask("NullBean", work, workType, taskContext);
 
 		// Execute the 'List' task (for table and its child)
 		this.doTask("List", work, workType, taskContext); // table row bean

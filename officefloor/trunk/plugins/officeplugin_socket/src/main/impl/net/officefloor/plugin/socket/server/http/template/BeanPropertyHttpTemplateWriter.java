@@ -140,6 +140,11 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	public void write(HttpResponseWriter writer, String workName, Object bean)
 			throws IOException {
 
+		// If no bean, then no value to output
+		if (bean == null) {
+			return;
+		}
+
 		// Obtain the property text value
 		String propertyTextValue;
 		try {

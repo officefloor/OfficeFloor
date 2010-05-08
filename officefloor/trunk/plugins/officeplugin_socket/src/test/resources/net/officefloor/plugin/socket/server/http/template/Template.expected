@@ -2,6 +2,8 @@
 <body>
 Template Test
 <br />
+
+Should be no template name  available.
 <br />
 with a listing of <a href="/WORK/beans.task">beans</a>:
 <br />
