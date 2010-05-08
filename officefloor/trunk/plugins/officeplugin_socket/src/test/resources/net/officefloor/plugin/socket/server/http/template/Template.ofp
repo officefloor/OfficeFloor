@@ -2,6 +2,8 @@
 <body>
 Template ${TemplateName}
 <br />
+<!-- [NullBean] -->
+Should be no template name ${TemplateName} available.
 <br />
 with a listing of <a href="#{beans}">beans</a>:
 <br />
