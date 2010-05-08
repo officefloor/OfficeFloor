@@ -59,7 +59,7 @@ import org.easymock.MockControl;
 
 /**
  * Contains functionality for testing the {@link ManagedObjectContainerImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractManagedObjectContainerImplTest extends
@@ -67,7 +67,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Creates all meta-data combinations for the input {@link TestCase} class.
-	 *
+	 * 
 	 * @param testCaseClass
 	 *            {@link AbstractManagedObjectContainerImplTest} class.
 	 * @param filters
@@ -174,7 +174,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		/**
 		 * Indicates if to filter out the scenario.
-		 *
+		 * 
 		 * @param isNameAware
 		 *            Is {@link NameAwareManagedObject}.
 		 * @param isAsynchronous
@@ -376,6 +376,14 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
+	 * Records obtaining the object type, typically for escalating.
+	 */
+	protected void record_MoMetaData_getObjectType() {
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.getObjectType(), this.objectType);
+	}
+
+	/**
 	 * Records initialising the {@link ManagedObjectContainer}.
 	 */
 	protected void record_MoContainer_init(Class<?> objectType) {
@@ -414,7 +422,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records sourcing the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param isSourced
 	 *            Indicates if the {@link ManagedObject} is sourced.
 	 * @param failure
@@ -490,7 +498,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Records setting the {@link ManagedObject} on the
 	 * {@link ManagedObjectUser}.
-	 *
+	 * 
 	 * @param isInLoadScope
 	 *            Flag indicating if {@link ManagedObject} set immediately (in
 	 *            other words not at a later time).
@@ -572,7 +580,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records coordinating the {@link CoordinatingManagedObject}.
-	 *
+	 * 
 	 * @param coordinateFailure
 	 *            Failure in coordinating.
 	 * @param object
@@ -662,7 +670,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Records the checking the particular state of the
 	 * {@link ManagedObjectContainer}.
-	 *
+	 * 
 	 * @param readyState
 	 *            {@link ReadyState}.
 	 */
@@ -714,7 +722,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records whether {@link ManagedObject} is ready.
-	 *
+	 * 
 	 * @param isSourced
 	 *            Indicates if {@link ManagedObject} sourced.
 	 * @param isInAsyncOperation
@@ -837,7 +845,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records a check on the {@link ManagedObjectContainer} {@link Asset}.
-	 *
+	 * 
 	 * @param timeout
 	 *            Timeout for the {@link ManagedObject}.
 	 */
@@ -848,7 +856,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Records unloading the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param isUnload
 	 *            <code>true</code> indicates that the {@link ManagedObject}
 	 *            requires unloading.
@@ -890,7 +898,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Creates the {@link ManagedObjectContainer}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectContainer}.
 	 */
 	protected ManagedObjectContainer createManagedObjectContainer() {
@@ -900,7 +908,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Loads the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -912,7 +920,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Coordinates the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param isExpectedCoordinate
@@ -928,7 +936,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Checks if the {@link ManagedObject} is ready.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param isExpectedReady
@@ -943,7 +951,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -953,7 +961,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Sets the {@link ManagedObject} on the {@link ManagedObjectUser}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param object
@@ -967,7 +975,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Sets the failure on the {@link ManagedObjectUser}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param failure
@@ -981,7 +989,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Obtains the Object of the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @return Object of the {@link ManagedObject}.
@@ -1010,7 +1018,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Asserts the object of the {@link ManagedObject} is correct.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 * @param expectedObject
@@ -1025,7 +1033,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Notifies the {@link AsynchronousListener} that started asynchronous
 	 * operation.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -1037,7 +1045,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Notifies the {@link AsynchronousListener} that completed asynchronous
 	 * operation.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link ManagedObjectContainer}.
 	 */
@@ -1048,7 +1056,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Asserts the correct {@link Escalation} returning the {@link Escalation}.
-	 *
+	 * 
 	 * @param propagate
 	 *            {@link PropagateEscalationError}.
 	 * @param escalationType
@@ -1075,7 +1083,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Asserts the correct {@link ManagedObjectEscalation} returning the cause
 	 * of the {@link ManagedObjectEscalation}.
-	 *
+	 * 
 	 * @param propagate
 	 *            {@link PropagateEscalationError}.
 	 * @param escalationType
@@ -1102,7 +1110,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 	/**
 	 * Obtains the current time.
-	 *
+	 * 
 	 * @param millisecondsInFuture
 	 *            Time to be added to current time for return.
 	 * @return Current time.

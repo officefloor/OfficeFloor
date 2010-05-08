@@ -48,7 +48,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container of a {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectContainerImpl implements ManagedObjectContainer,
@@ -125,7 +125,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Initiate the container.
-	 *
+	 * 
 	 * @param metaData
 	 *            Meta-data of the {@link ManagedObject}.
 	 * @param processState
@@ -154,7 +154,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Initiate the container with a provided {@link ManagedObject}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} triggering the {@link ProcessState}.
 	 * @param metaData
@@ -198,7 +198,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be unloaded.
 	 * @param recycleJob
@@ -228,7 +228,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/*
 	 * =============== ManagedObjectContainer =============================
-	 *
+	 * 
 	 * Note: Synchronising of the methods is done by JobContainer holding a
 	 * ProcessState lock.
 	 */
@@ -438,7 +438,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Checks that the {@link ManagedObject} is ready.
-	 *
+	 * 
 	 * @param executionContext
 	 *            {@link JobContext}.
 	 * @param jobNode
@@ -544,18 +544,21 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public Object getObject(ThreadState threadState) {
 
 		// Access Point: JobContainer via WorkContainer
-		// Locks: Unknown (object treated as final)
+		// Locks: Unknown (though should have synchronise before call)
 
-		// Ensure have Object
-		if (this.object == null) {
-			throw new PropagateEscalationError(
-					new FailedToSourceManagedObjectEscalation(this.metaData
-							.getObjectType(), new NullPointerException(
-							"No object provided from ManagedObject")));
+		// Only return Object if in valid state
+		switch (this.containerState) {
+		case OBJECT_AVAILABLE:
+			// Return the Object
+			return this.object;
 		}
 
-		// Return the Object
-		return this.object;
+		// Incorrect state if here
+		throw new PropagateEscalationError(
+				new FailedToSourceManagedObjectEscalation(this.metaData
+						.getObjectType(), new IllegalStateException(
+						"ManagedObject in incorrect state "
+								+ this.containerState + " to obtain Object")));
 	}
 
 	@Override
@@ -840,7 +843,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Sets the {@link ManagedObjectContainer} into a failed state and makes the
 	 * {@link AssetMonitor} instances aware.
-	 *
+	 * 
 	 * @param failure
 	 *            Failure.
 	 * @param activateSet
