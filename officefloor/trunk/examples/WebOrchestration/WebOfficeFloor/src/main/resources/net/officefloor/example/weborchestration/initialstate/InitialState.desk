@@ -37,9 +37,9 @@
         </task-object>
       </work-task>
     </work>
-    <work name="InitialState" source="net.officefloor.plugin.work.clazz.ClassWorkSource" x="151" y="375">
+    <work name="InitialStateDisplay" source="net.officefloor.plugin.work.clazz.ClassWorkSource" x="151" y="375">
       <properties>
-        <property name="class.name" value="net.officefloor.example.weborchestration.initialstate.InitialState"/>
+        <property name="class.name" value="net.officefloor.example.weborchestration.initialstate.InitialStateDisplay"/>
       </properties>
       <work-task name="display">
         <task-object name="ServerHttpConnection" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
@@ -59,7 +59,7 @@
         <external-flow name="Exception"/>
       </task-escalation>
     </task>
-    <task name="display" public="true" work="InitialState" task="display" return-type="" x="152" y="39">
+    <task name="display" public="true" work="InitialStateDisplay" task="display" return-type="" x="152" y="39">
       <task-flow name="displayHeader" key="" argument-type="net.officefloor.example.weborchestration.Customer">
         <task name="template" link="PARALLEL"/>
       </task-flow>

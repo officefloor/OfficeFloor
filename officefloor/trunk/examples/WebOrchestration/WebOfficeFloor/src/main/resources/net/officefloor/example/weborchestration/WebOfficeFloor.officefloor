@@ -5,6 +5,7 @@
         <property name="port" value="8080"/>
         <property name="buffer.size" value="1024"/>
         <property name="max.connections.per.listener" value="-1"/>
+        <property name="is.send.stack.trace.on.failure" value="true"/>
       </properties>
       <managing-office name="WebOfficeFloor"/>
       <input-managed-object name="HTTP"/>

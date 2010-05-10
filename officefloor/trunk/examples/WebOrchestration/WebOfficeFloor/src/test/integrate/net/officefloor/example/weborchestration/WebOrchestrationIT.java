@@ -26,4 +26,10 @@ public class WebOrchestrationIT extends CustomerTestCase /*
 														 * TODO use:
 														 * WebOrchestrationTestCases
 														 */{
+
+	// TODO remove
+	static {
+		AbstractSeleniumTestCase.urlFileExtension = ".task";
+	}
+
 }
