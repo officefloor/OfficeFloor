@@ -85,7 +85,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	/**
 	 * Time to wait for page to load.
 	 */
-	private long pageLoadWaitTime = 5000;
+	private long pageLoadWaitTime = 15000;
 
 	/**
 	 * Starting URL.
@@ -180,6 +180,11 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 
+		// Indicate test being run
+		System.out.println("=============================================");
+		System.out.println("  VERIFY TEST: " + this.getName());
+		System.out.println("=============================================");
+
 		// Lazy load the setup state
 		if ((customerName == null) || (customerName.trim().length() == 0)) {
 			this.alignTestState();
@@ -207,6 +212,17 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	private void loadProduct(String productName, DefaultSelenium initiate) {
 		String productId = initiate.getText("id=product-" + productName);
 		productIdentifiers.put(productName, Long.valueOf(productId));
+	}
+
+	@Override
+	public void runBare() throws Throwable {
+		// Log failures for verification tests
+		try {
+			super.runBare();
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
 	}
 
 	@Override

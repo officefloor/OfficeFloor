@@ -9,7 +9,7 @@ import net.officefloor.example.weborchestration.WebUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
-public class InitialState {
+public class InitialStateDisplay {
 
 	/**
 	 * Flows for the rendering.
