@@ -1,0 +1,44 @@
+<desk>
+  <external-managed-objects>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="691" y="481"/>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <external-flows>
+    <external-flow name="Displayed" argument-type="java.lang.Void" x="667" y="119"/>
+    <external-flow name="Exception" argument-type="java.lang.Exception" x="660" y="77"/>
+  </external-flows>
+  <works>
+    <work name="HttpTemplate-login.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="173" y="365">
+      <properties>
+        <property name="template.path" value="net/officefloor/example/weborchestration/login/login.ofp"/>
+        <property name="bean.template" value="net.officefloor.example.weborchestration.login.LoginCredentials"/>
+      </properties>
+      <work-task name="createCustomer">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="false">
+        </task-object>
+      </work-task>
+      <work-task name="login">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="false">
+        </task-object>
+      </work-task>
+      <work-task name="template">
+        <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+        <task-object name="OBJECT" key="" object-type="net.officefloor.example.weborchestration.login.LoginCredentials" parameter="true">
+        </task-object>
+      </work-task>
+    </work>
+  </works>
+  <tasks>
+    <task name="display" public="true" work="HttpTemplate-login.ofp" task="template" return-type="" x="144" y="102">
+      <next-external-flow name="Displayed"/>
+      <task-escalation escalation-type="java.io.IOException">
+        <external-flow name="Exception"/>
+      </task-escalation>
+    </task>
+  </tasks>
+</desk>
