@@ -60,6 +60,7 @@ import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.section.SubSectionObjectToSectionManagedObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
@@ -67,7 +68,7 @@ import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionSource} for a {@link SectionModel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionModelSectionSource extends AbstractSectionSource implements
@@ -346,6 +347,23 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 					// Link the output to the input
 					designer.link(output, linkedInput);
 				}
+
+				// Determine if link to section output
+				SectionOutput linkedOutput = null;
+				SubSectionOutputToExternalFlowModel outputToExternalFlow = outputModel
+						.getExternalFlow();
+				if (outputToExternalFlow != null) {
+					ExternalFlowModel externalFlow = outputToExternalFlow
+							.getExternalFlow();
+					if (externalFlow != null) {
+						linkedOutput = sectionOutputs.get(externalFlow
+								.getExternalFlowName());
+					}
+				}
+				if (linkedOutput != null) {
+					// Link the output to the section output
+					designer.link(output, linkedOutput);
+				}
 			}
 
 			// Add the sub section objects
@@ -372,6 +390,23 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 				if (linkedMo != null) {
 					// Link the object to the managed object
 					designer.link(object, linkedMo);
+				}
+
+				// Determine if link to external managed object
+				SectionObject linkedObject = null;
+				SubSectionObjectToExternalManagedObjectModel objectToExtMo = objectModel
+						.getExternalManagedObject();
+				if (objectToExtMo != null) {
+					ExternalManagedObjectModel extMo = objectToExtMo
+							.getExternalManagedObject();
+					if (extMo != null) {
+						linkedObject = sectionObjects.get(extMo
+								.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link the object to section object
+					designer.link(object, linkedObject);
 				}
 			}
 		}
@@ -440,7 +475,7 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 	/**
 	 * Obtains the {@link SubSectionModel} containing the input
 	 * {@link SubSectionInputModel}.
-	 *
+	 * 
 	 * @param section
 	 *            {@link SectionModel}.
 	 * @param input
@@ -468,7 +503,7 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 	/**
 	 * Obtains the {@link ManagedObjectScope} from the managed object scope
 	 * name.
-	 *
+	 * 
 	 * @param managedObjectScope
 	 *            Name of the {@link ManagedObjectScope}.
 	 * @param designer
