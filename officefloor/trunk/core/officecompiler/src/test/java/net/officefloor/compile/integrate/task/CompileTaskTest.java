@@ -266,6 +266,28 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensures compiling a {@link Task} linking to next {@link Task} that is
+	 * through a parent {@link SubSection}.
+	 */
+	public void testLinkTaskNextToTaskThroughParentSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION_A.desk-one.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION_B.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		task.setNextTaskInFlow("SECTION_B.WORK", "INPUT", Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensures issue if {@link TaskObject} not linked.
 	 */
 	public void testTaskObjectNotLinked() throws Exception {
@@ -448,6 +470,34 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE.SECTION.DESK.MANAGED_OBJECT_SOURCE",
 				ClassManagedObjectSource.class, 0, "class.name",
 				CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensures compiling a {@link TaskObject} linking
+	 * {@link OfficeManagedObject} that is through a parent {@link SubSection}.
+	 */
+	public void testLinkTaskObjectThroughParentSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
+		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the office floor
