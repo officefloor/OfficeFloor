@@ -108,7 +108,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Login" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.desk" x="455" y="44">
+    <section name="Login" source="net.officefloor.model.impl.section.SectionModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.section" x="507" y="18">
       <properties>
       </properties>
       <input name="display" parameter-type="net.officefloor.example.weborchestration.login.LoginCredentials"/>
@@ -117,8 +117,14 @@
       </output>
       <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
       </output>
+      <output name="LoggedIn" argument-type="net.officefloor.example.weborchestration.Customer" escalation-only="false">
+        <section-input section="index" input="display"/>
+      </output>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
+      </object>
+      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+        <managed-object name="CustomerSessionObject"/>
       </object>
       <responsibility name="Responsibility">
         <team name="Servicer"/>

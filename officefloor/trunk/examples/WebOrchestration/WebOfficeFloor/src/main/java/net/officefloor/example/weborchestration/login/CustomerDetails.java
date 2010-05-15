@@ -1,11 +1,16 @@
 package net.officefloor.example.weborchestration.login;
 
 /**
- * Login credentials.
+ * Customer details.
  * 
  * @author daniel
  */
-public class LoginCredentials {
+public class CustomerDetails {
+
+	/**
+	 * Name.
+	 */
+	private String name;
 
 	/**
 	 * Email.
@@ -25,20 +30,41 @@ public class LoginCredentials {
 	/**
 	 * Default constructor.
 	 */
-	public LoginCredentials() {
+	public CustomerDetails() {
 	}
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param name
+	 *            Name.
 	 * @param email
 	 *            Email.
 	 * @param error
 	 *            Error.
 	 */
-	public LoginCredentials(String email, String error) {
+	public CustomerDetails(String name, String email, String error) {
 		this.email = email;
 		this.error = error;
+	}
+
+	/**
+	 * Obtains the name.
+	 * 
+	 * @return Name.
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * HTTP parameter for name.
+	 * 
+	 * @param name
+	 *            Name.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
