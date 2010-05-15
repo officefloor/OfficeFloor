@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -113,22 +114,6 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 		// Retrieve the section model
 		SectionModel section = new SectionRepositoryImpl(
 				new ModelRepositoryImpl()).retrieveSection(configuration);
-
-		// Add the public section inputs as inputs to section
-		for (SubSectionModel subSection : section.getSubSections()) {
-			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
-				if (input.getIsPublic()) {
-					// Obtain the public name for the input
-					String inputName = input.getPublicInputName();
-					inputName = (CompileUtil.isBlank(inputName) ? input
-							.getSubSectionInputName() : inputName);
-
-					// Add the input
-					designer.addSectionInput(inputName, input
-							.getParameterType());
-				}
-			}
-		}
 
 		// Add the external flows as outputs from the section, keeping registry
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
@@ -309,6 +294,21 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 				SubSectionInput input = subSection
 						.getSubSectionInput(inputName);
 				subSectionInputs.put(subSectionName, inputName, input);
+
+				// Determine if public input to section
+				if (inputModel.getIsPublic()) {
+					// Obtain the public name for the input
+					String publicInputName = inputModel.getPublicInputName();
+					publicInputName = (CompileUtil.isBlank(publicInputName) ? inputName
+							: publicInputName);
+
+					// Add the public input
+					SectionInput sectionInput = designer.addSectionInput(
+							publicInputName, inputModel.getParameterType());
+
+					// Link the section input to sub section input
+					designer.link(sectionInput, input);
+				}
 			}
 		}
 
