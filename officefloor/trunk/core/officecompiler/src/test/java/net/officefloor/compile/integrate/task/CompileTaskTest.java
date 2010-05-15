@@ -288,6 +288,29 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensures compiling a {@link Task} linking to next {@link Task} that is
+	 * through a child {@link SubSection}.
+	 */
+	public void testLinkTaskNextToTaskThroughChildSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION_A.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION_B.desk-two.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		task.setNextTaskInFlow("SECTION_B.desk-two.WORK", "INPUT",
+				Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensures issue if {@link TaskObject} not linked.
 	 */
 	public void testTaskObjectNotLinked() throws Exception {
