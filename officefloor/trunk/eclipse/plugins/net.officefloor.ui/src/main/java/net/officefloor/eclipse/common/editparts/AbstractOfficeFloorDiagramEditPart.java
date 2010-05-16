@@ -26,11 +26,14 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ShortestPathConnectionRouter;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
 
@@ -93,6 +96,15 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 
 		// Initialise
 		this.init();
+	}
+
+	@Override
+	protected void refreshVisuals() {
+		// Provide shortest path routing for better visual lines
+		ConnectionLayer layer = (ConnectionLayer) this
+				.getLayer(LayerConstants.CONNECTION_LAYER);
+		layer.setConnectionRouter(new ShortestPathConnectionRouter(this
+				.getFigure()));
 	}
 
 	@Override
