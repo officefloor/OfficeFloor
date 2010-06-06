@@ -31,7 +31,7 @@
 				<executions>
 					<execution>
 						<id>copy-update-site-content</id>
-						<phase>prepare-package</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -48,7 +48,7 @@
 				<executions>
 					<execution>
 						<id>build-update-site-content</id>
-						<phase>prepare-package</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
