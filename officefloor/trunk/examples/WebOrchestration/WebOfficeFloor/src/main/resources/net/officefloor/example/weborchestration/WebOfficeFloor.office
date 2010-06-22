@@ -1,26 +1,26 @@
 <office>
   <external-managed-objects>
-    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="750" y="182">
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="817" y="408">
     </external-managed-object>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="CustomerSessionObject" source="net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" timeout="0" x="217" y="476">
+    <managed-object-source name="CustomerSessionObject" source="net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" timeout="0" x="477" y="546">
       <properties>
       </properties>
     </managed-object-source>
-    <managed-object-source name="HttpSession" source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.HttpSession" timeout="1000" x="470" y="512">
+    <managed-object-source name="HttpSession" source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.HttpSession" timeout="1000" x="685" y="561">
       <properties>
       </properties>
     </managed-object-source>
   </managed-object-sources>
   <managed-objects>
-    <managed-object name="CustomerSessionObject" scope="PROCESS" x="210" y="398">
+    <managed-object name="CustomerSessionObject" scope="PROCESS" x="430" y="486">
       <managed-object-source name="CustomerSessionObject"/>
       <dependency name="HTTP_SESSION" object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
         <managed-object name="HttpSession"/>
       </dependency>
     </managed-object>
-    <managed-object name="HttpSession" scope="PROCESS" x="430" y="404">
+    <managed-object name="HttpSession" scope="PROCESS" x="648" y="502">
       <managed-object-source name="HttpSession"/>
       <dependency name="HTTP_CONNECTION" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
@@ -28,14 +28,14 @@
     </managed-object>
   </managed-objects>
   <teams>
-    <team name="Servicer" x="789" y="346"/>
+    <team name="Servicer" x="782" y="203"/>
   </teams>
   <escalations>
   </escalations>
   <administrators>
   </administrators>
   <sections>
-    <section name="InitialState" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/initialstate/InitialState.desk" x="142" y="19">
+    <section name="InitialState" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/initialstate/InitialState.desk" x="133" y="256">
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
@@ -51,7 +51,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/route/Route.desk" x="9" y="229">
+    <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/route/Route.desk" x="9" y="51">
       <properties>
       </properties>
       <input name="handleRequest" parameter-type=""/>
@@ -73,7 +73,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/send/Send.desk" x="738" y="227">
+    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/send/Send.desk" x="613" y="169">
       <properties>
       </properties>
       <input name="SEND" parameter-type=""/>
@@ -86,7 +86,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="index" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/index/index.desk" x="155" y="131">
+    <section name="index" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/index/index.desk" x="295" y="131">
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
@@ -98,6 +98,9 @@
       <output name="Login" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Login" input="display"/>
       </output>
+      <output name="SelectProducts" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="SelectProducts" input="display"/>
+      </output>
       <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
@@ -108,7 +111,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Login" source="net.officefloor.model.impl.section.SectionModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.section" x="507" y="18">
+    <section name="Login" source="net.officefloor.model.impl.section.SectionModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.section" x="225" y="442">
       <properties>
       </properties>
       <input name="display" parameter-type="net.officefloor.example.weborchestration.login.LoginCredentials"/>
@@ -125,6 +128,22 @@
       </object>
       <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="SelectProducts" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/products/SelectProducts.desk" x="529" y="39">
+      <properties>
+      </properties>
+      <input name="display" parameter-type=""/>
+      <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
       </object>
       <responsibility name="Responsibility">
         <team name="Servicer"/>
