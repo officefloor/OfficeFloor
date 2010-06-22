@@ -48,8 +48,8 @@ public class WebOrchestrationTestCases extends TestCase {
 		// Create the suite of tests
 		TestSuite suite = new TestSuite();
 		suite.addTestSuite(CustomerTestCase.class);
-		suite.addTestSuite(InvoiceTestCase.class);
 		suite.addTestSuite(QuoteTestCase.class);
+		suite.addTestSuite(InvoiceTestCase.class);
 		suite.addTestSuite(SelectProductsTestCase.class);
 
 		// Return the suite of tests

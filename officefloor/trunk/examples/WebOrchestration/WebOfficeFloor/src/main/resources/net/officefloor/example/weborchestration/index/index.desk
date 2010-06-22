@@ -22,6 +22,7 @@
     <external-flow name="Displayed" argument-type="java.lang.Void" x="562" y="44"/>
     <external-flow name="Exception" argument-type="java.lang.Exception" x="562" y="73"/>
     <external-flow name="Login" argument-type="java.lang.Void" x="585" y="130"/>
+    <external-flow name="SelectProducts" argument-type="java.lang.Void" x="601" y="195"/>
   </external-flows>
   <works>
     <work name="HttpTemplate-index.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="49" y="319">
@@ -64,6 +65,9 @@
     </task>
     <task name="login" public="false" work="HttpTemplate-index.ofp" task="login" return-type="" x="110" y="140">
       <next-external-flow name="Login"/>
+    </task>
+    <task name="selectProducts" public="false" work="HttpTemplate-index.ofp" task="selectProducts" return-type="" x="151" y="213">
+      <next-external-flow name="SelectProducts"/>
     </task>
   </tasks>
 </desk>
