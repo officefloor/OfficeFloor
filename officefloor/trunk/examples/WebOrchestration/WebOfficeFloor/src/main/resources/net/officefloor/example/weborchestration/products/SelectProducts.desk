@@ -1,0 +1,78 @@
+<desk>
+  <external-managed-objects>
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="669" y="549"/>
+  </external-managed-objects>
+  <managed-object-sources>
+  </managed-object-sources>
+  <managed-objects>
+  </managed-objects>
+  <external-flows>
+    <external-flow name="Displayed" argument-type="java.lang.Void" x="724" y="147"/>
+    <external-flow name="Exception" argument-type="java.lang.Exception" x="701" y="96"/>
+  </external-flows>
+  <works>
+    <work name="HttpTemplate-selectProducts.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="308" y="408">
+      <properties>
+        <property name="template.path" value="net/officefloor/example/weborchestration/products/selectProducts.ofp"/>
+        <property name="bean.Product" value="net.officefloor.example.weborchestration.products.ProductQuantity"/>
+      </properties>
+      <work-task name="Cancel">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        </task-object>
+      </work-task>
+      <work-task name="Product">
+        <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+        <task-object name="OBJECT" key="" object-type="net.officefloor.example.weborchestration.products.ProductQuantity" parameter="true">
+        </task-object>
+      </work-task>
+      <work-task name="ProductsSelected">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        </task-object>
+      </work-task>
+      <work-task name="Tail">
+        <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+      </work-task>
+      <work-task name="template">
+        <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
+          <external-managed-object name="HTTP"/>
+        </task-object>
+      </work-task>
+    </work>
+    <work name="ProductsDisplayer" source="net.officefloor.plugin.work.clazz.ClassWorkSource" x="155" y="184">
+      <properties>
+        <property name="class.name" value="net.officefloor.example.weborchestration.products.ProductsDisplayer"/>
+      </properties>
+      <work-task name="displayProducts">
+      </work-task>
+    </work>
+  </works>
+  <tasks>
+    <task name="Product" public="false" work="HttpTemplate-selectProducts.ofp" task="Product" return-type="" x="325" y="127">
+      <task-escalation escalation-type="java.io.IOException">
+        <external-flow name="Exception"/>
+      </task-escalation>
+    </task>
+    <task name="Tail" public="false" work="HttpTemplate-selectProducts.ofp" task="Tail" return-type="" x="450" y="310">
+      <next-external-flow name="Displayed"/>
+      <task-escalation escalation-type="java.io.IOException">
+        <external-flow name="Exception"/>
+      </task-escalation>
+    </task>
+    <task name="display" public="true" work="HttpTemplate-selectProducts.ofp" task="template" return-type="" x="15" y="46">
+      <next-task name="displayProducts"/>
+      <task-escalation escalation-type="java.io.IOException">
+        <external-flow name="Exception"/>
+      </task-escalation>
+    </task>
+    <task name="displayProducts" public="false" work="ProductsDisplayer" task="displayProducts" return-type="" x="153" y="119">
+      <task-flow name="displayProduct" key="" argument-type="net.officefloor.example.weborchestration.products.ProductQuantity">
+        <task name="Product" link="PARALLEL"/>
+      </task-flow>
+      <next-task name="Tail"/>
+    </task>
+  </tasks>
+</desk>
