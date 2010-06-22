@@ -33,6 +33,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
+import net.officefloor.demo.AbstractGuiTestCase;
 import net.officefloor.demo.macro.DragMacro;
 import net.officefloor.demo.macro.LeftClickMacro;
 import net.officefloor.demo.macro.Macro;
@@ -40,14 +41,13 @@ import net.officefloor.demo.macro.MacroSource;
 import net.officefloor.demo.macro.MacroSourceContext;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Test the {@link RecordComponent}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RecordComponentTest extends OfficeFrameTestCase {
+public class RecordComponentTest extends AbstractGuiTestCase {
 
 	/**
 	 * {@link RecordComponent} being tested.
@@ -93,6 +93,7 @@ public class RecordComponentTest extends OfficeFrameTestCase {
 	/**
 	 * Tests single click.
 	 */
+	@GuiTest
 	public void testSingleClick() throws Throwable {
 		final Point location = this
 				.getRelativeMouseLocation(this.mockFrame.button);
@@ -105,6 +106,7 @@ public class RecordComponentTest extends OfficeFrameTestCase {
 	/**
 	 * Test get another location with {@link DragMacro}.
 	 */
+	@GuiTest
 	public void testAnotherLocation() throws Throwable {
 
 		// Specify locations

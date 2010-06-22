@@ -26,7 +26,7 @@ import java.awt.Robot;
 
 import javax.swing.JFrame;
 
-import junit.framework.TestCase;
+import net.officefloor.demo.AbstractGuiTestCase;
 import net.officefloor.demo.record.RecordComponent;
 
 /**
@@ -34,7 +34,7 @@ import net.officefloor.demo.record.RecordComponent;
  * 
  * @author Daniel Sagenschneider
  */
-public class DemoToolTest extends TestCase {
+public class DemoToolTest extends AbstractGuiTestCase {
 
 	/**
 	 * {@link JFrame} for the {@link DemoTool}.
@@ -62,6 +62,7 @@ public class DemoToolTest extends TestCase {
 	/**
 	 * Ensure the correct recording area.
 	 */
+	@GuiTest
 	public void testRecordingArea() throws Exception {
 
 		// Create the frame with recording

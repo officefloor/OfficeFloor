@@ -32,18 +32,18 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+import net.officefloor.demo.AbstractGuiTestCase;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.demo.macro.WaitMacro;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link MacroPlayer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MacroPlayerTest extends OfficeFrameTestCase {
+public class MacroPlayerTest extends AbstractGuiTestCase {
 
 	/**
 	 * {@link MacroPlayer} to test.
@@ -144,6 +144,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can run the {@link Macro} with no mouse location.
 	 */
+	@GuiTest
 	public void testNoMouseLocation() {
 
 		// Create the macro that obtains context
@@ -163,6 +164,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to move mouse to starting location.
 	 */
+	@GuiTest
 	public void testMouseStartLocation() throws Exception {
 
 		// Obtain starting and ending location for mouse move
@@ -194,6 +196,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Tests moving the mouse for next {@link Macro}.
 	 */
+	@GuiTest
 	public void testMouseMoveLocation() {
 
 		// Obtain starting and ending location for mouse move
@@ -225,6 +228,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Tests moving the mouse in negative direction for next {@link Macro}.
 	 */
+	@GuiTest
 	public void testMouseMoveLocationInNegativeDirection() {
 
 		// Obtain starting and ending location for mouse move
@@ -254,9 +258,9 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to trigger moving the mouse from the {@link MacroTaskContext}
-	 * .
+	 * Ensure can trigger moving the mouse from the {@link MacroTaskContext}.
 	 */
+	@GuiTest
 	public void testContext_mouseMove() {
 
 		// Obtain starting and ending location for mouse move
@@ -278,6 +282,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to trigger mouse click from the {@link MacroTaskContext}.
 	 */
+	@GuiTest
 	public void testContext_mouseClick() throws Exception {
 
 		// Move to button middle
@@ -297,6 +302,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to trigger key stroke.
 	 */
+	@GuiTest
 	public void testContext_keyStroke() throws Exception {
 
 		// Setup to input into the text
@@ -319,6 +325,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to input text.
 	 */
+	@GuiTest
 	public void testContext_keyText() {
 
 		final String INPUT_TEXT = "Example Text with special characters ./:";
@@ -337,6 +344,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correctly obtains absolute location.
 	 */
+	@GuiTest
 	public void testContext_AbsoluteLocation() {
 
 		final Point relativeLocation = new Point(10, 10);
@@ -354,6 +362,7 @@ public class MacroPlayerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correctly obtains relative location.
 	 */
+	@GuiTest
 	public void testContext_RelativeLocation() {
 
 		final Point absoluteLocation = new Point(10, 10);
