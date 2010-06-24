@@ -95,8 +95,18 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
 					classPathBuilderFactory);
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed starting the "
-					+ OfficeBuilding.class.getSimpleName(), ex);
+			// Provide details of the failure
+			final String MESSAGE = "Failed starting the "
+					+ OfficeBuilding.class.getSimpleName();
+			this.getLog().error(
+					MESSAGE + ": " + ex.getMessage() + " ["
+							+ ex.getClass().getSimpleName() + "]");
+			this.getLog().error(
+					"DIAGNOSIS INFORMATION: classpath='"
+							+ System.getProperty("java.class.path") + "'");
+
+			// Propagate the failure
+			throw new MojoExecutionException(MESSAGE, ex);
 		}
 
 		// Log started OfficeBuilding
