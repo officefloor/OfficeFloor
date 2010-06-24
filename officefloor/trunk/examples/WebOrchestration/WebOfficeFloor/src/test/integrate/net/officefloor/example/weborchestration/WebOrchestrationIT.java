@@ -22,10 +22,8 @@ package net.officefloor.example.weborchestration;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebOrchestrationIT extends CustomerTestCase /*
-														 * TODO use:
-														 * WebOrchestrationTestCases
-														 */{
+public class WebOrchestrationIT extends CustomerTestCase // QuoteTestCase 
+										/* TODO use: WebOrchestrationTestCases */{
 
 	// TODO remove
 	static {

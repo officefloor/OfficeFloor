@@ -81,6 +81,13 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 */
 	private String jvmOptions;
 
+	/**
+	 * Indicates whether to provide verbose output.
+	 * 
+	 * @parameter
+	 */
+	private Boolean verbose = new Boolean(false);
+
 	/*
 	 * ======================== Mojo ==========================
 	 */
@@ -112,9 +119,11 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Create the Seed
 		ClassPathSeed seed = new ClassPathSeed();
+		List<String> seedClasspathElements = null;
 		try {
 			@SuppressWarnings("unchecked")
 			List<String> elements = this.project.getCompileClasspathElements();
+			seedClasspathElements = elements;
 			for (String element : elements) {
 				File file = new File(element);
 				if (file.isDirectory()) {
@@ -150,6 +159,14 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				"Opened " + OfficeFloor.class.getSimpleName()
 						+ " under process name space '" + processNameSpace
 						+ "' for " + this.officeFloorLocation);
+
+		// Determine if provide verbose output
+		if (this.verbose.booleanValue()) {
+			this.getLog().info("CLASS PATH SEEDING");
+			for (String element : seedClasspathElements) {
+				this.getLog().info("   " + element);
+			}
+		}
 	}
 
 }
