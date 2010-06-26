@@ -41,6 +41,14 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<!-- OpenEJB required to start RMI -->
+						<groupId>org.apache.openejb</groupId>
+						<artifactId>openejb-core</artifactId>
+						<version>3.1.2</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
