@@ -100,8 +100,48 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			}
 		}
 
-		// Run the test
-		super.runBare();
+		try {
+			// Run the test
+			super.runBare();
+		} catch (TestFail ex) {
+			// Propagate cause of wrapper
+			throw ex.getCause();
+		}
+	}
+
+	/**
+	 * <p>
+	 * Triggers failure due to exception.
+	 * <p>
+	 * This is useful to not have to provide throws clauses on tests.
+	 * 
+	 * @param ex
+	 *            Failure.
+	 * @return {@link RuntimeException} to allow <code>throw fail(ex);</code>
+	 *         for compilation. Note this is never returned as always throws
+	 *         exception.
+	 * @throws TestFail
+	 *             Handled by {@link #runBare()}.
+	 */
+	public static RuntimeException fail(Throwable ex) {
+		// Propagate for runBare to pick up
+		throw new TestFail(ex);
+	}
+
+	/**
+	 * Wrapping error for failures.
+	 */
+	private static class TestFail extends Error {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param cause
+		 *            Cause of failure.
+		 */
+		public TestFail(Throwable cause) {
+			super(cause);
+		}
 	}
 
 	/**

@@ -36,7 +36,7 @@ import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoader
 /**
  * {@link ManagedObjectSource} to load the {@link HttpRequest} parameters onto a
  * dependency Object.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderManagedObjectSource extends
@@ -108,7 +108,7 @@ public class HttpParametersLoaderManagedObjectSource extends
 		}
 
 		// Initialise the HTTP parameters loader
-		this.loader.init(type, aliasMappings, isCaseSensitive);
+		this.loader.init(type, aliasMappings, isCaseSensitive, null);
 
 		// Load the meta-data
 		context.setManagedObjectClass(HttpParametersLoaderManagedObject.class);
