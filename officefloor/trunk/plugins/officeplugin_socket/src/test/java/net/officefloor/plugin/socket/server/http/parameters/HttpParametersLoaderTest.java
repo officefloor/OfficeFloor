@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
@@ -38,9 +40,23 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	private final MockInterface object = this.createMock(MockInterface.class);
 
 	/**
+	 * Expected {@link MockRoleBean} instances.
+	 */
+	private final Map<String, MockRoleBean> roles = new HashMap<String, MockRoleBean>();
+
+	/**
+	 * Expected {@link MockProductBean} instances.
+	 */
+	private final Map<String, MockProductBean> products = new HashMap<String, MockProductBean>();
+
+	/*
+	 * ========================= Single value tests ========================
+	 */
+
+	/**
 	 * Ensures all {@link Method} instances of the type are available.
 	 */
-	public void testAllMethodsAvaiable() throws Exception {
+	public void testAllMethodsAvailable() throws Exception {
 		this.object.setFirstName("Daniel");
 		this.object.setLastName("Sagenschneider");
 		this.object.setDescription("description");
@@ -71,8 +87,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 						"GET",
 						"/path?FirstName=Daniel&LastName=Sagenschneider&Description=description&Ignore=NotLoaded",
 						null);
-		HttpParametersLoader<MockInterface> loader = this.createLoader(
-				MockInterface.class, true);
+		HttpParametersLoader<MockInterface> loader = this.createLoader(true);
 		MockObject mockObject = new MockObject();
 		loader.loadParameters(request, mockObject);
 
@@ -213,6 +228,10 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 				"LastName=Sagenschneider", true);
 	}
 
+	/*
+	 * ===================== Keyed value tests ========================
+	 */
+
 	/**
 	 * Ensure able to load multiple values for a GET request. In other words
 	 * will look for prefix on parameter name and use remaining of parameter
@@ -221,7 +240,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testGetWithMultipleValues() throws Exception {
 		this.object.setMultipleValues("One", "1");
 		this.object.setMultipleValues("Two", "2");
-		this.doTest("GET", "/path?MultipleValuesOne=1&MultipleValuesTwo=2",
+		this.doTest("GET", "/path?MultipleValues{One}=1&MultipleValues{Two}=2",
 				null, true);
 	}
 
@@ -231,9 +250,66 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	public void testPostWithMultipleValues() throws Exception {
 		this.object.setMultipleValues("One", "1");
 		this.object.setMultipleValues("Two", "2");
-		this.doTest("POST", "/path", "MultipleValuesOne=1&MultipleValuesTwo=2",
-				true);
+		this.doTest("POST", "/path",
+				"MultipleValues{One}=1&MultipleValues{Two}=2", true);
 	}
+
+	/*
+	 * ========================= Map loading tests ========================
+	 */
+
+	/**
+	 * Ensure can map a property.
+	 */
+	public void testMapProperty() throws Exception {
+		this.expectRole("key", "VALUE", null);
+		this.doTest("GET", "/path?Roles{key}.RoleName=VALUE", null, true);
+	}
+
+	/**
+	 * Ensure can load multiple properties on a mapped bean.
+	 */
+	public void testMapProperties() throws Exception {
+		this.expectRole("key", "ROLE", "DESCRIPTION");
+		this
+				.doTest(
+						"GET",
+						"/path?roles{key}.roleName=ROLE&roles{key}.description=DESCRIPTION",
+						null, false);
+	}
+
+	/**
+	 * <p>
+	 * Ensure can load multiple map entries.
+	 * <p>
+	 * Also shows how to create an indexed list.
+	 */
+	public void testMultipleMapEntries() throws Exception {
+		this.expectRole("1", "ROLE1", "DESCRIPTION1");
+		this.expectRole("2", "ROLE2", "DESCRIPTION2");
+		this
+				.doTest(
+						"GET",
+						"/path?roles{1}.roleName=ROLE1&roles{1}.description=DESCRIPTION1&roles{2}.roleName=ROLE2&roles{2}.description=DESCRIPTION2",
+						null, false);
+	}
+
+	/**
+	 * Ensure can load multiple maps.
+	 */
+	public void testMultipleMaps() throws Exception {
+		this.expectRole("role", "ROLE", "ROLE_DESCRIPTION");
+		this.expectProduct("product", "PRODUCT", "PRODUCT_DESCRIPTION");
+		this
+				.doTest(
+						"GET",
+						"/path?roles{role}.roleName=ROLE&roles{role}.description=ROLE_DESCRIPTION&products{product}.productName=PRODUCT&products{product}.description=PRODUCT_DESCRIPTION",
+						null, false);
+	}
+
+	/*
+	 * ========================= Helper methods ========================
+	 */
 
 	/**
 	 * Does the test, expecting mocks to have recorded actions.
@@ -252,32 +328,94 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 	private void doTest(String method, String requestUri, String body,
 			boolean isCaseSensitive, String... aliasProperties)
 			throws Exception {
+
+		// Record obtaining the map values
+		final Map<String, MockRoleBean> roleMap = new HashMap<String, MockRoleBean>();
+		final Map<String, MockProductBean> productMap = new HashMap<String, MockProductBean>();
+		boolean isMatcherLoader = false;
+		for (int i = 0; i < this.roles.size(); i++) {
+			this.object.setRoles(null, null);
+			if (!isMatcherLoader) {
+				this.control(this.object).setMatcher(new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						String key = (String) actual[0];
+						MockRoleBean bean = (MockRoleBean) actual[1];
+						roleMap.put(key, bean);
+						return true;
+					}
+				});
+				isMatcherLoader = true;
+			}
+		}
+		isMatcherLoader = false;
+		for (int i = 0; i < this.products.size(); i++) {
+			this.object.setProducts(null, null);
+			if (!isMatcherLoader) {
+				this.control(this.object).setMatcher(new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						String key = (String) actual[0];
+						MockProductBean bean = (MockProductBean) actual[1];
+						productMap.put(key, bean);
+						return true;
+					}
+				});
+				isMatcherLoader = true;
+			}
+		}
+
+		// Run test to load values
 		this.replayMockObjects();
 		HttpRequest request = HttpTestUtil.createHttpRequest(method,
 				requestUri, body);
 		HttpParametersLoader<MockInterface> loader = this.createLoader(
-				MockInterface.class, isCaseSensitive, aliasProperties);
+				isCaseSensitive, aliasProperties);
 		loader.loadParameters(request, this.object);
 		this.verifyMockObjects();
+
+		// Verify the roles
+		assertEquals("Incorrect number of roles", this.roles.size(), roleMap
+				.size());
+		for (String key : this.roles.keySet()) {
+			MockRoleBean e = this.roles.get(key);
+			MockRoleBean a = roleMap.get(key);
+			assertNotNull("Expecting role for key '" + key + "'", a);
+			assertEquals("Incorrect role name for key '" + key + "'",
+					e.roleName, a.roleName);
+			assertEquals("Incorrect description for key '" + key + "'",
+					e.description, a.description);
+		}
+
+		// Verify the products
+		assertEquals("Incorrect number of products", this.products.size(),
+				productMap.size());
+		for (String key : this.products.keySet()) {
+			MockProductBean e = this.products.get(key);
+			MockProductBean a = productMap.get(key);
+			assertNotNull("Expecting product for key '" + key + "'", a);
+			assertEquals("Incorrect product name for key '" + key + "'",
+					e.productName, a.productName);
+			assertEquals("Incorrect description for key '" + key + "'",
+					e.description, a.description);
+		}
 	}
 
 	/**
-	 * Creates the initialisd {@link HttpParametersLoader} for testing.
+	 * Creates the initialised {@link HttpParametersLoader} for testing.
 	 * 
-	 * @param type
-	 *            Object type to be loaded.
 	 * @param isCaseSensitive
 	 *            Indicates if should be case sensitive.
 	 * @param aliasProperties
 	 *            Alias mappings of alias to property name pairs.
 	 * @return Initialised {@link HttpParametersLoader}.
 	 */
-	private <T> HttpParametersLoader<T> createLoader(Class<T> type,
+	private HttpParametersLoader<MockInterface> createLoader(
 			boolean isCaseSensitive, String... aliasProperties)
 			throws Exception {
 
 		// Create the loader
-		HttpParametersLoader<T> loader = new HttpParametersLoaderImpl<T>();
+		HttpParametersLoader<MockInterface> loader = new HttpParametersLoaderImpl<MockInterface>();
 
 		// Create the alias mappings
 		Map<String, String> aliasMappings = new HashMap<String, String>();
@@ -288,10 +426,62 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		}
 
 		// Initialise the loader
-		loader.init(type, aliasMappings, isCaseSensitive);
+		loader.init(MockInterface.class, aliasMappings, isCaseSensitive, null);
 
 		// Return the loader
 		return loader;
+	}
+
+	/**
+	 * Creates an expected {@link MockRoleBean}.
+	 * 
+	 * @param key
+	 *            Key to be loaded into the {@link Map}.
+	 * @param roleName
+	 *            Role name.
+	 * @param description
+	 *            Description.
+	 * @return Expected {@link MockRoleBean}.
+	 */
+	private MockRoleBean expectRole(String key, String roleName,
+			String description) {
+
+		// Create the expected role
+		MockRoleBean role = new MockRoleBean();
+		role.setRoleName(roleName);
+		role.setDescription(description);
+
+		// Register the expected role
+		this.roles.put(key, role);
+
+		// Return the expected role
+		return role;
+	}
+
+	/**
+	 * Creates an expected {@link MockProductBean}.
+	 * 
+	 * @param key
+	 *            Key to be loaded into the {@link Map}.
+	 * @param productName
+	 *            Product name.
+	 * @param description
+	 *            Description.
+	 * @return Expected {@link MockProductBean}.
+	 */
+	private MockProductBean expectProduct(String key, String productName,
+			String description) {
+
+		// Create the expected product
+		MockProductBean product = new MockProductBean();
+		product.setProductName(productName);
+		product.setDescription(description);
+
+		// Register the expected product
+		this.products.put(key, product);
+
+		// Return the expected product
+		return product;
 	}
 
 	/**
@@ -307,7 +497,47 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 
 		void setMultipleValues(String key, String value);
 
+		void setRoles(String key, MockRoleBean bean);
+
+		void setProducts(String key, MockProductBean bean);
+
 		void setIgnore(int value);
+	}
+
+	/**
+	 * Role bean within the {@link Map}.
+	 */
+	public static class MockRoleBean {
+
+		public String roleName;
+
+		public String description;
+
+		public void setRoleName(String roleName) {
+			this.roleName = roleName;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+	}
+
+	/**
+	 * Product bean within the {@link Map}.
+	 */
+	public static class MockProductBean {
+
+		public String productName;
+
+		public String description;
+
+		public void setProductName(String productName) {
+			this.productName = productName;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
 	}
 
 	/**
@@ -329,6 +559,16 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		 * Description.
 		 */
 		public String description = null;
+
+		/**
+		 * Roles.
+		 */
+		public Map<String, MockRoleBean> roles = null;
+
+		/**
+		 * Products.
+		 */
+		public Map<String, MockProductBean> products = null;
 
 		/**
 		 * Ensures only the interface (type) methods are loaded.
@@ -357,6 +597,16 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		@Override
 		public void setDescription(String description) {
 			this.description = description;
+		}
+
+		@Override
+		public void setRoles(String key, MockRoleBean bean) {
+			fail("Should not be used in testing");
+		}
+
+		@Override
+		public void setProducts(String key, MockProductBean bean) {
+			fail("Should not be used in testing");
 		}
 
 		@Override

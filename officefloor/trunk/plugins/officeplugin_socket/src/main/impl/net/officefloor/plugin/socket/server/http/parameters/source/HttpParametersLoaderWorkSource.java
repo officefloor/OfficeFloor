@@ -39,7 +39,7 @@ import net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoader
 /**
  * {@link WorkSource} to load the {@link HttpRequest} parameters onto a
  * dependency Object.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderWorkSource
@@ -110,7 +110,7 @@ public class HttpParametersLoaderWorkSource
 		}
 
 		// Initialise the loader
-		this.loader.init(type, aliasMappings, isCaseSensitive);
+		this.loader.init(type, aliasMappings, isCaseSensitive, null);
 
 		// Create the task to load the HTTP parameters
 		HttpParametersLoaderTask task = new HttpParametersLoaderTask();

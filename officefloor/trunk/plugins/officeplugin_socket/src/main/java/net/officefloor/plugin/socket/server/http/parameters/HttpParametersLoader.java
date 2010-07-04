@@ -21,6 +21,7 @@ package net.officefloor.plugin.socket.server.http.parameters;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.value.loader.ObjectInstantiator;
 
 /**
  * <p>
@@ -52,11 +53,14 @@ public interface HttpParametersLoader<T> {
 	 *            Flag indicating if matching on parameter names is to be case
 	 *            sensitive. Specifying <code>false</code> results in matching
 	 *            names ignoring case - which makes for more tolerable loading.
+	 * @param objectInstantiator
+	 *            {@link ObjectInstantiator}.
 	 * @throws Exception
 	 *             If fails to initialise.
 	 */
 	void init(Class<T> type, Map<String, String> aliasMappings,
-			boolean isCaseSensitive) throws Exception;
+			boolean isCaseSensitive, ObjectInstantiator objectInstantiator)
+			throws Exception;
 
 	/**
 	 * Loads the parameters of the {@link HttpRequest} to the Object.
