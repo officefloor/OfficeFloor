@@ -20,7 +20,9 @@ package net.officefloor.example.weborchestration;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
@@ -55,7 +57,27 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	/**
 	 * URL file extension.
 	 */
-	public static String urlFileExtension = ".action";
+	private static String urlFileExtension = ".action";
+
+	/**
+	 * Tag within identifiers for open bracket.
+	 */
+	private static String tagOpenBracket = "[";
+
+	/**
+	 * Open key bracket for identifiers.
+	 */
+	private static String openKeyBracket = tagOpenBracket;
+
+	/**
+	 * Tag within identifiers for close bracket.
+	 */
+	private static String tagCloseBracket = "]";
+
+	/**
+	 * Close key bracket for identifiers.
+	 */
+	private static String closeKeyBracket = tagCloseBracket;
 
 	/**
 	 * {@link Customer} name.
@@ -68,6 +90,35 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	private static String customerEmail;
 
 	/**
+	 * Setups the environment for testing.
+	 * 
+	 * @param urlFileExtension
+	 *            URL file extension.
+	 * @param openKeyBracket
+	 *            Open key bracket for identifiers.
+	 * @param closeKeyBracket
+	 *            Close key bracket for identifiers.
+	 */
+	public static Test createTestSuite(String urlFileExtension,
+			String openKeyBracket, String closeKeyBracket) {
+		
+		// Specify state
+		AbstractSeleniumTestCase.urlFileExtension = urlFileExtension;
+		AbstractSeleniumTestCase.openKeyBracket = openKeyBracket;
+		AbstractSeleniumTestCase.closeKeyBracket = closeKeyBracket;
+		
+		// Create the suite of tests
+		TestSuite suite = new TestSuite();
+		suite.addTestSuite(CustomerTestCase.class);
+		suite.addTestSuite(QuoteTestCase.class);
+		suite.addTestSuite(InvoiceTestCase.class);
+		suite.addTestSuite(SelectProductsTestCase.class);
+
+		// Return the suite of tests
+		return suite;
+	}
+
+	/**
 	 * Creates the {@link DefaultSelenium} client.
 	 * 
 	 * @return {@link DefaultSelenium} client.
@@ -75,6 +126,19 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	private static DefaultSelenium createSeleniumClient() {
 		return new DefaultSelenium("localhost", 4444, "*firefox",
 				"http://localhost:8080/");
+	}
+
+	/**
+	 * Transforms the identifier for use.
+	 * 
+	 * @param identifier
+	 *            Identifier to be transformed.
+	 * @return Transformed identifier.
+	 */
+	private static String transformIdentifier(String identifier) {
+		identifier = identifier.replace(tagOpenBracket, openKeyBracket);
+		identifier = identifier.replace(tagCloseBracket, closeKeyBracket);
+		return identifier;
 	}
 
 	/**
@@ -140,11 +204,18 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 * Aligns the state of this test to the server state.
 	 */
 	public void alignTestState() {
+
+		// Initiate state
+		System.out.println("Starting Selenium Server for initiating ...");
 		DefaultSelenium initiate = createSeleniumClient();
 		initiate.start();
 		initiate.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		try {
+			// Log initiating state
+			System.out.println("Initiating state ...");
+
+			// Open page to provide initial state
 			initiate.open("/initialState" + urlFileExtension);
 
 			// Load the customer details
@@ -191,11 +262,13 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 		}
 
 		// Start selenium client
+		System.out.println("Starting Selenium Server ...");
 		this.selenium = createSeleniumClient();
 		this.selenium.start();
 		this.selenium.setTimeout(String.valueOf(this.pageLoadWaitTime));
 
 		// Reset for next test
+		System.out.println("Reseting state for test ...");
 		this.selenium.open("/testReset" + urlFileExtension);
 
 		// Open the starting URL
@@ -294,6 +367,14 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Text to input.
 	 */
 	public void inputText(String identifier, String text) {
+
+		// Transform the identifier
+		identifier = transformIdentifier(identifier);
+
+		// Log the input
+		System.out.println("INPUT: " + identifier + "=" + text);
+
+		// Input the text
 		this.selenium.type(identifier, text);
 	}
 
@@ -304,6 +385,10 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Text regular expression.
 	 */
 	public void assertTextPresent(String regexp) {
+
+		// Log assertion
+		System.out.println("ASSERT: " + regexp);
+
 		// Asset content available
 		assertTrue("Expecting text: " + regexp, this.selenium
 				.isTextPresent("regexp:" + regexp));
@@ -323,6 +408,15 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 */
 	public void assertTableCellValue(String tableIdentifier, int row,
 			int column, String expectedCellValue) {
+
+		// Transform the identifier
+		tableIdentifier = transformIdentifier(tableIdentifier);
+
+		// Log assertion
+		System.out.println("ASSERT: " + tableIdentifier + "[" + row + ","
+				+ column + "]=" + expectedCellValue);
+
+		// Assert table cell value
 		assertEquals("Incorrect value for cell " + row + "," + column
 				+ " of table " + tableIdentifier, expectedCellValue,
 				this.selenium.getTable(tableIdentifier + "." + row + "."
@@ -336,6 +430,9 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 *            Identifier of submit input to submit form.
 	 */
 	public void submit(String identifier) {
+
+		// Transform the identifier
+		identifier = transformIdentifier(identifier);
 
 		// Log submit
 		System.out.println("SUBMIT: " + identifier);

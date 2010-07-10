@@ -17,17 +17,33 @@
  */
 package net.officefloor.example.weborchestration;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * Integration tests for Web Orchestration examples.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebOrchestrationIT extends CustomerTestCase // QuoteTestCase 
-										/* TODO use: WebOrchestrationTestCases */{
+public class WebOrchestrationIT extends AbstractSeleniumTestCase {
 
-	// TODO remove
-	static {
-		AbstractSeleniumTestCase.urlFileExtension = ".task";
+	/**
+	 * Creates the {@link TestSuite} of web example integration tests.
+	 * 
+	 * @return {@link TestSuite} of web example integration tests.
+	 */
+	public static Test suite() {
+		// TODO just return the createTestSuite
+		// return
+		AbstractSeleniumTestCase.createTestSuite(".task", "{", "}");
+
+		// TODO remove
+		TestSuite suite = new TestSuite();
+		// suite.addTestSuite(CustomerTestCase.class);
+		// suite.addTestSuite(QuoteTestCase.class);
+		suite.addTestSuite(InvoiceTestCase.class);
+		// suite.addTestSuite(SelectProductsTestCase.class);
+		return suite;
 	}
 
 }

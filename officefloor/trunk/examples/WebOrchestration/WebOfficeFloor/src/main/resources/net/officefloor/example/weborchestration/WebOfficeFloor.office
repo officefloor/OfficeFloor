@@ -1,6 +1,6 @@
 <office>
   <external-managed-objects>
-    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="817" y="408">
+    <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="551" y="451">
     </external-managed-object>
   </external-managed-objects>
   <managed-object-sources>
@@ -28,14 +28,14 @@
     </managed-object>
   </managed-objects>
   <teams>
-    <team name="Servicer" x="782" y="203"/>
+    <team name="Servicer" x="802" y="12"/>
   </teams>
   <escalations>
   </escalations>
   <administrators>
   </administrators>
   <sections>
-    <section name="InitialState" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/initialstate/InitialState.desk" x="133" y="256">
+    <section name="InitialState" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/initialstate/InitialState.desk" x="36" y="497">
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
@@ -73,7 +73,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/send/Send.desk" x="613" y="169">
+    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/send/Send.desk" x="705" y="362">
       <properties>
       </properties>
       <input name="SEND" parameter-type=""/>
@@ -86,10 +86,13 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="index" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/index/index.desk" x="295" y="131">
+    <section name="index" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/index/index.desk" x="140" y="13">
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
+      <output name="DeliverProducts" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="DeliverProducts" input="obtainProducts"/>
+      </output>
       <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Send" input="SEND"/>
       </output>
@@ -111,7 +114,7 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="Login" source="net.officefloor.model.impl.section.SectionModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.section" x="225" y="442">
+    <section name="Login" source="net.officefloor.model.impl.section.SectionModelSectionSource" location="net/officefloor/example/weborchestration/login/Login.section" x="39" y="224">
       <properties>
       </properties>
       <input name="display" parameter-type="net.officefloor.example.weborchestration.login.LoginCredentials"/>
@@ -133,11 +136,109 @@
         <team name="Servicer"/>
       </responsibility>
     </section>
-    <section name="SelectProducts" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/products/SelectProducts.desk" x="529" y="39">
+    <section name="SelectProducts" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/products/SelectProducts.desk" x="301" y="21">
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
       <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <output name="Selected" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="ShoppingCart" input="display"/>
+      </output>
+      <object name="CustomerSessionObject" object-type="net.officefloor.example.weborchestration.Customer">
+        <managed-object name="CustomerSessionObject"/>
+      </object>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="ShoppingCart" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/shoppingcart/ShoppingCart.desk" x="458" y="29">
+      <properties>
+      </properties>
+      <input name="display" parameter-type=""/>
+      <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <output name="PurchaseShoppingCart" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Invoice" input="PurchaseShoppingCart"/>
+      </output>
+      <output name="Quote" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Quote" input="quote"/>
+      </output>
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+        <managed-object name="CustomerSessionObject"/>
+      </object>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="Quote" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/quote/Quote.desk" x="629" y="27">
+      <properties>
+      </properties>
+      <input name="quote" parameter-type=""/>
+      <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <output name="PurchaseQuote" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Invoice" input="PurchaseQuote"/>
+      </output>
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+        <managed-object name="CustomerSessionObject"/>
+      </object>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="Invoice" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/invoice/Invoice.desk" x="690" y="207">
+      <properties>
+      </properties>
+      <input name="PurchaseQuote" parameter-type=""/>
+      <input name="PurchaseShoppingCart" parameter-type=""/>
+      <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="Send" input="SEND"/>
+      </output>
+      <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">
+      </output>
+      <output name="Index" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="index" input="display"/>
+      </output>
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+        <managed-object name="CustomerSessionObject"/>
+      </object>
+      <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+        <external-managed-object name="HTTP"/>
+      </object>
+      <responsibility name="Responsibility">
+        <team name="Servicer"/>
+      </responsibility>
+    </section>
+    <section name="DeliverProducts" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/deliver/DeliverProducts.desk" x="186" y="381">
+      <properties>
+      </properties>
+      <input name="obtainProducts" parameter-type=""/>
+      <output name="Cancel" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="index" input="display"/>
+      </output>
+      <output name="Delivered" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="index" input="display"/>
+      </output>
+      <output name="Display" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Send" input="SEND"/>
       </output>
       <output name="Exception" argument-type="java.lang.Exception" escalation-only="true">

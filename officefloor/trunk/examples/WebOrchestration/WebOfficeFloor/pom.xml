@@ -22,7 +22,7 @@
 					<officeFloorLocation>net/officefloor/example/weborchestration/WebOfficeFloor.officefloor</officeFloorLocation>
 					<jvmOptions>-Djava.naming.factory.initial=org.apache.openejb.client.LocalInitialContextFactory
 						-Dopenejb.deployments.classpath.include=.*WebOrchestration.*</jvmOptions>
-					<verbose>true</verbose>
+					<verbose>false</verbose>
 				</configuration>
 				<executions>
 					<execution>
