@@ -11,11 +11,15 @@ with a listing of <a href="#{beans}">beans</a>:
     <tr>
         <td>Name</td>
         <td>Description</td>
+        <td>Property toString</td>
+        <td>Property Value</td>
     </tr>
     <!-- [List] -->
     <tr>
         <td>${Name}</td>
         <td>${description}</td>
+        <td>${Property}</td>
+        <td>${property.value}</td>
     </tr>
     <!-- [Tail] -->
 </table>

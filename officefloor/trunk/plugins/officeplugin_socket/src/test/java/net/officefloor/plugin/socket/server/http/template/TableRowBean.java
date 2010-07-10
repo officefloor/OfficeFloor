@@ -28,12 +28,17 @@ public class TableRowBean {
 	/**
 	 * Name.
 	 */
-	private String name;
+	private final String name;
 
 	/**
 	 * Description.
 	 */
-	private String description;
+	private final String description;
+
+	/**
+	 * {@link PropertyBean}.
+	 */
+	private final PropertyBean property;
 
 	/**
 	 * Initiate.
@@ -42,10 +47,13 @@ public class TableRowBean {
 	 *            Name.
 	 * @param description
 	 *            Description.
+	 * @param property
+	 *            {@link PropertyBean}.
 	 */
-	public TableRowBean(String name, String description) {
+	public TableRowBean(String name, String description, PropertyBean property) {
 		this.name = name;
 		this.description = description;
+		this.property = property;
 	}
 
 	/**
@@ -64,5 +72,14 @@ public class TableRowBean {
 	 */
 	public String getDescription() {
 		return this.description;
+	}
+
+	/**
+	 * Obtains the {@link PropertyBean}.
+	 * 
+	 * @return {@link PropertyBean}.
+	 */
+	public PropertyBean getProperty() {
+		return this.property;
 	}
 }
