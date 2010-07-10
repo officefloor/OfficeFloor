@@ -14,13 +14,13 @@
 				</tr>
 				<!-- [Product] -->
 				<tr>
-					<input type="hidden" name="products[${rowIndex}].productId" value="${productId}" />
-					<input type="hidden" name="products[${rowIndex}].name" value="${name}" />
-					<input type="hidden" name="products[${rowIndex}].price" value="${price}" />
+					<input type="hidden" name="products{${rowIndex}}.productId" value="${productId}" />
+					<input type="hidden" name="products{${rowIndex}}.name" value="${name}" />
+					<input type="hidden" name="products{${rowIndex}}.price" value="${price}" />
 						
 					<td>${name}</td>
 					<td>${price}</td>
-					<td><input type="text" name="products[${rowIndex}].quantity" value="${quantity}" /></td>
+					<td><input type="text" name="products{${rowIndex}}.quantity" value="${quantity}" /></td>
 					<td>${error}</td>
 				</tr>
 				<!-- [Tail] -->

@@ -19,6 +19,7 @@
     </managed-object>
   </managed-objects>
   <external-flows>
+    <external-flow name="DeliverProducts" argument-type="java.lang.Void" x="637" y="267"/>
     <external-flow name="Displayed" argument-type="java.lang.Void" x="562" y="44"/>
     <external-flow name="Exception" argument-type="java.lang.Exception" x="562" y="73"/>
     <external-flow name="Login" argument-type="java.lang.Void" x="585" y="130"/>
@@ -57,6 +58,9 @@
     </work>
   </works>
   <tasks>
+    <task name="deliverProducts" public="false" work="HttpTemplate-index.ofp" task="deliverProducts" return-type="" x="189" y="272">
+      <next-external-flow name="DeliverProducts"/>
+    </task>
     <task name="display" public="true" work="HttpTemplate-index.ofp" task="template" return-type="" x="19" y="67">
       <next-external-flow name="Displayed"/>
       <task-escalation escalation-type="java.io.IOException">

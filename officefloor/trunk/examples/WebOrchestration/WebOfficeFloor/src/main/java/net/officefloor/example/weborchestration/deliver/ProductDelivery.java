@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.example.weborchestration.products;
+package net.officefloor.example.weborchestration.deliver;
 
 import net.officefloor.example.weborchestration.Product;
 
@@ -24,12 +24,12 @@ import net.officefloor.example.weborchestration.Product;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProductQuantity {
+public class ProductDelivery {
 
 	/**
-	 * Index of the row for the {@link Product}.
+	 * Row index.
 	 */
-	private int rowIndex = -1;
+	private int rowIndex;
 
 	/**
 	 * {@link Product} identifier.
@@ -42,11 +42,6 @@ public class ProductQuantity {
 	private String name;
 
 	/**
-	 * Price of the {@link Product}.
-	 */
-	private double price;
-
-	/**
 	 * Quantity.
 	 */
 	private String quantity;
@@ -57,30 +52,29 @@ public class ProductQuantity {
 	private String error;
 
 	/**
-	 * Default constructor for struts.
+	 * Default constructor for loading.
 	 */
-	public ProductQuantity() {
+	public ProductDelivery() {
 	}
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param rowIndex
-	 *            Index of the row for the {@link Product}.
+	 *            Row index.
 	 * @param product
 	 *            {@link Product}.
 	 */
-	public ProductQuantity(int rowIndex, Product product) {
+	public ProductDelivery(int rowIndex, Product product) {
 		this.rowIndex = rowIndex;
 		this.productId = product.getProductId();
 		this.name = product.getName();
-		this.price = product.getPrice();
 		this.quantity = "";
 		this.error = "";
 	}
 
 	/**
-	 * Obtains the index of the row for the {@link Product}.
+	 * Obtains the row index.
 	 * 
 	 * @return Row index.
 	 */
@@ -94,8 +88,8 @@ public class ProductQuantity {
 	 * @param rowIndex
 	 *            Row index.
 	 */
-	public void setRowIndex(int rowIndex) {
-		this.rowIndex = rowIndex;
+	public void setRowIndex(String rowIndex) {
+		this.rowIndex = Integer.parseInt(rowIndex);
 	}
 
 	/**
@@ -134,25 +128,6 @@ public class ProductQuantity {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Obtains the price of a single {@link Product}.
-	 * 
-	 * @return Price of a single {@link Product}.
-	 */
-	public double getPrice() {
-		return this.price;
-	}
-
-	/**
-	 * Specifies the price for a single {@link Product}.
-	 * 
-	 * @param price
-	 *            Price for a single {@link Product}.
-	 */
-	public void setPrice(String price) {
-		this.price = Double.parseDouble(price);
 	}
 
 	/**
