@@ -21,12 +21,10 @@ package net.officefloor.plugin.socket.server.http.template;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTemplateSectionContent;
+import net.officefloor.plugin.value.retriever.ValueRetriever;
 
 /**
  * {@link HttpTemplateWriter} to write a bean property.
@@ -36,29 +34,27 @@ import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTem
 public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
-	 * {@link Method} to obtain the property value from the bean.
-	 */
-	private final Map<Class<?>, Method> beanTypeToPropertyMap = new HashMap<Class<?>, Method>(
-			3);
-
-	/**
-	 * Name of the property {@link Method} on the bean.
-	 */
-	private final String propertyMethodName;
-
-	/**
 	 * <code>Content-Type</code>.
 	 */
 	private final String contentType;
+
+	/**
+	 * {@link ValueRetriever}.
+	 */
+	private final ValueRetriever<Object> valueRetriever;
+
+	/**
+	 * Property name.
+	 */
+	private final String propertyName;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param content
 	 *            {@link ReferenceHttpTemplateSectionContent}.
-	 * @param beanType
-	 *            Bean type. The bean class will either be an instance of this
-	 *            type or a sub type of it.
+	 * @param valueRetriever
+	 *            {@link ValueRetriever}.
 	 * @param contentType
 	 *            <code>Content-Type</code>.
 	 * @throws NoSuchMethodException
@@ -66,70 +62,12 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 *             available on the bean type.
 	 */
 	public BeanPropertyHttpTemplateWriter(
-			ReferenceHttpTemplateSectionContent content, Class<?> beanType,
-			String contentType) throws NoSuchMethodException {
-		this.contentType = contentType;
-
-		// Obtain the property method name
-		String propertyName = content.getKey();
-		propertyName = (propertyName == null ? "" : propertyName.trim());
-		if ((propertyName.length() == 0)
-				|| ("toString".equalsIgnoreCase(propertyName))) {
-			// Use 'toString' method of object
-			this.propertyMethodName = "toString";
-		} else {
-			// Ensure first character is upper case
-			propertyName = propertyName.trim();
-			propertyName = propertyName.substring(0, 1).toUpperCase()
-					+ propertyName.substring(1);
-
-			// Use the 'getXxx' method
-			this.propertyMethodName = "get" + propertyName;
-		}
-
-		// Obtain and register the property method for the bean type
-		Method method = this.getPropertyMethod(beanType);
-
-		// Ensure method is public
-		if (!Modifier.isPublic(method.getModifiers())) {
-			throw new NoSuchMethodException("Method "
-					+ beanType.getSimpleName() + "." + this.propertyMethodName
-					+ "() must be public");
-		}
-
-		// Ensure method returns type (not void)
-		Class<?> returnType = method.getReturnType();
-		if ((returnType == null) || (returnType.equals(Void.TYPE))) {
-			throw new NoSuchMethodException("Method "
-					+ beanType.getSimpleName() + "." + this.propertyMethodName
-					+ "() must return a value (not void)");
-		}
-	}
-
-	/**
-	 * Obtains the {@link Method} to obtain the value to write from the bean.
-	 * 
-	 * @param beanClass
-	 *            {@link Class} of the bean to find the {@link Method}.
-	 * @return {@link Method} to obtain the value to write from the bean.
-	 */
-	private Method getPropertyMethod(Class<?> beanClass)
+			ReferenceHttpTemplateSectionContent content,
+			ValueRetriever<Object> valueRetriever, String contentType)
 			throws NoSuchMethodException {
-		synchronized (this.beanTypeToPropertyMap) {
-
-			// Lazy load the property method
-			Method propertyMethod = this.beanTypeToPropertyMap.get(beanClass);
-			if (propertyMethod == null) {
-				// New bean type, so obtain property method for it
-				propertyMethod = beanClass.getMethod(this.propertyMethodName);
-
-				// Cache property method, for next time
-				this.beanTypeToPropertyMap.put(beanClass, propertyMethod);
-			}
-
-			// Return the property method
-			return propertyMethod;
-		}
+		this.contentType = contentType;
+		this.valueRetriever = valueRetriever;
+		this.propertyName = content.getKey();
 	}
 
 	/*
@@ -149,15 +87,12 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 		String propertyTextValue;
 		try {
 
-			// Obtain the method to obtain the value
-			Class<?> beanClass = bean.getClass();
-			Method propertyMethod = this.getPropertyMethod(beanClass);
-
 			// Obtain the property value from bean
-			Object value = propertyMethod.invoke(bean);
+			String value = this.valueRetriever.retrieveValue(bean,
+					this.propertyName);
 
 			// Obtain the text value to write as content
-			propertyTextValue = (value == null ? "" : value.toString());
+			propertyTextValue = (value == null ? "" : value);
 
 		} catch (InvocationTargetException ex) {
 			// Propagate cause of method failure

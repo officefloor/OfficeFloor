@@ -43,6 +43,9 @@ import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSect
 import net.officefloor.plugin.socket.server.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.socket.server.http.template.parse.ReferenceHttpTemplateSectionContent;
 import net.officefloor.plugin.socket.server.http.template.parse.StaticHttpTemplateSectionContent;
+import net.officefloor.plugin.value.retriever.ValueRetriever;
+import net.officefloor.plugin.value.retriever.ValueRetrieverSource;
+import net.officefloor.plugin.value.retriever.ValueRetrieverSourceImpl;
 
 /**
  * {@link Task} to write the {@link HttpTemplateSection}.
@@ -74,19 +77,15 @@ public class HttpTemplateTask extends
 	 *            {@link WorkSourceContext}.
 	 * @return Listing of {@link Task} names to handle {@link HttpTemplate} link
 	 *         requests.
-	 * @throws IOException
+	 * @throws Exception
 	 *             If fails to prepare the template.
-	 * @throws ClassNotFoundException
-	 *             If template bean can not be found.
-	 * @throws NoSuchMethodException
-	 *             If property can not be found on bean type.
 	 */
+	@SuppressWarnings("unchecked")
 	public static String[] loadTaskType(HttpTemplateSection section,
 			String contentType, Charset charset,
 			HttpResponseWriterFactory writerFactory,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
-			WorkSourceContext context) throws IOException,
-			ClassNotFoundException, NoSuchMethodException {
+			WorkSourceContext context) throws Exception {
 
 		// Obtain the section and task name
 		String sectionAndTaskName = section.getSectionName();
@@ -97,6 +96,7 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
 		Class<?> beanClass = null;
+		ValueRetriever valueRetriever = null;
 		for (HttpTemplateSectionContent content : section.getContent()) {
 
 			// Handle based on type
@@ -110,8 +110,8 @@ public class HttpTemplateTask extends
 				// Add the reference template writer
 				ReferenceHttpTemplateSectionContent referenceContent = (ReferenceHttpTemplateSectionContent) content;
 
-				// Ensure have the bean class
-				if (beanClass == null) {
+				// Ensure have the value loader for the bean
+				if (valueRetriever == null) {
 					String beanClassPropertyName = PROPERTY_BEAN_PREFIX
 							+ sectionAndTaskName;
 					String beanClassName = context
@@ -120,11 +120,16 @@ public class HttpTemplateTask extends
 					// Obtain the class
 					beanClass = context.getClassLoader().loadClass(
 							beanClassName);
+
+					// Obtain the value retriever
+					ValueRetrieverSource source = new ValueRetrieverSourceImpl();
+					source.init(false);
+					valueRetriever = source.sourceValueRetriever(beanClass);
 				}
 
 				// Add the content writer
 				contentWriterList.add(new BeanPropertyHttpTemplateWriter(
-						referenceContent, beanClass, contentType));
+						referenceContent, valueRetriever, contentType));
 
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
@@ -143,7 +148,7 @@ public class HttpTemplateTask extends
 		}
 
 		// Determine if requires bean
-		boolean isRequireBean = (beanClass != null);
+		boolean isRequireBean = (valueRetriever != null);
 
 		// Create the task factory
 		HttpTemplateTask task = new HttpTemplateTask(contentWriterList

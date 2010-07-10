@@ -168,8 +168,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		beans[0] = new TemplateBean("Test");
 		final int NULL_BEAN_INDEX = 1;
 		beans[NULL_BEAN_INDEX] = null; // 'NullBean' template
-		beans[2] = new TableRowBean("one", "Same");
-		beans[3] = new ChildTableRowBean("two", "Child");
+		beans[2] = new TableRowBean("one", "Same", new PropertyBean("A"));
+		beans[3] = new ChildTableRowBean("two", "Child", null); // no property
 		beans[4] = null;
 		for (int i = 0; i < beans.length; i++) {
 			this.recordReturn(taskContext, taskContext.getObject(0),

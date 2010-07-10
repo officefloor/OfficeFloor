@@ -23,7 +23,7 @@ import java.util.Map;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests loading values via a {@link StatelessValueLoader}.
+ * Tests loading values via a {@link ValueLoader}.
  * 
  * @author Daniel Sagenschneider
  */

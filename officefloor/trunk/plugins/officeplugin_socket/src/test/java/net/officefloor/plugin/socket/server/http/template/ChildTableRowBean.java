@@ -32,9 +32,12 @@ public class ChildTableRowBean extends TableRowBean {
 	 *            Name.
 	 * @param description
 	 *            Description.
+	 * @param property
+	 *            {@link PropertyBean}.
 	 */
-	public ChildTableRowBean(String name, String description) {
-		super(name, description);
+	public ChildTableRowBean(String name, String description,
+			PropertyBean property) {
+		super(name, description, property);
 	}
 
 }
