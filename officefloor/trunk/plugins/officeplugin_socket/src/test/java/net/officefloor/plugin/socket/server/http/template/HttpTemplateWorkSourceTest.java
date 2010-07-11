@@ -20,6 +20,12 @@ package net.officefloor.plugin.socket.server.http.template;
 
 import java.io.IOException;
 
+import org.easymock.AbstractMatcher;
+
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
@@ -27,12 +33,14 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.template.RequestHandlerTask.RequestHandlerIdentifier;
+import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
 
 /**
  * Tests the {@link HttpTemplateWorkSource}.
@@ -45,6 +53,13 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * Properties to load the {@link WorkType}.
 	 */
 	private final String[] properties;
+
+	/**
+	 * Path to template for missing items to check errors.
+	 */
+	private final String missingTemplateFilePath = this.getClass().getPackage()
+			.getName().replace('.', '/')
+			+ "/TemplateMissing.ofp";
 
 	/**
 	 * Initiate.
@@ -134,6 +149,83 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,
 				this.properties);
+	}
+
+	/**
+	 * Ensure indicates failure on missing bean for {@link HttpTemplateSection}.
+	 */
+	public void testMissingBean() {
+
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Record failure due to missing bean
+		issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				"Missing property 'bean.template' for WorkSource "
+						+ HttpTemplateWorkSource.class.getName());
+
+		// Create and initiate the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(issues);
+
+		// Do not provide bean for template section
+		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
+		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE)
+				.setValue(this.missingTemplateFilePath);
+
+		// Test loading ensuring indicates failure
+		this.replayMockObjects();
+		compiler.getWorkLoader().loadWorkType(HttpTemplateWorkSource.class,
+				propertyList);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure indicates failure on missing property in the
+	 * {@link HttpTemplateSection}.
+	 */
+	public void testMissingProperty() {
+		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+
+		// Record failure due to missing bean
+		final String message = "Property 'MissingProperty' can not be sourced from bean type "
+				+ Object.class.getName();
+		issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				"Failed to source WorkType definition from WorkSource "
+						+ HttpTemplateWorkSource.class.getName(),
+				new Exception(message));
+		this.control(issues).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect location type", expected[0], actual[0]);
+				assertEquals("Incorrect location", expected[1], actual[1]);
+				assertEquals("Incorrect asset type", expected[2], actual[2]);
+				assertEquals("Incorrect asset", expected[3], actual[3]);
+				assertEquals("Incorrect description", expected[4], actual[4]);
+				Exception cause = (Exception) actual[5];
+				assertEquals("Incorrect cause message", message, cause
+						.getMessage());
+				return true;
+			}
+		});
+
+		// Create and initiate the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(issues);
+
+		// Provide bean that does not have the required property
+		PropertyList propertyList = OfficeFloorCompiler.newPropertyList();
+		propertyList.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE)
+				.setValue(this.missingTemplateFilePath);
+		propertyList.addProperty("bean.template").setValue(
+				Object.class.getName());
+
+		// Test loading ensuring indicates failure
+		this.replayMockObjects();
+		compiler.getWorkLoader().loadWorkType(HttpTemplateWorkSource.class,
+				propertyList);
+		this.verifyMockObjects();
 	}
 
 	/**

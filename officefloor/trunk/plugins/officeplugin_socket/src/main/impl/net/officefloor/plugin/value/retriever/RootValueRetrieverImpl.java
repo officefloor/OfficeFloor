@@ -64,8 +64,74 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 * ===================== ValueRetreiver ======================
 	 */
 
+	/**
+	 * {@link Processor} to determine if value is retrievable.
+	 */
+	private static Processor<Boolean> retrievable = new Processor<Boolean>() {
+		@Override
+		public Boolean process(ValueRetriever<Object> propertyRetriever,
+				Object object, String remainingName) throws Exception {
+
+			// Must be retriever to obtain value
+			if (propertyRetriever == null) {
+				return false; // property not retrievable
+			}
+
+			// Determine if further property
+			if (remainingName.length() == 0) {
+				return true; // property is retrievable
+			}
+
+			// Delegate to determine if retrievable
+			return propertyRetriever.isValueRetrievable(remainingName);
+		}
+	};
+
+	@Override
+	public boolean isValueRetrievable(String name) throws Exception {
+		// Return if value retrievable
+		return this.process(name, null, retrievable).booleanValue();
+	}
+
+	/**
+	 * {@link Processor} to retrieve the value.
+	 */
+	private static Processor<String> retriever = new Processor<String>() {
+		@Override
+		public String process(ValueRetriever<Object> propertyRetriever,
+				Object object, String remainingName) throws Exception {
+
+			// Ensure able to retrieve value
+			if (propertyRetriever == null) {
+				return null; // Unknown value
+			}
+
+			// Return the retrieved value
+			return propertyRetriever.retrieveValue(object, remainingName);
+		}
+	};
+
 	@Override
 	public String retrieveValue(T object, String name) throws Exception {
+		// Return the retrieved value
+		return this.process(name, object, retriever);
+	}
+
+	/**
+	 * Processes.
+	 * 
+	 * @param name
+	 *            Property name to retrieve.
+	 * @param object
+	 *            Object on the value. May be <code>null</code>.
+	 * @param processor
+	 *            {@link Processor}.
+	 * @return Value as per the {@link Processor}.
+	 * @throws Exception
+	 *             If fails to process.
+	 */
+	private <R> R process(String name, Object object, Processor<R> processor)
+			throws Exception {
 
 		// Obtain the property name
 		String propertyName;
@@ -85,13 +151,32 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		// Obtain the property value retriever
 		ValueRetriever<Object> propertyRetriever = this.propertyToRetriever
 				.get(propertyName);
-		if (propertyRetriever == null) {
-			// Unknown value
-			return null;
-		}
 
-		// Return the retrieved value
-		return propertyRetriever.retrieveValue(object, remainingName);
+		// Process
+		return processor.process(propertyRetriever, object, remainingName);
+	}
+
+	/**
+	 * Processor.
+	 */
+	private interface Processor<R> {
+
+		/**
+		 * Processes the details.
+		 * 
+		 * @param propertyRetriever
+		 *            {@link ValueRetriever} for the property. May be
+		 *            <code>null</code>.
+		 * @param object
+		 *            Object to retrieve value from.
+		 * @param remainingName
+		 *            Remaining name of the property.
+		 * @return Value as per processing.
+		 * @throws Exception
+		 *             If fails to process.
+		 */
+		R process(ValueRetriever<Object> propertyRetriever, Object object,
+				String remainingName) throws Exception;
 	}
 
 }
