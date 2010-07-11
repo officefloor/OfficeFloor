@@ -58,6 +58,12 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 */
 
 	@Override
+	public boolean isValueRetrievable(String name) throws Exception {
+		// Delegate to determine if retrievable
+		return this.delegate.isValueRetrievable(name);
+	}
+
+	@Override
 	public String retrieveValue(T object, String name) throws Exception {
 
 		// Ensure have value

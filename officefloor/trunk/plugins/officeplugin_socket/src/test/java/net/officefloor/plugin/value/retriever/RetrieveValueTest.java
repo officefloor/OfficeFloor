@@ -20,11 +20,11 @@ package net.officefloor.plugin.value.retriever;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the retrieving the values via a
+ * Tests the retrieving the values via the {@link ValueRetriever}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ValueRetrieverTest extends OfficeFrameTestCase {
+public class RetrieveValueTest extends OfficeFrameTestCase {
 
 	/**
 	 * Root object.
@@ -134,24 +134,6 @@ public class ValueRetrieverTest extends OfficeFrameTestCase {
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
-	}
-
-	/**
-	 * Root object type.
-	 */
-	public static interface RootObject {
-
-		String getValue();
-
-		PropertyObject getProperty();
-	}
-
-	/**
-	 * Property object type.
-	 */
-	public static interface PropertyObject {
-
-		String getText();
 	}
 
 }

@@ -57,17 +57,26 @@ public class BeanPropertyHttpTemplateWriter implements HttpTemplateWriter {
 	 *            {@link ValueRetriever}.
 	 * @param contentType
 	 *            <code>Content-Type</code>.
-	 * @throws NoSuchMethodException
+	 * @param beanType
+	 *            Bean type for the property.
+	 * @throws Exception
 	 *             If {@link Method} to obtain the value to write is not
 	 *             available on the bean type.
 	 */
 	public BeanPropertyHttpTemplateWriter(
 			ReferenceHttpTemplateSectionContent content,
-			ValueRetriever<Object> valueRetriever, String contentType)
-			throws NoSuchMethodException {
+			ValueRetriever<Object> valueRetriever, String contentType,
+			Class<?> beanType) throws Exception {
 		this.contentType = contentType;
 		this.valueRetriever = valueRetriever;
 		this.propertyName = content.getKey();
+
+		// Ensure the property is retrievable
+		if (!this.valueRetriever.isValueRetrievable(this.propertyName)) {
+			throw new Exception("Property '" + this.propertyName
+					+ "' can not be sourced from bean type "
+					+ beanType.getName());
+		}
 	}
 
 	/*

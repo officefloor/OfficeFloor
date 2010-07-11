@@ -17,37 +17,29 @@
  */
 package net.officefloor.plugin.value.retriever;
 
+
 /**
- * Retrieves a value from an object graph.
+ * <p>
+ * Root object type.
+ * <p>
+ * Provides methods for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ValueRetriever<T> {
+public interface RootObject {
 
 	/**
-	 * Retrieves the value from the object graph.
+	 * Obtains String value for simple property name.
 	 * 
-	 * @param object
-	 *            Root object of the object graph.
-	 * @param name
-	 *            Property name.
-	 * @return Property value.
-	 * @throws Exception
-	 *             If fails to retrieve the value.
+	 * @return String value as per testing.
 	 */
-	String retrieveValue(T object, String name) throws Exception;
+	String getValue();
 
 	/**
-	 * Indicates if name maps to getter on the object graph to actually be able
-	 * to provide the value.
+	 * Obtains an object for <code>property.text</code> property names.
 	 * 
-	 * @param name
-	 *            Property name to check is available from the object graph.
-	 * @return <code>true</code> if the object graph provides a corresponding
-	 *         getter for the property name.
-	 * @throws Exception
-	 *             If fails to determine if value is retrievable.
+	 * @return {@link PropertyObject} as per testing.
 	 */
-	boolean isValueRetrievable(String name) throws Exception;
+	PropertyObject getProperty();
 
 }

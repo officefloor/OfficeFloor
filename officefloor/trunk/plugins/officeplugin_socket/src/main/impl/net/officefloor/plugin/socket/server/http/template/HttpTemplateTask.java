@@ -129,7 +129,8 @@ public class HttpTemplateTask extends
 
 				// Add the content writer
 				contentWriterList.add(new BeanPropertyHttpTemplateWriter(
-						referenceContent, valueRetriever, contentType));
+						referenceContent, valueRetriever, contentType,
+						beanClass));
 
 			} else if (content instanceof LinkHttpTemplateSectionContent) {
 				// Add the link template writer
