@@ -18,21 +18,6 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 public class ProductsDisplayer {
 
 	/**
-	 * Flows for displaying the {@link Product}.
-	 */
-	@FlowInterface
-	public static interface DisplayProductsFlows {
-
-		/**
-		 * Displays the {@link Product}.
-		 * 
-		 * @param quantity
-		 *            {@link ProductQuantity} containing detail to display.
-		 */
-		void displayProduct(ProductQuantity quantity);
-	}
-
-	/**
 	 * Obtains the {@link ProductQuantity} instances.
 	 * 
 	 * @return {@link ProductQuantity} instances.
@@ -56,6 +41,31 @@ public class ProductsDisplayer {
 	}
 
 	/**
+	 * Flows for displaying the {@link Product}.
+	 */
+	@FlowInterface
+	public static interface DisplayProductsFlows {
+
+		/**
+		 * Displays the head.
+		 */
+		void displayHead();
+
+		/**
+		 * Displays the {@link Product}.
+		 * 
+		 * @param quantity
+		 *            {@link ProductQuantity} containing detail to display.
+		 */
+		void displayProduct(ProductQuantity quantity);
+
+		/**
+		 * Displays the tail.
+		 */
+		void displayTail();
+	}
+
+	/**
 	 * Displays the {@link Product} instances.
 	 * 
 	 * @param productQuantities
@@ -74,10 +84,16 @@ public class ProductsDisplayer {
 			}
 		});
 
+		// Display the head
+		flows.displayHead();
+
 		// Display the products
 		for (ProductQuantity product : productQuantities) {
 			flows.displayProduct(product);
 		}
+
+		// Display the tail
+		flows.displayTail();
 	}
 
 }

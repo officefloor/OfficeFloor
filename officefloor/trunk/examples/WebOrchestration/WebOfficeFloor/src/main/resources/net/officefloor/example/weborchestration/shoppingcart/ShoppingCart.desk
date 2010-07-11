@@ -19,6 +19,7 @@
     </managed-object>
   </managed-objects>
   <external-flows>
+    <external-flow name="ContinueShopping" argument-type="java.lang.Void" x="723" y="246"/>
     <external-flow name="Displayed" argument-type="java.lang.Void" x="686" y="72"/>
     <external-flow name="Exception" argument-type="java.lang.Exception" x="672" y="113"/>
     <external-flow name="PurchaseShoppingCart" argument-type="java.lang.Void" x="696" y="225"/>
@@ -81,6 +82,9 @@
     </task>
     <task name="Quote" public="false" work="HttpTemplate-shoppingCart.ofp" task="Quote" return-type="" x="40" y="261">
       <next-external-flow name="Quote"/>
+    </task>
+    <task name="SelectProducts" public="false" work="HttpTemplate-shoppingCart.ofp" task="SelectProducts" return-type="" x="24" y="385">
+      <next-external-flow name="ContinueShopping"/>
     </task>
     <task name="ShoppingCartItem" public="false" work="HttpTemplate-shoppingCart.ofp" task="ShoppingCartItem" return-type="" x="413" y="105">
       <task-escalation escalation-type="java.io.IOException">

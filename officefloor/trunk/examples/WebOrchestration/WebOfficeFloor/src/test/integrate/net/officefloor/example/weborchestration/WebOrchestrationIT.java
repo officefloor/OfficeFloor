@@ -33,17 +33,7 @@ public class WebOrchestrationIT extends AbstractSeleniumTestCase {
 	 * @return {@link TestSuite} of web example integration tests.
 	 */
 	public static Test suite() {
-		// TODO just return the createTestSuite
-		// return
-		AbstractSeleniumTestCase.createTestSuite(".task", "{", "}");
-
-		// TODO remove
-		TestSuite suite = new TestSuite();
-		// suite.addTestSuite(CustomerTestCase.class);
-		// suite.addTestSuite(QuoteTestCase.class);
-		suite.addTestSuite(InvoiceTestCase.class);
-		// suite.addTestSuite(SelectProductsTestCase.class);
-		return suite;
+		return AbstractSeleniumTestCase.createTestSuite(".task", "{", "}");
 	}
 
 }

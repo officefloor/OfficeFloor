@@ -102,7 +102,7 @@
         <section-input section="Login" input="display"/>
       </output>
       <output name="SelectProducts" argument-type="java.lang.Void" escalation-only="false">
-        <section-input section="SelectProducts" input="display"/>
+        <section-input section="SelectProducts" input="obtainProductQuantities"/>
       </output>
       <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
@@ -139,7 +139,7 @@
     <section name="SelectProducts" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/example/weborchestration/products/SelectProducts.desk" x="301" y="21">
       <properties>
       </properties>
-      <input name="display" parameter-type=""/>
+      <input name="obtainProductQuantities" parameter-type=""/>
       <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Send" input="SEND"/>
       </output>
@@ -162,6 +162,9 @@
       <properties>
       </properties>
       <input name="display" parameter-type=""/>
+      <output name="ContinueShopping" argument-type="java.lang.Void" escalation-only="false">
+        <section-input section="SelectProducts" input="obtainProductQuantities"/>
+      </output>
       <output name="Displayed" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Send" input="SEND"/>
       </output>
