@@ -127,6 +127,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_servlet</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_socket</artifactId>
 				<version>0.1.2</version>
 			</dependency>
