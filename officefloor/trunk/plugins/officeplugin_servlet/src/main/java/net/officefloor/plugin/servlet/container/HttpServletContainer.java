@@ -1,0 +1,52 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2010 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.plugin.servlet.container;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.session.HttpSession;
+
+/**
+ * Container for a {@link HttpServlet}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public interface HttpServletContainer {
+
+	/**
+	 * Services the {@link HttpRequest} of the {@link ServerHttpConnection}.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection} containing the
+	 *            {@link HttpRequest} to service.
+	 * @param session
+	 *            {@link HttpSession} for the {@link HttpRequest}.
+	 * @throws ServletException
+	 *             As per {@link HttpServlet} API.
+	 * @throws IOException
+	 *             As per {@link HttpServlet} API.
+	 */
+	void service(ServerHttpConnection connection, HttpSession session)
+			throws ServletException, IOException;
+
+}
