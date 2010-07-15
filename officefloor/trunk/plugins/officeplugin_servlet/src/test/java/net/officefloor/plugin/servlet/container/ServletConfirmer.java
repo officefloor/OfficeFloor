@@ -67,12 +67,19 @@ public class ServletConfirmer extends HttpServlet {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
+			Object returnValue;
 			synchronized (ServletConfirmer.this) {
+
+				// Record the invocation
 				ServletConfirmer.this.invocations
 						.add(new RecordedMethodInvocation(method,
 								(args == null ? new Object[0] : args)));
+
+				// Obtain Proxy return and reset
+				returnValue = ServletConfirmer.this.proxyReturn;
+				ServletConfirmer.this.proxyReturn = null;
 			}
-			return null;
+			return returnValue;
 		}
 	};
 
@@ -84,9 +91,24 @@ public class ServletConfirmer extends HttpServlet {
 					new Class[] { HttpServletRequest.class }, this.recorder);
 
 	/**
+	 * Proxy return.
+	 */
+	private Object proxyReturn = null;
+
+	/**
 	 * Result of last recorded {@link Method}.
 	 */
 	private Object lastResult;
+
+	/**
+	 * Specifies the return the proxy (mainly for primitive return types).
+	 * 
+	 * @param proxyReturn
+	 *            Proxy return value.
+	 */
+	public synchronized void setProxyReturn(Object proxyReturn) {
+		this.proxyReturn = proxyReturn;
+	}
 
 	/**
 	 * Obtains the {@link HttpServletRequest} to record method to return value.

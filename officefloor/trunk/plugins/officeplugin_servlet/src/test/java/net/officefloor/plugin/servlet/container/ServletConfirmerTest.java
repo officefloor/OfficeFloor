@@ -60,4 +60,15 @@ public class ServletConfirmerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect URI", "/test", this.confirmer.confirm("test"));
 	}
 
+	/**
+	 * Validates the date header.
+	 */
+	public void testConfirmDateHeader() throws Exception {
+		this.confirmer.setProxyReturn(new Long(1));
+		this.request.getDateHeader("date");
+		System.out.println("Date: "
+				+ this.confirmer.confirm(null, "date",
+						"Sun, 06 Nov 1994 08:49:37 GMT"));
+	}
+
 }
