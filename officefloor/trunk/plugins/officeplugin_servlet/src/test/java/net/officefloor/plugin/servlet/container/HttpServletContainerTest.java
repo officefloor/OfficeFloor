@@ -114,10 +114,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain header values.
 	 */
-	public void test_getHeaders() {
-		// Should cache headers (only single call)
+	public void test_getHeader() {
+		// Only single call as should cache headers
 		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("name", "value"));
+				.createHttpHeaders("name", "value", "int", "1", "date",
+						"Sun, 06 Nov 1994 08:49:37 GMT"));
 
 		// Validate able to obtain header values
 		this.doTest(new MockHttpServlet() {
@@ -126,6 +127,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					throws ServletException, IOException {
 				assertNull("getHeader(missing)", req.getHeader("missing"));
 				assertEquals("getHeader(name)", "value", req.getHeader("name"));
+				assertEquals("getIntHeader(int)", 1, req.getIntHeader("int"));
+				assertEquals("getDateHeader(date)", 784111777000l, req
+						.getDateHeader("date"));
 			}
 		});
 	}

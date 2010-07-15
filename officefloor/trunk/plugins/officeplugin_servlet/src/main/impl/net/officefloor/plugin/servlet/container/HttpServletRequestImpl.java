@@ -21,11 +21,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -44,6 +48,47 @@ import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
  * @author Daniel Sagenschneider
  */
 public class HttpServletRequestImpl implements HttpServletRequest {
+
+	/**
+	 * RFC 1123 header date format.
+	 */
+	private static final String RFC1123_HEADER_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+	/**
+	 * RFC 1036 header date format.
+	 */
+	private static final String RFC1036_HEADER_DATE_FORMAT = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+
+	/**
+	 * ANSI C header date format.
+	 */
+	private static final String ANSI_C_HEADER_DATE_FORMAT = "EEE MMM d HH:mm:ss yyyy";
+
+	/**
+	 * Header date formats.
+	 */
+	private static final String[] HEADER_DATE_FORMATS = {
+			RFC1123_HEADER_DATE_FORMAT, RFC1036_HEADER_DATE_FORMAT,
+			ANSI_C_HEADER_DATE_FORMAT };
+
+	/**
+	 * {@link TimeZone} for date header.
+	 */
+	private static TimeZone DATE_HEADER_TIMEZONE = TimeZone.getTimeZone("GMT");
+
+	/**
+	 * Start {@link Date} for the date header.
+	 */
+	private static final Date DATE_HEADER_TWO_DIGIT_YEAR_START;
+
+	/**
+	 * Initiate date header two digit start year.
+	 */
+	static {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2000, Calendar.JANUARY, 1, 0, 0);
+		DATE_HEADER_TWO_DIGIT_YEAR_START = calendar.getTime();
+	}
 
 	/**
 	 * {@link HttpRequest}.
@@ -98,9 +143,41 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public long getDateHeader(String name) {
-		// TODO implement HttpServletRequest.getDateHeader
-		throw new UnsupportedOperationException(
-				"TODO implement HttpServletRequest.getDateHeader");
+		String value = this.getHeader(name);
+		if (value != null) {
+
+			// Have value so attempt to parse
+			SimpleDateFormat dateParser = null;
+			for (String dateFormat : HEADER_DATE_FORMATS) {
+
+				// Configure the parser
+				if (dateParser == null) {
+					// Create new data parser
+					dateParser = new SimpleDateFormat(dateFormat, Locale.US);
+					dateParser.setTimeZone(DATE_HEADER_TIMEZONE);
+					dateParser
+							.set2DigitYearStart(DATE_HEADER_TWO_DIGIT_YEAR_START);
+				} else {
+					// Use the next date format
+					dateParser.applyPattern(dateFormat);
+				}
+
+				// Parse the date
+				try {
+					long date = dateParser.parse(value).getTime();
+					return date;
+				} catch (Exception ex) {
+					// Ignore parsing failure and try next format
+				}
+			}
+
+			// Can not parse so throw failure
+			throw new IllegalArgumentException(
+					"Can not parse header date value '" + value + "'");
+		}
+
+		// No value so return as per Servlet API
+		return -1;
 	}
 
 	@Override
@@ -124,6 +201,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Enumeration getHeaderNames() {
 		// TODO implement HttpServletRequest.getHeaderNames
 		throw new UnsupportedOperationException(
@@ -131,6 +209,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Enumeration getHeaders(String name) {
 		// TODO implement HttpServletRequest.getHeaders
 		throw new UnsupportedOperationException(
@@ -139,9 +218,14 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public int getIntHeader(String name) {
-		// TODO implement HttpServletRequest.getIntHeader
-		throw new UnsupportedOperationException(
-				"TODO implement HttpServletRequest.getIntHeader");
+		String value = this.getHeader(name);
+		if (value != null) {
+			// Return the integer value
+			return Integer.parseInt(value);
+		} else {
+			// No value so return as Servlet API
+			return -1;
+		}
 	}
 
 	@Override
@@ -269,6 +353,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Enumeration getAttributeNames() {
 		// TODO implement ServletRequest.getAttributeNames
 		throw new UnsupportedOperationException(
@@ -332,6 +417,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Enumeration getLocales() {
 		// TODO implement ServletRequest.getLocales
 		throw new UnsupportedOperationException(
@@ -346,6 +432,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map getParameterMap() {
 		// TODO implement ServletRequest.getParameterMap
 		throw new UnsupportedOperationException(
@@ -353,6 +440,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Enumeration getParameterNames() {
 		// TODO implement ServletRequest.getParameterNames
 		throw new UnsupportedOperationException(
