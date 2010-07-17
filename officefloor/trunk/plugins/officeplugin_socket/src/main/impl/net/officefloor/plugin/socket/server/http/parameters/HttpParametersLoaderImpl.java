@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.plugin.value.loader.ObjectInstantiator;
 import net.officefloor.plugin.value.loader.ValueLoader;
 import net.officefloor.plugin.value.loader.ValueLoaderFactory;
@@ -134,11 +137,11 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 		final ValueLoader valueLoader = loader;
 
 		// Create the parameters parser
-		HttpParametersParser parser = new HttpParametersParserImpl();
+		HttpRequestTokeniser parser = new HttpRequestTokeniserImpl();
 
 		// Parse the parameters and load onto the object
 		parser.parseHttpParameters(httpRequest,
-				new HttpParametersParseHandler() {
+				new HttpRequestTokenHandler() {
 					@Override
 					public void handleHttpParameter(String name, String value)
 							throws HttpParametersException {

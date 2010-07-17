@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.socket.server.http.parameters;
+package net.officefloor.plugin.socket.server.http.tokenise;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,15 +24,19 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
- * {@link HttpParametersParser} implementation.
+ * {@link HttpRequestTokeniser} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersParserImpl implements HttpParametersParser {
+public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 	/*
 	 * ====================== HttpParametersParser ============================
@@ -40,7 +44,7 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 
 	@Override
 	public void parseHttpParameters(HttpRequest request,
-			HttpParametersParseHandler handler) throws HttpParametersException {
+			HttpRequestTokenHandler handler) throws HttpParametersException {
 
 		// Create the temporary buffer (aids reducing object creation)
 		TempBuffer tempBuffer = new TempBuffer();
@@ -72,7 +76,7 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 				}
 			} catch (IOException ex) {
 				// Propagate failure
-				throw new HttpParametersParseException(ex);
+				throw new HttpRequestTokeniseException(ex);
 			}
 
 			// Obtain the body data as string
@@ -89,14 +93,14 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 	 * @param contents
 	 *            Contents containing the parameter name/values to be parsed.
 	 * @param handler
-	 *            {@link HttpParametersParseHandler}.
+	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
 	 * @throws HttpParametersException
 	 *             If fails to parse the parameters.
 	 */
 	private void loadParameters(String contents,
-			HttpParametersParseHandler handler, TempBuffer tempBuffer)
+			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
 			throws HttpParametersException {
 
 		// The implementation of this method reduces character array creations
@@ -193,7 +197,7 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 	 *            Indicates if a translation is required. {@link Method} array
 	 *            to load the parameters to the Object.
 	 * @param handler
-	 *            {@link HttpParametersParseHandler}.
+	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
 	 * @throws HttpParametersException
@@ -201,12 +205,12 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 	 */
 	private void loadParameter(String contents, int nameBegin, int nameEnd,
 			int valueBegin, int valueEnd, boolean isRequireTranslate,
-			HttpParametersParseHandler handler, TempBuffer tempBuffer)
+			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
 			throws HttpParametersException {
 
 		// Ensure valid
 		if ((nameEnd < 0) || (valueBegin < 0) || (valueEnd < 0)) {
-			throw new HttpParametersParseException(
+			throw new HttpRequestTokeniseException(
 					"Invalid HTTP contents (name " + nameBegin + "," + nameEnd
 							+ "  value " + valueBegin + "," + valueEnd + "): "
 							+ contents);
@@ -241,11 +245,11 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
 	 * @return Translated text.
-	 * @throws HttpParametersParseException
+	 * @throws HttpRequestTokeniseException
 	 *             If fails to translate.
 	 */
 	private String translate(String parameterText, TempBuffer tempBuffer)
-			throws HttpParametersParseException {
+			throws HttpRequestTokeniseException {
 
 		// Obtain the temporary buffer
 		char[] buffer = tempBuffer.buffer;
@@ -308,7 +312,7 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 
 		// Should always be in non-escape state after translating
 		if (escape != EscapeState.NONE) {
-			throw new HttpParametersParseException(
+			throw new HttpRequestTokeniseException(
 					"Invalid parameter text as escaping not complete: '"
 							+ parameterText + "'");
 		}
@@ -323,11 +327,11 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 	 * @param character
 	 *            Character to translate.
 	 * @return Corresponding 4 bits for character.
-	 * @throws HttpParametersParseException
+	 * @throws HttpRequestTokeniseException
 	 *             If invalid character for escaping.
 	 */
 	private byte translateEscapedCharToBits(char character)
-			throws HttpParametersParseException {
+			throws HttpRequestTokeniseException {
 
 		// Obtain the bits for the character
 		int bits;
@@ -339,7 +343,7 @@ public class HttpParametersParserImpl implements HttpParametersParser {
 			bits = (character - 'a') + 0xA;
 		} else {
 			// Invalid character for escaping
-			throw new HttpParametersParseException(
+			throw new HttpRequestTokeniseException(
 					"Invalid character for escaping: " + character);
 		}
 

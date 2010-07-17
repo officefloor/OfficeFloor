@@ -16,28 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.socket.server.http.parameters;
+package net.officefloor.plugin.socket.server.http.tokenise;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 
 /**
- * Handler that receives the {@link HttpRequest} parameters.
+ * Tokenises the {@link HttpRequest} for the path, parameters, fragment.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpParametersParseHandler {
+public interface HttpRequestTokeniser {
 
 	/**
-	 * Handles the {@link HttpRequest} parameter.
+	 * Tokenises the {@link HttpRequest} for the path, parameters and fragment
+	 * providing them to the {@link HttpRequestTokenHandler} to handle.
 	 * 
-	 * @param name
-	 *            Name of the parameter.
-	 * @param value
-	 *            Value for the parameter.
+	 * @param request
+	 *            {@link HttpRequest} to be tokenised.
+	 * @param handler
+	 *            {@link HttpRequestTokenHandler} to handle the
+	 *            {@link HttpRequest} tokens.
 	 * @throws HttpParametersException
-	 *             If fails to handle the {@link HttpRequest} parameter.
+	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
-	void handleHttpParameter(String name, String value)
-			throws HttpParametersException;
+	void parseHttpParameters(HttpRequest request,
+			HttpRequestTokenHandler handler) throws HttpParametersException;
 
 }
