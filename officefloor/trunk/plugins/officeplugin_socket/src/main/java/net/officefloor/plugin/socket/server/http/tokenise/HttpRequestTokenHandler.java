@@ -19,7 +19,6 @@
 package net.officefloor.plugin.socket.server.http.tokenise;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 
 /**
  * Handler that receives the {@link HttpRequest} tokens.
@@ -35,10 +34,10 @@ public interface HttpRequestTokenHandler {
 	 *            Name of the parameter.
 	 * @param value
 	 *            Value for the parameter.
-	 * @throws HttpParametersException
+	 * @throws HttpRequestTokeniseException
 	 *             If fails to handle the {@link HttpRequest} parameter.
 	 */
 	void handleHttpParameter(String name, String value)
-			throws HttpParametersException;
+			throws HttpRequestTokeniseException;
 
 }
