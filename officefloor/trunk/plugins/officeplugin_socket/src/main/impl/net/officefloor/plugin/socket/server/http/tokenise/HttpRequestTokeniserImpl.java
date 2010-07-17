@@ -20,7 +20,6 @@ package net.officefloor.plugin.socket.server.http.tokenise;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -46,9 +45,9 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		// Create the temporary buffer (aids reducing object creation)
 		TempBuffer tempBuffer = new TempBuffer();
 
-		// Always load the parameters from the request URI
+		// Always load the tokens from the request URI
 		String requestUri = request.getRequestURI();
-		this.loadParameters(requestUri, handler, tempBuffer);
+		this.loadTokens(requestUri, false, handler, tempBuffer);
 
 		// Only load parameters of body if a POST
 		if ("POST".equalsIgnoreCase(request.getMethod())) {
@@ -80,15 +79,17 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 			String bodyText = new String(data, charset);
 
 			// Load the parameters from the body
-			this.loadParameters(bodyText, handler, tempBuffer);
+			this.loadTokens(bodyText, true, handler, tempBuffer);
 		}
 	}
 
 	/**
-	 * Loads the parameters to the Object.
+	 * Loads the tokens to the handler.
 	 * 
 	 * @param contents
 	 *            Contents containing the parameter name/values to be parsed.
+	 * @param isOnlyParameters
+	 *            Flags to only load parameters.
 	 * @param handler
 	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
@@ -96,7 +97,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to parse the parameters.
 	 */
-	private void loadParameters(String contents,
+	private void loadTokens(String contents, boolean isOnlyParameters,
 			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
 			throws HttpRequestTokeniseException {
 
@@ -105,7 +106,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		// performance and reduce memory.
 
 		// Values to aid in parsing
-		boolean isPath = false;
+		boolean isPathProcessed = isOnlyParameters;
 		int nameBegin = 0; // start of contents
 		int nameEnd = -1;
 		int valueBegin = -1;
@@ -121,9 +122,14 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 			case '?':
 				// If not processing path then just include
-				if (!isPath) {
+				if (!isPathProcessed) {
+					// Load the path
+					nameEnd = i; // before '?'
+					this.loadPath(contents, nameBegin, nameEnd,
+							isRequireTranslate, handler, tempBuffer);
+
 					// No longer processing path
-					isPath = true;
+					isPathProcessed = true;
 					nameBegin = i + 1; // after '?'
 				}
 				break;
@@ -156,29 +162,85 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 				break;
 
 			case '#':
-				// At end of parameters as have fragment
-				valueEnd = i; // before terminator
-				if (valueBegin > 0) {
-					// Have name/value before fragment so load
-					this.loadParameter(contents, nameBegin, nameEnd,
-							valueBegin, valueEnd, isRequireTranslate, handler,
-							tempBuffer);
+				// Determine previous (path/parameter)
+				if (!isPathProcessed) {
+					// Load path
+					nameEnd = i; // before '#'
+					this.loadPath(contents, nameBegin, nameEnd,
+							isRequireTranslate, handler, tempBuffer);
+
+				} else {
+					// At end of parameters as have fragment
+					valueEnd = i; // before '#'
+					if (valueBegin > 0) {
+						// Have name/value before fragment so load
+						this.loadParameter(contents, nameBegin, nameEnd,
+								valueBegin, valueEnd, isRequireTranslate,
+								handler, tempBuffer);
+					}
 				}
-				return; // stop parsing
+
+				// Load the fragment
+				nameBegin = i + 1; // after '#'
+				String fragment = contents.substring(nameBegin);
+				fragment = this.translate(fragment, tempBuffer);
+				handler.handleFragment(fragment);
+
+				// Loaded fragment so stop parsing
+				return;
 			}
 		}
 
-		// Determine if final parameter to load (not terminated)
-		if (valueBegin > 0) {
+		// Determine if load final token
+		if (!isPathProcessed) {
+			// Only path so load as path
+			nameEnd = contents.length();
+			this.loadPath(contents, nameBegin, nameEnd, isRequireTranslate,
+					handler, tempBuffer);
+
+		} else if (valueBegin > 0) {
 			// Load the final parameter
 			valueEnd = contents.length();
 			this.loadParameter(contents, nameBegin, nameEnd, valueBegin,
 					valueEnd, isRequireTranslate, handler, tempBuffer);
 		}
+
 	}
 
 	/**
-	 * Loads the parameter to the Object.
+	 * Loads the path to the handler.
+	 * 
+	 * @param contents
+	 *            Contents being parsed that contains the parameter name/values.
+	 * @param pathBegin
+	 *            Beginning index of path in contents.
+	 * @param pathEnd
+	 *            Ending index of path in contents.
+	 * @param isRequireTranslate
+	 *            Indicates if a translation is required.
+	 * @param handler
+	 *            {@link HttpRequestTokenHandler}.
+	 * @param tempBuffer
+	 *            {@link TempBuffer}.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to load the path.
+	 */
+	private void loadPath(String contents, int pathBegin, int pathEnd,
+			boolean isRequireTranslate, HttpRequestTokenHandler handler,
+			TempBuffer tempBuffer) throws HttpRequestTokeniseException {
+
+		// Obtain the path
+		String path = contents.substring(pathBegin, pathEnd);
+		if (isRequireTranslate) {
+			path = this.translate(path, tempBuffer);
+		}
+
+		// Handle path
+		handler.handlePath(path);
+	}
+
+	/**
+	 * Loads the parameter to the handler.
 	 * 
 	 * @param contents
 	 *            Contents being parsed that contains the parameter name/values.
@@ -191,14 +253,13 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 * @param valueEnd
 	 *            Ending index of value in contents.
 	 * @param isRequireTranslate
-	 *            Indicates if a translation is required. {@link Method} array
-	 *            to load the parameters to the Object.
+	 *            Indicates if a translation is required.
 	 * @param handler
 	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
 	 * @throws HttpRequestTokeniseException
-	 *             If fails to parse the parameters.
+	 *             If fails to load the parameter.
 	 */
 	private void loadParameter(String contents, int nameBegin, int nameEnd,
 			int valueBegin, int valueEnd, boolean isRequireTranslate,

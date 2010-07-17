@@ -42,7 +42,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load GET request with no parameters.
 	 */
 	public void testGetWithNoParameters() throws Exception {
-		// Nothing loaded
+		this.handler.handlePath("http://wwww.officefloor.net");
 		this.doTest("GET", "http://wwww.officefloor.net", null);
 	}
 
@@ -50,6 +50,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load a single parameter.
 	 */
 	public void testGetWithOneParameter() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.doTest("GET", "/path?FirstName=Daniel", null);
 	}
@@ -58,6 +59,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load multiple parameters.
 	 */
 	public void testGetWithMultipleParameters() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
 		this.doTest("GET", "/path?FirstName=Daniel;LastName=Sagenschneider",
@@ -68,16 +70,29 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensures able to parse GET with only a segment.
 	 */
 	public void testGetWithFragment() throws Exception {
-		// Nothing loaded
+		this.handler.handlePath("/path");
+		this.handler.handleFragment("fragment");
 		this.doTest("GET", "/path#fragment", null);
+	}
+
+	/**
+	 * Ensures able to parse GET with empty tokens.
+	 */
+	public void testEmptyTokens() throws Exception {
+		this.handler.handlePath("");
+		this.handler.handleHttpParameter("", "");
+		this.handler.handleFragment("");
+		this.doTest("GET", "?=#", null);
 	}
 
 	/**
 	 * Ensures able to parse GET with parameters and fragments.
 	 */
 	public void testGetWithParametersAndFragments() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
+		this.handler.handleFragment("fragment");
 		this
 				.doTest(
 						"GET",
@@ -89,6 +104,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure able to load parameter with <code>+</code> for space.
 	 */
 	public void testGetParameterWithSpace() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
 		this.doTest("GET", "/path?FirstName=Daniel+Aaron", null);
 	}
@@ -97,6 +113,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure able to load parameter with <code>%HH</code> escaping.
 	 */
 	public void testGetParameterWithEscape() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
 		this.doTest("GET", "/path?FirstName=Daniel%20Aaron", null);
 	}
@@ -105,7 +122,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with no parameters.
 	 */
 	public void testPostNoParameter() throws Exception {
-		// Nothing loaded
+		this.handler.handlePath("/path");
 		this.doTest("POST", "/path", "");
 	}
 
@@ -113,6 +130,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with a parameter.
 	 */
 	public void testPostWithOneParameter() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.doTest("POST", "/path", "FirstName=Daniel");
 	}
@@ -121,6 +139,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with multiple parameters.
 	 */
 	public void testPostWithMultipleParameters() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
 		this
@@ -132,6 +151,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure can load POST request with parameters in the URI and the body.
 	 */
 	public void testPostWithUriAndBodyParameters() throws Exception {
+		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
 		this

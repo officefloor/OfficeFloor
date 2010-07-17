@@ -21,11 +21,24 @@ package net.officefloor.plugin.socket.server.http.tokenise;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
+ * <p>
  * Handler that receives the {@link HttpRequest} tokens.
+ * <p>
+ * Other values are directly available from the {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpRequestTokenHandler {
+
+	/**
+	 * Handles the path token of the {@link HttpRequest}.
+	 * 
+	 * @param path
+	 *            Path.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to handle the {@link HttpRequest} path.
+	 */
+	void handlePath(String path) throws HttpRequestTokeniseException;
 
 	/**
 	 * Handles a {@link HttpRequest} parameter.
@@ -39,5 +52,15 @@ public interface HttpRequestTokenHandler {
 	 */
 	void handleHttpParameter(String name, String value)
 			throws HttpRequestTokeniseException;
+
+	/**
+	 * Handles the fragment token of the {@link HttpRequest}.
+	 * 
+	 * @param fragment
+	 *            Fragment.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to handle the {@link HttpRequest} fragment.
+	 */
+	void handleFragment(String fragment) throws HttpRequestTokeniseException;
 
 }
