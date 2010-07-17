@@ -154,8 +154,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		HttpRequest request = HttpTestUtil.createHttpRequest(method,
 				requestUri, body);
-		HttpRequestTokeniser parser = new HttpRequestTokeniserImpl();
-		parser.parseHttpParameters(request, this.handler);
+		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
+		tokeniser.tokeniseHttpRequest(request, this.handler);
 		this.verifyMockObjects();
 	}
 

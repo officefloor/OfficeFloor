@@ -24,10 +24,6 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.stream.BufferStream;
 import net.officefloor.plugin.stream.InputBufferStream;
 
@@ -39,12 +35,13 @@ import net.officefloor.plugin.stream.InputBufferStream;
 public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 	/*
-	 * ====================== HttpParametersParser ============================
+	 * ====================== HttpRequestTokeniser ============================
 	 */
 
 	@Override
-	public void parseHttpParameters(HttpRequest request,
-			HttpRequestTokenHandler handler) throws HttpParametersException {
+	public void tokeniseHttpRequest(HttpRequest request,
+			HttpRequestTokenHandler handler)
+			throws HttpRequestTokeniseException {
 
 		// Create the temporary buffer (aids reducing object creation)
 		TempBuffer tempBuffer = new TempBuffer();
@@ -96,12 +93,12 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
-	 * @throws HttpParametersException
+	 * @throws HttpRequestTokeniseException
 	 *             If fails to parse the parameters.
 	 */
 	private void loadParameters(String contents,
 			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
-			throws HttpParametersException {
+			throws HttpRequestTokeniseException {
 
 		// The implementation of this method reduces character array creations
 		// and copying by using sub strings. This should both improve parsing
@@ -200,13 +197,13 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 	 *            {@link HttpRequestTokenHandler}.
 	 * @param tempBuffer
 	 *            {@link TempBuffer}.
-	 * @throws HttpParametersException
+	 * @throws HttpRequestTokeniseException
 	 *             If fails to parse the parameters.
 	 */
 	private void loadParameter(String contents, int nameBegin, int nameEnd,
 			int valueBegin, int valueEnd, boolean isRequireTranslate,
 			HttpRequestTokenHandler handler, TempBuffer tempBuffer)
-			throws HttpParametersException {
+			throws HttpRequestTokeniseException {
 
 		// Ensure valid
 		if ((nameEnd < 0) || (valueBegin < 0) || (valueEnd < 0)) {

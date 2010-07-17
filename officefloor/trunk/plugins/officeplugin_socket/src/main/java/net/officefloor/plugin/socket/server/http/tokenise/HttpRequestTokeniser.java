@@ -40,7 +40,8 @@ public interface HttpRequestTokeniser {
 	 * @throws HttpParametersException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
-	void parseHttpParameters(HttpRequest request,
-			HttpRequestTokenHandler handler) throws HttpParametersException;
+	void tokeniseHttpRequest(HttpRequest request,
+			HttpRequestTokenHandler handler)
+			throws HttpRequestTokeniseException;
 
 }
