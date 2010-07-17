@@ -144,6 +144,12 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 		tokeniser.tokeniseHttpRequest(httpRequest,
 				new HttpRequestTokenHandler() {
 					@Override
+					public void handlePath(String path)
+							throws HttpRequestTokeniseException {
+						// Ignore path as only interested in parameters
+					}
+
+					@Override
 					public void handleHttpParameter(String name, String value)
 							throws HttpRequestTokeniseException {
 						// Load the value
@@ -152,6 +158,12 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 						} catch (Exception ex) {
 							throw new HttpRequestTokeniseException(ex);
 						}
+					}
+
+					@Override
+					public void handleFragment(String fragment)
+							throws HttpRequestTokeniseException {
+						// Ignore fragment as only interested in parameters
 					}
 				});
 	}
