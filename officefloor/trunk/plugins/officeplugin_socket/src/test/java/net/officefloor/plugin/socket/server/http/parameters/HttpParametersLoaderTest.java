@@ -26,6 +26,7 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 /**
  * Tests the {@link HttpParametersLoader}.

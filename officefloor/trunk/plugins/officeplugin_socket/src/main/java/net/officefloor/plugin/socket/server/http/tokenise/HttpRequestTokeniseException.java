@@ -16,16 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.socket.server.http.parameters;
+package net.officefloor.plugin.socket.server.http.tokenise;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 
 /**
- * Indicates a failure parsing the {@link HttpRequest} parameters.
+ * Indicates a failure tokenising the {@link HttpRequest} parameters.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersParseException extends HttpParametersException {
+public class HttpRequestTokeniseException extends HttpParametersException {
 
 	/**
 	 * Initiate.
@@ -33,7 +34,7 @@ public class HttpParametersParseException extends HttpParametersException {
 	 * @param reason
 	 *            Reason.
 	 */
-	public HttpParametersParseException(String reason) {
+	public HttpRequestTokeniseException(String reason) {
 		super(reason);
 	}
 
@@ -43,7 +44,7 @@ public class HttpParametersParseException extends HttpParametersException {
 	 * @param cause
 	 *            Cause.
 	 */
-	public HttpParametersParseException(Throwable cause) {
+	public HttpRequestTokeniseException(Throwable cause) {
 		super(cause);
 	}
 

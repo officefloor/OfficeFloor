@@ -16,23 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.socket.server.http.parameters;
+package net.officefloor.plugin.socket.server.http.tokenise;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
+import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniserImpl;
 
 /**
- * Tests the {@link HttpParametersParser}.
+ * Tests the {@link HttpRequestTokeniser}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersParserTest extends OfficeFrameTestCase {
+public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link HttpParametersParseHandler}.
+	 * Mock {@link HttpRequestTokenHandler}.
 	 */
-	private final HttpParametersParseHandler handler = this
-			.createMock(HttpParametersParseHandler.class);
+	private final HttpRequestTokenHandler handler = this
+			.createMock(HttpRequestTokenHandler.class);
 
 	/**
 	 * Ensure can load GET request with no parameters.
@@ -150,7 +154,7 @@ public class HttpParametersParserTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		HttpRequest request = HttpTestUtil.createHttpRequest(method,
 				requestUri, body);
-		HttpParametersParser parser = new HttpParametersParserImpl();
+		HttpRequestTokeniser parser = new HttpRequestTokeniserImpl();
 		parser.parseHttpParameters(request, this.handler);
 		this.verifyMockObjects();
 	}
