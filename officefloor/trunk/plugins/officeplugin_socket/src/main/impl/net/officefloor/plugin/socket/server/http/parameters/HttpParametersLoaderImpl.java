@@ -161,6 +161,12 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 					}
 
 					@Override
+					public void handleQueryString(String queryString)
+							throws HttpRequestTokeniseException {
+						// Ignore query string as only interested in parameters
+					}
+
+					@Override
 					public void handleFragment(String fragment)
 							throws HttpRequestTokeniseException {
 						// Ignore fragment as only interested in parameters

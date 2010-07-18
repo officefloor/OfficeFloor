@@ -52,6 +52,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	public void testGetWithOneParameter() throws Exception {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
+		this.handler.handleQueryString("FirstName=Daniel");
 		this.doTest("GET", "/path?FirstName=Daniel", null);
 	}
 
@@ -62,6 +63,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
+		this.handler
+				.handleQueryString("FirstName=Daniel;LastName=Sagenschneider");
 		this.doTest("GET", "/path?FirstName=Daniel;LastName=Sagenschneider",
 				null);
 	}
@@ -81,6 +84,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	public void testEmptyTokens() throws Exception {
 		this.handler.handlePath("");
 		this.handler.handleHttpParameter("", "");
+		this.handler.handleQueryString("=");
 		this.handler.handleFragment("");
 		this.doTest("GET", "?=#", null);
 	}
@@ -92,6 +96,8 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
+		this.handler
+				.handleQueryString("FirstName=Daniel&LastName=Sagenschneider");
 		this.handler.handleFragment("fragment");
 		this
 				.doTest(
@@ -106,6 +112,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	public void testGetParameterWithSpace() throws Exception {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
+		this.handler.handleQueryString("FirstName=Daniel+Aaron");
 		this.doTest("GET", "/path?FirstName=Daniel+Aaron", null);
 	}
 
@@ -115,6 +122,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	public void testGetParameterWithEscape() throws Exception {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel Aaron");
+		this.handler.handleQueryString("FirstName=Daniel%20Aaron");
 		this.doTest("GET", "/path?FirstName=Daniel%20Aaron", null);
 	}
 
@@ -153,6 +161,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	public void testPostWithUriAndBodyParameters() throws Exception {
 		this.handler.handlePath("/path");
 		this.handler.handleHttpParameter("FirstName", "Daniel");
+		this.handler.handleQueryString("FirstName=Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
 		this
 				.doTest("POST", "/path?FirstName=Daniel",

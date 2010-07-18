@@ -41,7 +41,11 @@ public interface HttpRequestTokenHandler {
 	void handlePath(String path) throws HttpRequestTokeniseException;
 
 	/**
+	 * <p>
 	 * Handles a {@link HttpRequest} parameter.
+	 * <p>
+	 * Parameters are also sourced from the body on a <code>POST</code>
+	 * {@link HttpRequest}.
 	 * 
 	 * @param name
 	 *            Name of the parameter.
@@ -51,6 +55,17 @@ public interface HttpRequestTokenHandler {
 	 *             If fails to handle the {@link HttpRequest} parameter.
 	 */
 	void handleHttpParameter(String name, String value)
+			throws HttpRequestTokeniseException;
+
+	/**
+	 * Handles the query string (raw parameter text on the request URI).
+	 * 
+	 * @param queryString
+	 *            Raw query string.
+	 * @throws HttpRequestTokeniseException
+	 *             if fails to handle the query string.
+	 */
+	void handleQueryString(String queryString)
 			throws HttpRequestTokeniseException;
 
 	/**
