@@ -111,6 +111,8 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		int nameEnd = -1;
 		int valueBegin = -1;
 		int valueEnd = -1;
+		int queryBegin = -1;
+		int queryEnd = -1;
 		boolean isRequireTranslate = false;
 
 		// Iterate over the contents, loading the parameters
@@ -131,6 +133,7 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 					// No longer processing path
 					isPathProcessed = true;
 					nameBegin = i + 1; // after '?'
+					queryBegin = nameBegin; // start of first parameter
 				}
 				break;
 
@@ -177,6 +180,11 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 						this.loadParameter(contents, nameBegin, nameEnd,
 								valueBegin, valueEnd, isRequireTranslate,
 								handler, tempBuffer);
+
+						// Load the query string
+						queryEnd = valueEnd; // end of last parameter value
+						this.loadQueryString(contents, queryBegin, queryEnd,
+								isOnlyParameters, handler);
 					}
 				}
 
@@ -203,8 +211,12 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 			valueEnd = contents.length();
 			this.loadParameter(contents, nameBegin, nameEnd, valueBegin,
 					valueEnd, isRequireTranslate, handler, tempBuffer);
-		}
 
+			// Load the query string
+			queryEnd = valueEnd; // end of last parameter value
+			this.loadQueryString(contents, queryBegin, queryEnd,
+					isOnlyParameters, handler);
+		}
 	}
 
 	/**
@@ -237,6 +249,34 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 		// Handle path
 		handler.handlePath(path);
+	}
+
+	/**
+	 * Loads the query string to the handler.
+	 * 
+	 * @param contents
+	 *            Contents being parsed that contains the parameter name/values.
+	 * @param queryBegin
+	 *            Beginning index of query string in contents.
+	 * @param queryEnd
+	 *            Ending index of query string in contents.
+	 * @param isOnlyParameters
+	 *            Flag indicate if only loading parameters.
+	 * @param handler
+	 *            {@link HttpRequestTokenHandler}.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to load the query string.
+	 */
+	private void loadQueryString(String contents, int queryBegin, int queryEnd,
+			boolean isOnlyParameters, HttpRequestTokenHandler handler)
+			throws HttpRequestTokeniseException {
+
+		// Only load query string if not just parameters
+		if (!isOnlyParameters) {
+			// Load the query string
+			String queryString = contents.substring(queryBegin, queryEnd);
+			handler.handleQueryString(queryString);
+		}
 	}
 
 	/**
