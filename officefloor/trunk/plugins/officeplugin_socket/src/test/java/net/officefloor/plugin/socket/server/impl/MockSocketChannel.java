@@ -19,8 +19,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -31,7 +30,7 @@ import junit.framework.TestCase;
 
 /**
  * Mock {@link NonblockingSocketChannel} that provides mock data.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MockSocketChannel implements NonblockingSocketChannel {
@@ -53,7 +52,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param selectionKey
 	 *            {@link SelectionKey}.
 	 */
@@ -63,7 +62,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Indicates if closed.
-	 *
+	 * 
 	 * @return <code>true</code> if closed.
 	 */
 	public boolean isClosed() {
@@ -72,7 +71,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Mocks inputting the data from the client.
-	 *
+	 * 
 	 * @param data
 	 *            Mock data input from client.
 	 */
@@ -84,7 +83,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Mocks inputting the text from the client.
-	 *
+	 * 
 	 * @param text
 	 *            Mock text input from client.
 	 */
@@ -94,7 +93,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Validates the output of data to the client.
-	 *
+	 * 
 	 * @param data
 	 *            Data that the client is expected to receive.
 	 */
@@ -137,7 +136,7 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * Validates the output of text to the client.
-	 *
+	 * 
 	 * @param text
 	 *            Text that the client is expected to receive.
 	 */
@@ -212,18 +211,13 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 	}
 
 	@Override
-	public InetAddress getInetAddress() {
-		try {
-			return InetAddress.getLocalHost();
-		} catch (UnknownHostException ex) {
-			TestCase.fail("Should always be able to obtain localhost");
-			return null;
-		}
+	public InetSocketAddress getLocalAddress() {
+		return new InetSocketAddress("local", 80);
 	}
 
 	@Override
-	public int getPort() {
-		return 10000;
+	public InetSocketAddress getRemoteAddress() {
+		return new InetSocketAddress("remote", 10000);
 	}
 
 	@Override

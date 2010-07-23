@@ -127,7 +127,7 @@ public class HttpConversationImpl implements HttpConversation {
 
 		// Create the HTTP managed object
 		HttpManagedObjectImpl managedObject = new HttpManagedObjectImpl(
-				request, response);
+				this.connection, request, response);
 
 		// Register the HTTP managed object
 		this.managedObjects.add(managedObject);

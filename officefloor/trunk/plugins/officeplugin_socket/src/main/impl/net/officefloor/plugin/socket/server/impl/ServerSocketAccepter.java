@@ -19,9 +19,9 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -39,7 +39,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Accepts connections.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ServerSocketAccepter<CH extends ConnectionHandler>
@@ -75,7 +75,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param serverSocketAddress
 	 *            {@link InetSocketAddress} to listen for connections.
 	 * @param serverSocketHandler
@@ -109,7 +109,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 	/**
 	 * Opens and binds the {@link ServerSocketChannel}.
-	 *
+	 * 
 	 * @throws IOException
 	 *             {@link IOException}.
 	 */
@@ -191,7 +191,7 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param socketChannel
 		 *            {@link SocketChannel}.
 		 */
@@ -210,13 +210,17 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		}
 
 		@Override
-		public InetAddress getInetAddress() {
-			return this.socketChannel.socket().getInetAddress();
+		public InetSocketAddress getLocalAddress() {
+			Socket socket = this.socketChannel.socket();
+			return new InetSocketAddress(socket.getLocalAddress(), socket
+					.getLocalPort());
 		}
 
 		@Override
-		public int getPort() {
-			return this.socketChannel.socket().getPort();
+		public InetSocketAddress getRemoteAddress() {
+			Socket socket = this.socketChannel.socket();
+			return new InetSocketAddress(socket.getInetAddress(), socket
+					.getPort());
 		}
 
 		@Override

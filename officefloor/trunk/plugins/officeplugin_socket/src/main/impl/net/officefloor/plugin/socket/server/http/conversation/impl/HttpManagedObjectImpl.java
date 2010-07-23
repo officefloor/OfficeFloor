@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -30,11 +31,16 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 
 /**
  * {@link ManagedObject} for the {@link ServerHttpConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpManagedObjectImpl implements HttpManagedObject,
 		ServerHttpConnection, EscalationHandler {
+
+	/**
+	 * {@link Connection}.
+	 */
+	private final Connection connection;
 
 	/**
 	 * {@link HttpRequest}.
@@ -49,32 +55,36 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	/**
 	 * Initiate to process the {@link HttpRequest} by populating the
 	 * {@link HttpResponse}.
-	 *
+	 * 
+	 * @param connection
+	 *            {@link Connection}.
 	 * @param request
 	 *            {@link HttpRequestImpl}.
 	 * @param response
 	 *            {@link HttpResponseImpl}.
 	 */
-	public HttpManagedObjectImpl(HttpRequestImpl request,
-			HttpResponseImpl response) {
+	public HttpManagedObjectImpl(Connection connection,
+			HttpRequestImpl request, HttpResponseImpl response) {
+		this.connection = connection;
 		this.request = request;
 		this.response = response;
 	}
 
 	/**
 	 * Initiate with {@link HttpResponse} ready to be sent.
-	 *
+	 * 
 	 * @param completedResponse
 	 *            {@link HttpResponse} ready to be sent.
 	 */
 	public HttpManagedObjectImpl(HttpResponseImpl completedResponse) {
+		this.connection = null;
 		this.request = null;
 		this.response = completedResponse;
 	}
 
 	/**
 	 * Sends the {@link HttpResponse} if it is completed.
-	 *
+	 * 
 	 * @return <code>true</code> if {@link HttpResponse} is completed and was
 	 *         added to the {@link Connection} output to be sent.
 	 * @throws IOException
@@ -131,6 +141,16 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	@Override
 	public HttpResponse getHttpResponse() {
 		return this.response;
+	}
+
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.connection.getLocalAddress();
+	}
+
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return this.connection.getRemoteAddress();
 	}
 
 	/*
