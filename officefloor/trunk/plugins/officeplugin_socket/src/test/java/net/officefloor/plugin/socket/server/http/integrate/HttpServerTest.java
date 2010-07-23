@@ -32,7 +32,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpServerTest extends MockHttpServer {
@@ -49,8 +49,9 @@ public class HttpServerTest extends MockHttpServer {
 		server.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
 
 		// Register the work to process messages
-		ReflectiveWorkBuilder workBuilder = server.constructWork(
-				new HttpWork(), "servicer", "service");
+		HttpWork work = new HttpWork(this.getLocalAddress());
+		ReflectiveWorkBuilder workBuilder = server.constructWork(work,
+				"servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
 		taskBuilder.buildObject(managedObjectName);
@@ -114,7 +115,7 @@ public class HttpServerTest extends MockHttpServer {
 
 	/**
 	 * Does the {@link HttpMethod}.
-	 *
+	 * 
 	 * @param request
 	 *            {@link HttpMethod}.
 	 * @return Resulting body of response.
@@ -126,7 +127,7 @@ public class HttpServerTest extends MockHttpServer {
 
 	/**
 	 * Does the {@link HttpMethod}.
-	 *
+	 * 
 	 * @param client
 	 *            {@link HttpClient}.
 	 * @param method

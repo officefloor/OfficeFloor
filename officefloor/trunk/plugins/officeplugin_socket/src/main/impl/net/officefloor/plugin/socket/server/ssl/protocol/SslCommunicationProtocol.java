@@ -19,7 +19,7 @@
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -46,7 +46,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 /**
  * SSL {@link CommunicationProtocol} that wraps another
  * {@link CommunicationProtocol}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
@@ -113,7 +113,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param wrappedCommunicationProtocol
 	 *            {@link CommunicationProtocol} to be wrapped with this SSL
 	 *            {@link CommunicationProtocol}.
@@ -218,12 +218,13 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 			Connection connection) {
 
 		// Obtain the remote connection details
-		InetAddress remoteInetAddress = connection.getInetAddress();
-		int remotePort = connection.getPort();
+		InetSocketAddress remoteAddress = connection.getRemoteAddress();
+		String remoteHost = remoteAddress.getHostName();
+		int remotePort = remoteAddress.getPort();
 
 		// Create the server SSL engine
-		SSLEngine engine = this.sslContext.createSSLEngine(remoteInetAddress
-				.getHostAddress(), remotePort);
+		SSLEngine engine = this.sslContext.createSSLEngine(remoteHost,
+				remotePort);
 		this.sslEngineConfigurator.configureSslEngine(engine);
 		engine.setUseClientMode(false); // Always in server mode
 

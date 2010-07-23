@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
@@ -51,7 +51,7 @@ import net.officefloor.plugin.stream.impl.BufferStreamImpl;
 
 /**
  * Tests the {@link HttpConversation}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpConversationTest extends OfficeFrameTestCase {
@@ -226,9 +226,9 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures {@link HttpRequestParseException} response sent to correct request. In other
-	 * words all previous requests are sent response and {@link HttpRequestParseException}
-	 * is then sent immediately.
+	 * Ensures {@link HttpRequestParseException} response sent to correct
+	 * request. In other words all previous requests are sent response and
+	 * {@link HttpRequestParseException} is then sent immediately.
 	 */
 	public void testStopProcessingOnParseFailure() throws IOException {
 		final HttpRequestParseException failure = new HttpRequestParseException(
@@ -290,7 +290,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Writes the text to the {@link OutputBufferStream} in US-ASCII.
-	 *
+	 * 
 	 * @param output
 	 *            {@link OutputBufferStream}.
 	 * @param text
@@ -308,7 +308,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Asserts that the data on the wire is as expected.
-	 *
+	 * 
 	 * @param expectedData
 	 *            Expected data on the wire.
 	 */
@@ -340,7 +340,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Adds a {@link HttpRequest}.
-	 *
+	 * 
 	 * @param method
 	 *            Method.
 	 * @param requestURI
@@ -447,15 +447,15 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public InetAddress getInetAddress() {
-			fail("Remote InetAddress should not be required for HTTP conversation");
+		public InetSocketAddress getLocalAddress() {
+			fail("Local InetSocketAddress should not be required for HTTP conversation");
 			return null;
 		}
 
 		@Override
-		public int getPort() {
-			fail("Remote port should not be required for HTTP conversation");
-			return -1;
+		public InetSocketAddress getRemoteAddress() {
+			fail("Remote InetSocketAddress should not be required for HTTP conversation");
+			return null;
 		}
 
 		@Override
@@ -468,6 +468,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		public OutputBufferStream getOutputBufferStream() {
 			return HttpConversationTest.this.wire.getOutputBufferStream();
 		}
+
 	}
 
 }

@@ -19,7 +19,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -29,7 +29,7 @@ import java.nio.channels.SocketChannel;
 /**
  * Interface encapsulating the {@link SocketChannel} to provide the necessary
  * non-blocking {@link Socket} operations.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface NonblockingSocketChannel {
@@ -37,7 +37,7 @@ public interface NonblockingSocketChannel {
 	/**
 	 * Registers the underlying {@link SocketChannel} with the input
 	 * {@link Selector}.
-	 *
+	 * 
 	 * @param selector
 	 *            {@link Selector}.
 	 * @param ops
@@ -52,26 +52,24 @@ public interface NonblockingSocketChannel {
 			throws IOException;
 
 	/**
+	 * Obtains the local address for this {@link NonblockingSocketChannel}.
+	 * 
+	 * @return Local address for this {@link NonblockingSocketChannel}.
+	 */
+	InetSocketAddress getLocalAddress();
+
+	/**
 	 * Obtains the remote address to which this {@link NonblockingSocketChannel}
 	 * is connected.
-	 *
+	 * 
 	 * @return Remote address to which this {@link NonblockingSocketChannel} is
 	 *         connected.
 	 */
-	InetAddress getInetAddress();
-
-	/**
-	 * Obtains the remote port to which this {@link NonblockingSocketChannel} is
-	 * connected.
-	 *
-	 * @return Remote port to which this {@link NonblockingSocketChannel} is
-	 *         connected.
-	 */
-	int getPort();
+	InetSocketAddress getRemoteAddress();
 
 	/**
 	 * Reads data from the {@link SocketChannel}.
-	 *
+	 * 
 	 * @param buffer
 	 *            {@link ByteBuffer} to write data.
 	 * @return Number of bytes read.
@@ -82,7 +80,7 @@ public interface NonblockingSocketChannel {
 
 	/**
 	 * Writes the data to the {@link SocketChannel}.
-	 *
+	 * 
 	 * @param data
 	 *            {@link ByteBuffer} with the data to write.
 	 * @return Number of bytes written.
@@ -93,7 +91,7 @@ public interface NonblockingSocketChannel {
 
 	/**
 	 * Closes the underlying {@link SocketChannel}.
-	 *
+	 * 
 	 * @throws IOException
 	 *             If fails to close.
 	 */

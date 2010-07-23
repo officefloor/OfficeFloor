@@ -23,7 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
@@ -395,15 +395,15 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public InetAddress getInetAddress() {
-			fail("Remote InetAddress should not be required for writing HTTP response");
+		public InetSocketAddress getLocalAddress() {
+			fail("Local InetSocketAddress should not be required for writing HTTP response");
 			return null;
 		}
 
 		@Override
-		public int getPort() {
-			fail("Remote port should not be required for writing HTTP response");
-			return -1;
+		public InetSocketAddress getRemoteAddress() {
+			fail("Remote InetSocketAddress should not be required for writing HTTP response");
+			return null;
 		}
 
 		@Override
@@ -416,6 +416,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		public OutputBufferStream getOutputBufferStream() {
 			return HttpResponseTest.this.wire.getOutputBufferStream();
 		}
+
 	}
 
 }

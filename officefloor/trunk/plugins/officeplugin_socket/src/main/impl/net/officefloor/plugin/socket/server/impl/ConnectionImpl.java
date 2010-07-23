@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -42,7 +42,7 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 
 /**
  * Implementation of a {@link Connection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ConnectionImpl<CH extends ConnectionHandler> implements
@@ -102,7 +102,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param nonblockingSocketChannel
 	 *            {@link NonblockingSocketChannel}.
 	 * @param serverSocketHandler
@@ -133,7 +133,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Specifies the {@link SocketListener} handling this {@link Connection}.
-	 *
+	 * 
 	 * @param socketListener
 	 *            {@link SocketListener} handling this {@link Connection}.
 	 */
@@ -145,7 +145,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Obtains the {@link ConnectionHandler} for this {@link Connection}.
-	 *
+	 * 
 	 * @return {@link ConnectionHandler} for this {@link Connection}.
 	 */
 	CH getConnectionHandler() {
@@ -154,7 +154,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Registers this {@link Connection} with the {@link Selector}.
-	 *
+	 * 
 	 * @param selector
 	 *            {@link Selector}.
 	 * @param operation
@@ -179,7 +179,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Reads data from the client.
-	 *
+	 * 
 	 * @return Number of bytes read from the client. -1 indicates connection
 	 *         closed.
 	 * @throws IOException
@@ -199,7 +199,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	 * The {@link InputBufferStream} is not wrapped by
 	 * {@link SynchronizedInputBufferStream} as {@link ReadContext} should be
 	 * called synchronized on {@link #getLock()}.
-	 *
+	 * 
 	 * @return {@link InputBufferStream} to read data available from the client.
 	 */
 	InputBufferStream getConnectionInputBufferStream() {
@@ -208,7 +208,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Indicates if there is data to be written to the client.
-	 *
+	 * 
 	 * @return <code>true</code> if there is data to be written to the client.
 	 */
 	boolean isDataForClient() {
@@ -217,7 +217,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Writes data to the client.
-	 *
+	 * 
 	 * @return Number of bytes written to the client. -1 indicates connection
 	 *         closed.
 	 * @throws IOException
@@ -280,7 +280,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Indicates if this {@link Connection} has been flagged for closing.
-	 *
+	 * 
 	 * @return <code>true</code> if this {@link Connection} flagged for closing.
 	 */
 	boolean isCancelled() {
@@ -289,7 +289,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 	/**
 	 * Terminates this {@link Connection} releasing resources.
-	 *
+	 * 
 	 * @throws IOException
 	 *             If fails to terminate the {@link Connection}.
 	 */
@@ -333,13 +333,13 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	}
 
 	@Override
-	public InetAddress getInetAddress() {
-		return this.socketChannel.getInetAddress();
+	public InetSocketAddress getLocalAddress() {
+		return this.socketChannel.getLocalAddress();
 	}
 
 	@Override
-	public int getPort() {
-		return this.socketChannel.getPort();
+	public InetSocketAddress getRemoteAddress() {
+		return this.socketChannel.getRemoteAddress();
 	}
 
 	@Override
@@ -364,7 +364,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param backingStream
 		 *            Backing {@link OutputBufferStream}.
 		 */
@@ -432,7 +432,7 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param backingStream
 		 *            Backing {@link OutputStream}.
 		 */

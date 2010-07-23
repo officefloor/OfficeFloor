@@ -37,7 +37,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * SSL {@link ConnectionHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SslConnectionHandler<CH extends ConnectionHandler> implements
@@ -78,7 +78,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param engine
@@ -97,8 +97,8 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 		// Creates the SSL connection
 		this.connection = new SslConnectionImpl(connection.getLock(),
-				connection.getInetAddress(), connection.getPort(), connection
-						.getInputBufferStream(), connection
+				connection.getLocalAddress(), connection.getRemoteAddress(),
+				connection.getInputBufferStream(), connection
 						.getOutputBufferStream(), engine, bufferSquirtFactory,
 				this, taskExecutor);
 
@@ -109,7 +109,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 
 	/**
 	 * Obtains the wrapped {@link ConnectionHandler}.
-	 *
+	 * 
 	 * @return Wrapped {@link ConnectionHandler}.
 	 */
 	public CH getWrappedConnectionHandler() {

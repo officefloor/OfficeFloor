@@ -45,7 +45,7 @@ import net.officefloor.plugin.stream.BufferSquirtFactory;
 
 /**
  * Tests the {@link AbstractServerSocketManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
@@ -61,6 +61,11 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 * Response message.
 	 */
 	private static final byte[] RESPONSE_MSG = new byte[] { 6, 7, 8, 9, 10 };
+
+	/**
+	 * {@link Socket} to the {@link OfficeFloor}.
+	 */
+	private final Socket socket = new Socket();
 
 	/**
 	 * Current instance executing.
@@ -111,24 +116,25 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		officeFloor.openOfficeFloor();
 
 		// Open socket to Office
-		Socket socket = new Socket();
-		socket.connect(
-				new InetSocketAddress(InetAddress.getLocalHost(), 12345), 100);
+		synchronized (this.socket) {
+			this.socket.connect(new InetSocketAddress(InetAddress
+					.getLocalHost(), 12345), 100);
+		}
 
 		// Write a message
-		socket.getOutputStream().write(REQUEST_MSG);
+		this.socket.getOutputStream().write(REQUEST_MSG);
 
 		// Read the response
 		byte[] buffer = new byte[RESPONSE_MSG.length];
-		socket.getInputStream().read(buffer);
+		this.socket.getInputStream().read(buffer);
 		for (int i = 0; i < buffer.length; i++) {
 			assertEquals("Incorrect response byte " + i, RESPONSE_MSG[i],
 					buffer[i]);
 		}
 
 		// Ensure the connection is closed
-		assertEquals("Connection should be closed", -1, socket.getInputStream()
-				.read());
+		assertEquals("Connection should be closed", -1, this.socket
+				.getInputStream().read());
 
 		// Close the Office
 		officeFloor.closeOfficeFloor();
@@ -146,6 +152,35 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
 		this.connection = connection;
+
+		// Validate the connection details
+		try {
+
+			// Create the expected addresses (other way round from client)
+			InetSocketAddress expectedLocalAddress;
+			InetSocketAddress expectedRemoteAddress;
+			synchronized (this.socket) {
+				expectedLocalAddress = new InetSocketAddress(this.socket
+						.getInetAddress(), this.socket.getPort());
+				expectedRemoteAddress = new InetSocketAddress(this.socket
+						.getLocalAddress(), this.socket.getLocalPort());
+			}
+
+			// Validate local address
+			InetSocketAddress actualLocalAddress = connection.getLocalAddress();
+			assertEquals("Incorrect local address", expectedLocalAddress,
+					actualLocalAddress);
+
+			// Validate remote address
+			InetSocketAddress actualRemoteAddress = connection
+					.getRemoteAddress();
+			assertEquals("Incorrect remote address", expectedRemoteAddress,
+					actualRemoteAddress);
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+
 		return this;
 	}
 

@@ -18,6 +18,9 @@
 
 package net.officefloor.plugin.socket.server.http;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -40,5 +43,21 @@ public interface ServerHttpConnection {
 	 * @return {@link HttpResponse} for this {@link ServerHttpConnection}.
 	 */
 	HttpResponse getHttpResponse();
+
+	/**
+	 * Obtains the local address for this {@link ServerHttpConnection}.
+	 * 
+	 * @return {@link InetSocketAddress} describing the local {@link Socket} for
+	 *         this {@link ServerHttpConnection}.
+	 */
+	InetSocketAddress getLocalAddress();
+
+	/**
+	 * Obtains the remote address for this {@link ServerHttpConnection}.
+	 * 
+	 * @return {@link InetSocketAddress} describing the remote {@link Socket}
+	 *         for this {@link ServerHttpConnection}.
+	 */
+	InetSocketAddress getRemoteAddress();
 
 }

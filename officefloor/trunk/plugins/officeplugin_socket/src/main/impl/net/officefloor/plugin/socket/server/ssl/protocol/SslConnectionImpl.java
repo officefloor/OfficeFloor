@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import javax.net.ssl.SSLEngine;
@@ -44,7 +44,7 @@ import net.officefloor.plugin.stream.synchronise.SynchronizedOutputBufferStream;
 
 /**
  * {@link SslConnection} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SslConnectionImpl implements SslConnection {
@@ -55,14 +55,14 @@ public class SslConnectionImpl implements SslConnection {
 	private final Object lock;
 
 	/**
-	 * Remote {@link InetAddress} that this is connected.
+	 * Local {@link InetSocketAddress}.
 	 */
-	private final InetAddress remoteInetAddress;
+	private final InetSocketAddress localAddress;
 
 	/**
-	 * Remote port that this is connected.
+	 * Remote {@link InetSocketAddress}.
 	 */
-	private final int remotePort;
+	private final InetSocketAddress remoteAddress;
 
 	/**
 	 * Delegate {@link InputBufferStream} to read the cipher text from the peer.
@@ -227,13 +227,13 @@ public class SslConnectionImpl implements SslConnection {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param lock
 	 *            Lock to coordinate access to this {@link SslConnection}.
-	 * @param remoteInetAddress
-	 *            Remote {@link InetAddress} that this is connected.
-	 * @param remotePort
-	 *            Remote port that this is connected.
+	 * @param localAddress
+	 *            Local {@link InetSocketAddress}.
+	 * @param remoteAddress
+	 *            Remote {@link InetSocketAddress}.
 	 * @param inputDelegate
 	 *            Delegate {@link InputBufferStream} to read the cipher text
 	 *            from the peer.
@@ -253,15 +253,15 @@ public class SslConnectionImpl implements SslConnection {
 	 *            {@link SslTaskExecutor} to execute any necessary
 	 *            {@link SslTask} instances.
 	 */
-	public SslConnectionImpl(Object lock, InetAddress remoteInetAddress,
-			int remotePort, InputBufferStream inputDelegate,
+	public SslConnectionImpl(Object lock, InetSocketAddress localAddress,
+			InetSocketAddress remoteAddress, InputBufferStream inputDelegate,
 			OutputBufferStream outputDelegate, SSLEngine engine,
 			BufferSquirtFactory bufferSquirtFactory,
 			TemporaryByteArrayFactory byteArrayFactory,
 			SslTaskExecutor taskExecutor) {
 		this.lock = lock;
-		this.remoteInetAddress = remoteInetAddress;
-		this.remotePort = remotePort;
+		this.remoteAddress = remoteAddress;
+		this.localAddress = localAddress;
 		this.inputDelegate = inputDelegate;
 		this.outputDelegate = outputDelegate;
 		this.engine = engine;
@@ -280,7 +280,7 @@ public class SslConnectionImpl implements SslConnection {
 
 	/**
 	 * Throws the {@link IOException} if failure in processing.
-	 *
+	 * 
 	 * @throws IOException
 	 *             {@link IOException} if failure in processing.
 	 */
@@ -483,7 +483,7 @@ public class SslConnectionImpl implements SslConnection {
 
 	/**
 	 * Cleans up the resources.
-	 *
+	 * 
 	 * @throws IOException
 	 *             If fails to clean up resources.
 	 */
@@ -533,13 +533,13 @@ public class SslConnectionImpl implements SslConnection {
 	}
 
 	@Override
-	public InetAddress getInetAddress() {
-		return this.remoteInetAddress;
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
 	}
 
 	@Override
-	public int getPort() {
-		return this.remotePort;
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
 	}
 
 	@Override
@@ -564,7 +564,7 @@ public class SslConnectionImpl implements SslConnection {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param delegate
 		 *            Delegate {@link OutputBufferStream}.
 		 */
@@ -639,7 +639,7 @@ public class SslConnectionImpl implements SslConnection {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param delegate
 		 *            Delegate {@link OutputStream}.
 		 */
@@ -694,7 +694,7 @@ public class SslConnectionImpl implements SslConnection {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param task
 		 *            SSL task to be run.
 		 */

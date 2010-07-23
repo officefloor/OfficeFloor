@@ -18,7 +18,8 @@
 
 package net.officefloor.plugin.socket.server;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.plugin.stream.InputBufferStream;
@@ -26,7 +27,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * {@link SocketChannel} connection.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface Connection {
@@ -34,35 +35,37 @@ public interface Connection {
 	/**
 	 * Obtains the lock to <code>synchronize</code> for using this
 	 * {@link Connection}.
-	 *
+	 * 
 	 * @return Lock for this {@link Connection}.
 	 */
 	Object getLock();
 
 	/**
-	 * Obtains the remote address to which this {@link Connection} is connected.
-	 *
-	 * @return Remote address to which this {@link Connection} is connected.
+	 * Obtains the local address for the {@link Connection}.
+	 * 
+	 * @return {@link InetSocketAddress} describing the local {@link Socket} for
+	 *         the {@link Connection}.
 	 */
-	InetAddress getInetAddress();
+	InetSocketAddress getLocalAddress();
 
 	/**
-	 * Obtains the remote port to which this {@link Connection} is connected.
-	 *
-	 * @return Remote port to which this {@link Connection} is connected.
+	 * Obtains the remote address for the {@link Connection}.
+	 * 
+	 * @return {@link InetSocketAddress} describing the remote {@link Socket}
+	 *         for the {@link Connection}.
 	 */
-	int getPort();
+	InetSocketAddress getRemoteAddress();
 
 	/**
 	 * Obtains the {@link InputBufferStream} to obtain data from the client.
-	 *
+	 * 
 	 * @return {@link InputBufferStream}.
 	 */
 	InputBufferStream getInputBufferStream();
 
 	/**
 	 * Obtains the {@link OutputBufferStream} to write data to the client.
-	 *
+	 * 
 	 * @return {@link OutputBufferStream}.
 	 */
 	OutputBufferStream getOutputBufferStream();

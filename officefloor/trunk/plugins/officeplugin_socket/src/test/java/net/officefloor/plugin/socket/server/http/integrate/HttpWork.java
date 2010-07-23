@@ -19,25 +19,62 @@
 package net.officefloor.plugin.socket.server.http.integrate;
 
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 
+import junit.framework.TestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * Provides for processing a {@link HttpRequest}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpWork {
 
 	/**
+	 * Expected local {@link InetSocketAddress} for the
+	 * {@link ServerHttpConnection}.
+	 */
+	private final InetSocketAddress expectedLocalAddress;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param expectedLocalAddress
+	 *            Expected local {@link InetSocketAddress} for the
+	 *            {@link ServerHttpConnection}.
+	 */
+	public HttpWork(InetSocketAddress expectedLocalAddress) {
+		this.expectedLocalAddress = expectedLocalAddress;
+	}
+
+	/**
 	 * Processes the {@link HttpRequest}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 */
 	public void service(ServerHttpConnection connection) throws Throwable {
+
+		// Obtain expected local port
+		int expectedLocalPort = this.expectedLocalAddress.getPort();
+
+		// Validate the local address
+		InetSocketAddress actualLocalAddress = connection.getLocalAddress();
+		TestCase.assertNotNull("Must have local host", actualLocalAddress
+				.getHostName());
+		TestCase.assertEquals("Incorrect local port", expectedLocalPort,
+				actualLocalAddress.getPort());
+
+		// Validate the remote address (not same port as local)
+		InetSocketAddress actualRemoteAddress = connection.getRemoteAddress();
+		TestCase.assertNotNull("Must have remote host", actualRemoteAddress
+				.getHostName());
+		TestCase.assertTrue(
+				"Remote address port to be different to local address port",
+				expectedLocalPort != actualRemoteAddress.getPort());
 
 		// Obtain the HTTP request
 		HttpRequest request = connection.getHttpRequest();
@@ -58,5 +95,4 @@ public class HttpWork {
 		// Send response
 		response.getBody().close();
 	}
-
 }

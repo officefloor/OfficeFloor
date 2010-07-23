@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.ssl.protocol;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -32,7 +33,7 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link SslConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SslConnectionTest extends AbstractSslConnectionTestCase {
@@ -63,22 +64,30 @@ public class SslConnectionTest extends AbstractSslConnectionTestCase {
 		// Obtain the SSL Context
 		SSLContext sslContext = SSLContext.getDefault();
 
+		// Addresses
+		InetSocketAddress serverAddress = new InetSocketAddress("server", 443);
+		InetSocketAddress clientAddress = new InetSocketAddress("client", 10000);
+
 		// Create the server side of connection
-		SSLEngine serverEngine = sslContext.createSSLEngine("client", 10000);
+		SSLEngine serverEngine = sslContext.createSSLEngine(clientAddress
+				.getHostName(), clientAddress.getPort());
 		serverEngine.setUseClientMode(false);
 		serverEngine.setEnabledCipherSuites(serverEngine
 				.getSupportedCipherSuites());
-		this.server = new SslConnectionImpl(new Object(), null, 10000,
+		this.server = new SslConnectionImpl(new Object(), serverAddress,
+				clientAddress,
 				this.clientToServerStream.getInputBufferStream(),
 				this.serverToClientStream.getOutputBufferStream(),
 				serverEngine, squirtFactory, this, this);
 
 		// Create the client side of connection
-		SSLEngine clientEngine = sslContext.createSSLEngine("server", 443);
+		SSLEngine clientEngine = sslContext.createSSLEngine(serverAddress
+				.getHostName(), serverAddress.getPort());
 		clientEngine.setUseClientMode(true);
 		clientEngine.setEnabledCipherSuites(clientEngine
 				.getSupportedCipherSuites());
-		this.client = new SslConnectionImpl(new Object(), null, 443,
+		this.client = new SslConnectionImpl(new Object(), clientAddress,
+				serverAddress,
 				this.serverToClientStream.getInputBufferStream(),
 				this.clientToServerStream.getOutputBufferStream(),
 				clientEngine, squirtFactory, this, this);

@@ -58,7 +58,7 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
  * <p>
  * <b>This should never be used for production as it is focus is to simplify
  * writing tests.</b>
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
@@ -161,7 +161,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	/**
 	 * Helper method to register a {@link Team} for the
 	 * {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectTeamName
@@ -179,7 +179,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 	/**
 	 * Flags if {@link MockHttpServer} is running with secure connections.
-	 *
+	 * 
 	 * @return <code>true</code> if secure connections.
 	 */
 	public boolean isServerSecure() {
@@ -188,7 +188,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 	/**
 	 * Obtains the URL of the server.
-	 *
+	 * 
 	 * @return URL of the server.
 	 */
 	public String getServerUrl() {
@@ -198,7 +198,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 	/**
 	 * Creates a {@link HttpClient} to connect to this {@link MockHttpServer}.
-	 *
+	 * 
 	 * @return {@link HttpClient} to connect to this {@link MockHttpServer}.
 	 */
 	public HttpClient createHttpClient() {
@@ -216,6 +216,20 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			client = new HttpClient(new SimpleHttpConnectionManager());
 		}
 		return client;
+	}
+
+	/**
+	 * Obtains the local {@link InetSocketAddress} for this server.
+	 * 
+	 * @return Local {@link InetSocketAddress} for this server.
+	 */
+	public InetSocketAddress getLocalAddress() {
+		try {
+			return new InetSocketAddress(InetAddress.getLocalHost()
+					.getHostAddress(), this.port);
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 	/**
