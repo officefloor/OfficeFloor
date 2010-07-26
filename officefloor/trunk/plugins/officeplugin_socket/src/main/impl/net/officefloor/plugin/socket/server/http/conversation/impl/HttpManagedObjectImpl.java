@@ -144,6 +144,11 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
+	public boolean isSecure() {
+		return this.connection.isSecure();
+	}
+
+	@Override
 	public InetSocketAddress getLocalAddress() {
 		return this.connection.getLocalAddress();
 	}
