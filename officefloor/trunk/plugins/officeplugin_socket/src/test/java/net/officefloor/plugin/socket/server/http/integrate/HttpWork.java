@@ -40,14 +40,24 @@ public class HttpWork {
 	private final InetSocketAddress expectedLocalAddress;
 
 	/**
+	 * Flag indicating if expecting {@link ServerHttpConnection} to be secure.
+	 */
+	private final boolean expectIsSecure;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param expectedLocalAddress
 	 *            Expected local {@link InetSocketAddress} for the
 	 *            {@link ServerHttpConnection}.
+	 * @param expectIsSecure
+	 *            Flag indicating if expecting {@link ServerHttpConnection} to
+	 *            be secure.
 	 */
-	public HttpWork(InetSocketAddress expectedLocalAddress) {
+	public HttpWork(InetSocketAddress expectedLocalAddress,
+			boolean expectIsSecure) {
 		this.expectedLocalAddress = expectedLocalAddress;
+		this.expectIsSecure = expectIsSecure;
 	}
 
 	/**
@@ -75,6 +85,10 @@ public class HttpWork {
 		TestCase.assertTrue(
 				"Remote address port to be different to local address port",
 				expectedLocalPort != actualRemoteAddress.getPort());
+
+		// Validate whether secure channel
+		TestCase.assertEquals("Incorrect secure channel indication",
+				this.expectIsSecure, connection.isSecure());
 
 		// Obtain the HTTP request
 		HttpRequest request = connection.getHttpRequest();

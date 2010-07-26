@@ -49,7 +49,8 @@ public class HttpServerTest extends MockHttpServer {
 		server.constructTeam("WORKER", new OnePersonTeam("WORKER", 100));
 
 		// Register the work to process messages
-		HttpWork work = new HttpWork(this.getLocalAddress());
+		HttpWork work = new HttpWork(this.getLocalAddress(), this
+				.isServerSecure());
 		ReflectiveWorkBuilder workBuilder = server.constructWork(work,
 				"servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",

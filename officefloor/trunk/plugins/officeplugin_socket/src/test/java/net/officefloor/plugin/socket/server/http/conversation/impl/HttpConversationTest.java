@@ -459,6 +459,12 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public boolean isSecure() {
+			fail("Determine if secure should not be required for HTTP conversation");
+			return false;
+		}
+
+		@Override
 		public InputBufferStream getInputBufferStream() {
 			fail("Should not input from Connection");
 			return null; // should fail
@@ -468,7 +474,6 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		public OutputBufferStream getOutputBufferStream() {
 			return HttpConversationTest.this.wire.getOutputBufferStream();
 		}
-
 	}
 
 }

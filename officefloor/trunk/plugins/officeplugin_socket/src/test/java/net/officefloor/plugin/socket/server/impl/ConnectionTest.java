@@ -23,10 +23,18 @@ import net.officefloor.plugin.socket.server.impl.ConnectionImpl;
 
 /**
  * Tests reading data from the {@link ConnectionImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ConnectionTest extends AbstractWriteRead {
+
+	/**
+	 * Ensures that a plain connection is not secure.
+	 */
+	public void testPlainConnectionNotSecure() {
+		assertFalse("Plain connection should not be secure", this.connection
+				.isSecure());
+	}
 
 	/**
 	 * Ensures able to read from the {@link Connection}.

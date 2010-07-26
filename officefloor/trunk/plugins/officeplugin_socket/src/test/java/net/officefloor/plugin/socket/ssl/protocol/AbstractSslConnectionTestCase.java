@@ -21,6 +21,7 @@ package net.officefloor.plugin.socket.ssl.protocol;
 import java.io.IOException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.Connection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.ssl.TemporaryByteArrayFactory;
 import net.officefloor.plugin.socket.server.ssl.SslConnection;
@@ -30,7 +31,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Abstract test for {@link SslConnection}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
@@ -57,6 +58,15 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 	 * that the data is available.
 	 */
 	protected abstract void transferDataFromServerToClient() throws IOException;
+
+	/**
+	 * Ensures that indicates the {@link Connection} is secure.
+	 */
+	public void testConnectionIsSecure() {
+		assertTrue("Server connection should be secure", this.server.isSecure());
+		assertTrue("Client connection should also be secure", this.client
+				.isSecure());
+	}
 
 	/**
 	 * Ensure able to send and receive data.
@@ -181,7 +191,7 @@ public abstract class AbstractSslConnectionTestCase extends OfficeFrameTestCase
 
 	/**
 	 * Asserts the expected data was received.
-	 *
+	 * 
 	 * @param expectedData
 	 *            Expected data.
 	 * @param inputBufferStream

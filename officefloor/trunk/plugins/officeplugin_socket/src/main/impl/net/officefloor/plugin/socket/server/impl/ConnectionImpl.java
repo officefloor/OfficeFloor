@@ -343,6 +343,12 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	}
 
 	@Override
+	public boolean isSecure() {
+		// Connection is not secure
+		return false;
+	}
+
+	@Override
 	public InputBufferStream getInputBufferStream() {
 		return this.safeFromClientStream;
 	}

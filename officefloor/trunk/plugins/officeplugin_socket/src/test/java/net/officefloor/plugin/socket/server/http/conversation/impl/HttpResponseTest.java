@@ -407,6 +407,12 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public boolean isSecure() {
+			fail("Determine if secure should not be required for writing HTTP response");
+			return false;
+		}
+
+		@Override
 		public InputBufferStream getInputBufferStream() {
 			fail("Should not input from connection for response");
 			return null;
@@ -416,7 +422,6 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		public OutputBufferStream getOutputBufferStream() {
 			return HttpResponseTest.this.wire.getOutputBufferStream();
 		}
-
 	}
 
 }

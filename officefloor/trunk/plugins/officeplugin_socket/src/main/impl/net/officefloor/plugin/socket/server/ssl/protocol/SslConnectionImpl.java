@@ -543,6 +543,12 @@ public class SslConnectionImpl implements SslConnection {
 	}
 
 	@Override
+	public boolean isSecure() {
+		// SSL connection is secure
+		return true;
+	}
+
+	@Override
 	public InputBufferStream getInputBufferStream() {
 		return this.inputApplication;
 	}

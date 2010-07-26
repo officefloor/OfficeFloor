@@ -45,6 +45,13 @@ public interface ServerHttpConnection {
 	HttpResponse getHttpResponse();
 
 	/**
+	 * Indicates if the connection is over a secure channel (e.g. utilising SSL).
+	 * 
+	 * @return <code>true</code> if connection is over a secure channel.
+	 */
+	boolean isSecure();
+
+	/**
 	 * Obtains the local address for this {@link ServerHttpConnection}.
 	 * 
 	 * @return {@link InetSocketAddress} describing the local {@link Socket} for
