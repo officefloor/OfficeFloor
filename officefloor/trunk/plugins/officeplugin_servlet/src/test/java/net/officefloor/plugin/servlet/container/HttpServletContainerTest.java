@@ -17,23 +17,42 @@
  */
 package net.officefloor.plugin.servlet.container;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.security.Principal;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
+import net.officefloor.plugin.servlet.log.Logger;
+import net.officefloor.plugin.servlet.resource.ResourceLocator;
+import net.officefloor.plugin.servlet.security.HttpSecurity;
+import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Tests the {@link HttpServletContainer}.
@@ -64,37 +83,228 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final HttpSession session = this.createMock(HttpSession.class);
 
 	/**
+	 * {@link HttpSecurity}.
+	 */
+	private final HttpSecurity security = this.createMock(HttpSecurity.class);
+
+	/**
+	 * {@link RequestDispatcherFactory}.
+	 */
+	private final RequestDispatcherFactory dispatcherFactory = this
+			.createMock(RequestDispatcherFactory.class);
+
+	/**
+	 * {@link ServletContext}.
+	 */
+	private final ServletContext servletContext = this
+			.createMock(ServletContext.class);
+
+	/**
+	 * Init parameters.
+	 */
+	private final Map<String, String> initParameters = new HashMap<String, String>();
+
+	/**
+	 * Attributes.
+	 */
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
+
+	/**
+	 * Servlet name.
+	 */
+	private String servletName = "ServletName";
+
+	/**
+	 * Context Path.
+	 */
+	private String contextPath = "/server";
+
+	/**
+	 * Servlet path.
+	 */
+	private String servletPath = "/servlet";
+
+	/**
+	 * Name to locate the session identifier.
+	 */
+	private String sessionIdIdentifierName = "JSESSION_ID";
+
+	/**
+	 * HTTP method.
+	 */
+	private String httpMethod = "GET";
+
+	/**
 	 * Tests the unsupported functions.
 	 */
-	public void testUnsupportedFunctions() {
+	public void test_UnsupportedFunctions() {
+		this.record_init("/test");
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getAuthType()", null, req.getAuthType());
-				assertEquals("getContextPath()", "/", req.getContextPath());
+				// TODO consider unsupported functions
 			}
 		});
 	}
 
 	/**
-	 * Ensure correct method.
+	 * Ensure initialises the {@link HttpServlet}.
 	 */
-	public void test_getMethod() {
-		this.recordReturn(this.request, this.request.getMethod(), "POST");
+	public void test_init() {
+
+		// Flag to ensure initialised
+		final boolean[] isInitialised = new boolean[1];
+		isInitialised[0] = false;
+
+		// Register an init parameter
+		this.initParameters.put("available", "value");
+
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+
+			@Override
+			public void init() throws ServletException {
+				isInitialised[0] = true; // Initialised
+			}
+
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				ServletConfig config = this.getServletConfig();
+				assertEquals("Incorrect servlet name",
+						HttpServletContainerTest.this.servletName, config
+								.getServletName());
+				assertEquals("Incorrect servlet context",
+						HttpServletContainerTest.this.servletContext, config
+								.getServletContext());
+				assertEquals("getInitParameter(available)", "value", config
+						.getInitParameter("available"));
+				assertNull("getInitParameter(none)", config
+						.getInitParameter("none"));
+			}
+		});
+
+		// Ensure initialised
+		assertTrue("Should be initialised", isInitialised[0]);
+	}
+
+	/**
+	 * Ensure context methods are correct.
+	 */
+	public void test_Context() {
+		this.contextPath = "/context/path";
+		this.servletPath = "/servlet/path";
+		this.record_init("/context/path/servlet/path");
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getMethod()", "POST", req.getMethod());
+				assertEquals("getContextPath()", "/context/path", req
+						.getContextPath());
+				assertEquals("getServletPath()", "/servlet/path", req
+						.getServletPath());
+				assertNull("getPathTranslated()", req.getPathTranslated());
 			}
 		});
+	}
+
+	/**
+	 * Ensure status line methods are correct.
+	 */
+	public void test_StatusLine() {
+		this.record_init("/server/path?one=1&two=2;three=3#fragment");
+		this.recordReturn(this.request, this.request.getMethod(),
+				this.httpMethod);
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("host", "officefloor.net"));
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.connection, this.connection.isSecure(), true);
+		this.recordReturn(this.request, this.request.getVersion(), "HTTP/1.1");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getMethod()", "GET", req.getMethod());
+				assertEquals("getPathInfor()", "/server/path", req
+						.getPathInfo());
+				assertEquals("getQueryString()", "one=1&two=2;three=3", req
+						.getQueryString());
+				assertEquals("getRequestURI()", "/server/path", req
+						.getRequestURI());
+				assertEquals("getRequestURL", "officefloor.net/server/path",
+						req.getRequestURL().toString());
+				assertEquals("getScheme - not secure", "http", req.getScheme());
+				assertEquals("getScheme - secure", "https", req.getScheme());
+				assertEquals("getVersion", "HTTP/1.1", req.getProtocol());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to work with parameters.
+	 */
+	public void test_Parameters() {
+		this
+				.record_init("/server/path?one=1&two=2;three=3&duplicate=A;duplicate=B#fragment");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			@SuppressWarnings("unchecked")
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate single parameter value
+				assertEquals("getParameter(one)", "1", req.getParameter("one"));
+				assertEquals("getParameter(two)", "2", req.getParameter("two"));
+				assertEquals("getParameter(three)", "3", req
+						.getParameter("three"));
+				assertEquals("getParameter(duplicate)", "A", req
+						.getParameter("duplicate"));
+
+				// Validate parameter names
+				Enumeration<?> names = req.getParameterNames();
+				for (String expectedName : new String[] { "one", "two",
+						"three", "duplicate" }) {
+					assertTrue("Expect another name", names.hasMoreElements());
+					String actualName = (String) names.nextElement();
+					assertEquals("Incorrect parameter name", expectedName,
+							actualName);
+				}
+				assertFalse("Should be no further names", names
+						.hasMoreElements());
+
+				// Validate multiple parameter values
+				assertArray(req.getParameterValues("one"), "1");
+				assertArray(req.getParameterValues("duplicate"), "A", "B");
+
+				// Validate parameter map
+				Map<String, String[]> map = req.getParameterMap();
+				assertArray(map.get("one"), "1");
+				assertArray(map.get("duplicate"), "A", "B");
+			}
+		});
+	}
+
+	/**
+	 * Validates the array.
+	 * 
+	 * @param actual
+	 *            Actual array.
+	 * @param expected
+	 *            Expected array.
+	 */
+	private static void assertArray(String[] actual, String... expected) {
+		assertEquals("Incorrect array count", expected.length, actual.length);
+		for (int i = 0; i < expected.length; i++) {
+			assertEquals("Incorrect value " + i, expected[i], actual[i]);
+		}
 	}
 
 	/**
 	 * Ensure able to obtain cookies.
 	 */
-	public void test_getCookies() {
+	public void test_Cookies() {
+		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("cookie", "name=\"value\""));
 		this.doTest(new MockHttpServlet() {
@@ -114,11 +324,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain header values.
 	 */
-	public void test_getHeader() {
+	public void test_Header() {
+		this.record_init("/test");
+
 		// Only single call as should cache headers
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("name", "value", "int", "1", "date",
-						"Sun, 06 Nov 1994 08:49:37 GMT"));
+						"Sun, 06 Nov 1994 08:49:37 GMT", "Content-Length",
+						"50", "Content-Type", "text/html"));
 
 		// Validate able to obtain header values
 		this.doTest(new MockHttpServlet() {
@@ -130,6 +343,447 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertEquals("getIntHeader(int)", 1, req.getIntHeader("int"));
 				assertEquals("getDateHeader(date)", 784111777000l, req
 						.getDateHeader("date"));
+				assertEquals("getContentLength()", 50, req.getContentLength());
+				assertEquals("getContentType()", "text/html", req
+						.getContentType());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain headers.
+	 */
+	public void test_Headers() {
+		this.record_init("/test");
+
+		// Only single call as should cache headers
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("one", "10", "one", "11", "two", "20"));
+
+		// Validate able to obtain headers
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate unique header names
+				Enumeration<?> names = req.getHeaderNames();
+				for (String expectedName : new String[] { "one", "two" }) {
+					assertTrue("Expect name " + expectedName, names
+							.hasMoreElements());
+					String actualName = (String) names.nextElement();
+					assertEquals("Incorrect header name", expectedName,
+							actualName);
+				}
+				assertFalse("No further names expected", names
+						.hasMoreElements());
+
+				// Validate the first header value
+				assertEquals("getHeader(one)", "10", req.getHeader("one"));
+
+				// Validate the multiple header values
+				Enumeration<?> values = req.getHeaders("one");
+				for (String expectedValue : new String[] { "10", "11" }) {
+					assertTrue("Expect value " + expectedValue, values
+							.hasMoreElements());
+					String actualValue = (String) values.nextElement();
+					assertEquals("Incorrect header value", expectedValue,
+							actualValue);
+				}
+				assertFalse("No further values expected", names
+						.hasMoreElements());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain details of Server from Host header.
+	 */
+	public void test_Server_FromHostHeader() {
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("Host", "officefloor.net:80"));
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getServerName()", "officefloor.net", req
+						.getServerName());
+				assertEquals("getServerPort()", 80, req.getServerPort());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain details of Server without Host Header.
+	 */
+	public void test_Server_Default() throws Exception {
+
+		// Local address for server
+		final String serverName = "192.168.0.1";
+		final byte[] serverAddr = new byte[] { (byte) 192, (byte) 168,
+				(byte) 0, (byte) 1 };
+		final int serverPort = 80;
+		final InetSocketAddress localAddress = new InetSocketAddress(
+				InetAddress.getByAddress(serverName, serverAddr), serverPort);
+
+		// Record obtaining the local address for server
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders());
+		this.recordReturn(this.connection, this.connection.getLocalAddress(),
+				localAddress);
+		this.recordReturn(this.connection, this.connection.getLocalAddress(),
+				localAddress);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getServerName()", serverName, req.getServerName());
+				assertEquals("getServerPort()", serverPort, req.getServerPort());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain details of body.
+	 */
+	public void test_ServletInputStream() {
+		// Mocks
+		final InputBufferStream bufferStream = this
+				.createMock(InputBufferStream.class);
+		final ByteArrayInputStream inputStream = new ByteArrayInputStream("a"
+				.getBytes(Charset.forName("ASCII")));
+
+		// Record obtaining the input streams and data
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getBody(), bufferStream);
+		this.recordReturn(bufferStream, bufferStream.getInputStream(),
+				inputStream);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate the Servlet Input Stream
+				ServletInputStream inputStream = req.getInputStream();
+				assertEquals("Incorrect number of bytes available", 1,
+						inputStream.available());
+				assertEquals("Incorrect body value", 'a', inputStream.read());
+
+				// Ensure not able to obtain Reader
+				try {
+					req.getReader();
+					fail("Should not be able to obtain Reader");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to obtain reader
+				}
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain details of body.
+	 */
+	public void test_Reader() {
+		// Mocks
+		final InputBufferStream bufferStream = this
+				.createMock(InputBufferStream.class);
+		final ByteArrayInputStream inputStream = new ByteArrayInputStream(
+				"test line\n".getBytes());
+
+		// Record obtaining the input streams and data
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getBody(), bufferStream);
+		this.recordReturn(bufferStream, bufferStream.getInputStream(),
+				inputStream);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate the Reader
+				BufferedReader reader = req.getReader();
+				assertEquals("Incorrect body line", "test line", reader
+						.readLine());
+				assertNull("Expecting no further body content", reader
+						.readLine());
+
+				// Ensure not able to obtain InputStream
+				try {
+					req.getInputStream();
+					fail("Should not be able to obtain Reader");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to obtain reader
+				}
+			}
+		});
+	}
+
+	/**
+	 * Validates the use of attributes.
+	 */
+	public void test_Attributes() {
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			@SuppressWarnings("unchecked")
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure initially no attributes
+				assertFalse("Should be no attributes initially", req
+						.getAttributeNames().hasMoreElements());
+
+				// Load the attribute
+				final Object attribute = new Object();
+				req.setAttribute("attribute", attribute);
+
+				// Validate the loaded attribute
+				assertEquals("Incorrect attribute", attribute, req
+						.getAttribute("attribute"));
+				Enumeration<String> names = req.getAttributeNames();
+				assertTrue("Expect an attribute loaded", names
+						.hasMoreElements());
+				assertEquals("Incorrect attribute name", "attribute", names
+						.nextElement());
+				assertFalse("Expect only one attribute loaded", names
+						.hasMoreElements());
+
+				// Remove the attribute
+				req.removeAttribute("attribute");
+				assertFalse("Attribute should be removed", req
+						.getAttributeNames().hasMoreElements());
+			}
+		});
+	}
+
+	/**
+	 * Validates details of the connection.
+	 */
+	public void test_ConnectionDetails() throws Exception {
+
+		// Initiate remote address
+		final String remoteTextAddr = "192.168.0.1";
+		final byte[] remoteByteAddr = new byte[] { (byte) 192, (byte) 168,
+				(byte) 0, (byte) 1 };
+		final String remoteHost = "client";
+		final int remotePort = 43100;
+		final InetSocketAddress remoteAddress = new InetSocketAddress(
+				InetAddress.getByAddress(remoteHost, remoteByteAddr),
+				remotePort);
+
+		// Initiate local address
+		final String localTextAddr = "192.168.0.2";
+		final byte[] localByteAddr = new byte[] { (byte) 192, (byte) 168,
+				(byte) 0, (byte) 2 };
+		final String localName = "server";
+		final int localPort = 80;
+		final InetSocketAddress localAddress = new InetSocketAddress(
+				InetAddress.getByAddress(localName, localByteAddr), localPort);
+
+		// Record obtaining remote and local addresses appropriate times
+		this.record_init("/test");
+		for (int i = 0; i < 3; i++) {
+			this.recordReturn(this.connection, this.connection
+					.getRemoteAddress(), remoteAddress);
+			this.recordReturn(this.connection, this.connection
+					.getLocalAddress(), localAddress);
+		}
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate address
+				assertEquals("getRemoteAddr", remoteTextAddr, req
+						.getRemoteAddr());
+				assertEquals("getLocalAddr", localTextAddr, req.getLocalAddr());
+
+				// Validate host/name
+				assertEquals("getRemoteHost", remoteHost, req.getRemoteHost());
+				assertEquals("getLocalName", localName, req.getLocalName());
+
+				// Validate port
+				assertEquals("getRemotePort", remotePort, req.getRemotePort());
+				assertEquals("getLocalPort", localPort, req.getLocalPort());
+			}
+		});
+	}
+
+	/**
+	 * Ensure secure channel methods are correct.
+	 */
+	public void test_SecureChannel() {
+		this.record_init("/test");
+		this.recordReturn(this.connection, this.connection.isSecure(), true);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertTrue("isSecure()", req.isSecure());
+			}
+		});
+	}
+
+	/**
+	 * Ensure security methods are correct.
+	 */
+	public void test_Security() {
+		final Principal principal = this.createMock(Principal.class);
+		this.record_init("/test");
+		this.recordReturn(this.security, this.security.getAuthType(), "BASIC");
+		this.recordReturn(this.security, this.security.getUserPrincipal(),
+				principal);
+		this.recordReturn(this.security, this.security.getRemoteUser(),
+				"daniel");
+		this.recordReturn(this.security, this.security.isUserInRole("role"),
+				true);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getAuthType()", "BASIC", req.getAuthType());
+				assertEquals("getUserPrincipal()", principal, req
+						.getUserPrincipal());
+				assertEquals("getRemoteUser()", "daniel", req.getRemoteUser());
+				assertEquals("isUserInRole(role)", true, req
+						.isUserInRole("role"));
+			}
+		});
+	}
+
+	/**
+	 * Ensure obtain HTTP session.
+	 */
+	public void test_HttpSession() {
+		final String SESSION_ID = "SessionId";
+		this.record_init("/test");
+		this
+				.recordReturn(this.session, this.session.getSessionId(),
+						SESSION_ID);
+		this
+				.recordReturn(this.session, this.session.getSessionId(),
+						SESSION_ID);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Ensure always obtain session
+				javax.servlet.http.HttpSession httpSession = req.getSession();
+				assertEquals("Must have session", SESSION_ID, httpSession
+						.getId());
+
+				// Will always obtain session
+				httpSession = req.getSession(false);
+				assertEquals("Always have session", SESSION_ID, httpSession
+						.getId());
+			}
+		});
+	}
+
+	/**
+	 * Ensure session methods are correct.
+	 */
+	public void test_Session_ViaCookie() {
+		final String SESSION_ID = "SessionId";
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("cookie", this.sessionIdIdentifierName
+						+ "=\"" + SESSION_ID + "\""));
+		this
+				.recordReturn(this.session, this.session.getSessionId(),
+						SESSION_ID);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getRequestSessionId", SESSION_ID, req
+						.getRequestedSessionId());
+				assertTrue("isRequestedSessionIdFromCookie", req
+						.isRequestedSessionIdFromCookie());
+				assertFalse("isRequestedSessionIdFromUrl", req
+						.isRequestedSessionIdFromURL());
+				assertTrue("isRequestedSessionIdValid", req
+						.isRequestedSessionIdValid());
+			}
+		});
+	}
+
+	/**
+	 * Ensure session methods are correct.
+	 */
+	public void test_Session_ViaParameter() {
+		final String SESSION_ID = "SessionId";
+		this.record_init("/test?" + this.sessionIdIdentifierName + "="
+				+ SESSION_ID);
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders());
+		this.recordReturn(this.session, this.session.getSessionId(),
+				"Not same Session Id");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getRequestSessionId", SESSION_ID, req
+						.getRequestedSessionId());
+				assertFalse("isRequestedSessionIdFromCookie", req
+						.isRequestedSessionIdFromCookie());
+				assertTrue("isRequestedSessionIdFromUrl", req
+						.isRequestedSessionIdFromURL());
+				assertFalse("isRequestedSessionIdValid", req
+						.isRequestedSessionIdValid());
+			}
+		});
+	}
+
+	/**
+	 * Validates session methods are correct.
+	 */
+	public void test_Session_NoId() {
+		this.record_init("/test");
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders());
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertNull("getRequestSessionId", req.getRequestedSessionId());
+				assertFalse("isRequestedSessionIdFromCookie", req
+						.isRequestedSessionIdFromCookie());
+				assertFalse("isRequestedSessionIdFromUrl", req
+						.isRequestedSessionIdFromURL());
+				assertFalse("isRequestedSessionIdValid", req
+						.isRequestedSessionIdValid());
+			}
+		});
+	}
+
+	/**
+	 * Validates the request dispatcher methods.
+	 */
+	public void test_RequestDispatcher() {
+		final RequestDispatcher dispatcher = this
+				.createMock(RequestDispatcher.class);
+		this.record_init("/test");
+		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
+				.createRequestDispatcher("available"), dispatcher);
+		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
+				.createRequestDispatcher("none"), null);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getRequestDispatcher(available)", dispatcher, req
+						.getRequestDispatcher("available"));
+				assertNull("getRequestDispathcer(none)", req
+						.getRequestDispatcher("none"));
 			}
 		});
 	}
@@ -152,6 +806,25 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records initialising the {@link HttpServletContainer}.
+	 * 
+	 * @param requestUri
+	 *            Request URI.
+	 */
+	private void record_init(String requestUri) {
+
+		// Record obtaining the request and responses
+		this.recordReturn(this.connection, this.connection.getHttpRequest(),
+				this.request);
+		this.recordReturn(this.connection, this.connection.getHttpResponse(),
+				this.response);
+		this.recordReturn(this.request, this.request.getRequestURI(),
+				requestUri);
+		this.recordReturn(this.request, this.request.getMethod(),
+				this.httpMethod);
+	}
+
+	/**
 	 * Does the test.
 	 * 
 	 * @param servlet
@@ -160,21 +833,31 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private void doTest(HttpServlet servlet) {
 		try {
 
-			// Record obtaining the request and responses
-			this.recordReturn(this.connection,
-					this.connection.getHttpRequest(), this.request);
-			this.recordReturn(this.connection, this.connection
-					.getHttpResponse(), this.response);
+			// Create additional unused mocks
+			final long lastAccessTime = 1000;
+			final Map<String, String> contextParameters = new HashMap<String, String>();
+			final ContextAttributes contextAttributes = this
+					.createMock(ContextAttributes.class);
+			final Map<String, String> fileExtensionToMimeType = new HashMap<String, String>();
+			final Clock clock = this.createMock(Clock.class);
+			final ResourceLocator resourceLocator = this
+					.createMock(ResourceLocator.class);
+			final Logger logger = this.createMock(Logger.class);
 
 			// Replay
 			this.replayMockObjects();
 
 			// Create the HTTP Servlet container
 			HttpServletContainer container = new HttpServletContainerImpl(
-					servlet);
+					"ServletContextName", this.contextPath, contextParameters,
+					this.servletName, this.servletPath, servlet,
+					this.initParameters, this.servletContext,
+					this.sessionIdIdentifierName, this.dispatcherFactory,
+					fileExtensionToMimeType, clock, resourceLocator, logger);
 
 			// Process a request
-			container.service(this.connection, this.session);
+			container.service(this.connection, this.attributes, this.security,
+					lastAccessTime, this.session, contextAttributes);
 
 			// Verify functionality
 			this.verifyMockObjects();

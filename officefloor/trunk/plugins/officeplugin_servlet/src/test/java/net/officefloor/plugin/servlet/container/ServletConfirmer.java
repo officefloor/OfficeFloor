@@ -91,6 +91,36 @@ public class ServletConfirmer extends HttpServlet {
 					new Class[] { HttpServletRequest.class }, this.recorder);
 
 	/**
+	 * Context path for confirmation.
+	 */
+	private String contextPath = "/";
+
+	/**
+	 * Specifies the Context Path.
+	 * 
+	 * @param contextPath
+	 *            Context Path.
+	 */
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	/**
+	 * Servlet path for confirmation.
+	 */
+	private String servletPath = "/*";
+
+	/**
+	 * Specifies the Servlet Path.
+	 * 
+	 * @param servletPath
+	 *            Servlet Path.
+	 */
+	public void setServletPath(String servletPath) {
+		this.servletPath = servletPath;
+	}
+
+	/**
 	 * Proxy return.
 	 */
 	private Object proxyReturn = null;
@@ -137,8 +167,8 @@ public class ServletConfirmer extends HttpServlet {
 		// Start the HTTP container for the HTTP Servlet
 		Server server = new Server(PORT);
 		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/");
-		context.addServlet(new ServletHolder(this), "/*");
+		context.setContextPath(this.contextPath);
+		context.addServlet(new ServletHolder(this), this.servletPath);
 		server.setHandler(context);
 		try {
 			server.start();

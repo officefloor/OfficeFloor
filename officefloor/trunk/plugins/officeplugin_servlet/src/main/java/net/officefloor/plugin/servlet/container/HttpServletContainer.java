@@ -18,10 +18,12 @@
 package net.officefloor.plugin.servlet.container;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
@@ -39,14 +41,25 @@ public interface HttpServletContainer {
 	 * @param connection
 	 *            {@link ServerHttpConnection} containing the
 	 *            {@link HttpRequest} to service.
+	 * @param attributes
+	 *            Attributes in {@link HttpRequest} context.
+	 * @param security
+	 *            {@link HttpSecurity}.
+	 * @param lastAccessTime
+	 *            Last access time of the client.
 	 * @param session
 	 *            {@link HttpSession} for the {@link HttpRequest}.
+	 * @param contextAttributes
+	 *            {@link ContextAttributes}.
 	 * @throws ServletException
 	 *             As per {@link HttpServlet} API.
 	 * @throws IOException
 	 *             As per {@link HttpServlet} API.
 	 */
-	void service(ServerHttpConnection connection, HttpSession session)
-			throws ServletException, IOException;
+	void service(ServerHttpConnection connection,
+			Map<String, Object> attributes, HttpSecurity security,
+			long lastAccessTime, HttpSession session,
+			ContextAttributes contextAttributes) throws ServletException,
+			IOException;
 
 }
