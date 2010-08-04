@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.easymock.ArgumentsMatcher;
@@ -307,6 +308,114 @@ public abstract class OfficeFrameTestCase extends TestCase {
 						+ "." + methodName + "()", ignoreMethodNames, writer);
 			}
 		}
+	}
+
+	/**
+	 * Operation for {@link #assertFail} that should fail.
+	 */
+	protected static interface FailOperation {
+
+		/**
+		 * Contains the operation that should fail.
+		 * 
+		 * @throws Throwable
+		 *             Expected failure of the operation.
+		 */
+		void run() throws Throwable;
+	}
+
+	/**
+	 * Asserts the failure.
+	 * 
+	 * @param operation
+	 *            {@link FailOperation} that is expected fail.
+	 * @param expectedFailureType
+	 *            Expect type of failure.
+	 * @return Actual failure for further assertions.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <F extends Throwable> F assertFail(FailOperation operation,
+			Class<F> expectedFailureType) {
+		try {
+			operation.run();
+			fail("Operation expected to fail with cause "
+					+ expectedFailureType.getSimpleName());
+			return null; // for compilation
+
+		} catch (AssertionFailedError ex) {
+			// Propagate unit test failure
+			throw ex;
+		} catch (Throwable ex) {
+			// Ensure the correct type
+			assertEquals("Incorrect cause of failure", expectedFailureType, ex
+					.getClass());
+			return (F) ex;
+		}
+	}
+
+	/**
+	 * Provides simplified facade to verify {@link Method} will fail.
+	 * 
+	 * @param expectedFailureType
+	 *            Expected failure of method.
+	 * @param object
+	 *            Object to invoke {@link Method} on.
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @param parameters
+	 *            Parameters for the {@link Method}.
+	 * @return Actual failure for further assertions.
+	 */
+	public static <F extends Throwable> F assertFail(
+			Class<F> expectedFailureType, final Object object,
+			final String methodName, final Object... parameters) {
+		try {
+			// Obtain the listing of parameter types
+			Class<?>[] parameterTypes = new Class[parameters.length];
+			for (int i = 0; i < parameterTypes.length; i++) {
+				parameterTypes[i] = parameters[i].getClass();
+			}
+
+			// Obtain the method
+			Method method = object.getClass().getMethod(methodName,
+					parameterTypes);
+
+			// Assert fail
+			return assertFail(expectedFailureType, object, method, parameters);
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
+	 * Provides simplified facade to verify {@link Method} will fail.
+	 * 
+	 * @param expectedFailureType
+	 *            Expected failure of method.
+	 * @param object
+	 *            Object to invoke {@link Method} on.
+	 * @param method
+	 *            {@link Method}.
+	 * @param parameters
+	 *            Parameters for the {@link Method}.
+	 * @return Actual failure for further assertions.
+	 */
+	public static <F extends Throwable> F assertFail(
+			Class<F> expectedFailureType, final Object object,
+			final Method method, final Object... parameters) {
+		return assertFail(new FailOperation() {
+			@Override
+			public void run() throws Throwable {
+				// Invoke the method
+				try {
+					method.invoke(object, parameters);
+				} catch (InvocationTargetException ex) {
+					// Throw cause of method failure
+					throw ex.getCause();
+				}
+			}
+		}, expectedFailureType);
 	}
 
 	/**

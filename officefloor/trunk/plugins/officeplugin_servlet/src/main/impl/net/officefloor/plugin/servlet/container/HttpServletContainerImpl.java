@@ -18,6 +18,7 @@
 package net.officefloor.plugin.servlet.container;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -90,6 +91,11 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	private final Clock clock;
 
 	/**
+	 * Default {@link Locale}.
+	 */
+	private final Locale locale;
+
+	/**
 	 * {@link ResourceLocator}.
 	 */
 	private final ResourceLocator resourceLocator;
@@ -127,6 +133,8 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	 *            Mapping file extensions to MIME type.
 	 * @param clock
 	 *            {@link Clock}.
+	 * @param locale
+	 *            Default {@link Locale}.
 	 * @param resourceLocator
 	 *            {@link ResourceLocator}.
 	 * @param logger
@@ -141,7 +149,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 			String sessionIdIdentifierName,
 			RequestDispatcherFactory dispatcherFactory,
 			Map<String, String> fileExtensionToMimeType, Clock clock,
-			ResourceLocator resourceLocator, Logger logger)
+			Locale locale, ResourceLocator resourceLocator, Logger logger)
 			throws ServletException {
 
 		this.servletContextName = servletContextName;
@@ -153,6 +161,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 		this.dispatcherFactory = dispatcherFactory;
 		this.fileExtensionToMimeType = fileExtensionToMimeType;
 		this.clock = clock;
+		this.locale = locale;
 		this.resourceLocator = resourceLocator;
 		this.logger = logger;
 
@@ -181,9 +190,11 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 					contextAttributes, connection, this.servletPath,
 					attributes, security, this.sessionIdIdentifierName,
 					lastAccessTime, session, this.fileExtensionToMimeType,
-					this.dispatcherFactory, this.clock, this.resourceLocator,
-					this.logger);
-			response = new HttpServletResponseImpl(connection.getHttpResponse());
+					this.dispatcherFactory, this.clock, this.locale,
+					this.resourceLocator, this.logger);
+			response = new HttpServletResponseImpl(
+					connection.getHttpResponse(), this.clock, request,
+					this.locale);
 		} catch (HttpRequestTokeniseException ex) {
 			// Propagate invalid HTTP Request
 			throw new IOException(ex);
