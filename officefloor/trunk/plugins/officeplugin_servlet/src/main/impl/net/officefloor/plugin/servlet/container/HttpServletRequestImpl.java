@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -67,7 +68,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	/**
 	 * RFC 1123 header date format.
 	 */
-	private static final String RFC1123_HEADER_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+	public static final String RFC1123_HEADER_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
 	/**
 	 * RFC 1036 header date format.
@@ -147,6 +148,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private final HttpSession session;
 
 	/**
+	 * Default {@link Locale} if not specified on {@link HttpRequest}.
+	 */
+	private final Locale defaultLocale;
+
+	/**
 	 * {@link RequestDispatcherFactory}.
 	 */
 	private final RequestDispatcherFactory dispatcherFactory;
@@ -224,6 +230,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 *            {@link RequestDispatcherFactory}.
 	 * @param clock
 	 *            {@link Clock}.
+	 * @param defaultLocale
+	 *            Default {@link Locale} if not specified.
 	 * @param resourceLocator
 	 *            {@link ResourceLocator}.
 	 * @param logger
@@ -245,7 +253,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			net.officefloor.plugin.socket.server.http.session.HttpSession session,
 			Map<String, String> fileExtensionToMimeType,
 			RequestDispatcherFactory dispatcherFactory, Clock clock,
-			ResourceLocator resourceLocator, Logger logger)
+			Locale defaultLocale, ResourceLocator resourceLocator, Logger logger)
 			throws HttpRequestTokeniseException {
 
 		// Initiate state
@@ -256,6 +264,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		this.attributes = requestAttributes;
 		this.security = security;
 		this.sessionIdIdentifierName = sessionIdIdentifierName;
+		this.defaultLocale = defaultLocale;
 		this.dispatcherFactory = dispatcherFactory;
 
 		// Tokenise the HTTP request
@@ -827,12 +836,6 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public boolean isRequestedSessionIdFromUrl() {
-		throw new UnsupportedOperationException(
-				"HttpServletRequest.isRequestedSessionIdFromUrl deprecated as of version 2.1");
-	}
-
-	@Override
 	public boolean isRequestedSessionIdValid() {
 		this.lazyLoadSessionId();
 
@@ -898,17 +901,14 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public Locale getLocale() {
-		// TODO implement ServletRequest.getLocale
-		throw new UnsupportedOperationException(
-				"TODO implement ServletRequest.getLocale");
+		return this.defaultLocale;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Enumeration getLocales() {
-		// TODO implement ServletRequest.getLocales
-		throw new UnsupportedOperationException(
-				"TODO implement ServletRequest.getLocales");
+		return new IteratorEnumeration<Locale>(Arrays
+				.asList(this.defaultLocale).iterator());
 	}
 
 	/*
@@ -983,6 +983,16 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	@Override
 	public boolean isUserInRole(String role) {
 		return this.security.isUserInRole(role);
+	}
+
+	/*
+	 * -------------------- Deprecated Methods --------------------------
+	 */
+
+	@Override
+	public boolean isRequestedSessionIdFromUrl() {
+		throw new UnsupportedOperationException(
+				"HttpServletRequest.isRequestedSessionIdFromUrl deprecated as of version 2.1");
 	}
 
 	/**

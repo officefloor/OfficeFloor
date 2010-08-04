@@ -19,7 +19,11 @@ package net.officefloor.plugin.servlet.container;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
@@ -28,6 +32,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -35,6 +40,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +59,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.stream.InputBufferStream;
+import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * Tests the {@link HttpServletContainer}.
@@ -100,6 +107,16 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			.createMock(ServletContext.class);
 
 	/**
+	 * {@link Clock}.
+	 */
+	private final Clock clock = this.createMock(Clock.class);
+
+	/**
+	 * {@link OutputStream} for {@link HttpResponse}.
+	 */
+	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+	/**
 	 * Init parameters.
 	 */
 	private final Map<String, String> initParameters = new HashMap<String, String>();
@@ -135,15 +152,34 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private String httpMethod = "GET";
 
 	/**
-	 * Tests the unsupported functions.
+	 * Tests the deprecated functions.
 	 */
-	public void test_UnsupportedFunctions() {
+	public void test_DeprecatedFunctions() {
 		this.record_init("/test");
 		this.doTest(new MockHttpServlet() {
 			@Override
-			protected void test(HttpServletRequest req, HttpServletResponse resp)
-					throws ServletException, IOException {
-				// TODO consider unsupported functions
+			protected void test(final HttpServletRequest req,
+					HttpServletResponse resp) throws ServletException,
+					IOException {
+				try {
+
+					// Deprecated request methods
+					assertFail(UnsupportedOperationException.class, req,
+							"isRequestedSessionIdFromUrl");
+					// TODO provide remaining deprecated request methods
+
+					// Deprecated response methods
+					assertFail(UnsupportedOperationException.class, resp,
+							"encodeUrl", "URL");
+					assertFail(UnsupportedOperationException.class, resp,
+							"encodeRedirectUrl", "URL");
+					assertFail(UnsupportedOperationException.class, resp, resp
+							.getClass().getMethod("setStatus", int.class,
+									String.class), 200, "message");
+
+				} catch (Throwable ex) {
+					throw fail(ex);
+				}
 			}
 		});
 	}
@@ -192,7 +228,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure context methods are correct.
 	 */
-	public void test_Context() {
+	public void test_req_Context() {
 		this.contextPath = "/context/path";
 		this.servletPath = "/servlet/path";
 		this.record_init("/context/path/servlet/path");
@@ -212,7 +248,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure status line methods are correct.
 	 */
-	public void test_StatusLine() {
+	public void test_req_StatusLine() {
 		this.record_init("/server/path?one=1&two=2;three=3#fragment");
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
@@ -244,7 +280,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to work with parameters.
 	 */
-	public void test_Parameters() {
+	public void test_req_Parameters() {
 		this
 				.record_init("/server/path?one=1&two=2;three=3&duplicate=A;duplicate=B#fragment");
 		this.doTest(new MockHttpServlet() {
@@ -303,7 +339,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain cookies.
 	 */
-	public void test_Cookies() {
+	public void test_req_Cookies() {
 		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("cookie", "name=\"value\""));
@@ -324,7 +360,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain header values.
 	 */
-	public void test_Header() {
+	public void test_req_Header() {
 		this.record_init("/test");
 
 		// Only single call as should cache headers
@@ -353,7 +389,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain headers.
 	 */
-	public void test_Headers() {
+	public void test_req_Headers() {
 		this.record_init("/test");
 
 		// Only single call as should cache headers
@@ -399,7 +435,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of Server from Host header.
 	 */
-	public void test_Server_FromHostHeader() {
+	public void test_req_Server_FromHostHeader() {
 		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("Host", "officefloor.net:80"));
@@ -417,7 +453,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of Server without Host Header.
 	 */
-	public void test_Server_Default() throws Exception {
+	public void test_req_Server_Default() throws Exception {
 
 		// Local address for server
 		final String serverName = "192.168.0.1";
@@ -450,7 +486,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of body.
 	 */
-	public void test_ServletInputStream() {
+	public void test_req_ServletInputStream() {
 		// Mocks
 		final InputBufferStream bufferStream = this
 				.createMock(InputBufferStream.class);
@@ -489,7 +525,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain details of body.
 	 */
-	public void test_Reader() {
+	public void test_req_Reader() {
 		// Mocks
 		final InputBufferStream bufferStream = this
 				.createMock(InputBufferStream.class);
@@ -529,7 +565,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the use of attributes.
 	 */
-	public void test_Attributes() {
+	public void test_req_Attributes() {
 		this.record_init("/test");
 		this.doTest(new MockHttpServlet() {
 			@Override
@@ -566,7 +602,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Validates details of the connection.
 	 */
-	public void test_ConnectionDetails() throws Exception {
+	public void test_req_ConnectionDetails() throws Exception {
 
 		// Initiate remote address
 		final String remoteTextAddr = "192.168.0.1";
@@ -619,7 +655,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure secure channel methods are correct.
 	 */
-	public void test_SecureChannel() {
+	public void test_req_SecureChannel() {
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
 		this.doTest(new MockHttpServlet() {
@@ -634,7 +670,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure security methods are correct.
 	 */
-	public void test_Security() {
+	public void test_req_Security() {
 		final Principal principal = this.createMock(Principal.class);
 		this.record_init("/test");
 		this.recordReturn(this.security, this.security.getAuthType(), "BASIC");
@@ -661,7 +697,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure obtain HTTP session.
 	 */
-	public void test_HttpSession() {
+	public void test_req_HttpSession() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test");
 		this
@@ -691,7 +727,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure session methods are correct.
 	 */
-	public void test_Session_ViaCookie() {
+	public void test_req_Session_ViaCookie() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
@@ -719,7 +755,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure session methods are correct.
 	 */
-	public void test_Session_ViaParameter() {
+	public void test_req_Session_ViaParameter() {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test?" + this.sessionIdIdentifierName + "="
 				+ SESSION_ID);
@@ -746,7 +782,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Validates session methods are correct.
 	 */
-	public void test_Session_NoId() {
+	public void test_req_Session_NoId() {
 		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders());
@@ -768,7 +804,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the request dispatcher methods.
 	 */
-	public void test_RequestDispatcher() {
+	public void test_req_RequestDispatcher() {
 		final RequestDispatcher dispatcher = this
 				.createMock(RequestDispatcher.class);
 		this.record_init("/test");
@@ -786,6 +822,596 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						.getRequestDispatcher("none"));
 			}
 		});
+	}
+
+	/**
+	 * Allow specifying {@link Locale} for {@link HttpRequest}.
+	 */
+	public void test_req_Locale() {
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// TODO take Locale from Accept-Language header
+
+				// Only default locale
+				assertEquals("Default locale", Locale.getDefault(), req
+						.getLocale());
+
+				// Only default locale
+				Enumeration<?> enumeration = req.getLocales();
+				assertTrue("Expecting default locale", enumeration
+						.hasMoreElements());
+				assertEquals("Should have default locale", Locale.getDefault(),
+						enumeration.nextElement());
+				assertFalse("Only expecting default locale", enumeration
+						.hasMoreElements());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to work with the {@link ServletOutputStream}.
+	 */
+	public void test_resp_ServletOutputStream() {
+		final byte DATA = 1;
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure always write out
+				resp.setBufferSize(0);
+
+				// Validate the Servlet Output Stream
+				ServletOutputStream outputStream = resp.getOutputStream();
+				outputStream.write(DATA);
+
+				// Ensure not able to obtain Writer
+				try {
+					resp.getWriter();
+					fail("Should not be able to obtain Writer");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to obtain writer
+				}
+			}
+		});
+
+		// Validate written data
+		byte[] writtenData = this.outputStream.toByteArray();
+		assertEquals("Incorrect number of bytes written", 1, writtenData.length);
+		assertEquals("Incorrect data written", DATA, writtenData[0]);
+	}
+
+	/**
+	 * Ensure able to work with the {@link ServletOutputStream}.
+	 */
+	public void test_resp_Writer() {
+		final String DATA = "test";
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure always write out
+				resp.setBufferSize(0);
+
+				// Validate the Writer
+				PrintWriter writer = resp.getWriter();
+				writer.write(DATA);
+
+				// Ensure not able to obtain Servlet Output Stream
+				try {
+					resp.getOutputStream();
+					fail("Should not be able to obtain ServletOutputStream");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to obtain output stream
+				}
+
+				// Ensure not able to change buffer size
+				try {
+					resp.setBufferSize(10);
+					fail("Should not be able to change buffer size after the fact");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to specify buffer size
+				}
+			}
+		});
+
+		// Validate written data
+		assertText(DATA, this.outputStream.toByteArray());
+	}
+
+	/**
+	 * Ensure able to buffer content.
+	 */
+	public void test_resp_Buffer() {
+		final String DATA = "test data";
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure large buffer and not write out data
+				resp.setBufferSize(10000);
+				assertEquals("Incorrect buffer size", 10000, resp
+						.getBufferSize());
+
+				// Write small data (below buffer size)
+				PrintWriter writer = resp.getWriter();
+				writer.write(DATA);
+
+				// Ensure no content written
+				assertEquals("Content should still be buffered", 0,
+						HttpServletContainerTest.this.outputStream
+								.toByteArray().length);
+				assertFalse("Should not yet be committed", resp.isCommitted());
+
+				// Flush the buffer
+				resp.flushBuffer();
+				assertTrue("Committed to content", resp.isCommitted());
+				assertText("test data",
+						HttpServletContainerTest.this.outputStream
+								.toByteArray());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to reset buffer.
+	 */
+	public void test_resp_ResetBuffer() {
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure large buffer and not write out data
+				resp.setBufferSize(10000);
+
+				// Write small data (below buffer size)
+				PrintWriter writer = resp.getWriter();
+				writer.write("test data");
+
+				// Ensure no content written
+				assertEquals("Content should still be buffered", 0,
+						HttpServletContainerTest.this.outputStream
+								.toByteArray().length);
+				assertFalse("Should not yet be committed", resp.isCommitted());
+
+				// Reset the buffer
+				resp.resetBuffer();
+
+				// Write other data and ensure reset data is not sent
+				writer.write("other data");
+				writer.flush(); // triggers flushing buffer
+				assertTrue("Committed to content", resp.isCommitted());
+				assertText("other data",
+						HttpServletContainerTest.this.outputStream
+								.toByteArray());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to reset the response.
+	 */
+	public void test_resp_Reset() {
+
+		// Mocks
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record obtaining the output streams
+		this.record_init("/test");
+		this.recordReturn(this.response, this.response.addHeader("test",
+				"value"), header);
+		this.recordReturn(this.response, this.response.getHeaders(),
+				new HttpHeader[] { header });
+		this.response.removeHeader(header);
+		this.recordReturn(this.response, this.response.addHeader("test",
+				"another"), header);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure large buffer and not write out data
+				resp.setBufferSize(10000);
+
+				// Write small data (below buffer size)
+				PrintWriter writer = resp.getWriter();
+				writer.write("test data");
+
+				// Add a header
+				resp.addHeader("test", "value");
+
+				// Ensure no content written
+				assertEquals("Content should still be buffered", 0,
+						HttpServletContainerTest.this.outputStream
+								.toByteArray().length);
+				assertFalse("Should not yet be committed", resp.isCommitted());
+
+				// Reset
+				resp.reset();
+
+				// Write other data and header and ensure reset data is not sent
+				resp.addHeader("test", "another");
+				writer.write("other data");
+				resp.flushBuffer();
+				assertTrue("Committed to content", resp.isCommitted());
+				assertText("other data",
+						HttpServletContainerTest.this.outputStream
+								.toByteArray());
+			}
+		});
+	}
+
+	/**
+	 * Ensure can specify the content details.
+	 */
+	public void test_resp_ContentDetails() {
+		final String CONTENT_LENGTH = "Content-Length";
+		final String CONTENT_TYPE = "Content-Type";
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record
+		this.record_init("/test");
+
+		// Record specify content length
+		this.response.removeHeaders(CONTENT_LENGTH);
+		this.recordReturn(this.response, this.response.addHeader(
+				CONTENT_LENGTH, "10"), header);
+
+		// Record specifying content type without charset
+		this.response.removeHeaders(CONTENT_TYPE);
+		this.recordReturn(this.response, this.response.addHeader(CONTENT_TYPE,
+				"text/html"), header);
+		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
+				header);
+		this.recordReturn(header, header.getValue(), "text/html");
+
+		// Record specifying content type with charset
+		this.response.removeHeaders(CONTENT_TYPE);
+		this.recordReturn(this.response, this.response.addHeader(CONTENT_TYPE,
+				"text/html; charset=UTF-8; another=parameter"), header);
+		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
+				header);
+		this.recordReturn(header, header.getValue(),
+				"text/html; charset=UTF-8; another=parameter");
+
+		// Record specifying character encoding
+		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
+				header);
+		this.recordReturn(header, header.getValue(),
+				"text/html; charset=UTF-8; another=parameter");
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.setContentLength(10);
+
+				// Ensure default charset not changed if not specified
+				resp.setContentType("text/html");
+				assertEquals("Incorrect Content-Type", "text/html", resp
+						.getContentType());
+
+				// Ensure default character encoding
+				assertEquals("Incorrect default character encoding",
+						"ISO-8859-1", resp.getCharacterEncoding());
+
+				// Ensure can change via content type
+				resp
+						.setContentType("text/html; charset=UTF-8; another=parameter");
+				assertEquals("Incorrect Content-Type",
+						"text/html; charset=UTF-8; another=parameter", resp
+								.getContentType());
+				assertEquals("Incorrect charset from Content-Type", "UTF-8",
+						resp.getCharacterEncoding());
+
+				// Ensure can change via character encoding
+				resp.setCharacterEncoding("UTF-16");
+				assertEquals("Incorrect specified charset", "UTF-16", resp
+						.getCharacterEncoding());
+
+				// Does not change charset for content type
+				assertEquals("Content-Type charset should not be overwritten",
+						"text/html; charset=UTF-8; another=parameter", resp
+								.getContentType());
+
+				// Write content
+				Writer writer = resp.getWriter();
+				writer.write("test data");
+				writer.flush();
+			}
+		});
+
+		// Validate the content written
+		assertText("test data", this.outputStream.toByteArray(), "UTF-16");
+	}
+
+	/**
+	 * Ensure can specify cookies on the {@link HttpResponse}.
+	 */
+	public void test_resp_Cookies() {
+		final long TIME = 1280920637665l;
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record specifying the cookie
+		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getHeaders(),
+				new HttpHeader[0]);
+		this.recordReturn(this.clock, this.clock.currentTimeMillis(), TIME);
+		this
+				.recordReturn(
+						this.response,
+						this.response
+								.addHeader(
+										"set-cookie",
+										"name=\"value\"; expires=Wed, 04-Aug-2010 11:17:18 GMT; domain=.officefloor.net"),
+						header);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				Cookie cookie = new Cookie("name", "value");
+				cookie.setMaxAge(600);
+				cookie.setDomain(".officefloor.net");
+				resp.addCookie(cookie);
+			}
+		});
+	}
+
+	/**
+	 * Ensure {@link HttpResponse} header functionality works.
+	 */
+	public void test_resp_Headers() {
+		final HttpHeader header = this.createMock(HttpHeader.class);
+		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getHeaders(),
+				new HttpHeader[] { header });
+		this.recordReturn(header, header.getName(), "test");
+		this.recordReturn(this.response, this.response.getHeaders(),
+				new HttpHeader[0]);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertTrue("Should contain 'test' header", resp
+						.containsHeader("test"));
+				assertFalse("Should not contain 'missing' header", resp
+						.containsHeader("missing"));
+			}
+		});
+	}
+
+	/**
+	 * Ensure can encode URL.
+	 */
+	public void test_resp_Encode() {
+		final String URL = "/test";
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("Session Id always via cookie", URL, resp
+						.encodeURL(URL));
+				assertEquals("Session Id not included in redirects", URL, resp
+						.encodeRedirectURL(URL));
+			}
+		});
+	}
+
+	/**
+	 * Ensure can send error.
+	 */
+	public void test_resp_SendErrorWithMessage() throws Exception {
+
+		// Record
+		this.record_init("/test");
+		this.response.setStatus(404, "test message");
+		this.response.send();
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.sendError(404, "test message");
+			}
+		});
+
+		// Validate sent message as body
+		assertText("<html><body>test message</body></html>", this.outputStream
+				.toByteArray());
+	}
+
+	/**
+	 * Ensure can send error.
+	 */
+	public void test_resp_SendError() throws Exception {
+		this.record_init("/test");
+		this.response.setStatus(404);
+		this.response.send();
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.sendError(404);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to send a relative redirect.
+	 */
+	public void test_resp_SendRelativeRedirect() throws Exception {
+
+		// Mocks
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record obtaining details for redirect
+		this.record_init("/test");
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("host", "officefloor.net:8080"));
+
+		// Record sending redirect
+		this.response.setStatus(307);
+		this.recordReturn(this.response, this.response.addHeader("Location",
+				"http://officefloor.net:8080" + this.contextPath
+						+ this.servletPath + "/redirect.txt"), header);
+		this.response.send();
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.sendRedirect("redirect.txt");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to send an absolute redirect.
+	 */
+	public void test_resp_SendAbsoluteRedirect() throws Exception {
+
+		// Mock
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record obtaining details for redirect
+		this.record_init("/test");
+		this.recordReturn(this.connection, this.connection.isSecure(), true);
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("host", "officefloor.net:443"));
+
+		// Record sending redirect
+		this.response.setStatus(307);
+		this.recordReturn(this.response, this.response.addHeader("Location",
+				"https://officefloor.net:443" + this.contextPath
+						+ "/redirect.html"), header);
+		this.response.send();
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.sendRedirect("/redirect.html");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can load header values to {@link HttpResponse}.
+	 */
+	public void test_resp_Header() {
+		final long dateValue = 784111777000l;
+		final String dateText = "Sun, 06 Nov 1994 08:49:37 GMT";
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record specifying headers
+		this.record_init("/test");
+		this.recordReturn(this.response, this.response.addHeader("date",
+				dateText), header);
+		this.response.removeHeaders("OnlyDate");
+		this.recordReturn(this.response, this.response.addHeader("OnlyDate",
+				dateText), header);
+		this.recordReturn(this.response, this.response.addHeader("header",
+				"value"), header);
+		this.response.removeHeaders("OnlyHeader");
+		this.recordReturn(this.response, this.response.addHeader("OnlyHeader",
+				"value"), header);
+		this.recordReturn(this.response, this.response.addHeader("integer",
+				"10"), header);
+		this.response.removeHeaders("OnlyInteger");
+		this.recordReturn(this.response, this.response.addHeader("OnlyInteger",
+				"5"), header);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.addDateHeader("date", dateValue);
+				resp.setDateHeader("OnlyDate", dateValue);
+				resp.addHeader("header", "value");
+				resp.setHeader("OnlyHeader", "value");
+				resp.addIntHeader("integer", 10);
+				resp.setIntHeader("OnlyInteger", 5);
+			}
+		});
+	}
+
+	/**
+	 * Ensure can specify the status.
+	 */
+	public void test_resp_Status() {
+		this.record_init("/test");
+		this.response.setStatus(203);
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.setStatus(203);
+			}
+		});
+	}
+
+	/**
+	 * Allow specifying {@link Locale} for {@link HttpResponse}.
+	 */
+	public void test_resp_Locale() {
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("Initially default locale", Locale.getDefault(),
+						resp.getLocale());
+				resp.setLocale(Locale.GERMANY);
+				assertEquals("Incorrect changed locale", Locale.GERMANY, resp
+						.getLocale());
+			}
+		});
+	}
+
+	/**
+	 * Asserts the written bytes to match the expected text (charset ASCII).
+	 * 
+	 * @param expectedText
+	 *            Expected text written.
+	 * @param writtenBytes
+	 *            Actual bytes written.
+	 */
+	private static void assertText(String expectedText, byte[] writtenBytes) {
+		assertText(expectedText, writtenBytes, "ASCII");
+	}
+
+	/**
+	 * Asserts the written bytes to match the expected text.
+	 * 
+	 * @param expectedText
+	 *            Expected text written.
+	 * @param writtenBytes
+	 *            Actual bytes written.
+	 * @param charSetName
+	 *            Name of {@link Charset}.
+	 */
+	private static void assertText(String expectedText, byte[] writtenBytes,
+			String charSetName) {
+		String writtenString = new String(writtenBytes, Charset
+				.forName(charSetName));
+		assertEquals("Incorrect written text", expectedText, writtenString);
 	}
 
 	/**
@@ -813,6 +1439,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	private void record_init(String requestUri) {
 
+		final OutputBufferStream bufferStream = this
+				.createMock(OutputBufferStream.class);
+
 		// Record obtaining the request and responses
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
@@ -822,6 +1451,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				requestUri);
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
+		this.recordReturn(this.response, this.response.getBody(), bufferStream);
+		this.recordReturn(bufferStream, bufferStream.getOutputStream(),
+				this.outputStream);
 	}
 
 	/**
@@ -839,7 +1471,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			final ContextAttributes contextAttributes = this
 					.createMock(ContextAttributes.class);
 			final Map<String, String> fileExtensionToMimeType = new HashMap<String, String>();
-			final Clock clock = this.createMock(Clock.class);
+			final Locale locale = Locale.getDefault();
 			final ResourceLocator resourceLocator = this
 					.createMock(ResourceLocator.class);
 			final Logger logger = this.createMock(Logger.class);
@@ -853,7 +1485,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					this.servletName, this.servletPath, servlet,
 					this.initParameters, this.servletContext,
 					this.sessionIdIdentifierName, this.dispatcherFactory,
-					fileExtensionToMimeType, clock, resourceLocator, logger);
+					fileExtensionToMimeType, this.clock, locale,
+					resourceLocator, logger);
 
 			// Process a request
 			container.service(this.connection, this.attributes, this.security,
