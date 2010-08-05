@@ -29,7 +29,6 @@ import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
@@ -42,6 +41,11 @@ import net.officefloor.plugin.servlet.resource.ResourceLocator;
  * @author Daniel Sagenschneider
  */
 public class ServletContextTest extends OfficeFrameTestCase {
+
+	/**
+	 * Server name.
+	 */
+	private final String serverName = "www.officefloor.net";
 
 	/**
 	 * Context path.
@@ -76,12 +80,6 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	private final Logger logger = this.createMock(Logger.class);
 
 	/**
-	 * {@link HttpServletRequest}.
-	 */
-	private final HttpServletRequest request = this
-			.createMock(HttpServletRequest.class);
-
-	/**
 	 * Init parameters.
 	 */
 	private final Map<String, String> initParameters = new HashMap<String, String>();
@@ -96,9 +94,9 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	 * {@link ServletContextImpl} to test.
 	 */
 	private final ServletContext context = new ServletContextImpl(
-			this.servletContextName, this.contextPath, this.mimeMappings,
-			this.locator, this.dispatcherFactory, this.logger, this.request,
-			this.initParameters, this.attributes);
+			this.serverName, 80, this.servletContextName, this.contextPath,
+			this.initParameters, this.attributes, this.mimeMappings,
+			this.locator, this.dispatcherFactory, this.logger);
 
 	/**
 	 * Ensure correct context path.
@@ -208,12 +206,8 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain real path.
 	 */
 	public void testRealPath() {
-		this.recordReturn(this.request, this.request.getScheme(), "http");
-		this.recordReturn(this.request, this.request.getLocalName(),
-				"officefloor.net");
-		this.recordReturn(this.request, this.request.getLocalPort(), 80);
 		this.replayMockObjects();
-		assertEquals("Incorrect real path", "http://officefloor.net:80"
+		assertEquals("Incorrect real path", "http://" + this.serverName
 				+ this.contextPath + "/real.path", this.context
 				.getRealPath("/real.path"));
 		this.verifyMockObjects();

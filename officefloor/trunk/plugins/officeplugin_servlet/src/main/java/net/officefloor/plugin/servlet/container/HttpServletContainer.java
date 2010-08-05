@@ -49,8 +49,6 @@ public interface HttpServletContainer {
 	 *            Last access time of the client.
 	 * @param session
 	 *            {@link HttpSession} for the {@link HttpRequest}.
-	 * @param contextAttributes
-	 *            {@link ContextAttributes}.
 	 * @throws ServletException
 	 *             As per {@link HttpServlet} API.
 	 * @throws IOException
@@ -58,8 +56,7 @@ public interface HttpServletContainer {
 	 */
 	void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSecurity security,
-			long lastAccessTime, HttpSession session,
-			ContextAttributes contextAttributes) throws ServletException,
+			long lastAccessTime, HttpSession session) throws ServletException,
 			IOException;
 
 }
