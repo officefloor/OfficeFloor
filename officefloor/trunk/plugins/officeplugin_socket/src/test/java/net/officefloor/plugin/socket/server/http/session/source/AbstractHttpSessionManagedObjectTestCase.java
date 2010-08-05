@@ -55,7 +55,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends
 	/**
 	 * Name of {@link HttpCookie} to contain the Session Id.
 	 */
-	private static final String SESSION_ID_COOKIE_NAME = "jsessionid";
+	protected static final String SESSION_ID_COOKIE_NAME = "jsessionid";
 
 	/**
 	 * Index of the {@link ServerHttpConnection}.
