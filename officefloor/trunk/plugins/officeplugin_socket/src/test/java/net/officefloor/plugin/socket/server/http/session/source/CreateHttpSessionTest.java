@@ -23,7 +23,7 @@ import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionStore;
 
 /**
  * Tests the creation of a {@link HttpSession}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CreateHttpSessionTest extends
@@ -265,7 +265,7 @@ public class CreateHttpSessionTest extends
 
 	/**
 	 * Verifies the {@link HttpSessionManagedObject}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link HttpSessionManagedObject} to verify.
 	 */
@@ -278,11 +278,13 @@ public class CreateHttpSessionTest extends
 		// Verify new Http Session
 		HttpSession session = (HttpSession) mo.getObject();
 		assertHttpSession(SESSION_ID, CREATION_TIME, true, session);
+		assertEquals("Incorrect Token name", SESSION_ID_COOKIE_NAME, session
+				.getTokenName());
 	}
 
 	/**
 	 * Verifies failure to load the {@link HttpSession}.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link HttpSessionManagedObject} to verify.
 	 * @param failure

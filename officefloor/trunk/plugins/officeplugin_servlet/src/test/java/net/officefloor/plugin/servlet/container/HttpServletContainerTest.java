@@ -66,6 +66,11 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 	/**
+	 * Token name for the Session Id.
+	 */
+	private final static String SESSION_ID_TOKEN_NAME = "JSESSIONID";
+
+	/**
 	 * {@link ServerHttpConnection}.
 	 */
 	private final ServerHttpConnection connection = this
@@ -126,11 +131,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Servlet path.
 	 */
 	private String servletPath = "/servlet";
-
-	/**
-	 * Name to locate the session identifier.
-	 */
-	private String sessionIdIdentifierName = "JSESSION_ID";
 
 	/**
 	 * HTTP method.
@@ -717,8 +717,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final String SESSION_ID = "SessionId";
 		this.record_init("/test");
 		this.recordReturn(this.request, this.request.getHeaders(), this
-				.createHttpHeaders("cookie", this.sessionIdIdentifierName
-						+ "=\"" + SESSION_ID + "\""));
+				.createHttpHeaders("cookie", SESSION_ID_TOKEN_NAME + "=\""
+						+ SESSION_ID + "\""));
 		this
 				.recordReturn(this.session, this.session.getSessionId(),
 						SESSION_ID);
@@ -743,8 +743,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_req_Session_ViaParameter() {
 		final String SESSION_ID = "SessionId";
-		this.record_init("/test?" + this.sessionIdIdentifierName + "="
-				+ SESSION_ID);
+		this.record_init("/test?" + SESSION_ID_TOKEN_NAME + "=" + SESSION_ID);
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders());
 		this.recordReturn(this.session, this.session.getSessionId(),
@@ -1438,6 +1437,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.createMock(OutputBufferStream.class);
 
 		// Record obtaining the request and responses
+		this.recordReturn(this.session, this.session.getTokenName(),
+				SESSION_ID_TOKEN_NAME);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
@@ -1470,8 +1471,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			// Create the HTTP Servlet container
 			HttpServletContainer container = new HttpServletContainerImpl(
 					this.servletName, this.servletPath, servlet,
-					this.initParameters, this.sessionIdIdentifierName,
-					this.servletContext, this.clock, locale);
+					this.initParameters, this.servletContext, this.clock,
+					locale);
 
 			// Process a request
 			container.service(this.connection, this.attributes, this.security,

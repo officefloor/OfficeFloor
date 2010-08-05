@@ -46,7 +46,7 @@ import net.officefloor.plugin.socket.server.http.session.spi.StoreHttpSessionOpe
 
 /**
  * {@link ManagedObject} for a {@link HttpSession}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionManagedObject implements
@@ -140,7 +140,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param sessionIdCookieName
 	 *            Name of the {@link HttpCookie} containing the Session Id.
 	 * @param serverHttpConnectionIndex
@@ -194,7 +194,7 @@ public class HttpSessionManagedObject implements
 	/**
 	 * Loads the Session Id and continues processing loading the
 	 * {@link HttpSession}.
-	 *
+	 * 
 	 * @param sessionId
 	 *            Session Id.
 	 * @param isNewSession
@@ -231,7 +231,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Loads the {@link HttpSession}.
-	 *
+	 * 
 	 * @param creationTime
 	 *            Creation Time.
 	 * @param expireTime
@@ -256,7 +256,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Triggers storing the {@link HttpSession}.
-	 *
+	 * 
 	 * @param sessionId
 	 *            Session Id.
 	 * @param creationTime
@@ -300,7 +300,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Triggers invalidating the {@link HttpSession}.
-	 *
+	 * 
 	 * @param isRequireNewSession
 	 *            Flag indicating if requires a new {@link HttpSession}.
 	 */
@@ -343,7 +343,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Loads failure.
-	 *
+	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
@@ -390,7 +390,7 @@ public class HttpSessionManagedObject implements
 	/**
 	 * Indicates if operation is complete (in other words that can use the
 	 * {@link HttpSession}).
-	 *
+	 * 
 	 * @return <code>true</code> if can complete the {@link HttpSession}.
 	 * @throws Throwable
 	 *             If failure in operation.
@@ -408,7 +408,7 @@ public class HttpSessionManagedObject implements
 
 	/**
 	 * Adds the Session Id {@link HttpCookie} to the {@link HttpResponse}.
-	 *
+	 * 
 	 * @param sessionId
 	 *            Session Id.
 	 * @param expireTime
@@ -532,7 +532,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Loads the state of this {@link HttpSession}.
-		 *
+		 * 
 		 * @param sessionId
 		 *            Session Id.
 		 * @param creationTime
@@ -559,7 +559,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Flags this {@link HttpSession} as invalid.
-		 *
+		 * 
 		 * @param failure
 		 *            Potential failure invalidating this {@link HttpSession}.
 		 *            May be <code>null</code>.
@@ -571,7 +571,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Ensures {@link HttpSession} is valid for use.
-		 *
+		 * 
 		 * @throws InvalidatedHttpSessionException
 		 *             If {@link HttpSession} is not valid for use.
 		 */
@@ -587,7 +587,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Ensures can alter the {@link HttpSession}.
-		 *
+		 * 
 		 * @throws StoringHttpSessionException
 		 *             If not able to alter the {@link HttpSession}.
 		 */
@@ -607,6 +607,11 @@ public class HttpSessionManagedObject implements
 				this.ensureValid();
 				return this.sessionId;
 			}
+		}
+
+		@Override
+		public String getTokenName() {
+			return HttpSessionManagedObject.this.sessionIdCookieName;
 		}
 
 		@Override
@@ -721,7 +726,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
@@ -762,7 +767,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param sessionId
 		 *            Session Id.
 		 */
@@ -811,7 +816,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param sessionId
 		 *            Session Id.
 		 */
@@ -875,7 +880,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param sessionId
 		 *            Session Id.
 		 * @param creationTime
@@ -947,7 +952,7 @@ public class HttpSessionManagedObject implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param sessionId
 		 *            Session Id.
 		 * @param isRequireNewSession

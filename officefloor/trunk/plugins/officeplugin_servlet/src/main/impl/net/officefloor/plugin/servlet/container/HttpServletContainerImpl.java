@@ -57,12 +57,6 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	private final HttpServlet servlet;
 
 	/**
-	 * Name of identifier (e.g. cookie or parameter name) providing the session
-	 * Id.
-	 */
-	private final String sessionIdIdentifierName;
-
-	/**
 	 * {@link Clock}.
 	 */
 	private final Clock clock;
@@ -83,9 +77,6 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	 *            {@link HttpServlet}.
 	 * @param initParameters
 	 *            Init parameters for the {@link ServletConfig}.
-	 * @param sessionIdIdentifierName
-	 *            Name of identifier (e.g. cookie or parameter name) providing
-	 *            the session Id.
 	 * @param servletContext
 	 *            {@link ServletContext}.
 	 * @param clock
@@ -97,13 +88,12 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	 */
 	public HttpServletContainerImpl(String servletName, String servletPath,
 			HttpServlet servlet, Map<String, String> initParameters,
-			String sessionIdIdentifierName, ServletContext servletContext,
-			Clock clock, Locale defaultLocale) throws ServletException {
+			ServletContext servletContext, Clock clock, Locale defaultLocale)
+			throws ServletException {
 
 		// Initiate state
 		this.servletPath = servletPath;
 		this.servlet = servlet;
-		this.sessionIdIdentifierName = sessionIdIdentifierName;
 		this.servletContext = servletContext;
 		this.clock = clock;
 		this.defaultLocale = defaultLocale;
@@ -130,10 +120,13 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 			javax.servlet.http.HttpSession httpSession = new HttpSessionImpl(
 					session, lastAccessTime, this.clock, this.servletContext);
 
+			// Obtain the session Id token name
+			String sessionIdTokenName = session.getTokenName();
+
 			// Create the HTTP request
 			request = new HttpServletRequestImpl(connection, this.servletPath,
-					attributes, security, this.sessionIdIdentifierName,
-					httpSession, this.servletContext, this.defaultLocale);
+					attributes, security, sessionIdTokenName, httpSession,
+					this.servletContext, this.defaultLocale);
 
 			// Create the HTTP response
 			response = new HttpServletResponseImpl(

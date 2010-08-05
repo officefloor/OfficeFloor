@@ -24,14 +24,14 @@ import net.officefloor.plugin.socket.server.http.session.spi.HttpSessionStore;
 
 /**
  * HTTP session.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface HttpSession {
 
 	/**
 	 * Obtains the session Id.
-	 *
+	 * 
 	 * @return Session Id.
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
@@ -39,8 +39,18 @@ public interface HttpSession {
 	String getSessionId() throws InvalidatedHttpSessionException;
 
 	/**
+	 * <p>
+	 * Obtains the token name.
+	 * <p>
+	 * This is the name of the cookie or parameter that contains the session Id.
+	 * 
+	 * @return Token name.
+	 */
+	String getTokenName();
+
+	/**
 	 * Indicates if this is a new {@link HttpSession}.
-	 *
+	 * 
 	 * @return <code>true</code> if this is a new {@link HttpSession}.
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
@@ -49,7 +59,7 @@ public interface HttpSession {
 
 	/**
 	 * Obtains the time this {@link HttpSession} was created.
-	 *
+	 * 
 	 * @return Time this {@link HttpSession} was created.
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
@@ -59,7 +69,7 @@ public interface HttpSession {
 	/**
 	 * Obtains the time this {@link HttpSession} will be expired should it be
 	 * idle.
-	 *
+	 * 
 	 * @return Time this {@link HttpSession} will be expired.
 	 * @throws InvalidatedHttpSessionException
 	 *             Indicating the {@link HttpSession} is invalidated.
@@ -72,7 +82,7 @@ public interface HttpSession {
 	 * <p>
 	 * The {@link HttpSessionStore} may increment this time on further requests
 	 * to keep the {@link HttpSession} active over a long conversation.
-	 *
+	 * 
 	 * @param expireTime
 	 *            Time to expire this {@link HttpSession}.
 	 * @throws StoringHttpSessionException
@@ -87,7 +97,7 @@ public interface HttpSession {
 	/**
 	 * Obtains the {@link Object} that is bound to the name for this
 	 * {@link HttpSession}.
-	 *
+	 * 
 	 * @param name
 	 *            Name.
 	 * @return {@link Object} bound to the name or <code>null</code> if no
@@ -100,7 +110,7 @@ public interface HttpSession {
 	/**
 	 * Obtains an {@link Iterator} to the names of the bound {@link Object}
 	 * instances.
-	 *
+	 * 
 	 * @return {@link Iterator} to the names of the bound {@link Object}
 	 *         instances.
 	 * @throws InvalidatedHttpSessionException
@@ -110,7 +120,7 @@ public interface HttpSession {
 
 	/**
 	 * Binds the {@link Object} to the name within this {@link HttpSession}.
-	 *
+	 * 
 	 * @param name
 	 *            Name.
 	 * @param object
@@ -127,7 +137,7 @@ public interface HttpSession {
 	/**
 	 * Removes the bound {@link Object} by the name from this
 	 * {@link HttpSession}.
-	 *
+	 * 
 	 * @param name
 	 *            Name of bound {@link Object} to remove.
 	 * @throws StoringHttpSessionException
@@ -142,7 +152,7 @@ public interface HttpSession {
 	/**
 	 * Obtains the {@link HttpSessionAdministration} to administer this
 	 * {@link HttpSession}.
-	 *
+	 * 
 	 * @return {@link HttpSessionAdministration} to administer this
 	 *         {@link HttpSession}.
 	 */
