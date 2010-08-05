@@ -28,9 +28,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
 import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -45,19 +42,9 @@ import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseExc
 public class HttpServletContainerImpl implements HttpServletContainer {
 
 	/**
-	 * {@link ServletContext} name.
+	 * {@link ServletContext}.
 	 */
-	private final String servletContextName;
-
-	/**
-	 * Context Path.
-	 */
-	private final String contextPath;
-
-	/**
-	 * Context parameters.
-	 */
-	private final Map<String, String> contextParameters;
+	private final ServletContext servletContext;
 
 	/**
 	 * Servlet Path.
@@ -76,16 +63,6 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	private final String sessionIdIdentifierName;
 
 	/**
-	 * {@link RequestDispatcherFactory}.
-	 */
-	private final RequestDispatcherFactory dispatcherFactory;
-
-	/**
-	 * Mapping file extensions to MIME type.
-	 */
-	private final Map<String, String> fileExtensionToMimeType;
-
-	/**
 	 * {@link Clock}.
 	 */
 	private final Clock clock;
@@ -93,81 +70,47 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	/**
 	 * Default {@link Locale}.
 	 */
-	private final Locale locale;
-
-	/**
-	 * {@link ResourceLocator}.
-	 */
-	private final ResourceLocator resourceLocator;
-
-	/**
-	 * {@link Logger}.
-	 */
-	private final Logger logger;
+	private final Locale defaultLocale;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param servletContextName
-	 *            {@link ServletContext} name.
 	 * @param servletName
 	 *            Name of the Servlet.
-	 * @param contextPath
-	 *            Context Path.
-	 * @param contextParameters
-	 *            Context parameters.
 	 * @param servletPath
 	 *            Servlet Path.
 	 * @param servlet
 	 *            {@link HttpServlet}.
 	 * @param initParameters
 	 *            Init parameters for the {@link ServletConfig}.
-	 * @param context
-	 *            {@link ServletContext}.
 	 * @param sessionIdIdentifierName
 	 *            Name of identifier (e.g. cookie or parameter name) providing
 	 *            the session Id.
-	 * @param dispatcherFactory
-	 *            {@link RequestDispatcherFactory}.
-	 * @param fileExtensionToMimeType
-	 *            Mapping file extensions to MIME type.
+	 * @param servletContext
+	 *            {@link ServletContext}.
 	 * @param clock
 	 *            {@link Clock}.
-	 * @param locale
+	 * @param defaultLocale
 	 *            Default {@link Locale}.
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
-	 * @param logger
-	 *            {@link Logger}.
 	 * @throws ServletException
 	 *             If fails to initialise the {@link HttpServlet}.
 	 */
-	public HttpServletContainerImpl(String servletContextName,
-			String contextPath, Map<String, String> contextParameters,
-			String servletName, String servletPath, HttpServlet servlet,
-			Map<String, String> initParameters, ServletContext context,
-			String sessionIdIdentifierName,
-			RequestDispatcherFactory dispatcherFactory,
-			Map<String, String> fileExtensionToMimeType, Clock clock,
-			Locale locale, ResourceLocator resourceLocator, Logger logger)
-			throws ServletException {
+	public HttpServletContainerImpl(String servletName, String servletPath,
+			HttpServlet servlet, Map<String, String> initParameters,
+			String sessionIdIdentifierName, ServletContext servletContext,
+			Clock clock, Locale defaultLocale) throws ServletException {
 
-		this.servletContextName = servletContextName;
-		this.contextPath = contextPath;
-		this.contextParameters = contextParameters;
+		// Initiate state
 		this.servletPath = servletPath;
 		this.servlet = servlet;
 		this.sessionIdIdentifierName = sessionIdIdentifierName;
-		this.dispatcherFactory = dispatcherFactory;
-		this.fileExtensionToMimeType = fileExtensionToMimeType;
+		this.servletContext = servletContext;
 		this.clock = clock;
-		this.locale = locale;
-		this.resourceLocator = resourceLocator;
-		this.logger = logger;
+		this.defaultLocale = defaultLocale;
 
 		// Initialise the servlet
-		this.servlet.init(new ServletConfigImpl(servletName, context,
-				initParameters));
+		this.servlet.init(new ServletConfigImpl(servletName,
+				this.servletContext, initParameters));
 	}
 
 	/*
@@ -177,24 +120,26 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	@Override
 	public void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSecurity security,
-			long lastAccessTime, HttpSession session,
-			ContextAttributes contextAttributes) throws ServletException,
+			long lastAccessTime, HttpSession session) throws ServletException,
 			IOException {
 
-		// Create the request and response
 		HttpServletRequest request;
 		HttpServletResponse response;
 		try {
-			request = new HttpServletRequestImpl(this.servletContextName,
-					this.contextPath, this.contextParameters,
-					contextAttributes, connection, this.servletPath,
+			// Create the HTTP session
+			javax.servlet.http.HttpSession httpSession = new HttpSessionImpl(
+					session, lastAccessTime, this.clock, this.servletContext);
+
+			// Create the HTTP request
+			request = new HttpServletRequestImpl(connection, this.servletPath,
 					attributes, security, this.sessionIdIdentifierName,
-					lastAccessTime, session, this.fileExtensionToMimeType,
-					this.dispatcherFactory, this.clock, this.locale,
-					this.resourceLocator, this.logger);
+					httpSession, this.servletContext, this.defaultLocale);
+
+			// Create the HTTP response
 			response = new HttpServletResponseImpl(
 					connection.getHttpResponse(), this.clock, request,
-					this.locale);
+					this.defaultLocale);
+
 		} catch (HttpRequestTokeniseException ex) {
 			// Propagate invalid HTTP Request
 			throw new IOException(ex);

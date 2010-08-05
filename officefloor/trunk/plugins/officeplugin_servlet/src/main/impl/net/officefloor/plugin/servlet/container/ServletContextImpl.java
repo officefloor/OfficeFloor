@@ -28,7 +28,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
 import net.officefloor.plugin.servlet.log.Logger;
@@ -52,6 +51,16 @@ public class ServletContextImpl implements ServletContext {
 	private final String contextPath;
 
 	/**
+	 * Init parameters.
+	 */
+	private final Map<String, String> initParameters;
+
+	/**
+	 * {@link ContextAttributes}.
+	 */
+	private final ContextAttributes attributes;
+
+	/**
 	 * Mapping of file extension to MIME type.
 	 */
 	private final Map<String, String> fileExtensionToMimeType;
@@ -72,27 +81,25 @@ public class ServletContextImpl implements ServletContext {
 	private final Logger logger;
 
 	/**
-	 * {@link HttpServletRequest}.
+	 * Real path prefix.
 	 */
-	private final HttpServletRequest request;
-
-	/**
-	 * Init parameters.
-	 */
-	private final Map<String, String> initParameters;
-
-	/**
-	 * {@link ContextAttributes}.
-	 */
-	private final ContextAttributes attributes;
+	private final String realPathPrefix;
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param serverName
+	 *            Server name.
+	 * @param serverPort
+	 *            Server port.
 	 * @param servletContextName
 	 *            {@link ServletContext} name.
 	 * @param contextPath
 	 *            Context path.
+	 * @param initParameters
+	 *            Init parameters.
+	 * @param attributes
+	 *            {@link ContextAttributes}.
 	 * @param fileExtensionToMimeType
 	 *            Mapping of file extension to MIME type.
 	 * @param resourceLocator
@@ -101,28 +108,25 @@ public class ServletContextImpl implements ServletContext {
 	 *            {@link RequestDispatcherFactory}.
 	 * @param logger
 	 *            {@link Logger}.
-	 * @param request
-	 *            {@link HttpServletRequest}.
-	 * @param initParameters
-	 *            Init parameters.
-	 * @param attributes
-	 *            {@link ContextAttributes}.
 	 */
-	public ServletContextImpl(String servletContextName, String contextPath,
+	public ServletContextImpl(String serverName, int serverPort,
+			String servletContextName, String contextPath,
+			Map<String, String> initParameters, ContextAttributes attributes,
 			Map<String, String> fileExtensionToMimeType,
 			ResourceLocator resourceLocator,
-			RequestDispatcherFactory requestDispatcherFactory, Logger logger,
-			HttpServletRequest request, Map<String, String> initParameters,
-			ContextAttributes attributes) {
+			RequestDispatcherFactory requestDispatcherFactory, Logger logger) {
 		this.servletContextName = servletContextName;
+		this.initParameters = initParameters;
+		this.attributes = attributes;
 		this.contextPath = contextPath;
 		this.fileExtensionToMimeType = fileExtensionToMimeType;
 		this.resourceLocator = resourceLocator;
 		this.requestDispatcherFactory = requestDispatcherFactory;
 		this.logger = logger;
-		this.request = request;
-		this.initParameters = initParameters;
-		this.attributes = attributes;
+
+		// Create the real path prefix
+		this.realPathPrefix = "http://" + serverName
+				+ (serverPort == 80 ? "" : ":" + serverPort);
 	}
 
 	/*
@@ -211,9 +215,7 @@ public class ServletContextImpl implements ServletContext {
 	public String getRealPath(String path) {
 
 		// Obtain the path to context
-		String realPath = this.request.getScheme() + "://"
-				+ this.request.getLocalName() + ":"
-				+ this.request.getLocalPort() + this.contextPath;
+		String realPath = this.realPathPrefix + this.contextPath;
 
 		// Add path
 		realPath = realPath + (path.startsWith("/") ? path : "/" + path);

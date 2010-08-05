@@ -43,11 +43,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
 import net.officefloor.plugin.servlet.security.HttpSecurity;
-import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -112,11 +108,6 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private static final String HEADER_HOST = "Host";
 
 	/**
-	 * Context path.
-	 */
-	private final String contextPath;
-
-	/**
 	 * Servlet path.
 	 */
 	private final String servletPath;
@@ -148,14 +139,14 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private final HttpSession session;
 
 	/**
+	 * {@link ServletContext}.
+	 */
+	private final ServletContext servletContext;
+
+	/**
 	 * Default {@link Locale} if not specified on {@link HttpRequest}.
 	 */
 	private final Locale defaultLocale;
-
-	/**
-	 * {@link RequestDispatcherFactory}.
-	 */
-	private final RequestDispatcherFactory dispatcherFactory;
 
 	/**
 	 * Path.
@@ -200,14 +191,6 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	/**
 	 * Initiate.
 	 * 
-	 * @param servletContextName
-	 *            {@link ServletContext} name.
-	 * @param contextPath
-	 *            Context Path.
-	 * @param contextParameters
-	 *            Context init parameters.
-	 * @param contextAttributes
-	 *            Context attributes.
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 * @param servletPath
@@ -219,53 +202,31 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 * @param sessionIdIdentifierName
 	 *            Name of identifier (e.g. cookie or parameter name) providing
 	 *            the session Id.
-	 * @param lastAccessTime
-	 *            Last access time.
 	 * @param session
-	 *            {@link net.officefloor.plugin.socket.server.http.session.HttpSession}
-	 *            .
-	 * @param fileExtensionToMimeType
-	 *            File extension to MIME type mapping.
-	 * @param dispatcherFactory
-	 *            {@link RequestDispatcherFactory}.
-	 * @param clock
-	 *            {@link Clock}.
+	 *            {@link HttpSession}.
+	 * @param servletContext
+	 *            {@link ServletContext}.
 	 * @param defaultLocale
 	 *            Default {@link Locale} if not specified.
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
-	 * @param logger
-	 *            {@link Logger}.
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
-	public HttpServletRequestImpl(
-			String servletContextName,
-			String contextPath,
-			Map<String, String> contextParameters,
-			ContextAttributes contextAttributes,
-			ServerHttpConnection connection,
-			String servletPath,
-			Map<String, Object> requestAttributes,
-			HttpSecurity security,
-			String sessionIdIdentifierName,
-			long lastAccessTime,
-			net.officefloor.plugin.socket.server.http.session.HttpSession session,
-			Map<String, String> fileExtensionToMimeType,
-			RequestDispatcherFactory dispatcherFactory, Clock clock,
-			Locale defaultLocale, ResourceLocator resourceLocator, Logger logger)
-			throws HttpRequestTokeniseException {
+	public HttpServletRequestImpl(ServerHttpConnection connection,
+			String servletPath, Map<String, Object> requestAttributes,
+			HttpSecurity security, String sessionIdIdentifierName,
+			HttpSession session, ServletContext servletContext,
+			Locale defaultLocale) throws HttpRequestTokeniseException {
 
 		// Initiate state
-		this.contextPath = contextPath;
 		this.servletPath = servletPath;
 		this.connection = connection;
 		this.request = this.connection.getHttpRequest();
 		this.attributes = requestAttributes;
 		this.security = security;
 		this.sessionIdIdentifierName = sessionIdIdentifierName;
+		this.session = session;
+		this.servletContext = servletContext;
 		this.defaultLocale = defaultLocale;
-		this.dispatcherFactory = dispatcherFactory;
 
 		// Tokenise the HTTP request
 		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
@@ -297,16 +258,6 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 						// Ignore fragment
 					}
 				});
-
-		// Create the servlet context
-		ServletContextImpl servletContext = new ServletContextImpl(
-				servletContextName, this.contextPath, fileExtensionToMimeType,
-				resourceLocator, this.dispatcherFactory, logger, this,
-				contextParameters, contextAttributes);
-
-		// Create the HTTP session
-		this.session = new HttpSessionImpl(session, lastAccessTime, clock,
-				servletContext);
 	}
 
 	/**
@@ -359,7 +310,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getContextPath() {
-		return this.contextPath;
+		return this.servletContext.getContextPath();
 	}
 
 	@Override
@@ -953,7 +904,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		return this.dispatcherFactory.createRequestDispatcher(path);
+
+		// Determine path (absolute or relative)
+		String dispatcherPath = (path.startsWith("/") ? path
+				: this.servletPath + "/" + path);
+
+		// Obtain the request dispatcher
+		return this.servletContext.getRequestDispatcher(dispatcherPath);
 	}
 
 	@Override

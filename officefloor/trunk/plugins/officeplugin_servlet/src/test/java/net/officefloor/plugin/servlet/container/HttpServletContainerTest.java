@@ -47,9 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
 import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -95,12 +92,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final HttpSecurity security = this.createMock(HttpSecurity.class);
 
 	/**
-	 * {@link RequestDispatcherFactory}.
-	 */
-	private final RequestDispatcherFactory dispatcherFactory = this
-			.createMock(RequestDispatcherFactory.class);
-
-	/**
 	 * {@link ServletContext}.
 	 */
 	private final ServletContext servletContext = this
@@ -132,11 +123,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private String servletName = "ServletName";
 
 	/**
-	 * Context Path.
-	 */
-	private String contextPath = "/server";
-
-	/**
 	 * Servlet path.
 	 */
 	private String servletPath = "/servlet";
@@ -166,7 +152,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					// Deprecated request methods
 					assertFail(UnsupportedOperationException.class, req,
 							"isRequestedSessionIdFromUrl");
-					// TODO provide remaining deprecated request methods
 
 					// Deprecated response methods
 					assertFail(UnsupportedOperationException.class, resp,
@@ -229,7 +214,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure context methods are correct.
 	 */
 	public void test_req_Context() {
-		this.contextPath = "/context/path";
+		this.recordReturn(this.servletContext, this.servletContext
+				.getContextPath(), "/context/path");
 		this.servletPath = "/servlet/path";
 		this.record_init("/context/path/servlet/path");
 		this.doTest(new MockHttpServlet() {
@@ -808,18 +794,23 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final RequestDispatcher dispatcher = this
 				.createMock(RequestDispatcher.class);
 		this.record_init("/test");
-		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
-				.createRequestDispatcher("available"), dispatcher);
-		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
-				.createRequestDispatcher("none"), null);
+		this.recordReturn(this.servletContext, this.servletContext
+				.getRequestDispatcher("/none"), null);
+		this.recordReturn(this.servletContext, this.servletContext
+				.getRequestDispatcher("/absolute"), dispatcher);
+		this.recordReturn(this.servletContext, this.servletContext
+				.getRequestDispatcher(this.servletPath + "/relative"),
+				dispatcher);
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getRequestDispatcher(available)", dispatcher, req
-						.getRequestDispatcher("available"));
 				assertNull("getRequestDispathcer(none)", req
-						.getRequestDispatcher("none"));
+						.getRequestDispatcher("/none"));
+				assertEquals("getRequestDispatcher(absolute)", dispatcher, req
+						.getRequestDispatcher("/absolute"));
+				assertEquals("getRequestDispatcher(relative)", dispatcher, req
+						.getRequestDispatcher("relative"));
 			}
 		});
 	}
@@ -1260,14 +1251,16 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.servletContext, this.servletContext
+				.getContextPath(), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:8080"));
 
 		// Record sending redirect
 		this.response.setStatus(307);
 		this.recordReturn(this.response, this.response.addHeader("Location",
-				"http://officefloor.net:8080" + this.contextPath
-						+ this.servletPath + "/redirect.txt"), header);
+				"http://officefloor.net:8080/context" + this.servletPath
+						+ "/redirect.txt"), header);
 		this.response.send();
 
 		// Test
@@ -1291,14 +1284,16 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
+		this.recordReturn(this.servletContext, this.servletContext
+				.getContextPath(), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:443"));
 
 		// Record sending redirect
 		this.response.setStatus(307);
 		this.recordReturn(this.response, this.response.addHeader("Location",
-				"https://officefloor.net:443" + this.contextPath
-						+ "/redirect.html"), header);
+				"https://officefloor.net:443/context" + "/redirect.html"),
+				header);
 		this.response.send();
 
 		// Test
@@ -1467,30 +1462,20 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 			// Create additional unused mocks
 			final long lastAccessTime = 1000;
-			final Map<String, String> contextParameters = new HashMap<String, String>();
-			final ContextAttributes contextAttributes = this
-					.createMock(ContextAttributes.class);
-			final Map<String, String> fileExtensionToMimeType = new HashMap<String, String>();
 			final Locale locale = Locale.getDefault();
-			final ResourceLocator resourceLocator = this
-					.createMock(ResourceLocator.class);
-			final Logger logger = this.createMock(Logger.class);
 
 			// Replay
 			this.replayMockObjects();
 
 			// Create the HTTP Servlet container
 			HttpServletContainer container = new HttpServletContainerImpl(
-					"ServletContextName", this.contextPath, contextParameters,
 					this.servletName, this.servletPath, servlet,
-					this.initParameters, this.servletContext,
-					this.sessionIdIdentifierName, this.dispatcherFactory,
-					fileExtensionToMimeType, this.clock, locale,
-					resourceLocator, logger);
+					this.initParameters, this.sessionIdIdentifierName,
+					this.servletContext, this.clock, locale);
 
 			// Process a request
 			container.service(this.connection, this.attributes, this.security,
-					lastAccessTime, this.session, contextAttributes);
+					lastAccessTime, this.session);
 
 			// Verify functionality
 			this.verifyMockObjects();
