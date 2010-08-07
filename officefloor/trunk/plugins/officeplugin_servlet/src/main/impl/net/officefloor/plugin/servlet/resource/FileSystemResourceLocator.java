@@ -18,6 +18,9 @@
 package net.officefloor.plugin.servlet.resource;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -54,16 +57,42 @@ public class FileSystemResourceLocator implements ResourceLocator {
 
 	@Override
 	public URL getResource(String resourcePath) throws MalformedURLException {
-		// TODO implement ResourceLocator.getResource
-		throw new UnsupportedOperationException(
-				"TODO implement ResourceLocator.getResource");
+
+		// Obtain the file
+		File file = new File(this.root, resourcePath);
+
+		// Ensure file exists
+		if (!file.exists()) {
+			return null; // no file so no URL
+		}
+
+		// Attempt to use canonical file
+		try {
+			file = file.getCanonicalFile();
+		} catch (IOException ex) {
+		}
+
+		// Return the URL
+		return file.toURI().toURL();
 	}
 
 	@Override
 	public InputStream getResourceAsStream(String resourcePath) {
-		// TODO implement ResourceLocator.getResourceAsStream
-		throw new UnsupportedOperationException(
-				"TODO implement ResourceLocator.getResourceAsStream");
+
+		// Obtain the file
+		File file = new File(this.root, resourcePath);
+
+		// Ensure file exists
+		if (!file.exists()) {
+			return null; // no file so no content
+		}
+
+		// Return content to the file
+		try {
+			return new FileInputStream(file);
+		} catch (FileNotFoundException ex) {
+			return null; // failed to obtain so no content
+		}
 	}
 
 	@Override

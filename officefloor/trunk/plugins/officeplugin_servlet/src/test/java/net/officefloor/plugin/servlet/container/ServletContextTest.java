@@ -157,8 +157,8 @@ public class ServletContextTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		assertEquals("Incorrect resource paths", children, this.context
 				.getResourcePaths("/parent"));
-		assertEquals("Incorrect resource URL", url, this.context
-				.getResource("/resource"));
+		assertEquals("Incorrect resource URL", url.toString(), this.context
+				.getResource("/resource").toString());
 		assertEquals("Incorrect resource InputStream", stream, this.context
 				.getResourceAsStream("/resource"));
 		this.verifyMockObjects();
