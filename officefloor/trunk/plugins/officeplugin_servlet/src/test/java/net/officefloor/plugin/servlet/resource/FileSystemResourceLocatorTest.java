@@ -89,6 +89,10 @@ public class FileSystemResourceLocatorTest extends OfficeFrameTestCase {
 	 */
 	public void testResourceChildren() {
 		Set<String> children = this.resourceLocator.getResourceChildren(".");
+
+		// Remove svn file (as will be picked up)
+		children.remove(".svn");
+
 		assertEquals("Expecting only one child", 1, children.size());
 		assertEquals("Incorrect child", "test.txt", children
 				.toArray(new String[0])[0]);
