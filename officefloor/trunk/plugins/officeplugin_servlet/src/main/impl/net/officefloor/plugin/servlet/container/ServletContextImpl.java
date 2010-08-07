@@ -20,7 +20,10 @@ package net.officefloor.plugin.servlet.container;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +61,7 @@ public class ServletContextImpl implements ServletContext {
 	/**
 	 * {@link ContextAttributes}.
 	 */
-	private final ContextAttributes attributes;
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
 	/**
 	 * Mapping of file extension to MIME type.
@@ -98,8 +101,6 @@ public class ServletContextImpl implements ServletContext {
 	 *            Context path.
 	 * @param initParameters
 	 *            Init parameters.
-	 * @param attributes
-	 *            {@link ContextAttributes}.
 	 * @param fileExtensionToMimeType
 	 *            Mapping of file extension to MIME type.
 	 * @param resourceLocator
@@ -111,13 +112,12 @@ public class ServletContextImpl implements ServletContext {
 	 */
 	public ServletContextImpl(String serverName, int serverPort,
 			String servletContextName, String contextPath,
-			Map<String, String> initParameters, ContextAttributes attributes,
+			Map<String, String> initParameters,
 			Map<String, String> fileExtensionToMimeType,
 			ResourceLocator resourceLocator,
 			RequestDispatcherFactory requestDispatcherFactory, Logger logger) {
 		this.servletContextName = servletContextName;
 		this.initParameters = initParameters;
-		this.attributes = attributes;
 		this.contextPath = contextPath;
 		this.fileExtensionToMimeType = fileExtensionToMimeType;
 		this.resourceLocator = resourceLocator;
@@ -242,25 +242,28 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	public void setAttribute(String name, Object object) {
-		this.attributes.setAttribute(name, object);
+	public synchronized void setAttribute(String name, Object object) {
+		this.attributes.put(name, object);
 	}
 
 	@Override
-	public Object getAttribute(String name) {
-		return this.attributes.getAttribute(name);
+	public synchronized Object getAttribute(String name) {
+		return this.attributes.get(name);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Enumeration getAttributeNames() {
-		return new IteratorEnumeration<String>(this.attributes
-				.getAttributeNames());
+	public synchronized Enumeration getAttributeNames() {
+		// Create copy of names to stop concurrency issues
+		List<String> names = new ArrayList<String>(this.attributes.keySet());
+
+		// Return the iterator over the names
+		return new IteratorEnumeration<String>(names.iterator());
 	}
 
 	@Override
-	public void removeAttribute(String name) {
-		this.attributes.removeAttribute(name);
+	public synchronized void removeAttribute(String name) {
+		this.attributes.remove(name);
 	}
 
 	@Override
