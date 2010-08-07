@@ -85,18 +85,12 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	private final Map<String, String> initParameters = new HashMap<String, String>();
 
 	/**
-	 * {@link ContextAttributes}.
-	 */
-	private final ContextAttributes attributes = this
-			.createMock(ContextAttributes.class);
-
-	/**
 	 * {@link ServletContextImpl} to test.
 	 */
 	private final ServletContext context = new ServletContextImpl(
 			this.serverName, 80, this.servletContextName, this.contextPath,
-			this.initParameters, this.attributes, this.mimeMappings,
-			this.locator, this.dispatcherFactory, this.logger);
+			this.initParameters, this.mimeMappings, this.locator,
+			this.dispatcherFactory, this.logger);
 
 	/**
 	 * Ensure correct context path.
@@ -245,16 +239,6 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testAttributes() {
 		final Object attribute = new Object();
-
-		// Record setting, obtaining, removing an attribute
-		this.attributes.setAttribute("attribute", attribute);
-		this.recordReturn(this.attributes, this.attributes
-				.getAttribute("attribute"), attribute);
-		this.recordReturn(this.attributes, this.attributes.getAttributeNames(),
-				Arrays.asList("attribute").iterator());
-		this.attributes.removeAttribute("attribute");
-		this.recordReturn(this.attributes, this.attributes
-				.getAttribute("attribute"), null);
 
 		// Test
 		this.replayMockObjects();
