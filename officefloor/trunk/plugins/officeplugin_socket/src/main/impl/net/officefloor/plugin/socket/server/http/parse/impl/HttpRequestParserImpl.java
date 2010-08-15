@@ -45,7 +45,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	/*
 	 * ASCII values.
 	 */
-	private static final Charset US_ASCII = Charset.forName("US-ASCII");
+	public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
 	private static byte UsAscii(char character) {
 		return UsAscii(String.valueOf(character))[0];
