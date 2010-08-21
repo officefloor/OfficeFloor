@@ -29,9 +29,9 @@ public interface HttpSecurity {
 	/**
 	 * Obtains the authentication scheme used.
 	 * 
-	 * @return Authentication type.
+	 * @return Authentication scheme.
 	 */
-	String getAuthType();
+	String getAuthenticationScheme();
 
 	/**
 	 * Obtains the {@link Principal} for the user.

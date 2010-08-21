@@ -15,29 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.security.parser;
-
-import net.officefloor.plugin.socket.server.http.HttpHeader;
+package net.officefloor.plugin.socket.server.http.security.scheme;
 
 /**
- * Tokenises the {@link HttpHeader} value <code>Authorization</code> for details
- * of security.
+ * Context for the {@link HttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AuthorisationTokeniser {
+public interface HttpSecuritySourceContext<D extends Enum<D>> {
+
+	// TODO provide access to properties
 
 	/**
-	 * Tokenises the <code>Authorization</code> {@link HttpHeader} value.
+	 * Flags that the {@link HttpSecuritySource} requires a dependency.
 	 * 
-	 * @param value
-	 *            <code>Authorization</code> {@link HttpHeader} value.
-	 * @param handler
-	 *            {@link AuthorisationTokenHandler}.
-	 * @throws AuthorisationTokeniseException
-	 *             If fails to tokenise the value.
+	 * @param key
+	 *            Key allowing {@link HttpSecuritySource} to identify the
+	 *            dependency.
+	 * @param dependencyType
+	 *            Type expected for the dependency.
 	 */
-	void tokeniseAuthorizationHeaderValue(String value,
-			AuthorisationTokenHandler handler)
-			throws AuthorisationTokeniseException;
+	void requireDependency(D key, Class<?> dependencyType);
+
 }
