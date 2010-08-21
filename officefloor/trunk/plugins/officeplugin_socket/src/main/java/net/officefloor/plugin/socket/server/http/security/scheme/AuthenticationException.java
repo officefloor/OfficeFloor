@@ -16,18 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.socket.server.http.security.parser;
+package net.officefloor.plugin.socket.server.http.security.scheme;
 
-import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.parameters.HttpParametersException;
 
 /**
- * Indicates a failure tokenising the <code>Authorization</code>
- * {@link HttpHeader} value.
+ * Indicates a failure with authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public class AuthorisationTokeniseException extends HttpParametersException {
+public class AuthenticationException extends HttpParametersException {
 
 	/**
 	 * Initiate.
@@ -35,7 +33,7 @@ public class AuthorisationTokeniseException extends HttpParametersException {
 	 * @param reason
 	 *            Reason.
 	 */
-	public AuthorisationTokeniseException(String reason) {
+	public AuthenticationException(String reason) {
 		super(reason);
 	}
 
@@ -45,7 +43,7 @@ public class AuthorisationTokeniseException extends HttpParametersException {
 	 * @param cause
 	 *            Cause.
 	 */
-	public AuthorisationTokeniseException(Throwable cause) {
+	public AuthenticationException(Throwable cause) {
 		super(cause);
 	}
 
