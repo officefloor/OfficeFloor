@@ -26,10 +26,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -42,6 +46,16 @@ import org.apache.commons.codec.binary.Hex;
  */
 public class DigestHttpSecuritySource implements
 		HttpSecuritySource<DigestHttpSecuritySource.Dependencies> {
+
+	/**
+	 * Name of property for the realm.
+	 */
+	public static final String PROPERTY_REALM = "http.security.digest.realm";
+
+	/**
+	 * Name of property for the private key.
+	 */
+	public static final String PROPERTY_PRIVATE_KEY = "http.security.digest.private.key";
 
 	/**
 	 * US ASCII {@link Charset}.
@@ -60,10 +74,15 @@ public class DigestHttpSecuritySource implements
 	protected static final String MOCK_NONCE = "dcd98b7102dd2f0e8b11d0f600bfb0c093";
 
 	/**
+	 * Process access to the mock opaque for testing.
+	 */
+	protected static final String MOCK_OPAQUE = "5ccc069c403ebaf9f0171e9517f40e41";
+
+	/**
 	 * Provides access to a mock {@link SecurityState} for testing.
 	 */
 	protected static final Object MOCK_SECURITY_STATE = new SecurityState(
-			MOCK_NONCE);
+			MOCK_NONCE, MOCK_OPAQUE);
 
 	/**
 	 * Dependency keys.
@@ -78,6 +97,16 @@ public class DigestHttpSecuritySource implements
 	private static enum ParameterState {
 		INIT, NAME, NAME_VALUE_SEPARATION, VALUE, QUOTED_VALUE
 	}
+
+	/**
+	 * Realm.
+	 */
+	private String realm;
+
+	/**
+	 * Private key.
+	 */
+	private String privateKey;
 
 	/**
 	 * Parses out the parameters.
@@ -207,6 +236,24 @@ public class DigestHttpSecuritySource implements
 		return parameters;
 	}
 
+	/**
+	 * Obtains the time stamp.
+	 * 
+	 * @return Time stamp.
+	 */
+	protected String getTimestamp() {
+		return String.valueOf(System.currentTimeMillis());
+	}
+
+	/**
+	 * Obtains the <code>opaque</code> seed for the challenge.
+	 * 
+	 * @return <code>opaque</code> seed.
+	 */
+	protected String getOpaqueSeed() {
+		return UUID.randomUUID().toString();
+	}
+
 	/*
 	 * ======================= HttpSecuritySource ========================
 	 */
@@ -214,6 +261,11 @@ public class DigestHttpSecuritySource implements
 	@Override
 	public void init(HttpSecuritySourceContext<Dependencies> context)
 			throws Exception {
+
+		// Specify the properties
+		this.realm = context.getProperty(PROPERTY_REALM);
+		this.privateKey = context.getProperty(PROPERTY_PRIVATE_KEY);
+
 		// Require credential store
 		context.requireDependency(Dependencies.CREDENTIAL_STORE,
 				CredentialStore.class);
@@ -246,10 +298,38 @@ public class DigestHttpSecuritySource implements
 		String username = params.getProperty("username");
 		String realm = params.getProperty("realm");
 		String response = params.getProperty("response");
+		String opaque = params.getProperty("opaque");
 		String digestUri = params.getProperty("uri");
 		String qop = params.getProperty("qop");
 		String cnonce = params.getProperty("cnonce");
 		String nonceCount = params.getProperty("nc");
+
+		// Ensure correct opaque
+		if (!securityState.opaque.equals(opaque)) {
+			return null; // not authenticated
+		}
+
+		// Ensure correct nonce count
+		if (nonceCount != null) {
+			try {
+				byte[] decodedNonceCount = Hex.decodeHex(nonceCount
+						.toCharArray());
+				long nonceCountValue = 0;
+				for (byte decodedNonceCountByte : decodedNonceCount) {
+					nonceCountValue <<= 8; // shift to right by byte
+					nonceCountValue += decodedNonceCountByte; // add byte
+				}
+				if (securityState.nonceCount != nonceCountValue) {
+					return null; // likely replay attack so do not authenticate
+				}
+
+				// Increment for next authentication attempt
+				securityState.nonceCount++;
+
+			} catch (Exception ex) {
+				throw new AuthenticationException(ex);
+			}
+		}
 
 		// Obtain the required credentials
 		CredentialStore store = (CredentialStore) dependencies
@@ -345,11 +425,56 @@ public class DigestHttpSecuritySource implements
 
 	@Override
 	public void loadUnauthorised(ServerHttpConnection connection,
-			HttpSession session, Map<Dependencies, Object> depedendencies)
+			HttpSession session, Map<Dependencies, Object> dependencies)
 			throws AuthenticationException {
-		// TODO implement HttpSecuritySource<Dependencies>.loadUnauthorised
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<Dependencies>.loadUnauthorised");
+
+		// Obtain the algorithm
+		CredentialStore store = (CredentialStore) dependencies
+				.get(Dependencies.CREDENTIAL_STORE);
+		String algorithm = store.getAlgorithm();
+
+		// Obtain the ETag header value (if available)
+		HttpRequest request = connection.getHttpRequest();
+		String eTag = "";
+		for (HttpHeader header : request.getHeaders()) {
+			if ("ETag".equalsIgnoreCase(header.getName())) {
+				eTag = header.getValue();
+			}
+		}
+
+		// Obtain the current time stamp
+		String timestamp = this.getTimestamp();
+
+		// Calculate the nonce
+		Digest nonceDigest = new Digest(algorithm);
+		nonceDigest.append(timestamp);
+		nonceDigest.appendColon();
+		nonceDigest.append(eTag);
+		nonceDigest.appendColon();
+		nonceDigest.append(this.privateKey);
+		byte[] nonceData = nonceDigest.getDigest();
+		String nonce = new String(nonceData, US_ASCII);
+
+		// Calculate the opaque
+		Digest opaqueDigest = new Digest(algorithm);
+		opaqueDigest.append(this.getOpaqueSeed());
+		byte[] opaqueData = opaqueDigest.getDigest();
+		String opaque = new String(opaqueData, US_ASCII);
+
+		// Construct the authentication challenge
+		String challenge = this.getAuthenticationScheme() + " realm=\""
+				+ this.realm + "\", qop=\"auth,auth-int\", nonce=\"" + nonce
+				+ "\", opaque=\"" + opaque + "\", algorithm=\"" + algorithm
+				+ "\"";
+
+		// Specify unauthorised
+		HttpResponse response = connection.getHttpResponse();
+		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", challenge);
+
+		// Record details for authentication
+		session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(
+				nonce, opaque));
 	}
 
 	/**
@@ -363,6 +488,11 @@ public class DigestHttpSecuritySource implements
 		public final String nonce;
 
 		/**
+		 * Opaque for authentication.
+		 */
+		public final String opaque;
+
+		/**
 		 * Nonce count for current request.
 		 */
 		public int nonceCount = 1;
@@ -372,9 +502,12 @@ public class DigestHttpSecuritySource implements
 		 * 
 		 * @param nonce
 		 *            Nounce for authentication.
+		 * @param opaque
+		 *            Opaque for authentication.
 		 */
-		private SecurityState(String nonce) {
+		private SecurityState(String nonce, String opaque) {
 			this.nonce = nonce;
+			this.opaque = opaque;
 		}
 	}
 
