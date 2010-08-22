@@ -85,13 +85,13 @@ public interface HttpSecuritySource<D extends Enum<D>> {
 	 *            {@link HttpSession} to allow maintaining state between
 	 *            {@link HttpRequest} instances. This is especially useful for
 	 *            security negotiations.
-	 * @param depedendencies
+	 * @param dependencies
 	 *            Dependencies for authentication as specified in initialisation
 	 *            on the {@link HttpSecuritySourceContext}.
 	 * @throws AuthenticationException
 	 *             If failure in loading unauthorised information.
 	 */
 	void loadUnauthorised(ServerHttpConnection connection, HttpSession session,
-			Map<D, Object> depedendencies) throws AuthenticationException;
+			Map<D, Object> dependencies) throws AuthenticationException;
 
 }

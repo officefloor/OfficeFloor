@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http.security.scheme;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
+
 /**
  * Context for the {@link HttpSecuritySource}.
  * 
@@ -24,7 +26,29 @@ package net.officefloor.plugin.socket.server.http.security.scheme;
  */
 public interface HttpSecuritySourceContext<D extends Enum<D>> {
 
-	// TODO provide access to properties
+	/**
+	 * Obtains a required property value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @return Value of the property.
+	 * @throws ManagedObjectSourceUnknownPropertyError
+	 *             If property was not configured. Let this propagate as the
+	 *             framework will handle it.
+	 */
+	String getProperty(String name)
+			throws ManagedObjectSourceUnknownPropertyError;
+
+	/**
+	 * Obtains the property value or subsequently the default value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @param defaultValue
+	 *            Default value if property not specified.
+	 * @return Value of the property or the the default value if not specified.
+	 */
+	String getProperty(String name, String defaultValue);
 
 	/**
 	 * Flags that the {@link HttpSecuritySource} requires a dependency.

@@ -34,6 +34,11 @@ public class BasicHttpSecuritySourceTest extends
 		AbstractHttpSecuritySourceTest<Dependencies> {
 
 	/**
+	 * Realm for testing.
+	 */
+	private static final String REALM = "WallyWorld";
+
+	/**
 	 * {@link CredentialStore}.
 	 */
 	private final CredentialStore store = this
@@ -45,7 +50,9 @@ public class BasicHttpSecuritySourceTest extends
 	public BasicHttpSecuritySourceTest() {
 		super(BasicHttpSecuritySource.class, "Basic");
 
-		// Always require credential store
+		// Provide values for testing
+		this.recordReturn(this.context, this.context
+				.getProperty(BasicHttpSecuritySource.PROPERTY_REALM), REALM);
 		this.context.requireDependency(Dependencies.CREDENTIAL_STORE,
 				CredentialStore.class);
 	}
@@ -56,15 +63,24 @@ public class BasicHttpSecuritySourceTest extends
 	}
 
 	/**
+	 * Tests creating the challenge.
+	 */
+	public void testChallenge() throws Exception {
+		this.doChallenge("realm=\"" + REALM + "\"");
+	}
+
+	/**
 	 * Ensure can authenticate.
 	 */
 	public void testSimpleAuthenticate() throws Exception {
 		this.recordReturn(this.store, this.store.retrieveCredentials("Aladdin",
-				null), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store,
-				this.store.retrieveRoles("Aladdin", null), new HashSet<String>(
-						Arrays.asList("prince")));
-		this.doTest("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin", "prince");
+				REALM), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.store, this.store
+				.retrieveRoles("Aladdin", REALM), new HashSet<String>(Arrays
+				.asList("prince")));
+		this
+				.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin",
+						"prince");
 	}
 
 	/**
@@ -72,18 +88,19 @@ public class BasicHttpSecuritySourceTest extends
 	 */
 	public void testExtraSpacing() throws Exception {
 		this.recordReturn(this.store, this.store.retrieveCredentials("Aladdin",
-				null), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store,
-				this.store.retrieveRoles("Aladdin", null), new HashSet<String>(
-						Arrays.asList("prince")));
-		this.doTest("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin", "prince");
+				REALM), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.store, this.store
+				.retrieveRoles("Aladdin", REALM), new HashSet<String>(Arrays
+				.asList("prince")));
+		this.doAuthenticate("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin",
+				"prince");
 	}
 
 	/**
 	 * Ensure not authenticated if not provide credentials.
 	 */
 	public void testNoCredentials() throws Exception {
-		HttpSecurity security = this.doTest("");
+		HttpSecurity security = this.doAuthenticate("");
 		assertNull("Should not be authenticated", security);
 	}
 
@@ -91,7 +108,7 @@ public class BasicHttpSecuritySourceTest extends
 	 * Ensure handle invalid Base64 encoding.
 	 */
 	public void testInvalidBase64() throws Exception {
-		HttpSecurity security = this.doTest("wrong");
+		HttpSecurity security = this.doAuthenticate("wrong");
 		assertNull("Should not be authenticated", security);
 	}
 

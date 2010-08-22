@@ -22,8 +22,10 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -36,11 +38,21 @@ public class BasicHttpSecuritySource implements
 		HttpSecuritySource<BasicHttpSecuritySource.Dependencies> {
 
 	/**
+	 * Name of property to retrieve the realm being secured.
+	 */
+	public static final String PROPERTY_REALM = "http.security.basic.realm";
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
 		CREDENTIAL_STORE
 	}
+
+	/**
+	 * Realm being secured.
+	 */
+	private String realm;
 
 	/*
 	 * ====================== HttpSecuritySource ============================
@@ -49,6 +61,10 @@ public class BasicHttpSecuritySource implements
 	@Override
 	public void init(HttpSecuritySourceContext<Dependencies> context)
 			throws Exception {
+
+		// Obtain the realm
+		this.realm = context.getProperty(PROPERTY_REALM);
+
 		// Require credential store
 		context.requireDependency(Dependencies.CREDENTIAL_STORE,
 				CredentialStore.class);
@@ -87,7 +103,7 @@ public class BasicHttpSecuritySource implements
 				.get(Dependencies.CREDENTIAL_STORE);
 
 		// Obtain the password for the user
-		byte[] usAsciiPassword = store.retrieveCredentials(userId, null);
+		byte[] usAsciiPassword = store.retrieveCredentials(userId, this.realm);
 		String requiredPassword = new String(usAsciiPassword,
 				HttpRequestParserImpl.US_ASCII);
 
@@ -97,7 +113,7 @@ public class BasicHttpSecuritySource implements
 		}
 
 		// Obtain the roles for the user
-		Set<String> roles = store.retrieveRoles(userId, null);
+		Set<String> roles = store.retrieveRoles(userId, this.realm);
 
 		// Return the Http Security
 		return new HttpSecurityImpl(this.getAuthenticationScheme(), userId,
@@ -108,9 +124,14 @@ public class BasicHttpSecuritySource implements
 	public void loadUnauthorised(ServerHttpConnection connection,
 			HttpSession session, Map<Dependencies, Object> depedendencies)
 			throws AuthenticationException {
-		// TODO implement HttpSecuritySource<Dependencies>.loadUnauthorised
-		throw new UnsupportedOperationException(
-				"TODO implement HttpSecuritySource<Dependencies>.loadUnauthorised");
+
+		// Obtain the response to load the challenge
+		HttpResponse response = connection.getHttpResponse();
+
+		// Load the challenge
+		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+		response.addHeader("WWW-Authenticate", this.getAuthenticationScheme()
+				+ " realm=\"" + this.realm + "\"");
 	}
 
 }

@@ -22,7 +22,9 @@ import java.util.Map;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -117,13 +119,13 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 	protected abstract void loadDependencies(Map<D, Object> dependencies);
 
 	/**
-	 * Does the test.
+	 * Does the test of authentication.
 	 * 
 	 * @param parameters
 	 *            Parameters text from {@link HttpHeader}.
 	 * @return {@link HttpSecurity}.
 	 */
-	protected HttpSecurity doTest(String parameters) {
+	protected HttpSecurity doAuthenticate(String parameters) {
 		try {
 
 			// Load the dependencies
@@ -161,7 +163,8 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 	}
 
 	/**
-	 * Does the test and validates the expected {@link HttpSecurity}.
+	 * Does the authentication test and validates the expected
+	 * {@link HttpSecurity}.
 	 * 
 	 * @param parameters
 	 *            Parameters text from {@link HttpHeader}.
@@ -171,11 +174,52 @@ public abstract class AbstractHttpSecuritySourceTest<D extends Enum<D>> extends
 	 *            Expected roles that user within.
 	 * @return {@link HttpSecurity}.
 	 */
-	protected HttpSecurity doTest(String parameters, String expectedUserName,
-			String... expectedRoles) {
-		HttpSecurity security = this.doTest(parameters);
+	protected HttpSecurity doAuthenticate(String parameters,
+			String expectedUserName, String... expectedRoles) {
+		HttpSecurity security = this.doAuthenticate(parameters);
 		assertHttpSecurity(security, expectedUserName, expectedRoles);
 		return security;
+	}
+
+	/**
+	 * Does the challenge test.
+	 * 
+	 * @param parameters
+	 *            Parameters text for the {@link HttpHeader}.
+	 */
+	protected void doChallenge(String parameters) {
+		try {
+
+			// Load the dependencies
+			this.loadDependencies(this.dependencies);
+
+			// Mock
+			final HttpResponse response = this.createMock(HttpResponse.class);
+			final HttpHeader header = this.createMock(HttpHeader.class);
+
+			// Record loading the challenge
+			this.recordReturn(this.connection, this.connection
+					.getHttpResponse(), response);
+			response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+			this.recordReturn(response, response.addHeader("WWW-Authenticate",
+					this.expectedAuthenticationScheme + " " + parameters),
+					header);
+
+			// Test
+			this.replayMockObjects();
+
+			// Initialise the HTTP security source
+			this.source.init(this.context);
+
+			// Load the unauthorised response details
+			this.source.loadUnauthorised(this.connection, this.session,
+					this.dependencies);
+
+			this.verifyMockObjects();
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 }

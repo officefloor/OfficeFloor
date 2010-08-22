@@ -23,11 +23,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Hex;
-
+import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.security.scheme.DigestHttpSecuritySource.Dependencies;
+
+import org.apache.commons.codec.binary.Hex;
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link DigestHttpSecuritySource}.
@@ -36,6 +38,21 @@ import net.officefloor.plugin.socket.server.http.security.scheme.DigestHttpSecur
  */
 public class DigestHttpSecuritySourceTest extends
 		AbstractHttpSecuritySourceTest<Dependencies> {
+
+	/**
+	 * Realm.
+	 */
+	private static final String REALM = "testrealm@host.com";
+
+	/**
+	 * Algorithm.
+	 */
+	private static final String ALGORITHM = "MD5";
+
+	/**
+	 * Private key.
+	 */
+	private static final String PRIVATE_KEY = "Private Key";
 
 	/**
 	 * {@link CredentialStore}.
@@ -47,7 +64,14 @@ public class DigestHttpSecuritySourceTest extends
 	 * Initiate.
 	 */
 	public DigestHttpSecuritySourceTest() {
-		super(DigestHttpSecuritySource.class, "Digest");
+		super(MockDigestHttpSecuritySource.class, "Digest");
+
+		// Make properties available
+		this.recordReturn(this.context, this.context
+				.getProperty(DigestHttpSecuritySource.PROPERTY_REALM), REALM);
+		this.recordReturn(this.context, this.context
+				.getProperty(DigestHttpSecuritySource.PROPERTY_PRIVATE_KEY),
+				PRIVATE_KEY);
 
 		// Always require credential store
 		this.context.requireDependency(Dependencies.CREDENTIAL_STORE,
@@ -60,12 +84,62 @@ public class DigestHttpSecuritySourceTest extends
 	}
 
 	/**
+	 * Ensure can send challenge.
+	 */
+	public void testChallenge() throws Exception {
+
+		// Mock
+		final HttpRequest request = this.createMock(HttpRequest.class);
+		final HttpHeader header = this.createMock(HttpHeader.class);
+		MockDigestHttpSecuritySource.timestamp = "Test Timestamp";
+		MockDigestHttpSecuritySource.opaqueSeed = "Test Opaque";
+		final String eTag = "Test ETag";
+
+		// Create the expected nonce
+		byte[] nonceDigest = this.createDigest(ALGORITHM,
+				MockDigestHttpSecuritySource.timestamp, eTag, PRIVATE_KEY);
+		final String nonce = new String(nonceDigest,
+				HttpRequestParserImpl.US_ASCII);
+
+		// Create the expected opaque
+		byte[] opaqueDigest = this.createDigest(ALGORITHM,
+				MockDigestHttpSecuritySource.opaqueSeed);
+		final String opaque = new String(opaqueDigest,
+				HttpRequestParserImpl.US_ASCII);
+
+		// Record
+		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(),
+				request);
+		this.recordReturn(request, request.getHeaders(), Arrays.asList(header));
+		this.recordReturn(header, header.getName(), "ETag");
+		this.recordReturn(header, header.getValue(), eTag);
+		this.session.setAttribute("#"
+				+ DigestHttpSecuritySource.class.getName() + "#",
+				"SecurityStore");
+		this.control(this.session).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect key", expected[0], actual[0]);
+				assertNotNull("Expecting security store", actual[1]);
+				return true;
+			}
+		});
+
+		// Test
+		this.doChallenge("realm=\"" + REALM + "\", qop=\"auth,auth-int\","
+				+ " nonce=\"" + nonce + "\"," + " opaque=\"" + opaque + "\","
+				+ " algorithm=\"" + ALGORITHM + "\"");
+	}
+
+	/**
 	 * Ensure can do simple authentication.
 	 */
 	public void testSimpleAuthenticate() throws Exception {
+
 		// Mock values
-		final byte[] digest = this.createDigest("MD5", "Mufasa",
-				"testrealm@host.com", "Circle Of Life");
+		final byte[] digest = this.createDigest(ALGORITHM, "Mufasa", REALM,
+				"Circle Of Life");
 		final HttpRequest request = this.createMock(HttpRequest.class);
 
 		// Record authentication
@@ -76,22 +150,22 @@ public class DigestHttpSecuritySourceTest extends
 								.getAttribute(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY),
 						DigestHttpSecuritySource.MOCK_SECURITY_STATE);
 		this.recordReturn(this.store, this.store.retrieveCredentials("Mufasa",
-				"testrealm@host.com"), digest);
-		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
+				REALM), digest);
+		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				request);
 		this.recordReturn(request, request.getMethod(), "GET");
-		this.recordReturn(this.store, this.store.retrieveRoles("Mufasa",
-				"testrealm@host.com"), new HashSet<String>(Arrays
-				.asList("prince")));
+		this.recordReturn(this.store,
+				this.store.retrieveRoles("Mufasa", REALM), new HashSet<String>(
+						Arrays.asList("prince")));
 
 		// Test
-		this
-				.doTest("username=\"Mufasa\", realm=\"testrealm@host.com\","
-						+ " nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\", uri=\"/dir/index.html\","
-						+ " qop=auth, nc=00000001, cnonce=\"0a4f113b\","
-						+ " response=\"6629fae49393a05397450978507c4ef1\","
-						+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"");
+		this.doAuthenticate("username=\"Mufasa\", realm=\"" + REALM
+				+ "\", nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\","
+				+ " uri=\"/dir/index.html\","
+				+ " qop=auth, nc=00000001, cnonce=\"0a4f113b\","
+				+ " response=\"6629fae49393a05397450978507c4ef1\","
+				+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"");
 	}
 
 	/**
@@ -128,6 +202,38 @@ public class DigestHttpSecuritySourceTest extends
 
 		} catch (Exception ex) {
 			throw fail(ex);
+		}
+	}
+
+	/**
+	 * {@link DigestHttpSecuritySource} for testing to provide consistent
+	 * values.
+	 */
+	public static class MockDigestHttpSecuritySource extends
+			DigestHttpSecuritySource {
+
+		/**
+		 * Time stamp.
+		 */
+		public static String timestamp;
+
+		/**
+		 * Opaque seed.
+		 */
+		public static String opaqueSeed;
+
+		/*
+		 * =============== DigestHttpSecuritySource ================
+		 */
+
+		@Override
+		protected String getTimestamp() {
+			return timestamp;
+		}
+
+		@Override
+		protected String getOpaqueSeed() {
+			return opaqueSeed;
 		}
 	}
 
