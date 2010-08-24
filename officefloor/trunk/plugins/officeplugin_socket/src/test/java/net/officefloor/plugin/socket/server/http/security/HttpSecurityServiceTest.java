@@ -74,12 +74,34 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
+	 * Ensure that can provide {@link HttpSecurity} from the {@link HttpSession}
+	 * for already authenticated {@link ServerHttpConnection}.
+	 */
+	public void testAlreadyAuthenticated() throws Exception {
+
+		// Mocks
+		final HttpSecurity security = this.createMock(HttpSecurity.class);
+
+		// Record obtaining the cache HttpSecurity
+		this.record_getCached(security);
+
+		// Test
+		this.replayMockObjects();
+		HttpSecurity actualSecurity = this.service.authenticate();
+		this.verifyMockObjects();
+
+		// Ensure correct security
+		assertEquals("Incorrect HTTP security", security, actualSecurity);
+	}
+
+	/**
 	 * Ensure not authenticate if missing <code>Authenticate</code>
 	 * {@link HttpHeader}.
 	 */
 	public void testMissingAuthenticateHttpHeader() throws Exception {
 
 		// Record not providing Authenticate header
+		this.record_getCached(null);
 		this.record_getHeaders(null);
 
 		// Test
@@ -94,6 +116,7 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 	public void testIncorrectAuthenticateScheme() throws Exception {
 
 		// Record incorrect authentication scheme
+		this.record_getCached(null);
 		this.record_getHeaders("Digest incorrect");
 		this.recordReturn(this.source, this.source.getAuthenticationScheme(),
 				"Basic");
@@ -113,12 +136,14 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
 
 		// Record
+		this.record_getCached(null);
 		this.record_getHeaders("Basic Base64UsernamePassword");
 		this.recordReturn(this.source, this.source.getAuthenticationScheme(),
 				"basic");
 		this.recordReturn(this.source, this.source.authenticate(
 				"Base64UsernamePassword", this.connection, this.session,
 				this.dependencies), security);
+		this.record_cache(security);
 
 		// Test
 		this.replayMockObjects();
@@ -138,12 +163,14 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
 
 		// Record
+		this.record_getCached(null);
 		this.record_getHeaders(" Basic  Base64UsernamePassword");
 		this.recordReturn(this.source, this.source.getAuthenticationScheme(),
 				"Basic");
 		this.recordReturn(this.source, this.source.authenticate(
 				" Base64UsernamePassword", this.connection, this.session,
 				this.dependencies), security);
+		this.record_cache(security);
 
 		// Test
 		this.replayMockObjects();
@@ -167,6 +194,29 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.service.loadUnauthorised();
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records obtaining the cached {@link HttpSecurity} from the
+	 * {@link HttpSession}.
+	 * 
+	 * @param security
+	 *            {@link HttpSecurity} to return from the {@link HttpSession}.
+	 *            May be <code>null</code>.
+	 */
+	private void record_getCached(HttpSecurity security) {
+		this.recordReturn(this.session, this.session
+				.getAttribute("#HttpSecurity#"), security);
+	}
+
+	/**
+	 * Records caching the {@link HttpSecurity} in the {@link HttpSession}.
+	 * 
+	 * @param security
+	 *            {@link HttpSecurity} to cache.
+	 */
+	private void record_cache(HttpSecurity security) {
+		this.session.setAttribute("#HttpSecurity#", security);
 	}
 
 	/**

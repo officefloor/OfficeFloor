@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.security.scheme;
 
-import java.io.Serializable;
 import java.security.Principal;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityImpl implements HttpSecurity, Serializable {
+public class HttpSecurityImpl implements HttpSecurity {
 
 	/**
 	 * Authentication scheme.

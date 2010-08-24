@@ -17,14 +17,23 @@
  */
 package net.officefloor.plugin.socket.server.http.security;
 
+import java.io.Serializable;
 import java.security.Principal;
 
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.session.HttpSession;
+
 /**
+ * <p>
  * HTTP Security.
+ * <p>
+ * This must be {@link Serializable} as the {@link HttpSecurity} may be stored
+ * in the {@link HttpSession} to avoid re-authentication on each
+ * {@link HttpRequest}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecurity {
+public interface HttpSecurity extends Serializable {
 
 	/**
 	 * Obtains the authentication scheme used.

@@ -82,6 +82,15 @@ public class HttpSecurityServiceImpl<D extends Enum<D>> implements
 	@Override
 	public HttpSecurity authenticate() throws AuthenticationException {
 
+		final String ATTRIBUTE_HTTP_SECURITY = "#HttpSecurity#";
+
+		// Determine if session already authenticated
+		HttpSecurity security = (HttpSecurity) this.session
+				.getAttribute(ATTRIBUTE_HTTP_SECURITY);
+		if (security != null) {
+			return security; // already authenticated
+		}
+
 		// Obtain the authenticate header value
 		String authenticate = "";
 		HttpRequest request = this.connection.getHttpRequest();
@@ -134,8 +143,11 @@ public class HttpSecurityServiceImpl<D extends Enum<D>> implements
 		String parameters = authenticate.substring(endIndex + 1);
 
 		// Authenticate
-		HttpSecurity security = this.source.authenticate(parameters,
-				this.connection, this.session, this.dependencies);
+		security = this.source.authenticate(parameters, this.connection,
+				this.session, this.dependencies);
+
+		// Cache security
+		this.session.setAttribute(ATTRIBUTE_HTTP_SECURITY, security);
 
 		// Return the authentication
 		return security;
