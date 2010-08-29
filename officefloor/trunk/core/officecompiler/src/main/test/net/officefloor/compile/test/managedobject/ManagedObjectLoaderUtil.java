@@ -40,7 +40,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 
 /**
  * Utility class for testing the {@link ManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectLoaderUtil {
@@ -48,7 +48,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels
@@ -75,7 +75,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Creates the {@link ManagedObjectTypeBuilder} to create the expected
 	 * {@link ManagedObjectType}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectTypeBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -87,7 +87,7 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectType} contained in the
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
 	 * loaded from the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -185,7 +185,7 @@ public class ManagedObjectLoaderUtil {
 	 * Convenience method to load the {@link ManagedObjectType} from the
 	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the
 	 * input {@link ManagedObjectSource} class.
-	 *
+	 * 
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameValues
@@ -205,7 +205,7 @@ public class ManagedObjectLoaderUtil {
 
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param classLoader
@@ -225,15 +225,41 @@ public class ManagedObjectLoaderUtil {
 	}
 
 	/**
+	 * {@link OfficeFloorCompiler} for the next operation.
+	 */
+	private static OfficeFloorCompiler nextOfficeFloorCompiler = null;
+
+	/**
+	 * Specifies the {@link OfficeFloorCompiler} for the next operation.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler} for the next operation.
+	 */
+	public static void setNextOfficeFloorCompiler(OfficeFloorCompiler compiler) {
+		nextOfficeFloorCompiler = compiler;
+	}
+
+	/**
 	 * Obtains the {@link OfficeFloorCompiler} setup for use.
-	 *
+	 * 
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
-		// Create the office floor compiler that fails on first issue
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+
+		OfficeFloorCompiler compiler;
+
+		// Determine if OfficeFloorCompiler for this operation
+		if (nextOfficeFloorCompiler != null) {
+			// Use next OfficeFloorCompiler
+			compiler = nextOfficeFloorCompiler;
+			nextOfficeFloorCompiler = null; // clear for further operations
+		} else {
+			// Create the office floor compiler that fails on first issue
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
+			compiler.setCompilerIssues(new FailCompilerIssues());
+		}
+
+		// Return the OfficeFloorCompiler
 		return compiler;
 	}
 
