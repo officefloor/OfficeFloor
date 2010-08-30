@@ -184,6 +184,7 @@ public class HttpSecurityServiceManagedObjectSource extends
 
 		// Provide the meta-data
 		context.setObjectClass(HttpSecurityService.class);
+		context.setManagedObjectClass(HttpSecurityServiceManagedObject.class);
 	}
 
 	@Override

@@ -450,6 +450,12 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		HttpSecurityServiceManagedObjectSource source = loader
 				.loadManagedObjectSource(HttpSecurityServiceManagedObjectSource.class);
 
+		// Ensure correct managed object class
+		Class<?> managedObjectClass = source.getMetaData()
+				.getManagedObjectClass();
+		assertEquals("Incorrect managed object class",
+				HttpSecurityServiceManagedObject.class, managedObjectClass);
+
 		// Load the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
 		user.mapDependency(0, connection);

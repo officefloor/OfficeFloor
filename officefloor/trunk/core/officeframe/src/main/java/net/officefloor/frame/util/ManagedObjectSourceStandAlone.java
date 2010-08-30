@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -25,8 +27,11 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -53,6 +58,12 @@ public class ManagedObjectSourceStandAlone {
 	 * {@link Properties}.
 	 */
 	private final Properties properties = new Properties();
+
+	/**
+	 * {@link InvokeProcessTaskStruct} instances by their {@link ProcessState}
+	 * invocation index.
+	 */
+	private final Map<Integer, InvokeProcessTaskStruct> processes = new HashMap<Integer, InvokeProcessTaskStruct>();
 
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
@@ -139,10 +150,123 @@ public class ManagedObjectSourceStandAlone {
 	}
 
 	/**
+	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
+	 * 
+	 * @param processIndex
+	 *            Index of the {@link ProcessState}.
+	 * @param task
+	 *            Initial {@link Task} for the {@link ProcessState}.
+	 * @param taskContext
+	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
+	 *            the {@link TaskContext} to validate functionality for the
+	 *            {@link Task}.
+	 */
+	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task,
+			TaskContext<?, ?, ?> taskContext) {
+		this.processes.put(new Integer(processIndex),
+				new InvokeProcessTaskStruct(task, taskContext));
+	}
+
+	/**
+	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
+	 * 
+	 * @param processKey
+	 *            Key of the {@link ProcessState}.
+	 * @param task
+	 *            Initial {@link Task} for the {@link ProcessState}.
+	 * @param taskContext
+	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
+	 *            the {@link TaskContext} to validate functionality for the
+	 *            {@link Task}.
+	 */
+	public void registerInvokeProcessTask(Enum<?> processKey,
+			Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+		this.registerInvokeProcessTask(processKey.ordinal(), task, taskContext);
+	}
+
+	/**
+	 * Struct containing the details for the initial {@link Task} to be executed
+	 * for the invoked {@link ProcessState}.
+	 */
+	private class InvokeProcessTaskStruct {
+
+		/**
+		 * {@link Task}.
+		 */
+		public final Task<?, ?, ?> task;
+
+		/**
+		 * {@link TaskContext}.
+		 */
+		public final TaskContext<?, ?, ?> taskContext;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param task
+		 *            {@link Task}.
+		 * @param taskContext
+		 *            {@link TaskContext}.
+		 */
+		public InvokeProcessTaskStruct(Task<?, ?, ?> task,
+				TaskContext<?, ?, ?> taskContext) {
+			this.task = task;
+			this.taskContext = taskContext;
+		}
+	}
+
+	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private class LoadExecuteContext<F extends Enum<F>> implements
 			ManagedObjectExecuteContext<F> {
+
+		/**
+		 * Processes the {@link Task} for the invoked {@link ProcessState}.
+		 * 
+		 * @param processIndex
+		 *            Index of the {@link ProcessState} to invoke.
+		 * @param escalationHandler
+		 *            {@link EscalationHandler}. May be <code>null</code>.
+		 */
+		@SuppressWarnings("unchecked")
+		private void process(int processIndex,
+				EscalationHandler escalationHandler) {
+
+			// Obtain the details for invoking process
+			InvokeProcessTaskStruct struct = ManagedObjectSourceStandAlone.this.processes
+					.get(new Integer(processIndex));
+			if (struct == null) {
+				throw new UnsupportedOperationException(
+						"No task configured for process invocation index "
+								+ processIndex);
+			}
+
+			try {
+				try {
+					// Invoke the task for the process
+					struct.task.doTask((TaskContext) struct.taskContext);
+
+				} catch (Throwable ex) {
+					// Determine if handle
+					if (escalationHandler != null) {
+						escalationHandler.handleEscalation(ex);
+					} else {
+						throw ex; // not handled so propagate
+					}
+				}
+			} catch (Throwable ex) {
+				// Handle failure
+				if (ex instanceof Error) {
+					throw (Error) ex;
+				} else if (ex instanceof RuntimeException) {
+					throw (RuntimeException) ex;
+				} else {
+					// Propagate failure
+					throw new Error(ex);
+				}
+			}
+		}
 
 		/*
 		 * ================ ManagedObjectExecuteContext =====================
@@ -151,33 +275,25 @@ public class ManagedObjectSourceStandAlone {
 		@Override
 		public void invokeProcess(F key, Object parameter,
 				ManagedObject managedObject) {
-			throw new UnsupportedOperationException(
-					ManagedObjectSourceStandAlone.class.getSimpleName()
-							+ " does not support invoking processes");
+			this.process(key.ordinal(), null);
 		}
 
 		@Override
 		public void invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject) {
-			throw new UnsupportedOperationException(
-					ManagedObjectSourceStandAlone.class.getSimpleName()
-							+ " does not support invoking processes");
+			this.process(flowIndex, null);
 		}
 
 		@Override
 		public void invokeProcess(F key, Object parameter,
 				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			throw new UnsupportedOperationException(
-					ManagedObjectSourceStandAlone.class.getSimpleName()
-							+ " does not support invoking processes");
+			this.process(key.ordinal(), escalationHandler);
 		}
 
 		@Override
 		public void invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			throw new UnsupportedOperationException(
-					ManagedObjectSourceStandAlone.class.getSimpleName()
-							+ " does not support invoking processes");
+			this.process(flowIndex, escalationHandler);
 		}
 	}
 
