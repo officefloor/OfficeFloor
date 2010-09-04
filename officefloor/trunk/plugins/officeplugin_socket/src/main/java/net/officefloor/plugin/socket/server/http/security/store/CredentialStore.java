@@ -15,10 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.socket.server.http.security.scheme;
+package net.officefloor.plugin.socket.server.http.security.store;
 
 import java.nio.charset.Charset;
 import java.util.Set;
+
+import net.officefloor.plugin.socket.server.http.security.scheme.AuthenticationException;
+import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySource;
 
 /**
  * <p>

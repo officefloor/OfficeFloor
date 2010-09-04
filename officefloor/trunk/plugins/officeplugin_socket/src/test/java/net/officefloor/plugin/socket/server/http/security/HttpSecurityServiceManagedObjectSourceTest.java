@@ -41,11 +41,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.security.scheme.AuthenticationException;
 import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource;
-import net.officefloor.plugin.socket.server.http.security.scheme.CredentialStore;
 import net.officefloor.plugin.socket.server.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySource;
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySourceContext;
 import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource.Dependencies;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;

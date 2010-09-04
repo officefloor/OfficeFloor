@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource.Dependencies;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 
 /**
  * Tests the {@link BasicHttpSecuritySource}.
