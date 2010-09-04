@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 import org.apache.commons.codec.binary.Hex;
