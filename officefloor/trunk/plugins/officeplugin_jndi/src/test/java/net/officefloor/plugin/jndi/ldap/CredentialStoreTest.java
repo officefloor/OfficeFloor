@@ -26,7 +26,6 @@ import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.apache.commons.codec.binary.Base64;
@@ -68,8 +67,7 @@ public class CredentialStoreTest extends AbstractLdapTest {
 
 		// Search for person
 		NamingEnumeration<SearchResult> results = people.search("",
-				"(&(objectClass=inetOrgPerson)(uid=daniel))",
-				new SearchControls());
+				"(&(objectClass=inetOrgPerson)(uid=daniel))", null);
 		assertTrue("Expecting to find daniel entry", results.hasMore());
 		SearchResult result = results.next();
 		assertFalse("Should only have the daniel entry", results.hasMore());
@@ -111,8 +109,7 @@ public class CredentialStoreTest extends AbstractLdapTest {
 
 		// Search for person
 		NamingEnumeration<SearchResult> personResults = people.search("",
-				"(&(objectClass=inetOrgPerson)(uid=daniel))",
-				new SearchControls());
+				"(&(objectClass=inetOrgPerson)(uid=daniel))", null);
 		assertTrue("Expecting to find daniel entry", personResults.hasMore());
 		SearchResult daniel = personResults.next();
 		assertFalse("Should only have the daniel entry", personResults
@@ -126,8 +123,7 @@ public class CredentialStoreTest extends AbstractLdapTest {
 		// Search for groups containing daniel
 		String danielDn = daniel.getNameInNamespace();
 		NamingEnumeration<SearchResult> groupResults = groups.search("",
-				"(&(objectClass=groupOfNames)(member=" + danielDn + "))",
-				new SearchControls());
+				"(&(objectClass=groupOfNames)(member=" + danielDn + "))", null);
 
 		// Obtain the listing of roles for daniel
 		List<String> roles = new ArrayList<String>(2);

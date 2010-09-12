@@ -172,25 +172,14 @@ public class PasswordFileCredentialStore implements CredentialStore {
 	}
 
 	@Override
-	public byte[] retrieveCredentials(String userId, String realm)
+	public CredentialEntry retrieveCredentialEntry(String userId, String realm)
 			throws AuthenticationException {
 
 		// Obtain the entry
 		PasswordEntry entry = this.file.getEntry(userId);
 
-		// Return based on whether have entry
-		return (entry == null ? null : entry.getCredentials());
-	}
-
-	@Override
-	public Set<String> retrieveRoles(String userId, String realm)
-			throws AuthenticationException {
-
-		// Obtain the entry
-		PasswordEntry entry = this.file.getEntry(userId);
-
-		// Return based on whether have entry
-		return (entry == null ? null : entry.getRoles());
+		// Return the entry
+		return entry;
 	}
 
 }

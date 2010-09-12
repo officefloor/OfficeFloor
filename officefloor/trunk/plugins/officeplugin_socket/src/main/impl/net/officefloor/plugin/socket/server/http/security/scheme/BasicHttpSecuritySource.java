@@ -27,6 +27,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -99,12 +100,17 @@ public class BasicHttpSecuritySource implements
 		String userId = userIdPassword.substring(0, separatorIndex);
 		String password = userIdPassword.substring(separatorIndex + 1);
 
-		// Obtain the credentials store
+		// Obtain the credentials
 		CredentialStore store = (CredentialStore) dependencies
 				.get(Dependencies.CREDENTIAL_STORE);
+		CredentialEntry entry = store.retrieveCredentialEntry(userId,
+				this.realm);
+		if (entry == null) {
+			return null; // unknown user
+		}
 
 		// Obtain the password for the user
-		byte[] usAsciiPassword = store.retrieveCredentials(userId, this.realm);
+		byte[] usAsciiPassword = entry.retrieveCredentials();
 		String requiredPassword = new String(usAsciiPassword,
 				HttpRequestParserImpl.US_ASCII);
 
@@ -114,7 +120,7 @@ public class BasicHttpSecuritySource implements
 		}
 
 		// Obtain the roles for the user
-		Set<String> roles = store.retrieveRoles(userId, this.realm);
+		Set<String> roles = entry.retrieveRoles();
 
 		// Return the Http Security
 		return new HttpSecurityImpl(this.getAuthenticationScheme(), userId,

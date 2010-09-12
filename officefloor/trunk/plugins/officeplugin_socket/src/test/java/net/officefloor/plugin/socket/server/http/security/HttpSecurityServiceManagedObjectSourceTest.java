@@ -45,6 +45,7 @@ import net.officefloor.plugin.socket.server.http.security.scheme.DigestHttpSecur
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySource;
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySourceContext;
 import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource.Dependencies;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -409,6 +410,7 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		final HttpRequest request = this.createMock(HttpRequest.class);
 		final HttpHeader header = this.createMock(HttpHeader.class);
 		final CredentialStore store = this.createMock(CredentialStore.class);
+		final CredentialEntry entry = this.createMock(CredentialEntry.class);
 
 		// Create the base 64 user name and password
 		final String username = "Username";
@@ -430,10 +432,10 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		this.recordReturn(header, header.getName(), "Authenticate");
 		this.recordReturn(header, header.getValue(), "Basic "
 				+ base64UsernamePassword);
-		this.recordReturn(store, store.retrieveCredentials(username,
-				"TestRealm"), passwordBytes);
-		this.recordReturn(store, store.retrieveRoles(username, "TestRealm"),
-				Collections.EMPTY_SET);
+		this.recordReturn(store, store.retrieveCredentialEntry(username,
+				"TestRealm"), entry);
+		this.recordReturn(entry, entry.retrieveCredentials(), passwordBytes);
+		this.recordReturn(entry, entry.retrieveRoles(), Collections.EMPTY_SET);
 		session.setAttribute("#HttpSecurity", null);
 		this.control(session).setMatcher(new AlwaysMatcher());
 
