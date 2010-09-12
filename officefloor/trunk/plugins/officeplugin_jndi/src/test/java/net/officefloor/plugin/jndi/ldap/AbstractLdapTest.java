@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.jndi.ldap;
 
-import org.apache.directory.server.core.entry.ServerEntry;
-
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -57,10 +55,8 @@ public abstract class AbstractLdapTest extends OfficeFrameTestCase {
 		this.ldap.addPartition("OfficeFloor", LDAP_DOMAIN, "objectClass");
 		this.ldap.start(LDAP_PORT);
 
-		// Add the entry
-		ServerEntry entry = this.ldap.newEntry(LDAP_DOMAIN);
-		entry.add("objectClass", "top", "domain", "extensibleObject");
-		this.ldap.bindEntry(entry);
+		// Populate the LDAP server
+		this.ldap.addCredentialStoreEntries();
 	}
 
 	@Override

@@ -17,15 +17,9 @@
  */
 package net.officefloor.plugin.jndi.ldap;
 
-import java.util.Properties;
-
-import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.apache.directory.server.core.entry.ServerEntry;
 import org.apache.directory.shared.ldap.name.LdapDN;
@@ -35,33 +29,11 @@ import org.apache.directory.shared.ldap.name.LdapDN;
  * 
  * @author Daniel Sagenschneider
  */
-public class EmbeddedLdapTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link EmbeddedLdap}.
-	 */
-	private final EmbeddedLdap ldap = new EmbeddedLdap();
+public class EmbeddedLdapTest extends AbstractLdapTest {
 
 	@Override
 	protected void setUp() throws Exception {
-
-		// Add partition with appropriate attributes
-		this.ldap.addPartition("officefloor", "dc=officefloor,dc=net",
-				"objectClass", "ou", "uid");
-
-		// Start LDAP
-		this.ldap.start(63636);
-
-		// Inject the OfficeFloor root entry
-		ServerEntry entry = this.ldap.newEntry("dc=officefloor,dc=net");
-		entry.add("objectClass", "top", "domain", "extensibleObject");
-		this.ldap.bindEntry(entry);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		// Stop LDAP
-		this.ldap.stop();
+		this.setupLdap();
 	}
 
 	/**
@@ -81,11 +53,7 @@ public class EmbeddedLdapTest extends OfficeFrameTestCase {
 	public void testJndiAccess() throws Exception {
 
 		// Create the context
-		Properties env = new Properties();
-		env.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-				"com.sun.jndi.ldap.LdapCtxFactory");
-		env.setProperty(Context.PROVIDER_URL, "ldap://localhost:63636");
-		DirContext context = new InitialDirContext(env);
+		DirContext context = this.ldap.getDirContext();
 
 		// Obtain the entry
 		boolean hasValue = false;
@@ -108,4 +76,33 @@ public class EmbeddedLdapTest extends OfficeFrameTestCase {
 		assertTrue("Must have a value", hasValue);
 	}
 
+	/**
+	 * Ensure to undertake simple login via JNDI.
+	 */
+	public void testSimpleJndiLogin() throws Exception {
+
+		// Create the context
+		DirContext context = this.ldap.getDirContext("simple",
+				"uid=daniel,ou=People,dc=officefloor,dc=net", "password");
+
+		// Obtain the entry
+		DirContext officeFloor = (DirContext) context
+				.lookup("dc=officefloor,dc=net");
+		assertNotNull("Expecting OfficeFloor domain context", officeFloor);
+	}
+
+	/**
+	 * Ensure to undertake <code>DIGEST-MD5</code> SASL login via JNDI.
+	 */
+	public void testDigestMd5JndiLogin() throws Exception {
+
+		// Create the context
+		DirContext context = this.ldap.getDirContext("DIGEST-MD5", "daniel",
+				"password", "java.naming.security.sasl.realm", "officefloor");
+
+		// Obtain the entry
+		DirContext officeFloor = (DirContext) context
+				.lookup("dc=officefloor,dc=net");
+		assertNotNull("Expecting OfficeFloor domain context", officeFloor);
+	}
 }
