@@ -122,12 +122,26 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure appropriately retrieves {@link CredentialEntry} instances.
+	 */
+	public void testRetrieveEntry() throws Exception {
+		CredentialStore store = this.createCredentialStore(PASSWORD_FILE_NAME);
+		assertNotNull("Expect to find daniel", store.retrieveCredentialEntry(
+				"daniel", null));
+		assertNotNull("Expect to find daniel in a realm", store
+				.retrieveCredentialEntry("daniel", "realm"));
+		assertNull("Should not find unknown entry", store
+				.retrieveCredentialEntry("unknown", null));
+	}
+
+	/**
 	 * Ensure correct credentials.
 	 */
 	public void testCredentials() throws Exception {
 		// Validate credentials
 		CredentialStore store = this.createCredentialStore(PASSWORD_FILE_NAME);
-		byte[] credentials = store.retrieveCredentials("daniel", null);
+		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
+		byte[] credentials = entry.retrieveCredentials();
 		assertCredentials("credentials", credentials);
 	}
 
@@ -137,7 +151,8 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	public void testRoles() throws Exception {
 		// Validate the roles
 		CredentialStore store = this.createCredentialStore(PASSWORD_FILE_NAME);
-		Set<String> roles = store.retrieveRoles("daniel", null);
+		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
+		Set<String> roles = entry.retrieveRoles();
 		assertRoles(roles, "founder", "administrator", "developer");
 	}
 
@@ -182,11 +197,11 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect user Id", userId, entry.getUserId());
 
 			// Ensure correct credentials
-			byte[] entryCredentialsData = entry.getCredentials();
+			byte[] entryCredentialsData = entry.retrieveCredentials();
 			assertCredentials(credentials, entryCredentialsData);
 
 			// Ensure correct roles
-			Set<String> entryRoles = entry.getRoles();
+			Set<String> entryRoles = entry.retrieveRoles();
 			assertRoles(entryRoles, roles);
 
 		} catch (Exception ex) {

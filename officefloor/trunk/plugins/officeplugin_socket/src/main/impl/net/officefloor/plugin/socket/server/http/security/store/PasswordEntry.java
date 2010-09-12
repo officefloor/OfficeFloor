@@ -20,11 +20,11 @@ package net.officefloor.plugin.socket.server.http.security.store;
 import java.util.Set;
 
 /**
- * {@link PasswordFile} entry.
+ * {@link PasswordFile} {@link CredentialEntry}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PasswordEntry {
+public class PasswordEntry implements CredentialEntry {
 
 	/**
 	 * User Id.
@@ -66,21 +66,17 @@ public class PasswordEntry {
 		return this.userId;
 	}
 
-	/**
-	 * Obtains the credentials for the user.
-	 * 
-	 * @return Credentials for the user.
+	/*
+	 * ======================= CredentialEntry ======================
 	 */
-	public byte[] getCredentials() {
+
+	@Override
+	public byte[] retrieveCredentials() {
 		return this.credentials;
 	}
 
-	/**
-	 * Obtains the roles for the user.
-	 * 
-	 * @return Roles for the user.
-	 */
-	public Set<String> getRoles() {
+	@Override
+	public Set<String> retrieveRoles() {
 		return this.roles;
 	}
 

@@ -35,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
@@ -332,11 +333,16 @@ public class DigestHttpSecuritySource implements
 			}
 		}
 
-		// Obtain the required credentials
+		// Obtain the credentials entry
 		CredentialStore store = (CredentialStore) dependencies
 				.get(Dependencies.CREDENTIAL_STORE);
-		byte[] usernameRealmPasswordCredentials = store.retrieveCredentials(
-				username, realm);
+		CredentialEntry entry = store.retrieveCredentialEntry(username, realm);
+		if (entry == null) {
+			return null; // unknown user in realm
+		}
+
+		// Obtain the required credentials
+		byte[] usernameRealmPasswordCredentials = entry.retrieveCredentials();
 
 		// Obtain the algorithm (stripping suffix)
 		String algorithm = store.getAlgorithm();
@@ -417,7 +423,7 @@ public class DigestHttpSecuritySource implements
 		}
 
 		// Obtain the roles
-		Set<String> roles = store.retrieveRoles(username, realm);
+		Set<String> roles = entry.retrieveRoles();
 
 		// Return the HTTP security
 		return new HttpSecurityImpl(this.getAuthenticationScheme(), username,

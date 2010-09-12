@@ -17,9 +17,6 @@
  */
 package net.officefloor.plugin.socket.server.http.security.store;
 
-import java.nio.charset.Charset;
-import java.util.Set;
-
 import net.officefloor.plugin.socket.server.http.security.scheme.AuthenticationException;
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySource;
 
@@ -35,57 +32,41 @@ import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySou
 public interface CredentialStore {
 
 	/**
-	 * Default algorithm for Digest security.
+	 * Default algorithm.
 	 */
 	public static final String DEFAULT_ALGORITHM = "MD5";
 
 	/**
-	 * Obtains the algorithm used to encrypt Digest credentials.
+	 * <p>
+	 * Obtains the algorithm used to encrypt credentials within this
+	 * {@link CredentialStore}.
+	 * <p>
+	 * Should the return be <code>null</code> or blank then the password is
+	 * considered to be stored in plain text. This is however only useful for
+	 * the <code>BASIC</code> authentication scheme.
+	 * <p>
+	 * It is expected that the credentials for <code>DIGEST</code> will be
+	 * stored as the algorithm applied to <code>userId:realm:password</code> (as
+	 * per RFC 2617). This is necessary as the password is never supplied and
+	 * therefore for <code>DIGEST</code> this MUST return an algorithm.
 	 * 
 	 * @return Algorithm.
 	 */
 	String getAlgorithm();
 
 	/**
-	 * <p>
-	 * Retrieves the credentials from the store.
-	 * <p>
-	 * The actual credentials are particular to the authentication scheme:
-	 * <ol>
-	 * <li>Basic: clear text password ({@link Charset} being US_ASCII)</li>
-	 * <li>Digest: encrypted &quot;username:realm:password&quot; as per the
-	 * algorithm. For example, if the algorithm were MD5 then the following
-	 * command would produce the appropriate value ({@link Charset} being
-	 * US_ASCII):
-	 * <code>echo -n &quot;username:realm:password&quot; | md5sum</code></li>
-	 * <li>Negotiate: as necessary for authentication</li>
-	 * </ol>
+	 * Retrieves the {@link CredentialEntry}.
 	 * 
 	 * @param userId
 	 *            User identifier.
 	 * @param realm
 	 *            Realm. May be <code>null</code> (especially in the case for
-	 *            Basic authentication).
-	 * @return Value as per above description.
+	 *            <code>Basic</code> authentication).
+	 * @return {@link CredentialEntry} or <code>null</code> if no
+	 *         {@link CredentialEntry} exists for parameters.
 	 * @throws AuthenticationException
-	 *             If fails to retrieve the credentials.
 	 */
-	byte[] retrieveCredentials(String userId, String realm)
-			throws AuthenticationException;
-
-	/**
-	 * Retrieves the roles for the user from the store.
-	 * 
-	 * @param userId
-	 *            User identifier.
-	 * @param realm
-	 *            Realm. May be <code>null</code> (especially in the case for
-	 *            Basic authentication).
-	 * @return {@link Set} of roles for the user.
-	 * @throws AuthenticationException
-	 *             If fails to retrieve the roles.
-	 */
-	Set<String> retrieveRoles(String userId, String realm)
+	CredentialEntry retrieveCredentialEntry(String userId, String realm)
 			throws AuthenticationException;
 
 }

@@ -27,6 +27,7 @@ import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.security.scheme.DigestHttpSecuritySource.Dependencies;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 
 import org.apache.commons.codec.binary.Hex;
@@ -60,6 +61,12 @@ public class DigestHttpSecuritySourceTest extends
 	 */
 	private final CredentialStore store = this
 			.createMock(CredentialStore.class);
+
+	/**
+	 * {@link CredentialEntry}.
+	 */
+	private final CredentialEntry entry = this
+			.createMock(CredentialEntry.class);
 
 	/**
 	 * Initiate.
@@ -150,15 +157,15 @@ public class DigestHttpSecuritySourceTest extends
 						this.session
 								.getAttribute(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY),
 						DigestHttpSecuritySource.MOCK_SECURITY_STATE);
-		this.recordReturn(this.store, this.store.retrieveCredentials("Mufasa",
-				REALM), digest);
+		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
+				"Mufasa", REALM), this.entry);
+		this.recordReturn(this.entry, this.entry.retrieveCredentials(), digest);
 		this.recordReturn(this.store, this.store.getAlgorithm(), ALGORITHM);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				request);
 		this.recordReturn(request, request.getMethod(), "GET");
-		this.recordReturn(this.store,
-				this.store.retrieveRoles("Mufasa", REALM), new HashSet<String>(
-						Arrays.asList("prince")));
+		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+				new HashSet<String>(Arrays.asList("prince")));
 
 		// Test
 		this.doAuthenticate("username=\"Mufasa\", realm=\"" + REALM

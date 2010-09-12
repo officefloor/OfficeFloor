@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource.Dependencies;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
 
 /**
@@ -44,6 +45,12 @@ public class BasicHttpSecuritySourceTest extends
 	 */
 	private final CredentialStore store = this
 			.createMock(CredentialStore.class);
+
+	/**
+	 * {@link CredentialEntry}.
+	 */
+	private final CredentialEntry entry = this
+			.createMock(CredentialEntry.class);
 
 	/**
 	 * Initiate.
@@ -74,11 +81,12 @@ public class BasicHttpSecuritySourceTest extends
 	 * Ensure can authenticate.
 	 */
 	public void testSimpleAuthenticate() throws Exception {
-		this.recordReturn(this.store, this.store.retrieveCredentials("Aladdin",
-				REALM), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store, this.store
-				.retrieveRoles("Aladdin", REALM), new HashSet<String>(Arrays
-				.asList("prince")));
+		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
+				"Aladdin", REALM), this.entry);
+		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+				new HashSet<String>(Arrays.asList("prince")));
 		this
 				.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin",
 						"prince");
@@ -88,11 +96,12 @@ public class BasicHttpSecuritySourceTest extends
 	 * Ensure can extra spacing.
 	 */
 	public void testExtraSpacing() throws Exception {
-		this.recordReturn(this.store, this.store.retrieveCredentials("Aladdin",
-				REALM), "open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
-		this.recordReturn(this.store, this.store
-				.retrieveRoles("Aladdin", REALM), new HashSet<String>(Arrays
-				.asList("prince")));
+		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
+				"Aladdin", REALM), this.entry);
+		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+				new HashSet<String>(Arrays.asList("prince")));
 		this.doAuthenticate("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin",
 				"prince");
 	}

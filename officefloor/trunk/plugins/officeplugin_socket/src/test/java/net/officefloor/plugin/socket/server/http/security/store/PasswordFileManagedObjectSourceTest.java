@@ -90,7 +90,8 @@ public class PasswordFileManagedObjectSourceTest extends OfficeFrameTestCase {
 		assertTrue("Object should be " + CredentialStore.class.getSimpleName(),
 				object instanceof CredentialStore);
 		CredentialStore store = (CredentialStore) object;
-		Set<String> roles = store.retrieveRoles("daniel", null);
+		CredentialEntry entry = store.retrieveCredentialEntry("daniel", null);
+		Set<String> roles = entry.retrieveRoles();
 		assertTrue("Incorrect role", roles.contains("founder"));
 	}
 
