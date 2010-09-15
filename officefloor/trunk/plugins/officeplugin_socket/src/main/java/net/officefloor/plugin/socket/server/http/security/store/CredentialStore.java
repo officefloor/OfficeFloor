@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.socket.server.http.security.store;
 
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.security.scheme.AuthenticationException;
 import net.officefloor.plugin.socket.server.http.security.scheme.HttpSecuritySource;
 
@@ -38,12 +40,24 @@ public interface CredentialStore {
 
 	/**
 	 * <p>
+	 * Non-blank value indicating no algorithm.
+	 * <p>
+	 * This is useful for property configurations of {@link ManagedObjectSource}
+	 * and {@link WorkSource} instances that need to indicate an algorithm (and
+	 * can not provide blank values for required properties).
+	 */
+	public static final String NO_ALGORITHM = "-";
+
+	/**
+	 * <p>
 	 * Obtains the algorithm used to encrypt credentials within this
 	 * {@link CredentialStore}.
 	 * <p>
-	 * Should the return be <code>null</code> or blank then the password is
-	 * considered to be stored in plain text. This is however only useful for
-	 * the <code>BASIC</code> authentication scheme.
+	 * Should the return be <code>null</code>, blank or {@link #NO_ALGORITHM}
+	 * then the password is considered to be stored in plain text. This is
+	 * however only useful for the <code>BASIC</code> authentication scheme due
+	 * to the nature of the other authentication schemes (such as
+	 * <code>DIGEST</code>).
 	 * <p>
 	 * It is expected that the credentials for <code>DIGEST</code> will be
 	 * stored as the algorithm applied to <code>userId:realm:password</code> (as

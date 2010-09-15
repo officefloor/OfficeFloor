@@ -95,7 +95,7 @@ public class HttpSecurityServiceImpl<D extends Enum<D>> implements
 		String authenticate = "";
 		HttpRequest request = this.connection.getHttpRequest();
 		for (HttpHeader header : request.getHeaders()) {
-			if ("Authenticate".equalsIgnoreCase(header.getName())) {
+			if ("Authorization".equalsIgnoreCase(header.getName())) {
 				authenticate = header.getValue();
 			}
 		}

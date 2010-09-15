@@ -42,11 +42,6 @@ public class JndiLdapManagedObjectSource
 	public static final String PROPERTY_ALGORITHM = "jndi.ldap.store.algorithm";
 
 	/**
-	 * Value indicating no algorithm.
-	 */
-	public static final String NO_ALGORITHM = "-";
-
-	/**
 	 * Name of property for the search base Dn for entries.
 	 */
 	public static final String PROPERTY_ENTRY_SEARCH_BASE_DN = "jndi.ldap.store.entry.search.base.dn";
