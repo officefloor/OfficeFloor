@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.socket.server.http.security.scheme;
 
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -85,6 +86,30 @@ public class BasicHttpSecuritySourceTest extends
 				"Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.store, this.store.getAlgorithm(), null);
+		this.recordReturn(this.entry, this.entry.retrieveRoles(),
+				new HashSet<String>(Arrays.asList("prince")));
+		this
+				.doAuthenticate("QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "Aladdin",
+						"prince");
+	}
+
+	/**
+	 * Ensure can authenticate with algorithm applied to credentials.
+	 */
+	public void testAlgorithmAuthenticate() throws Exception {
+
+		// Determine credentials
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		digest.update("open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		byte[] credentials = digest.digest();
+
+		// Test
+		this.recordReturn(this.store, this.store.retrieveCredentialEntry(
+				"Aladdin", REALM), this.entry);
+		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
+				credentials);
+		this.recordReturn(this.store, this.store.getAlgorithm(), "MD5");
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
 		this
@@ -100,6 +125,8 @@ public class BasicHttpSecuritySourceTest extends
 				"Aladdin", REALM), this.entry);
 		this.recordReturn(this.entry, this.entry.retrieveCredentials(),
 				"open sesame".getBytes(HttpRequestParserImpl.US_ASCII));
+		this.recordReturn(this.store, this.store.getAlgorithm(),
+				CredentialStore.NO_ALGORITHM);
 		this.recordReturn(this.entry, this.entry.retrieveRoles(),
 				new HashSet<String>(Arrays.asList("prince")));
 		this.doAuthenticate("    QWxhZGRpbjpvcGVuIHNlc2FtZQ==   ", "Aladdin",

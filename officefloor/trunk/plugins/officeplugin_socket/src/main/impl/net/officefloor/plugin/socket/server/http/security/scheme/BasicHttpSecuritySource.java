@@ -17,11 +17,14 @@
  */
 package net.officefloor.plugin.socket.server.http.security.scheme;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
@@ -29,6 +32,7 @@ import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 /**
@@ -43,6 +47,11 @@ public class BasicHttpSecuritySource implements
 	 * Name of property to retrieve the realm being secured.
 	 */
 	public static final String PROPERTY_REALM = "http.security.basic.realm";
+
+	/**
+	 * {@link Charset} for {@link HttpRequest} headers.
+	 */
+	private static final Charset US_ASCII = HttpRequestParserImpl.US_ASCII;
 
 	/**
 	 * Dependency keys.
@@ -83,24 +92,19 @@ public class BasicHttpSecuritySource implements
 			Map<Dependencies, Object> dependencies)
 			throws AuthenticationException {
 
-		// Decode Base64 credentials
-		byte[] credentials = Base64.decodeBase64(parameters);
+		// Decode Base64 credentials into userId:password text
+		byte[] userIdPasswordBytes = Base64.decodeBase64(parameters);
+		String userIdPassword = new String(userIdPasswordBytes, US_ASCII);
 
-		// Obtain the string value
-		String userIdPassword = new String(credentials,
-				HttpRequestParserImpl.US_ASCII);
-
-		// Obtain location of user Id to password separator
+		// Split out the userId and password
 		int separatorIndex = userIdPassword.indexOf(':');
 		if (separatorIndex < 0) {
 			return null; // no user/password to authenticate
 		}
-
-		// Have user Id and password, so parse out
 		String userId = userIdPassword.substring(0, separatorIndex);
 		String password = userIdPassword.substring(separatorIndex + 1);
 
-		// Obtain the credentials
+		// Obtain the credential entry for the connection
 		CredentialStore store = (CredentialStore) dependencies
 				.get(Dependencies.CREDENTIAL_STORE);
 		CredentialEntry entry = store.retrieveCredentialEntry(userId,
@@ -109,20 +113,32 @@ public class BasicHttpSecuritySource implements
 			return null; // unknown user
 		}
 
-		// Obtain the password for the user
-		byte[] usAsciiPassword = entry.retrieveCredentials();
-		String requiredPassword = new String(usAsciiPassword,
-				HttpRequestParserImpl.US_ASCII);
+		// Obtain the required credentials for the connection
+		byte[] requiredCredentials = entry.retrieveCredentials();
 
-		// Ensure match for authentication
-		if (!requiredPassword.equals(password)) {
-			return null; // not authenticated
+		// Translate password as per algorithm
+		byte[] inputCredentials = password.getBytes(US_ASCII);
+		String algorithm = store.getAlgorithm();
+		MessageDigest digest = CredentialStoreUtil.createDigest(algorithm);
+		if (digest != null) {
+			// Translate credentials as per algorithm
+			digest.update(inputCredentials);
+			inputCredentials = digest.digest();
 		}
 
-		// Obtain the roles for the user
-		Set<String> roles = entry.retrieveRoles();
+		// Ensure match for authentication
+		if (requiredCredentials.length != inputCredentials.length) {
+			return null; // not authenticated
+		} else {
+			for (int i = 0; i < requiredCredentials.length; i++) {
+				if (requiredCredentials[i] != inputCredentials[i]) {
+					return null; // not authenticated
+				}
+			}
+		}
 
-		// Return the Http Security
+		// Authenticated, so obtain roles and return the Http Security
+		Set<String> roles = entry.retrieveRoles();
 		return new HttpSecurityImpl(this.getAuthenticationScheme(), userId,
 				roles);
 	}

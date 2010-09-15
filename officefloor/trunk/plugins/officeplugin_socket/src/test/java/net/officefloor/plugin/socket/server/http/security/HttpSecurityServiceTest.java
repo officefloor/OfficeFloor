@@ -235,7 +235,7 @@ public class HttpSecurityServiceTest extends OfficeFrameTestCase {
 
 		// Add the HTTP header (if have value)
 		if (authenticateValue != null) {
-			headers.add(new HttpHeaderImpl("Authenticate", authenticateValue));
+			headers.add(new HttpHeaderImpl("Authorization", authenticateValue));
 		}
 
 		// Record obtaining the HTTP headers from request

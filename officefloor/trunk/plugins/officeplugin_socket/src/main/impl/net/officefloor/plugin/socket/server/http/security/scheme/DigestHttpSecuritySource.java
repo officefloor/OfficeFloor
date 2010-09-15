@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -37,6 +36,7 @@ import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialEntry;
 import net.officefloor.plugin.socket.server.http.security.store.CredentialStore;
+import net.officefloor.plugin.socket.server.http.security.store.CredentialStoreUtil;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 import org.apache.commons.codec.binary.Hex;
@@ -542,11 +542,7 @@ public class DigestHttpSecuritySource implements
 		 *             If fails to initiate for algorithm.
 		 */
 		public Digest(String algorithm) throws AuthenticationException {
-			try {
-				this.digest = MessageDigest.getInstance(algorithm);
-			} catch (NoSuchAlgorithmException ex) {
-				throw new AuthenticationException(ex);
-			}
+			this.digest = CredentialStoreUtil.createDigest(algorithm);
 		}
 
 		/**

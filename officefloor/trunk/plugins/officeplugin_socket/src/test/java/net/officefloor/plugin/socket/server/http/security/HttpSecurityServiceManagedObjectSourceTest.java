@@ -429,12 +429,13 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 						null);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getHeaders(), Arrays.asList(header));
-		this.recordReturn(header, header.getName(), "Authenticate");
+		this.recordReturn(header, header.getName(), "Authorization");
 		this.recordReturn(header, header.getValue(), "Basic "
 				+ base64UsernamePassword);
 		this.recordReturn(store, store.retrieveCredentialEntry(username,
 				"TestRealm"), entry);
 		this.recordReturn(entry, entry.retrieveCredentials(), passwordBytes);
+		this.recordReturn(store, store.getAlgorithm(), null);
 		this.recordReturn(entry, entry.retrieveRoles(), Collections.EMPTY_SET);
 		session.setAttribute("#HttpSecurity", null);
 		this.control(session).setMatcher(new AlwaysMatcher());

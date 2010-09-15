@@ -70,6 +70,17 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	private static int portStart = 12643;
 
 	/**
+	 * Obtains the next port number for testing.
+	 * 
+	 * @return Next port number for testing.
+	 */
+	public static synchronized int getAvailablePort() {
+		int port = portStart;
+		portStart++; // increment port for next text
+		return port;
+	}
+
+	/**
 	 * Port number to use for testing.
 	 */
 	private int port;
@@ -101,8 +112,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		super.setUp();
 
 		// Specify the port
-		port = portStart;
-		portStart++; // increment for next test
+		port = getAvailablePort();
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
