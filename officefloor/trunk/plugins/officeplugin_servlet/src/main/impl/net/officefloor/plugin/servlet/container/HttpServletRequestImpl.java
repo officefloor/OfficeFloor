@@ -43,12 +43,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
+import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
@@ -906,8 +906,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	public RequestDispatcher getRequestDispatcher(String path) {
 
 		// Determine path (absolute or relative)
-		String dispatcherPath = (path.startsWith("/") ? path
-				: this.servletPath + "/" + path);
+		String dispatcherPath = (path.startsWith("/") ? path : this.servletPath
+				+ "/" + path);
 
 		// Obtain the request dispatcher
 		return this.servletContext.getRequestDispatcher(dispatcherPath);
@@ -924,7 +924,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getAuthType() {
-		return this.security.getAuthType();
+		return this.security.getAuthenticationScheme();
 	}
 
 	@Override
