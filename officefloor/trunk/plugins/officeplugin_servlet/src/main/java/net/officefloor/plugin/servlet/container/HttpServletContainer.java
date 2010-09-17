@@ -23,9 +23,9 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 /**

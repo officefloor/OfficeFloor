@@ -47,13 +47,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.security.HttpSecurity;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
@@ -659,7 +659,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_Security() {
 		final Principal principal = this.createMock(Principal.class);
 		this.record_init("/test");
-		this.recordReturn(this.security, this.security.getAuthType(), "BASIC");
+		this.recordReturn(this.security, this.security
+				.getAuthenticationScheme(), "BASIC");
 		this.recordReturn(this.security, this.security.getUserPrincipal(),
 				principal);
 		this.recordReturn(this.security, this.security.getRemoteUser(),
