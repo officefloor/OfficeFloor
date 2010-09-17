@@ -94,7 +94,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurity security = this.createMock(HttpSecurity.class);
+	private HttpSecurity security = this.createMock(HttpSecurity.class);
 
 	/**
 	 * {@link ServletContext}.
@@ -675,8 +675,28 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertEquals("getUserPrincipal()", principal, req
 						.getUserPrincipal());
 				assertEquals("getRemoteUser()", "daniel", req.getRemoteUser());
-				assertEquals("isUserInRole(role)", true, req
-						.isUserInRole("role"));
+				assertTrue("isUserInRole(role)", req.isUserInRole("role"));
+			}
+		});
+	}
+
+	/**
+	 * Ensure handle security methods for anonymous request.
+	 */
+	public void test_req_Security_Anonymous() {
+		// Anonymous request so no security
+		this.security = null;
+
+		// Test
+		this.record_init("/test");
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertNull("getAuthType()", req.getAuthType());
+				assertNull("getUserPrincipal()", req.getUserPrincipal());
+				assertNull("getRemoteUser()", req.getRemoteUser());
+				assertFalse("isUserInRole(role)", req.isUserInRole("role"));
 			}
 		});
 	}

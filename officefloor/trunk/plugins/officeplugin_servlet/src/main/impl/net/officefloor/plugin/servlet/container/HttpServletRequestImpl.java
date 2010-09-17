@@ -924,22 +924,28 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getAuthType() {
-		return this.security.getAuthenticationScheme();
+		// Handle based on whether secured
+		return (this.security == null ? null : this.security
+				.getAuthenticationScheme());
 	}
 
 	@Override
 	public Principal getUserPrincipal() {
-		return this.security.getUserPrincipal();
+		// Handle based on whether secured
+		return (this.security == null ? null : this.security.getUserPrincipal());
 	}
 
 	@Override
 	public String getRemoteUser() {
-		return this.security.getRemoteUser();
+		// Handle based on whether secured
+		return (this.security == null ? null : this.security.getRemoteUser());
 	}
 
 	@Override
 	public boolean isUserInRole(String role) {
-		return this.security.isUserInRole(role);
+		// Handle based on whether secured
+		return (this.security == null ? false : this.security
+				.isUserInRole(role));
 	}
 
 	/*
