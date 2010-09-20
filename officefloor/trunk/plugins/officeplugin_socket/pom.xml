@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.plugin</groupId>
@@ -26,6 +26,7 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
+								<source>src/main/test</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -44,7 +45,7 @@
 			<artifactId>commons-httpclient
             </artifactId>
 			<version>3.1</version>
-			<scope>test</scope>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
