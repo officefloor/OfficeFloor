@@ -68,7 +68,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Token name for the Session Id.
 	 */
-	private final static String SESSION_ID_TOKEN_NAME = "JSESSIONID";
+	private static final String SESSION_ID_TOKEN_NAME = "JSESSIONID";
+
+	/**
+	 * Attribute for last access time.
+	 */
+	private static final String ATTRIBUTE_LAST_ACCESS_TIME = "#HttpServlet.LastAccessTime#";
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -558,6 +563,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@SuppressWarnings("unchecked")
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
+
+				// Remove the last access time attribute for below testing
+				req.removeAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
+
 				// Ensure initially no attributes
 				assertFalse("Should be no attributes initially", req
 						.getAttributeNames().hasMoreElements());
@@ -729,6 +738,101 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						.getId());
 			}
 		});
+	}
+
+	/**
+	 * Ensure able to obtain last access time from the request attributes.
+	 */
+	public void test_req_HttpSession_LastAccessTimeViaRequest() {
+		final Long LAST_ACCESS_TIME = new Long(1000);
+
+		// Obtain from request attributes
+		this.record_init("/test");
+
+		// Last access time from request
+		this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, LAST_ACCESS_TIME);
+
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				javax.servlet.http.HttpSession httpSession = req.getSession();
+				assertEquals("Incorrect last access time", LAST_ACCESS_TIME
+						.longValue(), httpSession.getLastAccessedTime());
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain last access time from the session attributes.
+	 */
+	public void test_req_HttpSession_LastAccessTimeViaSession() {
+		final Long LAST_ACCESS_TIME = new Long(2000);
+		final long CURRENT_TIME = 3000;
+
+		// Last access time from session
+		this.session.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
+		this.control(this.session).setReturnValue(LAST_ACCESS_TIME);
+		this.recordReturn(this.clock, this.clock.currentTimeMillis(),
+				CURRENT_TIME);
+		this.session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
+				CURRENT_TIME));
+
+		// Record remaining
+		this.record_init("/test");
+
+		// Remove after initialising (to obtain from session)
+		this.attributes.remove(ATTRIBUTE_LAST_ACCESS_TIME);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				javax.servlet.http.HttpSession httpSession = req.getSession();
+				assertEquals("Incorrect last access time", LAST_ACCESS_TIME
+						.longValue(), httpSession.getLastAccessedTime());
+			}
+		});
+
+		// Ensure last access time in request attributes
+		assertEquals("Incorrect last access time", LAST_ACCESS_TIME,
+				this.attributes.get(ATTRIBUTE_LAST_ACCESS_TIME));
+	}
+
+	/**
+	 * Ensure able to obtain last access time for first request.
+	 */
+	public void test_req_HttpSession_LastAccessTimeForFirstRequest() {
+		final long CURRENT_TIME = 5000;
+
+		// Record using current time (no previous request)
+		this.recordReturn(this.session, this.session
+				.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME), null);
+		this.recordReturn(this.clock, this.clock.currentTimeMillis(),
+				CURRENT_TIME);
+		this.session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
+				CURRENT_TIME));
+
+		// Record remaining
+		this.record_init("/test");
+
+		// Remove after initialising (to use current time)
+		this.attributes.remove(ATTRIBUTE_LAST_ACCESS_TIME);
+
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				javax.servlet.http.HttpSession httpSession = req.getSession();
+				assertEquals("Incorrect last access time", CURRENT_TIME,
+						httpSession.getLastAccessedTime());
+			}
+		});
+
+		// Ensure last access time in request attributes
+		assertEquals("Incorrect last access time", new Long(CURRENT_TIME),
+				this.attributes.get(ATTRIBUTE_LAST_ACCESS_TIME));
 	}
 
 	/**
@@ -1457,6 +1561,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		final OutputBufferStream bufferStream = this
 				.createMock(OutputBufferStream.class);
 
+		// Load last access time
+		this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, new Long(10));
+
 		// Record obtaining the request and responses
 		this.recordReturn(this.session, this.session.getTokenName(),
 				SESSION_ID_TOKEN_NAME);
@@ -1483,7 +1590,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		try {
 
 			// Create additional unused mocks
-			final long lastAccessTime = 1000;
 			final Locale locale = Locale.getDefault();
 
 			// Replay
@@ -1496,8 +1602,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					locale);
 
 			// Process a request
-			container.service(this.connection, this.attributes, this.security,
-					lastAccessTime, this.session);
+			container.service(this.connection, this.attributes, this.session,
+					this.security);
 
 			// Verify functionality
 			this.verifyMockObjects();
