@@ -42,6 +42,12 @@ import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseExc
 public class HttpServletContainerImpl implements HttpServletContainer {
 
 	/**
+	 * Name of attribute containing the last access time for the
+	 * {@link HttpSession}.
+	 */
+	private static final String ATTRIBUTE_LAST_ACCESS_TIME = "#HttpServlet.LastAccessTime#";
+
+	/**
 	 * {@link ServletContext}.
 	 */
 	private final ServletContext servletContext;
@@ -109,16 +115,37 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 	@Override
 	public void service(ServerHttpConnection connection,
-			Map<String, Object> attributes, HttpSecurity security,
-			long lastAccessTime, HttpSession session) throws ServletException,
-			IOException {
+			Map<String, Object> attributes, HttpSession session,
+			HttpSecurity security) throws ServletException, IOException {
+
+		// Obtain the last access time
+		Long lastAccessTime = (Long) attributes.get(ATTRIBUTE_LAST_ACCESS_TIME);
+		if (lastAccessTime == null) {
+			// Not available for request, so use last request time
+			lastAccessTime = (Long) session
+					.getAttribute(ATTRIBUTE_LAST_ACCESS_TIME);
+			long currentTime = this.clock.currentTimeMillis();
+			if (lastAccessTime == null) {
+				// No last request, so use current time
+				lastAccessTime = new Long(currentTime);
+			}
+
+			// Update request with time so only the one time per request.
+			// Above get will return value for further request servicing.
+			attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, lastAccessTime);
+
+			// Update session for next request (with time of this request)
+			session.setAttribute(ATTRIBUTE_LAST_ACCESS_TIME, new Long(
+					currentTime));
+		}
 
 		HttpServletRequest request;
 		HttpServletResponse response;
 		try {
 			// Create the HTTP session
 			javax.servlet.http.HttpSession httpSession = new HttpSessionImpl(
-					session, lastAccessTime, this.clock, this.servletContext);
+					session, lastAccessTime.longValue(), this.clock,
+					this.servletContext);
 
 			// Obtain the session Id token name
 			String sessionIdTokenName = session.getTokenName();

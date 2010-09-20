@@ -43,20 +43,18 @@ public interface HttpServletContainer {
 	 *            {@link HttpRequest} to service.
 	 * @param attributes
 	 *            Attributes in {@link HttpRequest} context.
-	 * @param security
-	 *            {@link HttpSecurity}.
-	 * @param lastAccessTime
-	 *            Last access time of the client.
 	 * @param session
 	 *            {@link HttpSession} for the {@link HttpRequest}.
+	 * @param security
+	 *            {@link HttpSecurity}. May be <code>null</code> if anonymous
+	 *            {@link HttpRequest}.
 	 * @throws ServletException
 	 *             As per {@link HttpServlet} API.
 	 * @throws IOException
 	 *             As per {@link HttpServlet} API.
 	 */
 	void service(ServerHttpConnection connection,
-			Map<String, Object> attributes, HttpSecurity security,
-			long lastAccessTime, HttpSession session) throws ServletException,
-			IOException;
+			Map<String, Object> attributes, HttpSession session,
+			HttpSecurity security) throws ServletException, IOException;
 
 }
