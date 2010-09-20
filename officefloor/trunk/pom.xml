@@ -242,6 +242,11 @@
 				<artifactId>easymock</artifactId>
 				<version>1.1</version>
 			</dependency>
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>3.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -329,35 +334,52 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-					<phase>validate</phase>
-					<goals>
-						<goal>run</goal>
-					</goals>
-					<configuration>
-						<tasks>
-							<!-- Obtain the raw test class path which has greatest number of dependencies 
-							(plus ensure a property is always available for replacefilterfile functionality to not fail) -->
-							<property name="maven_classpath" refid="maven.test.classpath"/>
-							<echo file="${project.build.directory}/verifier/dependencies.raw" message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
-							
-							<!-- Remove the compile and test classes directory from the class path -->
-							<replace file="${project.build.directory}/verifier/dependencies.raw" token="${project.build.outputDirectory}" value="" />
-							<replace file="${project.build.directory}/verifier/dependencies.raw" token="${project.build.testOutputDirectory}" value="" />
-							
-							<!-- Transform into properties file of: ${artifactId}_version=${version} -->
-							<copy file="${project.build.directory}/verifier/dependencies.raw" tofile="${project.build.directory}/verifier/dependencies.properties">
-								<filterchain>
-									<tokenfilter>
-										<stringtokenizer delims="${path.separator}" suppressdelims="true" />
-										<replaceregex pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" replace="@{\2_version}=\3${line.separator}" /> 
-									</tokenfilter>
-								</filterchain>
-							</copy>
-							
-							<!-- Replace dependency versions in verifications file -->
-							<replace file="${project.build.directory}/verifier/verifications.xml" replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
-						</tasks>
-					</configuration>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<!--
+									Obtain the raw test class path which has greatest number of
+									dependencies (plus ensure a property is always available for
+									replacefilterfile functionality to not fail)
+								-->
+								<property name="maven_classpath" refid="maven.test.classpath" />
+								<echo file="${project.build.directory}/verifier/dependencies.raw"
+									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
+
+								<!--
+									Remove the compile and test classes directory from the class
+									path
+								-->
+								<replace file="${project.build.directory}/verifier/dependencies.raw"
+									token="${project.build.outputDirectory}" value="" />
+								<replace file="${project.build.directory}/verifier/dependencies.raw"
+									token="${project.build.testOutputDirectory}" value="" />
+
+								<!--
+									Transform into properties file of:
+									${artifactId}_version=${version}
+								-->
+								<copy file="${project.build.directory}/verifier/dependencies.raw"
+									tofile="${project.build.directory}/verifier/dependencies.properties">
+									<filterchain>
+										<tokenfilter>
+											<stringtokenizer delims="${path.separator}"
+												suppressdelims="true" />
+											<replaceregex
+												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
+												replace="@{\2_version}=\3${line.separator}" />
+										</tokenfilter>
+									</filterchain>
+								</copy>
+
+								<!-- Replace dependency versions in verifications file -->
+								<replace file="${project.build.directory}/verifier/verifications.xml"
+									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
+							</tasks>
+						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
@@ -370,7 +392,10 @@
 				</dependencies>
 			</plugin>
 			<plugin>
-				<!-- Verification done during initialise to allow further setup in validation -->
+				<!--
+					Verification done during initialise to allow further setup in
+					validation
+				-->
 				<artifactId>maven-verifier-plugin</artifactId>
 				<executions>
 					<execution>
