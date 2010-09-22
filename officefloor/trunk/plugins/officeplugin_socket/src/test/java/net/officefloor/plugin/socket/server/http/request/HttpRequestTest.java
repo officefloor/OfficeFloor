@@ -40,24 +40,25 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.StatusLine;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 
 /**
  * Runs requests against a started instance based on XML configuration.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Create the {@link TestSuite} of the tests to be run.
-	 *
+	 * 
 	 * @return {@link TestSuite} of tests to be run.
 	 */
 	public static Test suite() throws Exception {
@@ -144,7 +145,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Loads the tests for the *Test.xml files.
-	 *
+	 * 
 	 * @param testNamePrefix
 	 *            Prefix for the test name.
 	 * @param directory
@@ -204,7 +205,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Instantiate.
-	 *
+	 * 
 	 * @param testName
 	 *            Name of the test.
 	 * @param configuration
@@ -221,7 +222,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#runTest()
 	 */
 	@Override
@@ -262,13 +263,12 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 			// Create the method
 			String requestUrl = this.server.getServerUrl() + request.path;
-			HttpMethod method;
+			HttpUriRequest method;
 			if ("GET".equals(request.method)) {
-				method = new GetMethod(requestUrl);
+				method = new HttpGet(requestUrl);
 			} else if ("POST".equals(request.method)) {
-				PostMethod post = new PostMethod(requestUrl);
-				post.setRequestEntity(new StringRequestEntity(request.body,
-						null, null));
+				HttpPost post = new HttpPost(requestUrl);
+				post.setEntity(new StringEntity(request.body));
 				method = post;
 			} else {
 				TestCase
@@ -278,7 +278,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 
 			// Provide any headers to the request
 			for (HeaderConfig header : request.headers) {
-				method.addRequestHeader(header.name, header.value);
+				method.addHeader(header.name, header.value);
 			}
 
 			// Indicate the processing
@@ -287,59 +287,53 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			System.out.println("isClose=" + process.isClose);
 			System.out.println(process.body);
 
-			try {
-				// Execute the method
-				client.executeMethod(method);
+			// Execute the method
+			HttpResponse methodResponse = client.execute(method);
 
-				// Obtain the response
-				String actualResponseBody = method.getResponseBodyAsString();
+			// Obtain the response body
+			String actualResponseBody = MockHttpServer
+					.getEntityBody(methodResponse);
 
-				// Validate no failure in processing
-				this.server.validateNoTopLevelEscalation();
+			// Validate no failure in processing
+			this.server.validateNoTopLevelEscalation();
 
-				// Indicate the expected response
-				ResponseConfig response = communication.response;
-				System.out.println("--- EXPECTED RESPONSE (isClosed="
-						+ response.isClosed + ") ---");
-				System.out.println(response.status + " " + response.version
-						+ " " + response.message);
-				for (HeaderConfig header : response.headers) {
-					System.out.println(header.name + ": " + header.value);
-				}
-				System.out.println("\n" + response.body);
-
-				// Indicate the actual response
-				System.out.println("--- ACTUAL RESPONSE ---");
-				StatusLine status = method.getStatusLine();
-				System.out.println(status.getStatusCode() + " "
-						+ status.getHttpVersion() + " "
-						+ status.getReasonPhrase());
-				for (Header header : method.getResponseHeaders()) {
-					System.out.println(header.getName() + ": "
-							+ header.getValue());
-				}
-				System.out.println();
-				System.out.println(actualResponseBody);
-
-				// Validate the response
-				assertEquals("Incorrect response status", response.status,
-						status.getStatusCode());
-				assertEquals("Incorrect status message", response.message,
-						status.getReasonPhrase());
-				assertEquals("Incorrect response HTTP version",
-						response.version, status.getHttpVersion());
-				for (HeaderConfig header : response.headers) {
-					assertEquals("Incorrect response header '" + header.name
-							+ "'", header.value, method.getResponseHeader(
-							header.name).getValue());
-				}
-				assertEquals("Incorrect response body", response.body,
-						actualResponseBody);
-
-			} finally {
-				// Release the method from the connection
-				method.releaseConnection();
+			// Indicate the expected response
+			ResponseConfig response = communication.response;
+			System.out.println("--- EXPECTED RESPONSE (isClosed="
+					+ response.isClosed + ") ---");
+			System.out.println(response.status + " " + response.version + " "
+					+ response.message);
+			for (HeaderConfig header : response.headers) {
+				System.out.println(header.name + ": " + header.value);
 			}
+			System.out.println("\n" + response.body);
+
+			// Indicate the actual response
+			System.out.println("--- ACTUAL RESPONSE ---");
+			StatusLine status = methodResponse.getStatusLine();
+			System.out.println(status.getStatusCode() + " "
+					+ status.getProtocolVersion() + " "
+					+ status.getReasonPhrase());
+			for (Header header : methodResponse.getAllHeaders()) {
+				System.out.println(header.getName() + ": " + header.getValue());
+			}
+			System.out.println();
+			System.out.println(actualResponseBody);
+
+			// Validate the response
+			assertEquals("Incorrect response status", response.status, status
+					.getStatusCode());
+			assertEquals("Incorrect status message", response.message, status
+					.getReasonPhrase());
+			assertEquals("Incorrect response HTTP version", response.version,
+					status.getProtocolVersion().toString());
+			for (HeaderConfig header : response.headers) {
+				assertEquals("Incorrect response header '" + header.name + "'",
+						header.value, methodResponse
+								.getFirstHeader(header.name).getValue());
+			}
+			assertEquals("Incorrect response body", response.body,
+					actualResponseBody);
 		}
 	}
 

@@ -34,12 +34,14 @@ import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
@@ -85,20 +87,18 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	public void testHttpSessionStateAcrossCalls() throws Exception {
 
 		// Loop calling server (HttpClient should send back Session Id)
-		HttpClient client = new HttpClient();
+		HttpClient client = new DefaultHttpClient();
 		for (int i = 0; i < 10; i++) {
 
 			// Call the server
-			GetMethod method = new GetMethod(this.getServerUrl());
-			int status = client.executeMethod(method);
+			HttpGet request = new HttpGet(this.getServerUrl());
+			HttpResponse response = client.execute(request);
+			int status = response.getStatusLine().getStatusCode();
+			String callIndex = MockHttpServer.getEntityBody(response);
 
 			// Ensure results match and call index remembered by Session
-			String callIndex = method.getResponseBodyAsString();
 			assertEquals("Call should be successful", 200, status);
 			assertEquals("Incorrect call index", String.valueOf(i), callIndex);
-
-			// Release connection for next call
-			method.releaseConnection();
 		}
 	}
 
@@ -109,7 +109,7 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 
 		/**
 		 * Services the {@link HttpRequest}.
-		 *
+		 * 
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 * @param session

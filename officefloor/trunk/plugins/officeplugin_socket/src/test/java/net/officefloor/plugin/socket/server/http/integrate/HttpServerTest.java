@@ -25,10 +25,11 @@ import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
@@ -71,7 +72,7 @@ public class HttpServerTest extends MockHttpServer {
 	public void testGetRequest() throws Exception {
 
 		// Create the request
-		HttpMethod method = new GetMethod(this.getServerUrl() + "/path");
+		HttpGet method = new HttpGet(this.getServerUrl() + "/path");
 
 		// Obtain the response
 		String responseBody = this.doRequest(method);
@@ -92,9 +93,9 @@ public class HttpServerTest extends MockHttpServer {
 		// Validate multiple tests
 		for (int i = 0; i < 100; i++) {
 			// Execute the particular request
-			HttpMethod method = new GetMethod(this.getServerUrl() + "/path");
+			HttpUriRequest request = new HttpGet(this.getServerUrl() + "/path");
 			assertEquals("Incorrect response body for request " + i,
-					"Hello World", this.doRequest(client, method));
+					"Hello World", this.doRequest(client, request));
 		}
 	}
 
@@ -104,10 +105,10 @@ public class HttpServerTest extends MockHttpServer {
 	public void testPostRequest() throws Exception {
 
 		// Create the request
-		HttpMethod method = new PostMethod(this.getServerUrl() + "/path");
+		HttpUriRequest request = new HttpPost(this.getServerUrl() + "/path");
 
 		// Obtain the response body
-		String responseBody = this.doRequest(method);
+		String responseBody = this.doRequest(request);
 		assertEquals("Incorrect response body", "Hello World", responseBody);
 
 		// Output the response entity
@@ -115,39 +116,38 @@ public class HttpServerTest extends MockHttpServer {
 	}
 
 	/**
-	 * Does the {@link HttpMethod}.
+	 * Does the {@link HttpUriRequest}.
 	 * 
 	 * @param request
-	 *            {@link HttpMethod}.
+	 *            {@link HttpUriRequest}.
 	 * @return Resulting body of response.
 	 */
-	private String doRequest(HttpMethod method) throws Exception {
+	private String doRequest(HttpUriRequest request) throws Exception {
 		// Do the request
-		return this.doRequest(this.createHttpClient(), method);
+		return this.doRequest(this.createHttpClient(), request);
 	}
 
 	/**
-	 * Does the {@link HttpMethod}.
+	 * Does the {@link HttpUriRequest}.
 	 * 
 	 * @param client
 	 *            {@link HttpClient}.
-	 * @param method
-	 *            {@link HttpMethod}.
+	 * @param request
+	 *            {@link HttpUriRequest}.
 	 * @return Resulting body of response.
 	 */
-	private String doRequest(HttpClient client, HttpMethod method)
+	private String doRequest(HttpClient client, HttpUriRequest request)
 			throws Exception {
-		try {
-			// Do the request and obtain the response
-			int status = client.executeMethod(method);
-			assertEquals("Incorrect status", 200, status);
+		// Do the request and obtain the response
+		HttpResponse response = client.execute(request);
+		int status = response.getStatusLine().getStatusCode();
+		assertEquals("Incorrect status", 200, status);
 
-			// Return the response
-			return method.getResponseBodyAsString();
+		// Read in the body of the response
+		String body = MockHttpServer.getEntityBody(response);
 
-		} finally {
-			method.releaseConnection();
-		}
+		// Return the body
+		return body;
 	}
 
 }

@@ -3,7 +3,6 @@
 
 	<communication>
 		<request method="POST" path="/path" version="HTTP/1.1">
-			<header name="Content-Length" value="3" />
 			<body>abc</body>
 		</request>
 		<process close="true">
