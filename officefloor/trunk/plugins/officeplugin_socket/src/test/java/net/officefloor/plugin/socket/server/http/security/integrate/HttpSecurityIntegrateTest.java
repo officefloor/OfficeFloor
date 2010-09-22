@@ -54,10 +54,11 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Integrate tests the {@link HttpSecurity} {@link WorkSource} and
@@ -75,7 +76,7 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link HttpClient} to use for testing.
 	 */
-	private final HttpClient client = new HttpClient();
+	private final DefaultHttpClient client = new DefaultHttpClient();
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -227,41 +228,43 @@ public class HttpSecurityIntegrateTest extends AbstractOfficeConstructTestCase {
 	public void testIntegration() throws Exception {
 
 		// Create the request
-		GetMethod method = new GetMethod("http://localhost:" + PORT);
+		HttpGet request = new HttpGet("http://localhost:" + PORT);
 
 		// Should not authenticate (without credentials)
-		this.doRequest(method, 401, "Please try again");
+		this.doRequest(request, 401, "Please try again");
 
 		// Should authenticate with credentials
-		this.client.getState().setCredentials(
+		this.client.getCredentialsProvider().setCredentials(
 				new AuthScope(null, -1, "TestRealm"),
 				new UsernamePasswordCredentials("daniel", "password"));
-		method.setDoAuthentication(true);
-		this.doRequest(method, 200, "Serviced");
+		this.doRequest(request, 200, "Serviced");
 	}
 
 	/**
-	 * Asserts the response from the {@link GetMethod}.
+	 * Asserts the response from the {@link HttpGet}.
 	 * 
-	 * @param method
-	 *            {@link GetMethod}.
+	 * @param request
+	 *            {@link HttpGet}.
+	 * @param expectedStatus
+	 *            Expected status.
+	 * @param expectedBodyContent
+	 *            Expected body content.
 	 */
-	private void doRequest(GetMethod method, int expectedStatus,
+	private void doRequest(HttpGet request, int expectedStatus,
 			String expectedBodyContent) {
 		try {
 			// Execute the method
-			int status = this.client.executeMethod(method);
+			org.apache.http.HttpResponse response = this.client
+					.execute(request);
+			int status = response.getStatusLine().getStatusCode();
+			String body = MockHttpServer.getEntityBody(response);
 
 			// Verify response
 			assertEquals("Should be successful", expectedStatus, status);
-			assertEquals("Incorrect response body", expectedBodyContent, method
-					.getResponseBodyAsString());
+			assertEquals("Incorrect response body", expectedBodyContent, body);
 
 		} catch (Exception ex) {
 			throw fail(ex);
-		} finally {
-			// Ensure release connection
-			method.releaseConnection();
 		}
 	}
 

@@ -28,8 +28,10 @@ import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Ensure integration of {@link HttpTemplateWorkSource} and
@@ -77,7 +79,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	public void testRoute() throws Exception {
 
 		// Create HTTP Client
-		HttpClient client = new HttpClient();
+		HttpClient client = new DefaultHttpClient();
 
 		// Request the initial page (PageOne)
 		Properties initialPage = this.doRequest(
@@ -111,21 +113,17 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 			throws Exception {
 
 		// Do the request
-		GetMethod method = new GetMethod("http://localhost:10101" + uriPath);
-		try {
-			int status = client.executeMethod(method);
-			assertEquals("Must be successful", 200, status);
+		HttpGet method = new HttpGet("http://localhost:10101" + uriPath);
+		HttpResponse response = client.execute(method);
+		int status = response.getStatusLine().getStatusCode();
+		assertEquals("Must be successful", 200, status);
 
-			// Load properties from response
-			Properties properties = new Properties();
-			properties.load(method.getResponseBodyAsStream());
+		// Load properties from response
+		Properties properties = new Properties();
+		properties.load(response.getEntity().getContent());
 
-			// Return the properties
-			return properties;
-
-		} finally {
-			method.releaseConnection();
-		}
+		// Return the properties
+		return properties;
 	}
 
 }
