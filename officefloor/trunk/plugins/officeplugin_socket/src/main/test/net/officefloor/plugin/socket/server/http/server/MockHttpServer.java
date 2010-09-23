@@ -28,6 +28,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -150,6 +152,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	private boolean isServerSecure = false;
 
 	/**
+	 * Listing of the {@link HttpClient} instances.
+	 */
+	private final List<HttpClient> httpClients = new LinkedList<HttpClient>();
+
+	/**
 	 * Flags to setup the {@link MockHttpServer} with secure connections.
 	 */
 	public void setupSecure() {
@@ -265,6 +272,8 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	 * @return {@link HttpClient} to connect to this {@link MockHttpServer}.
 	 */
 	public HttpClient createHttpClient() {
+
+		// Create the HTTP client
 		HttpClient client = new DefaultHttpClient();
 		if (this.isServerSecure()) {
 			// Configure to be secure client
@@ -272,6 +281,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 			Scheme scheme = new Scheme("https", socketFactory, this.port);
 			client.getConnectionManager().getSchemeRegistry().register(scheme);
 		}
+
+		// Register the HTTP client for cleanup
+		this.httpClients.add(client);
+
+		// Return the HTTP client
 		return client;
 	}
 
@@ -304,6 +318,17 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	protected void setUp() throws Exception {
 		// Setup to use this as TestCase
 		this.startup(this);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		// Shutdown the HTTP Clients
+		for (HttpClient client : this.httpClients) {
+			client.getConnectionManager().shutdown();
+		}
+
+		// Clean up parent
+		super.tearDown();
 	}
 
 	/*
