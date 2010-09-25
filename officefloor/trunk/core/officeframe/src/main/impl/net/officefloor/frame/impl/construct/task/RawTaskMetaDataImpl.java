@@ -69,7 +69,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Task}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
@@ -77,7 +77,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Obtains the {@link RawTaskMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawTaskMetaDataFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param configuration
@@ -179,6 +179,13 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		Class<?> parameterType = null;
 		NEXT_OBJECT: for (int i = 0; i < objectConfigurations.length; i++) {
 			TaskObjectConfiguration<d> objectConfiguration = objectConfigurations[i];
+
+			// Ensure have configuration
+			if (objectConfiguration == null) {
+				issues.addIssue(AssetType.TASK, taskName,
+						"No object configuration at index " + i);
+				continue NEXT_OBJECT; // must have configuration
+			}
 
 			// Obtain the type of object required
 			Class<?> objectType = objectConfiguration.getObjectType();
@@ -310,7 +317,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * Recursively loads all the {@link ManagedObjectIndex} instances for the
 	 * {@link RawBoundManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param boundMo
 	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @param requiredManagedObjects
@@ -349,7 +356,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Creates the {@link TaskDutyAssociation} instances.
-	 *
+	 * 
 	 * @param configurations
 	 *            {@link TaskDutyConfiguration} instances.
 	 * @param rawWorkMetaData
@@ -459,7 +466,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * <p>
 	 * This is necessary for coordinating so that dependencies are coordinated
 	 * before the {@link ManagedObject} instances using them are coordinated.
-	 *
+	 * 
 	 * @param requiredManagedObjectIndexes
 	 *            Listing of required {@link ManagedObject} instances to be
 	 *            sorted.
@@ -573,7 +580,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param message
 		 *            Initiate with description for {@link OfficeFloorIssues}.
 		 */

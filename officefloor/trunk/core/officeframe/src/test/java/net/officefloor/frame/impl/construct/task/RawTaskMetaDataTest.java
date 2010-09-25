@@ -68,7 +68,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link RawTaskMetaDataImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends Enum<F>>
@@ -397,6 +397,25 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
 		this.record_taskIssue("Incompatible parameter types ("
 				+ paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can handle {@link ManagedObject} not configured for dependency.
+	 */
+	public void testMissingManagedObject() {
+
+		// Record null managed object configuration
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { null });
+		this.record_taskIssue("No object configuration at index 0");
 		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
@@ -1703,7 +1722,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 * Records obtaining the {@link RawManagedObjectMetaData} for a
 	 * {@link RawBoundManagedObjectMetaData} with a single
 	 * {@link RawBoundManagedObjectInstanceMetaData}.
-	 *
+	 * 
 	 * @param rawMo
 	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @param rawInstanceMo
@@ -1727,7 +1746,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * Records sorting the {@link RawBoundManagedObjectMetaData} for
 	 * coordinating.
-	 *
+	 * 
 	 * @param boundManagedObjects
 	 *            Listing of {@link RawBoundManagedObjectMetaData} to be sorted.
 	 */
@@ -1740,7 +1759,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Records loading the dependencies.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link LoadDependencies}.
 	 */
@@ -1750,7 +1769,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Records loading the dependencies.
-	 *
+	 * 
 	 * @param mo
 	 *            {@link LoadDependencies}.
 	 * @param loadedDependencies
@@ -1841,7 +1860,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Records an issue on the {@link OfficeFloorIssues} about the {@link Task}.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Issue description expected.
 	 */
@@ -1851,7 +1870,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Constructs the {@link RawTaskMetaData}.
-	 *
+	 * 
 	 * @param isExpectConstruct
 	 *            If expected to be constructed.
 	 * @return {@link RawTaskMetaData}.
@@ -1876,7 +1895,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * Fully constructs the {@link RawTaskMetaData} by ensuring remaining state
 	 * is loaded. Will always expect to construct the {@link RawTaskMetaData}.
-	 *
+	 * 
 	 * @return {@link RawTaskMetaData}.
 	 */
 	private RawTaskMetaData<W, D, F> fullyConstructRawTaskMetaData() {
