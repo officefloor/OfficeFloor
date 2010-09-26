@@ -556,11 +556,33 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 								// B dependent on A, so A must come first
 								return 1;
 							} else {
-								// No dependency relationship (same)
-								return 0;
+								/*
+								 * No dependency relationship. As the sorting
+								 * only changes on differences (non 0 value)
+								 * then need means to differentiate when no
+								 * dependency relationship.
+								 */
+
+								// Least number of dependencies first
+								int value = aDep.size() - bDep.size();
+								if (value == 0) {
+									// Same dependencies, so base on scope
+									value = a.getManagedObjectScope().ordinal()
+											- b.getManagedObjectScope()
+													.ordinal();
+									if (value == 0) {
+										// Same scope, so arbitrary order
+										value = a
+												.getIndexOfManagedObjectWithinScope()
+												- b
+														.getIndexOfManagedObjectWithinScope();
+									}
+								}
+								return value;
 							}
 						}
 					});
+
 		} catch (CyclicDependencyException ex) {
 			// Register issue that cyclic dependency
 			issues.addIssue(AssetType.TASK, taskName, ex.getMessage());

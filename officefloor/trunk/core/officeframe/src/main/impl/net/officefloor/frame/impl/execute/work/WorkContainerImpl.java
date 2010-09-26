@@ -44,7 +44,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container of a {@link Work} instance.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
@@ -73,7 +73,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param work
 	 *            {@link Work} to be managed.
 	 * @param workMetaData
@@ -247,7 +247,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Indicate not ready on first managed object not ready
-			if (!container.isManagedObjectReady(jobContext, jobNode, notifySet)) {
+			if (!container.isManagedObjectReady(this, jobContext, jobNode,
+					notifySet)) {
 				return false;
 			}
 		}

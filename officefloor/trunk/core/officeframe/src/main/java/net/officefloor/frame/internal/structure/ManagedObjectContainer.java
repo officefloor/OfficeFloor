@@ -25,14 +25,14 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container managing a {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectContainer {
 
 	/**
 	 * Triggers loading the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
@@ -49,7 +49,7 @@ public interface ManagedObjectContainer {
 	 * Allows this {@link ManagedObject} to coordinate with the other
 	 * {@link ManagedObject} instances. Also handles completion of loading the
 	 * {@link ManagedObject} and obtaining the {@link Object}.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer} to source the other
 	 *            {@link ManagedObject} instances.
@@ -74,7 +74,12 @@ public interface ManagedObjectContainer {
 	 * {@link ManagedObject} is not currently involved within an asynchronous
 	 * operation (in other words the {@link AsynchronousManagedObject} completed
 	 * execution and ready for another operation).
-	 *
+	 * 
+	 * @param workContainer
+	 *            {@link WorkContainer} to source the other
+	 *            {@link ManagedObject} instances. This may be required should
+	 *            coordination be necessary to make the {@link ManagedObject}
+	 *            ready.
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
@@ -87,12 +92,13 @@ public interface ManagedObjectContainer {
 	 *         otherwise <code>false</code> indicating that waiting on a
 	 *         {@link ManagedObject}.
 	 */
-	boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet);
+	<W extends Work> boolean isManagedObjectReady(
+			WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param threadState
 	 *            {@link ThreadState} of thread requiring the object.
 	 * @return Object being managed by the {@link ManagedObject}.
@@ -102,7 +108,7 @@ public interface ManagedObjectContainer {
 	/**
 	 * Extracts the extension interface from the {@link ManagedObject} within
 	 * this {@link ManagedObjectContainer}.
-	 *
+	 * 
 	 * @param extractor
 	 *            {@link ExtensionInterfaceExtractor} to extract the extension
 	 *            interface from the {@link ManagedObject}.
@@ -113,7 +119,7 @@ public interface ManagedObjectContainer {
 
 	/**
 	 * Unloads the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.

@@ -351,8 +351,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				}
 
 				// Ensure this managed object is ready
-				if (!this.checkManagedObjectReady(executionContext, jobNode,
-						activateSet, ManagedObjectContainerState.LOADED)) {
+				if (!this.checkManagedObjectReady(executionContext,
+						workContainer, jobNode, activateSet,
+						ManagedObjectContainerState.LOADED)) {
 					// This object must be ready before coordinating it
 					return false;
 				}
@@ -384,8 +385,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		case COORDINATING:
 
 			// Wait until managed object ready
-			if (!this.checkManagedObjectReady(executionContext, jobNode,
-					activateSet, ManagedObjectContainerState.COORDINATING)) {
+			if (!this.checkManagedObjectReady(executionContext, workContainer,
+					jobNode, activateSet,
+					ManagedObjectContainerState.COORDINATING)) {
 				// Must be ready before obtaining the object
 				return false;
 			}
@@ -420,8 +422,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	@Override
-	public boolean isManagedObjectReady(JobContext executionContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
+	@SuppressWarnings("unchecked")
+	public boolean isManagedObjectReady(WorkContainer workContainer,
+			JobContext executionContext, JobNode jobNode,
+			JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -432,8 +436,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 
 		// Return check on ready (object must be available)
-		return this.checkManagedObjectReady(executionContext, jobNode,
-				activateSet, ManagedObjectContainerState.OBJECT_AVAILABLE);
+		return this.checkManagedObjectReady(executionContext, workContainer,
+				jobNode, activateSet,
+				ManagedObjectContainerState.OBJECT_AVAILABLE);
 	}
 
 	/**
@@ -441,6 +446,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * 
 	 * @param executionContext
 	 *            {@link JobContext}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
 	 * @param jobNode
 	 *            {@link JobNode}.
 	 * @param activateSet
@@ -450,8 +457,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *            to be in any other state other than this one.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready.
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean checkManagedObjectReady(JobContext executionContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
+			WorkContainer workContainer, JobNode jobNode,
+			JobNodeActivateSet activateSet,
 			ManagedObjectContainerState expectedContainerState) {
 
 		// Handle based on state
@@ -519,6 +528,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			// Ready so should be in expected container state
 			if (this.containerState != expectedContainerState) {
+
+				// Chaining of coordination causes dependency to only be loaded
+				switch (this.containerState) {
+				case LOADED:
+					// As this a dependency loaded but not coordinated.
+					// If coordination successful then ready.
+					return this.coordinateManagedObject(workContainer,
+							executionContext, jobNode, activateSet);
+				}
+
+				// Fail as not expected state
 				throw new IllegalStateException(
 						"Ready but in wrong container state [expected "
 								+ expectedContainerState + ", actual "
