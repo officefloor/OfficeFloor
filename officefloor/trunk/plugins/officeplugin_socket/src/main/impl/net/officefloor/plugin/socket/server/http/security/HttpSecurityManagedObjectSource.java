@@ -107,6 +107,9 @@ public class HttpSecurityManagedObjectSource
 		context.addDependency(DependencyKeys.HTTP_SECURITY_SERVICE,
 				HttpSecurityService.class);
 
+		// Add flow for authenticating
+		context.addFlow(FlowKeys.AUTHENTICATE, HttpSecurityManagedObject.class);
+
 		// Register the task to authenticate
 		final String WORK_NAME = "Authentication";
 		final String TASK_NAME = "Authenticate";
