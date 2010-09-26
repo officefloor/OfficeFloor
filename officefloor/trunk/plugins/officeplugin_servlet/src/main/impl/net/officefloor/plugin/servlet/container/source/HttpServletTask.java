@@ -50,7 +50,7 @@ public class HttpServletTask
 	 * Keys for the dependencies.
 	 */
 	public static enum DependencyKeys {
-		SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SECURITY, HTTP_SESSION
+		SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
 	}
 
 	/**
