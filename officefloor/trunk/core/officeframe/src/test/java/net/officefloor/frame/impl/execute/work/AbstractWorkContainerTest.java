@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
@@ -52,9 +53,11 @@ import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
+import org.easymock.AbstractMatcher;
+
 /**
  * Contains functionality for testing the {@link WorkContainerImpl}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
@@ -126,7 +129,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Adds a {@link ManagedObjectIndex} for the next index to the
 	 * {@link WorkMetaData}.
-	 *
+	 * 
 	 * @param scope
 	 *            {@link ManagedObjectScope} for the {@link ManagedObjectIndex}.
 	 * @return {@link ManagedObjectIndex}.
@@ -185,7 +188,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Adds a {@link AdministratorIndex} for the next index to the
 	 * {@link WorkMetaData}.
-	 *
+	 * 
 	 * @param scope
 	 *            {@link AdministratorScope} for the {@link AdministratorIndex}.
 	 * @return {@link AdministratorIndex}.
@@ -323,7 +326,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the loading of the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances specifying the
 	 *            {@link ManagedObject} instances to load.
@@ -353,7 +356,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the coordinating of the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances specifying the
 	 *            {@link ManagedObject} instances to coordinate.
@@ -392,8 +395,15 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Flags if the {@link Matcher} has been loaded for the
+	 * <code>isManagedObjectsReady</code> for the {@link ManagedObjectContainer}
+	 * .
+	 */
+	private Set<ManagedObjectContainer> managedObjectContainersWithIsReadyMatcherProvided = new HashSet<ManagedObjectContainer>();
+
+	/**
 	 * Records whether {@link ManagedObject} instances are ready.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances specifying the
 	 *            {@link ManagedObject} instances to check are ready.
@@ -416,15 +426,44 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 					.record_getManagedObjectContainer(managedObjectIndex, false);
 
 			// Record indicating if managed object ready
-			this.recordReturn(managedObjectContainer, managedObjectContainer
-					.isManagedObjectReady(this.jobContext, this.jobNode,
-							this.jobActivateSet), true);
+			if (!this.managedObjectContainersWithIsReadyMatcherProvided
+					.contains(managedObjectContainer)) {
+				// Record with matcher
+				this.recordReturn(managedObjectContainer,
+						managedObjectContainer.isManagedObjectReady(null,
+								this.jobContext, this.jobNode,
+								this.jobActivateSet), true,
+						new AbstractMatcher() {
+							@Override
+							public boolean matches(Object[] expected,
+									Object[] actual) {
+								assertTrue("First should be WorkContainer",
+										actual[0] instanceof WorkContainer<?>);
+								for (int i = 1; i < expected.length; i++) {
+									assertEquals("Incorrect parameter " + i,
+											expected[i], actual[i]);
+								}
+								return true; // matches if here
+							}
+						});
+
+				// Matcher now provided
+				this.managedObjectContainersWithIsReadyMatcherProvided
+						.add(managedObjectContainer);
+
+			} else {
+				// Record without matcher
+				this.recordReturn(managedObjectContainer,
+						managedObjectContainer.isManagedObjectReady(null,
+								this.jobContext, this.jobNode,
+								this.jobActivateSet), true);
+			}
 		}
 	}
 
 	/**
 	 * Records obtaining the Object.
-	 *
+	 * 
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} instance specifying the
 	 *            {@link ManagedObject} to obtain.
@@ -569,7 +608,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining the {@link ManagedObjectContainer} for the
 	 * {@link ManagedObjectIndex}.
-	 *
+	 * 
 	 * @param index
 	 *            {@link ManagedObjectIndex}.
 	 * @param isLazyLoad
@@ -635,7 +674,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates the {@link WorkContainer}.
-	 *
+	 * 
 	 * @return {@link WorkContainer}.
 	 */
 	protected WorkContainer<?> createWorkContainer() {
@@ -645,7 +684,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Loads the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndexes
@@ -660,7 +699,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Checks if {@link ManagedObject} instances are ready.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param isExpectReady
@@ -681,7 +720,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Coordinates the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndexes
@@ -696,7 +735,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Administers the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @throws Exception
@@ -710,7 +749,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the object of the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param work
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndex
@@ -727,7 +766,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Unloads the {@link WorkContainer}.
-	 *
+	 * 
 	 * @param work
 	 *            {@link WorkContainer}.
 	 */

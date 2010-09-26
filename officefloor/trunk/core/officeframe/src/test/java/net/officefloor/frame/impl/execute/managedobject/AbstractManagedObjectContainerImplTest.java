@@ -944,8 +944,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 */
 	protected void isManagedObjectReady(ManagedObjectContainer mo,
 			boolean isExpectedReady) {
-		boolean isReady = mo.isManagedObjectReady(this.jobContext,
-				this.jobNode, this.jobActivateSet);
+		boolean isReady = mo.isManagedObjectReady(this.workContainer,
+				this.jobContext, this.jobNode, this.jobActivateSet);
 		assertEquals("Incorrect indicating if ready", isExpectedReady, isReady);
 	}
 
