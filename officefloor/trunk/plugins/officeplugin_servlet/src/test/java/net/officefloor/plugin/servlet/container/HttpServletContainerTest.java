@@ -977,12 +977,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				// Ensure always write out
-				resp.setBufferSize(0);
 
 				// Validate the Servlet Output Stream
 				ServletOutputStream outputStream = resp.getOutputStream();
 				outputStream.write(DATA);
+				// No need to flush as container should ensure flushing buffers
 
 				// Ensure not able to obtain Writer
 				try {
@@ -1010,12 +1009,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				// Ensure always write out
-				resp.setBufferSize(0);
 
 				// Validate the Writer
 				PrintWriter writer = resp.getWriter();
 				writer.write(DATA);
+				// No need to flush as container should ensure flushing buffers
 
 				// Ensure not able to obtain Servlet Output Stream
 				try {
@@ -1023,14 +1021,6 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 					fail("Should not be able to obtain ServletOutputStream");
 				} catch (IllegalStateException ex) {
 					// Correctly indicated not able to obtain output stream
-				}
-
-				// Ensure not able to change buffer size
-				try {
-					resp.setBufferSize(10);
-					fail("Should not be able to change buffer size after the fact");
-				} catch (IllegalStateException ex) {
-					// Correctly indicated not able to specify buffer size
 				}
 			}
 		});
@@ -1070,6 +1060,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertText("test data",
 						HttpServletContainerTest.this.outputStream
 								.toByteArray());
+
+				// Ensure not able to change buffer size
+				try {
+					resp.setBufferSize(10);
+					fail("Should not be able to change buffer size after the fact");
+				} catch (IllegalStateException ex) {
+					// Correctly indicated not able to specify buffer size
+				}
 			}
 		});
 	}

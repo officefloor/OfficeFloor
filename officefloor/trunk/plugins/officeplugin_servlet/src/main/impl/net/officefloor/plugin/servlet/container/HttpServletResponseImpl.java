@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
 import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
@@ -150,6 +151,17 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 		this.clock = clock;
 		this.request = request;
 		this.locale = locale;
+	}
+
+	/**
+	 * Flushes the buffers. Typically this is invoked after servicing the
+	 * {@link HttpRequest}.
+	 * 
+	 * @throws IOException
+	 *             If fails to flush the buffers.
+	 */
+	void flushBuffers() throws IOException {
+		this.outputStream.flush();
 	}
 
 	/*
