@@ -26,7 +26,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -140,7 +139,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 		}
 
 		HttpServletRequest request;
-		HttpServletResponse response;
+		HttpServletResponseImpl response;
 		try {
 			// Create the HTTP session
 			javax.servlet.http.HttpSession httpSession = new HttpSessionImpl(
@@ -167,6 +166,9 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 		// Service the request
 		this.servlet.service(request, response);
+
+		// Serviced so flush buffered content
+		response.flushBuffers();
 	}
 
 }

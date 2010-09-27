@@ -17,25 +17,13 @@
  */
 package net.officefloor.plugin.servlet.container.source;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
-import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
 
 /**
  * {@link WorkSource} for a {@link HttpServletContainer}.
@@ -63,7 +51,7 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	/**
 	 * Prefix of property for an initialisation parameter.
 	 */
-	public static final String PROPERTY_PREFIX_INIT_PARAMETER = "init.parameter.";
+	public static final String PROPERTY_PREFIX_INIT_PARAMETER = HttpServletTask.PROPERTY_PREFIX_INIT_PARAMETER;
 
 	/*
 	 * ===================== WorkSource =========================
@@ -86,41 +74,13 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 		String servletClassName = context
 				.getProperty(PROPERTY_HTTP_SERVLET_CLASS_NAME);
 
-		// Obtain the initialisation parameters
-		Map<String, String> initParameters = new HashMap<String, String>();
-		for (String propertyName : context.getPropertyNames()) {
-			if (propertyName.startsWith(PROPERTY_PREFIX_INIT_PARAMETER)) {
-				String parameterName = propertyName
-						.substring(PROPERTY_PREFIX_INIT_PARAMETER.length());
-				String parameterValue = context.getProperty(propertyName);
-				initParameters.put(parameterName, parameterValue);
-			}
-		}
-
 		// Create the HTTP Servlet instance
 		HttpServlet servlet = (HttpServlet) context.getClassLoader().loadClass(
 				servletClassName).newInstance();
 
-		// Construct the HttpServletTask
-		HttpServletTask factory = new HttpServletTask(servletName, servletPath,
-				servlet, initParameters);
-
-		// Load the type information
-		workTypeBuilder.setWorkFactory(factory);
-
-		// Add task to service HTTP request with HTTP Servlet
-		TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-				.addTaskType("service", factory, DependencyKeys.class,
-						None.class);
-		task.addObject(ServletContext.class).setKey(
-				DependencyKeys.SERVLET_CONTEXT);
-		task.addObject(ServerHttpConnection.class).setKey(
-				DependencyKeys.HTTP_CONNECTION);
-		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
-		task.addObject(HttpSession.class).setKey(DependencyKeys.HTTP_SESSION);
-		task.addObject(HttpSecurity.class).setKey(DependencyKeys.HTTP_SECURITY);
-		task.addEscalation(ServletException.class);
-		task.addEscalation(IOException.class);
+		// Source the HTTP Servlet work
+		HttpServletTask.sourceWork(servletName, servletPath, servlet,
+				workTypeBuilder, context);
 	}
 
 }
