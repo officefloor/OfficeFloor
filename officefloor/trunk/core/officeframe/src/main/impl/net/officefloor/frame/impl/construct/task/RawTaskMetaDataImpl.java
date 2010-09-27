@@ -560,10 +560,13 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 								 * No dependency relationship. As the sorting
 								 * only changes on differences (non 0 value)
 								 * then need means to differentiate when no
-								 * dependency relationship.
+								 * dependency relationship. This is especially
+								 * the case with the merge sort used by default
+								 * by Java.
 								 */
 
-								// Least number of dependencies first
+								// Least number of dependencies first.
+								// Note: this pushes no dependencies to start.
 								int value = aDep.size() - bDep.size();
 								if (value == 0) {
 									// Same dependencies, so base on scope

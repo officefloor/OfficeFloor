@@ -55,9 +55,14 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Tests integration of {@link HttpServletWorkSource} with dependencies to
@@ -71,6 +76,8 @@ public class HttpServletIntegrateTest extends MockHttpServer {
 	@SuppressWarnings("unchecked")
 	public HttpServicerTask buildServicer(String managedObjectName,
 			MockHttpServer server) throws Exception {
+
+		final long TIMEOUT = 10000; // 100 seconds (for debugging)
 
 		// Obtain Office Name
 		String officeName = this.getOfficeName();
@@ -131,7 +138,7 @@ public class HttpServletIntegrateTest extends MockHttpServer {
 				.constructManagedObject("HttpSession",
 						HttpSessionManagedObjectSource.class);
 		httpSession.setManagingOffice(officeName);
-		httpSession.setTimeout(1000);
+		httpSession.setTimeout(TIMEOUT);
 		DependencyMappingBuilder httpSessionDependencies = this
 				.getOfficeBuilder().addProcessManagedObject("HttpSession",
 						"HttpSession");
@@ -143,6 +150,7 @@ public class HttpServletIntegrateTest extends MockHttpServer {
 						HttpSecurityManagedObjectSource.class);
 		ManagingOfficeBuilder<FlowKeys> httpSecurityOffice = httpSecurity
 				.setManagingOffice(officeName);
+		httpSecurity.setTimeout(TIMEOUT);
 		httpSecurityOffice
 				.setInputManagedObjectName("InputHttpSecurity")
 				.mapDependency(
@@ -195,21 +203,186 @@ public class HttpServletIntegrateTest extends MockHttpServer {
 	}
 
 	/**
-	 * Ensure can {@link HttpServlet} can service {@link HttpRequest}.
+	 * Ensure can {@link HttpServlet} can service a simple {@link HttpRequest}.
 	 */
-	public void testService() throws Exception {
-		// Obtain the Http Client
+	public void testSimpleRequest() throws Exception {
+
+		// Specify servicing
+		setServicing(new Servicer() {
+			@Override
+			public String service(HttpServlet servlet, HttpServletRequest req,
+					HttpServletResponse resp) throws ServletException,
+					IOException {
+				resp.addHeader("test", "value");
+				return "Hello World";
+			}
+		});
+
+		// Send request
 		HttpClient client = this.createHttpClient();
+		HttpGet request = new HttpGet(this.getServerUrl());
+		HttpResponse response = client.execute(request);
+
+		// Validate the response
+		assertHttpResponse(response, 200, "Hello World", "test", "value");
+	}
+
+	/**
+	 * Ensure can remember state between {@link HttpRequest} instances via the
+	 * {@link HttpSession}.
+	 */
+	public void testSession() throws Exception {
+
+		final String KEY = "test";
+
+		// Specify servicing
+		setServicing(new Servicer() {
+			@Override
+			public String service(HttpServlet servlet, HttpServletRequest req,
+					HttpServletResponse resp) throws ServletException,
+					IOException {
+
+				// Obtain response state from session
+				String body = (String) req.getSession().getAttribute(KEY);
+
+				// Load state to session for next request
+				String value = req.getHeader(KEY);
+				req.getSession().setAttribute(KEY, value);
+
+				// Return the body
+				return body;
+			}
+		});
+
+		// Create the client
+		HttpClient client = this.createHttpClient();
+
+		final String VALUE = "state";
+
+		// Send first request with details (expect no body returned)
+		HttpGet requestOne = new HttpGet(this.getServerUrl());
+		requestOne.setHeader(KEY, VALUE);
+		HttpResponse responseOne = client.execute(requestOne);
+		assertHttpResponse(responseOne, 204, null);
+
+		// Send another request and validate obtained session state
+		HttpGet requestTwo = new HttpGet(this.getServerUrl());
+		HttpResponse responseTwo = client.execute(requestTwo);
+		assertHttpResponse(responseTwo, 200, VALUE);
+	}
+
+	/**
+	 * Ensure can handle authenticated {@link HttpRequest}.
+	 */
+	public void testAuthenticatedRequest() throws Exception {
+
+		// Specify servicing
+		setServicing(new Servicer() {
+			@Override
+			public String service(HttpServlet servlet, HttpServletRequest req,
+					HttpServletResponse resp) throws ServletException,
+					IOException {
+
+				// Determine if authenticated
+				String remoteUser = req.getRemoteUser();
+				if (remoteUser == null) {
+					// Challenge for authentication
+					resp.setStatus(HttpStatus.SC_UNAUTHORIZED);
+					resp.setHeader("WWW-Authenticate",
+							"Basic realm=\"TestRealm\"");
+					return "Challenge"; // challenge constructed
+				}
+
+				// Send response to user
+				return "Hello " + req.getRemoteUser();
+			}
+		});
+
+		// Provide preemptive authentication
+		DefaultHttpClient client = (DefaultHttpClient) this.createHttpClient();
+		client.getCredentialsProvider().setCredentials(
+				new AuthScope(null, -1, "TestRealm"),
+				new UsernamePasswordCredentials("Daniel", "password"));
 
 		// Send request
 		HttpGet request = new HttpGet(this.getServerUrl());
 		HttpResponse response = client.execute(request);
 
 		// Validate the response
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
-		String body = getEntityBody(response);
-		assertEquals("Incorrect response body", "Hello World", body);
+		assertHttpResponse(response, 200, "Hello Daniel");
+	}
+
+	/**
+	 * Asserts the correctness of the {@link HttpResponse}.
+	 * 
+	 * @param response
+	 *            {@link HttpResponse} to validate.
+	 * @param expectedStatus
+	 *            Expected status.
+	 * @param expectedBody
+	 *            Expected body content.
+	 * @param expectedHeaderNameValuePairs
+	 *            Expected {@link Header} instances on the {@link HttpResponse}.
+	 */
+	private static void assertHttpResponse(HttpResponse response,
+			int expectedStatus, String expectedBody,
+			String... expectedHeaderNameValuePairs) {
+		try {
+			// Validate the status
+			assertEquals("Request should be successful", expectedStatus,
+					response.getStatusLine().getStatusCode());
+
+			// Validate the body
+			String body = getEntityBody(response);
+			assertEquals("Incorrect response body", expectedBody, body);
+
+			// Validate the headers
+			for (int i = 0; i < expectedHeaderNameValuePairs.length; i += 2) {
+				String name = expectedHeaderNameValuePairs[i];
+				String value = expectedHeaderNameValuePairs[i + 1];
+				Header header = response.getFirstHeader(name);
+				assertEquals("Incorrect header " + name, value,
+						(header == null ? null : header.getValue()));
+			}
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
+	 * Specifies the {@link Servicer} for servcing the {@link HttpRequest}.
+	 * 
+	 * @param servicer
+	 *            {@link Servicer}.
+	 */
+	private static void setServicing(Servicer servicer) {
+		MockHttpServlet.servicer = servicer;
+	}
+
+	/**
+	 * Interface for servicing the {@link HttpRequest} via the
+	 * {@link HttpServlet}.
+	 */
+	private static interface Servicer {
+
+		/**
+		 * Services the {@link HttpRequest}.
+		 * 
+		 * @param servlet
+		 *            {@link HttpServlet}.
+		 * @param req
+		 *            {@link HttpServletRequest}.
+		 * @param resp
+		 *            {@link HttpServletResponse}.
+		 * @return Body content for {@link HttpResponse}.
+		 * @throws ServletException
+		 *             As per {@link HttpServlet}.
+		 * @throws IOException
+		 *             As per {@link HttpServlet}.
+		 */
+		String service(HttpServlet servlet, HttpServletRequest req,
+				HttpServletResponse resp) throws ServletException, IOException;
 	}
 
 	/**
@@ -217,15 +390,25 @@ public class HttpServletIntegrateTest extends MockHttpServer {
 	 */
 	public static class MockHttpServlet extends HttpServlet {
 
+		/**
+		 * {@link Servicer} to service the request.
+		 */
+		public static volatile Servicer servicer = null;
+
 		/*
 		 * ================== HttpServlet =========================
 		 */
 
 		@Override
-		protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+		protected void service(HttpServletRequest req, HttpServletResponse resp)
 				throws ServletException, IOException {
+
+			// Service the request
+			String responseBody = servicer.service(this, req, resp);
+
+			// Provide body response
 			PrintWriter writer = resp.getWriter();
-			writer.write("Hello World");
+			writer.write(responseBody == null ? "" : responseBody);
 			writer.flush();
 		}
 	}

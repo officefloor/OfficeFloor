@@ -22,21 +22,35 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
+ * <p>
  * Context that the {@link ManagedObject} is to execute within.
+ * <p>
+ * In invoking processes the following should be taken into account:
+ * <ol>
+ * <li>The {@link Flow} (process) will be instigated in a new
+ * {@link ProcessState} which for example will cause new {@link ManagedObject}
+ * dependencies to be instantiated.</li>
+ * <li>
+ * The {@link ManagedObject} passed to the invocation will go through a full
+ * life-cycle so be careful passing in an existing initialised
+ * {@link ManagedObject}. For example the {@link AsynchronousListener} instance
+ * will be overwritten which will likely cause dead-lock as the
+ * {@link AsynchronousListener#notifyComplete()} will notify on the wrong
+ * {@link ManagedObjectContainer}.</li>
+ * </ol>
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 
 	/**
-	 * <p>
 	 * Instigates a {@link Flow}.
-	 * <p>
-	 * The {@link Flow} will be instigated in a new {@link ProcessState}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
@@ -45,14 +59,13 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * 
+	 * @see ManagedObjectExecuteContext
 	 */
 	void invokeProcess(F key, Object parameter, ManagedObject managedObject);
 
 	/**
-	 * <p>
 	 * Instigates a {@link Flow}.
-	 * <p>
-	 * The {@link Flow} will be instigated in a new {@link ProcessState}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} to instigate.
@@ -61,6 +74,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * 
+	 * @see ManagedObjectExecuteContext
 	 */
 	void invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject);
@@ -72,8 +87,6 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * <p>
 	 * An example of using this would be a HTTP server socket that sends status
 	 * 500 on {@link EscalationFlow} from {@link Flow}.
-	 * <p>
-	 * The {@link Flow} will be instigated in a new {@link ProcessState}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
@@ -84,6 +97,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            {@link Flow}.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
+	 * 
+	 * @see ManagedObjectExecuteContext
 	 */
 	void invokeProcess(F key, Object parameter, ManagedObject managedObject,
 			EscalationHandler escalationHandler);
@@ -95,8 +110,6 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * <p>
 	 * An example of using this would be a HTTP server socket that sends status
 	 * 500 on {@link EscalationFlow} from {@link Flow}.
-	 * <p>
-	 * The {@link Flow} will be instigated in a new {@link ProcessState}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} to instigate.
@@ -107,6 +120,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            {@link Flow}.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
+	 * 
+	 * @see ManagedObjectExecuteContext
 	 */
 	void invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler);
