@@ -84,8 +84,9 @@ public class HttpSecurityManagedObjectSource
 	 *            {@link HttpSecurityManagedObject} to undertake authentication.
 	 */
 	public void triggerAuthentication(HttpSecurityManagedObject managedObject) {
+		// Must provide new managed object to not override asynchronous listener
 		this.executeContext.invokeProcess(FlowKeys.AUTHENTICATE, managedObject,
-				managedObject);
+				new HttpSecurityManagedObject(this));
 	}
 
 	/*
@@ -127,6 +128,7 @@ public class HttpSecurityManagedObjectSource
 
 		// Specify the meta-data
 		context.setObjectClass(HttpSecurity.class);
+		context.setManagedObjectClass(HttpSecurityManagedObject.class);
 	}
 
 	@Override
