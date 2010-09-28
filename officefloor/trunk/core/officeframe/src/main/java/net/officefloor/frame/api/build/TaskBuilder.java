@@ -20,6 +20,7 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -34,6 +35,24 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  */
 public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		extends FlowNodeBuilder<F> {
+
+	/**
+	 * <p>
+	 * Specifies the differentiator for this {@link Task}.
+	 * <p>
+	 * This is exposed as is on the {@link TaskManager} interface for this
+	 * {@link Task} to allow reflective:
+	 * <ol>
+	 * <li>identification of this {@link Task} (e.g. can check on type of this
+	 * object)</li>
+	 * <li>means to trigger functionality on this {@link Task} (e.g. can expose
+	 * functionality to be invoked)</li>
+	 * </ol>
+	 * 
+	 * @param differentiator
+	 *            Differentiator.
+	 */
+	void setDifferentiator(Object differentiator);
 
 	/**
 	 * Links in the parameter for this {@link Task}.

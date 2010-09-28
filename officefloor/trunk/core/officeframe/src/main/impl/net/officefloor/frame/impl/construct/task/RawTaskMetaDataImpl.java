@@ -152,6 +152,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			return null; // no task factory
 		}
 
+		// Obtain the differentiator
+		Object differentiator = configuration.getDifferentiator();
+
 		// Obtain the team responsible for the task
 		String officeTeamName = configuration.getOfficeTeamName();
 		if (ConstructUtil.isBlank(officeTeamName)) {
@@ -305,7 +308,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		// Create the task meta-data
 		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
-				taskName, taskFactory, parameterType, team,
+				taskName, taskFactory, differentiator, parameterType, team,
 				requiredManagedObjectIndexes, taskToWorkMoTranslations,
 				preTaskDuties, postTaskDuties);
 

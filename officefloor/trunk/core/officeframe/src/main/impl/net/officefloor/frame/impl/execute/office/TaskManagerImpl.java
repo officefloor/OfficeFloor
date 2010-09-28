@@ -68,6 +68,11 @@ public class TaskManagerImpl implements TaskManager {
 	 */
 
 	@Override
+	public Object getDifferentiator() {
+		return this.taskMetaData.getDifferentiator();
+	}
+
+	@Override
 	public Class<?> getParameterType() {
 		return this.taskMetaData.getParameterType();
 	}

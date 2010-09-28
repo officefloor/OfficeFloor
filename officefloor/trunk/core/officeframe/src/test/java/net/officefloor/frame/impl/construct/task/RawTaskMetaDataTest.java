@@ -184,6 +184,61 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
+	 * Ensure able to have a differentiator.
+	 */
+	public void testDifferentiator() {
+
+		final Object DIFFERENTIATOR = "Differentiator";
+
+		// Record with differentiator
+		this.recordReturn(this.configuration, this.configuration.getTaskName(),
+				TASK_NAME);
+		this.recordReturn(this.configuration, this.configuration
+				.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration, this.configuration
+				.getDifferentiator(), DIFFERENTIATOR);
+		this.recordReturn(this.configuration, this.configuration
+				.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getRawOfficeMetaData(), this.rawOfficeMetaData);
+		Map<String, Team> teams = new HashMap<String, Team>();
+		teams.put("TEAM", this.team);
+		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
+				.getTeams(), teams);
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+
+		// Verify differentiator
+		assertEquals("Incorrect differentiator", DIFFERENTIATOR, metaData
+				.getTaskMetaData().getDifferentiator());
+	}
+
+	/**
+	 * Ensure able to have no differentiator.
+	 */
+	public void testNoDifferentiator() {
+
+		// Record with differentiator
+		this.record_taskNameFactoryTeam(); // no differentiator loaded
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+
+		// Verify no differentiator
+		assertNull("Should have no differentiator", metaData.getTaskMetaData()
+				.getDifferentiator());
+	}
+
+	/**
 	 * Ensure issue if no {@link Team} name.
 	 */
 	public void testNoTeamName() {
@@ -193,6 +248,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				TASK_NAME);
 		this.recordReturn(this.configuration, this.configuration
 				.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration, this.configuration
+				.getDifferentiator(), null);
 		this.recordReturn(this.configuration, this.configuration
 				.getOfficeTeamName(), null);
 		this.record_taskIssue("No team name provided for task");
@@ -213,6 +270,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				TASK_NAME);
 		this.recordReturn(this.configuration, this.configuration
 				.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration, this.configuration
+				.getDifferentiator(), null);
 		this.recordReturn(this.configuration, this.configuration
 				.getOfficeTeamName(), "TEAM");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
@@ -249,6 +308,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				metaData.getRawWorkMetaData());
 		assertEquals("Incorect task factory", this.taskFactory, metaData
 				.getTaskMetaData().getTaskFactory());
+		assertNull("No differentiator", metaData.getTaskMetaData()
+				.getDifferentiator());
 		assertEquals("Incorrect team", this.team, metaData.getTaskMetaData()
 				.getTeam());
 	}
@@ -1667,6 +1728,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				TASK_NAME);
 		this.recordReturn(this.configuration, this.configuration
 				.getTaskFactory(), this.taskFactory);
+		this.recordReturn(this.configuration, this.configuration
+				.getDifferentiator(), null);
 		this.recordReturn(this.configuration, this.configuration
 				.getOfficeTeamName(), "TEAM");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData

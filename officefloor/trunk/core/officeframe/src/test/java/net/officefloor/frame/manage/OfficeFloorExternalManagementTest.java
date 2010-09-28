@@ -35,6 +35,7 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Ensures the external management API of {@link OfficeFloor} responses
@@ -53,7 +54,7 @@ public class OfficeFloorExternalManagementTest extends
 	/**
 	 * {@link Work} name.
 	 */
-	private String workName = "WORK";
+	private final String workName = "WORK";
 
 	/**
 	 * {@link MockWork} instance.
@@ -61,9 +62,14 @@ public class OfficeFloorExternalManagementTest extends
 	private MockWork mockWork;
 
 	/**
+	 * Differentiator.
+	 */
+	private final Object differentiator = "Differentiator";
+
+	/**
 	 * No initial {@link Task} {@link Work} name.
 	 */
-	private String noInitialTaskWorkName = "NO_INITIAL_TASK_WORK";
+	private final String noInitialTaskWorkName = "NO_INITIAL_TASK_WORK";
 
 	/**
 	 * {@link OfficeFloor} to test management.
@@ -85,7 +91,10 @@ public class OfficeFloorExternalManagementTest extends
 		this.mockWork = new MockWork();
 		ReflectiveWorkBuilder workBuilder = this.constructWork(this.mockWork,
 				this.workName, "initialTask");
-		workBuilder.buildTask("initialTask", TEAM_NAME).buildParameter();
+		ReflectiveTaskBuilder initialTask = workBuilder.buildTask(
+				"initialTask", TEAM_NAME);
+		initialTask.buildParameter();
+		initialTask.getBuilder().setDifferentiator(this.differentiator);
 		workBuilder.buildTask("anotherTask", TEAM_NAME).buildParameter();
 
 		// Construct the Work (with no initial task)
@@ -308,6 +317,21 @@ public class OfficeFloorExternalManagementTest extends
 			assertEquals("Incorrect cause", "Unknown Task '" + unknownTaskName
 					+ "'", ex.getMessage());
 		}
+	}
+
+	/**
+	 * Ensure able to obtain {@link Task} differentiator.
+	 */
+	public void testTaskDifferentiator() throws UnknownOfficeException,
+			UnknownWorkException, UnknownTaskException {
+
+		// Obtain the Task Manager
+		TaskManager task = this.officeFloor.getOffice(this.officeName)
+				.getWorkManager(this.workName).getTaskManager("initialTask");
+
+		// Ensure correct differentiator
+		assertEquals("Incorrect differentiator", this.differentiator, task
+				.getDifferentiator());
 	}
 
 	/**
