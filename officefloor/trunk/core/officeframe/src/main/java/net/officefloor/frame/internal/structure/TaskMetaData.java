@@ -49,6 +49,13 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	TaskFactory<W, D, F> getTaskFactory();
 
 	/**
+	 * Obtains the differentiator for the {@link Task}.
+	 * 
+	 * @return Differentiator or <code>null</code> if no differentiator.
+	 */
+	Object getDifferentiator();
+
+	/**
 	 * Obtains the parameter type for the {@link Task}.
 	 * 
 	 * @return Parameter type for the {@link Task}. May be <code>null</code> to

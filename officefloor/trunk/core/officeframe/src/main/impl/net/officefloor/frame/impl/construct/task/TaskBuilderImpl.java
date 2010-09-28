@@ -72,6 +72,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	private final Map<Integer, TaskFlowConfigurationImpl<F>> flows = new HashMap<Integer, TaskFlowConfigurationImpl<F>>();
 
 	/**
+	 * Differentiator.
+	 */
+	private Object differentiator = null;
+
+	/**
 	 * {@link Team}.
 	 */
 	private String teamName;
@@ -116,6 +121,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	/*
 	 * ================ TaskBuilder =======================================
 	 */
+
+	@Override
+	public void setDifferentiator(Object differentiator) {
+		this.differentiator = differentiator;
+	}
 
 	@Override
 	public void setTeam(String officeTeamName) {
@@ -301,6 +311,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	@Override
 	public TaskFactory<W, D, F> getTaskFactory() {
 		return this.taskFactory;
+	}
+
+	@Override
+	public Object getDifferentiator() {
+		return this.differentiator;
 	}
 
 	@Override

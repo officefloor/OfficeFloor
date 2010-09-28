@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.api.manage;
 
+import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -26,6 +27,16 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * @author Daniel Sagenschneider
  */
 public interface TaskManager {
+
+	/**
+	 * Obtains the differentiator for this {@link Task}.
+	 * 
+	 * @return Differentiator for this {@link Task}. May be <code>null</code> if
+	 *         no differentiator for {@link Task}.
+	 * 
+	 * @see TaskBuilder#setDifferentiator(Object)
+	 */
+	Object getDifferentiator();
 
 	/**
 	 * Obtains the parameter type for invoking this {@link Task}.

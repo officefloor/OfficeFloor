@@ -263,6 +263,11 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
+	public Object getDifferentiator() {
+		return null; // no differentiator
+	}
+
+	@Override
 	public Class<?> getParameterType() {
 		return Object.class;
 	}

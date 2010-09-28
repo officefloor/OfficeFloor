@@ -41,7 +41,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * {@link EscalationFlow} for an {@link EscalationHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class EscalationHandlerEscalation implements EscalationFlow {
@@ -58,7 +58,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @param team
@@ -79,7 +79,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 		// Create the escalation task meta-data
 		TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None> taskMetaData = new TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None>(
-				"Escalation Handler Task", task, Throwable.class, team,
+				"Escalation Handler Task", task, null, Throwable.class, team,
 				new ManagedObjectIndex[0], dependencies,
 				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
 
@@ -98,7 +98,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * Obtains the {@link EscalationHandler}.
-	 *
+	 * 
 	 * @return {@link EscalationHandler}.
 	 */
 	public EscalationHandler getEscalationHandler() {

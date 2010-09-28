@@ -47,6 +47,14 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	TaskFactory<W, D, F> getTaskFactory();
 
 	/**
+	 * Obtains the differentiator for the {@link Task}.
+	 * 
+	 * @return Differentiator or <code>null</code> if no differentiator for the
+	 *         {@link Task}.
+	 */
+	Object getDifferentiator();
+
+	/**
 	 * Obtains the name of {@link Office} registered {@link Team} responsible
 	 * for completing this {@link Task}.
 	 * 

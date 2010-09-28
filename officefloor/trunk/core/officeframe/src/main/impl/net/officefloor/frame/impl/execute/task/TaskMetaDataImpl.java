@@ -54,6 +54,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	private final TaskFactory<W, D, F> taskFactory;
 
 	/**
+	 * Differentiator.
+	 */
+	private final Object differentiator;
+
+	/**
 	 * Parameter type of this {@link Task}.
 	 */
 	private final Class<?> parameterType;
@@ -126,6 +131,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param taskFactory
 	 *            {@link TaskFactory} to create the {@link Task} of the
 	 *            {@link TaskMetaData}.
+	 * @param differentiator
+	 *            Differentiator. May be <code>null</code>.
 	 * @param parameterType
 	 *            Parameter type of this {@link Task}.
 	 * @param team
@@ -145,13 +152,14 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            instances to be completed after executing the {@link Task}.
 	 */
 	public TaskMetaDataImpl(String taskName, TaskFactory<W, D, F> taskFactory,
-			Class<?> parameterType, Team team,
+			Object differentiator, Class<?> parameterType, Team team,
 			ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
+		this.differentiator = differentiator;
 		this.parameterType = parameterType;
 		this.team = team;
 		this.requiredManagedObjects = requiredManagedObjects;
@@ -197,6 +205,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	@Override
 	public TaskFactory<W, D, F> getTaskFactory() {
 		return this.taskFactory;
+	}
+
+	@Override
+	public Object getDifferentiator() {
+		return this.differentiator;
 	}
 
 	@Override
