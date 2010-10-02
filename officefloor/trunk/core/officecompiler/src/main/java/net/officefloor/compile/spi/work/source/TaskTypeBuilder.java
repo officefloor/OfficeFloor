@@ -19,6 +19,7 @@
 package net.officefloor.compile.spi.work.source;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
@@ -30,6 +31,16 @@ import net.officefloor.frame.internal.structure.Flow;
  * @author Daniel Sagenschneider
  */
 public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
+
+	/**
+	 * Specifies the differentiator.
+	 * 
+	 * @param differentiator
+	 *            Differentiator.
+	 * 
+	 * @see TaskBuilder#setDifferentiator(Object)
+	 */
+	void setDifferentiator(Object differentiator);
 
 	/**
 	 * Specifies the type of {@link Object} returned from the {@link Task} that
