@@ -79,8 +79,8 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 				servletClassName).newInstance();
 
 		// Source the HTTP Servlet work
-		HttpServletTask.sourceWork(servletName, servletPath, servlet,
-				workTypeBuilder, context);
+		HttpServletTask.sourceWork(workTypeBuilder, context, servletName,
+				servletPath, servlet);
 	}
 
 }

@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -61,6 +63,21 @@ public interface HttpServletContainer {
 	void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSession session,
 			HttpSecurity security, TaskContext<?, ?, ?> taskContext)
+			throws ServletException, IOException;
+
+	/**
+	 * Includes the servicing of contained {@link HttpServlet} on the inputs.
+	 * 
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @param response
+	 *            {@link HttpServletResponse}.
+	 * @throws ServletException
+	 *             As per {@link HttpServlet} API.
+	 * @throws IOException
+	 *             As per {@link HttpServlet} API.
+	 */
+	void include(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException;
 
 }

@@ -26,8 +26,10 @@ import javax.servlet.ServletException;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -64,6 +66,7 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
+		task.setDifferentiator(factory);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -75,7 +78,15 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 		task.addEscalation(IOException.class);
 
 		// Validate type
-		WorkLoaderUtil.validateWorkType(type, JspWorkSource.class);
+		WorkType<HttpServletTask> work = WorkLoaderUtil.validateWorkType(type,
+				JspWorkSource.class);
+
+		// Ensure match JSP extension
+		HttpServletDifferentiator differentiator = (HttpServletDifferentiator) work
+				.getTaskTypes()[0].getTaskFactory();
+		String[] extensions = differentiator.getExtensions();
+		assertEquals("Incorrect number of extensions", 1, extensions.length);
+		assertEquals("Incorrect JSP extension", "jsp", extensions[0]);
 	}
 
 }

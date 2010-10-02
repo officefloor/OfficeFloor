@@ -24,6 +24,8 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
@@ -32,10 +34,12 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.container.HttpServletContainerImpl;
+import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -51,7 +55,8 @@ import net.officefloor.plugin.socket.server.http.session.HttpSession;
 public class HttpServletTask
 		extends
 		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None>
-		implements OfficeAwareWorkFactory<HttpServletTask> {
+		implements OfficeAwareWorkFactory<HttpServletTask>,
+		HttpServletDifferentiator {
 
 	/**
 	 * Prefix of property for an initialisation parameter.
@@ -65,10 +70,26 @@ public class HttpServletTask
 		OFFICE_SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
 	}
 
-	public static void sourceWork(String servletName, String servletPath,
-			HttpServlet servlet,
+	/**
+	 * Sources the {@link Work} for a {@link HttpServletTask}.
+	 * 
+	 * @param workTypeBuilder
+	 *            {@link WorkTypeBuilder}.
+	 * @param context
+	 *            {@link WorkSourceContext}.
+	 * @param servletName
+	 *            Servlet name.
+	 * @param servletPath
+	 *            Servlet path.
+	 * @param servlet
+	 *            {@link HttpServlet}.
+	 * @param extensions
+	 *            Extensions.
+	 */
+	public static void sourceWork(
 			WorkTypeBuilder<HttpServletTask> workTypeBuilder,
-			WorkSourceContext context) {
+			WorkSourceContext context, String servletName, String servletPath,
+			HttpServlet servlet, String... extensions) {
 
 		// Obtain the initialisation parameters
 		Map<String, String> initParameters = new HashMap<String, String>();
@@ -83,7 +104,7 @@ public class HttpServletTask
 
 		// Construct the HttpServletTask
 		HttpServletTask factory = new HttpServletTask(servletName, servletPath,
-				servlet, initParameters);
+				servlet, initParameters, extensions);
 
 		// Load the type information
 		workTypeBuilder.setWorkFactory(factory);
@@ -92,6 +113,7 @@ public class HttpServletTask
 		TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
 				.addTaskType("service", factory, DependencyKeys.class,
 						None.class);
+		task.setDifferentiator(factory);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -134,6 +156,11 @@ public class HttpServletTask
 	private final Map<String, String> initParameters;
 
 	/**
+	 * Extensions.
+	 */
+	private final String[] extensions;
+
+	/**
 	 * {@link Office}.
 	 */
 	private Office office;
@@ -154,13 +181,47 @@ public class HttpServletTask
 	 *            {@link HttpServlet} to service the {@link HttpRequest}.
 	 * @param initParameters
 	 *            Initialisation parameters.
+	 * @param extensions
+	 *            Extensions.
 	 */
 	public HttpServletTask(String servletName, String servletPath,
-			HttpServlet servlet, Map<String, String> initParameters) {
+			HttpServlet servlet, Map<String, String> initParameters,
+			String... extensions) {
 		this.servletName = servletName;
 		this.servletPath = servletPath;
 		this.servlet = servlet;
 		this.initParameters = initParameters;
+		this.extensions = extensions;
+	}
+
+	/**
+	 * Obtains the {@link HttpServletContainer}.
+	 * 
+	 * @param officeServletContext
+	 *            {@link OfficeServletContext}.
+	 * @return {@link HttpServletContainer}.
+	 * @throws ServletException
+	 *             If fails to create {@link HttpServletContainer}.
+	 */
+	private HttpServletContainer getHttpServletContainer(
+			OfficeServletContext officeServletContext) throws ServletException {
+
+		// Lazy load the HTTP Servlet Container
+		synchronized (CLOCK) {
+			if (this.container == null) {
+
+				// TODO consider configuring the Locale
+				Locale locale = Locale.getDefault();
+
+				// Create the HTTP Servlet Container
+				this.container = new HttpServletContainerImpl(this.servletName,
+						this.servletPath, this.servlet, this.initParameters,
+						officeServletContext, this.office, CLOCK, locale);
+			}
+		}
+
+		// Return the container
+		return this.container;
 	}
 
 	/*
@@ -182,22 +243,11 @@ public class HttpServletTask
 			TaskContext<HttpServletTask, DependencyKeys, None> context)
 			throws ServletException, IOException {
 
-		// Lazy load the HTTP Servlet Container
-		synchronized (CLOCK) {
-			if (this.container == null) {
-				// Obtain the Office Servlet Context
-				OfficeServletContext officeServletContext = (OfficeServletContext) context
-						.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT);
-
-				// TODO consider configuring the Locale
-				Locale locale = Locale.getDefault();
-
-				// Create the HTTP Servlet Container
-				this.container = new HttpServletContainerImpl(this.servletName,
-						this.servletPath, this.servlet, this.initParameters,
-						officeServletContext, this.office, CLOCK, locale);
-			}
-		}
+		// Obtain the HTTP Servlet Container
+		OfficeServletContext officeServletContext = (OfficeServletContext) context
+				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT);
+		HttpServletContainer container = this
+				.getHttpServletContainer(officeServletContext);
 
 		// Obtain the parameters for servicing the request
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -210,11 +260,41 @@ public class HttpServletTask
 				.getObject(DependencyKeys.HTTP_SECURITY);
 
 		// Service the request
-		this.container.service(connection, attributes, session, security,
-				context);
+		container.service(connection, attributes, session, security, context);
 
 		// Nothing to return
 		return null;
+	}
+
+	/*
+	 * ===================== HttpServletDifferentiator ===================
+	 */
+
+	@Override
+	public String getServletPath() {
+		return this.servletPath;
+	}
+
+	@Override
+	public String getServletName() {
+		return this.servletName;
+	}
+
+	@Override
+	public String[] getExtensions() {
+		return this.extensions;
+	}
+
+	@Override
+	public void include(OfficeServletContext context,
+			HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// Obtain the HTTP Servlet Container
+		HttpServletContainer container = this.getHttpServletContainer(context);
+
+		// Include
+		container.include(request, response);
 	}
 
 }

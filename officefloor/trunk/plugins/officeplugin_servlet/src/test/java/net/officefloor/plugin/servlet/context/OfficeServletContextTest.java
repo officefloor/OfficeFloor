@@ -29,8 +29,10 @@ import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
@@ -167,8 +169,10 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		final TaskManager taskManager = this.createMock(TaskManager.class);
 		final HttpServletDifferentiator differentiator = this
 				.createMock(HttpServletDifferentiator.class);
-		final ServletRequest request = this.createMock(ServletRequest.class);
-		final ServletResponse response = this.createMock(ServletResponse.class);
+		final HttpServletRequest request = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this
+				.createMock(HttpServletResponse.class);
 		final ServletRequestForwarder forwarder = this
 				.createMock(ServletRequestForwarder.class);
 		final String WORK_NAME = "WORK";
@@ -199,7 +203,18 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
 
 		// Record including
-		differentiator.include(request, response);
+		differentiator.include(this.context, request, response);
+		this.control(differentiator).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect context", expected[0], actual[0]);
+				HttpServletRequest request = (HttpServletRequest) actual[1];
+				assertEquals("Incorrect request", "/resource", request
+						.getPathInfo());
+				assertEquals("Incorrect response", expected[2], actual[2]);
+				return true;
+			}
+		});
 
 		// Record allowing illegal state of no access available
 		this.recordReturn(request, request
@@ -246,8 +261,10 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		final TaskManager taskManager = this.createMock(TaskManager.class);
 		final HttpServletDifferentiator differentiator = this
 				.createMock(HttpServletDifferentiator.class);
-		final ServletRequest request = this.createMock(ServletRequest.class);
-		final ServletResponse response = this.createMock(ServletResponse.class);
+		final HttpServletRequest request = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this
+				.createMock(HttpServletResponse.class);
 		final ServletRequestForwarder forwarder = this
 				.createMock(ServletRequestForwarder.class);
 
@@ -295,6 +312,11 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				new Object());
 
+		// Record using Servlet Path for Named Dispatcher
+		final String SERVLET_PATH = "/servlet/path";
+		this.recordReturn(differentiator, differentiator.getServletPath(),
+				SERVLET_PATH);
+
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
@@ -302,7 +324,18 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		forwarder.forward("WORK", "HTTP_SERVLET", null);
 
 		// Record including
-		differentiator.include(request, response);
+		differentiator.include(this.context, request, response);
+		this.control(differentiator).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect context", expected[0], actual[0]);
+				HttpServletRequest request = (HttpServletRequest) actual[1];
+				assertEquals("Incorrect request", SERVLET_PATH, request
+						.getPathInfo());
+				assertEquals("Incorrect response", expected[2], actual[2]);
+				return true;
+			}
+		});
 
 		// Test
 		this.replayMockObjects();
@@ -334,8 +367,10 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		final TaskManager taskManager = this.createMock(TaskManager.class);
 		final HttpServletDifferentiator differentiator = this
 				.createMock(HttpServletDifferentiator.class);
-		final ServletRequest request = this.createMock(ServletRequest.class);
-		final ServletResponse response = this.createMock(ServletResponse.class);
+		final HttpServletRequest request = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this
+				.createMock(HttpServletResponse.class);
 		final ServletRequestForwarder forwarder = this
 				.createMock(ServletRequestForwarder.class);
 		final String WORK_NAME = "WORK";
@@ -367,7 +402,18 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
 
 		// Record including
-		differentiator.include(request, response);
+		differentiator.include(this.context, request, response);
+		this.control(differentiator).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect context", expected[0], actual[0]);
+				HttpServletRequest request = (HttpServletRequest) actual[1];
+				assertEquals("Incorrect request", "/extension.jsp", request
+						.getPathInfo());
+				assertEquals("Incorrect response", expected[2], actual[2]);
+				return true;
+			}
+		});
 
 		// Test
 		this.replayMockObjects();

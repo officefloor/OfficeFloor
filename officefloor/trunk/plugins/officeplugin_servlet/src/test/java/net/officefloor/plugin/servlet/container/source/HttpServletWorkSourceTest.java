@@ -76,6 +76,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
+		task.setDifferentiator(factory);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(

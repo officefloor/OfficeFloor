@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -63,6 +64,11 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	 * {@link HttpServlet} path.
 	 */
 	private static final String SERVLET_PATH = "/servlet/path";
+
+	/**
+	 * Extensions for matching via {@link HttpServletDifferentiator}.
+	 */
+	private static final String[] EXTENSIONS = new String[] { "html", "htm" };
 
 	/**
 	 * {@link HttpServlet}.
@@ -132,7 +138,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Setup the work factory (and task factory)
 		HttpServletTask factory = new HttpServletTask(SERVLET_NAME,
-				SERVLET_PATH, this.servlet, this.initParameters);
+				SERVLET_PATH, this.servlet, this.initParameters, EXTENSIONS);
 		factory.setOffice(this.office);
 
 		// Create the task
@@ -146,9 +152,6 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	public void testService() throws Throwable {
 
 		// Record obtain context for initialising Servlet
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
-				this.officeServletContext);
 		this.record_service();
 
 		// Test
@@ -157,6 +160,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure service is invoked
+		assertEquals("Should be initialised", 1, this.servlet.initCount);
 		assertTrue("HttpServlet should service", this.servlet.isServiceInvoked);
 	}
 
@@ -167,9 +171,6 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	public void testServiceAgain() throws Throwable {
 
 		// Record servicing twice (second time without init)
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
-				this.officeServletContext);
 		this.record_service();
 		this.record_service();
 
@@ -177,6 +178,45 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.task.doTask(this.taskContext);
 		this.task.doTask(this.taskContext);
+		this.verifyMockObjects();
+
+		// Ensure service is initialised only once in servicing
+		assertEquals("Should only be initialised once", 1,
+				this.servlet.initCount);
+		assertTrue("HttpServlet should service", this.servlet.isServiceInvoked);
+	}
+
+	/**
+	 * Ensure appropriately acts as a {@link HttpServletDifferentiator}.
+	 */
+	public void testHttpServletDifferentiator() throws Exception {
+
+		final HttpServletRequest request = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse response = this
+				.createMock(HttpServletResponse.class);
+
+		// Record servlet functionality
+		this.recordReturn(request, request.getContextPath(), CONTEXT_PATH);
+		this.recordReturn(request, request.getServletPath(), SERVLET_PATH);
+
+		// Test
+		this.replayMockObjects();
+
+		// Utilise as differentiator
+		HttpServletDifferentiator differentiator = this.task;
+
+		// Verify details
+		assertEquals("Incorrect servlet path", SERVLET_PATH, differentiator
+				.getServletPath());
+		assertEquals("Incorrect servlet name", SERVLET_NAME, differentiator
+				.getServletName());
+		assertEquals("Incorrect extensions", EXTENSIONS, differentiator
+				.getExtensions());
+
+		// Test include
+		differentiator.include(this.officeServletContext, request, response);
+
 		this.verifyMockObjects();
 
 		// Ensure service is invoked
@@ -193,6 +233,9 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		final OutputStream outputStream = new ByteArrayOutputStream();
 
 		// Record sourcing the dependencies for servicing the request
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+				this.officeServletContext);
 		this.recordReturn(this.taskContext, this.taskContext
 				.getObject(DependencyKeys.HTTP_CONNECTION), this.connection);
 		this.recordReturn(this.taskContext, this.taskContext
@@ -234,9 +277,19 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		 */
 		public boolean isServiceInvoked = false;
 
+		/**
+		 * Indicates the number of time initialised.
+		 */
+		public int initCount = 0;
+
 		/*
 		 * ================= HttpServlet =========================
 		 */
+
+		@Override
+		public void init() throws ServletException {
+			this.initCount++;
+		}
 
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp)

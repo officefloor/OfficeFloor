@@ -1564,6 +1564,45 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure may include.
+	 */
+	public void test_include() throws Exception {
+
+		final HttpServletRequest REQUEST = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse RESPONSE = this
+				.createMock(HttpServletResponse.class);
+
+		// Record to ensure invoked
+		this.recordReturn(REQUEST, REQUEST.getContextPath(), "/context/path");
+
+		// Test
+		this.replayMockObjects();
+
+		// Construct container with servlet
+		MockHttpServlet servlet = new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("Incorrect request", REQUEST, req);
+				assertEquals("Incorrect response", RESPONSE, resp);
+				assertEquals("Incorrect context path", "/context/path", req
+						.getContextPath());
+			}
+		};
+		HttpServletContainer container = new HttpServletContainerImpl(
+				this.servletName, this.servletPath, servlet,
+				this.initParameters, this.officeServletContext, this.office,
+				this.clock, Locale.getDefault());
+
+		// Include
+		container.include(REQUEST, RESPONSE);
+
+		// Verify functionality
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Asserts the written bytes to match the expected text (charset ASCII).
 	 * 
 	 * @param expectedText

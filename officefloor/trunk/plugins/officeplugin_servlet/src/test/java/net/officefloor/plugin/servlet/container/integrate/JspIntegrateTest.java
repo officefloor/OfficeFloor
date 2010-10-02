@@ -107,10 +107,6 @@ public class JspIntegrateTest extends MockHttpServletServer {
 	 */
 	public void testTag() throws Exception {
 
-		// TODO remove and have test pass
-		System.err.println("TODO remove and run test once RequestDispatcher has been implemented");
-		if (true) return;
-
 		// Send request
 		HttpClient client = this.createHttpClient();
 		HttpGet request = new HttpGet(this.getServerUrl() + "/Tag.jsp");
