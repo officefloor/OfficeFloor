@@ -37,7 +37,7 @@ public class JspIntegrateTest extends MockHttpServletServer {
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 		// Construct and return JSP task
-		return this.constructHttpServlet(servletContextName, httpName,
+		return this.constructHttpServlet("JSP", servletContextName, httpName,
 				requestAttributesName, sessionName, securityName,
 				JspWorkSource.class);
 	}

@@ -36,7 +36,9 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask;
 import net.officefloor.plugin.servlet.container.source.RequestAttributesManagedObjectSource;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
@@ -129,12 +131,19 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	}
 
 	/**
+	 * Flag indicating if {@link Team} is constructed for {@link HttpServlet}.
+	 */
+	private boolean isHttpServletTeamConstructed = false;
+
+	/**
 	 * Convenience method to construct {@link HttpServlet} {@link WorkSource}.
 	 * 
-	 * @param httpName
-	 *            Name of the {@link ServerHttpConnection}.
+	 * @param workName
+	 *            Name of {@link Work} for the {@link HttpServlet}.
 	 * @param servletContextName
 	 *            Name of the {@link ServletContext}.
+	 * @param httpName
+	 *            Name of the {@link ServerHttpConnection}.
 	 * @param requestAttributesName
 	 *            Name of the request attributes.
 	 * @param sessionName
@@ -149,19 +158,23 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 *         {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected HttpServicerTask constructHttpServlet(String servletContextName,
-			String httpName, String requestAttributesName, String sessionName,
+	protected HttpServicerTask constructHttpServlet(String workName,
+			String servletContextName, String httpName,
+			String requestAttributesName, String sessionName,
 			String securityName,
 			Class<? extends WorkSource<HttpServletTask>> workSourceClass,
 			String... properties) {
 
 		// Construct the reference
-		final HttpServicerTask reference = new HttpServicerTask("Servlet",
+		final HttpServicerTask reference = new HttpServicerTask(workName,
 				"service");
 
-		// Construct servicer
+		// Construct servicer (only once for test)
 		final String SERVICER_NAME = "Servicer";
-		this.constructTeam(SERVICER_NAME, OnePersonTeamSource.class);
+		if (!this.isHttpServletTeamConstructed) {
+			this.constructTeam(SERVICER_NAME, OnePersonTeamSource.class);
+			this.isHttpServletTeamConstructed = true;
+		}
 
 		// Constructs the HTTP Servlet
 		WorkType<HttpServletTask> servlet = WorkLoaderUtil.loadWorkType(

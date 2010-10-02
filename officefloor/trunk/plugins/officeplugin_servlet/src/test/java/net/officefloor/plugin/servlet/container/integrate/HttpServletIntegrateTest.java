@@ -51,8 +51,8 @@ public class HttpServletIntegrateTest extends MockHttpServletServer {
 			String httpName, String requestAttributesName, String sessionName,
 			String securityName) {
 		// Construct and return reference to HTTP Servlet
-		return this.constructHttpServlet(servletContextName, httpName,
-				requestAttributesName, sessionName, securityName,
+		return this.constructHttpServlet("HttpServlet", servletContextName,
+				httpName, requestAttributesName, sessionName, securityName,
 				HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Servlet",
 				HttpServletWorkSource.PROPERTY_SERVLET_PATH, "/servlet/path",
@@ -169,7 +169,6 @@ public class HttpServletIntegrateTest extends MockHttpServletServer {
 		// Validate the response
 		assertHttpResponse(response, 200, "Hello Daniel");
 	}
-
 
 	/**
 	 * Specifies the {@link Servicer} for servcing the {@link HttpRequest}.
