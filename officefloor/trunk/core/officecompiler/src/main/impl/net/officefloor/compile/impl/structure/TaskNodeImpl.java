@@ -61,7 +61,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link TaskNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TaskNodeImpl implements TaskNode {
@@ -136,7 +136,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param taskName
 	 *            Name of this {@link SectionTask}.
 	 * @param taskTypeName
@@ -160,7 +160,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 */
@@ -226,6 +226,12 @@ public class TaskNodeImpl implements TaskNode {
 		TaskBuilder taskBuilder = workBuilder.addTask(this.taskName,
 				taskFactory);
 		taskBuilder.setTeam(officeTeam.getOfficeTeamName());
+
+		// Add differentiator (if available)
+		Object differentiator = taskType.getDifferentiator();
+		if (differentiator != null) {
+			taskBuilder.setDifferentiator(differentiator);
+		}
 
 		// Build the flows
 		TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();

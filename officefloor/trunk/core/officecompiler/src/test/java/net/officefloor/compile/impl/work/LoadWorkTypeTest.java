@@ -40,6 +40,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -281,6 +282,58 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 						null);
 			}
 		});
+	}
+
+	/**
+	 * Ensure Differentiator not required.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testNoDifferentiator() {
+
+		final TaskFactory<Work, None, None> taskFactory = this
+				.createMock(TaskFactory.class);
+
+		// Attempt to load differentiator
+		WorkType<Work> work = this.loadWorkType(true, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				work.addTaskType("TASK", taskFactory, None.class, None.class);
+				// Do not specify differentiator
+			}
+		});
+
+		// Ensure differentiator available
+		Object differentiator = work.getTaskTypes()[0].getDifferentiator();
+		assertNull("Should not have differentiator", differentiator);
+	}
+
+	/**
+	 * Ensure able to load the Differentiator.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testDifferentiator() {
+
+		final TaskFactory<Work, None, None> taskFactory = this
+				.createMock(TaskFactory.class);
+		final Object DIFFERENTIATOR = "Differentiator";
+
+		// Attempt to load differentiator
+		WorkType<Work> work = this.loadWorkType(true, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				work.setWorkFactory(workFactory);
+				TaskTypeBuilder<None, None> task = work.addTaskType("TASK",
+						taskFactory, None.class, None.class);
+				task.setDifferentiator(DIFFERENTIATOR);
+			}
+		});
+
+		// Ensure differentiator available
+		Object differentiator = work.getTaskTypes()[0].getDifferentiator();
+		assertEquals("Incorrect differentiator", DIFFERENTIATOR, differentiator);
 	}
 
 	/**

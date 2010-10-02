@@ -137,6 +137,22 @@ public class WorkLoaderUtil {
 					+ expectedTask.getTaskName() + ")", expectedTask
 					.getFlowKeyClass(), actualTask.getFlowKeyClass());
 
+			// Verify differentiator
+			Object expectedDifferentiator = expectedTask.getDifferentiator();
+			Object actualDifferentiator = actualTask.getDifferentiator();
+			if (expectedDifferentiator == null) {
+				TestCase.assertNull("Should not have differentiator (task="
+						+ expectedTask.getTaskName() + ")",
+						actualDifferentiator);
+			} else {
+				// Match differentiator on type
+				TestCase.assertEquals("Incorrect differentiator type (task="
+						+ expectedTask.getTaskName() + ")",
+						expectedDifferentiator.getClass(),
+						(actualDifferentiator == null ? null
+								: actualDifferentiator.getClass()));
+			}
+
 			// If work factory and task factory match then should be so
 			if (expectedWork.getWorkFactory() == expectedTask.getTaskFactory()) {
 				TestCase

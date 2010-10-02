@@ -28,7 +28,13 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -43,8 +49,12 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
+import net.officefloor.plugin.work.clazz.ClassTaskFactory;
+import net.officefloor.plugin.work.clazz.ClassWork;
+import net.officefloor.plugin.work.clazz.ClassWorkFactory;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
+import net.officefloor.plugin.work.clazz.ParameterFactory;
 
 /**
  * Tests compiling a {@link Task}.
@@ -65,6 +75,25 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} with a differentiator.
+	 */
+	public void testDifferentiatorTask() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		this
+				.record_taskBuilder_setDifferentiator(DifferentiatorWorkSource.DIFFERENTIATOR);
 
 		// Compile the office floor
 		this.compile(true);
@@ -651,6 +680,37 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 
 		public void escalationTask() throws Exception {
 			fail("Should not be invoked in compiling");
+		}
+	}
+
+	/**
+	 * {@link WorkSource} to load differentiator for {@link Task}.
+	 */
+	public static class DifferentiatorWorkSource extends
+			AbstractWorkSource<ClassWork> {
+
+		public static final String DIFFERENTIATOR = "DIFFERENTIATOR";
+
+		/*
+		 * ================== WorkSource ==============================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		public void sourceWork(WorkTypeBuilder<ClassWork> workTypeBuilder,
+				WorkSourceContext context) throws Exception {
+			workTypeBuilder.setWorkFactory(new ClassWorkFactory(
+					CompileTaskWork.class));
+			TaskTypeBuilder<Indexed, Indexed> task = workTypeBuilder
+					.addTaskType("task", new ClassTaskFactory(
+							CompileTaskWork.class.getMethod("simpleTask"),
+							false, new ParameterFactory[0]), Indexed.class,
+							Indexed.class);
+			task.setDifferentiator(DIFFERENTIATOR);
 		}
 	}
 

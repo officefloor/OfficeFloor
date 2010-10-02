@@ -81,6 +81,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final List<TaskEscalationType> escalations = new LinkedList<TaskEscalationType>();
 
 	/**
+	 * Differentiator.
+	 */
+	private Object differentiator = null;
+
+	/**
 	 * Return type.
 	 */
 	private Class<?> returnType = null;
@@ -110,6 +115,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/*
 	 * ==================== TaskTypeBuilder ===================================
 	 */
+
+	@Override
+	public void setDifferentiator(Object differentiator) {
+		this.differentiator = differentiator;
+	}
 
 	@Override
 	public void setReturnType(Class<?> returnType) {
@@ -152,6 +162,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	@Override
 	public TaskFactory<W, M, F> getTaskFactory() {
 		return this.taskFactory;
+	}
+
+	@Override
+	public Object getDifferentiator() {
+		return this.differentiator;
 	}
 
 	@Override

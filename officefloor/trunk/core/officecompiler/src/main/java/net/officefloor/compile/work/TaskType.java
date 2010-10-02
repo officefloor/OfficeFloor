@@ -19,6 +19,7 @@
 package net.officefloor.compile.work;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -45,6 +46,15 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 	 * @return {@link TaskFactory}.
 	 */
 	TaskFactory<W, M, F> getTaskFactory();
+
+	/**
+	 * Obtains the differentiator.
+	 * 
+	 * @return Differentiator.
+	 * 
+	 * @see TaskBuilder#setDifferentiator(Object)
+	 */
+	Object getDifferentiator();
 
 	/**
 	 * Obtains the type of {@link Object} returned from the {@link Task} that is
