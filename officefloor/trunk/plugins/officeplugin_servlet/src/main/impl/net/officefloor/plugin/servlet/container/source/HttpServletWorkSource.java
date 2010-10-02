@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.servlet.container.source;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -52,6 +53,12 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	 * Prefix of property for an initialisation parameter.
 	 */
 	public static final String PROPERTY_PREFIX_INIT_PARAMETER = HttpServletTask.PROPERTY_PREFIX_INIT_PARAMETER;
+
+	/**
+	 * Name of property to obtain extensions for {@link RequestDispatcher}
+	 * matching.
+	 */
+	public static final String PROPERTY_EXTENSIONS = HttpServletTask.PROPERTY_EXTENSIONS;
 
 	/*
 	 * ===================== WorkSource =========================

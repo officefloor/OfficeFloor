@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +65,12 @@ public class HttpServletTask
 	public static final String PROPERTY_PREFIX_INIT_PARAMETER = "init.parameter.";
 
 	/**
+	 * Name of property to obtain extensions for {@link RequestDispatcher}
+	 * matching. Extensions are comma (,) separator.
+	 */
+	public static final String PROPERTY_EXTENSIONS = "extensions";
+
+	/**
 	 * Keys for the dependencies.
 	 */
 	public static enum DependencyKeys {
@@ -99,6 +106,16 @@ public class HttpServletTask
 						.substring(PROPERTY_PREFIX_INIT_PARAMETER.length());
 				String parameterValue = context.getProperty(propertyName);
 				initParameters.put(parameterName, parameterValue);
+			}
+		}
+
+		// Determine if overriding extensions
+		String extensionText = context.getProperty(PROPERTY_EXTENSIONS, null);
+		if (extensionText != null) {
+			// Override the extensions (trimming for use)
+			extensions = extensionText.split(",");
+			for (int i = 0; i < extensions.length; i++) {
+				extensions[i] = extensions[i].trim();
 			}
 		}
 
