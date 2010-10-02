@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.servlet.container.source;
+package net.officefloor.plugin.servlet.context.source;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,19 +30,19 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.servlet.container.ServletContextImpl;
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.context.OfficeServletContextImpl;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.log.StdoutLogger;
 import net.officefloor.plugin.servlet.resource.FileSystemResourceLocator;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
- * {@link ManagedObjectSource} for the {@link ServletContext}.
+ * {@link ManagedObjectSource} for the {@link OfficeServletContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ServletContextManagedObjectSource extends
+public class OfficeServletContextManagedObjectSource extends
 		AbstractManagedObjectSource<None, None> implements ManagedObject {
 
 	/**
@@ -81,9 +81,9 @@ public class ServletContextManagedObjectSource extends
 	public static final String PROPERTY_RESOURCE_PATH_ROOT = "resource.path.root";
 
 	/**
-	 * {@link ServletContext}.
+	 * {@link OfficeServletContext}.
 	 */
-	private ServletContext servletContext;
+	private OfficeServletContext officeServletContext;
 
 	/**
 	 * Extracts the mapping from the {@link ManagedObjectSourceContext}.
@@ -177,22 +177,17 @@ public class ServletContextManagedObjectSource extends
 		ResourceLocator resourceLocator = new FileSystemResourceLocator(
 				resourcePathRoot);
 
-		// TODO Create the request dispatcher factory
-		System.err.println("TODO provide request dispatcher factory");
-		RequestDispatcherFactory requestDispatcherFactory = null;
-
 		// Create the logger
 		Logger logger = new StdoutLogger();
 
-		// Create the servlet context instance
-		this.servletContext = new ServletContextImpl(serverName, serverPort,
-				servletContextName, contextPath, initParameters,
-				fileExtensionToMimeType, resourceLocator,
-				requestDispatcherFactory, logger);
+		// Create the office servlet context instance
+		this.officeServletContext = new OfficeServletContextImpl(serverName,
+				serverPort, servletContextName, contextPath, initParameters,
+				fileExtensionToMimeType, resourceLocator, logger);
 
 		// Specify the meta-data
 		context.setManagedObjectClass(this.getClass());
-		context.setObjectClass(ServletContext.class);
+		context.setObjectClass(OfficeServletContext.class);
 	}
 
 	@Override
@@ -206,7 +201,7 @@ public class ServletContextManagedObjectSource extends
 
 	@Override
 	public Object getObject() throws Throwable {
-		return this.servletContext;
+		return this.officeServletContext;
 	}
 
 }

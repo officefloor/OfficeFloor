@@ -31,8 +31,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -46,6 +48,11 @@ import net.officefloor.plugin.stream.OutputBufferStream;
  * @author Daniel Sagenschneider
  */
 public class HttpServletTaskTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link ServletContext} path.
+	 */
+	private static final String CONTEXT_PATH = "/context/path";
 
 	/**
 	 * {@link HttpServlet} name.
@@ -68,12 +75,6 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private final Map<String, String> initParameters = new HashMap<String, String>();
 
 	/**
-	 * {@link HttpServletTask} to test.
-	 */
-	private final HttpServletTask task = new HttpServletTask(SERVLET_NAME,
-			SERVLET_PATH, this.servlet, this.initParameters);
-
-	/**
 	 * {@link TaskContext}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -81,10 +82,15 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 			.createMock(TaskContext.class);
 
 	/**
-	 * {@link ServletContext}.
+	 * {@link OfficeServletContext}.
 	 */
-	private final ServletContext servletContext = this
-			.createMock(ServletContext.class);
+	private final OfficeServletContext officeServletContext = this
+			.createMock(OfficeServletContext.class);
+
+	/**
+	 * {@link Office}.
+	 */
+	private final Office office = this.createMock(Office.class);
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -118,15 +124,31 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private final HttpResponse response = this.createMock(HttpResponse.class);
 
 	/**
+	 * {@link HttpServletTask} to test.
+	 */
+	private HttpServletTask task;
+
+	@Override
+	protected void setUp() throws Exception {
+		// Setup the work factory (and task factory)
+		HttpServletTask factory = new HttpServletTask(SERVLET_NAME,
+				SERVLET_PATH, this.servlet, this.initParameters);
+		factory.setOffice(this.office);
+
+		// Create the task
+		HttpServletTask work = factory.createWork();
+		this.task = (HttpServletTask) factory.createTask(work);
+	}
+
+	/**
 	 * Ensure can service the {@link HttpRequest} with the {@link HttpServlet}.
 	 */
 	public void testService() throws Throwable {
 
 		// Record obtain context for initialising Servlet
-		this
-				.recordReturn(this.taskContext, this.taskContext
-						.getObject(DependencyKeys.SERVLET_CONTEXT),
-						this.servletContext);
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+				this.officeServletContext);
 		this.record_service();
 
 		// Test
@@ -145,10 +167,9 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	public void testServiceAgain() throws Throwable {
 
 		// Record servicing twice (second time without init)
-		this
-				.recordReturn(this.taskContext, this.taskContext
-						.getObject(DependencyKeys.SERVLET_CONTEXT),
-						this.servletContext);
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+				this.officeServletContext);
 		this.record_service();
 		this.record_service();
 
@@ -197,6 +218,10 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.response, this.response.getBody(), bufferStream);
 		this.recordReturn(bufferStream, bufferStream.getOutputStream(),
 				outputStream);
+
+		// Record obtain context path
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), CONTEXT_PATH);
 	}
 
 	/**
@@ -216,6 +241,10 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		@Override
 		protected void service(HttpServletRequest req, HttpServletResponse resp)
 				throws ServletException, IOException {
+
+			// Ensure correct context path
+			assertEquals("Incorrect context path", CONTEXT_PATH, req
+					.getContextPath());
 
 			// Ensure correct servlet path
 			assertEquals("Incorrect Servlet path", SERVLET_PATH, req

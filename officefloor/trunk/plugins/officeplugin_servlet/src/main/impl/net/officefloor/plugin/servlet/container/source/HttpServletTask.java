@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -30,11 +29,14 @@ import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.container.HttpServletContainerImpl;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -48,7 +50,8 @@ import net.officefloor.plugin.socket.server.http.session.HttpSession;
  */
 public class HttpServletTask
 		extends
-		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None> {
+		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None>
+		implements OfficeAwareWorkFactory<HttpServletTask> {
 
 	/**
 	 * Prefix of property for an initialisation parameter.
@@ -59,7 +62,7 @@ public class HttpServletTask
 	 * Keys for the dependencies.
 	 */
 	public static enum DependencyKeys {
-		SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
+		OFFICE_SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
 	}
 
 	public static void sourceWork(String servletName, String servletPath,
@@ -89,8 +92,8 @@ public class HttpServletTask
 		TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
 				.addTaskType("service", factory, DependencyKeys.class,
 						None.class);
-		task.addObject(ServletContext.class).setKey(
-				DependencyKeys.SERVLET_CONTEXT);
+		task.addObject(OfficeServletContext.class).setKey(
+				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
 		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
@@ -131,6 +134,11 @@ public class HttpServletTask
 	private final Map<String, String> initParameters;
 
 	/**
+	 * {@link Office}.
+	 */
+	private Office office;
+
+	/**
 	 * {@link HttpServletContainer}.
 	 */
 	private HttpServletContainer container = null;
@@ -156,6 +164,15 @@ public class HttpServletTask
 	}
 
 	/*
+	 * ================== OfficeAwareWorkFactory ===========================
+	 */
+
+	@Override
+	public void setOffice(Office office) throws Exception {
+		this.office = office;
+	}
+
+	/*
 	 * ====================== Task ================================
 	 */
 
@@ -168,9 +185,9 @@ public class HttpServletTask
 		// Lazy load the HTTP Servlet Container
 		synchronized (CLOCK) {
 			if (this.container == null) {
-				// Obtain the Servlet Context
-				ServletContext servletContext = (ServletContext) context
-						.getObject(DependencyKeys.SERVLET_CONTEXT);
+				// Obtain the Office Servlet Context
+				OfficeServletContext officeServletContext = (OfficeServletContext) context
+						.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT);
 
 				// TODO consider configuring the Locale
 				Locale locale = Locale.getDefault();
@@ -178,7 +195,7 @@ public class HttpServletTask
 				// Create the HTTP Servlet Container
 				this.container = new HttpServletContainerImpl(this.servletName,
 						this.servletPath, this.servlet, this.initParameters,
-						servletContext, CLOCK, locale);
+						officeServletContext, this.office, CLOCK, locale);
 			}
 		}
 
@@ -193,7 +210,8 @@ public class HttpServletTask
 				.getObject(DependencyKeys.HTTP_SECURITY);
 
 		// Service the request
-		this.container.service(connection, attributes, session, security);
+		this.container.service(connection, attributes, session, security,
+				context);
 
 		// Nothing to return
 		return null;

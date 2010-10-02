@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
-import org.apache.jasper.servlet.JspServlet;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
@@ -32,9 +29,12 @@ import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
+
+import org.apache.jasper.servlet.JspServlet;
 
 /**
  * Tests the {@link JspWorkSource}.
@@ -64,8 +64,8 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
-		task.addObject(ServletContext.class).setKey(
-				DependencyKeys.SERVLET_CONTEXT);
+		task.addObject(OfficeServletContext.class).setKey(
+				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
 		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
