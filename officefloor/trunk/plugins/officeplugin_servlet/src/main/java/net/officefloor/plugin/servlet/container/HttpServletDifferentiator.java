@@ -22,11 +22,12 @@ import java.io.IOException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 
 /**
  * {@link HttpServlet} {@link Task} differentiator.
@@ -69,16 +70,18 @@ public interface HttpServletDifferentiator {
 	/**
 	 * Includes the content from this {@link HttpServlet}.
 	 * 
+	 * @param context
+	 *            {@link OfficeServletContext}.
 	 * @param request
-	 *            {@link ServletRequest}.
+	 *            {@link HttpServletRequest}.
 	 * @param response
-	 *            {@link ServletResponse}.
+	 *            {@link HttpServletResponse}.
 	 * @throws ServletException
 	 *             As per {@link RequestDispatcher}.
 	 * @throws IOException
 	 *             As per {@link RequestDispatcher}.
 	 */
-	void include(ServletRequest request, ServletResponse response)
-			throws ServletException, IOException;
+	void include(OfficeServletContext context, HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException;
 
 }

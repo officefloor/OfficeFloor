@@ -34,6 +34,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -155,20 +157,20 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 						if (differentiator instanceof HttpServletDifferentiator) {
 							HttpServletDifferentiator httpServlet = (HttpServletDifferentiator) differentiator;
 
-							// Create the request dispatcher to HTTP Servlet
-							RequestDispatcher dispatcher = new OfficeRequestDispatcher(
+							// Create request dispatcher factory to HTTP Servlet
+							RequestDispatcherFactory factory = new RequestDispatcherFactory(
 									workName, taskName, httpServlet);
 
 							// Register for Servlet path
 							String servletPath = httpServlet.getServletPath();
-							context.requestDispatchers.put(servletPath,
-									dispatcher);
+							context.requestDispatchers
+									.put(servletPath, factory);
 
 							// Register for Servlet name (if available)
 							String servletName = httpServlet.getServletName();
 							if (servletName != null) {
 								context.namedDispatchers.put(servletName,
-										dispatcher);
+										factory);
 							}
 
 							// Register for extensions (if available)
@@ -176,7 +178,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 							if (extensions != null) {
 								for (String extension : extensions) {
 									context.extensionDispatchers.put(extension
-											.toLowerCase(), dispatcher);
+											.toLowerCase(), factory);
 								}
 							}
 						}
@@ -253,19 +255,23 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		OfficeContext context = this.getOfficeContext(office);
 
 		// Obtain dispatcher by path first
-		RequestDispatcher dispatcher = context.requestDispatchers.get(path);
-		if (dispatcher == null) {
+		RequestDispatcherFactory factory = context.requestDispatchers.get(path);
+		if (factory == null) {
 			// No dispatcher by path so try on extension
 			int extensionIndex = path.lastIndexOf('.');
 			if (extensionIndex >= 0) {
 				// +1 to ignore '.'
 				String extension = path.substring(extensionIndex + 1);
-				dispatcher = context.extensionDispatchers.get(extension
+				factory = context.extensionDispatchers.get(extension
 						.toLowerCase());
 			}
 		}
 
-		// Return the dispatcher
+		// Create and return the dispatcher
+		RequestDispatcher dispatcher = null;
+		if (factory != null) {
+			dispatcher = factory.createRequestDispatcher(path);
+		}
 		return dispatcher;
 	}
 
@@ -274,8 +280,15 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
 
-		// Obtain and return the named dispatcher
-		return context.namedDispatchers.get(name);
+		// Obtain the dispatcher
+		RequestDispatcher dispatcher = null;
+		RequestDispatcherFactory factory = context.namedDispatchers.get(name);
+		if (factory != null) {
+			dispatcher = factory.createRequestDispatcher(null);
+		}
+
+		// Return the named dispatcher
+		return dispatcher;
 	}
 
 	@Override
@@ -386,24 +399,23 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		/**
 		 * {@link RequestDispatcher} instances by their path.
 		 */
-		public final Map<String, RequestDispatcher> requestDispatchers = new HashMap<String, RequestDispatcher>();
+		public final Map<String, RequestDispatcherFactory> requestDispatchers = new HashMap<String, RequestDispatcherFactory>();
 
 		/**
 		 * {@link RequestDispatcher} instances by their name.
 		 */
-		public final Map<String, RequestDispatcher> namedDispatchers = new HashMap<String, RequestDispatcher>();
+		public final Map<String, RequestDispatcherFactory> namedDispatchers = new HashMap<String, RequestDispatcherFactory>();
 
 		/**
 		 * {@link RequestDispatcher} instances by their extension.
 		 */
-		public final Map<String, RequestDispatcher> extensionDispatchers = new HashMap<String, RequestDispatcher>();
+		public final Map<String, RequestDispatcherFactory> extensionDispatchers = new HashMap<String, RequestDispatcherFactory>();
 	}
 
 	/**
-	 * {@link RequestDispatcher} implementation to route to {@link HttpServlet}
-	 * instances within the {@link Office}.
+	 * Factory for the creation of a {@link RequestDispatcher}.
 	 */
-	private static class OfficeRequestDispatcher implements RequestDispatcher {
+	private class RequestDispatcherFactory {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -431,11 +443,76 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 *            {@link HttpServletDifferentiator} to include
 		 *            {@link HttpServlet}.
 		 */
-		public OfficeRequestDispatcher(String workName, String taskName,
+		public RequestDispatcherFactory(String workName, String taskName,
 				HttpServletDifferentiator httpServlet) {
 			this.workName = workName;
 			this.taskName = taskName;
 			this.httpServlet = httpServlet;
+		}
+
+		/**
+		 * Creates the {@link RequestDispatcher}.
+		 * 
+		 * @param path
+		 *            Path to the {@link RequestDispatcher}.
+		 * @return {@link RequestDispatcher}.
+		 */
+		public RequestDispatcher createRequestDispatcher(String path) {
+
+			// Ensure have the path
+			path = (path == null ? this.httpServlet.getServletPath() : path);
+
+			// Create the Request Dispatcher
+			return new OfficeRequestDispatcher(this.workName, this.taskName,
+					this.httpServlet, path);
+		}
+	}
+
+	/**
+	 * {@link RequestDispatcher} implementation to route to {@link HttpServlet}
+	 * instances within the {@link Office}.
+	 */
+	private class OfficeRequestDispatcher implements RequestDispatcher {
+
+		/**
+		 * Name of {@link Work} for forwarding.
+		 */
+		private final String workName;
+
+		/**
+		 * Name of {@link Task} for forwarding.
+		 */
+		private final String taskName;
+
+		/**
+		 * {@link HttpServletDifferentiator} to include {@link HttpServlet}.
+		 */
+		private final HttpServletDifferentiator httpServlet;
+
+		/**
+		 * Path to the {@link RequestDispatcher}.
+		 */
+		private final String path;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param workName
+		 *            Name of {@link Work} for forwarding.
+		 * @param taskName
+		 *            Name of {@link Task} for forwarding.
+		 * @param httpServlet
+		 *            {@link HttpServletDifferentiator} to include
+		 *            {@link HttpServlet}.
+		 * @param path
+		 *            Path to the {@link RequestDispatcher}.
+		 */
+		public OfficeRequestDispatcher(String workName, String taskName,
+				HttpServletDifferentiator httpServlet, String path) {
+			this.workName = workName;
+			this.taskName = taskName;
+			this.httpServlet = httpServlet;
+			this.path = path;
 		}
 
 		/*
@@ -469,8 +546,18 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		@Override
 		public void include(ServletRequest request, ServletResponse response)
 				throws ServletException, IOException {
+
+			// Downcast to HTTP request/response
+			HttpServletRequest httpRequest = (HttpServletRequest) request;
+			HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+			// Wrap request to change path as per dispatcher
+			httpRequest = new DispatcherHttpServletRequest(this.path,
+					httpRequest);
+
 			// Include the HTTP Servlet
-			this.httpServlet.include(request, response);
+			this.httpServlet.include(OfficeServletContextImpl.this,
+					httpRequest, httpResponse);
 		}
 	}
 

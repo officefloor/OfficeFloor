@@ -26,6 +26,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
@@ -178,6 +179,13 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 		// Serviced so flush buffered content
 		response.flushBuffers();
+	}
+
+	@Override
+	public void include(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// Include
+		this.servlet.service(request, response);
 	}
 
 }

@@ -537,12 +537,6 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	public String getRealPath(String path) {
-		throw new UnsupportedOperationException(
-				"ServletRequest.getRealPath(path) deprecated as of version 2.1");
-	}
-
-	@Override
 	public String getScheme() {
 		// Return based on whether secure
 		return (this.connection.isSecure() ? "https" : "http");
@@ -993,6 +987,12 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	/*
 	 * -------------------- Deprecated Methods --------------------------
 	 */
+
+	@Override
+	public String getRealPath(String path) {
+		throw new UnsupportedOperationException(
+				"ServletRequest.getRealPath(path) deprecated as of version 2.1");
+	}
 
 	@Override
 	public boolean isRequestedSessionIdFromUrl() {

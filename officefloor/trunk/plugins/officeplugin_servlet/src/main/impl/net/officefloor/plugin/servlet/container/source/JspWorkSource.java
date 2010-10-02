@@ -57,8 +57,8 @@ public class JspWorkSource extends AbstractWorkSource<HttpServletTask> {
 		HttpServlet servlet = new JspServlet();
 
 		// Source the JSP work
-		HttpServletTask
-				.sourceWork("JSP", "", servlet, workTypeBuilder, context);
+		HttpServletTask.sourceWork(workTypeBuilder, context, "JSP", "",
+				servlet, "jsp");
 	}
 
 }

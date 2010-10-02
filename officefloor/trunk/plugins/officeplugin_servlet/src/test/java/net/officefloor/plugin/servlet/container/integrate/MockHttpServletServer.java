@@ -170,6 +170,9 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		TaskBuilder<HttpServletTask, DependencyKeys, None> service = (TaskBuilder<HttpServletTask, DependencyKeys, None>) this
 				.constructTask(reference.taskName, servlet.getTaskTypes()[0]
 						.getTaskFactory(), SERVICER_NAME);
+		service
+				.setDifferentiator(servlet.getTaskTypes()[0]
+						.getDifferentiator());
 		service.linkManagedObject(DependencyKeys.OFFICE_SERVLET_CONTEXT,
 				servletContextName, OfficeServletContext.class);
 		service.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,
