@@ -39,8 +39,9 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask;
 import net.officefloor.plugin.servlet.container.source.RequestAttributesManagedObjectSource;
-import net.officefloor.plugin.servlet.container.source.ServletContextManagedObjectSource;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
@@ -169,8 +170,8 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		TaskBuilder<HttpServletTask, DependencyKeys, None> service = (TaskBuilder<HttpServletTask, DependencyKeys, None>) this
 				.constructTask(reference.taskName, servlet.getTaskTypes()[0]
 						.getTaskFactory(), SERVICER_NAME);
-		service.linkManagedObject(DependencyKeys.SERVLET_CONTEXT,
-				servletContextName, ServletContext.class);
+		service.linkManagedObject(DependencyKeys.OFFICE_SERVLET_CONTEXT,
+				servletContextName, OfficeServletContext.class);
 		service.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,
 				ServerHttpConnection.class);
 		service.linkManagedObject(DependencyKeys.REQUEST_ATTRIBUTES,
@@ -206,19 +207,21 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		final String SERVLET_CONTEXT_NAME = "ServletContext";
 		ManagedObjectBuilder<None> servletContext = this
 				.constructManagedObject(SERVLET_CONTEXT_NAME,
-						ServletContextManagedObjectSource.class);
+						OfficeServletContextManagedObjectSource.class);
 		servletContext.addProperty(
-				ServletContextManagedObjectSource.PROPERTY_SERVER_NAME,
+				OfficeServletContextManagedObjectSource.PROPERTY_SERVER_NAME,
 				"localhost");
 		servletContext
 				.addProperty(
-						ServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
+						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
 						"ServletContext");
 		servletContext.addProperty(
-				ServletContextManagedObjectSource.PROPERTY_CONTEXT_PATH, "/");
-		servletContext.addProperty(
-				ServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-				resourcePathRoot.getAbsolutePath());
+				OfficeServletContextManagedObjectSource.PROPERTY_CONTEXT_PATH,
+				"/");
+		servletContext
+				.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
+						resourcePathRoot.getAbsolutePath());
 		servletContext.setManagingOffice(officeName);
 		this.getOfficeBuilder().addProcessManagedObject(SERVLET_CONTEXT_NAME,
 				SERVLET_CONTEXT_NAME);

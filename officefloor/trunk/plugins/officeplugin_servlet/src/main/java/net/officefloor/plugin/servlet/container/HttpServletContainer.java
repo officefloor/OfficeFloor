@@ -23,6 +23,8 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
@@ -48,6 +50,9 @@ public interface HttpServletContainer {
 	 * @param security
 	 *            {@link HttpSecurity}. May be <code>null</code> if anonymous
 	 *            {@link HttpRequest}.
+	 * @param taskContext
+	 *            {@link TaskContext} to allow access to {@link OfficeFloor}
+	 *            capabilities.
 	 * @throws ServletException
 	 *             As per {@link HttpServlet} API.
 	 * @throws IOException
@@ -55,6 +60,7 @@ public interface HttpServletContainer {
 	 */
 	void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSession session,
-			HttpSecurity security) throws ServletException, IOException;
+			HttpSecurity security, TaskContext<?, ?, ?> taskContext)
+			throws ServletException, IOException;
 
 }

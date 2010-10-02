@@ -37,16 +37,19 @@ import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -102,10 +105,21 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private HttpSecurity security = this.createMock(HttpSecurity.class);
 
 	/**
-	 * {@link ServletContext}.
+	 * {@link TaskContext}.
 	 */
-	private final ServletContext servletContext = this
-			.createMock(ServletContext.class);
+	private final TaskContext<?, ?, ?> taskContext = this
+			.createMock(TaskContext.class);
+
+	/**
+	 * {@link OfficeServletContext}.
+	 */
+	private final OfficeServletContext officeServletContext = this
+			.createMock(OfficeServletContext.class);
+
+	/**
+	 * {@link Office}.
+	 */
+	private final Office office = this.createMock(Office.class);
 
 	/**
 	 * {@link Clock}.
@@ -186,7 +200,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Register an init parameter
 		this.initParameters.put("available", "value");
 
+		// Record using Servlet Context (init parameter)
 		this.record_init("/test");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getInitParameter(this.office, "NAME"), "VALUE");
+
+		// Test
 		this.doTest(new MockHttpServlet() {
 
 			@Override
@@ -201,9 +220,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect servlet name",
 						HttpServletContainerTest.this.servletName, config
 								.getServletName());
-				assertEquals("Incorrect servlet context",
-						HttpServletContainerTest.this.servletContext, config
-								.getServletContext());
+				assertEquals("Incorrect servlet context init parameter",
+						"VALUE", config.getServletContext().getInitParameter(
+								"NAME"));
 				assertEquals("getInitParameter(available)", "value", config
 						.getInitParameter("available"));
 				assertNull("getInitParameter(none)", config
@@ -219,10 +238,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure context methods are correct.
 	 */
 	public void test_req_Context() {
-		this.recordReturn(this.servletContext, this.servletContext
-				.getContextPath(), "/context/path");
 		this.servletPath = "/servlet/path";
+
+		// Record obtaining paths
 		this.record_init("/context/path/servlet/path");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), "/context/path");
+
+		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -917,14 +940,18 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_req_RequestDispatcher() {
 		final RequestDispatcher dispatcher = this
 				.createMock(RequestDispatcher.class);
+
+		// Record obtaining the request dispatcher
 		this.record_init("/test");
-		this.recordReturn(this.servletContext, this.servletContext
-				.getRequestDispatcher("/none"), null);
-		this.recordReturn(this.servletContext, this.servletContext
-				.getRequestDispatcher("/absolute"), dispatcher);
-		this.recordReturn(this.servletContext, this.servletContext
-				.getRequestDispatcher(this.servletPath + "/relative"),
-				dispatcher);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, "/none"), null);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, "/absolute"), dispatcher);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, this.servletPath
+						+ "/relative"), dispatcher);
+
+		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -937,6 +964,40 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						.getRequestDispatcher("relative"));
 			}
 		});
+	}
+
+	/**
+	 * Ensure providing the {@link ServletRequestForwarder} via the
+	 * {@link ServletRequest}.
+	 */
+	public void test_req_ServletRequestForwarder() throws Exception {
+
+		final String WORK_NAME = "WORK";
+		final String TASK_NAME = "TASK";
+		final Object PARAMETER = "PARAMETER";
+
+		// Record forwarding the request
+		this.record_init("/test");
+		this.taskContext.doFlow(WORK_NAME, TASK_NAME, PARAMETER);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Obtain the forwarder
+				ServletRequestForwarder forwarder = (ServletRequestForwarder) req
+						.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER);
+				assertNotNull("Expect to always obtain access", forwarder);
+
+				// Forward to ensure correctly forwards
+				forwarder.forward(WORK_NAME, TASK_NAME, PARAMETER);
+			}
+		});
+
+		// Ensure not added to attributes
+		assertNull("Should not be added to attributes", this.attributes
+				.get(ServletRequestForwarder.ATTRIBUTE_FORWARDER));
 	}
 
 	/**
@@ -1373,8 +1434,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
-		this.recordReturn(this.servletContext, this.servletContext
-				.getContextPath(), "/context");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:8080"));
 
@@ -1406,8 +1467,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record obtaining details for redirect
 		this.record_init("/test");
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
-		this.recordReturn(this.servletContext, this.servletContext
-				.getContextPath(), "/context");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:443"));
 
@@ -1596,12 +1657,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			// Create the HTTP Servlet container
 			HttpServletContainer container = new HttpServletContainerImpl(
 					this.servletName, this.servletPath, servlet,
-					this.initParameters, this.servletContext, this.clock,
-					locale);
+					this.initParameters, this.officeServletContext,
+					this.office, this.clock, locale);
 
 			// Process a request
 			container.service(this.connection, this.attributes, this.session,
-					this.security);
+					this.security, this.taskContext);
 
 			// Verify functionality
 			this.verifyMockObjects();

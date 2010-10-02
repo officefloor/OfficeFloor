@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +35,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -76,8 +76,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
-		task.addObject(ServletContext.class).setKey(
-				DependencyKeys.SERVLET_CONTEXT);
+		task.addObject(OfficeServletContext.class).setKey(
+				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
 		task.addObject(Map.class).setKey(DependencyKeys.REQUEST_ATTRIBUTES);
@@ -103,8 +103,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		// Mocks
 		final TaskContext<HttpServletTask, DependencyKeys, None> taskContext = this
 				.createMock(TaskContext.class);
-		final ServletContext servletContext = this
-				.createMock(ServletContext.class);
+		final OfficeServletContext officeServletContext = this
+				.createMock(OfficeServletContext.class);
 		final ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		final Map<String, Object> attributes = this.createMock(Map.class);
@@ -120,7 +120,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 
 		// Record servicing request
 		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.SERVLET_CONTEXT), servletContext);
+				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+				officeServletContext);
 		this.recordReturn(taskContext, taskContext
 				.getObject(DependencyKeys.HTTP_CONNECTION), connection);
 		this.recordReturn(taskContext, taskContext

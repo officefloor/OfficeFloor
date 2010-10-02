@@ -20,20 +20,15 @@ package net.officefloor.plugin.servlet.container;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 
 /**
  * Tests the {@link ServletContextImpl}.
@@ -43,124 +38,129 @@ import net.officefloor.plugin.servlet.resource.ResourceLocator;
 public class ServletContextTest extends OfficeFrameTestCase {
 
 	/**
-	 * Server name.
+	 * {@link OfficeServletContext}.
 	 */
-	private final String serverName = "www.officefloor.net";
+	private final OfficeServletContext context = this
+			.createMock(OfficeServletContext.class);
 
 	/**
-	 * Context path.
+	 * {@link Office}.
 	 */
-	private final String contextPath = "/context/path";
-
-	/**
-	 * Name of the {@link ServletContext}.
-	 */
-	private final String servletContextName = "ServletContextName";
-
-	/**
-	 * Mapping of file extension to MIME type.
-	 */
-	private final Map<String, String> mimeMappings = new HashMap<String, String>();
-
-	/**
-	 * {@link ResourceLocator}.
-	 */
-	private final ResourceLocator locator = this
-			.createMock(ResourceLocator.class);
-
-	/**
-	 * {@link RequestDispatcherFactory}.
-	 */
-	private final RequestDispatcherFactory dispatcherFactory = this
-			.createMock(RequestDispatcherFactory.class);
-
-	/**
-	 * {@link Logger}.
-	 */
-	private final Logger logger = this.createMock(Logger.class);
-
-	/**
-	 * Init parameters.
-	 */
-	private final Map<String, String> initParameters = new HashMap<String, String>();
+	private final Office office = this.createMock(Office.class);
 
 	/**
 	 * {@link ServletContextImpl} to test.
 	 */
-	private final ServletContext context = new ServletContextImpl(
-			this.serverName, 80, this.servletContextName, this.contextPath,
-			this.initParameters, this.mimeMappings, this.locator,
-			this.dispatcherFactory, this.logger);
+	private final ServletContext servletContext = new ServletContextImpl(
+			this.context, this.office);
 
 	/**
 	 * Ensure correct context path.
 	 */
 	public void testContextPath() {
-		assertEquals("Incorrect context path", this.contextPath, this.context
-				.getContextPath());
+
+		// Record obtaining Context Path
+		final String CONTEXT_PATH = "/context/path";
+		this.recordReturn(this.context, this.context
+				.getContextPath(this.office), CONTEXT_PATH);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect context path", CONTEXT_PATH,
+				this.servletContext.getContextPath());
+		this.verifyMockObjects();
 	}
 
 	/**
-	 * Due to security (and simplicity) can not obtain other
-	 * {@link ServletContext} instances.
+	 * Obtain other {@link ServletContext} instances.
 	 */
 	public void testOtherContexts() {
-		assertNull("Restricting access to other servlet contexts", this.context
-				.getContext("/other"));
+
+		// Record obtaining available ServletContext
+		final String AVAILABLE_URL = "/available";
+		final ServletContext CONTEXT = this.createMock(ServletContext.class);
+		this.recordReturn(this.context, this.context.getContext(this.office,
+				AVAILABLE_URL), CONTEXT);
+
+		// Record unavailable
+		final String UNAVAILABLE_URL = "/unavailable";
+		this.recordReturn(this.context, this.context.getContext(this.office,
+				UNAVAILABLE_URL), null);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect ServletContext", CONTEXT, this.servletContext
+				.getContext(AVAILABLE_URL));
+		assertNull("Should be unavailable", this.servletContext
+				.getContext(UNAVAILABLE_URL));
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure correct version supported.
 	 */
 	public void testVersion() {
-		assertEquals("Incorrect major version", 2, this.context
+
+		// Versions
+		final int MAJOR = 2;
+		final int MINOR = 5;
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect major version", MAJOR, this.servletContext
 				.getMajorVersion());
-		assertEquals("Incorrect minor version", 5, this.context
+		assertEquals("Incorrect minor version", MINOR, this.servletContext
 				.getMinorVersion());
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure correct MIME type for files.
 	 */
 	public void testFileMimeTypes() {
-		this.mimeMappings.put("html", "text/html");
-		assertNull("No extension so no MIME type", this.context
-				.getMimeType("NoExtensionFileName"));
-		assertEquals("Incorrect MIME type", "text/html", this.context
-				.getMimeType("file.html"));
-		assertNull("Unknown file extension", this.context
-				.getMimeType("file.unknown"));
+
+		// Record obtain MIME type
+		final String FILE = "file.html";
+		final String MIME_TYPE = "text/html";
+		this.recordReturn(this.context, this.context.getMimeType(this.office,
+				FILE), MIME_TYPE);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect MIME type", MIME_TYPE, this.servletContext
+				.getMimeType(FILE));
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can obtain resources.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testResources() throws Exception {
 
 		// Record obtaining resource paths
-		final Set<String> children = new HashSet<String>(Arrays
-				.asList("/child/"));
-		this.recordReturn(this.locator, this.locator
-				.getResourceChildren("/parent"), children);
+		final Set<String> children = this.createMock(Set.class);
+		this.recordReturn(this.context, this.context.getResourcePaths(
+				this.office, "/parent"), children);
 
 		// Record obtain resource URL
 		final URL url = new URL("http", "officefloor.net", 80, "resource");
-		this.recordReturn(this.locator, this.locator.getResource("/resource"),
-				url);
+		this.recordReturn(this.context, this.context.getResource(this.office,
+				"/resource"), url);
 
 		// Record obtain resource stream
 		final InputStream stream = new ByteArrayInputStream(new byte[] { 1 });
-		this.recordReturn(this.locator, this.locator
-				.getResourceAsStream("/resource"), stream);
+		this.recordReturn(this.context, this.context.getResourceAsStream(
+				this.office, "/resource"), stream);
 
 		// Test
 		this.replayMockObjects();
-		assertEquals("Incorrect resource paths", children, this.context
+		assertEquals("Incorrect resource paths", children, this.servletContext
 				.getResourcePaths("/parent"));
-		assertEquals("Incorrect resource URL", url.toString(), this.context
-				.getResource("/resource").toString());
-		assertEquals("Incorrect resource InputStream", stream, this.context
-				.getResourceAsStream("/resource"));
+		assertEquals("Incorrect resource URL", url.toString(),
+				this.servletContext.getResource("/resource").toString());
+		assertEquals("Incorrect resource InputStream", stream,
+				this.servletContext.getResourceAsStream("/resource"));
 		this.verifyMockObjects();
 	}
 
@@ -170,15 +170,21 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	public void testRequestDispatcher() {
 		final RequestDispatcher dispatcher = this
 				.createMock(RequestDispatcher.class);
-		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
-				.createRequestDispatcher("/resource"), dispatcher);
-		this.recordReturn(this.dispatcherFactory, this.dispatcherFactory
-				.createNamedDispatcher("Name"), dispatcher);
+
+		// Record obtaining Request Dispatcher
+		this.recordReturn(this.context, this.context.getRequestDispatcher(
+				this.office, "/resource"), dispatcher);
+
+		// Record obtaining Named Dispatcher
+		this.recordReturn(this.context, this.context.getNamedDispatcher(
+				this.office, "Name"), dispatcher);
+
+		// Test
 		this.replayMockObjects();
-		assertEquals("Incorrect request dispatcher", dispatcher, this.context
-				.getRequestDispatcher("/resource"));
-		assertEquals("Incorrect named dispatcher", dispatcher, this.context
-				.getNamedDispatcher("Name"));
+		assertEquals("Incorrect request dispatcher", dispatcher,
+				this.servletContext.getRequestDispatcher("/resource"));
+		assertEquals("Incorrect named dispatcher", dispatcher,
+				this.servletContext.getNamedDispatcher("Name"));
 		this.verifyMockObjects();
 	}
 
@@ -188,11 +194,15 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	public void testLogging() {
 		final String message = "Log Message";
 		final Throwable failure = new Throwable("test");
-		this.logger.log(message);
-		this.logger.log(message, failure);
+
+		// Recording various logging
+		this.context.log(this.office, message);
+		this.context.log(this.office, message, failure);
+
+		// Test
 		this.replayMockObjects();
-		this.context.log(message);
-		this.context.log(message, failure);
+		this.servletContext.log(message);
+		this.servletContext.log(message, failure);
 		this.verifyMockObjects();
 	}
 
@@ -200,60 +210,92 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain real path.
 	 */
 	public void testRealPath() {
+
+		// Record obtaining real path
+		final String RELATIVE_PATH = "/relative.path";
+		final String REAL_PATH = "http://www.officefloor.net" + RELATIVE_PATH;
+		this.recordReturn(this.context, this.context.getRealPath(this.office,
+				RELATIVE_PATH), REAL_PATH);
+
+		// Test
 		this.replayMockObjects();
-		assertEquals("Incorrect real path", "http://" + this.serverName
-				+ this.contextPath + "/real.path", this.context
-				.getRealPath("/real.path"));
+		assertEquals("Incorrect real path", REAL_PATH, this.servletContext
+				.getRealPath(RELATIVE_PATH));
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensure correct server info.
+	 * Ensure correct server information.
 	 */
 	public void testServerInfo() {
-		String serverInfo = "OfficeFloor servlet plug-in/1.0";
-		System.out.println("Validating server info to be '" + serverInfo + "'");
-		assertEquals("Incorrect server info", serverInfo, this.context
+
+		// Record obtaining Server Info
+		final String SERVER_INFO = "Server Info";
+		this.recordReturn(this.context,
+				this.context.getServerInfo(this.office), SERVER_INFO);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect server info", SERVER_INFO, this.servletContext
 				.getServerInfo());
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can obtain init parameters.
 	 */
 	public void testInitParameters() {
-		this.initParameters.put("name", "value");
-		assertEquals("Incorrect init parameter value", "value", this.context
-				.getInitParameter("name"));
-		Enumeration<?> enumeration = this.context.getInitParameterNames();
-		assertTrue("Expecting init parameter name", enumeration
-				.hasMoreElements());
-		assertEquals("Incorrect init parameter name", "name", enumeration
-				.nextElement());
-		assertFalse("Expecting only one init parameter name", enumeration
-				.hasMoreElements());
+
+		// Record obtain init parameter
+		final String NAME = "name";
+		final String VALUE = "value";
+		this.recordReturn(this.context, this.context.getInitParameter(
+				this.office, NAME), VALUE);
+
+		// Record obtain init parameter names
+		final Enumeration<?> ENUMERATION = this.createMock(Enumeration.class);
+		this.recordReturn(this.context, this.context
+				.getInitParameterNames(this.office), ENUMERATION);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect init parameter value", "value",
+				this.servletContext.getInitParameter("name"));
+		assertEquals("Incorrect init parameter enumeration", ENUMERATION,
+				this.servletContext.getInitParameterNames());
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can set, obtain and remove attributes.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testAttributes() {
-		final Object attribute = new Object();
+		final String NAME = "name";
+		final Object VALUE = new Object();
+
+		// Record specify attribute
+		this.context.setAttribute(this.office, NAME, VALUE);
+
+		// Record obtain attribute
+		this.recordReturn(this.context, this.context.getAttribute(this.office,
+				NAME), VALUE);
+
+		// Record obtain attribute names
+		final Enumeration<?> ENUMERATION = this.createMock(Enumeration.class);
+		this.recordReturn(this.context, this.context
+				.getAttributeNames(this.office), ENUMERATION);
+
+		// Record remove attribute
+		this.context.removeAttribute(this.office, NAME);
 
 		// Test
 		this.replayMockObjects();
-		this.context.setAttribute("attribute", attribute);
-		assertEquals("Incorrect attribute", attribute, this.context
-				.getAttribute("attribute"));
-		Enumeration<String> enumeration = this.context.getAttributeNames();
-		assertTrue("Expecting an attribute name", enumeration.hasMoreElements());
-		assertEquals("Incorrect attribute name", "attribute", enumeration
-				.nextElement());
-		assertFalse("Expecting only one attribute name", enumeration
-				.hasMoreElements());
-		this.context.removeAttribute("attribute");
-		assertNull("Attribute should be removed", this.context
-				.getAttribute("attribute"));
+		this.servletContext.setAttribute(NAME, VALUE);
+		assertEquals("Incorrect attribute", VALUE, this.servletContext
+				.getAttribute(NAME));
+		assertEquals("Incorrect attribute name enumeration", ENUMERATION,
+				this.servletContext.getAttributeNames());
+		this.servletContext.removeAttribute(NAME);
 		this.verifyMockObjects();
 	}
 
@@ -261,8 +303,17 @@ public class ServletContextTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain servlet context name.
 	 */
 	public void testServletContextName() {
-		assertEquals("Incorrect servlet context name", this.servletContextName,
-				this.context.getServletContextName());
+
+		// Record obtain Servlet Context name
+		final String SERVLET_CONTEXT_NAME = "Servlet Context";
+		this.recordReturn(this.context, this.context
+				.getServletContextName(this.office), SERVLET_CONTEXT_NAME);
+
+		// Test
+		this.replayMockObjects();
+		assertEquals("Incorrect servlet context name", SERVLET_CONTEXT_NAME,
+				this.servletContext.getServletContextName());
+		this.verifyMockObjects();
 	}
 
 }

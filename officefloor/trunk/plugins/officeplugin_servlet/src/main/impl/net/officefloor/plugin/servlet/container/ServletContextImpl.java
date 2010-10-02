@@ -20,11 +20,7 @@ package net.officefloor.plugin.servlet.container;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -32,9 +28,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import net.officefloor.plugin.servlet.dispatch.RequestDispatcherFactory;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 
 /**
  * {@link ServletContext} implementation.
@@ -44,89 +39,28 @@ import net.officefloor.plugin.servlet.resource.ResourceLocator;
 public class ServletContextImpl implements ServletContext {
 
 	/**
-	 * {@link ServletContext} name.
+	 * {@link OfficeServletContext} to delegate functionality to within the
+	 * context of the {@link Office}.
 	 */
-	private final String servletContextName;
+	private final OfficeServletContext context;
 
 	/**
-	 * Context path.
+	 * {@link Office} for context of this {@link ServletContext}.
 	 */
-	private final String contextPath;
-
-	/**
-	 * Init parameters.
-	 */
-	private final Map<String, String> initParameters;
-
-	/**
-	 * {@link ContextAttributes}.
-	 */
-	private final Map<String, Object> attributes = new HashMap<String, Object>();
-
-	/**
-	 * Mapping of file extension to MIME type.
-	 */
-	private final Map<String, String> fileExtensionToMimeType;
-
-	/**
-	 * {@link ResourceLocator}.
-	 */
-	private final ResourceLocator resourceLocator;
-
-	/**
-	 * {@link RequestDispatcherFactory}.
-	 */
-	private final RequestDispatcherFactory requestDispatcherFactory;
-
-	/**
-	 * {@link Logger}.
-	 */
-	private final Logger logger;
-
-	/**
-	 * Real path prefix.
-	 */
-	private final String realPathPrefix;
+	private final Office office;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param serverName
-	 *            Server name.
-	 * @param serverPort
-	 *            Server port.
-	 * @param servletContextName
-	 *            {@link ServletContext} name.
-	 * @param contextPath
-	 *            Context path.
-	 * @param initParameters
-	 *            Init parameters.
-	 * @param fileExtensionToMimeType
-	 *            Mapping of file extension to MIME type.
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
-	 * @param requestDispatcherFactory
-	 *            {@link RequestDispatcherFactory}.
-	 * @param logger
-	 *            {@link Logger}.
+	 * @param context
+	 *            {@link OfficeServletContext} to delegate functionality to
+	 *            within the context of the {@link Office}.
+	 * @param office
+	 *            {@link Office} for context of this {@link ServletContext}.
 	 */
-	public ServletContextImpl(String serverName, int serverPort,
-			String servletContextName, String contextPath,
-			Map<String, String> initParameters,
-			Map<String, String> fileExtensionToMimeType,
-			ResourceLocator resourceLocator,
-			RequestDispatcherFactory requestDispatcherFactory, Logger logger) {
-		this.servletContextName = servletContextName;
-		this.initParameters = initParameters;
-		this.contextPath = contextPath;
-		this.fileExtensionToMimeType = fileExtensionToMimeType;
-		this.resourceLocator = resourceLocator;
-		this.requestDispatcherFactory = requestDispatcherFactory;
-		this.logger = logger;
-
-		// Create the real path prefix
-		this.realPathPrefix = "http://" + serverName
-				+ (serverPort == 80 ? "" : ":" + serverPort);
+	public ServletContextImpl(OfficeServletContext context, Office office) {
+		this.context = context;
+		this.office = office;
 	}
 
 	/*
@@ -135,13 +69,12 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getContextPath() {
-		return this.contextPath;
+		return this.context.getContextPath(this.office);
 	}
 
 	@Override
 	public ServletContext getContext(String uripath) {
-		// Do not allow access to other contexts
-		return null;
+		return this.context.getContext(this.office, uripath);
 	}
 
 	@Override
@@ -156,119 +89,90 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getMimeType(String file) {
-
-		// Determine if file extension
-		int extensionIndex = file.lastIndexOf('.');
-		if (extensionIndex < 0) {
-			// No file extension, so no MIME type
-			return null;
-		}
-
-		// Obtain the file extension (+1 to ignore separator)
-		String fileExtension = file.substring(extensionIndex + 1);
-
-		// Obtain the MIME type for file extension
-		String mimeType = this.fileExtensionToMimeType.get(fileExtension
-				.toLowerCase());
-
-		// Return the MIME type
-		return mimeType;
+		return this.context.getMimeType(this.office, file);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set getResourcePaths(String path) {
-		return this.resourceLocator.getResourceChildren(path);
+		return this.context.getResourcePaths(this.office, path);
 	}
 
 	@Override
 	public URL getResource(String path) throws MalformedURLException {
-		return this.resourceLocator.getResource(path);
+		return this.context.getResource(this.office, path);
 	}
 
 	@Override
 	public InputStream getResourceAsStream(String path) {
-		return this.resourceLocator.getResourceAsStream(path);
+		return this.context.getResourceAsStream(this.office, path);
 	}
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		return this.requestDispatcherFactory.createRequestDispatcher(path);
+		return this.context.getRequestDispatcher(this.office, path);
 	}
 
 	@Override
 	public RequestDispatcher getNamedDispatcher(String name) {
-		return this.requestDispatcherFactory.createNamedDispatcher(name);
+		return this.context.getNamedDispatcher(this.office, name);
 	}
 
 	@Override
 	public void log(String msg) {
-		this.logger.log(msg);
+		this.context.log(this.office, msg);
 	}
 
 	@Override
 	public void log(String message, Throwable throwable) {
-		this.logger.log(message, throwable);
+		this.context.log(this.office, message, throwable);
 	}
 
 	@Override
 	public String getRealPath(String path) {
-
-		// Obtain the path to context
-		String realPath = this.realPathPrefix + this.contextPath;
-
-		// Add path
-		realPath = realPath + (path.startsWith("/") ? path : "/" + path);
-
-		// Return the real path
-		return realPath;
+		return this.context.getRealPath(this.office, path);
 	}
 
 	@Override
 	public String getServerInfo() {
-		return "OfficeFloor servlet plug-in/1.0";
+		return this.context.getServerInfo(this.office);
 	}
 
 	@Override
 	public String getInitParameter(String name) {
-		return this.initParameters.get(name);
+		return this.context.getInitParameter(this.office, name);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Enumeration getInitParameterNames() {
-		return new IteratorEnumeration<String>(this.initParameters.keySet()
-				.iterator());
+		return this.context.getInitParameterNames(this.office);
 	}
 
 	@Override
-	public synchronized void setAttribute(String name, Object object) {
-		this.attributes.put(name, object);
+	public void setAttribute(String name, Object object) {
+		this.context.setAttribute(this.office, name, object);
 	}
 
 	@Override
-	public synchronized Object getAttribute(String name) {
-		return this.attributes.get(name);
+	public Object getAttribute(String name) {
+		return this.context.getAttribute(this.office, name);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public synchronized Enumeration getAttributeNames() {
-		// Create copy of names to stop concurrency issues
-		List<String> names = new ArrayList<String>(this.attributes.keySet());
-
-		// Return the iterator over the names
-		return new IteratorEnumeration<String>(names.iterator());
+	public Enumeration getAttributeNames() {
+		return this.context.getAttributeNames(this.office);
 	}
 
 	@Override
-	public synchronized void removeAttribute(String name) {
-		this.attributes.remove(name);
+	public void removeAttribute(String name) {
+		this.context.removeAttribute(this.office, name);
 	}
 
 	@Override
 	public String getServletContextName() {
-		return this.servletContextName;
+		return this.context.getServletContextName(this.office);
 	}
 
 	/*

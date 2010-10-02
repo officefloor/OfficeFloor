@@ -38,11 +38,16 @@ import java.util.TimeZone;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -59,7 +64,8 @@ import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniserIm
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServletRequestImpl implements HttpServletRequest {
+public class HttpServletRequestImpl implements HttpServletRequest,
+		ServletRequestForwarder {
 
 	/**
 	 * RFC 1123 header date format.
@@ -149,6 +155,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private final Locale defaultLocale;
 
 	/**
+	 * {@link TaskContext}.
+	 */
+	private final TaskContext<?, ?, ?> taskContext;
+
+	/**
 	 * Path.
 	 */
 	private String path = "";
@@ -208,6 +219,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 *            {@link ServletContext}.
 	 * @param defaultLocale
 	 *            Default {@link Locale} if not specified.
+	 * @param taskContext
+	 *            {@link TaskContext}.
 	 * @throws HttpRequestTokeniseException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
@@ -215,7 +228,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			String servletPath, Map<String, Object> requestAttributes,
 			HttpSecurity security, String sessionIdIdentifierName,
 			HttpSession session, ServletContext servletContext,
-			Locale defaultLocale) throws HttpRequestTokeniseException {
+			Locale defaultLocale, TaskContext<?, ?, ?> taskContext)
+			throws HttpRequestTokeniseException {
 
 		// Initiate state
 		this.servletPath = servletPath;
@@ -227,6 +241,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		this.session = session;
 		this.servletContext = servletContext;
 		this.defaultLocale = defaultLocale;
+		this.taskContext = taskContext;
 
 		// Tokenise the HTTP request
 		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
@@ -298,6 +313,26 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 		// As here not found HTTP header
 		return null;
+	}
+
+	/*
+	 * ====================== ServletRequestForwarder ========================
+	 */
+
+	@Override
+	public void forward(String workName, String taskName, Object parameter)
+			throws ServletException {
+		try {
+			// Forward
+			this.taskContext.doFlow(workName, taskName, parameter);
+
+		} catch (UnknownWorkException ex) {
+			throw new ServletException(ex);
+		} catch (UnknownTaskException ex) {
+			throw new ServletException(ex);
+		} catch (InvalidParameterTypeException ex) {
+			throw new ServletException(ex);
+		}
 	}
 
 	/*
@@ -806,6 +841,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public Object getAttribute(String name) {
+
+		// Determine if after Servlet Request Forwarder
+		if (ServletRequestForwarder.ATTRIBUTE_FORWARDER.equals(name)) {
+			return this; // ServletRequestForwarder
+		}
+
+		// Obtain the request attribute
 		return this.attributes.get(name);
 	}
 
