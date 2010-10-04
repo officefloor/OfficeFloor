@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
+import java.util.List;
+
 /**
  * Tests the {@link ServicerMapper}.
  * 
@@ -161,9 +163,59 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	/**
 	 * Ensure able to obtain named {@link ServicerMapping}.
 	 */
-	public void test_name() {
+	public void test_name_path() {
 		Servicer servicer = this.mapper.mapName("path");
 		assertEquals("Incorrect named mapping", this.path, servicer);
+	}
+
+	/**
+	 * Ensure returns <code>null</code> if unknown name.
+	 */
+	public void test_name_unknown() {
+		Servicer servicer = this.mapper.mapName("unknown");
+		assertNull("Should not map servicer for unknown name", servicer);
+	}
+
+	/**
+	 * Ensure can map to all {@link Servicer} instances.
+	 */
+	public void test_all_path() {
+		List<Servicer> servicers = this.mapper.mapAll("/path");
+		assertList(servicers, this.path);
+	}
+
+	/**
+	 * Ensure can map to all {@link Servicer} instances.
+	 */
+	public void test_all_path_longer() {
+		List<Servicer> servicers = this.mapper.mapAll("/path/longer");
+		assertList(servicers, this.path, this.pathLonger);
+	}
+
+	/**
+	 * Ensure can map to all {@link Servicer} instances.
+	 */
+	public void test_all_path_extension() {
+		List<Servicer> servicers = this.mapper
+				.mapAll("/path/longer/resource.extension");
+		assertList(servicers, this.path, this.pathLonger, this.extension);
+	}
+
+	/**
+	 * Ensure can map to all {@link Servicer} instances.
+	 */
+	public void test_all_exact_extension() {
+		List<Servicer> servicers = this.mapper
+				.mapAll("/exact/resource.extension");
+		assertList(servicers, this.exactResource, this.extension);
+	}
+
+	/**
+	 * Ensure get empty {@link List} for unknown path.
+	 */
+	public void test_all_unknown() {
+		List<Servicer> servicers = this.mapper.mapAll("/unknown");
+		assertList(servicers);
 	}
 
 }

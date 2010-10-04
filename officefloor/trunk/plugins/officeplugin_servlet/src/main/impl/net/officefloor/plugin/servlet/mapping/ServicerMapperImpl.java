@@ -17,7 +17,9 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -207,6 +209,38 @@ public class ServicerMapperImpl implements ServicerMapper {
 		return this.namedServicers.get(name);
 	}
 
+	@Override
+	public List<Servicer> mapAll(String path) {
+
+		// Create the listing of servicers
+		List<Servicer> servicers = new ArrayList<Servicer>(3);
+
+		// Create mapping from path
+		Mapping mapping;
+		try {
+			mapping = new Mapping(path);
+		} catch (HttpRequestTokeniseException ex) {
+			// Failed tokenising path so no servicers
+			return servicers;
+		}
+
+		// Iterate over mappers to map path
+		for (int i = 0; i < this.mappers.length; i++) {
+
+			// Ensure mapper available for priority
+			Mapper mapper = this.mappers[i];
+			if (mapper == null) {
+				continue;
+			}
+
+			// Load all mapped servicers
+			mapper.mapAll(mapping, servicers);
+		}
+
+		// Return the listing of mapped servicers
+		return servicers;
+	}
+
 	/**
 	 * Mapping.
 	 */
@@ -324,6 +358,18 @@ public class ServicerMapperImpl implements ServicerMapper {
 		 * @return {@link ServicerMapper} or <code>null</code>.
 		 */
 		ServicerMapping mapPath(Mapping mapping);
+
+		/**
+		 * Matches all {@link Servicer} instances loading them into the
+		 * {@link Servicer} listing.
+		 * 
+		 * @param mapping
+		 *            {@link Mapping}.
+		 * @param servicers
+		 *            Listing of {@link Servicer} instances to be loaded with
+		 *            matched {@link Servicer} instances.
+		 */
+		void mapAll(Mapping mapping, List<Servicer> servicers);
 	}
 
 	/**
@@ -360,6 +406,15 @@ public class ServicerMapperImpl implements ServicerMapper {
 				// Exact match servicer
 				return mapping.createServicerMapping(mapping.getPath(), null,
 						servicer);
+			}
+		}
+
+		@Override
+		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+			Servicer servicer = this.mappings.get(mapping.getPath());
+			if (servicer != null) {
+				// Load the matched servicer
+				servicers.add(servicer);
 			}
 		}
 	}
@@ -490,6 +545,59 @@ public class ServicerMapperImpl implements ServicerMapper {
 			return mapping.createServicerMapping(match.fullPath, pathInfo,
 					match.servicer);
 		}
+
+		@Override
+		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+
+			// Obtain the path
+			String path = mapping.getPath();
+
+			// Match on path
+			PathNode current = this.root;
+			int startIndex = 0;
+			int lastIndex = path.length() - 1;
+			PARSE: for (int i = startIndex; i <= lastIndex; i++) {
+				char character = path.charAt(i);
+
+				// Determine if separator or last character
+				if ((character == PATH_SEPARATOR_CHAR) || (i == lastIndex)) {
+
+					// Ignore blank segments
+					if (i == startIndex) {
+						// Update start index after blank segment
+						startIndex = i + 1; // after separator
+
+						// Continue parsing ignoring blank segment
+						continue PARSE;
+					}
+
+					// Determine if include current character
+					int endIndex = i;
+					if (character != PATH_SEPARATOR_CHAR) {
+						// Include current character as not separator
+						endIndex = endIndex + 1;
+					}
+
+					// Obtain the path segment
+					String segment = path.substring(startIndex, endIndex);
+
+					// Update start index for next segment
+					startIndex = i + 1; // after separator
+
+					// Obtain the path node
+					current = current.getChild(segment);
+					if (current == null) {
+						// No further matching of path
+						break PARSE;
+					}
+
+					// Load servicer for node (if available)
+					if (current.servicer != null) {
+						servicers.add(current.servicer);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -596,6 +704,52 @@ public class ServicerMapperImpl implements ServicerMapper {
 		public ServicerMapping mapPath(Mapping mapping) {
 
 			// Obtain the extension
+			String extension = this.getExtension(mapping);
+			if (extension == null) {
+				// No extension, so no mapping
+				return null;
+			}
+
+			// Obtain the servicer for extension
+			Servicer servicer = this.extensionServicers.get(extension);
+			if (servicer == null) {
+				// No servicer, so no mapping
+				return null;
+			}
+
+			// Return the servicer mapping (match on full path)
+			return mapping.createServicerMapping(mapping.getPath(), null,
+					servicer);
+		}
+
+		@Override
+		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+
+			// Obtain the extension
+			String extension = this.getExtension(mapping);
+			if (extension == null) {
+				// No extension, so no servicer
+				return;
+			}
+
+			// Obtain the servicer for extension
+			Servicer servicer = this.extensionServicers.get(extension);
+			if (servicer != null) {
+				// No servicer
+				servicers.add(servicer);
+			}
+		}
+
+		/**
+		 * Obtains the extension for the {@link Mapping}.
+		 * 
+		 * @param mapping
+		 *            {@link Mapping}.
+		 * @return Extension or <code>null</code> if not extension.
+		 */
+		private String getExtension(Mapping mapping) {
+
+			// Obtain the extension
 			String path = mapping.getPath();
 			int dotIndex = path.lastIndexOf('.');
 			if (dotIndex < 0) {
@@ -606,15 +760,8 @@ public class ServicerMapperImpl implements ServicerMapper {
 			String extension = path.substring(dotIndex + 1);
 			extension = extension.toLowerCase(); // to match
 
-			// Obtain the servicer for extension
-			Servicer servicer = this.extensionServicers.get(extension);
-			if (servicer == null) {
-				// No servicer, so no mapping
-				return null;
-			}
-
-			// Return the servicer mapping (match on full path)
-			return mapping.createServicerMapping(path, null, servicer);
+			// Return the extension
+			return extension;
 		}
 	}
 
@@ -648,6 +795,11 @@ public class ServicerMapperImpl implements ServicerMapper {
 			// Return servicer not matching of path
 			return mapping.createServicerMapping("", mapping.getPath(),
 					this.defaultServicer);
+		}
+
+		@Override
+		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+			servicers.add(this.defaultServicer);
 		}
 	}
 
