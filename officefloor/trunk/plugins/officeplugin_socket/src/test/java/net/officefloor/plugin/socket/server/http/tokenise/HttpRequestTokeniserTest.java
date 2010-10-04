@@ -169,6 +169,27 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can tokenise on just request URI.
+	 */
+	public void testRequestURI() throws Exception {
+		// Record tokenising of Request URI
+		this.handler.handlePath("/path");
+		this.handler.handleHttpParameter("FirstName", "Daniel");
+		this.handler.handleHttpParameter("LastName", "Sagenschneider");
+		this.handler
+				.handleQueryString("FirstName=Daniel&LastName=Sagenschneider");
+		this.handler.handleFragment("fragment");
+
+		// Test with request URI
+		this.replayMockObjects();
+		HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
+		tokeniser.tokeniseRequestURI(
+				"/path?FirstName=Daniel&LastName=Sagenschneider#fragment",
+				this.handler);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Does the test, expecting mocks to have recorded actions.
 	 * 
 	 * @param method

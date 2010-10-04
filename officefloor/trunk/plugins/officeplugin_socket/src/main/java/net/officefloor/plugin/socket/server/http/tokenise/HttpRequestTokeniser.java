@@ -29,8 +29,12 @@ import net.officefloor.plugin.socket.server.http.parameters.HttpParametersExcept
 public interface HttpRequestTokeniser {
 
 	/**
+	 * <p>
 	 * Tokenises the {@link HttpRequest} for the path, parameters and fragment
 	 * providing them to the {@link HttpRequestTokenHandler} to handle.
+	 * <p>
+	 * This encompasses the whole {@link HttpRequest} (e.g. on <code>POST</code>
+	 * will also tokenise the body for parameters).
 	 * 
 	 * @param request
 	 *            {@link HttpRequest} to be tokenised.
@@ -42,6 +46,20 @@ public interface HttpRequestTokeniser {
 	 */
 	void tokeniseHttpRequest(HttpRequest request,
 			HttpRequestTokenHandler handler)
+			throws HttpRequestTokeniseException;
+
+	/**
+	 * Tokenises the request URI for the path, parameters and fragment.
+	 * 
+	 * @param requestURI
+	 *            Request URI to be tokenised.
+	 * @param handler
+	 *            {@link HttpRequestTokenHandler} to handle the request URI
+	 *            tokens.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to tokenise the request URI.
+	 */
+	void tokeniseRequestURI(String requestURI, HttpRequestTokenHandler handler)
 			throws HttpRequestTokeniseException;
 
 }
