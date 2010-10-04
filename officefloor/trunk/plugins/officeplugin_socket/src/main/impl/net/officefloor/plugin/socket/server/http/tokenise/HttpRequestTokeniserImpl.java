@@ -83,6 +83,18 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 		}
 	}
 
+	@Override
+	public void tokeniseRequestURI(String requestURI,
+			HttpRequestTokenHandler handler)
+			throws HttpRequestTokeniseException {
+
+		// Create the temporary buffer (aids reducing object creation)
+		TempBuffer tempBuffer = new TempBuffer();
+
+		// Load the tokens
+		this.loadTokens(requestURI, false, handler, tempBuffer);
+	}
+
 	/**
 	 * Loads the tokens to the handler.
 	 * 
