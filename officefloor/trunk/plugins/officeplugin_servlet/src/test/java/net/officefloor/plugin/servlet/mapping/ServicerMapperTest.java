@@ -37,15 +37,33 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 			"/exact/resource.extension");
 
 	/**
+	 * {@link Servicer}.
+	 */
+	private final Servicer path = new MockServicer("path", "/path/*");
+
+	/**
+	 * {@link Servicer}.
+	 */
+	private final Servicer pathLonger = new MockServicer("pathLonger",
+			"/path/longer/*");
+
+	/**
+	 * {@link Servicer}.
+	 */
+	private final Servicer extension = new MockServicer("extension",
+			"*.extension");
+
+	/**
 	 * {@link ServicerMapper} to test.
 	 */
 	private final ServicerMapper mapper = new ServicerMapperImpl(
-			this.exactPath, this.exactResource);
+			this.exactPath, this.exactResource, this.path, this.pathLonger,
+			this.extension);
 
 	/**
 	 * Ensure exact path map.
 	 */
-	public void testExactPath() {
+	public void test_exact_Path() {
 		ServicerMapping mapping = this.mapper.mapPath("/exact/path");
 		assertMapping(mapping, this.exactPath, "/exact/path", null, null);
 	}
@@ -53,13 +71,99 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	/**
 	 * Ensure exact resource map.
 	 */
-	public void testExactResource() {
+	public void test_exact_Resource() {
 		ServicerMapping mapping = this.mapper
 				.mapPath("/exact/resource.extension");
 		assertMapping(mapping, this.exactResource, "/exact/resource.extension",
 				null, null);
 	}
 
-	// TODO continue further tests (especially with blank segments)
+	/**
+	 * Ensure exact map with a query string.
+	 */
+	public void test_exact_QueryString() {
+		ServicerMapping mapping = this.mapper
+				.mapPath("/exact/resource.extension?name=value");
+		assertMapping(mapping, this.exactResource, "/exact/resource.extension",
+				null, "name=value", "name", "value");
+	}
+
+	/**
+	 * Ensure path map with a query string.
+	 */
+	public void test_path_QueryString() {
+		ServicerMapping mapping = this.mapper.mapPath("/path?name=value");
+		assertMapping(mapping, this.path, "/path", null, "name=value", "name",
+				"value");
+	}
+
+	/**
+	 * Ensure match on the longer path.
+	 */
+	public void test_path_LongerIsBetterMatch() {
+		ServicerMapping mapping = this.mapper.mapPath("/path/longer/resource");
+		assertMapping(mapping, this.pathLonger, "/path/longer", "/resource",
+				null);
+	}
+
+	/**
+	 * Ensure can ignore blank segment.
+	 */
+	public void test_path_IgnoreBlankSegment() {
+		ServicerMapping mapping = this.mapper.mapPath("//path");
+		assertMapping(mapping, this.path, "/path", null, null);
+	}
+
+	/**
+	 * Ensure can match with a single trailing separator.
+	 */
+	public void test_path_IgnoreTrailingSeparator() {
+		ServicerMapping mapping = this.mapper.mapPath("/path/");
+		assertMapping(mapping, this.path, "/path", null, null);
+	}
+
+	/**
+	 * Ensure can match with many trailing separators.
+	 */
+	public void test_path_TrailingSeparators() {
+		ServicerMapping mapping = this.mapper.mapPath("/path//");
+		assertMapping(mapping, this.path, "/path", "//", null);
+	}
+
+	/**
+	 * Ensure can match extension ignoring case.
+	 */
+	public void test_extension_IgnoreCase() {
+		ServicerMapping mapping = this.mapper
+				.mapPath("/extension/test.EXTENSION");
+		assertMapping(mapping, this.extension, "/extension/test.EXTENSION",
+				null, null);
+	}
+
+	/**
+	 * Ensure path map with a query string.
+	 */
+	public void test_extension_QueryString() {
+		ServicerMapping mapping = this.mapper
+				.mapPath("/extension/test.extension?name=value");
+		assertMapping(mapping, this.extension, "/extension/test.extension",
+				null, "name=value", "name", "value");
+	}
+
+	/**
+	 * Ensure returns no mapping if not match and no default.
+	 */
+	public void test_none_NullIfNoMatchAndNoDefault() {
+		ServicerMapping mapping = this.mapper.mapPath("/unknown");
+		assertNull("Should not have mapping if no default", mapping);
+	}
+
+	/**
+	 * Ensure able to obtain named {@link ServicerMapping}.
+	 */
+	public void test_name() {
+		Servicer servicer = this.mapper.mapName("path");
+		assertEquals("Incorrect named mapping", this.path, servicer);
+	}
 
 }

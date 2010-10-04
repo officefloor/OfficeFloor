@@ -47,6 +47,7 @@ public abstract class AbstractServicerMapperTestCase extends
 			Servicer expectedServicer, String expectedServicerPath,
 			String expectedPathInfo, String expectedQueryString,
 			String... expectedParameterNameValues) {
+		assertNotNull("Expecting mapping", mapping);
 		assertEquals("Incorrect Servicer", expectedServicer, mapping
 				.getServicer());
 		assertEquals("Incorrect Servicer (Servlet) Path", expectedServicerPath,

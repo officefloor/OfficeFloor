@@ -76,6 +76,11 @@ public class ServicerMapperImpl implements ServicerMapper {
 	private static final int PRIORITY_DEFAULT = 3;
 
 	/**
+	 * {@link Servicer} instances by their name.
+	 */
+	private final Map<String, Servicer> namedServicers = new HashMap<String, Servicer>();
+
+	/**
 	 * {@link Mapper} instances indexed by priority.
 	 */
 	private final Mapper[] mappers = new Mapper[4];
@@ -92,6 +97,12 @@ public class ServicerMapperImpl implements ServicerMapper {
 
 		// Loop over servicers loading their mappings
 		for (Servicer servicer : servicers) {
+
+			// Load by servicer name
+			String servicerName = servicer.getServicerName();
+			if (servicerName != null) {
+				this.namedServicers.put(servicerName, servicer);
+			}
 
 			// Obtain the service mappings
 			String[] expressions = servicer.getServicerMappings();
@@ -189,6 +200,11 @@ public class ServicerMapperImpl implements ServicerMapper {
 
 		// As here no servicer mapping
 		return null;
+	}
+
+	@Override
+	public Servicer mapName(String name) {
+		return this.namedServicers.get(name);
 	}
 
 	/**

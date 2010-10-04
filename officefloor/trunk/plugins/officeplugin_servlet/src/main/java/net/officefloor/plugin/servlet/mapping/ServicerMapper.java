@@ -31,8 +31,19 @@ public interface ServicerMapper {
 	 * 
 	 * @param path
 	 *            Path for mapping.
-	 * @return Best {@link ServicerMapping}.
+	 * @return Best {@link ServicerMapping} or <code>null</code> if no
+	 *         appropriate {@link Servicer}.
 	 */
 	ServicerMapping mapPath(String path);
+
+	/**
+	 * Obtains the {@link Servicer} by its name.
+	 * 
+	 * @param name
+	 *            Name of the {@link Servicer}.
+	 * @return {@link Servicer} or <code>null</code> if no {@link Servicer} by
+	 *         name.
+	 */
+	Servicer mapName(String name);
 
 }
