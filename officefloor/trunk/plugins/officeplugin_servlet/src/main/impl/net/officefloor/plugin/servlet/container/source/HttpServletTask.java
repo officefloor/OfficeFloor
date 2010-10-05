@@ -39,7 +39,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.container.HttpServletContainerImpl;
-import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
@@ -56,8 +56,7 @@ import net.officefloor.plugin.socket.server.http.session.HttpSession;
 public class HttpServletTask
 		extends
 		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None>
-		implements OfficeAwareWorkFactory<HttpServletTask>,
-		HttpServletDifferentiator {
+		implements OfficeAwareWorkFactory<HttpServletTask>, HttpServletServicer {
 
 	/**
 	 * Prefix of property for an initialisation parameter.
@@ -279,16 +278,16 @@ public class HttpServletTask
 	}
 
 	/*
-	 * ===================== HttpServletDifferentiator ===================
+	 * ===================== HttpServletServicer ===================
 	 */
 
 	@Override
-	public String getServicerName() {
+	public String getServletName() {
 		return this.servletName;
 	}
 
 	@Override
-	public String[] getServicerMappings() {
+	public String[] getServletMappings() {
 		return this.servletMappings;
 	}
 

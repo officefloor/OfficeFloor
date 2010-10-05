@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
@@ -78,9 +79,9 @@ public class ServicerMapperImpl implements ServicerMapper {
 	private static final int PRIORITY_DEFAULT = 3;
 
 	/**
-	 * {@link Servicer} instances by their name.
+	 * {@link HttpServletServicer} instances by their name.
 	 */
-	private final Map<String, Servicer> namedServicers = new HashMap<String, Servicer>();
+	private final Map<String, HttpServletServicer> namedServicers = new HashMap<String, HttpServletServicer>();
 
 	/**
 	 * {@link Mapper} instances indexed by priority.
@@ -91,28 +92,29 @@ public class ServicerMapperImpl implements ServicerMapper {
 	 * Initiate.
 	 * 
 	 * @param servicers
-	 *            {@link Servicer} instances for this {@link ServicerMapper}.
+	 *            {@link HttpServletServicer} instances for this
+	 *            {@link ServicerMapper}.
 	 * @throws ServletException
 	 *             If fails to create the mappings.
 	 */
-	public ServicerMapperImpl(Servicer... servicers) {
+	public ServicerMapperImpl(HttpServletServicer... servicers) {
 
 		// Loop over servicers loading their mappings
-		for (Servicer servicer : servicers) {
+		for (HttpServletServicer servicer : servicers) {
 
-			// Load by servicer name
-			String servicerName = servicer.getServicerName();
-			if (servicerName != null) {
-				this.namedServicers.put(servicerName, servicer);
+			// Load by servlet name
+			String servletName = servicer.getServletName();
+			if (servletName != null) {
+				this.namedServicers.put(servletName, servicer);
 			}
 
-			// Obtain the service mappings
-			String[] expressions = servicer.getServicerMappings();
+			// Obtain the servlet mappings
+			String[] expressions = servicer.getServletMappings();
 			if (expressions == null) {
 				continue; // no mappings so ignore servicer
 			}
 
-			// Load the servicer mappings
+			// Load the servlet mappings
 			for (String expression : expressions) {
 
 				// Load based on mapping type
@@ -205,15 +207,16 @@ public class ServicerMapperImpl implements ServicerMapper {
 	}
 
 	@Override
-	public Servicer mapName(String name) {
+	public HttpServletServicer mapName(String name) {
 		return this.namedServicers.get(name);
 	}
 
 	@Override
-	public List<Servicer> mapAll(String path) {
+	public List<HttpServletServicer> mapAll(String path) {
 
 		// Create the listing of servicers
-		List<Servicer> servicers = new ArrayList<Servicer>(3);
+		List<HttpServletServicer> servicers = new ArrayList<HttpServletServicer>(
+				3);
 
 		// Create mapping from path
 		Mapping mapping;
@@ -286,15 +289,15 @@ public class ServicerMapperImpl implements ServicerMapper {
 		 * Creates the {@link ServicerMapping}.
 		 * 
 		 * @param servicerPath
-		 *            {@link Servicer} path.
+		 *            {@link HttpServletServicer} path.
 		 * @param pathInfo
 		 *            Path info.
 		 * @param servicer
-		 *            {@link Servicer}.
+		 *            {@link HttpServletServicer}.
 		 * @return {@link ServicerMapping}.
 		 */
 		public ServicerMapping createServicerMapping(String servicerPath,
-				String pathInfo, Servicer servicer) {
+				String pathInfo, HttpServletServicer servicer) {
 			return new ServicerMappingImpl(servicer, servicerPath, pathInfo,
 					this.queryString, this.parameters);
 		}
@@ -355,14 +358,14 @@ public class ServicerMapperImpl implements ServicerMapper {
 		int getPriority();
 
 		/**
-		 * Loads the {@link Servicer}.
+		 * Loads the {@link HttpServletServicer}.
 		 * 
 		 * @param mapping
 		 *            Mapping expression.
 		 * @param servicer
-		 *            {@link Servicer} for the mapping.
+		 *            {@link HttpServletServicer} for the mapping.
 		 */
-		void loadServicer(String mapping, Servicer servicer);
+		void loadServicer(String mapping, HttpServletServicer servicer);
 
 		/**
 		 * Matches best {@link ServicerMapper} or <code>null</code> if none
@@ -375,16 +378,16 @@ public class ServicerMapperImpl implements ServicerMapper {
 		ServicerMapping mapPath(Mapping mapping);
 
 		/**
-		 * Matches all {@link Servicer} instances loading them into the
-		 * {@link Servicer} listing.
+		 * Matches all {@link HttpServletServicer} instances loading them into
+		 * the {@link HttpServletServicer} listing.
 		 * 
 		 * @param mapping
 		 *            {@link Mapping}.
 		 * @param servicers
-		 *            Listing of {@link Servicer} instances to be loaded with
-		 *            matched {@link Servicer} instances.
+		 *            Listing of {@link HttpServletServicer} instances to be
+		 *            loaded with matched {@link HttpServletServicer} instances.
 		 */
-		void mapAll(Mapping mapping, List<Servicer> servicers);
+		void mapAll(Mapping mapping, List<HttpServletServicer> servicers);
 	}
 
 	/**
@@ -395,7 +398,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		/**
 		 * Exact mappings.
 		 */
-		private final Map<String, Servicer> mappings = new HashMap<String, Servicer>();
+		private final Map<String, HttpServletServicer> mappings = new HashMap<String, HttpServletServicer>();
 
 		/*
 		 * ==================== Mapper ======================
@@ -407,13 +410,13 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void loadServicer(String mapping, Servicer servicer) {
+		public void loadServicer(String mapping, HttpServletServicer servicer) {
 			this.mappings.put(mapping, servicer);
 		}
 
 		@Override
 		public ServicerMapping mapPath(Mapping mapping) {
-			Servicer servicer = this.mappings.get(mapping.getPath());
+			HttpServletServicer servicer = this.mappings.get(mapping.getPath());
 			if (servicer == null) {
 				// No matching servicer
 				return null;
@@ -425,8 +428,8 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void mapAll(Mapping mapping, List<Servicer> servicers) {
-			Servicer servicer = this.mappings.get(mapping.getPath());
+		public void mapAll(Mapping mapping, List<HttpServletServicer> servicers) {
+			HttpServletServicer servicer = this.mappings.get(mapping.getPath());
 			if (servicer != null) {
 				// Load the matched servicer
 				servicers.add(servicer);
@@ -454,7 +457,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void loadServicer(String mapping, Servicer servicer) {
+		public void loadServicer(String mapping, HttpServletServicer servicer) {
 
 			// Remove the trailing wild card
 			mapping = mapping.substring(0, (mapping.length() - WILDCARD
@@ -562,7 +565,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+		public void mapAll(Mapping mapping, List<HttpServletServicer> servicers) {
 
 			// Obtain the path
 			String path = mapping.getPath();
@@ -631,9 +634,9 @@ public class ServicerMapperImpl implements ServicerMapper {
 		private final Map<String, PathNode> children = new HashMap<String, PathNode>();
 
 		/**
-		 * {@link Servicer} for this {@link PathNode}.
+		 * {@link HttpServletServicer} for this {@link PathNode}.
 		 */
-		public Servicer servicer = null;
+		public HttpServletServicer servicer = null;
 
 		/**
 		 * Initiate.
@@ -683,9 +686,9 @@ public class ServicerMapperImpl implements ServicerMapper {
 	private static class ExtensionMapper implements Mapper {
 
 		/**
-		 * {@link Servicer} by its extension.
+		 * {@link HttpServletServicer} by its extension.
 		 */
-		private final Map<String, Servicer> extensionServicers = new HashMap<String, Servicer>();
+		private final Map<String, HttpServletServicer> extensionServicers = new HashMap<String, HttpServletServicer>();
 
 		/*
 		 * =================== Mapper ==========================
@@ -697,7 +700,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void loadServicer(String mapping, Servicer servicer) {
+		public void loadServicer(String mapping, HttpServletServicer servicer) {
 
 			// Remove the wild card from start
 			mapping = mapping.substring(WILDCARD.length());
@@ -726,7 +729,8 @@ public class ServicerMapperImpl implements ServicerMapper {
 			}
 
 			// Obtain the servicer for extension
-			Servicer servicer = this.extensionServicers.get(extension);
+			HttpServletServicer servicer = this.extensionServicers
+					.get(extension);
 			if (servicer == null) {
 				// No servicer, so no mapping
 				return null;
@@ -738,7 +742,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+		public void mapAll(Mapping mapping, List<HttpServletServicer> servicers) {
 
 			// Obtain the extension
 			String extension = this.getExtension(mapping);
@@ -748,7 +752,8 @@ public class ServicerMapperImpl implements ServicerMapper {
 			}
 
 			// Obtain the servicer for extension
-			Servicer servicer = this.extensionServicers.get(extension);
+			HttpServletServicer servicer = this.extensionServicers
+					.get(extension);
 			if (servicer != null) {
 				// No servicer
 				servicers.add(servicer);
@@ -786,9 +791,9 @@ public class ServicerMapperImpl implements ServicerMapper {
 	private static class DefaultMapper implements Mapper {
 
 		/**
-		 * Default {@link Servicer}.
+		 * Default {@link HttpServletServicer}.
 		 */
-		private Servicer defaultServicer;
+		private HttpServletServicer defaultServicer;
 
 		/*
 		 * =================== Mapper ==========================
@@ -800,7 +805,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void loadServicer(String mapping, Servicer servicer) {
+		public void loadServicer(String mapping, HttpServletServicer servicer) {
 			// Should only be the one default servicer
 			this.defaultServicer = servicer;
 		}
@@ -813,7 +818,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		}
 
 		@Override
-		public void mapAll(Mapping mapping, List<Servicer> servicers) {
+		public void mapAll(Mapping mapping, List<HttpServletServicer> servicers) {
 			servicers.add(this.defaultServicer);
 		}
 	}

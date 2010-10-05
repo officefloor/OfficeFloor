@@ -35,7 +35,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
@@ -218,7 +218,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure appropriately acts as a {@link HttpServletDifferentiator}.
+	 * Ensure appropriately acts as a {@link HttpServletServicer}.
 	 */
 	public void testHttpServletDifferentiator() throws Exception {
 
@@ -235,12 +235,12 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Utilise as differentiator
-		HttpServletDifferentiator differentiator = this.task;
+		HttpServletServicer differentiator = this.task;
 
 		// Verify details
-		assertEquals("Incorrect servicer name", SERVLET_NAME, differentiator
-				.getServicerName());
-		String[] mappings = differentiator.getServicerMappings();
+		assertEquals("Incorrect servlet name", SERVLET_NAME, differentiator
+				.getServletName());
+		String[] mappings = differentiator.getServletMappings();
 		assertList(Arrays.asList(mappings), SERVLET_MAPPINGS);
 
 		// Test include
@@ -299,7 +299,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getContextPath(this.office), CONTEXT_PATH);
 		if (this.mapping != null) {
-			this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+			this.recordReturn(this.mapping, this.mapping.getServletPath(),
 					SERVLET_PATH);
 		}
 	}

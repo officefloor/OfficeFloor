@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 
+import javax.servlet.http.HttpServlet;
+
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 
 /**
@@ -31,14 +34,14 @@ import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 public class ServicerMappingImpl implements ServicerMapping {
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer servicer;
+	private final HttpServletServicer servicer;
 
 	/**
-	 * {@link Servicer} path.
+	 * {@link HttpServlet} path.
 	 */
-	private final String servicerPath;
+	private final String servletPath;
 
 	/**
 	 * Path info.
@@ -59,9 +62,9 @@ public class ServicerMappingImpl implements ServicerMapping {
 	 * Initiate.
 	 * 
 	 * @param servicer
-	 *            {@link Servicer}.
-	 * @param servicerPath
-	 *            {@link Servicer} Path.
+	 *            {@link HttpServletServicer}.
+	 * @param servletPath
+	 *            {@link HttpServlet} Path.
 	 * @param pathInfo
 	 *            Path info.
 	 * @param queryString
@@ -69,11 +72,11 @@ public class ServicerMappingImpl implements ServicerMapping {
 	 * @param parameters
 	 *            Parameters.
 	 */
-	public ServicerMappingImpl(Servicer servicer, String servicerPath,
-			String pathInfo, String queryString,
+	public ServicerMappingImpl(HttpServletServicer servicer,
+			String servletPath, String pathInfo, String queryString,
 			Map<String, String[]> parameters) {
 		this.servicer = servicer;
-		this.servicerPath = servicerPath;
+		this.servletPath = servletPath;
 		this.pathInfo = pathInfo;
 		this.queryString = queryString;
 		this.parameters = Collections.unmodifiableMap(parameters);
@@ -84,13 +87,13 @@ public class ServicerMappingImpl implements ServicerMapping {
 	 */
 
 	@Override
-	public Servicer getServicer() {
+	public HttpServletServicer getServicer() {
 		return this.servicer;
 	}
 
 	@Override
-	public String getServicerPath() {
-		return this.servicerPath;
+	public String getServletPath() {
+		return this.servletPath;
 	}
 
 	@Override

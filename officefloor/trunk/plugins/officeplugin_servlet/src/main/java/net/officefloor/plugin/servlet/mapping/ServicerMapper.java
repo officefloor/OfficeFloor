@@ -19,10 +19,11 @@ package net.officefloor.plugin.servlet.mapping;
 
 import java.util.List;
 
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
- * Maps a {@link HttpRequest} to a {@link Servicer}.
+ * Maps a {@link HttpRequest} to a {@link HttpServletServicer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -34,27 +35,27 @@ public interface ServicerMapper {
 	 * @param path
 	 *            Path for mapping.
 	 * @return Best {@link ServicerMapping} or <code>null</code> if no
-	 *         appropriate {@link Servicer}.
+	 *         appropriate {@link HttpServletServicer}.
 	 */
 	ServicerMapping mapPath(String path);
 
 	/**
-	 * Obtains the {@link Servicer} by its name.
+	 * Obtains the {@link HttpServletServicer} by its name.
 	 * 
 	 * @param name
-	 *            Name of the {@link Servicer}.
-	 * @return {@link Servicer} or <code>null</code> if no {@link Servicer} by
-	 *         name.
+	 *            Name of the {@link HttpServletServicer}.
+	 * @return {@link HttpServletServicer} or <code>null</code> if no
+	 *         {@link HttpServletServicer} by name.
 	 */
-	Servicer mapName(String name);
+	HttpServletServicer mapName(String name);
 
 	/**
-	 * Matches all {@link Servicer} instances for the path.
+	 * Matches all {@link HttpServletServicer} instances for the path.
 	 * 
 	 * @param path
 	 *            Path for mapping.
-	 * @return All {@link Servicer} instances matching the path.
+	 * @return All {@link HttpServletServicer} instances matching the path.
 	 */
-	List<Servicer> mapAll(String path);
+	List<HttpServletServicer> mapAll(String path);
 
 }

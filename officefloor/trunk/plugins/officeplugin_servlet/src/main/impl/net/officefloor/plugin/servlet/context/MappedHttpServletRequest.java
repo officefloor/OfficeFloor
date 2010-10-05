@@ -43,7 +43,7 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
  * 
  * @author Daniel Sagenschneider
  */
-public class DispatcherHttpServletRequest implements HttpServletRequest {
+public class MappedHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * {@link ServicerMapping}.
@@ -63,7 +63,7 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 	 * @param delegate
 	 *            {@link HttpServletRequest}.
 	 */
-	public DispatcherHttpServletRequest(ServicerMapping mapping,
+	public MappedHttpServletRequest(ServicerMapping mapping,
 			HttpServletRequest delegate) {
 		this.mapping = mapping;
 		this.delegate = delegate;
@@ -75,7 +75,7 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServletPath() {
-		return this.mapping.getServicerPath();
+		return this.mapping.getServletPath();
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 
 		// Determine path (absolute or relative)
 		String dispatcherPath = (path.startsWith("/") ? path : this.mapping
-				.getServicerPath()
+				.getServletPath()
 				+ "/" + path);
 
 		// Obtain and return the request dispatcher

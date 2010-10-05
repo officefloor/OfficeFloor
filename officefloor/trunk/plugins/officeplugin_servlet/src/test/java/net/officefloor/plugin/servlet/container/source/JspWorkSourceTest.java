@@ -29,7 +29,7 @@ import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
@@ -85,9 +85,9 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 				JspWorkSource.class);
 
 		// Ensure match JSP extension
-		HttpServletDifferentiator differentiator = (HttpServletDifferentiator) work
+		HttpServletServicer differentiator = (HttpServletServicer) work
 				.getTaskTypes()[0].getTaskFactory();
-		String[] mappings = differentiator.getServicerMappings();
+		String[] mappings = differentiator.getServletMappings();
 		assertEquals("Incorrect number of mappings", 1, mappings.length);
 		assertEquals("Incorrect JSP extension mapping", "*.jsp", mappings[0]);
 	}

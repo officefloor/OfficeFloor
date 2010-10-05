@@ -38,7 +38,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
@@ -168,8 +168,8 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
 		final TaskManager taskManager = this.createMock(TaskManager.class);
-		final HttpServletDifferentiator differentiator = this
-				.createMock(HttpServletDifferentiator.class);
+		final HttpServletServicer differentiator = this
+				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
 				.createMock(HttpServletRequest.class);
 		final HttpServletResponse response = this
@@ -190,16 +190,17 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
-				null); // allow null servicer name
-		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+		this
+				.recordReturn(differentiator, differentiator.getServletName(),
+						null); // allow null servicer name
+		this.recordReturn(differentiator, differentiator.getServletMappings(),
 				new String[] { "/resource" });
 
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
 				forwarder);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
+		this.recordReturn(differentiator, differentiator.getServletName(),
 				"TEST"); // to ensure correct servicer
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
 		this.control(forwarder).setMatcher(new AbstractMatcher() {
@@ -209,7 +210,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect task", expected[1], actual[1]);
 				ServicerMapping mapping = (ServicerMapping) actual[2];
 				assertEquals("Incorrect mapping", "TEST", mapping.getServicer()
-						.getServicerName());
+						.getServletName());
 				return true;
 			}
 		});
@@ -273,8 +274,8 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
 		final TaskManager taskManager = this.createMock(TaskManager.class);
-		final HttpServletDifferentiator differentiator = this
-				.createMock(HttpServletDifferentiator.class);
+		final HttpServletServicer differentiator = this
+				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
 				.createMock(HttpServletRequest.class);
 		final HttpServletResponse response = this
@@ -297,9 +298,9 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				.getTaskManager("HTTP_SERVLET"), taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
+		this.recordReturn(differentiator, differentiator.getServletName(),
 				"NAME");
-		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+		this.recordReturn(differentiator, differentiator.getServletMappings(),
 				new String[] { "/resource" });
 
 		// Record HTTP Servlet without a name
@@ -307,9 +308,10 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
-				null);
-		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+		this
+				.recordReturn(differentiator, differentiator.getServletName(),
+						null);
+		this.recordReturn(differentiator, differentiator.getServletMappings(),
 				new String[] { "/another" });
 
 		// Record no differentiator
@@ -372,8 +374,8 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
 		final TaskManager taskManager = this.createMock(TaskManager.class);
-		final HttpServletDifferentiator differentiator = this
-				.createMock(HttpServletDifferentiator.class);
+		final HttpServletServicer differentiator = this
+				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
 				.createMock(HttpServletRequest.class);
 		final HttpServletResponse response = this
@@ -394,16 +396,17 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
-				null);
-		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+		this
+				.recordReturn(differentiator, differentiator.getServletName(),
+						null);
+		this.recordReturn(differentiator, differentiator.getServletMappings(),
 				new String[] { "/resource", "*.JSP" });
 
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
 				forwarder);
-		this.recordReturn(differentiator, differentiator.getServicerName(),
+		this.recordReturn(differentiator, differentiator.getServletName(),
 				"TEST"); // to ensure correct servicer
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
 		this.control(forwarder).setMatcher(new AbstractMatcher() {
@@ -413,7 +416,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect task", expected[1], actual[1]);
 				ServicerMapping mapping = (ServicerMapping) actual[2];
 				assertEquals("Incorrect mapping", "TEST", mapping.getServicer()
-						.getServicerName());
+						.getServletName());
 				return true;
 			}
 		});
