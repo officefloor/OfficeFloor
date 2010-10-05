@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.servlet.container.source;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -39,9 +38,9 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	public static final String PROPERTY_SERVLET_NAME = "servlet.name";
 
 	/**
-	 * Name of property for the {@link HttpServlet} path.
+	 * Name of property for the {@link HttpServlet} mappings.
 	 */
-	public static final String PROPERTY_SERVLET_PATH = "servlet.path";
+	public static final String PROPERTY_SERVLET_MAPPINGS = HttpServletTask.PROPERTY_SERVLET_MAPPINGS;
 
 	/**
 	 * Name of property for the class name of the {@link HttpServlet}
@@ -54,12 +53,6 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	 */
 	public static final String PROPERTY_PREFIX_INIT_PARAMETER = HttpServletTask.PROPERTY_PREFIX_INIT_PARAMETER;
 
-	/**
-	 * Name of property to obtain extensions for {@link RequestDispatcher}
-	 * matching.
-	 */
-	public static final String PROPERTY_EXTENSIONS = HttpServletTask.PROPERTY_EXTENSIONS;
-
 	/*
 	 * ===================== WorkSource =========================
 	 */
@@ -67,8 +60,8 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_SERVLET_NAME, "Servlet Name");
-		context.addProperty(PROPERTY_SERVLET_PATH, "Servlet Path");
 		context.addProperty(PROPERTY_HTTP_SERVLET_CLASS_NAME, "Servlet Class");
+		context.addProperty(PROPERTY_SERVLET_MAPPINGS, "Servlet Mappings");
 	}
 
 	@Override
@@ -77,9 +70,11 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 
 		// Obtain the properties
 		String servletName = context.getProperty(PROPERTY_SERVLET_NAME);
-		String servletPath = context.getProperty(PROPERTY_SERVLET_PATH);
 		String servletClassName = context
 				.getProperty(PROPERTY_HTTP_SERVLET_CLASS_NAME);
+
+		// Ensure servlet mappings configured
+		context.getProperty(PROPERTY_SERVLET_MAPPINGS);
 
 		// Create the HTTP Servlet instance
 		HttpServlet servlet = (HttpServlet) context.getClassLoader().loadClass(
@@ -87,7 +82,7 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 
 		// Source the HTTP Servlet work
 		HttpServletTask.sourceWork(workTypeBuilder, context, servletName,
-				servletPath, servlet);
+				servlet);
 	}
 
 }

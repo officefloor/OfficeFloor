@@ -100,6 +100,17 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to send <code>null</code> header value.
+	 */
+	public void testNullHeaderValue() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		response.addHeader("null", null);
+		response.send();
+		this.assertWireContent("HTTP/1.1 204 No Content\n" + "null: \n"
+				+ "Content-Length: 0\n\n");
+	}
+
+	/**
 	 * Tests manipulating the {@link HttpHeader} instances.
 	 */
 	public void testHeaderManipulation() {

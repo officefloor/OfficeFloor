@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
@@ -55,6 +56,10 @@ public interface HttpServletContainer {
 	 * @param taskContext
 	 *            {@link TaskContext} to allow access to {@link OfficeFloor}
 	 *            capabilities.
+	 * @param mapping
+	 *            {@link ServicerMapping} that mapped the {@link HttpRequest} to
+	 *            the {@link HttpServlet}. May be <code>null</code> if not
+	 *            mapped.
 	 * @throws ServletException
 	 *             As per {@link HttpServlet} API.
 	 * @throws IOException
@@ -62,8 +67,8 @@ public interface HttpServletContainer {
 	 */
 	void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSession session,
-			HttpSecurity security, TaskContext<?, ?, ?> taskContext)
-			throws ServletException, IOException;
+			HttpSecurity security, TaskContext<?, ?, ?> taskContext,
+			ServicerMapping mapping) throws ServletException, IOException;
 
 	/**
 	 * Includes the servicing of contained {@link HttpServlet} on the inputs.

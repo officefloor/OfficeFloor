@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -114,11 +115,6 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	private static final String HEADER_HOST = "Host";
 
 	/**
-	 * Servlet path.
-	 */
-	private final String servletPath;
-
-	/**
 	 * {@link ServerHttpConnection}.
 	 */
 	private final ServerHttpConnection connection;
@@ -158,6 +154,11 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 * {@link TaskContext}.
 	 */
 	private final TaskContext<?, ?, ?> taskContext;
+
+	/**
+	 * Request URI.
+	 */
+	private final String requestUri;
 
 	/**
 	 * Path.
@@ -204,8 +205,6 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 * 
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
-	 * @param servletPath
-	 *            Servlet Path.
 	 * @param requestAttributes
 	 *            Attributes for the {@link HttpRequest}.
 	 * @param security
@@ -225,14 +224,13 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
 	public HttpServletRequestImpl(ServerHttpConnection connection,
-			String servletPath, Map<String, Object> requestAttributes,
-			HttpSecurity security, String sessionIdIdentifierName,
-			HttpSession session, ServletContext servletContext,
-			Locale defaultLocale, TaskContext<?, ?, ?> taskContext)
+			Map<String, Object> requestAttributes, HttpSecurity security,
+			String sessionIdIdentifierName, HttpSession session,
+			ServletContext servletContext, Locale defaultLocale,
+			TaskContext<?, ?, ?> taskContext)
 			throws HttpRequestTokeniseException {
 
 		// Initiate state
-		this.servletPath = servletPath;
 		this.connection = connection;
 		this.request = this.connection.getHttpRequest();
 		this.attributes = requestAttributes;
@@ -273,6 +271,15 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 						// Ignore fragment
 					}
 				});
+
+		// Request URI is path with context
+		this.requestUri = this.path;
+
+		// Remove context from path (if begins with context)
+		String contextPath = this.servletContext.getContextPath();
+		if ((!"/".equals(contextPath)) && (this.path.startsWith(contextPath))) {
+			this.path = this.path.substring(contextPath.length());
+		}
 	}
 
 	/**
@@ -348,11 +355,6 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 		return this.servletContext.getContextPath();
 	}
 
-	@Override
-	public String getServletPath() {
-		return this.servletPath;
-	}
-
 	/*
 	 * ------------------- Path and Body Based Methods ---------------------
 	 */
@@ -363,8 +365,13 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
+	public String getServletPath() {
+		return this.path; // always full path
+	}
+
+	@Override
 	public String getPathInfo() {
-		return this.path;
+		return null; // never path info as always in servlet path
 	}
 
 	@Override
@@ -381,7 +388,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 	@Override
 	public String getRequestURI() {
-		return this.path;
+		return this.requestUri;
 	}
 
 	@Override
@@ -391,18 +398,18 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 		String host = null;
 
 		// Determine if require host (path is relative)
-		if (this.path.startsWith("/")) {
+		if (this.requestUri.startsWith("/")) {
 			host = this.getCaseInsensitiveHttpHeader(HEADER_HOST);
 		}
 
 		// Create and load the request URL
 		StringBuffer requestUrl;
 		if (host == null) {
-			requestUrl = new StringBuffer(this.path);
+			requestUrl = new StringBuffer(this.requestUri);
 		} else {
 			requestUrl = new StringBuffer(host.length() + this.path.length());
 			requestUrl.append(host);
-			requestUrl.append(this.path);
+			requestUrl.append(this.requestUri);
 		}
 
 		// Return the request URL
@@ -447,6 +454,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 		// Lazy load the parameter map
 		if (this.parameterMap == null) {
+
+			// Create and load the parameters
 			this.parameterMap = new HashMap<String, String[]>();
 			for (HttpParameter parameter : this.httpParameters) {
 				String[] values = this.parameterMap.get(parameter.name);
@@ -462,6 +471,9 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 				}
 				this.parameterMap.put(parameter.name, values);
 			}
+
+			// Make parameter map unmodifiable
+			this.parameterMap = Collections.unmodifiableMap(this.parameterMap);
 		}
 
 		// Return the parameter map
@@ -942,8 +954,8 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	public RequestDispatcher getRequestDispatcher(String path) {
 
 		// Determine path (absolute or relative)
-		String dispatcherPath = (path.startsWith("/") ? path : this.servletPath
-				+ "/" + path);
+		String dispatcherPath = (path.startsWith("/") ? path : this.path + "/"
+				+ path);
 
 		// Obtain the request dispatcher
 		return this.servletContext.getRequestDispatcher(dispatcherPath);

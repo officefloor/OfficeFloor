@@ -20,7 +20,6 @@ package net.officefloor.plugin.servlet.container;
 import java.io.IOException;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,44 +27,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.Servicer;
 
 /**
  * {@link HttpServlet} {@link Task} differentiator.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpServletDifferentiator {
-
-	/**
-	 * Obtains the path for the {@link HttpServlet}. The path corresponds to the
-	 * path used to obtain the {@link RequestDispatcher} from the
-	 * {@link ServletContext}.
-	 * 
-	 * @return Path for the {@link HttpServlet}.
-	 * 
-	 * @see ServletContext#getRequestDispatcher(String)
-	 */
-	String getServletPath();
-
-	/**
-	 * Obtains the name for the {@link HttpServlet}. The name corresponds to the
-	 * name used to obtain the {@link RequestDispatcher} from the
-	 * {@link ServletContext}.
-	 * 
-	 * @return Name for the {@link HttpServlet}.
-	 * 
-	 * @see ServletContext#getNamedDispatcher(String)
-	 */
-	String getServletName();
-
-	/**
-	 * Obtains the path extensions that may be handled by this
-	 * {@link HttpServlet}.
-	 * 
-	 * @return Listing of path extensions or <code>null</code> if can not handle
-	 *         based on extension.
-	 */
-	String[] getExtensions();
+public interface HttpServletDifferentiator extends Servicer {
 
 	/**
 	 * Includes the content from this {@link HttpServlet}.

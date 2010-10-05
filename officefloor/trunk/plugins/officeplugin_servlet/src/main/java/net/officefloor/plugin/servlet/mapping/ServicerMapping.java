@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
+import java.util.Enumeration;
+import java.util.Map;
+
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 
@@ -71,5 +74,28 @@ public interface ServicerMapping {
 	 *         query string.
 	 */
 	String getParameter(String name);
+
+	/**
+	 * Obtains the names of the parameters.
+	 * 
+	 * @return Names of the parameters.
+	 */
+	Enumeration<String> getParameterNames();
+
+	/**
+	 * Obtains the values for the parameter name.
+	 * 
+	 * @param name
+	 *            Name of the parameter.
+	 * @return Values for the parameter.
+	 */
+	String[] getParameterValues(String name);
+
+	/**
+	 * Obtains the parameter map.
+	 * 
+	 * @return Parameter map.
+	 */
+	Map<String, String[]> getParameterMap();
 
 }
