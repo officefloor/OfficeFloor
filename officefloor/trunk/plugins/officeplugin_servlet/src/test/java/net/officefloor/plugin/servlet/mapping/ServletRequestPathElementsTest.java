@@ -19,6 +19,8 @@ package net.officefloor.plugin.servlet.mapping;
 
 import javax.servlet.Servlet;
 
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
+
 /**
  * Tests the {@link ServicerMapper} as per &quot;Request Path Elements&quot; of
  * the {@link Servlet} specification.
@@ -29,24 +31,24 @@ public class ServletRequestPathElementsTest extends
 		AbstractServicerMapperTestCase {
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer lawn = new MockServicer("lawn", "/lawn/*");
+	private final HttpServletServicer lawn = new MockServicer("lawn", "/lawn/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer garden = new MockServicer("garden", "/garden/*");
+	private final HttpServletServicer garden = new MockServicer("garden", "/garden/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer jsp = new MockServicer("jsp", "*.jsp");
+	private final HttpServletServicer jsp = new MockServicer("jsp", "*.jsp");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer any = new MockServicer("default", "/");
+	private final HttpServletServicer any = new MockServicer("default", "/");
 
 	/**
 	 * {@link ServicerMapper} to test.

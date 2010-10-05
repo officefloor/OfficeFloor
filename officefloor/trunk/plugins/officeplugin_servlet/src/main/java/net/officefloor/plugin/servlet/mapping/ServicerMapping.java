@@ -21,39 +21,44 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 
 /**
  * <p>
- * Mapping to a {@link Servicer}.
+ * Mapping to a {@link HttpServletServicer}.
  * <p>
- * Interface follows the {@link Servlet} specification (though considers a
- * {@link Servlet} a {@link Servicer} for more generic mapping).
+ * Interface follows the {@link Servlet} specification.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ServicerMapping {
 
 	/**
-	 * Mapped {@link Servicer}.
+	 * Mapped {@link HttpServletServicer}.
 	 * 
-	 * @return Mapped {@link Servicer}.
+	 * @return Mapped {@link HttpServletServicer}.
 	 */
-	Servicer getServicer();
+	HttpServletServicer getServicer();
 
 	/**
-	 * Obtains the path segment that mapped to the {@link Servicer}.
+	 * Obtains the path segment that mapped to the {@link HttpServletServicer}.
 	 * 
-	 * @return {@link Servicer} path.
+	 * @return {@link HttpServlet} path.
 	 * 
 	 * @see HttpServletRequest#getServletPath()
 	 */
-	String getServicerPath();
+	String getServletPath();
 
 	/**
-	 * Obtains the remaining of the path after the {@link Servicer} path.
+	 * Obtains the remaining of the path after the {@link HttpServletServicer}
+	 * path.
 	 * 
 	 * @return Remaining path or <code>null</code> if exact mapping.
+	 * 
+	 * @see HttpServletRequest#getPathInfo()
 	 */
 	String getPathInfo();
 

@@ -17,7 +17,15 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 
 /**
  * Abstract {@link ServicerMapper} test functionality.
@@ -33,9 +41,9 @@ public abstract class AbstractServicerMapperTestCase extends
 	 * @param mapping
 	 *            Actual {@link ServicerMapping}.
 	 * @param expectedServicer
-	 *            Expected {@link Servicer}.
+	 *            Expected {@link HttpServletServicer}.
 	 * @param expectedServicerPath
-	 *            Expected {@link Servicer} path.
+	 *            Expected {@link HttpServletServicer} path.
 	 * @param expectedPathInfo
 	 *            Expected path info.
 	 * @param expectedQueryString
@@ -44,14 +52,14 @@ public abstract class AbstractServicerMapperTestCase extends
 	 *            Expected parameter name values.
 	 */
 	protected static void assertMapping(ServicerMapping mapping,
-			Servicer expectedServicer, String expectedServicerPath,
+			HttpServletServicer expectedServicer, String expectedServicerPath,
 			String expectedPathInfo, String expectedQueryString,
 			String... expectedParameterNameValues) {
 		assertNotNull("Expecting mapping", mapping);
 		assertEquals("Incorrect Servicer", expectedServicer, mapping
 				.getServicer());
 		assertEquals("Incorrect Servicer (Servlet) Path", expectedServicerPath,
-				mapping.getServicerPath());
+				mapping.getServletPath());
 		assertEquals("Incorrect Path Info", expectedPathInfo, mapping
 				.getPathInfo());
 		assertEquals("Incorrect Query String", expectedQueryString, mapping
@@ -65,9 +73,9 @@ public abstract class AbstractServicerMapperTestCase extends
 	}
 
 	/**
-	 * Mock {@link Servicer} implementation for testing.
+	 * Mock {@link HttpServletServicer} implementation for testing.
 	 */
-	protected class MockServicer implements Servicer {
+	protected class MockServicer implements HttpServletServicer {
 
 		/**
 		 * Name.
@@ -102,13 +110,20 @@ public abstract class AbstractServicerMapperTestCase extends
 		 */
 
 		@Override
-		public String getServicerName() {
+		public String getServletName() {
 			return this.name;
 		}
 
 		@Override
-		public String[] getServicerMappings() {
+		public String[] getServletMappings() {
 			return this.mappings;
+		}
+
+		@Override
+		public void include(OfficeServletContext context,
+				HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			fail("Should not be invoked");
 		}
 	}
 

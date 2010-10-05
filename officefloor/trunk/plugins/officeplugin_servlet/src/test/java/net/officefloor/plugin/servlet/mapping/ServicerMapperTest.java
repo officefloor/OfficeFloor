@@ -19,6 +19,8 @@ package net.officefloor.plugin.servlet.mapping;
 
 import java.util.List;
 
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
+
 /**
  * Tests the {@link ServicerMapper}.
  * 
@@ -27,32 +29,32 @@ import java.util.List;
 public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer exactPath = new MockServicer("exactPath",
+	private final HttpServletServicer exactPath = new MockServicer("exactPath",
 			"/exact/path");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer exactResource = new MockServicer("exactResource",
+	private final HttpServletServicer exactResource = new MockServicer("exactResource",
 			"/exact/resource.extension");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer path = new MockServicer("path", "/path/*");
+	private final HttpServletServicer path = new MockServicer("path", "/path/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer pathLonger = new MockServicer("pathLonger",
+	private final HttpServletServicer pathLonger = new MockServicer("pathLonger",
 			"/path/longer/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer extension = new MockServicer("extension",
+	private final HttpServletServicer extension = new MockServicer("extension",
 			"*.extension");
 
 	/**
@@ -164,7 +166,7 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	 * Ensure able to obtain named {@link ServicerMapping}.
 	 */
 	public void test_name_path() {
-		Servicer servicer = this.mapper.mapName("path");
+		HttpServletServicer servicer = this.mapper.mapName("path");
 		assertEquals("Incorrect named mapping", this.path, servicer);
 	}
 
@@ -172,40 +174,40 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	 * Ensure returns <code>null</code> if unknown name.
 	 */
 	public void test_name_unknown() {
-		Servicer servicer = this.mapper.mapName("unknown");
+		HttpServletServicer servicer = this.mapper.mapName("unknown");
 		assertNull("Should not map servicer for unknown name", servicer);
 	}
 
 	/**
-	 * Ensure can map to all {@link Servicer} instances.
+	 * Ensure can map to all {@link HttpServletServicer} instances.
 	 */
 	public void test_all_path() {
-		List<Servicer> servicers = this.mapper.mapAll("/path");
+		List<HttpServletServicer> servicers = this.mapper.mapAll("/path");
 		assertList(servicers, this.path);
 	}
 
 	/**
-	 * Ensure can map to all {@link Servicer} instances.
+	 * Ensure can map to all {@link HttpServletServicer} instances.
 	 */
 	public void test_all_path_longer() {
-		List<Servicer> servicers = this.mapper.mapAll("/path/longer");
+		List<HttpServletServicer> servicers = this.mapper.mapAll("/path/longer");
 		assertList(servicers, this.path, this.pathLonger);
 	}
 
 	/**
-	 * Ensure can map to all {@link Servicer} instances.
+	 * Ensure can map to all {@link HttpServletServicer} instances.
 	 */
 	public void test_all_path_extension() {
-		List<Servicer> servicers = this.mapper
+		List<HttpServletServicer> servicers = this.mapper
 				.mapAll("/path/longer/resource.extension");
 		assertList(servicers, this.path, this.pathLonger, this.extension);
 	}
 
 	/**
-	 * Ensure can map to all {@link Servicer} instances.
+	 * Ensure can map to all {@link HttpServletServicer} instances.
 	 */
 	public void test_all_exact_extension() {
-		List<Servicer> servicers = this.mapper
+		List<HttpServletServicer> servicers = this.mapper
 				.mapAll("/exact/resource.extension");
 		assertList(servicers, this.exactResource, this.extension);
 	}
@@ -214,7 +216,7 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	 * Ensure get empty {@link List} for unknown path.
 	 */
 	public void test_all_unknown() {
-		List<Servicer> servicers = this.mapper.mapAll("/unknown");
+		List<HttpServletServicer> servicers = this.mapper.mapAll("/unknown");
 		assertList(servicers);
 	}
 

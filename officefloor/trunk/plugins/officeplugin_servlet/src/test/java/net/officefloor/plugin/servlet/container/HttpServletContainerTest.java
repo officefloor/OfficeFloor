@@ -252,7 +252,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/context/servlet/path?name=value");
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getContextPath(this.office), this.contextPath);
-		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet/path");
 		this.recordReturn(this.mapping, this.mapping.getPathInfo(),
 				"/path/info");
@@ -370,7 +370,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.record_init("/context/servlet/path?one=1&two=2;three=3#fragment");
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
-		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet/path");
 		this.recordReturn(this.mapping, this.mapping.getPathInfo(), null);
 		this.recordReturn(this.mapping, this.mapping.getQueryString(), null);
@@ -1216,7 +1216,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.getRequestDispatcher(this.office, "/absolute"), dispatcher);
 
 		// Record obtaining relative path
-		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet/path");
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getRequestDispatcher(this.office, "/servlet/path/relative"),
@@ -1748,7 +1748,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.getContextPath(this.office), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:8080"));
-		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+		this.recordReturn(this.mapping, this.mapping.getServletPath(),
 				"/servlet");
 
 		// Record sending redirect

@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.container;
 import java.io.IOException;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -27,14 +28,45 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
-import net.officefloor.plugin.servlet.mapping.Servicer;
+import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 
 /**
- * {@link HttpServlet} {@link Task} differentiator.
+ * {@link HttpServlet} servicer that is also the differentiator type for a
+ * {@link HttpServlet} {@link Task}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpServletDifferentiator extends Servicer {
+public interface HttpServletServicer {
+
+	/**
+	 * <p>
+	 * Obtains the name of this {@link HttpServletServicer}.
+	 * <p>
+	 * This will be used to find this {@link HttpServletServicer} by name.
+	 * 
+	 * @return {@link HttpServletServicer} name.
+	 */
+	String getServletName();
+
+	/**
+	 * <p>
+	 * Obtains the mappings that are handled by this {@link HttpServletServicer}.
+	 * <p>
+	 * The mappings are of the form:
+	 * <ol>
+	 * <li><code>/some/path.extension</code>: for exact mapping (extension is
+	 * optional)</li>
+	 * <li><code>/wild/card/*</code>: for path wild card mapping</li>
+	 * <li><code>*.extension</code>: for extension mapping</li>
+	 * </ol>
+	 * <p>
+	 * This follows the {@link Servlet} specification in regards to mappings.
+	 * 
+	 * @return Mappings that are handled by this {@link HttpServletServicer}.
+	 * 
+	 * @see ServicerMapper
+	 */
+	String[] getServletMappings();
 
 	/**
 	 * Includes the content from this {@link HttpServlet}.

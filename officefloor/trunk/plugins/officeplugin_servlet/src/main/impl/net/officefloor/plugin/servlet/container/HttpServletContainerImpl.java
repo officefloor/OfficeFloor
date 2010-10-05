@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.plugin.servlet.context.DispatcherHttpServletRequest;
+import net.officefloor.plugin.servlet.context.MappedHttpServletRequest;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
@@ -160,7 +160,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 			// If have mapping, wrap to provide servicer mapping values
 			if (mapping != null) {
-				request = new DispatcherHttpServletRequest(mapping, request);
+				request = new MappedHttpServletRequest(mapping, request);
 			}
 
 			// Create the HTTP response

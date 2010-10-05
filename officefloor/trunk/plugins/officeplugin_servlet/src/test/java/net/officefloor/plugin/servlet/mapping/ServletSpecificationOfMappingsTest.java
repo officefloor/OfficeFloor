@@ -19,6 +19,8 @@ package net.officefloor.plugin.servlet.mapping;
 
 import javax.servlet.Servlet;
 
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
+
 /**
  * Tests the {@link ServicerMapper} as per &quot;Specification Of Mappings&quot;
  * of the {@link Servlet} specification.
@@ -29,29 +31,29 @@ public class ServletSpecificationOfMappingsTest extends
 		AbstractServicerMapperTestCase {
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer one = new MockServicer("servlet1", "/foo/bar/*");
+	private final HttpServletServicer one = new MockServicer("servlet1", "/foo/bar/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer two = new MockServicer("servlet2", "/baz/*");
+	private final HttpServletServicer two = new MockServicer("servlet2", "/baz/*");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer three = new MockServicer("servlet3", "/catalog");
+	private final HttpServletServicer three = new MockServicer("servlet3", "/catalog");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer four = new MockServicer("servlet4", "*.bop");
+	private final HttpServletServicer four = new MockServicer("servlet4", "*.bop");
 
 	/**
-	 * {@link Servicer}.
+	 * {@link HttpServletServicer}.
 	 */
-	private final Servicer any = new MockServicer("default", "/");
+	private final HttpServletServicer any = new MockServicer("default", "/");
 
 	/**
 	 * {@link ServicerMapper} to test.

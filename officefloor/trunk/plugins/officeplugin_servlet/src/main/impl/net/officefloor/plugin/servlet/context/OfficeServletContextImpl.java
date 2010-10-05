@@ -43,11 +43,10 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
+import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
 import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.mapping.Servicer;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 import net.officefloor.plugin.servlet.mapping.ServicerMapperImpl;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
@@ -151,7 +150,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		if (context == null) {
 
 			// Obtain the listing of servicers for the office
-			List<Servicer> servicers = new LinkedList<Servicer>();
+			List<HttpServletServicer> servicers = new LinkedList<HttpServletServicer>();
 			try {
 				// Iterate over work of the Office
 				for (String workName : office.getWorkNames()) {
@@ -163,12 +162,12 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 						// Load task if Servicer
 						Object differentiator = task.getDifferentiator();
-						if (differentiator instanceof HttpServletDifferentiator) {
-							HttpServletDifferentiator httpServlet = (HttpServletDifferentiator) differentiator;
+						if (differentiator instanceof HttpServletServicer) {
+							HttpServletServicer httpServlet = (HttpServletServicer) differentiator;
 
 							// Wrap servicer for Office details
-							Servicer servicer = new OfficeServicer(workName,
-									taskName, httpServlet);
+							HttpServletServicer servicer = new OfficeServicer(
+									workName, taskName, httpServlet);
 
 							// Register the servicer
 							servicers.add(servicer);
@@ -180,7 +179,8 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 			}
 
 			// Create the context for the office
-			context = new OfficeContext(servicers.toArray(new Servicer[0]));
+			context = new OfficeContext(servicers
+					.toArray(new HttpServletServicer[0]));
 
 			// Register the context against the office
 			this.contexts.put(office, context);
@@ -266,7 +266,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		OfficeContext context = this.getOfficeContext(office);
 
 		// Obtain the servicer for the name
-		Servicer servicer = context.mapper.mapName(name);
+		HttpServletServicer servicer = context.mapper.mapName(name);
 		if (servicer == null) {
 			// No servicer by name
 			return null;
@@ -391,17 +391,17 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * Initiate.
 		 * 
 		 * @param servicers
-		 *            {@link Servicer} instances.
+		 *            {@link HttpServletServicer} instances.
 		 */
-		public OfficeContext(Servicer[] servicers) {
+		public OfficeContext(HttpServletServicer[] servicers) {
 			this.mapper = new ServicerMapperImpl(servicers);
 		}
 	}
 
 	/**
-	 * {@link Office} {@link Servicer}.
+	 * {@link Office} {@link HttpServletServicer}.
 	 */
-	private class OfficeServicer implements Servicer {
+	private class OfficeServicer implements HttpServletServicer {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -414,9 +414,9 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String taskName;
 
 		/**
-		 * {@link HttpServletDifferentiator} to include {@link HttpServlet}.
+		 * {@link HttpServletServicer} to include {@link HttpServlet}.
 		 */
-		private final HttpServletDifferentiator httpServlet;
+		private final HttpServletServicer httpServlet;
 
 		/**
 		 * Initiate.
@@ -426,11 +426,11 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param taskName
 		 *            Name of {@link Task} for forwarding.
 		 * @param httpServlet
-		 *            {@link HttpServletDifferentiator} to include
-		 *            {@link HttpServlet}.
+		 *            {@link HttpServletServicer} to include {@link HttpServlet}
+		 *            .
 		 */
 		public OfficeServicer(String workName, String taskName,
-				HttpServletDifferentiator httpServlet) {
+				HttpServletServicer httpServlet) {
 			this.workName = workName;
 			this.taskName = taskName;
 			this.httpServlet = httpServlet;
@@ -454,13 +454,20 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 */
 
 		@Override
-		public String getServicerName() {
-			return this.httpServlet.getServicerName();
+		public String getServletName() {
+			return this.httpServlet.getServletName();
 		}
 
 		@Override
-		public String[] getServicerMappings() {
-			return this.httpServlet.getServicerMappings();
+		public String[] getServletMappings() {
+			return this.httpServlet.getServletMappings();
+		}
+
+		@Override
+		public void include(OfficeServletContext context,
+				HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			this.httpServlet.include(context, request, response);
 		}
 	}
 
@@ -481,9 +488,9 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String taskName;
 
 		/**
-		 * {@link HttpServletDifferentiator} to include {@link HttpServlet}.
+		 * {@link HttpServletServicer} to include {@link HttpServlet}.
 		 */
-		private final HttpServletDifferentiator httpServlet;
+		private final HttpServletServicer httpServlet;
 
 		/**
 		 * {@link ServicerMapping}.
@@ -498,13 +505,13 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param taskName
 		 *            Name of {@link Task} for forwarding.
 		 * @param httpServlet
-		 *            {@link HttpServletDifferentiator} to include
-		 *            {@link HttpServlet}.
+		 *            {@link HttpServletServicer} to include {@link HttpServlet}
+		 *            .
 		 * @param mapping
 		 *            {@link ServicerMapping}.
 		 */
 		public OfficeRequestDispatcher(String workName, String taskName,
-				HttpServletDifferentiator httpServlet, ServicerMapping mapping) {
+				HttpServletServicer httpServlet, ServicerMapping mapping) {
 			this.workName = workName;
 			this.taskName = taskName;
 			this.httpServlet = httpServlet;
@@ -549,7 +556,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 			// Provide mapping wrapper (not available if via named dispatch)
 			if (this.mapping != null) {
-				httpRequest = new DispatcherHttpServletRequest(this.mapping,
+				httpRequest = new MappedHttpServletRequest(this.mapping,
 						httpRequest);
 			}
 
