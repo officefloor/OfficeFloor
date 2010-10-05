@@ -336,6 +336,11 @@ public class HttpResponseImpl implements HttpResponse {
 	private static void writeUsAscii(OutputBufferStream outputBufferStream,
 			byte[] tempBuffer, String text) throws IOException {
 
+		// Do not write null text
+		if (text == null) {
+			return;
+		}
+
 		// Iterate over the characters writing them
 		for (int i = 0; i < text.length(); i++) {
 			char character = text.charAt(i);

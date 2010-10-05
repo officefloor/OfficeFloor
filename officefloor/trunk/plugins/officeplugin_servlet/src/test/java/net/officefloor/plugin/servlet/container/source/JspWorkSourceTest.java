@@ -32,6 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
@@ -58,8 +59,8 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Factory
-		HttpServletTask factory = new HttpServletTask("JSP", "",
-				new JspServlet(), new HashMap<String, String>());
+		HttpServletTask factory = new HttpServletTask("JSP", new JspServlet(),
+				new HashMap<String, String>());
 
 		// Create the expected type
 		WorkTypeBuilder<HttpServletTask> type = WorkLoaderUtil
@@ -67,6 +68,8 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
 		task.setDifferentiator(factory);
+		task.addObject(ServicerMapping.class).setKey(
+				DependencyKeys.SERVICER_MAPPING);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -84,9 +87,9 @@ public class JspWorkSourceTest extends OfficeFrameTestCase {
 		// Ensure match JSP extension
 		HttpServletDifferentiator differentiator = (HttpServletDifferentiator) work
 				.getTaskTypes()[0].getTaskFactory();
-		String[] extensions = differentiator.getExtensions();
-		assertEquals("Incorrect number of extensions", 1, extensions.length);
-		assertEquals("Incorrect JSP extension", "jsp", extensions[0]);
+		String[] mappings = differentiator.getServicerMappings();
+		assertEquals("Incorrect number of mappings", 1, mappings.length);
+		assertEquals("Incorrect JSP extension mapping", "*.jsp", mappings[0]);
 	}
 
 }

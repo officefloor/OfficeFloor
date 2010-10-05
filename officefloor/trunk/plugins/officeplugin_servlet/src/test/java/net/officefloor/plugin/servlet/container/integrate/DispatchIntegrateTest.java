@@ -50,10 +50,10 @@ public class DispatchIntegrateTest extends MockHttpServletServer {
 				servletContextName, httpName, requestAttributesName,
 				sessionName, securityName, HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Dispatch",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH,
-				"/servlet/dispatch",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
-				DispatchHttpServlet.class.getName());
+				DispatchHttpServlet.class.getName(),
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"/servlet/dispatch/*");
 
 		// Construct HTTP Servlet to dispatch.
 		// Include matching by extensions for the tests.
@@ -61,11 +61,10 @@ public class DispatchIntegrateTest extends MockHttpServletServer {
 				requestAttributesName, sessionName, securityName,
 				HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Handler",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH,
-				"/servlet/handler",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
 				HandlerHttpServlet.class.getName(),
-				HttpServletWorkSource.PROPERTY_EXTENSIONS, "frwd,inc");
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"/servlet/handler/*, *.frwd, *.inc");
 
 		// Return the reference to handling HTTP Servlet
 		return reference;
@@ -75,46 +74,46 @@ public class DispatchIntegrateTest extends MockHttpServletServer {
 	 * Ensure can forward by path.
 	 */
 	public void testRequestForward() throws Exception {
-		this.doTest("request", "/servlet/handler", "forward",
-				"/servlet/handler", "/");
+		this.doTest("request", "/servlet/handler/path/info", "forward",
+				"/servlet/handler", "/path/info");
 	}
 
 	/**
 	 * Ensure can include by path.
 	 */
 	public void testRequestInclude() throws Exception {
-		this.doTest("request", "/servlet/handler", "include", "",
-				"/servlet/handler");
+		this.doTest("request", "/servlet/handler/path/info", "include",
+				"/servlet/handler", "/path/info");
 	}
 
 	/**
 	 * Ensure can forward by name.
 	 */
 	public void testNamedForward() {
-		this.doTest("name", "Handler", "forward", "/servlet/handler", "/");
+		this.doTest("name", "Handler", "forward", "/", "");
 	}
 
 	/**
 	 * Ensure can include by name.
 	 */
 	public void testNamedInclude() {
-		this.doTest("name", "Handler", "include", "", "/servlet/handler");
+		this.doTest("name", "Handler", "include", "/", "");
 	}
 
 	/**
 	 * Ensure can include by extension.
 	 */
 	public void testExtensionForward() {
-		this.doTest("request", "/extension.frwd", "forward",
-				"/servlet/handler", "/");
+		this.doTest("request", "/extension.frwd", "forward", "/extension.frwd",
+				"");
 	}
 
 	/**
 	 * Ensure can include by extension.
 	 */
 	public void testExtensionInclude() {
-		this.doTest("request", "/extension.inc", "include", "",
-				"/extension.inc");
+		this.doTest("request", "/extension.inc", "include", "/extension.inc",
+				"");
 	}
 
 	/**

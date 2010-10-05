@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.plugin.servlet.context.DispatcherHttpServletRequest;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
@@ -56,11 +58,6 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	private final ServletContext servletContext;
 
 	/**
-	 * Servlet Path.
-	 */
-	private final String servletPath;
-
-	/**
 	 * {@link HttpServlet}.
 	 */
 	private final HttpServlet servlet;
@@ -80,8 +77,6 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	 * 
 	 * @param servletName
 	 *            Name of the Servlet.
-	 * @param servletPath
-	 *            Servlet Path.
 	 * @param servlet
 	 *            {@link HttpServlet}.
 	 * @param initParameters
@@ -97,13 +92,12 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	 * @throws ServletException
 	 *             If fails to initialise the {@link HttpServlet}.
 	 */
-	public HttpServletContainerImpl(String servletName, String servletPath,
-			HttpServlet servlet, Map<String, String> initParameters,
+	public HttpServletContainerImpl(String servletName, HttpServlet servlet,
+			Map<String, String> initParameters,
 			OfficeServletContext officeServletContext, Office office,
 			Clock clock, Locale defaultLocale) throws ServletException {
 
 		// Initiate state
-		this.servletPath = servletPath;
 		this.servlet = servlet;
 		this.clock = clock;
 		this.defaultLocale = defaultLocale;
@@ -124,8 +118,8 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	@Override
 	public void service(ServerHttpConnection connection,
 			Map<String, Object> attributes, HttpSession session,
-			HttpSecurity security, TaskContext<?, ?, ?> taskContext)
-			throws ServletException, IOException {
+			HttpSecurity security, TaskContext<?, ?, ?> taskContext,
+			ServicerMapping mapping) throws ServletException, IOException {
 
 		// Obtain the last access time
 		Long lastAccessTime = (Long) attributes.get(ATTRIBUTE_LAST_ACCESS_TIME);
@@ -160,9 +154,14 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 			String sessionIdTokenName = session.getTokenName();
 
 			// Create the HTTP request
-			request = new HttpServletRequestImpl(connection, this.servletPath,
-					attributes, security, sessionIdTokenName, httpSession,
+			request = new HttpServletRequestImpl(connection, attributes,
+					security, sessionIdTokenName, httpSession,
 					this.servletContext, this.defaultLocale, taskContext);
+
+			// If have mapping, wrap to provide servicer mapping values
+			if (mapping != null) {
+				request = new DispatcherHttpServletRequest(mapping, request);
+			}
 
 			// Create the HTTP response
 			response = new HttpServletResponseImpl(

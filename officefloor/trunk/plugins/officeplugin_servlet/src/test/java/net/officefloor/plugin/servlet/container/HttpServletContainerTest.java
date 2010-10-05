@@ -28,12 +28,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -50,6 +53,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -111,6 +115,11 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskContext.class);
 
 	/**
+	 * {@link ServicerMapping}.
+	 */
+	private ServicerMapping mapping = this.createMock(ServicerMapping.class);
+
+	/**
 	 * {@link OfficeServletContext}.
 	 */
 	private final OfficeServletContext officeServletContext = this
@@ -142,14 +151,14 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
 	/**
+	 * Context path.
+	 */
+	private String contextPath = "/context";
+
+	/**
 	 * Servlet name.
 	 */
 	private String servletName = "ServletName";
-
-	/**
-	 * Servlet path.
-	 */
-	private String servletPath = "/servlet";
 
 	/**
 	 * HTTP method.
@@ -238,23 +247,116 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure context methods are correct.
 	 */
 	public void test_req_Context() {
-		this.servletPath = "/servlet/path";
 
 		// Record obtaining paths
-		this.record_init("/context/path/servlet/path");
+		this.record_init("/context/servlet/path?name=value");
 		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), "/context/path");
+				.getContextPath(this.office), this.contextPath);
+		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+				"/servlet/path");
+		this.recordReturn(this.mapping, this.mapping.getPathInfo(),
+				"/path/info");
+
+		// Record no mapping Query String
+		this.recordReturn(this.mapping, this.mapping.getQueryString(), null);
+		this
+				.recordReturn(this.mapping, this.mapping.getParameter("name"),
+						null);
+
+		// Record with mapping Query String
+		this.recordReturn(this.mapping, this.mapping.getQueryString(),
+				"name=another");
+		this.recordReturn(this.mapping, this.mapping.getParameter("name"),
+				"another");
 
 		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				assertEquals("getContextPath()", "/context/path", req
-						.getContextPath());
+				// Verify path
+				assertEquals("getContextPath()",
+						HttpServletContainerTest.this.contextPath, req
+								.getContextPath());
 				assertEquals("getServletPath()", "/servlet/path", req
 						.getServletPath());
+				assertEquals("getPathInfo()", "/path/info", req.getPathInfo());
+
+				// Default to path if no mapping query string
+				assertEquals("getQueryString() [no mapping query string]",
+						"name=value", req.getQueryString());
+				assertEquals("getParameter() [no mapping query string]",
+						"value", req.getParameter("name"));
+
+				// Use mapping Query String
+				assertEquals("getQueryString() [mapping query string]",
+						"name=another", req.getQueryString());
+				assertEquals("getParameter() [mapping query string]",
+						"another", req.getParameter("name"));
+
+				// Always null as far as can be understood
+				assertNull("getPathTranslated() [no mapping query string]", req
+						.getPathTranslated());
+			}
+		});
+	}
+
+	/**
+	 * Ensure context methods are correct when no {@link ServicerMapping}.
+	 */
+	public void test_req_ContextNoMapping() {
+
+		// No mapping
+		this.mapping = null;
+
+		// Record obtaining paths
+		this.record_init("/context/servlet/path");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), this.contextPath);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getContextPath()",
+						HttpServletContainerTest.this.contextPath, req
+								.getContextPath());
+				assertEquals(
+						"getServletPath() [always full path without mapping]",
+						"/servlet/path", req.getServletPath());
+				assertNull("getPathInfo() [always null without mapping]", req
+						.getPathInfo());
 				assertNull("getPathTranslated()", req.getPathTranslated());
+			}
+		});
+	}
+
+	/**
+	 * Ensure default context when no {@link ServicerMapping}.
+	 */
+	public void test_req_DefaultContext() {
+
+		// Default context
+		this.contextPath = "/";
+
+		// No mapping
+		this.mapping = null;
+
+		// Record obtaining paths
+		this.record_init("/servlet/path");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), this.contextPath);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getContextPath()", "/", req.getContextPath());
+				assertEquals(
+						"getServletPath() [does not remove default context]",
+						"/servlet/path", req.getServletPath());
 			}
 		});
 	}
@@ -263,7 +365,54 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure status line methods are correct.
 	 */
 	public void test_req_StatusLine() {
-		this.record_init("/server/path?one=1&two=2;three=3#fragment");
+
+		// Record status line
+		this.record_init("/context/servlet/path?one=1&two=2;three=3#fragment");
+		this.recordReturn(this.request, this.request.getMethod(),
+				this.httpMethod);
+		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+				"/servlet/path");
+		this.recordReturn(this.mapping, this.mapping.getPathInfo(), null);
+		this.recordReturn(this.mapping, this.mapping.getQueryString(), null);
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("host", "officefloor.net"));
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.connection, this.connection.isSecure(), true);
+		this.recordReturn(this.request, this.request.getVersion(), "HTTP/1.1");
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("getMethod()", "GET", req.getMethod());
+				assertEquals("getServletPath()", "/servlet/path", req
+						.getServletPath());
+				assertNull("getPathInfo()", req.getPathInfo());
+				assertEquals("getQueryString()", "one=1&two=2;three=3", req
+						.getQueryString());
+				assertEquals("getRequestURI()", "/context/servlet/path", req
+						.getRequestURI());
+				assertEquals("getRequestURL",
+						"officefloor.net/context/servlet/path", req
+								.getRequestURL().toString());
+				assertEquals("getScheme - not secure", "http", req.getScheme());
+				assertEquals("getScheme - secure", "https", req.getScheme());
+				assertEquals("getProtocol", "HTTP/1.1", req.getProtocol());
+			}
+		});
+	}
+
+	/**
+	 * Ensure status line methods are correct.
+	 */
+	public void test_req_StatusLineNoMappping() {
+
+		// No mapping
+		this.mapping = null;
+
+		// Record status line
+		this.record_init("/context/servlet/path?one=1&two=2;three=3#fragment");
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
 		this.recordReturn(this.request, this.request.getHeaders(), this
@@ -271,19 +420,23 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.connection, this.connection.isSecure(), false);
 		this.recordReturn(this.connection, this.connection.isSecure(), true);
 		this.recordReturn(this.request, this.request.getVersion(), "HTTP/1.1");
+
+		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
 				assertEquals("getMethod()", "GET", req.getMethod());
-				assertEquals("getPathInfor()", "/server/path", req
-						.getPathInfo());
+				assertEquals("getServletPath()", "/servlet/path", req
+						.getServletPath());
+				assertNull("getPathInfo()", req.getPathInfo());
 				assertEquals("getQueryString()", "one=1&two=2;three=3", req
 						.getQueryString());
-				assertEquals("getRequestURI()", "/server/path", req
+				assertEquals("getRequestURI()", "/context/servlet/path", req
 						.getRequestURI());
-				assertEquals("getRequestURL", "officefloor.net/server/path",
-						req.getRequestURL().toString());
+				assertEquals("getRequestURL",
+						"officefloor.net/context/servlet/path", req
+								.getRequestURL().toString());
 				assertEquals("getScheme - not secure", "http", req.getScheme());
 				assertEquals("getScheme - secure", "https", req.getScheme());
 				assertEquals("getVersion", "HTTP/1.1", req.getProtocol());
@@ -295,8 +448,119 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * Ensure able to work with parameters.
 	 */
 	public void test_req_Parameters() {
+
+		// Record mapping overriding (or not overriding) parameters
+		this
+				.record_init("/server/path?one=1&two=2&dup1=A;dup1=B;dup2=a;dup2=b#fragment");
+
+		// Record single parameters
+		this
+				.recordReturn(this.mapping, this.mapping.getParameter("one"),
+						"ONE");
+		this.recordReturn(this.mapping, this.mapping.getParameter("two"), null);
+		this.recordReturn(this.mapping, this.mapping.getParameter("dup1"),
+				"DUPLICATE");
+		this
+				.recordReturn(this.mapping, this.mapping.getParameter("dup2"),
+						null);
+		this.recordReturn(this.mapping, this.mapping.getParameter("unknown"),
+				null);
+
+		// Record parameter names
+		this.recordReturn(this.mapping, this.mapping.getParameterNames(),
+				new IteratorEnumeration<String>(Arrays.asList("one", "dup1",
+						"three").iterator()));
+
+		// Record multiple parameters
+		this.recordReturn(this.mapping, this.mapping.getParameterValues("one"),
+				new String[] { "ONE" });
+		this.recordReturn(this.mapping, this.mapping.getParameterValues("two"),
+				null);
+		this.recordReturn(this.mapping,
+				this.mapping.getParameterValues("dup1"),
+				new String[] { "DUPLICATE" });
+		this.recordReturn(this.mapping,
+				this.mapping.getParameterValues("dup2"), null);
+		this.recordReturn(this.mapping, this.mapping
+				.getParameterValues("unknown"), null);
+
+		// Record map
+		Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+		parameterMap.put("one", new String[] { "ONE" });
+		parameterMap.put("dup1", new String[] { "DUPLICATE" });
+		parameterMap.put("three", new String[] { "3" });
+		this.recordReturn(this.mapping, this.mapping.getParameterMap(),
+				parameterMap);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			@SuppressWarnings("unchecked")
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+
+				// Validate single parameter value
+				assertEquals("getParameter(one)", "ONE", req
+						.getParameter("one"));
+				assertEquals("getParameter(two)", "2", req.getParameter("two"));
+				assertEquals("getParameter(dup1)", "DUPLICATE", req
+						.getParameter("dup1"));
+				assertEquals("getParameter(dup2)", "a", req
+						.getParameter("dup2"));
+				assertNull("getParameter(unknown)", req.getParameter("unknown"));
+
+				// Obtain the parameter names
+				Set<String> parameterNames = new HashSet<String>();
+				Enumeration<?> names = req.getParameterNames();
+				while (names.hasMoreElements()) {
+					String name = (String) names.nextElement();
+					assertFalse("Duplicate parameter name '" + name + "'",
+							parameterNames.contains(name));
+					parameterNames.add(name);
+				}
+
+				// Validate parameter names
+				String[] expectedNames = new String[] { "one", "two", "dup1",
+						"dup2", "three" };
+				assertEquals("Incorrect number of parameter names",
+						expectedNames.length, parameterNames.size());
+				for (String expectedName : expectedNames) {
+					assertTrue("Must contain parameter name '" + expectedName
+							+ "'", parameterNames.contains(expectedName));
+				}
+
+				// Validate multiple parameter values
+				assertArray(req.getParameterValues("one"), "ONE");
+				assertArray(req.getParameterValues("two"), "2");
+				assertArray(req.getParameterValues("dup1"), "DUPLICATE");
+				assertArray(req.getParameterValues("dup2"), "a", "b");
+				assertNull(req.getParameterValues("unknown"));
+
+				// Validate parameter map
+				Map<String, String[]> map = req.getParameterMap();
+				assertEquals("Incorrect number of map entries", 5, map.size());
+				assertArray(map.get("one"), "ONE");
+				assertArray(map.get("two"), "2");
+				assertArray(map.get("dup1"), "DUPLICATE");
+				assertArray(map.get("dup2"), "a", "b");
+				assertArray(map.get("three"), "3");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to work with parameters.
+	 */
+	public void test_req_ParametersNoMapping() {
+
+		// No mapping
+		this.mapping = null;
+
+		// Record path
 		this
 				.record_init("/server/path?one=1&two=2;three=3&duplicate=A;duplicate=B#fragment");
+
+		// Test
 		this.doTest(new MockHttpServlet() {
 			@Override
 			@SuppressWarnings("unchecked")
@@ -310,6 +574,7 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 						.getParameter("three"));
 				assertEquals("getParameter(duplicate)", "A", req
 						.getParameter("duplicate"));
+				assertNull("getParameter(unknown)", req.getParameter("unknown"));
 
 				// Validate parameter names
 				Enumeration<?> names = req.getParameterNames();
@@ -943,13 +1208,58 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining the request dispatcher
 		this.record_init("/test");
+
+		// Record obtaining absolute paths
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getRequestDispatcher(this.office, "/none"), null);
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getRequestDispatcher(this.office, "/absolute"), dispatcher);
+
+		// Record obtaining relative path
+		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+				"/servlet/path");
 		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getRequestDispatcher(this.office, this.servletPath
-						+ "/relative"), dispatcher);
+				.getRequestDispatcher(this.office, "/servlet/path/relative"),
+				dispatcher);
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertNull("getRequestDispathcer(none)", req
+						.getRequestDispatcher("/none"));
+				assertEquals("getRequestDispatcher(absolute)", dispatcher, req
+						.getRequestDispatcher("/absolute"));
+				assertEquals("getRequestDispatcher(relative)", dispatcher, req
+						.getRequestDispatcher("relative"));
+			}
+		});
+	}
+
+	/**
+	 * Validates the request dispatcher methods with no {@link ServicerMapping}.
+	 */
+	public void test_req_RequestDispatcherNoMapping() {
+		final RequestDispatcher dispatcher = this
+				.createMock(RequestDispatcher.class);
+
+		// No mapping
+		this.mapping = null;
+
+		// Record obtaining the request dispatcher
+		this.record_init("/test");
+
+		// Record obtaining absolute paths
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, "/none"), null);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, "/absolute"), dispatcher);
+
+		// Record obtaining relative path
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getRequestDispatcher(this.office, "/test/relative"),
+				dispatcher);
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1438,12 +1748,50 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.getContextPath(this.office), "/context");
 		this.recordReturn(this.request, this.request.getHeaders(), this
 				.createHttpHeaders("host", "officefloor.net:8080"));
+		this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+				"/servlet");
 
 		// Record sending redirect
 		this.response.setStatus(307);
 		this.recordReturn(this.response, this.response.addHeader("Location",
-				"http://officefloor.net:8080/context" + this.servletPath
-						+ "/redirect.txt"), header);
+				"http://officefloor.net:8080/context/servlet/redirect.txt"),
+				header);
+		this.response.send();
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				resp.sendRedirect("redirect.txt");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to send a relative redirect without {@link ServicerMapping}.
+	 */
+	public void test_resp_SendRelativeRedirectNoMapping() throws Exception {
+
+		// No mapping
+		this.mapping = null;
+
+		// Mocks
+		final HttpHeader header = this.createMock(HttpHeader.class);
+
+		// Record obtaining details for redirect
+		this.record_init("/test");
+		this.recordReturn(this.connection, this.connection.isSecure(), false);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), "/context");
+		this.recordReturn(this.request, this.request.getHeaders(), this
+				.createHttpHeaders("host", "officefloor.net:8080"));
+
+		// Record sending redirect
+		this.response.setStatus(307);
+		this.recordReturn(this.response, this.response.addHeader("Location",
+				"http://officefloor.net:8080/context/test/redirect.txt"),
+				header);
 		this.response.send();
 
 		// Test
@@ -1591,9 +1939,9 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			}
 		};
 		HttpServletContainer container = new HttpServletContainerImpl(
-				this.servletName, this.servletPath, servlet,
-				this.initParameters, this.officeServletContext, this.office,
-				this.clock, Locale.getDefault());
+				this.servletName, servlet, this.initParameters,
+				this.officeServletContext, this.office, this.clock, Locale
+						.getDefault());
 
 		// Include
 		container.include(REQUEST, RESPONSE);
@@ -1653,6 +2001,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param requestUri
 	 *            Request URI.
+	 * @param contextPath
+	 *            Context path.
 	 */
 	private void record_init(String requestUri) {
 
@@ -1671,6 +2021,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				this.response);
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				requestUri);
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), this.contextPath);
 		this.recordReturn(this.request, this.request.getMethod(),
 				this.httpMethod);
 		this.recordReturn(this.response, this.response.getBody(), bufferStream);
@@ -1695,13 +2047,12 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 			// Create the HTTP Servlet container
 			HttpServletContainer container = new HttpServletContainerImpl(
-					this.servletName, this.servletPath, servlet,
-					this.initParameters, this.officeServletContext,
-					this.office, this.clock, locale);
+					this.servletName, servlet, this.initParameters,
+					this.officeServletContext, this.office, this.clock, locale);
 
 			// Process a request
 			container.service(this.connection, this.attributes, this.session,
-					this.security, this.taskContext);
+					this.security, this.taskContext, this.mapping);
 
 			// Verify functionality
 			this.verifyMockObjects();

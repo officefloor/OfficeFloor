@@ -33,9 +33,11 @@ import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -56,9 +58,10 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Servlet Name",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH, "Servlet Path",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
-				"Servlet Class");
+				"Servlet Class",
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"Servlet Mappings");
 	}
 
 	/**
@@ -68,8 +71,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the work
 		HttpServletTask factory = new HttpServletTask("ServletName",
-				"/servlet/path", new MockHttpServlet(),
-				new HashMap<String, String>());
+				new MockHttpServlet(), new HashMap<String, String>());
 
 		// Create expected type
 		WorkTypeBuilder<HttpServletTask> type = WorkLoaderUtil
@@ -77,6 +79,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
 				"service", factory, DependencyKeys.class, None.class);
 		task.setDifferentiator(factory);
+		task.addObject(ServicerMapping.class).setKey(
+				DependencyKeys.SERVICER_MAPPING);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -90,9 +94,10 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		// Validate type
 		WorkLoaderUtil.validateWorkType(type, HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "ServletName",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH, "/servlet/path",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
-				MockHttpServlet.class.getName());
+				MockHttpServlet.class.getName(),
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"/servlet/path/*");
 	}
 
 	/**
@@ -112,9 +117,11 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		final HttpSession session = this.createMock(HttpSession.class);
 		final HttpSecurity security = this.createMock(HttpSecurity.class);
 		final HttpRequest request = this.createMock(HttpRequest.class);
+		final Office office = this.createMock(Office.class);
 		final HttpResponse response = this.createMock(HttpResponse.class);
 		final OutputBufferStream body = this
 				.createMock(OutputBufferStream.class);
+		final ServicerMapping mapping = this.createMock(ServicerMapping.class);
 
 		// Rest Mock HTTP Servlet for testing
 		MockHttpServlet.reset();
@@ -131,6 +138,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.getObject(DependencyKeys.HTTP_SESSION), session);
 		this.recordReturn(taskContext, taskContext
 				.getObject(DependencyKeys.HTTP_SECURITY), security);
+		this.recordReturn(taskContext, taskContext
+				.getObject(DependencyKeys.SERVICER_MAPPING), mapping);
 		attributes.get("#HttpServlet.LastAccessTime#");
 		this.control(attributes).setReturnValue(new Long(1000));
 		this.recordReturn(session, session.getTokenName(), "JSESSION_ID");
@@ -138,6 +147,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(request, request.getRequestURI(),
 				"http://www.officefloor.net");
 		this.recordReturn(request, request.getMethod(), "GET");
+		this.recordReturn(officeServletContext, officeServletContext
+				.getContextPath(office), "/context");
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		this.recordReturn(response, response.getBody(), body);
 		this.recordReturn(body, body.getOutputStream(),
@@ -151,14 +162,16 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		WorkType<HttpServletTask> type = WorkLoaderUtil.loadWorkType(
 				HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "ServletName",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH, "/servlet/path",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
 				MockHttpServlet.class.getName(),
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"/servlet/path/*",
 				HttpServletWorkSource.PROPERTY_PREFIX_INIT_PARAMETER + "test",
 				"available");
 
 		// Create the task and service request
 		HttpServletTask task = type.getWorkFactory().createWork();
+		task.setOffice(office);
 		task.doTask(taskContext);
 
 		// Verify functionality

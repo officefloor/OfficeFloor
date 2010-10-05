@@ -55,9 +55,10 @@ public class HttpServletIntegrateTest extends MockHttpServletServer {
 				httpName, requestAttributesName, sessionName, securityName,
 				HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "Servlet",
-				HttpServletWorkSource.PROPERTY_SERVLET_PATH, "/servlet/path",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
-				MockHttpServlet.class.getName());
+				MockHttpServlet.class.getName(),
+				HttpServletWorkSource.PROPERTY_SERVLET_MAPPINGS,
+				"/servlet/path/*");
 	}
 
 	/**

@@ -254,7 +254,7 @@ public class ServicerMapperImpl implements ServicerMapper {
 		/**
 		 * Parameters.
 		 */
-		private final Map<String, String> parameters = new HashMap<String, String>();
+		private final Map<String, String[]> parameters = new HashMap<String, String[]>();
 
 		/**
 		 * Query String.
@@ -311,7 +311,22 @@ public class ServicerMapperImpl implements ServicerMapper {
 		@Override
 		public void handleHttpParameter(String name, String value)
 				throws HttpRequestTokeniseException {
-			this.parameters.put(name, value);
+
+			// Add the parameter
+			String[] values = this.parameters.get(name);
+			if (values == null) {
+				// First value
+				values = new String[] { value };
+			} else {
+				// Append value
+				String[] appendedValues = new String[values.length + 1];
+				System.arraycopy(values, 0, appendedValues, 0, values.length);
+				appendedValues[values.length] = value;
+				values = appendedValues;
+			}
+
+			// Update values in map
+			this.parameters.put(name, values);
 		}
 
 		@Override

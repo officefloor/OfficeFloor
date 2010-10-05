@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,10 @@ import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
 import net.officefloor.plugin.servlet.log.Logger;
+import net.officefloor.plugin.servlet.mapping.Servicer;
+import net.officefloor.plugin.servlet.mapping.ServicerMapper;
+import net.officefloor.plugin.servlet.mapping.ServicerMapperImpl;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
@@ -144,49 +149,38 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		// Lazy create the office context
 		OfficeContext context = this.contexts.get(office);
 		if (context == null) {
-			// Create the context for the office
-			context = new OfficeContext();
 
-			// Load the context based on the office
+			// Obtain the listing of servicers for the office
+			List<Servicer> servicers = new LinkedList<Servicer>();
 			try {
+				// Iterate over work of the Office
 				for (String workName : office.getWorkNames()) {
 					WorkManager work = office.getWorkManager(workName);
+
+					// Iterate over tasks of the Office
 					for (String taskName : work.getTaskNames()) {
 						TaskManager task = work.getTaskManager(taskName);
+
+						// Load task if Servicer
 						Object differentiator = task.getDifferentiator();
 						if (differentiator instanceof HttpServletDifferentiator) {
 							HttpServletDifferentiator httpServlet = (HttpServletDifferentiator) differentiator;
 
-							// Create request dispatcher factory to HTTP Servlet
-							RequestDispatcherFactory factory = new RequestDispatcherFactory(
-									workName, taskName, httpServlet);
+							// Wrap servicer for Office details
+							Servicer servicer = new OfficeServicer(workName,
+									taskName, httpServlet);
 
-							// Register for Servlet path
-							String servletPath = httpServlet.getServletPath();
-							context.requestDispatchers
-									.put(servletPath, factory);
-
-							// Register for Servlet name (if available)
-							String servletName = httpServlet.getServletName();
-							if (servletName != null) {
-								context.namedDispatchers.put(servletName,
-										factory);
-							}
-
-							// Register for extensions (if available)
-							String[] extensions = httpServlet.getExtensions();
-							if (extensions != null) {
-								for (String extension : extensions) {
-									context.extensionDispatchers.put(extension
-											.toLowerCase(), factory);
-								}
-							}
+							// Register the servicer
+							servicers.add(servicer);
 						}
 					}
 				}
 			} catch (Exception ex) {
 				// Failed loading but carry on
 			}
+
+			// Create the context for the office
+			context = new OfficeContext(servicers.toArray(new Servicer[0]));
 
 			// Register the context against the office
 			this.contexts.put(office, context);
@@ -254,25 +248,16 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
 
-		// Obtain dispatcher by path first
-		RequestDispatcherFactory factory = context.requestDispatchers.get(path);
-		if (factory == null) {
-			// No dispatcher by path so try on extension
-			int extensionIndex = path.lastIndexOf('.');
-			if (extensionIndex >= 0) {
-				// +1 to ignore '.'
-				String extension = path.substring(extensionIndex + 1);
-				factory = context.extensionDispatchers.get(extension
-						.toLowerCase());
-			}
+		// Obtain the servicer mapping
+		ServicerMapping mapping = context.mapper.mapPath(path);
+		if (mapping == null) {
+			// No servicer for path
+			return null;
 		}
 
-		// Create and return the dispatcher
-		RequestDispatcher dispatcher = null;
-		if (factory != null) {
-			dispatcher = factory.createRequestDispatcher(path);
-		}
-		return dispatcher;
+		// Downcast and return the request dispatcher
+		OfficeServicer officeServicer = (OfficeServicer) mapping.getServicer();
+		return officeServicer.createRequestDispatcher(mapping);
 	}
 
 	@Override
@@ -280,15 +265,16 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
 
-		// Obtain the dispatcher
-		RequestDispatcher dispatcher = null;
-		RequestDispatcherFactory factory = context.namedDispatchers.get(name);
-		if (factory != null) {
-			dispatcher = factory.createRequestDispatcher(null);
+		// Obtain the servicer for the name
+		Servicer servicer = context.mapper.mapName(name);
+		if (servicer == null) {
+			// No servicer by name
+			return null;
 		}
 
-		// Return the named dispatcher
-		return dispatcher;
+		// Downcast and return the request dispatcher (no mapping as by name)
+		OfficeServicer officeServicer = (OfficeServicer) servicer;
+		return officeServicer.createRequestDispatcher(null);
 	}
 
 	@Override
@@ -397,25 +383,25 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		public final Map<String, Object> attributes = new HashMap<String, Object>();
 
 		/**
-		 * {@link RequestDispatcher} instances by their path.
+		 * {@link ServicerMapper}.
 		 */
-		public final Map<String, RequestDispatcherFactory> requestDispatchers = new HashMap<String, RequestDispatcherFactory>();
+		public final ServicerMapper mapper;
 
 		/**
-		 * {@link RequestDispatcher} instances by their name.
+		 * Initiate.
+		 * 
+		 * @param servicers
+		 *            {@link Servicer} instances.
 		 */
-		public final Map<String, RequestDispatcherFactory> namedDispatchers = new HashMap<String, RequestDispatcherFactory>();
-
-		/**
-		 * {@link RequestDispatcher} instances by their extension.
-		 */
-		public final Map<String, RequestDispatcherFactory> extensionDispatchers = new HashMap<String, RequestDispatcherFactory>();
+		public OfficeContext(Servicer[] servicers) {
+			this.mapper = new ServicerMapperImpl(servicers);
+		}
 	}
 
 	/**
-	 * Factory for the creation of a {@link RequestDispatcher}.
+	 * {@link Office} {@link Servicer}.
 	 */
-	private class RequestDispatcherFactory {
+	private class OfficeServicer implements Servicer {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -443,7 +429,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 *            {@link HttpServletDifferentiator} to include
 		 *            {@link HttpServlet}.
 		 */
-		public RequestDispatcherFactory(String workName, String taskName,
+		public OfficeServicer(String workName, String taskName,
 				HttpServletDifferentiator httpServlet) {
 			this.workName = workName;
 			this.taskName = taskName;
@@ -453,18 +439,28 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		/**
 		 * Creates the {@link RequestDispatcher}.
 		 * 
-		 * @param path
-		 *            Path to the {@link RequestDispatcher}.
+		 * @param mapping
+		 *            {@link ServicerMapping}. May be <code>null</code>.
 		 * @return {@link RequestDispatcher}.
 		 */
-		public RequestDispatcher createRequestDispatcher(String path) {
-
-			// Ensure have the path
-			path = (path == null ? this.httpServlet.getServletPath() : path);
-
+		public RequestDispatcher createRequestDispatcher(ServicerMapping mapping) {
 			// Create the Request Dispatcher
 			return new OfficeRequestDispatcher(this.workName, this.taskName,
-					this.httpServlet, path);
+					this.httpServlet, mapping);
+		}
+
+		/*
+		 * ======================== Servicer ==========================
+		 */
+
+		@Override
+		public String getServicerName() {
+			return this.httpServlet.getServicerName();
+		}
+
+		@Override
+		public String[] getServicerMappings() {
+			return this.httpServlet.getServicerMappings();
 		}
 	}
 
@@ -490,9 +486,9 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final HttpServletDifferentiator httpServlet;
 
 		/**
-		 * Path to the {@link RequestDispatcher}.
+		 * {@link ServicerMapping}.
 		 */
-		private final String path;
+		private final ServicerMapping mapping;
 
 		/**
 		 * Initiate.
@@ -504,15 +500,15 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param httpServlet
 		 *            {@link HttpServletDifferentiator} to include
 		 *            {@link HttpServlet}.
-		 * @param path
-		 *            Path to the {@link RequestDispatcher}.
+		 * @param mapping
+		 *            {@link ServicerMapping}.
 		 */
 		public OfficeRequestDispatcher(String workName, String taskName,
-				HttpServletDifferentiator httpServlet, String path) {
+				HttpServletDifferentiator httpServlet, ServicerMapping mapping) {
 			this.workName = workName;
 			this.taskName = taskName;
 			this.httpServlet = httpServlet;
-			this.path = path;
+			this.mapping = mapping;
 		}
 
 		/*
@@ -540,7 +536,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 			}
 
 			// Forward the Servlet Request
-			forwarder.forward(this.workName, this.taskName, null);
+			forwarder.forward(this.workName, this.taskName, this.mapping);
 		}
 
 		@Override
@@ -551,9 +547,11 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-			// Wrap request to change path as per dispatcher
-			httpRequest = new DispatcherHttpServletRequest(this.path,
-					httpRequest);
+			// Provide mapping wrapper (not available if via named dispatch)
+			if (this.mapping != null) {
+				httpRequest = new DispatcherHttpServletRequest(this.mapping,
+						httpRequest);
+			}
 
 			// Include the HTTP Servlet
 			this.httpServlet.include(OfficeServletContextImpl.this,

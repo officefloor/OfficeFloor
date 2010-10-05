@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +41,7 @@ import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.container.HttpServletContainerImpl;
 import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -65,16 +65,16 @@ public class HttpServletTask
 	public static final String PROPERTY_PREFIX_INIT_PARAMETER = "init.parameter.";
 
 	/**
-	 * Name of property to obtain extensions for {@link RequestDispatcher}
-	 * matching. Extensions are comma (,) separator.
+	 * Name of property to obtain mappings to the {@link HttpServlet}. Mappings
+	 * are comma (,) separated.
 	 */
-	public static final String PROPERTY_EXTENSIONS = "extensions";
+	public static final String PROPERTY_SERVLET_MAPPINGS = "servlet.mappings";
 
 	/**
 	 * Keys for the dependencies.
 	 */
 	public static enum DependencyKeys {
-		OFFICE_SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
+		SERVICER_MAPPING, OFFICE_SERVLET_CONTEXT, HTTP_CONNECTION, REQUEST_ATTRIBUTES, HTTP_SESSION, HTTP_SECURITY
 	}
 
 	/**
@@ -86,17 +86,15 @@ public class HttpServletTask
 	 *            {@link WorkSourceContext}.
 	 * @param servletName
 	 *            Servlet name.
-	 * @param servletPath
-	 *            Servlet path.
 	 * @param servlet
 	 *            {@link HttpServlet}.
-	 * @param extensions
-	 *            Extensions.
+	 * @param servletMappings
+	 *            Mappings to the {@link HttpServlet}.
 	 */
 	public static void sourceWork(
 			WorkTypeBuilder<HttpServletTask> workTypeBuilder,
-			WorkSourceContext context, String servletName, String servletPath,
-			HttpServlet servlet, String... extensions) {
+			WorkSourceContext context, String servletName, HttpServlet servlet,
+			String... servletMappings) {
 
 		// Obtain the initialisation parameters
 		Map<String, String> initParameters = new HashMap<String, String>();
@@ -109,19 +107,20 @@ public class HttpServletTask
 			}
 		}
 
-		// Determine if overriding extensions
-		String extensionText = context.getProperty(PROPERTY_EXTENSIONS, null);
-		if (extensionText != null) {
-			// Override the extensions (trimming for use)
-			extensions = extensionText.split(",");
-			for (int i = 0; i < extensions.length; i++) {
-				extensions[i] = extensions[i].trim();
+		// Determine if overriding servlet mappings
+		String servletMappingsText = context.getProperty(
+				PROPERTY_SERVLET_MAPPINGS, null);
+		if (servletMappingsText != null) {
+			// Override the mappings (trimming for use)
+			servletMappings = servletMappingsText.split(",");
+			for (int i = 0; i < servletMappings.length; i++) {
+				servletMappings[i] = servletMappings[i].trim();
 			}
 		}
 
 		// Construct the HttpServletTask
-		HttpServletTask factory = new HttpServletTask(servletName, servletPath,
-				servlet, initParameters, extensions);
+		HttpServletTask factory = new HttpServletTask(servletName, servlet,
+				initParameters, servletMappings);
 
 		// Load the type information
 		workTypeBuilder.setWorkFactory(factory);
@@ -131,6 +130,8 @@ public class HttpServletTask
 				.addTaskType("service", factory, DependencyKeys.class,
 						None.class);
 		task.setDifferentiator(factory);
+		task.addObject(ServicerMapping.class).setKey(
+				DependencyKeys.SERVICER_MAPPING);
 		task.addObject(OfficeServletContext.class).setKey(
 				DependencyKeys.OFFICE_SERVLET_CONTEXT);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -158,11 +159,6 @@ public class HttpServletTask
 	private final String servletName;
 
 	/**
-	 * Path of the {@link HttpServlet}.
-	 */
-	private final String servletPath;
-
-	/**
 	 * {@link HttpServlet} to service the {@link HttpRequest}.
 	 */
 	private final HttpServlet servlet;
@@ -173,9 +169,9 @@ public class HttpServletTask
 	private final Map<String, String> initParameters;
 
 	/**
-	 * Extensions.
+	 * Mappings to the {@link HttpServlet}.
 	 */
-	private final String[] extensions;
+	private final String[] servletMappings;
 
 	/**
 	 * {@link Office}.
@@ -192,23 +188,19 @@ public class HttpServletTask
 	 * 
 	 * @param servletName
 	 *            Name of the {@link HttpServlet}.
-	 * @param servletPath
-	 *            Path of the {@link HttpServlet}.
 	 * @param servlet
 	 *            {@link HttpServlet} to service the {@link HttpRequest}.
 	 * @param initParameters
 	 *            Initialisation parameters.
-	 * @param extensions
-	 *            Extensions.
+	 * @param servletMappings
+	 *            Mappings to the {@link HttpServlet}.
 	 */
-	public HttpServletTask(String servletName, String servletPath,
-			HttpServlet servlet, Map<String, String> initParameters,
-			String... extensions) {
+	public HttpServletTask(String servletName, HttpServlet servlet,
+			Map<String, String> initParameters, String... servletMappings) {
 		this.servletName = servletName;
-		this.servletPath = servletPath;
 		this.servlet = servlet;
 		this.initParameters = initParameters;
-		this.extensions = extensions;
+		this.servletMappings = servletMappings;
 	}
 
 	/**
@@ -232,7 +224,7 @@ public class HttpServletTask
 
 				// Create the HTTP Servlet Container
 				this.container = new HttpServletContainerImpl(this.servletName,
-						this.servletPath, this.servlet, this.initParameters,
+						this.servlet, this.initParameters,
 						officeServletContext, this.office, CLOCK, locale);
 			}
 		}
@@ -275,9 +267,12 @@ public class HttpServletTask
 				.getObject(DependencyKeys.HTTP_SESSION);
 		HttpSecurity security = (HttpSecurity) context
 				.getObject(DependencyKeys.HTTP_SECURITY);
+		ServicerMapping mapping = (ServicerMapping) context
+				.getObject(DependencyKeys.SERVICER_MAPPING);
 
 		// Service the request
-		container.service(connection, attributes, session, security, context);
+		container.service(connection, attributes, session, security, context,
+				mapping);
 
 		// Nothing to return
 		return null;
@@ -288,18 +283,13 @@ public class HttpServletTask
 	 */
 
 	@Override
-	public String getServletPath() {
-		return this.servletPath;
-	}
-
-	@Override
-	public String getServletName() {
+	public String getServicerName() {
 		return this.servletName;
 	}
 
 	@Override
-	public String[] getExtensions() {
-		return this.extensions;
+	public String[] getServicerMappings() {
+		return this.servletMappings;
 	}
 
 	@Override

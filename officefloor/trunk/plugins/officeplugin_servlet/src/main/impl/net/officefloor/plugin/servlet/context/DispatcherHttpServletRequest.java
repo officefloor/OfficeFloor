@@ -21,15 +21,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import net.officefloor.plugin.servlet.container.IteratorEnumeration;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 
 /**
  * {@link RequestDispatcher} {@link HttpServletRequest}.
@@ -39,9 +46,9 @@ import javax.servlet.http.HttpSession;
 public class DispatcherHttpServletRequest implements HttpServletRequest {
 
 	/**
-	 * Path.
+	 * {@link ServicerMapping}.
 	 */
-	private final String path;
+	private final ServicerMapping mapping;
 
 	/**
 	 * {@link HttpServletRequest}.
@@ -51,13 +58,14 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Initiate.
 	 * 
-	 * @param path
-	 *            Path to the {@link RequestDispatcher}.
+	 * @param mapping
+	 *            {@link ServicerMapping}.
 	 * @param delegate
 	 *            {@link HttpServletRequest}.
 	 */
-	public DispatcherHttpServletRequest(String path, HttpServletRequest delegate) {
-		this.path = path;
+	public DispatcherHttpServletRequest(ServicerMapping mapping,
+			HttpServletRequest delegate) {
+		this.mapping = mapping;
 		this.delegate = delegate;
 	}
 
@@ -67,17 +75,84 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServletPath() {
-		return ""; // Path Info is always full path
+		return this.mapping.getServicerPath();
 	}
 
 	@Override
 	public String getPathInfo() {
-		return this.path;
+		return this.mapping.getPathInfo();
 	}
 
 	@Override
 	public String getQueryString() {
-		return ""; // In Path Info
+		String queryString = this.mapping.getQueryString();
+		return (queryString == null ? this.delegate.getQueryString()
+				: queryString);
+	}
+
+	@Override
+	public String getParameter(String name) {
+		String value = this.mapping.getParameter(name);
+		return (value == null ? this.delegate.getParameter(name) : value);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Enumeration getParameterNames() {
+
+		// Create the set of names
+		Set<String> names = new HashSet<String>();
+
+		// Load the mapper names
+		Enumeration<String> mapperNames = this.mapping.getParameterNames();
+		while (mapperNames.hasMoreElements()) {
+			names.add(mapperNames.nextElement());
+		}
+
+		// Load the delegate names
+		Enumeration<String> delegateNames = this.delegate.getParameterNames();
+		while (delegateNames.hasMoreElements()) {
+			names.add(delegateNames.nextElement());
+		}
+
+		// Return the enumeration over names
+		return new IteratorEnumeration<String>(names.iterator());
+	}
+
+	@Override
+	public String[] getParameterValues(String name) {
+		String[] values = this.mapping.getParameterValues(name);
+		return (values == null ? this.delegate.getParameterValues(name)
+				: values);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map getParameterMap() {
+
+		// Create the map to be loaded
+		Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+
+		// Load the delegate first (to be overwritten by mapping)
+		parameterMap.putAll(this.delegate.getParameterMap());
+
+		// Override with mapping parameters
+		parameterMap.putAll(this.mapping.getParameterMap());
+
+		// Return unmodifiable parameter map
+		return Collections.unmodifiableMap(parameterMap);
+	}
+
+	@Override
+	public RequestDispatcher getRequestDispatcher(String path) {
+
+		// Determine path (absolute or relative)
+		String dispatcherPath = (path.startsWith("/") ? path : this.mapping
+				.getServicerPath()
+				+ "/" + path);
+
+		// Obtain and return the request dispatcher
+		return this.delegate.getRequestDispatcher(dispatcherPath);
 	}
 
 	/*
@@ -116,28 +191,6 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 	@Override
 	public int getContentLength() {
 		return this.delegate.getContentLength();
-	}
-
-	@Override
-	public String getParameter(String name) {
-		return this.delegate.getParameter(name);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Map getParameterMap() {
-		return this.delegate.getParameterMap();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Enumeration getParameterNames() {
-		return this.delegate.getParameterNames();
-	}
-
-	@Override
-	public String[] getParameterValues(String name) {
-		return this.delegate.getParameterValues(name);
 	}
 
 	@Override
@@ -328,11 +381,6 @@ public class DispatcherHttpServletRequest implements HttpServletRequest {
 	@Override
 	public int getRemotePort() {
 		return this.delegate.getRemotePort();
-	}
-
-	@Override
-	public RequestDispatcher getRequestDispatcher(String path) {
-		return this.delegate.getRequestDispatcher(path);
 	}
 
 	@Override

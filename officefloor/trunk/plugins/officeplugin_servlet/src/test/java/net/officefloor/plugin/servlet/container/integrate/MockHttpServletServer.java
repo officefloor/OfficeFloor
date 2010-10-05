@@ -23,9 +23,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
@@ -38,12 +35,15 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask;
 import net.officefloor.plugin.servlet.container.source.RequestAttributesManagedObjectSource;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
@@ -56,6 +56,9 @@ import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
 import net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 
 /**
  * <p>
@@ -186,6 +189,8 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		service
 				.setDifferentiator(servlet.getTaskTypes()[0]
 						.getDifferentiator());
+		service.linkParameter(DependencyKeys.SERVICER_MAPPING,
+				ServicerMapping.class);
 		service.linkManagedObject(DependencyKeys.OFFICE_SERVLET_CONTEXT,
 				servletContextName, OfficeServletContext.class);
 		service.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,
@@ -315,14 +320,38 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 						HTTP_SECURITY_SERVICE_NAME);
 
 		// Service authentication
-		this.constructTeam("of-HttpSecurity.AUTHENTICATOR",
-				OnePersonTeamSource.class);
+		final String TEAM_NAME = "of-HttpSecurity.AUTHENTICATOR";
+		this.constructTeam(TEAM_NAME, OnePersonTeamSource.class);
 
-		// Construct and return the HTTP Servlet task
+		// Construct the HTTP Servlet task
 		HttpServicerTask task = this.buildServlet(SERVLET_CONTEXT_NAME,
 				managedObjectName, REQUEST_ATTRIBUTES_NAME, HTTP_SESSION_NAME,
 				HTTP_SECURITY_NAME);
-		return task;
+
+		// Construct the invoker (due to parameter/argument difference)
+		HttpServicerTask invoker = new HttpServicerTask("INVOKER", "invoke");
+		this.constructWork(new Invoker(), invoker.workName, null).buildTask(
+				invoker.taskName, TEAM_NAME).buildFlow(task.workName,
+				task.taskName, FlowInstigationStrategyEnum.SEQUENTIAL, null);
+
+		// Return Invoker to invoke the HTTP Servlet
+		return invoker;
+	}
+
+	/**
+	 * Invoker.
+	 */
+	public static class Invoker {
+
+		/**
+		 * Invokes the flow.
+		 * 
+		 * @param flow
+		 *            Flow.
+		 */
+		public void invoke(ReflectiveFlow flow) {
+			flow.doFlow(null);
+		}
 	}
 
 }

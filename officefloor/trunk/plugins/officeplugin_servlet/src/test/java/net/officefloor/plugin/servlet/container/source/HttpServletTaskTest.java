@@ -20,9 +20,11 @@ package net.officefloor.plugin.servlet.container.source;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -36,6 +38,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -61,14 +64,15 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private static final String SERVLET_NAME = "ServletName";
 
 	/**
-	 * {@link HttpServlet} path.
+	 * {@link Servlet} path.
 	 */
 	private static final String SERVLET_PATH = "/servlet/path";
 
 	/**
-	 * Extensions for matching via {@link HttpServletDifferentiator}.
+	 * {@link HttpServlet} mappings.
 	 */
-	private static final String[] EXTENSIONS = new String[] { "html", "htm" };
+	private static final String[] SERVLET_MAPPINGS = new String[] {
+			SERVLET_PATH + "/*", "*.html", "*.htm" };
 
 	/**
 	 * {@link HttpServlet}.
@@ -120,6 +124,11 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private final HttpSession session = this.createMock(HttpSession.class);
 
 	/**
+	 * {@link ServicerMapping}.
+	 */
+	private ServicerMapping mapping = this.createMock(ServicerMapping.class);
+
+	/**
 	 * {@link HttpRequest}.
 	 */
 	private final HttpRequest request = this.createMock(HttpRequest.class);
@@ -138,7 +147,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Setup the work factory (and task factory)
 		HttpServletTask factory = new HttpServletTask(SERVLET_NAME,
-				SERVLET_PATH, this.servlet, this.initParameters, EXTENSIONS);
+				this.servlet, this.initParameters, SERVLET_MAPPINGS);
 		factory.setOffice(this.office);
 
 		// Create the task
@@ -187,6 +196,28 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can have no {@link ServicerMapping}.
+	 */
+	public void testServiceNoMapping() throws Throwable {
+
+		// No mapping
+		this.mapping = null;
+
+		// Record servicing (with no mapping)
+		this.record_service();
+
+		// Test
+		this.replayMockObjects();
+		this.task.doTask(this.taskContext);
+		this.verifyMockObjects();
+
+		// Ensure service is initialised only once in servicing
+		assertEquals("Should only be initialised once", 1,
+				this.servlet.initCount);
+		assertTrue("HttpServlet should service", this.servlet.isServiceInvoked);
+	}
+
+	/**
 	 * Ensure appropriately acts as a {@link HttpServletDifferentiator}.
 	 */
 	public void testHttpServletDifferentiator() throws Exception {
@@ -207,12 +238,10 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		HttpServletDifferentiator differentiator = this.task;
 
 		// Verify details
-		assertEquals("Incorrect servlet path", SERVLET_PATH, differentiator
-				.getServletPath());
-		assertEquals("Incorrect servlet name", SERVLET_NAME, differentiator
-				.getServletName());
-		assertEquals("Incorrect extensions", EXTENSIONS, differentiator
-				.getExtensions());
+		assertEquals("Incorrect servicer name", SERVLET_NAME, differentiator
+				.getServicerName());
+		String[] mappings = differentiator.getServicerMappings();
+		assertList(Arrays.asList(mappings), SERVLET_MAPPINGS);
 
 		// Test include
 		differentiator.include(this.officeServletContext, request, response);
@@ -244,6 +273,8 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 				.getObject(DependencyKeys.HTTP_SESSION), this.session);
 		this.recordReturn(this.taskContext, this.taskContext
 				.getObject(DependencyKeys.HTTP_SECURITY), this.security);
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.SERVICER_MAPPING), this.mapping);
 
 		// Load last access time
 		this.attributes.put("#HttpServlet.LastAccessTime#", new Long(10));
@@ -256,15 +287,21 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
 		this.recordReturn(this.request, this.request.getRequestURI(),
-				"http://www.officefloor.net");
+				CONTEXT_PATH + SERVLET_PATH);
 		this.recordReturn(this.request, this.request.getMethod(), "GET");
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getContextPath(this.office), CONTEXT_PATH);
 		this.recordReturn(this.response, this.response.getBody(), bufferStream);
 		this.recordReturn(bufferStream, bufferStream.getOutputStream(),
 				outputStream);
 
-		// Record obtain context path
+		// Record obtain context and servlet path in HTTP Servlet
 		this.recordReturn(this.officeServletContext, this.officeServletContext
 				.getContextPath(this.office), CONTEXT_PATH);
+		if (this.mapping != null) {
+			this.recordReturn(this.mapping, this.mapping.getServicerPath(),
+					SERVLET_PATH);
+		}
 	}
 
 	/**

@@ -41,6 +41,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletDifferentiator;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
 import net.officefloor.plugin.servlet.log.Logger;
+import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
@@ -189,18 +190,29 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServletPath(),
-				"/resource");
-		this
-				.recordReturn(differentiator, differentiator.getServletName(),
-						null);
-		this.recordReturn(differentiator, differentiator.getExtensions(), null);
+		this.recordReturn(differentiator, differentiator.getServicerName(),
+				null); // allow null servicer name
+		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+				new String[] { "/resource" });
 
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
 				forwarder);
+		this.recordReturn(differentiator, differentiator.getServicerName(),
+				"TEST"); // to ensure correct servicer
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
+		this.control(forwarder).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect work", expected[0], actual[0]);
+				assertEquals("Incorrect task", expected[1], actual[1]);
+				ServicerMapping mapping = (ServicerMapping) actual[2];
+				assertEquals("Incorrect mapping", "TEST", mapping.getServicer()
+						.getServicerName());
+				return true;
+			}
+		});
 
 		// Record including
 		differentiator.include(this.context, request, response);
@@ -209,7 +221,9 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertEquals("Incorrect context", expected[0], actual[0]);
 				HttpServletRequest request = (HttpServletRequest) actual[1];
-				assertEquals("Incorrect request", "/resource", request
+				assertEquals("Incorrect request (Servlet Path)", "/resource",
+						request.getServletPath());
+				assertNull("Incorrect request (Path Info)", request
 						.getPathInfo());
 				assertEquals("Incorrect response", expected[2], actual[2]);
 				return true;
@@ -283,23 +297,20 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				.getTaskManager("HTTP_SERVLET"), taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServletPath(),
-				"/resource");
-		this.recordReturn(differentiator, differentiator.getServletName(),
+		this.recordReturn(differentiator, differentiator.getServicerName(),
 				"NAME");
-		this.recordReturn(differentiator, differentiator.getExtensions(), null);
+		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+				new String[] { "/resource" });
 
 		// Record HTTP Servlet without a name
 		this.recordReturn(workManager, workManager.getTaskManager("NO_NAME"),
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServletPath(),
-				"/another");
-		this
-				.recordReturn(differentiator, differentiator.getServletName(),
-						null);
-		this.recordReturn(differentiator, differentiator.getExtensions(), null);
+		this.recordReturn(differentiator, differentiator.getServicerName(),
+				null);
+		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+				new String[] { "/another" });
 
 		// Record no differentiator
 		this.recordReturn(workManager, workManager.getTaskManager("NULL"),
@@ -312,11 +323,6 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				new Object());
 
-		// Record using Servlet Path for Named Dispatcher
-		final String SERVLET_PATH = "/servlet/path";
-		this.recordReturn(differentiator, differentiator.getServletPath(),
-				SERVLET_PATH);
-
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
@@ -324,14 +330,15 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		forwarder.forward("WORK", "HTTP_SERVLET", null);
 
 		// Record including
+		this.recordReturn(request, request.getServletPath(), "/servlet/path");
 		differentiator.include(this.context, request, response);
 		this.control(differentiator).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertEquals("Incorrect context", expected[0], actual[0]);
 				HttpServletRequest request = (HttpServletRequest) actual[1];
-				assertEquals("Incorrect request", SERVLET_PATH, request
-						.getPathInfo());
+				assertEquals("Incorrect request", "/servlet/path", request
+						.getServletPath());
 				assertEquals("Incorrect response", expected[2], actual[2]);
 				return true;
 			}
@@ -387,19 +394,29 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 				taskManager);
 		this.recordReturn(taskManager, taskManager.getDifferentiator(),
 				differentiator);
-		this.recordReturn(differentiator, differentiator.getServletPath(),
-				"/resource");
-		this
-				.recordReturn(differentiator, differentiator.getServletName(),
-						null);
-		this.recordReturn(differentiator, differentiator.getExtensions(),
-				new String[] { "JSP" });
+		this.recordReturn(differentiator, differentiator.getServicerName(),
+				null);
+		this.recordReturn(differentiator, differentiator.getServicerMappings(),
+				new String[] { "/resource", "*.JSP" });
 
 		// Record forwarding
 		this.recordReturn(request, request
 				.getAttribute(ServletRequestForwarder.ATTRIBUTE_FORWARDER),
 				forwarder);
+		this.recordReturn(differentiator, differentiator.getServicerName(),
+				"TEST"); // to ensure correct servicer
 		forwarder.forward(WORK_NAME, TASK_NAME, null);
+		this.control(forwarder).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect work", expected[0], actual[0]);
+				assertEquals("Incorrect task", expected[1], actual[1]);
+				ServicerMapping mapping = (ServicerMapping) actual[2];
+				assertEquals("Incorrect mapping", "TEST", mapping.getServicer()
+						.getServicerName());
+				return true;
+			}
+		});
 
 		// Record including
 		differentiator.include(this.context, request, response);
@@ -408,7 +425,9 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertEquals("Incorrect context", expected[0], actual[0]);
 				HttpServletRequest request = (HttpServletRequest) actual[1];
-				assertEquals("Incorrect request", "/extension.jsp", request
+				assertEquals("Incorrect request (Servlet Path)",
+						"/extension.jsp", request.getServletPath());
+				assertNull("Incorrect request (Path Info)", request
 						.getPathInfo());
 				assertEquals("Incorrect response", expected[2], actual[2]);
 				return true;

@@ -17,7 +17,11 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
+
+import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 
 /**
  * {@link ServicerMapping} implementation.
@@ -49,7 +53,7 @@ public class ServicerMappingImpl implements ServicerMapping {
 	/**
 	 * Parameters.
 	 */
-	private final Map<String, String> parameters;
+	private final Map<String, String[]> parameters;
 
 	/**
 	 * Initiate.
@@ -66,12 +70,13 @@ public class ServicerMappingImpl implements ServicerMapping {
 	 *            Parameters.
 	 */
 	public ServicerMappingImpl(Servicer servicer, String servicerPath,
-			String pathInfo, String queryString, Map<String, String> parameters) {
+			String pathInfo, String queryString,
+			Map<String, String[]> parameters) {
 		this.servicer = servicer;
 		this.servicerPath = servicerPath;
 		this.pathInfo = pathInfo;
 		this.queryString = queryString;
-		this.parameters = parameters;
+		this.parameters = Collections.unmodifiableMap(parameters);
 	}
 
 	/*
@@ -100,6 +105,29 @@ public class ServicerMappingImpl implements ServicerMapping {
 
 	@Override
 	public String getParameter(String name) {
+		String[] values = this.parameters.get(name);
+		if (values == null) {
+			// No value
+			return null;
+		} else {
+			// Return first value (if available)
+			return (values.length > 0 ? values[0] : null);
+		}
+	}
+
+	@Override
+	public Map<String, String[]> getParameterMap() {
+		return this.parameters;
+	}
+
+	@Override
+	public Enumeration<String> getParameterNames() {
+		return new IteratorEnumeration<String>(this.parameters.keySet()
+				.iterator());
+	}
+
+	@Override
+	public String[] getParameterValues(String name) {
 		return this.parameters.get(name);
 	}
 
