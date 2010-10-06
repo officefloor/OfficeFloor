@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,39 +208,6 @@ public class ServicerMapperImpl implements ServicerMapper {
 	@Override
 	public HttpServletServicer mapName(String name) {
 		return this.namedServicers.get(name);
-	}
-
-	@Override
-	public List<HttpServletServicer> mapAll(String path) {
-
-		// Create the listing of servicers
-		List<HttpServletServicer> servicers = new ArrayList<HttpServletServicer>(
-				3);
-
-		// Create mapping from path
-		Mapping mapping;
-		try {
-			mapping = new Mapping(path);
-		} catch (HttpRequestTokeniseException ex) {
-			// Failed tokenising path so no servicers
-			return servicers;
-		}
-
-		// Iterate over mappers to map path
-		for (int i = 0; i < this.mappers.length; i++) {
-
-			// Ensure mapper available for priority
-			Mapper mapper = this.mappers[i];
-			if (mapper == null) {
-				continue;
-			}
-
-			// Load all mapped servicers
-			mapper.mapAll(mapping, servicers);
-		}
-
-		// Return the listing of mapped servicers
-		return servicers;
 	}
 
 	/**

@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
-import java.util.List;
-
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
@@ -48,14 +46,5 @@ public interface ServicerMapper {
 	 *         {@link HttpServletServicer} by name.
 	 */
 	HttpServletServicer mapName(String name);
-
-	/**
-	 * Matches all {@link HttpServletServicer} instances for the path.
-	 * 
-	 * @param path
-	 *            Path for mapping.
-	 * @return All {@link HttpServletServicer} instances matching the path.
-	 */
-	List<HttpServletServicer> mapAll(String path);
 
 }
