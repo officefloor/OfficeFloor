@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.servlet.mapping;
 
-import java.util.List;
-
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 
 /**
@@ -37,8 +35,8 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	/**
 	 * {@link HttpServletServicer}.
 	 */
-	private final HttpServletServicer exactResource = new MockServicer("exactResource",
-			"/exact/resource.extension");
+	private final HttpServletServicer exactResource = new MockServicer(
+			"exactResource", "/exact/resource.extension");
 
 	/**
 	 * {@link HttpServletServicer}.
@@ -48,8 +46,8 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	/**
 	 * {@link HttpServletServicer}.
 	 */
-	private final HttpServletServicer pathLonger = new MockServicer("pathLonger",
-			"/path/longer/*");
+	private final HttpServletServicer pathLonger = new MockServicer(
+			"pathLonger", "/path/longer/*");
 
 	/**
 	 * {@link HttpServletServicer}.
@@ -176,48 +174,6 @@ public class ServicerMapperTest extends AbstractServicerMapperTestCase {
 	public void test_name_unknown() {
 		HttpServletServicer servicer = this.mapper.mapName("unknown");
 		assertNull("Should not map servicer for unknown name", servicer);
-	}
-
-	/**
-	 * Ensure can map to all {@link HttpServletServicer} instances.
-	 */
-	public void test_all_path() {
-		List<HttpServletServicer> servicers = this.mapper.mapAll("/path");
-		assertList(servicers, this.path);
-	}
-
-	/**
-	 * Ensure can map to all {@link HttpServletServicer} instances.
-	 */
-	public void test_all_path_longer() {
-		List<HttpServletServicer> servicers = this.mapper.mapAll("/path/longer");
-		assertList(servicers, this.path, this.pathLonger);
-	}
-
-	/**
-	 * Ensure can map to all {@link HttpServletServicer} instances.
-	 */
-	public void test_all_path_extension() {
-		List<HttpServletServicer> servicers = this.mapper
-				.mapAll("/path/longer/resource.extension");
-		assertList(servicers, this.path, this.pathLonger, this.extension);
-	}
-
-	/**
-	 * Ensure can map to all {@link HttpServletServicer} instances.
-	 */
-	public void test_all_exact_extension() {
-		List<HttpServletServicer> servicers = this.mapper
-				.mapAll("/exact/resource.extension");
-		assertList(servicers, this.exactResource, this.extension);
-	}
-
-	/**
-	 * Ensure get empty {@link List} for unknown path.
-	 */
-	public void test_all_unknown() {
-		List<HttpServletServicer> servicers = this.mapper.mapAll("/unknown");
-		assertList(servicers);
 	}
 
 }
