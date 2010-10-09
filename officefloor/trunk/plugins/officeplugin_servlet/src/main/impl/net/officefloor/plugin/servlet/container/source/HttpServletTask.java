@@ -215,7 +215,7 @@ public class HttpServletTask
 			OfficeServletContext officeServletContext) throws ServletException {
 
 		// Lazy load the HTTP Servlet Container
-		synchronized (CLOCK) {
+		synchronized (this) {
 			if (this.container == null) {
 
 				// TODO consider configuring the Locale
