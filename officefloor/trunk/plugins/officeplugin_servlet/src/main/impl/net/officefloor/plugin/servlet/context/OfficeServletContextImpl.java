@@ -27,8 +27,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.Filter;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -46,6 +48,10 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.filter.FilterChainFactoryImpl;
+import net.officefloor.plugin.servlet.filter.FilterServicer;
+import net.officefloor.plugin.servlet.filter.configuration.FilterServicersFactory;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 import net.officefloor.plugin.servlet.mapping.ServicerMapperImpl;
@@ -75,6 +81,11 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	private final Map<String, String> initParameters;
 
 	/**
+	 * {@link FilterServicer} instances.
+	 */
+	private final FilterServicer[] filterServicers;
+
+	/**
 	 * Mapping of file extension to MIME type.
 	 */
 	private final Map<String, String> fileExtensionToMimeType;
@@ -100,6 +111,11 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	private final Map<Office, OfficeContext> contexts = new HashMap<Office, OfficeContext>();
 
 	/**
+	 * {@link FilterChainFactory} instances by its {@link Office}.
+	 */
+	private final Map<Office, FilterChainFactory> filterChainFactories = new HashMap<Office, FilterChainFactory>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param serverName
@@ -118,18 +134,30 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 *            {@link ResourceLocator}.
 	 * @param logger
 	 *            {@link Logger}.
+	 * @param filterConfiguration
+	 *            {@link Filter} configuration.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @throws ServletException
+	 *             If fails to initialise.
 	 */
 	public OfficeServletContextImpl(String serverName, int serverPort,
 			String servletContextName, String contextPath,
 			Map<String, String> initParameters,
 			Map<String, String> fileExtensionToMimeType,
-			ResourceLocator resourceLocator, Logger logger) {
+			ResourceLocator resourceLocator, Logger logger,
+			Properties filterConfiguration, ClassLoader classLoader)
+			throws ServletException {
 		this.servletContextName = servletContextName;
 		this.initParameters = initParameters;
 		this.contextPath = contextPath;
 		this.fileExtensionToMimeType = fileExtensionToMimeType;
 		this.resourceLocator = resourceLocator;
 		this.logger = logger;
+
+		// Create the filter servicers from configuration
+		this.filterServicers = new FilterServicersFactory()
+				.createFilterServices(filterConfiguration, classLoader, this);
 
 		// Create the real path prefix
 		this.realPathPrefix = "http://" + serverName
@@ -143,56 +171,80 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 *            {@link Office}.
 	 * @return {@link OfficeContext} for the {@link Office}.
 	 */
-	private synchronized OfficeContext getOfficeContext(Office office) {
+	private OfficeContext getOfficeContext(Office office) {
+		synchronized (this.contexts) {
 
-		// Lazy create the office context
-		OfficeContext context = this.contexts.get(office);
-		if (context == null) {
+			// Lazy create the office context
+			OfficeContext context = this.contexts.get(office);
+			if (context == null) {
 
-			// Obtain the listing of servicers for the office
-			List<HttpServletServicer> servicers = new LinkedList<HttpServletServicer>();
-			try {
-				// Iterate over work of the Office
-				for (String workName : office.getWorkNames()) {
-					WorkManager work = office.getWorkManager(workName);
+				// Obtain the listing of servicers for the office
+				List<HttpServletServicer> servicers = new LinkedList<HttpServletServicer>();
+				try {
+					// Iterate over work of the Office
+					for (String workName : office.getWorkNames()) {
+						WorkManager work = office.getWorkManager(workName);
 
-					// Iterate over tasks of the Office
-					for (String taskName : work.getTaskNames()) {
-						TaskManager task = work.getTaskManager(taskName);
+						// Iterate over tasks of the Office
+						for (String taskName : work.getTaskNames()) {
+							TaskManager task = work.getTaskManager(taskName);
 
-						// Load task if Servicer
-						Object differentiator = task.getDifferentiator();
-						if (differentiator instanceof HttpServletServicer) {
-							HttpServletServicer httpServlet = (HttpServletServicer) differentiator;
+							// Load task if Servicer
+							Object differentiator = task.getDifferentiator();
+							if (differentiator instanceof HttpServletServicer) {
+								HttpServletServicer httpServlet = (HttpServletServicer) differentiator;
 
-							// Wrap servicer for Office details
-							HttpServletServicer servicer = new OfficeServicer(
-									workName, taskName, httpServlet);
+								// Wrap servicer for Office details
+								HttpServletServicer servicer = new OfficeServicer(
+										workName, taskName, httpServlet);
 
-							// Register the servicer
-							servicers.add(servicer);
+								// Register the servicer
+								servicers.add(servicer);
+							}
 						}
 					}
+				} catch (Exception ex) {
+					// Failed loading but carry on
 				}
-			} catch (Exception ex) {
-				// Failed loading but carry on
+
+				// Create the context for the office
+				context = new OfficeContext(servicers
+						.toArray(new HttpServletServicer[0]));
+
+				// Register the context against the office
+				this.contexts.put(office, context);
 			}
 
-			// Create the context for the office
-			context = new OfficeContext(servicers
-					.toArray(new HttpServletServicer[0]));
-
-			// Register the context against the office
-			this.contexts.put(office, context);
+			// Return the context
+			return context;
 		}
-
-		// Return the context
-		return context;
 	}
 
 	/*
 	 * ====================== OfficeServletContext ======================
 	 */
+
+	@Override
+	public FilterChainFactory getFilterChainFactory(Office office)
+			throws ServletException {
+		synchronized (this.filterChainFactories) {
+
+			// Lazy create the filter chain factory
+			FilterChainFactory factory = this.filterChainFactories.get(office);
+			if (factory == null) {
+
+				// Construct the filter chain factory
+				factory = new FilterChainFactoryImpl(office,
+						this.filterServicers);
+
+				// Register the filter chain factory
+				this.filterChainFactories.put(office, factory);
+			}
+
+			// Return the filter chain factory
+			return factory;
+		}
+	}
 
 	@Override
 	public String getContextPath(Office office) {
@@ -390,11 +442,11 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		/**
 		 * Initiate.
 		 * 
-		 * @param servicers
+		 * @param servletServicers
 		 *            {@link HttpServletServicer} instances.
 		 */
-		public OfficeContext(HttpServletServicer[] servicers) {
-			this.mapper = new ServicerMapperImpl(servicers);
+		public OfficeContext(HttpServletServicer[] servletServicers) {
+			this.mapper = new ServicerMapperImpl(servletServicers);
 		}
 	}
 

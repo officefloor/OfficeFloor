@@ -102,7 +102,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 		this.clock = clock;
 		this.defaultLocale = defaultLocale;
 
-		// Initate the servlet context
+		// Initiate the servlet context
 		this.servletContext = new ServletContextImpl(officeServletContext,
 				office);
 

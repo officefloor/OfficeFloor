@@ -21,7 +21,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 
 /**
@@ -33,11 +32,6 @@ import net.officefloor.plugin.servlet.mapping.MappingType;
 public class CombinationChainTest extends AbstractFilterChainFactoryTestCase {
 
 	/**
-	 * {@link Office}.
-	 */
-	private final Office office = this.createMock(Office.class);
-
-	/**
 	 * Ensure appropriate ordering for combination (filter mapping before
 	 * {@link Servlet} name).
 	 */
@@ -46,10 +40,9 @@ public class CombinationChainTest extends AbstractFilterChainFactoryTestCase {
 		final String SERVLET_NAME = "Servlet Name";
 		this.addServicer("FilterServlet", null, SERVLET_NAME);
 		this.addServicer("FilterPath", PATH, null);
-		this.record_init(this.office, "FilterServlet", "FilterPath");
-		this.record_doFilter(this.office, "FilterPath", "FilterServlet");
-		this.doFilter(this.office, PATH, null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("FilterServlet", "FilterPath");
+		this.record_doFilter("FilterPath", "FilterServlet");
+		this.doFilter(PATH, null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 	/**
@@ -61,10 +54,9 @@ public class CombinationChainTest extends AbstractFilterChainFactoryTestCase {
 		final FilterContainerFactory factory = this.createFactory("Filter");
 		this.addServicer(factory, null, SERVLET_NAME);
 		this.addServicer(factory, PATH, null);
-		this.record_init(this.office, "Filter");
-		this.record_doFilter(this.office, "Filter");
-		this.doFilter(this.office, PATH, null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("Filter");
+		this.record_doFilter("Filter");
+		this.doFilter(PATH, null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 }

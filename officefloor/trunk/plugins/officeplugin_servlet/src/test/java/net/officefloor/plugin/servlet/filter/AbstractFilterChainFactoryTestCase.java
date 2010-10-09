@@ -73,6 +73,11 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 			.createMock(OfficeServletContext.class);
 
 	/**
+	 * {@link Office}.
+	 */
+	private final Office office = this.createMock(Office.class);
+
+	/**
 	 * {@link FilterServicer} instances.
 	 */
 	private final List<FilterServicer> services = new LinkedList<FilterServicer>();
@@ -93,8 +98,6 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 	 *            Mapped path info.
 	 * @param mappingType
 	 *            {@link MappingType} being undertaken.
-	 * @param office
-	 *            {@link Office}.
 	 * @param filterMapping
 	 *            {@link Filter} mapping.
 	 * @param servletName
@@ -104,21 +107,19 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 	 */
 	protected void doSingleFilterTest(String mappedServletName,
 			String mappedServletPath, String mappedPathInfo,
-			MappingType mappingType, Office office, String filterMapping,
-			String servletName, MappingType... mappingTypes) {
+			MappingType mappingType, String filterMapping, String servletName,
+			MappingType... mappingTypes) {
 		final String FILTER_NAME = "SingleFilter";
 		this.addServicer(FILTER_NAME, filterMapping, servletName, mappingTypes);
-		this.record_init(office, FILTER_NAME);
-		this.record_doFilter(office, FILTER_NAME);
-		this.doFilter(office, mappedServletPath, mappedPathInfo, mappingType,
+		this.record_init(FILTER_NAME);
+		this.record_doFilter(FILTER_NAME);
+		this.doFilter(mappedServletPath, mappedPathInfo, mappingType,
 				mappedServletName);
 	}
 
 	/**
 	 * Undertakes the filtering with the {@link FilterChainFactory}.
 	 * 
-	 * @param office
-	 *            {@link Office} context.
 	 * @param servletPath
 	 *            {@link Servlet} path.
 	 * @param pathInfo
@@ -128,15 +129,15 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 	 * @param servletName
 	 *            {@link Servlet} name.
 	 */
-	protected void doFilter(Office office, String servletPath, String pathInfo,
+	protected void doFilter(String servletPath, String pathInfo,
 			MappingType mappingType, String servletName) {
 		try {
 
 			// Ensure construct factory and set for replay
 			if (this.factory == null) {
 				this.replayMockObjects();
-				this.factory = new FilterChainFactoryImpl(this.services
-						.toArray(new FilterServicer[0]));
+				this.factory = new FilterChainFactoryImpl(this.office,
+						this.services.toArray(new FilterServicer[0]));
 			}
 
 			// Create the servicer mapping
@@ -152,7 +153,7 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 			}
 
 			// Construct the filter chain
-			FilterChain chain = this.factory.createFilterChain(office, mapping,
+			FilterChain chain = this.factory.createFilterChain(mapping,
 					mappingType, this.target);
 			assertNotNull("Expecting filter chain for " + mappingType + ":"
 					+ servletName + "@" + servletPath
@@ -179,18 +180,16 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 	/**
 	 * Records instantiating new {@link Filter} instances by the name.
 	 * 
-	 * @param office
-	 *            {@link Office} containing the {@link Filter}.
 	 * @param filterNames
 	 *            {@link Filter} names in the order of initialisation.
 	 */
-	protected void record_init(Office office, String... filterNames) {
+	protected void record_init(String... filterNames) {
 		// Initialising triggers below recording
 		for (String filterName : filterNames) {
 
 			// Record obtaining filter name
 			this.recordReturn(this.officeServletContext,
-					this.officeServletContext.getInitParameter(office,
+					this.officeServletContext.getInitParameter(this.office,
 							filterName), "init parameter");
 		}
 	}
@@ -198,19 +197,17 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 	/**
 	 * Records undertaking the filtering.
 	 * 
-	 * @param office
-	 *            {@link Office} containing the {@link Filter}.
 	 * @param filterNames
 	 *            {@link Filter} names in the order of filtering.
 	 */
-	protected void record_doFilter(Office office, String... filterNames) {
+	protected void record_doFilter(String... filterNames) {
 		try {
 			// Filtering triggers below recording
 			for (String filterName : filterNames) {
 				this.recordReturn(this.request, this.request
 						.getAttribute(filterName), "request attribute");
 				this.recordReturn(this.officeServletContext,
-						this.officeServletContext.getAttribute(office,
+						this.officeServletContext.getAttribute(this.office,
 								filterName), "context attribute");
 			}
 

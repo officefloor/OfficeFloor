@@ -17,9 +17,7 @@
  */
 package net.officefloor.plugin.servlet.filter;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -44,25 +42,174 @@ public class FilterChainFactoryImpl implements FilterChainFactory {
 	private static final String WILD_CARD = "*";
 
 	/**
-	 * {@link FilterServicer} instances.
+	 * Default {@link MappingType} instances.
 	 */
-	private final FilterServicer[] servicers;
+	private static final MappingType[] DEFAULT_MAPPING_TYPES = new MappingType[] { MappingType.REQUEST };
 
 	/**
-	 * {@link OfficeFilterChainFactory} instances by their {@link Office}.
-	 * Typically in most cases should be servicing only a single {@link Office}.
+	 * Listing of {@link Filter} mapping {@link FilterOption} by
+	 * {@link MappingType} ordinal.
 	 */
-	private final Map<Office, OfficeFilterChainFactory> factories = new HashMap<Office, OfficeFilterChainFactory>(
-			1);
+	private final FilterOption[][] filterMappingsByMappingType = new FilterOption[MappingType
+			.values().length][];
+
+	/**
+	 * Listing of {@link Servlet} name {@link FilterOption} by
+	 * {@link MappingType} ordinal.
+	 */
+	private final FilterOption[][] servletNamesByMappingType = new FilterOption[MappingType
+			.values().length][];
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param office
+	 *            {@link Office}.
 	 * @param servicers
 	 *            {@link FilterServicer} instances.
+	 * @throws ServletException
+	 *             If fails to initiate.
 	 */
-	public FilterChainFactoryImpl(FilterServicer... servicers) {
-		this.servicers = servicers;
+	public FilterChainFactoryImpl(Office office, FilterServicer... servicers)
+			throws ServletException {
+
+		// Load the filter options
+		for (FilterServicer servicer : servicers) {
+
+			// Create the filter container
+			FilterContainer filter = servicer.getFilterContainerFactory()
+					.createFilterContainer(office);
+
+			// Load servlet name option (if available)
+			String servletName = servicer.getServletName();
+			if (servletName != null) {
+				FilterOption option = new ServletNameFilterOption(filter,
+						servletName);
+				this.loadFilterOption(option, servicer,
+						this.servletNamesByMappingType);
+			}
+
+			// Load the filter mapping option (if available)
+			String filterMapping = servicer.getFilterMapping();
+			if (filterMapping != null) {
+
+				// Create the filter option
+				FilterOption option;
+				if (filterMapping.endsWith(WILD_CARD)) {
+					// Path prefix mapping
+					String pathPrefix = filterMapping.substring(0,
+							filterMapping.length() - WILD_CARD.length());
+					option = new PathPrefixFilterOption(filter, pathPrefix);
+
+				} else if (filterMapping.startsWith(WILD_CARD)) {
+					// Extension mapping
+					String extension = filterMapping.substring(WILD_CARD
+							.length());
+					option = new ExtensionFilterOption(filter, extension);
+
+				} else {
+					// Exact path mapping
+					option = new ExactPathFilterOption(filter, filterMapping);
+				}
+
+				// Load the filter option
+				this.loadFilterOption(option, servicer,
+						this.filterMappingsByMappingType);
+			}
+		}
+	}
+
+	/**
+	 * Loads the {@link FilterOption} for the {@link MappingType} instances into
+	 * the {@link FilterOption} listings.
+	 * 
+	 * @param option
+	 *            {@link FilterOption} to load.
+	 * @param servicer
+	 *            {@link FilterServicer} to provide {@link MappingType}
+	 *            instances.
+	 * @param options
+	 *            {@link FilterOption} listing.
+	 */
+	private void loadFilterOption(FilterOption option, FilterServicer servicer,
+			FilterOption[][] options) {
+
+		// Obtain the mapping types
+		MappingType[] mappingTypes = servicer.getMappingTypes();
+		if ((mappingTypes == null) || (mappingTypes.length == 0)) {
+			mappingTypes = DEFAULT_MAPPING_TYPES;
+		}
+
+		// Iterate over mapping types loading the options
+		for (MappingType mappingType : mappingTypes) {
+
+			// Obtain the options for the mapping type
+			int mappingTypeIndex = mappingType.ordinal();
+			FilterOption[] mappingOptions = options[mappingTypeIndex];
+
+			// Determine if first option
+			if (mappingOptions == null) {
+				// First option, so just add option
+				mappingOptions = new FilterOption[] { option };
+			} else {
+				// Append the option
+				FilterOption[] tmp = new FilterOption[mappingOptions.length + 1];
+				System.arraycopy(mappingOptions, 0, tmp, 0,
+						mappingOptions.length);
+				tmp[mappingOptions.length] = option;
+				mappingOptions = tmp;
+			}
+
+			// Load updated mapping options back to options
+			options[mappingTypeIndex] = mappingOptions;
+		}
+	}
+
+	/**
+	 * Creates the {@link FilterChain}.
+	 * 
+	 * @param path
+	 *            Path for {@link Filter} mappings.
+	 * @param servletName
+	 *            {@link Servlet} name for matching.
+	 * @param options
+	 *            {@link FilterOption} instances.
+	 * @param target
+	 *            {@link FilterChain} target.
+	 * @param containersUsed
+	 *            Set of {@link FilterContainer} instances already used within
+	 *            {@link FilterChain} to not use again.
+	 * @return {@link FilterChain} to the {@link FilterChain} target.
+	 */
+	private FilterChain createFilterChain(String path, String servletName,
+			FilterOption[] options, FilterChain target,
+			Set<FilterContainer> containersUsed) {
+
+		// Determine if have options
+		if (options == null) {
+			// No options, so no chain to target
+			return target;
+		}
+
+		// Load the options in reverse order (so start is first in chain)
+		for (int i = (options.length - 1); i >= 0; i--) {
+			FilterOption option = options[i];
+
+			// Determine if include option
+			if (option.isInclude(path, servletName)) {
+				// Determine if include container
+				if (!containersUsed.contains(option.filter)) {
+					// Include the option in the filter chain
+					target = new FilterChainImpl(option.filter, target);
+
+					// Container used
+					containersUsed.add(option.filter);
+				}
+			}
+		}
+
+		// Return the filter chain
+		return target;
 	}
 
 	/*
@@ -70,243 +217,34 @@ public class FilterChainFactoryImpl implements FilterChainFactory {
 	 */
 
 	@Override
-	public FilterChain createFilterChain(Office office,
-			ServicerMapping mapping, MappingType mappingType, FilterChain target)
+	public FilterChain createFilterChain(ServicerMapping mapping,
+			MappingType mappingType, FilterChain target)
 			throws ServletException {
 
-		// Lazily obtain the factory for the office
-		OfficeFilterChainFactory factory;
-		synchronized (this) {
-			factory = this.factories.get(office);
-			if (factory == null) {
-				factory = new OfficeFilterChainFactory(office, this.servicers);
-			}
+		// Obtain details for filter chain
+		String path = mapping.getServletPath();
+		String pathInfo = mapping.getPathInfo();
+		if (pathInfo != null) {
+			path = path + pathInfo;
 		}
+		String servletName = mapping.getServicer().getServletName();
 
-		// Use factory to construct the filter chain
-		FilterChain chain = factory.createFilterChain(mapping, mappingType,
-				target);
+		// Create the set of containers to only filter once
+		Set<FilterContainer> containersUsed = new HashSet<FilterContainer>();
+
+		// Load servlet name options into chain first (last to filter)
+		FilterOption[] options = this.servletNamesByMappingType[mappingType
+				.ordinal()];
+		target = this.createFilterChain(path, servletName, options, target,
+				containersUsed);
+
+		// Load filter mapping options into chain last (first to filter)
+		options = this.filterMappingsByMappingType[mappingType.ordinal()];
+		target = this.createFilterChain(path, servletName, options, target,
+				containersUsed);
 
 		// Return the filter chain
-		return chain;
-	}
-
-	/**
-	 * {@link FilterChainFactory} for a particular {@link Office}.
-	 */
-	private static class OfficeFilterChainFactory {
-
-		/**
-		 * Default {@link MappingType} instances.
-		 */
-		private static final MappingType[] DEFAULT_MAPPING_TYPES = new MappingType[] { MappingType.REQUEST };
-
-		/**
-		 * Listing of {@link Filter} mapping {@link FilterOption} by
-		 * {@link MappingType} ordinal.
-		 */
-		private final FilterOption[][] filterMappingsByMappingType = new FilterOption[MappingType
-				.values().length][];
-
-		/**
-		 * Listing of {@link Servlet} name {@link FilterOption} by
-		 * {@link MappingType} ordinal.
-		 */
-		private final FilterOption[][] servletNamesByMappingType = new FilterOption[MappingType
-				.values().length][];
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param office
-		 *            {@link Office}.
-		 * @param servicers
-		 *            {@link FilterServicer} instances.
-		 * @throws ServletException
-		 *             If fails to initialise.
-		 */
-		public OfficeFilterChainFactory(Office office,
-				FilterServicer[] servicers) throws ServletException {
-
-			// Load the filter options
-			for (FilterServicer servicer : servicers) {
-
-				// Create the filter container
-				FilterContainer filter = servicer.getFilterContainerFactory()
-						.createFilterContainer(office);
-
-				// Load servlet name option (if available)
-				String servletName = servicer.getServletName();
-				if (servletName != null) {
-					FilterOption option = new ServletNameFilterOption(filter,
-							servletName);
-					this.loadFilterOption(option, servicer,
-							this.servletNamesByMappingType);
-				}
-
-				// Load the filter mapping option (if available)
-				String filterMapping = servicer.getFilterMapping();
-				if (filterMapping != null) {
-
-					// Create the filter option
-					FilterOption option;
-					if (filterMapping.endsWith(WILD_CARD)) {
-						// Path prefix mapping
-						String pathPrefix = filterMapping.substring(0,
-								filterMapping.length() - WILD_CARD.length());
-						option = new PathPrefixFilterOption(filter, pathPrefix);
-
-					} else if (filterMapping.startsWith(WILD_CARD)) {
-						// Extension mapping
-						String extension = filterMapping.substring(WILD_CARD
-								.length());
-						option = new ExtensionFilterOption(filter, extension);
-
-					} else {
-						// Exact path mapping
-						option = new ExactPathFilterOption(filter,
-								filterMapping);
-					}
-
-					// Load the filter option
-					this.loadFilterOption(option, servicer,
-							this.filterMappingsByMappingType);
-				}
-			}
-		}
-
-		/**
-		 * Loads the {@link FilterOption} for the {@link MappingType} instances
-		 * into the {@link FilterOption} listings.
-		 * 
-		 * @param option
-		 *            {@link FilterOption} to load.
-		 * @param servicer
-		 *            {@link FilterServicer} to provide {@link MappingType}
-		 *            instances.
-		 * @param options
-		 *            {@link FilterOption} listing.
-		 */
-		private void loadFilterOption(FilterOption option,
-				FilterServicer servicer, FilterOption[][] options) {
-
-			// Obtain the mapping types
-			MappingType[] mappingTypes = servicer.getMappingTypes();
-			if ((mappingTypes == null) || (mappingTypes.length == 0)) {
-				mappingTypes = DEFAULT_MAPPING_TYPES;
-			}
-
-			// Iterate over mapping types loading the options
-			for (MappingType mappingType : mappingTypes) {
-
-				// Obtain the options for the mapping type
-				int mappingTypeIndex = mappingType.ordinal();
-				FilterOption[] mappingOptions = options[mappingTypeIndex];
-
-				// Determine if first option
-				if (mappingOptions == null) {
-					// First option, so just add option
-					mappingOptions = new FilterOption[] { option };
-				} else {
-					// Append the option
-					FilterOption[] tmp = new FilterOption[mappingOptions.length + 1];
-					System.arraycopy(mappingOptions, 0, tmp, 0,
-							mappingOptions.length);
-					tmp[mappingOptions.length] = option;
-					mappingOptions = tmp;
-				}
-
-				// Load updated mapping options back to options
-				options[mappingTypeIndex] = mappingOptions;
-			}
-		}
-
-		/**
-		 * Creates the {@link FilterChain}.
-		 * 
-		 * @param mapping
-		 *            {@link ServicerMapping}.
-		 * @param mappingType
-		 *            {@link MappingType}.
-		 * @param target
-		 *            {@link FilterChain} target.
-		 * @return {@link FilterChain}.
-		 */
-		public FilterChain createFilterChain(ServicerMapping mapping,
-				MappingType mappingType, FilterChain target) {
-
-			// Obtain details for filter chain
-			String path = mapping.getServletPath();
-			String pathInfo = mapping.getPathInfo();
-			if (pathInfo != null) {
-				path = path + pathInfo;
-			}
-			String servletName = mapping.getServicer().getServletName();
-
-			// Create the set of containers to only filter once
-			Set<FilterContainer> containersUsed = new HashSet<FilterContainer>();
-
-			// Load servlet name options into chain first (last to filter)
-			FilterOption[] options = this.servletNamesByMappingType[mappingType
-					.ordinal()];
-			target = this.createFilterChain(path, servletName, options, target,
-					containersUsed);
-
-			// Load filter mapping options into chain last (first to filter)
-			options = this.filterMappingsByMappingType[mappingType.ordinal()];
-			target = this.createFilterChain(path, servletName, options, target,
-					containersUsed);
-
-			// Return the filter chain
-			return target;
-		}
-
-		/**
-		 * Creates the {@link FilterChain}.
-		 * 
-		 * @param path
-		 *            Path for {@link Filter} mappings.
-		 * @param servletName
-		 *            {@link Servlet} name for matching.
-		 * @param options
-		 *            {@link FilterOption} instances.
-		 * @param target
-		 *            {@link FilterChain} target.
-		 * @param containersUsed
-		 *            Set of {@link FilterContainer} instances already used
-		 *            within {@link FilterChain} to not use again.
-		 * @return {@link FilterChain} to the {@link FilterChain} target.
-		 */
-		private FilterChain createFilterChain(String path, String servletName,
-				FilterOption[] options, FilterChain target,
-				Set<FilterContainer> containersUsed) {
-
-			// Determine if have options
-			if (options == null) {
-				// No options, so no chain to target
-				return target;
-			}
-
-			// Load the options in reverse order (so start is first in chain)
-			for (int i = (options.length - 1); i >= 0; i--) {
-				FilterOption option = options[i];
-
-				// Determine if include option
-				if (option.isInclude(path, servletName)) {
-					// Determine if include container
-					if (!containersUsed.contains(option.filter)) {
-						// Include the option in the filter chain
-						target = new FilterChainImpl(option.filter, target);
-
-						// Container used
-						containersUsed.add(option.filter);
-					}
-				}
-			}
-
-			// Return the filter chain
-			return target;
-		}
+		return target;
 	}
 
 	/**

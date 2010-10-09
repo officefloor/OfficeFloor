@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 import net.officefloor.frame.api.build.None;
@@ -32,8 +34,10 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.OfficeServletContextImpl;
+import net.officefloor.plugin.servlet.filter.configuration.FilterMapping;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.log.StdoutLogger;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.resource.FileSystemResourceLocator;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
@@ -79,6 +83,41 @@ public class OfficeServletContextManagedObjectSource extends
 	 * Property name to specify the resource path root.
 	 */
 	public static final String PROPERTY_RESOURCE_PATH_ROOT = "resource.path.root";
+
+	/**
+	 * Prefix on property name to obtain the {@link Filter} name and its
+	 * corresponding {@link Filter} {@link Class} name.
+	 */
+	public static final String PROPERTY_FILTER_INSTANCE_NAME_PREFIX = "filter.instance.name.";
+
+	/**
+	 * Prefix on property name to obtain Init Parameter name and its
+	 * corresponding value.
+	 */
+	public static final String PROPERTY_FILTER_INSTANCE_INIT_PREFIX = "filter.instance.init.";
+
+	/**
+	 * Prefix on property name to obtain the {@link FilterMapping} index and its
+	 * corresponding {@link Filter} name.
+	 */
+	public static final String PROPERTY_FILTER_MAPPING_INDEX_PREFIX = "filter.mapping.index.";
+
+	/**
+	 * Prefix on property name to obtain the {@link FilterMapping} URL pattern.
+	 */
+	public static final String PROPERTY_FILTER_MAPPING_URL_PREFIX = "filter.mapping.url.";
+
+	/**
+	 * Prefix on property name to obtain the {@link FilterMapping}
+	 * {@link Servlet} name.
+	 */
+	public static final String PROPERTY_FILTER_MAPPING_SERVLET_PREFIX = "filter.mapping.servlet.";
+
+	/**
+	 * Prefix on property name to obtain the {@link FilterMapping}
+	 * {@link MappingType}.
+	 */
+	public static final String PROPERTY_FILTER_MAPPING_TYPE_PREFIX = "filter.mapping.type.";
 
 	/**
 	 * {@link OfficeServletContext}.
@@ -180,10 +219,15 @@ public class OfficeServletContextManagedObjectSource extends
 		// Create the logger
 		Logger logger = new StdoutLogger();
 
+		// Obtain the filter configurations
+		Properties properties = mosContext.getProperties();
+		ClassLoader classLoader = mosContext.getClassLoader();
+
 		// Create the office servlet context instance
 		this.officeServletContext = new OfficeServletContextImpl(serverName,
 				serverPort, servletContextName, contextPath, initParameters,
-				fileExtensionToMimeType, resourceLocator, logger);
+				fileExtensionToMimeType, resourceLocator, logger, properties,
+				classLoader);
 
 		// Specify the meta-data
 		context.setManagedObjectClass(this.getClass());
