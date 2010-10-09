@@ -28,6 +28,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 
@@ -71,7 +72,8 @@ public class FilterChainFactoryImpl implements FilterChainFactory {
 
 	@Override
 	public FilterChain createFilterChain(Office office,
-			ServicerMapping mapping, MappingType mappingType, FilterChain target)
+			ServicerMapping mapping, MappingType mappingType,
+			FilterChain target, OfficeServletContext officeServletContext)
 			throws ServletException {
 
 		// Lazily obtain the factory for the office
@@ -79,7 +81,8 @@ public class FilterChainFactoryImpl implements FilterChainFactory {
 		synchronized (this) {
 			factory = this.factories.get(office);
 			if (factory == null) {
-				factory = new OfficeFilterChainFactory(office, this.servicers);
+				factory = new OfficeFilterChainFactory(office, this.servicers,
+						officeServletContext);
 			}
 		}
 
@@ -122,18 +125,22 @@ public class FilterChainFactoryImpl implements FilterChainFactory {
 		 *            {@link Office}.
 		 * @param servicers
 		 *            {@link FilterServicer} instances.
+		 * @param officeServletContext
+		 *            {@link OfficeServletContext}.
 		 * @throws ServletException
 		 *             If fails to initialise.
 		 */
 		public OfficeFilterChainFactory(Office office,
-				FilterServicer[] servicers) throws ServletException {
+				FilterServicer[] servicers,
+				OfficeServletContext officeServletContext)
+				throws ServletException {
 
 			// Load the filter options
 			for (FilterServicer servicer : servicers) {
 
 				// Create the filter container
 				FilterContainer filter = servicer.getFilterContainerFactory()
-						.createFilterContainer(office);
+						.createFilterContainer(office, officeServletContext);
 
 				// Load servlet name option (if available)
 				String servletName = servicer.getServletName();
