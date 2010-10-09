@@ -19,12 +19,9 @@ package net.officefloor.plugin.servlet.filter;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.plugin.servlet.container.HttpServletContainer;
-import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 
@@ -51,17 +48,12 @@ public interface FilterChainFactory {
 	 *            {@link MappingType}.
 	 * @param target
 	 *            Target as last node in constructed the {@link FilterChain}.
-	 * @param officeServletContext
-	 *            {@link OfficeServletContext}. Typical implementation will have
-	 *            this provided from the {@link HttpServletContainer} so that
-	 *            filtering will be using the same {@link OfficeServletContext}
-	 *            as {@link Servlet} execution.
 	 * @return {@link FilterChain}.
 	 * @throws ServletException
 	 *             If fails to create {@link FilterChain}.
 	 */
 	FilterChain createFilterChain(Office office, ServicerMapping mapping,
-			MappingType mappingType, FilterChain target,
-			OfficeServletContext officeServletContext) throws ServletException;
+			MappingType mappingType, FilterChain target)
+			throws ServletException;
 
 }

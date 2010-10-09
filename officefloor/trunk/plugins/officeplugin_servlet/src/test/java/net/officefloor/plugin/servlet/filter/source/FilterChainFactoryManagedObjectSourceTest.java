@@ -36,7 +36,7 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
-import net.officefloor.plugin.servlet.filter.source.FilterChainFactoryManagedObjectSource;
+import net.officefloor.plugin.servlet.filter.source.FilterChainFactoryManagedObjectSource.DependencyKeys;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 
@@ -111,6 +111,8 @@ public class FilterChainFactoryManagedObjectSourceTest extends
 
 		// Source the filter chain factory
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(DependencyKeys.OFFICE_SERVLET_CONTEXT,
+				officeServletContext);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		Object object = managedObject.getObject();
 		assertTrue("Should be FilterChainFactory",
@@ -119,7 +121,7 @@ public class FilterChainFactoryManagedObjectSourceTest extends
 
 		// Ensure runs filter
 		FilterChain chain = factory.createFilterChain(office, mapping,
-				MappingType.REQUEST, target, officeServletContext);
+				MappingType.REQUEST, target);
 		chain.doFilter(request, response);
 
 		// Verify
