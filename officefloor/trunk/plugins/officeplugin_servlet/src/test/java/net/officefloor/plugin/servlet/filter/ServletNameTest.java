@@ -20,7 +20,6 @@ package net.officefloor.plugin.servlet.filter;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 
 /**
@@ -31,17 +30,11 @@ import net.officefloor.plugin.servlet.mapping.MappingType;
 public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 
 	/**
-	 * {@link Office}.
-	 */
-	private final Office office = this.createMock(Office.class);
-
-	/**
 	 * Ensure no filtering on no {@link Filter} instances.
 	 */
 	public void testNoFiltering() {
-		this.record_doFilter(this.office);
-		this.doFilter(this.office, "/not/matched", null, MappingType.REQUEST,
-				"NotMatched");
+		this.record_doFilter();
+		this.doFilter("/not/matched", null, MappingType.REQUEST, "NotMatched");
 	}
 
 	/**
@@ -49,9 +42,9 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 	 */
 	public void testNoMatch() {
 		this.addServicer("Filter", null, "Different Servlet Name");
-		this.record_init(this.office, "Filter");
-		this.record_doFilter(this.office);
-		this.doFilter(this.office, "/not/matched", null, MappingType.REQUEST,
+		this.record_init("Filter");
+		this.record_doFilter();
+		this.doFilter("/not/matched", null, MappingType.REQUEST,
 				"No Servlet Name Match");
 	}
 
@@ -60,7 +53,7 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 	 */
 	public void testSingleServletNameMatch() {
 		this.doSingleFilterTest("Servlet", "/ignored", null,
-				MappingType.REQUEST, this.office, null, "Servlet");
+				MappingType.REQUEST, null, "Servlet");
 	}
 
 	/**
@@ -70,10 +63,9 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 		final String SERVLET_NAME = "Servlet Name";
 		this.addServicer("FilterOne", null, SERVLET_NAME);
 		this.addServicer("FilterTwo", null, SERVLET_NAME);
-		this.record_init(this.office, "FilterOne", "FilterTwo");
-		this.record_doFilter(this.office, "FilterOne", "FilterTwo");
-		this.doFilter(this.office, "/not/matched", null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("FilterOne", "FilterTwo");
+		this.record_doFilter("FilterOne", "FilterTwo");
+		this.doFilter("/not/matched", null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 	/**
@@ -84,10 +76,9 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 		this.addServicer("FilterOne", null, SERVLET_NAME);
 		this.addServicer("FilterTwo", null, "Another Servlet");
 		this.addServicer("FilterThree", null, SERVLET_NAME);
-		this.record_init(this.office, "FilterOne", "FilterTwo", "FilterThree");
-		this.record_doFilter(this.office, "FilterOne", "FilterThree");
-		this.doFilter(this.office, "/not/matched", null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("FilterOne", "FilterTwo", "FilterThree");
+		this.record_doFilter("FilterOne", "FilterThree");
+		this.doFilter("/not/matched", null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 	/**
@@ -101,17 +92,13 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 				MappingType.FORWARD);
 		this.addServicer("IncludeFilter", null, SERVLET_NAME,
 				MappingType.INCLUDE);
-		this.record_init(this.office, "RequestFilter", "ForwardFilter",
-				"IncludeFilter");
-		this.record_doFilter(this.office, "IncludeFilter");
-		this.record_doFilter(this.office, "ForwardFilter");
-		this.record_doFilter(this.office, "RequestFilter");
-		this.doFilter(this.office, "/include", null, MappingType.INCLUDE,
-				SERVLET_NAME);
-		this.doFilter(this.office, "/forward", null, MappingType.FORWARD,
-				SERVLET_NAME);
-		this.doFilter(this.office, "/request", null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("RequestFilter", "ForwardFilter", "IncludeFilter");
+		this.record_doFilter("IncludeFilter");
+		this.record_doFilter("ForwardFilter");
+		this.record_doFilter("RequestFilter");
+		this.doFilter("/include", null, MappingType.INCLUDE, SERVLET_NAME);
+		this.doFilter("/forward", null, MappingType.FORWARD, SERVLET_NAME);
+		this.doFilter("/request", null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 	/**
@@ -122,34 +109,13 @@ public class ServletNameTest extends AbstractFilterChainFactoryTestCase {
 		final String SERVLET_NAME = "Servlet Name";
 		this.addServicer("Filter", null, SERVLET_NAME, MappingType.REQUEST,
 				MappingType.FORWARD, MappingType.INCLUDE);
-		this.record_init(this.office, "Filter");
-		this.record_doFilter(this.office, "Filter");
-		this.record_doFilter(this.office, "Filter");
-		this.record_doFilter(this.office, "Filter");
-		this.doFilter(this.office, "/include", null, MappingType.INCLUDE,
-				SERVLET_NAME);
-		this.doFilter(this.office, "/forward", null, MappingType.FORWARD,
-				SERVLET_NAME);
-		this.doFilter(this.office, "/request", null, MappingType.REQUEST,
-				SERVLET_NAME);
-	}
-
-	/**
-	 * Ensure {@link Filter} instances are isolated to an {@link Office}.
-	 */
-	public void testDifferentOffices() {
-		final Office one = this.createMock(Office.class);
-		final Office two = this.createMock(Office.class);
-		final String SERVLET_NAME = "Servlet Name";
-		this.addServicer("Filter", null, SERVLET_NAME);
-		this.record_init(one, "Filter");
-		this.record_doFilter(one, "Filter");
-		this.record_init(two, "Filter");
-		this.record_doFilter(two, "Filter");
-		this.doFilter(one, "/office/one", null, MappingType.REQUEST,
-				SERVLET_NAME);
-		this.doFilter(two, "/office/two", null, MappingType.REQUEST,
-				SERVLET_NAME);
+		this.record_init("Filter");
+		this.record_doFilter("Filter");
+		this.record_doFilter("Filter");
+		this.record_doFilter("Filter");
+		this.doFilter("/include", null, MappingType.INCLUDE, SERVLET_NAME);
+		this.doFilter("/forward", null, MappingType.FORWARD, SERVLET_NAME);
+		this.doFilter("/request", null, MappingType.REQUEST, SERVLET_NAME);
 	}
 
 }

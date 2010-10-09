@@ -23,10 +23,15 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Set;
 
+import javax.servlet.Filter;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.plugin.servlet.container.HttpServletContainer;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 
 /**
  * <p>
@@ -43,13 +48,32 @@ import net.officefloor.frame.api.manage.Office;
 public interface OfficeServletContext {
 
 	/**
+	 * <p>
+	 * Obtains the {@link FilterChainFactory} for the {@link Office}.
+	 * <p>
+	 * This is a non {@link ServletContext} method but is provided as filtering
+	 * is applied across an application. It is expected that the
+	 * {@link HttpServletContainer} will make use of this
+	 * {@link FilterChainFactory} for filtering {@link Servlet} servicing.
+	 * 
+	 * @param office
+	 *            {@link Office}.
+	 * @return {@link FilterChainFactory}.
+	 * @throws ServletException
+	 *             {@link Filter} instances are lazy loaded and initialising may
+	 *             fail for new {@link Filter} instances.
+	 */
+	FilterChainFactory getFilterChainFactory(Office office)
+			throws ServletException;
+
+	/**
 	 * @see ServletContext#getContextPath()
 	 * 
 	 * @param office
 	 *            {@link Office}.
 	 * @return Context path.
 	 */
-	public String getContextPath(Office office);
+	String getContextPath(Office office);
 
 	/**
 	 * @see ServletContext#getContext(String)
@@ -60,7 +84,7 @@ public interface OfficeServletContext {
 	 *            URI path.
 	 * @return {@link ServletContext}.
 	 */
-	public ServletContext getContext(Office office, String uripath);
+	ServletContext getContext(Office office, String uripath);
 
 	/**
 	 * @see ServletContext#getMimeType(String)
@@ -71,7 +95,7 @@ public interface OfficeServletContext {
 	 *            File name.
 	 * @return Mime type.
 	 */
-	public String getMimeType(Office office, String file);
+	String getMimeType(Office office, String file);
 
 	/**
 	 * @see ServletContext#getResourcePaths(String)
@@ -83,7 +107,7 @@ public interface OfficeServletContext {
 	 * @return Resource paths.
 	 */
 	@SuppressWarnings("unchecked")
-	public Set getResourcePaths(Office office, String path);
+	Set getResourcePaths(Office office, String path);
 
 	/**
 	 * @see ServletContext#getResource(String)
@@ -96,8 +120,7 @@ public interface OfficeServletContext {
 	 * @throws MalformedURLException
 	 *             If malformed {@link URL}.
 	 */
-	public URL getResource(Office office, String path)
-			throws MalformedURLException;
+	URL getResource(Office office, String path) throws MalformedURLException;
 
 	/**
 	 * @see ServletContext#getResourceAsStream(String)
@@ -108,7 +131,7 @@ public interface OfficeServletContext {
 	 *            Path.
 	 * @return {@link InputStream}.
 	 */
-	public InputStream getResourceAsStream(Office office, String path);
+	InputStream getResourceAsStream(Office office, String path);
 
 	/**
 	 * @see ServletContext#getRequestDispatcher(String)
@@ -119,7 +142,7 @@ public interface OfficeServletContext {
 	 *            Path.
 	 * @return {@link RequestDispatcher}.
 	 */
-	public RequestDispatcher getRequestDispatcher(Office office, String path);
+	RequestDispatcher getRequestDispatcher(Office office, String path);
 
 	/**
 	 * @see ServletContext#getNamedDispatcher(String)
@@ -130,7 +153,7 @@ public interface OfficeServletContext {
 	 *            Name.
 	 * @return {@link RequestDispatcher}.
 	 */
-	public RequestDispatcher getNamedDispatcher(Office office, String name);
+	RequestDispatcher getNamedDispatcher(Office office, String name);
 
 	/**
 	 * @see ServletContext#log(String)
@@ -140,7 +163,7 @@ public interface OfficeServletContext {
 	 * @param msg
 	 *            Message.
 	 */
-	public void log(Office office, String msg);
+	void log(Office office, String msg);
 
 	/**
 	 * @see ServletContext#log(String, Throwable)
@@ -152,7 +175,7 @@ public interface OfficeServletContext {
 	 * @param throwable
 	 *            Cause.
 	 */
-	public void log(Office office, String message, Throwable throwable);
+	void log(Office office, String message, Throwable throwable);
 
 	/**
 	 * @see ServletContext#getRealPath(String)
@@ -163,7 +186,7 @@ public interface OfficeServletContext {
 	 *            Path.
 	 * @return Real path.
 	 */
-	public String getRealPath(Office office, String path);
+	String getRealPath(Office office, String path);
 
 	/**
 	 * @see ServletContext#getServerInfo()
@@ -172,7 +195,7 @@ public interface OfficeServletContext {
 	 *            {@link Office}.
 	 * @return Server information.
 	 */
-	public String getServerInfo(Office office);
+	String getServerInfo(Office office);
 
 	/**
 	 * @see ServletContext#getInitParameter(String)
@@ -183,7 +206,7 @@ public interface OfficeServletContext {
 	 *            Name.
 	 * @return Initialisation parameter value.
 	 */
-	public String getInitParameter(Office office, String name);
+	String getInitParameter(Office office, String name);
 
 	/**
 	 * @see ServletContext#getInitParameterNames()
@@ -193,7 +216,7 @@ public interface OfficeServletContext {
 	 * @return Initialisation parameter names.
 	 */
 	@SuppressWarnings("unchecked")
-	public Enumeration getInitParameterNames(Office office);
+	Enumeration getInitParameterNames(Office office);
 
 	/**
 	 * @see ServletContext#getAttribute(String)
@@ -204,7 +227,7 @@ public interface OfficeServletContext {
 	 *            Name.
 	 * @return Attribute value.
 	 */
-	public Object getAttribute(Office office, String name);
+	Object getAttribute(Office office, String name);
 
 	/**
 	 * @see ServletContext#getAttributeNames()
@@ -214,7 +237,7 @@ public interface OfficeServletContext {
 	 * @return Attribute names.
 	 */
 	@SuppressWarnings("unchecked")
-	public Enumeration getAttributeNames(Office office);
+	Enumeration getAttributeNames(Office office);
 
 	/**
 	 * @see ServletContext#setAttribute(String, Object)
@@ -226,7 +249,7 @@ public interface OfficeServletContext {
 	 * @param object
 	 *            Attribute value.
 	 */
-	public void setAttribute(Office office, String name, Object object);
+	void setAttribute(Office office, String name, Object object);
 
 	/**
 	 * @see ServletContext#removeAttribute(String)
@@ -236,7 +259,7 @@ public interface OfficeServletContext {
 	 * @param name
 	 *            Name.
 	 */
-	public void removeAttribute(Office office, String name);
+	void removeAttribute(Office office, String name);
 
 	/**
 	 * @see ServletContext#getServletContextName()
@@ -245,6 +268,6 @@ public interface OfficeServletContext {
 	 *            {@link Office}.
 	 * @return {@link ServletContext} name.
 	 */
-	public String getServletContextName(Office office);
+	String getServletContextName(Office office);
 
 }

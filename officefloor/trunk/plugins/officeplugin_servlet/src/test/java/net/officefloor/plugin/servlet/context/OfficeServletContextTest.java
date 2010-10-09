@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -32,17 +33,18 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link OfficeServletContext}.
@@ -95,9 +97,15 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeServletContext} to test.
 	 */
-	private final OfficeServletContext context = new OfficeServletContextImpl(
-			this.serverName, 80, this.servletContextName, this.contextPath,
-			this.initParameters, this.mimeMappings, this.locator, this.logger);
+	private OfficeServletContext context;
+
+	@Override
+	protected void setUp() throws Exception {
+		this.context = new OfficeServletContextImpl(this.serverName, 80,
+				this.servletContextName, this.contextPath, this.initParameters,
+				this.mimeMappings, this.locator, this.logger, new Properties(),
+				this.getClass().getClassLoader());
+	}
 
 	/**
 	 * Ensure correct context path.
@@ -114,6 +122,21 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	public void testOtherContexts() {
 		assertNull("Restricting access to other servlet contexts", this.context
 				.getContext(this.office, "/other"));
+	}
+
+	/**
+	 * Ensure able to obtain {@link FilterChainFactory}.
+	 */
+	public void testFilterChainFactory() throws Exception {
+		// Ensure can obtain filter chain factory
+		FilterChainFactory factory = this.context
+				.getFilterChainFactory(this.office);
+		assertNotNull("Should have filter chain factory", factory);
+
+		// Ensure on new filter chain factory for different office
+		Office another = this.createMock(Office.class);
+		assertNotSame("Should be different factory for different office",
+				factory, this.context.getFilterChainFactory(another));
 	}
 
 	/**

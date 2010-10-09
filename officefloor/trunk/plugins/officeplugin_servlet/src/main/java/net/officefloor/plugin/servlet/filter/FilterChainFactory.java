@@ -17,11 +17,9 @@
  */
 package net.officefloor.plugin.servlet.filter;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 
@@ -33,15 +31,9 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 public interface FilterChainFactory {
 
 	/**
-	 * <p>
 	 * Constructs a {@link FilterChain} to a target {@link FilterChain} to allow
 	 * create chains of chains.
-	 * <p>
-	 * The {@link FilterChain} is to be constructed with {@link Filter}
-	 * instances specific to the {@link Office}.
 	 * 
-	 * @param office
-	 *            {@link Office}.
 	 * @param mapping
 	 *            {@link ServicerMapping}.
 	 * @param mappingType
@@ -52,8 +44,7 @@ public interface FilterChainFactory {
 	 * @throws ServletException
 	 *             If fails to create {@link FilterChain}.
 	 */
-	FilterChain createFilterChain(Office office, ServicerMapping mapping,
+	FilterChain createFilterChain(ServicerMapping mapping,
 			MappingType mappingType, FilterChain target)
 			throws ServletException;
-
 }
