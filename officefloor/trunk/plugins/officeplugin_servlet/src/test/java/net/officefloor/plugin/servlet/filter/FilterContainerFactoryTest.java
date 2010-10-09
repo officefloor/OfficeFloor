@@ -87,9 +87,9 @@ public class FilterContainerFactoryTest extends OfficeFrameTestCase {
 
 		// Create the filter container
 		FilterContainerFactory factory = new FilterContainerFactoryImpl(
-				FILTER_NAME, MockFilter.class, this.initParameters);
-		FilterContainer container = factory.createFilterContainer(office,
+				FILTER_NAME, MockFilter.class, this.initParameters,
 				this.officeServletContext);
+		FilterContainer container = factory.createFilterContainer(office);
 
 		// Undertake filter to ensure correct
 		container.doFilter(request, response, chain);
@@ -118,24 +118,23 @@ public class FilterContainerFactoryTest extends OfficeFrameTestCase {
 
 		// Create the factory
 		FilterContainerFactory factory = new FilterContainerFactoryImpl(
-				FILTER_NAME, MockFilter.class, this.initParameters);
+				FILTER_NAME, MockFilter.class, this.initParameters,
+				this.officeServletContext);
 
 		// Create the filter container
 		MockFilter.reset();
-		FilterContainer container = factory.createFilterContainer(one,
-				this.officeServletContext);
+		FilterContainer container = factory.createFilterContainer(one);
 		assertNotNull("Should be initialised", MockFilter.config);
 
 		// Ensure is singleton
 		MockFilter.reset();
 		assertSame("Must be singleton within office", container, factory
-				.createFilterContainer(one, this.officeServletContext));
+				.createFilterContainer(one));
 		assertNull("Should not re-initialise the singleton", MockFilter.config);
 
 		// Ensure different container for another office
 		MockFilter.reset();
-		FilterContainer another = factory.createFilterContainer(two,
-				this.officeServletContext);
+		FilterContainer another = factory.createFilterContainer(two);
 		assertNotNull("Should initialise new instance", MockFilter.config);
 		assertFalse("Should be different instance for another office",
 				container == another);

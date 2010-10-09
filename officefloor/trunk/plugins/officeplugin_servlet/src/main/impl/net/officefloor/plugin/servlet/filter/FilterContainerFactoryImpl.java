@@ -58,6 +58,11 @@ public class FilterContainerFactoryImpl implements FilterContainerFactory {
 	private final Map<String, String> initParameters;
 
 	/**
+	 * {@link OfficeServletContext}.
+	 */
+	private final OfficeServletContext officeServletContext;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param filterName
@@ -66,13 +71,17 @@ public class FilterContainerFactoryImpl implements FilterContainerFactory {
 	 *            {@link Class} of the {@link Filter}.
 	 * @param initParameters
 	 *            Init parameters.
+	 * @param officeServletContext
+	 *            {@link OfficeServletContext}.
 	 */
 	public FilterContainerFactoryImpl(String filterName,
 			Class<? extends Filter> filterClass,
-			Map<String, String> initParameters) {
+			Map<String, String> initParameters,
+			OfficeServletContext officeServletContext) {
 		this.filterName = filterName;
 		this.filterClass = filterClass;
 		this.initParameters = initParameters;
+		this.officeServletContext = officeServletContext;
 	}
 
 	/*
@@ -80,8 +89,8 @@ public class FilterContainerFactoryImpl implements FilterContainerFactory {
 	 */
 
 	@Override
-	public synchronized FilterContainer createFilterContainer(Office office,
-			OfficeServletContext officeServletContext) throws ServletException {
+	public synchronized FilterContainer createFilterContainer(Office office)
+			throws ServletException {
 
 		// Lazy create container for office
 		FilterContainer container = this.containers.get(office);
@@ -97,7 +106,7 @@ public class FilterContainerFactoryImpl implements FilterContainerFactory {
 
 			// Create the container
 			container = new FilterContainerImpl(this.filterName, filter,
-					this.initParameters, officeServletContext, office);
+					this.initParameters, this.officeServletContext, office);
 
 			// Register the container for the office
 			this.containers.put(office, container);
