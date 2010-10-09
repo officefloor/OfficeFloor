@@ -153,7 +153,7 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 
 			// Construct the filter chain
 			FilterChain chain = this.factory.createFilterChain(office, mapping,
-					mappingType, this.target);
+					mappingType, this.target, this.officeServletContext);
 			assertNotNull("Expecting filter chain for " + mappingType + ":"
 					+ servletName + "@" + servletPath
 					+ (pathInfo == null ? "" : pathInfo), chain);
@@ -286,8 +286,7 @@ public abstract class AbstractFilterChainFactoryTestCase extends
 		Map<String, String> initParameters = new HashMap<String, String>();
 		initParameters.put(MockFilter.PARAMETER_FILTER_NAME, filterName);
 		FilterContainerFactory factory = new FilterContainerFactoryImpl(
-				filterName, MockFilter.class, initParameters,
-				this.officeServletContext);
+				filterName, MockFilter.class, initParameters);
 
 		// Return the filter container factory
 		return factory;

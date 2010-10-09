@@ -21,6 +21,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletException;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.plugin.servlet.context.OfficeServletContext;
 
 /**
  * Constructs the {@link FilterContainer} for the {@link Office}.
@@ -39,11 +40,13 @@ public interface FilterContainerFactory {
 	 * 
 	 * @param office
 	 *            {@link Office}.
+	 * @param officeServletContext
+	 *            {@link OfficeServletContext}.
 	 * @return {@link FilterContainer} for the {@link Office}.
 	 * @throws ServletException
 	 *             If fails to initialise the {@link Filter}.
 	 */
-	FilterContainer createFilterContainer(Office office)
-			throws ServletException;
+	FilterContainer createFilterContainer(Office office,
+			OfficeServletContext officeServletContext) throws ServletException;
 
 }
