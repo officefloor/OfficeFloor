@@ -68,8 +68,8 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 
 		final int MAX_ASYNCHRONOUS_FLOWS = 10000;
 		final int MAX_ITERATIONS = 10;
-		final long JOIN_TIME = 10000;
 		final int MAX_WAIT_TIME = 100;
+		final long JOIN_TIME = MAX_WAIT_TIME * 1000; // 100 seconds
 		this.setVerbose(true);
 
 		// Construct the team
