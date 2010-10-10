@@ -94,6 +94,26 @@ public class FilterInstance {
 	}
 
 	/**
+	 * Convenience constructor to fully initialise.
+	 * 
+	 * @param name
+	 *            Name of the {@link Filter}.
+	 * @param className
+	 *            {@link Filter} class name.
+	 * @param initParameterNameValues
+	 *            Init parameters for the {@link Filter}.
+	 */
+	public FilterInstance(String name, String className,
+			String... initParameterNameValues) {
+		this.name = name;
+		this.className = className;
+		for (int i = 0; i < initParameterNameValues.length; i += 2) {
+			this.initParameters.put(initParameterNameValues[i],
+					initParameterNameValues[i + 1]);
+		}
+	}
+
+	/**
 	 * Obtains the name of the {@link Filter}.
 	 * 
 	 * @return Name of the {@link Filter}.

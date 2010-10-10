@@ -134,6 +134,11 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	}
 
 	/**
+	 * Resource path root.
+	 */
+	protected File resourcePathRoot;
+
+	/**
 	 * Flag indicating if {@link Team} is constructed for {@link HttpServlet}.
 	 */
 	private boolean isHttpServletTeamConstructed = false;
@@ -219,12 +224,12 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		// Obtain locations for testing
 		final File passwordFile = this.findFile(this.getClass(),
 				"password-file.txt");
-		final File resourcePathRoot = passwordFile.getParentFile();
+		this.resourcePathRoot = passwordFile.getParentFile();
 
 		// Obtain Office Name
 		String officeName = this.getOfficeName();
 
-		// ServletContext
+		// OfficeServletContext
 		final String SERVLET_CONTEXT_NAME = "ServletContext";
 		ManagedObjectBuilder<None> servletContext = this
 				.constructManagedObject(SERVLET_CONTEXT_NAME,
@@ -242,7 +247,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		servletContext
 				.addProperty(
 						OfficeServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-						resourcePathRoot.getAbsolutePath());
+						this.resourcePathRoot.getAbsolutePath());
 		servletContext.setManagingOffice(officeName);
 		this.getOfficeBuilder().addProcessManagedObject(SERVLET_CONTEXT_NAME,
 				SERVLET_CONTEXT_NAME);
