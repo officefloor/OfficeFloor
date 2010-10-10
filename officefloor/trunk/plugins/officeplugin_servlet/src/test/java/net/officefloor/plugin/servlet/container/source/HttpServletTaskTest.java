@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -35,9 +36,12 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -96,6 +100,18 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeServletContext officeServletContext = this
 			.createMock(OfficeServletContext.class);
+
+	/**
+	 * {@link FilterChainFactory}.
+	 */
+	private final FilterChainFactory filterChainFactory = new FilterChainFactory() {
+		@Override
+		public FilterChain createFilterChain(ServicerMapping mapping,
+				MappingType mappingType, FilterChain target)
+				throws ServletException {
+			return target; // no filtering
+		}
+	};
 
 	/**
 	 * {@link Office}.
@@ -161,7 +177,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	public void testService() throws Throwable {
 
 		// Record obtain context for initialising Servlet
-		this.record_service();
+		this.record_service(true);
 
 		// Test
 		this.replayMockObjects();
@@ -180,8 +196,8 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	public void testServiceAgain() throws Throwable {
 
 		// Record servicing twice (second time without init)
-		this.record_service();
-		this.record_service();
+		this.record_service(true);
+		this.record_service(false);
 
 		// Test
 		this.replayMockObjects();
@@ -204,7 +220,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 		this.mapping = null;
 
 		// Record servicing (with no mapping)
-		this.record_service();
+		this.record_service(true);
 
 		// Test
 		this.replayMockObjects();
@@ -228,6 +244,8 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 				.createMock(HttpServletResponse.class);
 
 		// Record servlet functionality
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getFilterChainFactory(this.office), this.filterChainFactory);
 		this.recordReturn(request, request.getContextPath(), CONTEXT_PATH);
 		this.recordReturn(request, request.getServletPath(), SERVLET_PATH);
 
@@ -254,53 +272,76 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records servicing the {@link HttpRequest}.
+	 * 
+	 * @param isCreateContainer
+	 *            Flag indicating if expecting to create the
+	 *            {@link HttpServletContainer}.
 	 */
-	private void record_service() {
+	private void record_service(boolean isCreateContainer) {
+		try {
 
-		final OutputBufferStream bufferStream = this
-				.createMock(OutputBufferStream.class);
-		final OutputStream outputStream = new ByteArrayOutputStream();
+			final OutputBufferStream bufferStream = this
+					.createMock(OutputBufferStream.class);
+			final OutputStream outputStream = new ByteArrayOutputStream();
 
-		// Record sourcing the dependencies for servicing the request
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
-				this.officeServletContext);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.HTTP_CONNECTION), this.connection);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.REQUEST_ATTRIBUTES), this.attributes);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.HTTP_SESSION), this.session);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.HTTP_SECURITY), this.security);
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVICER_MAPPING), this.mapping);
+			// Record sourcing the dependencies for servicing the request
+			this.recordReturn(this.taskContext, this.taskContext
+					.getObject(DependencyKeys.OFFICE_SERVLET_CONTEXT),
+					this.officeServletContext);
+			this
+					.recordReturn(this.taskContext, this.taskContext
+							.getObject(DependencyKeys.HTTP_CONNECTION),
+							this.connection);
+			this.recordReturn(this.taskContext, this.taskContext
+					.getObject(DependencyKeys.REQUEST_ATTRIBUTES),
+					this.attributes);
+			this.recordReturn(this.taskContext, this.taskContext
+					.getObject(DependencyKeys.HTTP_SESSION), this.session);
+			this.recordReturn(this.taskContext, this.taskContext
+					.getObject(DependencyKeys.HTTP_SECURITY), this.security);
+			this.recordReturn(this.taskContext, this.taskContext
+					.getObject(DependencyKeys.SERVICER_MAPPING), this.mapping);
 
-		// Load last access time
-		this.attributes.put("#HttpServlet.LastAccessTime#", new Long(10));
+			if (isCreateContainer) {
+				// Record obtaining filter chain factory in container creation
+				this.recordReturn(this.officeServletContext,
+						this.officeServletContext
+								.getFilterChainFactory(this.office),
+						this.filterChainFactory);
+			}
 
-		// Record obtaining the request and responses
-		this.recordReturn(this.session, this.session.getTokenName(),
-				"JSESSION_ID");
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				CONTEXT_PATH + SERVLET_PATH);
-		this.recordReturn(this.request, this.request.getMethod(), "GET");
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), CONTEXT_PATH);
-		this.recordReturn(this.response, this.response.getBody(), bufferStream);
-		this.recordReturn(bufferStream, bufferStream.getOutputStream(),
-				outputStream);
+			// Load last access time
+			this.attributes.put("#HttpServlet.LastAccessTime#", new Long(10));
 
-		// Record obtain context and servlet path in HTTP Servlet
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), CONTEXT_PATH);
-		if (this.mapping != null) {
-			this.recordReturn(this.mapping, this.mapping.getServletPath(),
-					SERVLET_PATH);
+			// Record obtaining the request and responses for servicing
+			this.recordReturn(this.session, this.session.getTokenName(),
+					"JSESSION_ID");
+			this.recordReturn(this.connection,
+					this.connection.getHttpRequest(), this.request);
+			this.recordReturn(this.connection, this.connection
+					.getHttpResponse(), this.response);
+			this.recordReturn(this.request, this.request.getRequestURI(),
+					CONTEXT_PATH + SERVLET_PATH);
+			this.recordReturn(this.request, this.request.getMethod(), "GET");
+			this.recordReturn(this.officeServletContext,
+					this.officeServletContext.getContextPath(this.office),
+					CONTEXT_PATH);
+			this.recordReturn(this.response, this.response.getBody(),
+					bufferStream);
+			this.recordReturn(bufferStream, bufferStream.getOutputStream(),
+					outputStream);
+
+			// Record obtain context and servlet path in HTTP Servlet
+			this.recordReturn(this.officeServletContext,
+					this.officeServletContext.getContextPath(this.office),
+					CONTEXT_PATH);
+			if (this.mapping != null) {
+				this.recordReturn(this.mapping, this.mapping.getServletPath(),
+						SERVLET_PATH);
+			}
+
+		} catch (Exception ex) {
+			throw fail(ex);
 		}
 	}
 

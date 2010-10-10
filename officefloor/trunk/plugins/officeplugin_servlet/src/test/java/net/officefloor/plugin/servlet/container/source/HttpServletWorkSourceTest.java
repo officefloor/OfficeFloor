@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -123,6 +126,16 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.createMock(OutputBufferStream.class);
 		final ServicerMapping mapping = this.createMock(ServicerMapping.class);
 
+		// No filtering
+		final FilterChainFactory filterChainFactory = new FilterChainFactory() {
+			@Override
+			public FilterChain createFilterChain(ServicerMapping mapping,
+					MappingType mappingType, FilterChain target)
+					throws ServletException {
+				return target; // no filtering
+			}
+		};
+
 		// Rest Mock HTTP Servlet for testing
 		MockHttpServlet.reset();
 
@@ -140,6 +153,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				.getObject(DependencyKeys.HTTP_SECURITY), security);
 		this.recordReturn(taskContext, taskContext
 				.getObject(DependencyKeys.SERVICER_MAPPING), mapping);
+		this.recordReturn(officeServletContext, officeServletContext
+				.getFilterChainFactory(office), filterChainFactory);
 		attributes.get("#HttpServlet.LastAccessTime#");
 		this.control(attributes).setReturnValue(new Long(1000));
 		this.recordReturn(session, session.getTokenName(), "JSESSION_ID");

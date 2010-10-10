@@ -38,12 +38,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +55,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -118,6 +122,18 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 * {@link ServicerMapping}.
 	 */
 	private ServicerMapping mapping = this.createMock(ServicerMapping.class);
+
+	/**
+	 * {@link FilterChainFactory}.
+	 */
+	private FilterChainFactory filterChainFactory = new FilterChainFactory() {
+		@Override
+		public FilterChain createFilterChain(ServicerMapping mapping,
+				MappingType mappingType, FilterChain target)
+				throws ServletException {
+			return target;
+		}
+	};
 
 	/**
 	 * {@link OfficeServletContext}.
@@ -1922,6 +1938,208 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				.createMock(HttpServletResponse.class);
 
 		// Record to ensure invoked
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getFilterChainFactory(this.office), this.filterChainFactory);
+		this.recordReturn(REQUEST, REQUEST.getContextPath(), "/context/path");
+
+		// Test
+		this.replayMockObjects();
+
+		// Construct container with servlet
+		MockHttpServlet servlet = new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				assertEquals("Incorrect request", REQUEST, req);
+				assertEquals("Incorrect response", RESPONSE, resp);
+				assertEquals("Incorrect context path", "/context/path", req
+						.getContextPath());
+			}
+		};
+		HttpServletContainer container = new HttpServletContainerImpl(
+				this.servletName, servlet, this.initParameters,
+				this.officeServletContext, this.office, this.clock, Locale
+						.getDefault());
+
+		// Include
+		container.include(REQUEST, RESPONSE);
+
+		// Verify functionality
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can filter for a {@link MappingType#REQUEST}.
+	 */
+	public void test_filter_Request() throws Exception {
+
+		// No mapping on request
+		this.mapping = null;
+
+		final String ATTRIBUTE_NAME = "FILTER_ATTRIBUTE";
+		final Object ATTRIBUTE_VALUE = "FILTER_VALUE";
+		final FilterChain[] providedTarget = new FilterChain[1];
+
+		// Filtering
+		final FilterChain chain = new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request,
+					ServletResponse response) throws IOException,
+					ServletException {
+				// Load attribute for servlet
+				request.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
+
+				// Trigger filtering
+				providedTarget[0].doFilter(request, response);
+			}
+		};
+
+		// Provide checking for filtering
+		this.filterChainFactory = new FilterChainFactory() {
+			@Override
+			public FilterChain createFilterChain(ServicerMapping mapping,
+					MappingType mappingType, FilterChain target)
+					throws ServletException {
+				assertNotNull("Should have request mapping", mapping);
+				assertEquals("Mapping should delegate to request",
+						"request-mapping", mapping.getParameter("type"));
+				assertEquals("Incorrect mapping type", MappingType.REQUEST,
+						mappingType);
+				assertTrue("Target should be the container",
+						target instanceof HttpServletContainerImpl);
+				providedTarget[0] = target;
+				return chain;
+			}
+		};
+
+		// Record
+		this.record_init("/test?type=request-mapping");
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure filtering attribute available
+				assertEquals("Filtering attribute not made available",
+						ATTRIBUTE_VALUE, req.getAttribute(ATTRIBUTE_NAME));
+			}
+		});
+	}
+
+	/**
+	 * Ensure can filter for a {@link MappingType#FORWARD}.
+	 */
+	public void test_filter_Forward() {
+
+		final String ATTRIBUTE_NAME = "FILTER_ATTRIBUTE";
+		final Object ATTRIBUTE_VALUE = "FILTER_VALUE";
+		final FilterChain[] providedTarget = new FilterChain[1];
+
+		// Filtering
+		final FilterChain chain = new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request,
+					ServletResponse response) throws IOException,
+					ServletException {
+				// Load attribute for servlet
+				request.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
+
+				// Trigger filtering
+				providedTarget[0].doFilter(request, response);
+			}
+		};
+
+		// Provide checking for filtering
+		this.filterChainFactory = new FilterChainFactory() {
+			@Override
+			public FilterChain createFilterChain(ServicerMapping mapping,
+					MappingType mappingType, FilterChain target)
+					throws ServletException {
+				assertEquals("Should have input mapping",
+						HttpServletContainerTest.this.mapping, mapping);
+				assertEquals("Mapping should delegate to request",
+						"forward-mapping", mapping.getParameter("type"));
+				assertEquals("Incorrect mapping type", MappingType.FORWARD,
+						mappingType);
+				assertTrue("Target should be the container",
+						target instanceof HttpServletContainerImpl);
+				providedTarget[0] = target;
+				return chain;
+			}
+		};
+
+		// Record
+		this.record_init("/test?type=REQUEST");
+		this.recordReturn(this.mapping, this.mapping.getParameter("type"),
+				"forward-mapping");
+
+		// Test
+		this.doTest(new MockHttpServlet() {
+			@Override
+			protected void test(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				// Ensure filtering attribute available
+				assertEquals("Filtering attribute not made available",
+						ATTRIBUTE_VALUE, req.getAttribute(ATTRIBUTE_NAME));
+			}
+		});
+	}
+
+	/**
+	 * Ensure can filter for a {@link MappingType#INCLUDE}.
+	 */
+	public void test_filter_Include() throws Exception {
+
+		final HttpServletRequest REQUEST = this
+				.createMock(HttpServletRequest.class);
+		final HttpServletResponse RESPONSE = this
+				.createMock(HttpServletResponse.class);
+		final String ATTRIBUTE_NAME = "FILTER_ATTRIBUTE";
+		final Object ATTRIBUTE_VALUE = "FILTER_VALUE";
+		final FilterChain[] providedTarget = new FilterChain[1];
+
+		// Filtering
+		final FilterChain chain = new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request,
+					ServletResponse response) throws IOException,
+					ServletException {
+				assertEquals("Incorrect filter request", REQUEST, request);
+				assertEquals("Incorrect filter response", RESPONSE, response);
+
+				// Load attribute for servlet
+				request.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
+
+				// Trigger filtering
+				providedTarget[0].doFilter(request, response);
+			}
+		};
+
+		// Provide checking for filtering
+		this.filterChainFactory = new FilterChainFactory() {
+			@Override
+			public FilterChain createFilterChain(ServicerMapping mapping,
+					MappingType mappingType, FilterChain target)
+					throws ServletException {
+				assertNotNull("Should have request mapping", mapping);
+				assertEquals("Mapping should delegate to request",
+						"include-mapping", mapping.getParameter("type"));
+				assertEquals("Incorrect mapping type", MappingType.INCLUDE,
+						mappingType);
+				assertTrue("Target should be the container",
+						target instanceof HttpServletContainerImpl);
+				providedTarget[0] = target;
+				return chain;
+			}
+		};
+
+		// Record to ensure filter and then servlet for servicing
+		this.recordReturn(this.officeServletContext, this.officeServletContext
+				.getFilterChainFactory(this.office), this.filterChainFactory);
+		this.recordReturn(REQUEST, REQUEST.getParameter("type"),
+				"include-mapping");
+		REQUEST.setAttribute(ATTRIBUTE_NAME, ATTRIBUTE_VALUE);
 		this.recordReturn(REQUEST, REQUEST.getContextPath(), "/context/path");
 
 		// Test
@@ -2005,29 +2223,42 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 *            Context path.
 	 */
 	private void record_init(String requestUri) {
+		try {
 
-		final OutputBufferStream bufferStream = this
-				.createMock(OutputBufferStream.class);
+			final OutputBufferStream bufferStream = this
+					.createMock(OutputBufferStream.class);
 
-		// Load last access time
-		this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, new Long(10));
+			// Record creating the HTTP Servlet Container
+			this.recordReturn(this.officeServletContext,
+					this.officeServletContext
+							.getFilterChainFactory(this.office),
+					this.filterChainFactory);
 
-		// Record obtaining the request and responses
-		this.recordReturn(this.session, this.session.getTokenName(),
-				SESSION_ID_TOKEN_NAME);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				requestUri);
-		this.recordReturn(this.officeServletContext, this.officeServletContext
-				.getContextPath(this.office), this.contextPath);
-		this.recordReturn(this.request, this.request.getMethod(),
-				this.httpMethod);
-		this.recordReturn(this.response, this.response.getBody(), bufferStream);
-		this.recordReturn(bufferStream, bufferStream.getOutputStream(),
-				this.outputStream);
+			// Load last access time
+			this.attributes.put(ATTRIBUTE_LAST_ACCESS_TIME, new Long(10));
+
+			// Record obtaining the request and response for servicing
+			this.recordReturn(this.session, this.session.getTokenName(),
+					SESSION_ID_TOKEN_NAME);
+			this.recordReturn(this.connection,
+					this.connection.getHttpRequest(), this.request);
+			this.recordReturn(this.connection, this.connection
+					.getHttpResponse(), this.response);
+			this.recordReturn(this.request, this.request.getRequestURI(),
+					requestUri);
+			this.recordReturn(this.officeServletContext,
+					this.officeServletContext.getContextPath(this.office),
+					this.contextPath);
+			this.recordReturn(this.request, this.request.getMethod(),
+					this.httpMethod);
+			this.recordReturn(this.response, this.response.getBody(),
+					bufferStream);
+			this.recordReturn(bufferStream, bufferStream.getOutputStream(),
+					this.outputStream);
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 	/**
