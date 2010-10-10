@@ -18,12 +18,17 @@
 package net.officefloor.plugin.servlet.container;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.FilterChain;
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +37,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.context.MappedHttpServletRequest;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -44,7 +51,8 @@ import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseExc
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServletContainerImpl implements HttpServletContainer {
+public class HttpServletContainerImpl implements HttpServletContainer,
+		HttpServletServicer, FilterChain {
 
 	/**
 	 * Name of attribute containing the last access time for the
@@ -53,14 +61,24 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	private static final String ATTRIBUTE_LAST_ACCESS_TIME = "#HttpServlet.LastAccessTime#";
 
 	/**
-	 * {@link ServletContext}.
+	 * {@link Servlet} name.
 	 */
-	private final ServletContext servletContext;
+	private final String servletName;
 
 	/**
 	 * {@link HttpServlet}.
 	 */
 	private final HttpServlet servlet;
+
+	/**
+	 * {@link FilterChainFactory}.
+	 */
+	private final FilterChainFactory filterChainFactory;
+
+	/**
+	 * {@link ServletContext}.
+	 */
+	private final ServletContext servletContext;
 
 	/**
 	 * {@link Clock}.
@@ -98,6 +116,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 			Clock clock, Locale defaultLocale) throws ServletException {
 
 		// Initiate state
+		this.servletName = servletName;
 		this.servlet = servlet;
 		this.clock = clock;
 		this.defaultLocale = defaultLocale;
@@ -106,9 +125,44 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 		this.servletContext = new ServletContextImpl(officeServletContext,
 				office);
 
+		// Create the filter chain factory
+		this.filterChainFactory = officeServletContext
+				.getFilterChainFactory(office);
+
 		// Initialise the servlet
 		this.servlet.init(new ServletConfigImpl(servletName,
 				this.servletContext, initParameters));
+	}
+
+	/**
+	 * Services the {@link HttpServletRequest} with appropriate filtering.
+	 * 
+	 * @param mapping
+	 *            {@link ServicerMapping}.
+	 * @param mappingType
+	 *            {@link MappingType}.
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @param response
+	 *            {@link HttpServletResponse}.
+	 * @throws ServletException
+	 *             As per {@link Servlet} API.
+	 * @throws IOException
+	 *             As per {@link Servlet} API.
+	 */
+	private void service(ServicerMapping mapping, MappingType mappingType,
+			HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// Target the HTTP Servlet to service request
+		FilterChain target = this;
+
+		// Create the filter chain
+		FilterChain filterChain = this.filterChainFactory.createFilterChain(
+				mapping, mappingType, target);
+
+		// Execute the filter chain to service request
+		filterChain.doFilter(request, response);
 	}
 
 	/*
@@ -144,6 +198,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 		HttpServletRequest request;
 		HttpServletResponseImpl response;
+		MappingType mappingType;
 		try {
 			// Create the HTTP session
 			javax.servlet.http.HttpSession httpSession = new HttpSessionImpl(
@@ -160,7 +215,18 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 
 			// If have mapping, wrap to provide servicer mapping values
 			if (mapping != null) {
+				// Override request with mapping details
 				request = new MappedHttpServletRequest(mapping, request);
+
+				// Servicer mapping provided so must be forward
+				mappingType = MappingType.FORWARD;
+
+			} else {
+				// Provide request mapping
+				mapping = new RequestServicerMapping(request);
+
+				// No servicer mapping so must be request
+				mappingType = MappingType.REQUEST;
 			}
 
 			// Create the HTTP response
@@ -174,7 +240,7 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 		}
 
 		// Service the request
-		this.servlet.service(request, response);
+		this.service(mapping, mappingType, request, response);
 
 		// Serviced so flush buffered content
 		response.flushBuffers();
@@ -183,8 +249,113 @@ public class HttpServletContainerImpl implements HttpServletContainer {
 	@Override
 	public void include(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
+		// Create the Include mapping
+		ServicerMapping mapping = new RequestServicerMapping(request);
+		MappingType mappingType = MappingType.INCLUDE;
+
 		// Include
+		this.service(mapping, mappingType, request, response);
+	}
+
+	/*
+	 * ========================= HttpServletServicer ===========================
+	 */
+
+	@Override
+	public String getServletName() {
+		return this.servletName;
+	}
+
+	@Override
+	public String[] getServletMappings() {
+		// Container does not handle mappings (only servicing)
+		return new String[0];
+	}
+
+	@Override
+	public void include(OfficeServletContext context,
+			HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		this.include(request, response);
+	}
+
+	/*
+	 * ============================= FilterChain ===============================
+	 */
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response)
+			throws IOException, ServletException {
+		// End of filter chain so service request with HTTP Servlet
 		this.servlet.service(request, response);
+	}
+
+	/**
+	 * {@link ServicerMapping} wrapping a {@link HttpServletRequest}.
+	 */
+	private class RequestServicerMapping implements ServicerMapping {
+
+		/**
+		 * Delegate {@link HttpServletRequest} being wrapped.
+		 */
+		private final HttpServletRequest request;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param request
+		 *            Delegate {@link HttpServletRequest} being wrapped.
+		 */
+		public RequestServicerMapping(HttpServletRequest request) {
+			this.request = request;
+		}
+
+		/*
+		 * ===================== ServicerMapping ========================
+		 */
+
+		@Override
+		public HttpServletServicer getServicer() {
+			return HttpServletContainerImpl.this;
+		}
+
+		@Override
+		public String getServletPath() {
+			return this.request.getServletPath();
+		}
+
+		@Override
+		public String getPathInfo() {
+			return this.request.getPathInfo();
+		}
+
+		@Override
+		public String getQueryString() {
+			return this.request.getQueryString();
+		}
+
+		@Override
+		public String getParameter(String name) {
+			return this.request.getParameter(name);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Map<String, String[]> getParameterMap() {
+			return this.request.getParameterMap();
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Enumeration<String> getParameterNames() {
+			return this.request.getParameterNames();
+		}
+
+		@Override
+		public String[] getParameterValues(String name) {
+			return this.getParameterValues(name);
+		}
 	}
 
 }
