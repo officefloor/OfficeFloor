@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.servlet.container.source;
+package net.officefloor.plugin.servlet.requestattributes.source;
 
 import java.util.Collections;
 import java.util.HashMap;
