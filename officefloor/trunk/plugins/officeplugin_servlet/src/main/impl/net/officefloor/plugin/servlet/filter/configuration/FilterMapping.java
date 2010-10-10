@@ -62,7 +62,7 @@ public class FilterMapping {
 	 *            {@link MappingType} instances.
 	 */
 	public FilterMapping(String filterName, String urlPattern,
-			String servletName, MappingType[] mappingTypes) {
+			String servletName, MappingType... mappingTypes) {
 		this.filterName = filterName;
 		this.urlPattern = urlPattern;
 		this.servletName = servletName;
