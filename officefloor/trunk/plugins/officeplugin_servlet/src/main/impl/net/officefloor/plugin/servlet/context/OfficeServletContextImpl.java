@@ -247,6 +247,23 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
+	public ServletTaskReference mapPath(Office office, String path) {
+		// Obtain the context
+		OfficeContext context = this.getOfficeContext(office);
+
+		// Obtain the servicer mapping
+		ServicerMapping mapping = context.mapper.mapPath(path);
+		if (mapping == null) {
+			// No servicer for path
+			return null;
+		}
+
+		// Downcast and return the Servlet task reference
+		OfficeServicer officeServicer = (OfficeServicer) mapping.getServicer();
+		return officeServicer;
+	}
+
+	@Override
 	public String getContextPath(Office office) {
 		return this.contextPath;
 	}
@@ -453,7 +470,8 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	/**
 	 * {@link Office} {@link HttpServletServicer}.
 	 */
-	private class OfficeServicer implements HttpServletServicer {
+	private class OfficeServicer implements HttpServletServicer,
+			ServletTaskReference {
 
 		/**
 		 * Name of {@link Work} for forwarding.
@@ -520,6 +538,20 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 				HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 			this.httpServlet.include(context, request, response);
+		}
+
+		/*
+		 * ================== ServletTaskReference ==========================
+		 */
+
+		@Override
+		public String getWorkName() {
+			return this.workName;
+		}
+
+		@Override
+		public String getTaskName() {
+			return this.taskName;
 		}
 	}
 
