@@ -482,6 +482,44 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can map path.
+	 */
+	public void testMapPath() throws Exception {
+
+		final WorkManager workManager = this.createMock(WorkManager.class);
+		final TaskManager taskManager = this.createMock(TaskManager.class);
+		final HttpServletServicer differentiator = this
+				.createMock(HttpServletServicer.class);
+		final String WORK_NAME = "WORK";
+		final String TASK_NAME = "TASK";
+
+		// Record reflection on Office for mapping path
+		this.recordReturn(this.office, this.office.getWorkNames(),
+				new String[] { WORK_NAME });
+		this.recordReturn(this.office, this.office.getWorkManager(WORK_NAME),
+				workManager);
+		this.recordReturn(workManager, workManager.getTaskNames(),
+				new String[] { TASK_NAME });
+		this.recordReturn(workManager, workManager.getTaskManager(TASK_NAME),
+				taskManager);
+		this.recordReturn(taskManager, taskManager.getDifferentiator(),
+				differentiator);
+		this
+				.recordReturn(differentiator, differentiator.getServletName(),
+						null); // allow null servicer name
+		this.recordReturn(differentiator, differentiator.getServletMappings(),
+				new String[] { "/path" });
+
+		// Test
+		this.replayMockObjects();
+		ServletTaskReference reference = this.context.mapPath(this.office,
+				"/path");
+		assertEquals("Incorrect work", WORK_NAME, reference.getWorkName());
+		assertEquals("Incorrect task", TASK_NAME, reference.getTaskName());
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can log.
 	 */
 	public void testLogging() {

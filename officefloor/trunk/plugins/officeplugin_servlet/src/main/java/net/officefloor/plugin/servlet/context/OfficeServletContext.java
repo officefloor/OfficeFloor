@@ -29,9 +29,11 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
  * <p>
@@ -51,7 +53,7 @@ public interface OfficeServletContext {
 	 * <p>
 	 * Obtains the {@link FilterChainFactory} for the {@link Office}.
 	 * <p>
-	 * This is a non {@link ServletContext} method but is provided as filtering
+	 * This is a non {@link ServletContext} method and is provided as filtering
 	 * is applied across an application. It is expected that the
 	 * {@link HttpServletContainer} will make use of this
 	 * {@link FilterChainFactory} for filtering {@link Servlet} servicing.
@@ -65,6 +67,23 @@ public interface OfficeServletContext {
 	 */
 	FilterChainFactory getFilterChainFactory(Office office)
 			throws ServletException;
+
+	/**
+	 * <p>
+	 * Obtains the {@link ServletTaskReference} to the {@link Servlet}
+	 * {@link Task} corresponding the the input path.
+	 * <p>
+	 * This is a non {@link ServletContext} method and is provided to allow
+	 * routing to a {@link Servlet} for servicing the {@link HttpRequest}.
+	 * 
+	 * @param office
+	 *            {@link Office}.
+	 * @param path
+	 *            Path to be mapped to a {@link Servlet} {@link Task}.
+	 * @return {@link ServletTaskReference} for the path or <code>null</code> if
+	 *         path does not map to a {@link Servlet} {@link Task}.
+	 */
+	ServletTaskReference mapPath(Office office, String path);
 
 	/**
 	 * @see ServletContext#getContextPath()
