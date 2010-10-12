@@ -1,0 +1,33 @@
+<context>
+	<!--
+		Provides surrounding configuration for a web.xml file to enable it to
+		be run within OfficeFloor. This is provided to test the web.xml
+		SectionSource implementation.
+	-->
+	<office-floor>
+		<teams>
+			<team name="SERVLET_TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="SERVLET_TEAM">
+					<office-floor-team name="SERVLET_TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="SERVLET_TEAM" />
+		</teams>
+		<sections>
+			<section name="WEB_XML"
+				source="net.officefloor.plugin.servlet.webxml.WebXmlSectionSource"
+				location="net/officefloor/plugin/servlet/webxml/${web.xml.file.name}">
+				<responsibility name="RESPONSIBILITY">
+					<team name="SERVLET_TEAM" />
+				</responsibility>
+			</section>
+		</sections>
+	</office>
+</context>
