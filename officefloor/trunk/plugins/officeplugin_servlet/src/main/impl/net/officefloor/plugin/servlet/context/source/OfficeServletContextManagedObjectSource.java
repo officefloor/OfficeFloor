@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.servlet.context.source;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,36 +26,35 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.OfficeServletContextImpl;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMapping;
-import net.officefloor.plugin.servlet.log.Logger;
-import net.officefloor.plugin.servlet.log.StdoutLogger;
+import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.mapping.MappingType;
-import net.officefloor.plugin.servlet.resource.FileSystemResourceLocator;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
  * {@link ManagedObjectSource} for the {@link OfficeServletContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeServletContextManagedObjectSource extends
-		AbstractManagedObjectSource<None, None> implements ManagedObject {
+public class OfficeServletContextManagedObjectSource
+		extends
+		AbstractManagedObjectSource<OfficeServletContextManagedObjectSource.DependencyKeys, None>
+		implements
+		CoordinatingManagedObject<OfficeServletContextManagedObjectSource.DependencyKeys> {
 
 	/**
-	 * Property name to specify the server name.
+	 * Dependency keys for the {@link OfficeServletContextManagedObjectSource}.
 	 */
-	public static final String PROPERTY_SERVER_NAME = "server.name";
-
-	/**
-	 * Property name to specify the server port.
-	 */
-	public static final String PROPERTY_SERVER_PORT = "server.port";
+	public static enum DependencyKeys {
+		SERVLET_SERVER
+	}
 
 	/**
 	 * Property name to specify the {@link ServletContext} name.
@@ -73,16 +70,6 @@ public class OfficeServletContextManagedObjectSource extends
 	 * Property prefix to file extension to MIME type mapping.
 	 */
 	public static final String PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE = "file.ext.to.mime.type.";
-
-	/**
-	 * Property name to specify the context path.
-	 */
-	public static final String PROPERTY_CONTEXT_PATH = "context.path";
-
-	/**
-	 * Property name to specify the resource path root.
-	 */
-	public static final String PROPERTY_RESOURCE_PATH_ROOT = "resource.path.root";
 
 	/**
 	 * Prefix on property name to obtain the {@link Filter} name and its
@@ -122,7 +109,7 @@ public class OfficeServletContextManagedObjectSource extends
 	/**
 	 * {@link OfficeServletContext}.
 	 */
-	private OfficeServletContext officeServletContext;
+	private OfficeServletContextImpl officeServletContext;
 
 	/**
 	 * Extracts the mapping from the {@link ManagedObjectSourceContext}.
@@ -161,26 +148,19 @@ public class OfficeServletContextManagedObjectSource extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_SERVER_NAME, "Server Name");
 		context.addProperty(PROPERTY_SERVLET_CONTEXT_NAME,
 				"Servlet Context Name");
-		context.addProperty(PROPERTY_CONTEXT_PATH, "Context Path");
-		context.addProperty(PROPERTY_RESOURCE_PATH_ROOT, "Resource Path Root");
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context)
+	protected void loadMetaData(MetaDataContext<DependencyKeys, None> context)
 			throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain configuration for the servlet context
-		String serverName = mosContext.getProperty(PROPERTY_SERVER_NAME);
-		int serverPort = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_SERVER_PORT, "80"));
 		String servletContextName = mosContext
 				.getProperty(PROPERTY_SERVLET_CONTEXT_NAME);
-		String contextPath = mosContext.getProperty(PROPERTY_CONTEXT_PATH);
 
 		// Create the init parameters
 		Map<String, String> initParameters = this.loadMappings(
@@ -205,33 +185,20 @@ public class OfficeServletContextManagedObjectSource extends
 		this.loadMappings(PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE,
 				mosContext, fileExtensionToMimeType);
 
-		// Create the resource locator
-		File resourcePathRoot = new File(mosContext
-				.getProperty(PROPERTY_RESOURCE_PATH_ROOT));
-		if (!resourcePathRoot.isDirectory()) {
-			throw new FileNotFoundException(
-					"Resource path root is not a directory: "
-							+ resourcePathRoot.getPath());
-		}
-		ResourceLocator resourceLocator = new FileSystemResourceLocator(
-				resourcePathRoot);
-
-		// Create the logger
-		Logger logger = new StdoutLogger();
-
 		// Obtain the filter configurations
 		Properties properties = mosContext.getProperties();
 		ClassLoader classLoader = mosContext.getClassLoader();
 
 		// Create the office servlet context instance
-		this.officeServletContext = new OfficeServletContextImpl(serverName,
-				serverPort, servletContextName, contextPath, initParameters,
-				fileExtensionToMimeType, resourceLocator, logger, properties,
-				classLoader);
+		this.officeServletContext = new OfficeServletContextImpl(
+				servletContextName, initParameters, fileExtensionToMimeType,
+				properties, classLoader);
 
 		// Specify the meta-data
-		context.setManagedObjectClass(this.getClass());
 		context.setObjectClass(OfficeServletContext.class);
+		context.setManagedObjectClass(this.getClass());
+		context.addDependency(DependencyKeys.SERVLET_SERVER,
+				ServletServer.class);
 	}
 
 	@Override
@@ -242,6 +209,17 @@ public class OfficeServletContextManagedObjectSource extends
 	/*
 	 * ======================== ManagedObject =============================
 	 */
+
+	@Override
+	public void loadObjects(ObjectRegistry<DependencyKeys> registry)
+			throws Throwable {
+		// Obtain the servlet server
+		ServletServer servletServer = (ServletServer) registry
+				.getObject(DependencyKeys.SERVLET_SERVER);
+
+		// Ensure office servlet context is initialised
+		this.officeServletContext.init(servletServer);
+	}
 
 	@Override
 	public Object getObject() throws Throwable {

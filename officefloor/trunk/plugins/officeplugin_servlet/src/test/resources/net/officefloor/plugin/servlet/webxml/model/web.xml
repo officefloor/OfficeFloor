@@ -1,5 +1,7 @@
 <web-app version="2.5">
 
+	<display-name>Test</display-name>
+
 	<context-param>
 		<param-name>one</param-name>
 		<param-value>A</param-value>
