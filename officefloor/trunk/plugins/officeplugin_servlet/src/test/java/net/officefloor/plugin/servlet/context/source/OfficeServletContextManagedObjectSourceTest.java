@@ -17,10 +17,6 @@
  */
 package net.officefloor.plugin.servlet.context.source;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.Set;
-
 import javax.servlet.ServletContext;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -31,6 +27,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
+import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource.DependencyKeys;
+import net.officefloor.plugin.servlet.host.ServletServer;
 
 /**
  * Tests the {@link OfficeServletContextManagedObjectSource}.
@@ -41,35 +39,14 @@ public class OfficeServletContextManagedObjectSourceTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Properties for sourcing.
-	 */
-	private static final String[] PROPERTIES = new String[] { "server.name",
-			"www.officefloor.net", "server.port", "80", "servlet.context.name",
-			"ServletContextName", "context.path", "/context",
-			"init.parameter.test", "Init Parameter", "resource.path.root",
-			null, "file.ext.to.mime.type.custom", "text/custom" };
-
-	@Override
-	protected void setUp() throws Exception {
-		// Specify location of resource path root
-		PROPERTIES[11] = this.findFile(this.getClass(), ".").getAbsolutePath();
-	}
-
-	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil
 				.validateSpecification(
 						OfficeServletContextManagedObjectSource.class,
-						OfficeServletContextManagedObjectSource.PROPERTY_SERVER_NAME,
-						"Server Name",
 						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
-						"Servlet Context Name",
-						OfficeServletContextManagedObjectSource.PROPERTY_CONTEXT_PATH,
-						"Context Path",
-						OfficeServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-						"Resource Path Root");
+						"Servlet Context Name");
 	}
 
 	/**
@@ -81,57 +58,65 @@ public class OfficeServletContextManagedObjectSourceTest extends
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(OfficeServletContext.class);
+		type.addDependency(DependencyKeys.SERVLET_SERVER, ServletServer.class);
 
 		// Validate type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				OfficeServletContextManagedObjectSource.class, PROPERTIES);
+		ManagedObjectLoaderUtil
+				.validateManagedObjectType(
+						type,
+						OfficeServletContextManagedObjectSource.class,
+						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
+						"Test");
 	}
 
 	/**
 	 * Ensures that the {@link ServletContext} is a single instance and
 	 * correctly initialised.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testServletContext() throws Throwable {
+	public void testSource() throws Throwable {
 
 		final Office office = this.createMock(Office.class);
+		final ServletServer servletServer = this
+				.createMock(ServletServer.class);
+
+		// Record
+		this.recordReturn(servletServer, servletServer.getContextPath(),
+				"/context");
+		this.recordReturn(office, office.getWorkNames(), new String[0]);
+
+		// Test
+		this.replayMockObjects();
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		for (int i = 0; i < PROPERTIES.length; i += 2) {
-			loader.addProperty(PROPERTIES[i], PROPERTIES[i + 1]);
-		}
+		loader
+				.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
+						"Servlet Context Name");
+		loader
+				.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
+								+ "test", "Init Parameter");
+		loader
+				.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
+								+ "custom", "text/custom");
 		OfficeServletContextManagedObjectSource mos = loader
 				.loadManagedObjectSource(OfficeServletContextManagedObjectSource.class);
 
 		// Obtain a managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(DependencyKeys.SERVLET_SERVER, servletServer);
 		ManagedObject mo = user.sourceManagedObject(mos);
 
 		// Obtain the Office Servlet Context and validate configured
 		OfficeServletContext context = (OfficeServletContext) mo.getObject();
-		assertEquals("getServletContextName", "ServletContextName", context
+		assertEquals("getServletContextName", "Servlet Context Name", context
 				.getServletContextName(office));
 		assertEquals("getContextPath", "/context", context
 				.getContextPath(office));
 		assertEquals("getInitParameter(test)", "Init Parameter", context
 				.getInitParameter(office, "test"));
-		Set<String> resources = context.getResourcePaths(office, "test");
-		assertTrue("getResourcePaths", resources.contains("test.txt"));
-		assertEquals("getRealPath(test.html)",
-				"http://www.officefloor.net/context/test.html", context
-						.getRealPath(office, "test.html"));
-
-		// Validate the logging
-		PrintStream stdOut = System.out;
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		try {
-			System.setOut(new PrintStream(output));
-			context.log(office, "test");
-			assertTextEquals("log(test)", "test\n", output.toString());
-		} finally {
-			System.setOut(stdOut);
-		}
 
 		// Validate default MIME mappings
 		assertEquals("getMimeType(test.css)", "text/css", context.getMimeType(
@@ -181,6 +166,8 @@ public class OfficeServletContextManagedObjectSourceTest extends
 		// Ensure attribute available across sourcing
 		assertEquals("Incorrect attribute accross sourcing", attribute,
 				otherContext.getAttribute(office, "test"));
+
+		this.verifyMockObjects();
 	}
 
 }

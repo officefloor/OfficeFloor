@@ -40,6 +40,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.ServletRequestForwarder;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
+import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
@@ -54,19 +55,15 @@ import org.easymock.AbstractMatcher;
 public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 	/**
-	 * Server name.
+	 * {@link ServletServer}.
 	 */
-	private final String serverName = "www.officefloor.net";
+	private final ServletServer servletServer = this
+			.createMock(ServletServer.class);
 
 	/**
 	 * Name of the {@link ServletContext}.
 	 */
 	private final String servletContextName = "ServletContextName";
-
-	/**
-	 * Context path.
-	 */
-	private final String contextPath = "/context/path";
 
 	/**
 	 * Init parameters.
@@ -101,18 +98,23 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context = new OfficeServletContextImpl(this.serverName, 80,
-				this.servletContextName, this.contextPath, this.initParameters,
-				this.mimeMappings, this.locator, this.logger, new Properties(),
-				this.getClass().getClassLoader());
+		// Construct and initialise the Office Servlet Context
+		this.context = new OfficeServletContextImpl(this.servletContextName,
+				this.initParameters, this.mimeMappings, new Properties(), this
+						.getClass().getClassLoader());
+		((OfficeServletContextImpl) this.context).init(this.servletServer);
 	}
 
 	/**
 	 * Ensure correct context path.
 	 */
 	public void testContextPath() {
-		assertEquals("Incorrect context path", this.contextPath, this.context
+		this.recordReturn(this.servletServer, this.servletServer
+				.getContextPath(), "/context");
+		this.replayMockObjects();
+		assertEquals("Incorrect context path", "/context", this.context
 				.getContextPath(this.office));
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -160,16 +162,22 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		// Record obtaining resource paths
 		final Set<String> children = new HashSet<String>(Arrays
 				.asList("/child/"));
+		this.recordReturn(this.servletServer, this.servletServer
+				.getResourceLocator(), this.locator);
 		this.recordReturn(this.locator, this.locator
 				.getResourceChildren("/parent"), children);
 
 		// Record obtain resource URL
 		final URL url = new URL("http", "officefloor.net", 80, "resource");
+		this.recordReturn(this.servletServer, this.servletServer
+				.getResourceLocator(), this.locator);
 		this.recordReturn(this.locator, this.locator.getResource("/resource"),
 				url);
 
 		// Record obtain resource stream
 		final InputStream stream = new ByteArrayInputStream(new byte[] { 1 });
+		this.recordReturn(this.servletServer, this.servletServer
+				.getResourceLocator(), this.locator);
 		this.recordReturn(this.locator, this.locator
 				.getResourceAsStream("/resource"), stream);
 
@@ -527,7 +535,11 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 		// Record logging
 		final String message = "Log Message";
 		final Throwable failure = new Throwable("test");
+		this.recordReturn(this.servletServer, this.servletServer.getLogger(),
+				this.logger);
 		this.logger.log(message);
+		this.recordReturn(this.servletServer, this.servletServer.getLogger(),
+				this.logger);
 		this.logger.log(message, failure);
 
 		// Test
@@ -541,10 +553,16 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain real path.
 	 */
 	public void testRealPath() {
+		this.recordReturn(this.servletServer, this.servletServer
+				.getServerName(), "www.officefloor.net");
+		this.recordReturn(this.servletServer, this.servletServer
+				.getServerPort(), 80);
+		this.recordReturn(this.servletServer, this.servletServer
+				.getContextPath(), "/context");
 		this.replayMockObjects();
-		assertEquals("Incorrect real path", "http://" + this.serverName
-				+ this.contextPath + "/real.path", this.context.getRealPath(
-				this.office, "/real.path"));
+		assertEquals("Incorrect real path",
+				"http://www.officefloor.net/context/real.path", this.context
+						.getRealPath(this.office, "/real.path"));
 		this.verifyMockObjects();
 	}
 
