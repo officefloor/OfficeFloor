@@ -71,6 +71,7 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 
 		// Validate the web-app
 		assertEquals("Incorrect version", "2.5", webApp.getVersion());
+		assertEquals("Incorrect diplay-name", "Test", webApp.getDisplayName());
 
 		// Validate the context-param
 		assertEquals("Incorrect number of context-param's", 2, webApp

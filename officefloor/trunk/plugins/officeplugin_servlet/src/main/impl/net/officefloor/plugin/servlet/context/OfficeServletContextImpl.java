@@ -52,11 +52,10 @@ import net.officefloor.plugin.servlet.filter.FilterChainFactory;
 import net.officefloor.plugin.servlet.filter.FilterChainFactoryImpl;
 import net.officefloor.plugin.servlet.filter.FilterServicer;
 import net.officefloor.plugin.servlet.filter.configuration.FilterServicersFactory;
-import net.officefloor.plugin.servlet.log.Logger;
+import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 import net.officefloor.plugin.servlet.mapping.ServicerMapperImpl;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
-import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
  * {@link OfficeServletContext} implementation.
@@ -69,11 +68,6 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 * {@link ServletContext} name.
 	 */
 	private final String servletContextName;
-
-	/**
-	 * Context path.
-	 */
-	private final String contextPath;
 
 	/**
 	 * Init parameters.
@@ -91,21 +85,6 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	private final Map<String, String> fileExtensionToMimeType;
 
 	/**
-	 * {@link ResourceLocator}.
-	 */
-	private final ResourceLocator resourceLocator;
-
-	/**
-	 * {@link Logger}.
-	 */
-	private final Logger logger;
-
-	/**
-	 * Real path prefix.
-	 */
-	private final String realPathPrefix;
-
-	/**
 	 * {@link OfficeContext} instances by its {@link Office}.
 	 */
 	private final Map<Office, OfficeContext> contexts = new HashMap<Office, OfficeContext>();
@@ -116,24 +95,19 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	private final Map<Office, FilterChainFactory> filterChainFactories = new HashMap<Office, FilterChainFactory>();
 
 	/**
+	 * {@link ServletServer}.
+	 */
+	private volatile ServletServer servletServer;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param serverName
-	 *            Server name.
-	 * @param serverPort
-	 *            Server port.
 	 * @param servletContextName
 	 *            {@link ServletContext} name.
-	 * @param contextPath
-	 *            Context path.
 	 * @param initParameters
 	 *            Init parameters.
 	 * @param fileExtensionToMimeType
 	 *            Mapping of file extension to MIME type.
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
-	 * @param logger
-	 *            {@link Logger}.
 	 * @param filterConfiguration
 	 *            {@link Filter} configuration.
 	 * @param classLoader
@@ -141,27 +115,35 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	 * @throws ServletException
 	 *             If fails to initialise.
 	 */
-	public OfficeServletContextImpl(String serverName, int serverPort,
-			String servletContextName, String contextPath,
+	public OfficeServletContextImpl(String servletContextName,
 			Map<String, String> initParameters,
 			Map<String, String> fileExtensionToMimeType,
-			ResourceLocator resourceLocator, Logger logger,
 			Properties filterConfiguration, ClassLoader classLoader)
 			throws ServletException {
 		this.servletContextName = servletContextName;
 		this.initParameters = initParameters;
-		this.contextPath = contextPath;
 		this.fileExtensionToMimeType = fileExtensionToMimeType;
-		this.resourceLocator = resourceLocator;
-		this.logger = logger;
 
 		// Create the filter servicers from configuration
 		this.filterServicers = new FilterServicersFactory()
 				.createFilterServices(filterConfiguration, classLoader, this);
+	}
 
-		// Create the real path prefix
-		this.realPathPrefix = "http://" + serverName
-				+ (serverPort == 80 ? "" : ":" + serverPort);
+	/**
+	 * <p>
+	 * Loads the {@link ServletServer}.
+	 * <p>
+	 * This method only uses the {@link ServletServer} on first invocation.
+	 * After this point further invocations ignore the input
+	 * {@link ServletServer}.
+	 * 
+	 * @param servletServer
+	 *            {@link ServletServer}.
+	 */
+	public void init(ServletServer servletServer) {
+		if (this.servletServer == null) {
+			this.servletServer = servletServer;
+		}
 	}
 
 	/**
@@ -265,7 +247,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 	@Override
 	public String getContextPath(Office office) {
-		return this.contextPath;
+		return this.servletServer.getContextPath();
 	}
 
 	@Override
@@ -298,18 +280,20 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set getResourcePaths(Office office, String path) {
-		return this.resourceLocator.getResourceChildren(path);
+		return this.servletServer.getResourceLocator()
+				.getResourceChildren(path);
 	}
 
 	@Override
 	public URL getResource(Office office, String path)
 			throws MalformedURLException {
-		return this.resourceLocator.getResource(path);
+		return this.servletServer.getResourceLocator().getResource(path);
 	}
 
 	@Override
 	public InputStream getResourceAsStream(Office office, String path) {
-		return this.resourceLocator.getResourceAsStream(path);
+		return this.servletServer.getResourceLocator()
+				.getResourceAsStream(path);
 	}
 
 	@Override
@@ -348,19 +332,23 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 	@Override
 	public void log(Office office, String msg) {
-		this.logger.log(msg);
+		this.servletServer.getLogger().log(msg);
 	}
 
 	@Override
 	public void log(Office office, String message, Throwable throwable) {
-		this.logger.log(message, throwable);
+		this.servletServer.getLogger().log(message, throwable);
 	}
 
 	@Override
 	public String getRealPath(Office office, String path) {
 
 		// Obtain the path to context
-		String realPath = this.realPathPrefix + this.contextPath;
+		String serverName = this.servletServer.getServerName();
+		int serverPort = this.servletServer.getServerPort();
+		String contextPath = this.servletServer.getContextPath();
+		String realPath = "http://" + serverName
+				+ (serverPort == 80 ? "" : ":" + serverPort) + contextPath;
 
 		// Add path
 		realPath = realPath + (path.startsWith("/") ? path : "/" + path);

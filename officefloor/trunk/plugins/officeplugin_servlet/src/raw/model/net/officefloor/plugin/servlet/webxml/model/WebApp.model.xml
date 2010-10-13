@@ -1,5 +1,6 @@
 <model>
 	<field type="String" name="version" />
+	<field type="String" name="display name" />
 	<list type="ContextParamModel" name="context param" />
 	<list type="MimeMappingModel" name="mime mapping" />
 	<list type="ServletModel" name="servlet" />

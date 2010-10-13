@@ -1,6 +1,7 @@
 <unmarshall xmlns="net.officefloor.plugin.xml.unmarshal"
 	class="net.officefloor.plugin.servlet.webxml.model.WebAppModel" node="web-app">
 	<value method="setVersion" node="web-app@version" />
+	<value method="setDisplayName" node="display-name" />
 
 	<object method="addContextParam" node="context-param"
 		class="net.officefloor.plugin.servlet.webxml.model.ContextParamModel">
