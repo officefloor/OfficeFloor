@@ -35,10 +35,12 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
+import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource.DependencyKeys;
 import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
 import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.mapping.MappingType;
@@ -71,20 +73,10 @@ public class FilterIntegrateTest extends MockHttpServletServer {
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
 		// Load the Office Servlet Context properties
-		properties.addProperty(
-				OfficeServletContextManagedObjectSource.PROPERTY_SERVER_NAME)
-				.setValue("localhost");
 		properties
 				.addProperty(
 						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME)
 				.setValue("FilterServletContext");
-		properties.addProperty(
-				OfficeServletContextManagedObjectSource.PROPERTY_CONTEXT_PATH)
-				.setValue("/");
-		properties
-				.addProperty(
-						OfficeServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT)
-				.setValue(this.resourcePathRoot.getAbsolutePath());
 
 		// Create the filter mappings
 		FilterMappings mappings = new FilterMappings();
@@ -137,8 +129,11 @@ public class FilterIntegrateTest extends MockHttpServletServer {
 			servletContext.addProperty(property.getName(), property.getValue());
 		}
 		servletContext.setManagingOffice(officeName);
-		this.getOfficeBuilder().addProcessManagedObject(SERVLET_CONTEXT_NAME,
-				SERVLET_CONTEXT_NAME);
+		DependencyMappingBuilder servletContextDependencies = this
+				.getOfficeBuilder().addProcessManagedObject(
+						SERVLET_CONTEXT_NAME, SERVLET_CONTEXT_NAME);
+		servletContextDependencies.mapDependency(DependencyKeys.SERVLET_SERVER,
+				SERVLET_SERVER_NAME);
 
 		// Construct HTTP Servlet to handle request
 		HttpServicerTask reference = this.constructHttpServlet(

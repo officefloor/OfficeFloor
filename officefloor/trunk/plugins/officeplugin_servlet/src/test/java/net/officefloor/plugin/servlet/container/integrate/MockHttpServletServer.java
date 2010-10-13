@@ -36,12 +36,15 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
+import net.officefloor.plugin.servlet.host.ServletServer;
+import net.officefloor.plugin.servlet.host.source.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -74,6 +77,11 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 * Realm for authentication.
 	 */
 	public static final String REALM = "TestRealm";
+
+	/**
+	 * Name of the {@link ServletServer} {@link ManagedObject}.
+	 */
+	protected final String SERVLET_SERVER_NAME = "ServletServer";
 
 	/**
 	 * Builds the {@link HttpServlet} servicer.
@@ -229,28 +237,40 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		// Obtain Office Name
 		String officeName = this.getOfficeName();
 
+		// ServletServer
+		ManagedObjectBuilder<None> servletServer = this.constructManagedObject(
+				SERVLET_SERVER_NAME, ServletServerManagedObjectSource.class);
+		servletServer.addProperty(
+				ServletServerManagedObjectSource.PROPERTY_SERVER_NAME,
+				"localhost");
+		servletServer.addProperty(
+				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT, "80");
+		servletServer.addProperty(
+				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH, "/");
+		servletServer.addProperty(
+				ServletServerManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
+				this.resourcePathRoot.getAbsolutePath());
+		servletServer.setManagingOffice(officeName);
+		this.getOfficeBuilder().addProcessManagedObject(SERVLET_SERVER_NAME,
+				SERVLET_SERVER_NAME);
+
 		// OfficeServletContext
 		final String SERVLET_CONTEXT_NAME = "ServletContext";
 		ManagedObjectBuilder<None> servletContext = this
 				.constructManagedObject(SERVLET_CONTEXT_NAME,
 						OfficeServletContextManagedObjectSource.class);
-		servletContext.addProperty(
-				OfficeServletContextManagedObjectSource.PROPERTY_SERVER_NAME,
-				"localhost");
 		servletContext
 				.addProperty(
 						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
 						"ServletContext");
-		servletContext.addProperty(
-				OfficeServletContextManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"/");
-		servletContext
-				.addProperty(
-						OfficeServletContextManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-						this.resourcePathRoot.getAbsolutePath());
 		servletContext.setManagingOffice(officeName);
-		this.getOfficeBuilder().addProcessManagedObject(SERVLET_CONTEXT_NAME,
-				SERVLET_CONTEXT_NAME);
+		DependencyMappingBuilder servletContextDependencies = this
+				.getOfficeBuilder().addProcessManagedObject(
+						SERVLET_CONTEXT_NAME, SERVLET_CONTEXT_NAME);
+		servletContextDependencies
+				.mapDependency(
+						net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource.DependencyKeys.SERVLET_SERVER,
+						SERVLET_SERVER_NAME);
 
 		// Request Attributes
 		final String REQUEST_ATTRIBUTES_NAME = "RequestAttributes";
