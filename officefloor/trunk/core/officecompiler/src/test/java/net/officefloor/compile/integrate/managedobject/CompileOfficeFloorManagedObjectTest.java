@@ -53,7 +53,7 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests compiling a {@link OfficeFloor} {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CompileOfficeFloorManagedObjectTest extends
@@ -318,6 +318,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		this.issues
 				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
 						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
@@ -340,6 +341,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		this.record_officeBuilder_registerTeam(
 				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
 

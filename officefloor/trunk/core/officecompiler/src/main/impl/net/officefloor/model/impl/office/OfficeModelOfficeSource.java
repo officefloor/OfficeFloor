@@ -393,7 +393,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					architect.link(object, officeObject);
 				}
 
-				// Determinf if link object to office managed object
+				// Determine if link object to office managed object
 				OfficeManagedObject officeMo = null;
 				OfficeSectionObjectToOfficeManagedObjectModel connToMo = objectModel
 						.getOfficeManagedObject();
