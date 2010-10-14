@@ -468,11 +468,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 				.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-		// Obtain the flow types for the managed object source
+		// Obtain the flow and team types for the managed object source
 		ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
+		ManagedObjectTeamType[] teamTypes = managedObjectType.getTeamTypes();
 
-		// Provide process bound name if have flows
-		if (flowTypes.length > 0) {
+		// Provide process bound name if have flows or teams.
+		// (flows may be linked so not appear in type - therefore use teams)
+		if ((flowTypes.length > 0) || (teamTypes.length > 0)) {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
@@ -608,7 +610,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Link in the teams for the managed object source
-		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+		for (ManagedObjectTeamType teamType : teamTypes) {
 
 			// Obtain the team type details
 			String teamName = teamType.getTeamName();
