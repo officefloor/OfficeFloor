@@ -52,7 +52,8 @@ public class ServletRouteWorkSourceTest extends OfficeFrameTestCase {
 		WorkTypeBuilder<ServletRouteTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 		TaskTypeBuilder<DependencyKeys, FlowKeys> task = type.addTaskType(
-				"Route", factory, DependencyKeys.class, FlowKeys.class);
+				ServletRouteWorkSource.TASK_ROUTE, factory,
+				DependencyKeys.class, FlowKeys.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
 		task.addObject(OfficeServletContext.class).setKey(

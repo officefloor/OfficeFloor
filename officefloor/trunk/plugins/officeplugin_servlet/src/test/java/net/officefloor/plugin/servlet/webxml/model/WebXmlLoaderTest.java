@@ -19,8 +19,9 @@ package net.officefloor.plugin.servlet.webxml.model;
 
 import java.io.File;
 import java.io.FileInputStream;
-import javax.servlet.Filter;
+import java.io.FileNotFoundException;
 
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -33,6 +34,32 @@ import net.officefloor.model.repository.ConfigurationItem;
  * @author Daniel Sagenschneider
  */
 public class WebXmlLoaderTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ensure can handle {@link ConfigurationItem} not being found.
+	 */
+	public void testNoConfigurationFound() throws Exception {
+
+		final SectionSourceContext context = this
+				.createMock(SectionSourceContext.class);
+
+		// Record not find configuration
+		this.recordReturn(context, context.getConfiguration("WEB-INF/web.xml"),
+				null);
+
+		// Ensure fail if no configuration
+		this.replayMockObjects();
+		WebXmlLoader loader = new WebXmlLoader();
+		try {
+			loader.loadConfiguration("WEB-INF/web.xml", context);
+			fail("Should not be successful if can not find configuration");
+		} catch (FileNotFoundException ex) {
+			assertEquals("Incorrect failure",
+					"Can not find configuration 'WEB-INF/web.xml'", ex
+							.getMessage());
+		}
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensure correct configuration loaded.

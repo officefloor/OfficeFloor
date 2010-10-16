@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -68,6 +69,11 @@ public class HttpServletTask
 	 * are comma (,) separated.
 	 */
 	public static final String PROPERTY_SERVLET_MAPPINGS = "servlet.mappings";
+
+	/**
+	 * Name of the servicing {@link Task} for the {@link Servlet}.
+	 */
+	public static final String TASK_NAME = "service";
 
 	/**
 	 * Keys for the dependencies.
@@ -126,7 +132,7 @@ public class HttpServletTask
 
 		// Add task to service HTTP request with HTTP Servlet
 		TaskTypeBuilder<DependencyKeys, None> task = workTypeBuilder
-				.addTaskType("service", factory, DependencyKeys.class,
+				.addTaskType(TASK_NAME, factory, DependencyKeys.class,
 						None.class);
 		task.setDifferentiator(factory);
 		task.addObject(ServicerMapping.class).setKey(

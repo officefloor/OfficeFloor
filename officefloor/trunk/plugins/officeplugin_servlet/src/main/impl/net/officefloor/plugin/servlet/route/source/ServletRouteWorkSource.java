@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.route.ServletRouteTask;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys;
@@ -38,6 +39,11 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  */
 public class ServletRouteWorkSource extends
 		AbstractWorkSource<ServletRouteTask> {
+
+	/**
+	 * Name of {@link Task} to route {@link HttpRequest}.
+	 */
+	public static final String TASK_ROUTE = "route";
 
 	/*
 	 * ======================== WorkSource ============================
@@ -60,7 +66,7 @@ public class ServletRouteWorkSource extends
 
 		// Add task to route
 		TaskTypeBuilder<DependencyKeys, FlowKeys> task = workTypeBuilder
-				.addTaskType("Route", factory, DependencyKeys.class,
+				.addTaskType(TASK_ROUTE, factory, DependencyKeys.class,
 						FlowKeys.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);
