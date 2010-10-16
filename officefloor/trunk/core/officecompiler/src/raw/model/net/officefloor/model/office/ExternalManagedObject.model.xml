@@ -5,5 +5,7 @@
 	<list type="OfficeSectionObjectToExternalManagedObjectModel" name="office section object" />
 	<list type="OfficeManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent office managed object" />
+	<list type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
+		name="dependent office input managed object" />
 	<list type="ExternalManagedObjectToAdministratorModel" name="administrator" />
 </model>

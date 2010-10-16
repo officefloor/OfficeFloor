@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.TestSource;
@@ -160,7 +161,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 * Tests compiling a {@link ManagedObject} with a dependency outside
 	 * {@link Office}.
 	 */
-	public void testManagedObjectWithDependencyOutSideOffice() {
+	public void testManagedObjectWithDependencyOutsideOffice() {
 
 		// Record building the office
 
@@ -181,6 +182,83 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				"OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling an Input {@link ManagedObject} with dependency linked to
+	 * a {@link ManagedObject} in the {@link Office}.
+	 */
+	public void testInputManagedObjectWithDependencyInOffice() {
+
+		// Record building the office floor
+
+		// Register the office with the work for the input process flow
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.INPUT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				InputManagedObject.class.getName());
+		ManagingOfficeBuilder<?> inputMos = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputDependencies = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.INPUT_SOURCE");
+		office.registerManagedObjectSource("OFFICE.SIMPLE",
+				"OFFICE.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE",
+				"OFFICE.SIMPLE");
+		inputDependencies.mapDependency(0, "OFFICE.SIMPLE");
+		inputMos.linkProcess(0, "SECTION.WORK", "INPUT");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling an Input {@link ManagedObject} with dependency linked to
+	 * a {@link ManagedObject} outside the {@link Office} (e.g.
+	 * {@link OfficeFloor}).
+	 */
+	public void testInputManagedObjectWithDependencyOutsideOffice() {
+
+		// Record building the office floor
+
+		// Register the office with the work for the input process flow
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.INPUT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				InputManagedObject.class.getName());
+		ManagingOfficeBuilder<?> inputMos = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputDependencies = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.INPUT_SOURCE");
+		inputDependencies.mapDependency(0, "SIMPLE");
+		inputMos.linkProcess(0, "SECTION.WORK", "INPUT");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
 				ClassManagedObjectSource.class, 0, "class.name",
 				SimpleManagedObject.class.getName());
@@ -319,6 +397,23 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		public static interface Processes {
 			void doProcess(Integer parameter);
 		}
+
+		@ProcessInterface
+		Processes processes;
+	}
+
+	/**
+	 * Class for {@link ClassManagedObjectSource} containing a
+	 * {@link ProcessInterface} and a {@link Dependency}.
+	 */
+	public static class InputManagedObject {
+
+		public static interface Processes {
+			void doProcess(String parameter);
+		}
+
+		@Dependency
+		SimpleManagedObject dependency;
 
 		@ProcessInterface
 		Processes processes;

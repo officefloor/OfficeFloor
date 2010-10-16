@@ -29,6 +29,19 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addOfficeInputManagedObjectDependency" node="input-dependency"
+			class="net.officefloor.model.office.OfficeInputManagedObjectDependencyModel">
+			<value method="setOfficeInputManagedObjectDependencyName" node="input-dependency@name" />
+			<value method="setDependencyType" node="input-dependency@object-type" />
+			<object method="setOfficeManagedObject" node="managed-object"
+				class="net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel">
+				<value method="setOfficeManagedObjectName" node="managed-object@name" />
+			</object>
+			<object method="setExternalManagedObject" node="external-managed-object"
+				class="net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel">
+				<value method="setExternalManagedObjectName" node="external-managed-object@name" />
+			</object>
+		</object>
 		<object method="addOfficeManagedObjectSourceFlow" node="flow"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel">
 			<value method="setOfficeManagedObjectSourceFlowName" node="flow@name" />

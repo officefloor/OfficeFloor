@@ -29,6 +29,9 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -63,7 +66,7 @@ import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link OfficeRepository}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeRepositoryTest extends OfficeFrameTestCase {
@@ -107,6 +110,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleManagedObjectSource", "java.lang.Object",
 				"0");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
+				"INPUT_DEPENDENCY", Connection.class.getName());
+		mos.addOfficeInputManagedObjectDependency(inputDependency);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
 				"FLOW", Integer.class.getName());
 		mos.addOfficeManagedObjectSourceFlow(moFlow);
@@ -223,6 +229,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"MANAGED_OBJECT");
 		dependency.setOfficeManagedObject(dependencyToMo);
 
+		// input managed object dependency -> external managed object
+		OfficeInputManagedObjectDependencyToExternalManagedObjectModel inputDependencyToExtMo = new OfficeInputManagedObjectDependencyToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT");
+		inputDependency.setExternalManagedObject(inputDependencyToExtMo);
+
+		// input managed object dependency -> office managed object
+		OfficeInputManagedObjectDependencyToOfficeManagedObjectModel inputDependencyToMo = new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel(
+				"MANAGED_OBJECT");
+		inputDependency.setOfficeManagedObject(inputDependencyToMo);
+
 		// escalation -> section input
 		OfficeEscalationToOfficeSectionInputModel escalationToInput = new OfficeEscalationToOfficeSectionInputModel(
 				"SECTION_TARGET", "INPUT");
@@ -328,6 +344,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("dependency -> managed object", mo, dependencyToMo
 				.getOfficeManagedObject());
 
+		// Ensure input dependency connected to external managed object
+		assertEquals("input dependency <- external mo", inputDependency,
+				inputDependencyToExtMo.getOfficeInputManagedObjectDependency());
+		assertEquals("input dependency -> external mo", extMo,
+				inputDependencyToExtMo.getExternalManagedObject());
+
+		// Ensure input dependency connected to office managed object
+		assertEquals("input dependency <- managed object", inputDependency,
+				inputDependencyToMo.getOfficeInputManagedObjectDependency());
+		assertEquals("input dependency -> managed object", mo,
+				inputDependencyToMo.getOfficeManagedObject());
+
 		// Ensure escalation connected to section input
 		assertEquals("escalation <- section input", escalation,
 				escalationToInput.getOfficeEscalation());
@@ -357,6 +385,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleManagedObjectSource", "java.lang.Object",
 				"0");
 		office.addOfficeManagedObjectSource(mos);
+		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
+				"INPUT_DEPENDENCY", Connection.class.getName());
+		mos.addOfficeInputManagedObjectDependency(inputDependency);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel(
 				"FLOW", Integer.class.getName());
 		mos.addOfficeManagedObjectSourceFlow(moFlow);
@@ -447,6 +478,20 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		dependencyToMo.setOfficeManagedObject(mo);
 		dependencyToMo.connect();
 
+		// input dependency -> external managed object
+		OfficeInputManagedObjectDependencyToExternalManagedObjectModel inputDependencyToExtMo = new OfficeInputManagedObjectDependencyToExternalManagedObjectModel();
+		inputDependencyToExtMo
+				.setOfficeInputManagedObjectDependency(inputDependency);
+		inputDependencyToExtMo.setExternalManagedObject(extMo);
+		inputDependencyToExtMo.connect();
+
+		// input dependency -> office managed object
+		OfficeInputManagedObjectDependencyToOfficeManagedObjectModel inputDependencyToMo = new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel();
+		inputDependencyToMo
+				.setOfficeInputManagedObjectDependency(inputDependency);
+		inputDependencyToMo.setOfficeManagedObject(mo);
+		inputDependencyToMo.connect();
+
 		// administrator -> team
 		AdministratorToOfficeTeamModel adminToTeam = new AdministratorToOfficeTeamModel();
 		adminToTeam.setAdministrator(admin);
@@ -526,6 +571,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 						.getExternalManagedObjectName());
 		assertEquals("dependency - managed object", "MANAGED_OBJECT",
 				dependencyToMo.getOfficeManagedObjectName());
+		assertEquals("input dependency - external managed object",
+				"EXTERNAL_MANAGED_OBJECT", inputDependencyToExtMo
+						.getExternalManagedObjectName());
+		assertEquals("input dependency - managed object", "MANAGED_OBJECT",
+				inputDependencyToMo.getOfficeManagedObjectName());
 		assertEquals("administrator - team", "TEAM", adminToTeam
 				.getOfficeTeamName());
 		assertEquals("task - pre duty (administrator name)", "ADMINISTRATOR",
