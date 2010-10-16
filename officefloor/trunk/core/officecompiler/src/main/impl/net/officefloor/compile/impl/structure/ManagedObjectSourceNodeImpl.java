@@ -676,8 +676,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Register the team to the office
-			String officeTeamName = this.managedObjectSourceName + "."
-					+ teamName;
+			String officeTeamName = managedObjectSourceName + "." + teamName;
 			officeBuilder.registerTeam(officeTeamName, team
 					.getOfficeFloorTeamName());
 		}

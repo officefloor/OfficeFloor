@@ -357,7 +357,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_registerTeam(
-				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
+				"OFFICE.MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM",
+				"TEAM");
 
 		// Compile the office floor
 		this.compile(true);
