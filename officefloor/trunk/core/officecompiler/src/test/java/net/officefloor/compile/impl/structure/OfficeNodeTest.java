@@ -779,41 +779,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectDependency} to the
-	 * {@link OfficeManagedObject}.
-	 */
-	public void testLinkManagedObjectDependencyToOfficeManagedObject() {
-
-		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
-
-		this.replayMockObjects();
-
-		// Link
-		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
-				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
-				ManagedObjectScope.THREAD);
-		ManagedObjectDependency dependency = mo
-				.getManagedObjectDependency("DEPENDENCY");
-		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(
-				this.node, "MO_SOURCE_TARGET", null);
-		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject(
-				"MO_TARGET", ManagedObjectScope.THREAD);
-		this.node.link(dependency, moTarget);
-		assertObjectLink("managed object dependency -> office managed object",
-				dependency, moTarget);
-
-		// Ensure only can link once
-		this.node.link(dependency, moSourceTarget.addOfficeManagedObject(
-				"ANOTHER", ManagedObjectScope.THREAD));
-		assertObjectLink("Can only link once", dependency, moTarget);
-
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensures can link {@link OfficeManagedObjectSource}
 	 * {@link ManagedObjectTeam} to the {@link OfficeTeam}.
 	 */
@@ -904,6 +869,41 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 	/**
 	 * Ensures can link {@link ManagedObjectDependency} to the
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testLinkManagedObjectDependencyToOfficeManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO_SOURCE", null);
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
+				ManagedObjectScope.THREAD);
+		ManagedObjectDependency dependency = mo
+				.getManagedObjectDependency("DEPENDENCY");
+		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(
+				this.node, "MO_SOURCE_TARGET", null);
+		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject(
+				"MO_TARGET", ManagedObjectScope.THREAD);
+		this.node.link(dependency, moTarget);
+		assertObjectLink("managed object dependency -> office managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, moSourceTarget.addOfficeManagedObject(
+				"ANOTHER", ManagedObjectScope.THREAD));
+		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link ManagedObjectDependency} to the
 	 * {@link OfficeObject}.
 	 */
 	public void testLinkManagedObjectDependencyToOfficeObject() {
@@ -931,6 +931,72 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Ensure only can link once
 		this.node.link(dependency, this.node.addOfficeObject("ANOTHER",
 				String.class.getName()));
+		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link Input {@link ManagedObjectDependency} to the
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testLinkInputManagedObjectDependencyToOfficeManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO_SOURCE", null);
+		ManagedObjectDependency dependency = moSource
+				.getInputManagedObjectDependency("DEPENDENCY");
+		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(
+				this.node, "MO_SOURCE_TARGET", null);
+		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject(
+				"MO_TARGET", ManagedObjectScope.PROCESS);
+		this.node.link(dependency, moTarget);
+		assertObjectLink(
+				"input managed object dependency -> office floor managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, moSourceTarget.addOfficeManagedObject(
+				"ANOTHER", ManagedObjectScope.PROCESS));
+		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link Input {@link ManagedObjectDependency} to the
+	 * {@link OfficeObject}.
+	 */
+	public void testLinkInputManagedObjectDependencyToOfficeObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
+				this.node, "MO_SOURCE", null);
+		ManagedObjectDependency dependency = moSource
+				.getInputManagedObjectDependency("DEPENDENCY");
+		OfficeObject moTarget = this.node.addOfficeObject("MO_TARGET",
+				Connection.class.getName());
+		this.node.link(dependency, moTarget);
+		assertObjectLink(
+				"input managed object dependency -> office floor managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, this.node.addOfficeObject("ANOTHER",
+				Connection.class.getName()));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();

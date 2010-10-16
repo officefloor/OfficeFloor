@@ -25,11 +25,11 @@
 			<value method="setOfficeFloorInputManagedObjectName" node="input-managed-object@name" />
 		</object>
 		<object method="addOfficeFloorManagedObjectSourceInputDependency"
-			node="dependency"
+			node="input-dependency"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel">
 			<value method="setOfficeFloorManagedObjectSourceInputDependencyName"
-				node="dependency@name" />
-			<value method="setDependencyType" node="dependency@object-type" />
+				node="input-dependency@name" />
+			<value method="setDependencyType" node="input-dependency@object-type" />
 			<object method="setOfficeFloorManagedObject" node="managed-object"
 				class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel">
 				<value method="setOfficeFloorManagedObjectName" node="managed-object@name" />

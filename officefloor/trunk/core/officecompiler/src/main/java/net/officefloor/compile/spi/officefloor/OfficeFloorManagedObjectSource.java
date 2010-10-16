@@ -18,10 +18,12 @@
 
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -31,21 +33,21 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectSource} on the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorManagedObjectSource {
 
 	/**
 	 * Obtains the name of this {@link OfficeFloorManagedObjectSource}.
-	 *
+	 * 
 	 * @return Name of this {@link OfficeFloorManagedObjectSource}.
 	 */
 	String getOfficeFloorManagedObjectSourceName();
 
 	/**
 	 * Adds a {@link Property} to for {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param name
 	 *            Name of the {@link Property}.
 	 * @param value
@@ -55,7 +57,7 @@ public interface OfficeFloorManagedObjectSource {
 
 	/**
 	 * Specifies the timeout for the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param timeout
 	 *            Timeout for the {@link ManagedObject}.
 	 */
@@ -64,7 +66,7 @@ public interface OfficeFloorManagedObjectSource {
 	/**
 	 * Obtains the {@link ManagingOffice} for this
 	 * {@link OfficeFloorManagedObjectSource}.
-	 *
+	 * 
 	 * @param office
 	 *            {@link ManagingOffice}.
 	 */
@@ -73,7 +75,7 @@ public interface OfficeFloorManagedObjectSource {
 	/**
 	 * Obtains the {@link ManagedObjectFlow} for he
 	 * {@link ManagedObjectFlowType}.
-	 *
+	 * 
 	 * @param managedObjectSourceFlowName
 	 *            Name of the {@link ManagedObjectFlowType}.
 	 * @return {@link ManagedObjectFlow}.
@@ -83,7 +85,7 @@ public interface OfficeFloorManagedObjectSource {
 	/**
 	 * Obtains the {@link ManagedObjectTeam} for the
 	 * {@link ManagedObjectTeamType}.
-	 *
+	 * 
 	 * @param managedObjectSourceTeamName
 	 *            Name of the {@link ManagedObjectTeamType}.
 	 * @return {@link ManagedObjectTeam}.
@@ -91,9 +93,20 @@ public interface OfficeFloorManagedObjectSource {
 	ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName);
 
 	/**
+	 * Obtains the {@link ManagedObjectDependency} for the
+	 * {@link ManagedObjectDependencyType} for the Input {@link ManagedObject}.
+	 * 
+	 * @param managedObjectDependencyName
+	 *            Name of the {@link ManagedObjectDependencyType}.
+	 * @return {@link ManagedObjectDependency}.
+	 */
+	ManagedObjectDependency getInputManagedObjectDependency(
+			String managedObjectDependencyName);
+
+	/**
 	 * Obtains the {@link OfficeFloorManagedObject} representing an instance use
 	 * of a {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link OfficeFloorManagedObject}. Typically this
 	 *            will be the name under which the {@link ManagedObject} will be

@@ -388,6 +388,44 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Tests compiling an Input {@link ManagedObject} with dependencies linked
+	 * via the {@link ManagedObjectSource}.
+	 */
+	public void testInputManagedObjectDependencyLinkedToManagedObject() {
+
+		// Record building the office floor
+
+		// Register the office with the work for the input process flow
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				InputManagedObject.class.getName());
+		ManagingOfficeBuilder<?> inputMos = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		DependencyMappingBuilder inputDependencies = this
+				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
+		inputDependencies.mapDependency(0, "SIMPLE");
+		inputMos.linkProcess(0, "SECTION.WORK", "INPUT");
+		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Simple class for {@link ClassManagedObjectSource}.
 	 */
 	public static class SimpleManagedObject {
@@ -421,6 +459,23 @@ public class CompileOfficeFloorManagedObjectTest extends
 		public static interface Processes {
 			void doProcess(Integer parameter);
 		}
+
+		@ProcessInterface
+		Processes processes;
+	}
+
+	/**
+	 * Class for {@link ClassManagedObjectSource} containing a
+	 * {@link ProcessInterface} and a {@link Dependency}.
+	 */
+	public static class InputManagedObject {
+
+		public static interface Processes {
+			void doProcess(String parameter);
+		}
+
+		@Dependency
+		SimpleManagedObject dependency;
 
 		@ProcessInterface
 		Processes processes;
