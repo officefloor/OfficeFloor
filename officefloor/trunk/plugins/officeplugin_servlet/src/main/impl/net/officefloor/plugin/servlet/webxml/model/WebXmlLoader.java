@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.servlet.webxml.model;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -49,6 +50,10 @@ public class WebXmlLoader {
 		// Obtain the web.xml configuration
 		ConfigurationItem webXmlConfigurationItem = context
 				.getConfiguration(webXmlLocation);
+		if (webXmlConfigurationItem == null) {
+			throw new FileNotFoundException("Can not find configuration '"
+					+ webXmlLocation + "'");
+		}
 		InputStream webXmlConfiguration = webXmlConfigurationItem
 				.getConfiguration();
 
