@@ -32,6 +32,9 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -68,7 +71,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshaling/unmarshaling of the {@link OfficeModel} via the
  * {@link ModelRepository}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
@@ -80,7 +83,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -108,7 +111,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getObjectType", "getX", "getY" }, office
 				.getExternalManagedObjects(), new ExternalManagedObjectModel(
 				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName(), null,
-				null, null, 100, 101));
+				null, null, null, 100, 101));
 		ExternalManagedObjectModel extMo = office.getExternalManagedObjects()
 				.get(0);
 		assertList(new String[] { "getAdministratorName", "getOrder" }, extMo
@@ -125,13 +128,31 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeManagedObjectSources(),
 				new OfficeManagedObjectSourceModel("MANAGED_OBJECT_SOURCE",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", "10", null, null, null, null, 200,
-						201));
+						"net.orm.Session", "10", null, null, null, null, null,
+						200, 201));
 		OfficeManagedObjectSourceModel mos = office
 				.getOfficeManagedObjectSources().get(0);
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
 						"MO_TWO", "VALUE_TWO"));
+		assertList(new String[] { "getOfficeInputManagedObjectDependencyName",
+				"getDependencyType" }, mos
+				.getOfficeInputManagedObjectDependencies(),
+				new OfficeInputManagedObjectDependencyModel(
+						"INPUT_DEPENDENCY_ONE", Connection.class.getName()),
+				new OfficeInputManagedObjectDependencyModel(
+						"INPUT_DEPENDENCY_TWO", Connection.class.getName()));
+		assertProperties(
+				new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel(
+						"MANAGED_OBJECT_TWO"), mos
+						.getOfficeInputManagedObjectDependencies().get(0)
+						.getOfficeManagedObject(), "getOfficeManagedObjectName");
+		assertProperties(
+				new OfficeInputManagedObjectDependencyToExternalManagedObjectModel(
+						"EXTERNAL_MANAGED_OBJECT"), mos
+						.getOfficeInputManagedObjectDependencies().get(1)
+						.getExternalManagedObject(),
+				"getExternalManagedObjectName");
 		assertList(new String[] { "getOfficeManagedObjectSourceFlowName",
 				"getArgumentType" }, mos.getOfficeManagedObjectSourceFlows(),
 				new OfficeManagedObjectSourceFlowModel("FLOW", Integer.class
@@ -157,8 +178,9 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getManagedObjectScope", "getX", "getY" }, office
 				.getOfficeManagedObjects(), new OfficeManagedObjectModel(
 				"MANAGED_OBJECT_ONE", "THREAD", null, null, null, null, null,
-				300, 301), new OfficeManagedObjectModel("MANAGED_OBJECT_TWO",
-				"PROCESS", null, null, null, null, null, 310, 311));
+				null, 300, 301), new OfficeManagedObjectModel(
+				"MANAGED_OBJECT_TWO", "PROCESS", null, null, null, null, null,
+				null, 310, 311));
 		OfficeManagedObjectModel mo = office.getOfficeManagedObjects().get(0);
 		assertProperties(
 				new OfficeManagedObjectToOfficeManagedObjectSourceModel(

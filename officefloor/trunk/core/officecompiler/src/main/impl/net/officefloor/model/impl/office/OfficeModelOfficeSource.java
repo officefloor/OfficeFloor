@@ -62,6 +62,9 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -93,7 +96,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeModel} {@link OfficeSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeModelOfficeSource extends AbstractOfficeSource implements
@@ -264,6 +267,62 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				}
 				if (linkedObject != null) {
 					// Link to office object
+					architect.link(dependency, linkedObject);
+				}
+			}
+		}
+
+		// Link the input managed object dependencies
+		for (OfficeManagedObjectSourceModel mosModel : office
+				.getOfficeManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeManagedObjectSource mos = managedObjectSources.get(mosModel
+					.getOfficeManagedObjectSourceName());
+			if (mos == null) {
+				continue; // should always have
+			}
+
+			// Link the input dependencies
+			for (OfficeInputManagedObjectDependencyModel dependencyModel : mosModel
+					.getOfficeInputManagedObjectDependencies()) {
+
+				// Obtain the input dependency
+				ManagedObjectDependency dependency = mos
+						.getInputManagedObjectDependency(dependencyModel
+								.getOfficeInputManagedObjectDependencyName());
+
+				// Determine if linked to managed object
+				OfficeManagedObject linkedManagedObject = null;
+				OfficeInputManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = dependencyModel
+						.getOfficeManagedObject();
+				if (dependencyToMo != null) {
+					OfficeManagedObjectModel linkedMoModel = dependencyToMo
+							.getOfficeManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel
+								.getOfficeManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link to managed object
+					architect.link(dependency, linkedManagedObject);
+				}
+
+				// Determine if linked to external managed object
+				OfficeObject linkedObject = null;
+				OfficeInputManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
+						.getExternalManagedObject();
+				if (dependencyToExtMo != null) {
+					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo
+							.getExternalManagedObject();
+					if (linkedExtMoModel != null) {
+						linkedObject = officeObjects.get(linkedExtMoModel
+								.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link to external managed object
 					architect.link(dependency, linkedObject);
 				}
 			}
@@ -668,7 +727,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Recurses through the {@link OfficeSubSectionModel} instances linking the
 	 * {@link OfficeTaskModel} instances to the {@link DutyModel} instances.
-	 *
+	 * 
 	 * @param subSectionPath
 	 *            Path from top level {@link OfficeSubSectionModel} to current
 	 *            {@link OfficeSubSectionModel}.
@@ -827,7 +886,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Obtains the {@link ManagedObjectScope} from the managed object scope
 	 * name.
-	 *
+	 * 
 	 * @param managedObjectScope
 	 *            Name of the {@link ManagedObjectScope}.
 	 * @param architect
@@ -862,7 +921,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeSectionInputModel}.
-	 *
+	 * 
 	 * @param office
 	 *            {@link OfficeModel}.
 	 * @param input
@@ -891,7 +950,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	/**
 	 * Loads the {@link OfficeTask} instances for the {@link OfficeSubSection}
 	 * and its {@link OfficeSubSection} instances.
-	 *
+	 * 
 	 * @param section
 	 *            {@link OfficeSubSection}.
 	 * @param tasks
@@ -929,7 +988,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param officeTeam
 		 *            {@link OfficeTeam} responsible for this responsibility.
 		 */
@@ -939,7 +998,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Indicates if {@link OfficeTask} is within this responsibility.
-		 *
+		 * 
 		 * @param task
 		 *            {@link OfficeTask}.
 		 * @return <code>true</code> if {@link OfficeTask} is within this
@@ -969,7 +1028,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param order
 		 *            Position in the order that the objects are administered.
 		 * @param managedObject
@@ -992,7 +1051,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		/**
 		 * Obtains the order as an {@link Integer}.
-		 *
+		 * 
 		 * @param order
 		 *            Text order value.
 		 * @return Numeric order value.

@@ -31,6 +31,9 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
@@ -63,7 +66,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link OfficeRepository} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeRepositoryImpl implements OfficeRepository {
@@ -75,7 +78,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -301,6 +304,44 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Connect input managed object dependencies to external managed object
+		for (OfficeManagedObjectSourceModel mos : office
+				.getOfficeManagedObjectSources()) {
+			for (OfficeInputManagedObjectDependencyModel dependency : mos
+					.getOfficeInputManagedObjectDependencies()) {
+				OfficeInputManagedObjectDependencyToExternalManagedObjectModel conn = dependency
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = extMos.get(conn
+							.getExternalManagedObjectName());
+					if (extMo != null) {
+						conn.setOfficeInputManagedObjectDependency(dependency);
+						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect input managed object dependencies to managed object
+		for (OfficeManagedObjectSourceModel mos : office
+				.getOfficeManagedObjectSources()) {
+			for (OfficeInputManagedObjectDependencyModel dependency : mos
+					.getOfficeInputManagedObjectDependencies()) {
+				OfficeInputManagedObjectDependencyToOfficeManagedObjectModel conn = dependency
+						.getOfficeManagedObject();
+				if (conn != null) {
+					OfficeManagedObjectModel mo = managedObjects.get(conn
+							.getOfficeManagedObjectName());
+					if (mo != null) {
+						conn.setOfficeInputManagedObjectDependency(dependency);
+						conn.setOfficeManagedObject(mo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the set of managed object sources
 		Map<String, OfficeManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeManagedObjectSourceModel>();
 		for (OfficeManagedObjectSourceModel managedObjectSource : office
@@ -376,7 +417,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 	/**
 	 * Connects the {@link OfficeTaskModel} to {@link DutyModel} instances.
-	 *
+	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel}.
 	 * @param duties
@@ -534,6 +575,26 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
 			for (OfficeManagedObjectDependencyToOfficeManagedObjectModel conn : mo
 					.getDependentOfficeManagedObjects()) {
+				conn
+						.setOfficeManagedObjectName(mo
+								.getOfficeManagedObjectName());
+			}
+		}
+
+		// Specify external managed objects to input dependencies
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			for (OfficeInputManagedObjectDependencyToExternalManagedObjectModel conn : extMo
+					.getDependentOfficeInputManagedObjects()) {
+				conn.setExternalManagedObjectName(extMo
+						.getExternalManagedObjectName());
+			}
+		}
+
+		// Specify managed objects to input dependencies
+		for (OfficeManagedObjectModel mo : office.getOfficeManagedObjects()) {
+			for (OfficeInputManagedObjectDependencyToOfficeManagedObjectModel conn : mo
+					.getDependentOfficeInputManagedObjects()) {
 				conn
 						.setOfficeManagedObjectName(mo
 								.getOfficeManagedObjectName());

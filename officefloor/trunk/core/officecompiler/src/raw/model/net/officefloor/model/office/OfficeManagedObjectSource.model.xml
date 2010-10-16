@@ -7,6 +7,8 @@
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="OfficeManagedObjectToOfficeManagedObjectSourceModel"
 		name="office managed object" />
+	<list type="OfficeInputManagedObjectDependencyModel" name="office input managed object dependency"
+		plural="office input managed object dependencies" />
 	<list type="OfficeManagedObjectSourceFlowModel" name="office managed object source flow" />
 	<list type="OfficeManagedObjectSourceTeamModel" name="office managed object source team" />
 </model>
