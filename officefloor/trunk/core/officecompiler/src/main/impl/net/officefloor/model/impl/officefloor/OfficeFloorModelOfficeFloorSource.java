@@ -58,6 +58,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
@@ -71,7 +73,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeFloorModel} {@link OfficeFloorSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorModelOfficeFloorSource extends
@@ -212,6 +214,53 @@ public class OfficeFloorModelOfficeFloorSource extends
 				// Have bound managed object source so bind it
 				inputManagedObject
 						.setBoundOfficeFloorManagedObjectSource(boundManagedObjectSource);
+			}
+
+			// Link dependencies for the input managed object
+			for (OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel mosToInputMoModel : inputManagedObjectModel
+					.getOfficeFloorManagedObjectSources()) {
+
+				// Obtain the inputting managed object source
+				OfficeFloorManagedObjectSource inputMos = null;
+				OfficeFloorManagedObjectSourceModel inputMosModel = mosToInputMoModel
+						.getOfficeFloorManagedObjectSource();
+				if (inputMosModel != null) {
+					inputMos = officeFloorManagedObjectSources
+							.get(inputMosModel
+									.getOfficeFloorManagedObjectSourceName());
+				}
+				if (inputMos != null) {
+					// Have managed object source so link input dependencies
+					for (OfficeFloorManagedObjectSourceInputDependencyModel inputDependencyModel : inputMosModel
+							.getOfficeFloorManagedObjectSourceInputDependencies()) {
+
+						// Add the dependency
+						String dependencyName = inputDependencyModel
+								.getOfficeFloorManagedObjectSourceInputDependencyName();
+						ManagedObjectDependency inputDependency = inputMos
+								.getInputManagedObjectDependency(dependencyName);
+
+						// Obtain the dependent managed object
+						OfficeFloorManagedObject dependentManagedObject = null;
+						OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel dependencyToMo = inputDependencyModel
+								.getOfficeFloorManagedObject();
+						if (dependencyToMo != null) {
+							OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo
+									.getOfficeFloorManagedObject();
+							if (dependentMoModel != null) {
+								dependentManagedObject = officeFloorManagedObjects
+										.get(dependentMoModel
+												.getOfficeFloorManagedObjectName());
+							}
+						}
+						if (dependentManagedObject == null) {
+							continue; // must have dependent managed object
+						}
+
+						// Link the input dependency to managed object
+						deployer.link(inputDependency, dependentManagedObject);
+					}
+				}
 			}
 		}
 
@@ -490,7 +539,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 	/**
 	 * Obtains {@link DeployedOfficeModel} for the
 	 * {@link DeployedOfficeInputModel}.
-	 *
+	 * 
 	 * @param officeInputModel
 	 *            {@link DeployedOfficeInputModel}.
 	 * @param officeFloor
@@ -519,7 +568,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 	/**
 	 * Obtains the {@link ManagedObjectScope} from the managed object scope
 	 * name.
-	 *
+	 * 
 	 * @param managedObjectScope
 	 *            Name of the {@link ManagedObjectScope}.
 	 * @param deployer

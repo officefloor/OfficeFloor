@@ -26,7 +26,9 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -51,6 +53,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
@@ -103,6 +106,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * names.
 	 */
 	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
+
+	/**
+	 * {@link ManagedObjectDependencyNode} instances by their
+	 * {@link ManagedObjectDependency} names. This is for the Input
+	 * {@link ManagedObject} dependencies.
+	 */
+	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<String, ManagedObjectDependencyNode>();
 
 	/**
 	 * Registry of all {@link ManagedObjectNode} instances within a location.
@@ -513,10 +523,49 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				ManagedObjectDependencyType<?>[] dependencyTypes = managedObjectType
 						.getDependencyTypes();
 				if (dependencyTypes.length > 0) {
-					// TODO load input dependencies
-					System.err
-							.println("TODO implement loading input dependency mappings: "
-									+ inputDependencyMappings);
+
+					// Load the dependencies for the input managed object
+					for (ManagedObjectDependencyType<?> dependencyType : managedObjectType
+							.getDependencyTypes()) {
+
+						// Obtain the dependency type details
+						String dependencyName = dependencyType
+								.getDependencyName();
+						Enum dependencyKey = dependencyType.getKey();
+						int dependencyIndex = dependencyType.getIndex();
+
+						// Obtain the dependency
+						ManagedObjectDependencyNode dependencyNode = this.inputDependencies
+								.get(dependencyName);
+						BoundManagedObjectNode dependency = LinkUtil
+								.retrieveTarget(dependencyNode,
+										BoundManagedObjectNode.class,
+										"Dependency " + dependencyName,
+										this.locationType, this.location,
+										AssetType.MANAGED_OBJECT,
+										this.managedObjectSourceName + "->"
+												+ inputBoundManagedObjectName,
+										this.context.getCompilerIssues());
+						if (dependency == null) {
+							continue; // must have dependency
+						}
+
+						// Ensure dependent managed object is built into office
+						dependency.buildOfficeManagedObject(managingOffice,
+								officeBuilder);
+
+						// Link the dependency
+						String dependentManagedObjectName = dependency
+								.getBoundManagedObjectName();
+						if (dependencyKey != null) {
+							inputDependencyMappings.mapDependency(
+									dependencyKey, dependentManagedObjectName);
+						} else {
+							inputDependencyMappings
+									.mapDependency(dependencyIndex,
+											dependentManagedObjectName);
+						}
+					}
 				}
 			}
 		}
@@ -703,6 +752,24 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			this.teams.put(managedObjectSourceTeamName, team);
 		}
 		return team;
+	}
+
+	@Override
+	public ManagedObjectDependency getInputManagedObjectDependency(
+			String managedObjectDependencyName) {
+		// Obtain and return the dependency for the name
+		ManagedObjectDependencyNode dependency = this.inputDependencies
+				.get(managedObjectDependencyName);
+		if (dependency == null) {
+			// Create the managed object dependency
+			dependency = new ManagedObjectDependencyNodeImpl(
+					managedObjectDependencyName, this.locationType,
+					this.location, this.context);
+
+			// Add the managed object dependency
+			this.inputDependencies.put(managedObjectDependencyName, dependency);
+		}
+		return dependency;
 	}
 
 	/*

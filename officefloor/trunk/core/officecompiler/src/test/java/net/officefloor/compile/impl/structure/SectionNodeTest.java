@@ -23,6 +23,7 @@ import java.sql.Connection;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -1276,6 +1277,72 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Ensure only can link once
 		this.node.link(dependency, moSourceTarget.addSectionManagedObject(
 				"ANOTHER", ManagedObjectScope.WORK));
+		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link Input {@link ManagedObjectDependency} to the
+	 * {@link SectionObject}.
+	 */
+	public void testLinkInputManagedObjectDependencyToSectionObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObjectSource moSource = this.node
+				.addSectionManagedObjectSource("MO_SOURCE", null);
+		ManagedObjectDependency dependency = moSource
+				.getInputManagedObjectDependency("DEPENDENCY");
+		SectionObject moTarget = this.node.addSectionObject("MO_TARGET",
+				Connection.class.getName());
+		this.node.link(dependency, moTarget);
+		assertObjectLink(
+				"input managed object dependency -> office floor managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, this.node.addSectionObject("ANOTHER",
+				Connection.class.getName()));
+		assertObjectLink("Can only link once", dependency, moTarget);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link Input {@link ManagedObjectDependency} to the
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testLinkInputManagedObjectDependencyToSectionManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObjectSource moSource = this.node
+				.addSectionManagedObjectSource("MO_SOURCE", null);
+		ManagedObjectDependency dependency = moSource
+				.getInputManagedObjectDependency("DEPENDENCY");
+		SectionManagedObjectSource moSourceTarget = this.node
+				.addSectionManagedObjectSource("MO_SOURCE_TARGET", null);
+		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject(
+				"MO_TARGET", ManagedObjectScope.PROCESS);
+		this.node.link(dependency, moTarget);
+		assertObjectLink(
+				"input managed object dependency -> office floor managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, moSourceTarget.addSectionManagedObject(
+				"ANOTHER", ManagedObjectScope.PROCESS));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();

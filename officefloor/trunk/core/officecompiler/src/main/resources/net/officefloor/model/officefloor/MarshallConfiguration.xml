@@ -41,7 +41,7 @@
 			<collection method="getOfficeFloorManagedObjectSourceInputDependencies">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel"
-					element="dependency">
+					element="input-dependency">
 					<attributes>
 						<attribute method="getOfficeFloorManagedObjectSourceInputDependencyName"
 							attribute="name" />
