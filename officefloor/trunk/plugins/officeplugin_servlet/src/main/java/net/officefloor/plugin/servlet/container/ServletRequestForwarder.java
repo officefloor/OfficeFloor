@@ -45,7 +45,7 @@ public interface ServletRequestForwarder {
 	 * Name of attribute in the {@link ServletRequest} containing this
 	 * {@link ServletRequestForwarder}.
 	 */
-	static String ATTRIBUTE_FORWARDER = "#net.officefloor.servlet.request.forwarder#";
+	String ATTRIBUTE_FORWARDER = "#net.officefloor.servlet.request.forwarder#";
 
 	/**
 	 * Forwards the {@link ServletRequest}.

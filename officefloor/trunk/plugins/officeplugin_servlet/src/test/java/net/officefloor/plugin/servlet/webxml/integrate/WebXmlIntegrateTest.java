@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.servlet.webxml.integrate;
 
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import net.officefloor.plugin.servlet.container.integrate.MockHttpServletServer;
@@ -47,6 +48,27 @@ public class WebXmlIntegrateTest extends AbstractWebXmlTestCase {
 	 */
 	public void testSingleServlet() {
 		this.doTest("/path", "SingleServlet");
+	}
+
+	/**
+	 * Ensure {@link Filter} the {@link Servlet}.
+	 */
+	public void testFiltering() {
+		this.doTest("/path", "Filter Dispatch Filter Handle");
+	}
+
+	/**
+	 * Ensure can configure a MIME mapping.
+	 */
+	public void testMimeMappings() {
+		this.doTest("/mime-mapping?extension=test", "plain/test");
+	}
+
+	/**
+	 * Ensure can configure context params and init params.
+	 */
+	public void testParams() {
+		this.doTest("/context-param?param=test", "available");
 	}
 
 	/**

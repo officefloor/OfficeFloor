@@ -30,6 +30,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -54,6 +56,8 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
+import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
+import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
@@ -285,6 +289,21 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 		protected final SectionManagedObject OFFICE_SERVLET_CONTEXT_MO = createMock(SectionManagedObject.class);
 
 		/**
+		 * {@link FilterInstance} instances.
+		 */
+		protected final List<FilterInstance> filters = new LinkedList<FilterInstance>();
+
+		/**
+		 * {@link FilterMappings}.
+		 */
+		protected final FilterMappings filterMappings = new FilterMappings();
+
+		/**
+		 * {@link MimeMapping} instances.
+		 */
+		protected final List<MimeMapping> mimeMappings = new LinkedList<MimeMapping>();
+
+		/**
 		 * {@link SectionDesigner}.
 		 */
 		private SectionDesigner designer;
@@ -336,9 +355,44 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 		}
 
 		/**
-		 * Records creating the {@link OfficeServletContext}.
+		 * Adds a {@link FilterInstance} for recording.
+		 * 
+		 * @param filter
+		 *            {@link FilterInstance}.
 		 */
-		protected void recordOfficeServletContext() {
+		protected void recordFilter(FilterInstance filter) {
+			this.filters.add(filter);
+		}
+
+		/**
+		 * Obtains the {@link FilterMappings}.
+		 * 
+		 * @return {@link FilterMappings}.
+		 */
+		protected FilterMappings getFilterMappings() {
+			return this.filterMappings;
+		}
+
+		/**
+		 * Records a MIME mapping.
+		 * 
+		 * @param extension
+		 *            Extension.
+		 * @param mimeType
+		 *            MIME type.
+		 */
+		protected void recordMimeMapping(String extension, String mimeType) {
+			this.mimeMappings.add(new MimeMapping(extension, mimeType));
+		}
+
+		/**
+		 * Records creating the {@link OfficeServletContext}.
+		 * 
+		 * @param contextParamNameValuePairs
+		 *            Expected context parameters.
+		 */
+		protected void recordOfficeServletContext(
+				String... contextParamNameValuePairs) {
 
 			// Record loading the office servlet context managed object source
 			final SectionManagedObjectSource source = createMock(SectionManagedObjectSource.class);
@@ -351,10 +405,28 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 							OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
 							"OfficeFloor");
 
+			// Record the context parameters
+			for (int i = 0; i < contextParamNameValuePairs.length; i += 2) {
+				String name = contextParamNameValuePairs[i];
+				String value = contextParamNameValuePairs[i + 1];
+				source
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
+										+ name, value);
+			}
+
 			// Record loading the office servlet context managed object
 			recordReturn(source, source.addSectionManagedObject(
 					"OfficeServletContext", ManagedObjectScope.PROCESS),
 					OFFICE_SERVLET_CONTEXT_MO);
+
+			// Record the MIME mappings
+			for (MimeMapping mapping : this.mimeMappings) {
+				source
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
+										+ mapping.extension, mapping.mimeType);
+			}
 
 			// Record linking servlet server dependency
 			final ManagedObjectDependency servletServerDependency = createMock(ManagedObjectDependency.class);
@@ -362,6 +434,20 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 					.getManagedObjectDependency("SERVLET_SERVER"),
 					servletServerDependency);
 			this.designer.link(servletServerDependency, SERVLET_SERVER_OBJECT);
+
+			// Create properties for the filters
+			PropertyList filterProperties = OfficeFloorCompiler
+					.newPropertyList();
+			for (FilterInstance filter : this.filters) {
+				filter.outputProperties(filterProperties);
+			}
+			this.filterMappings.outputProperties(filterProperties);
+
+			// Record the filter properties
+			for (Property filterProperty : filterProperties) {
+				source.addProperty(filterProperty.getName(), filterProperty
+						.getValue());
+			}
 		}
 
 		/**
@@ -416,7 +502,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			recordReturn(this.designer, this.designer.addSectionWork(
 					servletName, HttpServletWorkSource.class.getName()), work);
 			work.addProperty(HttpServletWorkSource.PROPERTY_SERVLET_NAME,
-					"Test");
+					servletName);
 			work.addProperty(
 					HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
 					MockHttpServlet.class.getName());
@@ -548,6 +634,35 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 		public String[] getClasspath() {
 			fail("Should not need class path for configuration item");
 			return null;
+		}
+	}
+
+	/**
+	 * MIME mapping.
+	 */
+	private static class MimeMapping {
+
+		/**
+		 * Extension.
+		 */
+		public final String extension;
+
+		/**
+		 * MIME type.
+		 */
+		public final String mimeType;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param extension
+		 *            Extension.
+		 * @param mimeType
+		 *            MIME type.
+		 */
+		public MimeMapping(String extension, String mimeType) {
+			this.extension = extension;
+			this.mimeType = mimeType;
 		}
 	}
 

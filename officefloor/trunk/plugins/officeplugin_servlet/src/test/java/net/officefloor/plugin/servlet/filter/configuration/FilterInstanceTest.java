@@ -35,8 +35,8 @@ public class FilterInstanceTest extends AbstractConfigurationTestCase {
 		// Create and configure the filter
 		FilterInstance instance = new FilterInstance("Filter");
 		instance.setClassName("MockFilter");
-		instance.getInitParameters().put("one", "A");
-		instance.getInitParameters().put("two", "B");
+		instance.addInitParameter("one", "A");
+		instance.addInitParameter("two", "B");
 
 		// Obtain the properties
 		PropertyList properties = createPropertyList();
