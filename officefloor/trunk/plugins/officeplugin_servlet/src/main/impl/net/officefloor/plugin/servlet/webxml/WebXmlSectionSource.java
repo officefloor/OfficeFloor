@@ -48,7 +48,11 @@ import net.officefloor.plugin.servlet.context.source.OfficeServletContextManaged
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.FlowKeys;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
+import net.officefloor.plugin.servlet.webxml.model.ContextParamModel;
+import net.officefloor.plugin.servlet.webxml.model.FilterMappingModel;
+import net.officefloor.plugin.servlet.webxml.model.FilterModel;
 import net.officefloor.plugin.servlet.webxml.model.InitParamModel;
+import net.officefloor.plugin.servlet.webxml.model.MimeMappingModel;
 import net.officefloor.plugin.servlet.webxml.model.ServletMappingModel;
 import net.officefloor.plugin.servlet.webxml.model.ServletModel;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
@@ -122,12 +126,98 @@ public class WebXmlSectionSource extends AbstractSectionSource {
 				.addProperty(
 						OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
 						servletContextName);
+		for (ContextParamModel contextParam : webApp.getContextParams()) {
+			officeServletContextMos
+					.addProperty(
+							OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
+									+ contextParam.getName(), contextParam
+									.getValue());
+		}
 		SectionManagedObject officeServletContextMo = officeServletContextMos
 				.addSectionManagedObject("OfficeServletContext",
 						ManagedObjectScope.PROCESS);
 		ManagedObjectDependency contextToServerDependency = officeServletContextMo
 				.getManagedObjectDependency("SERVLET_SERVER");
 		designer.link(contextToServerDependency, servletServerMo);
+
+		// Configure the MIME mappings
+		for (MimeMappingModel mimeMapping : webApp.getMimeMappings()) {
+			officeServletContextMos
+					.addProperty(
+							OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
+									+ mimeMapping.getExtension(), mimeMapping
+									.getMimeType());
+		}
+
+		// Configure the filters
+		for (FilterModel filter : webApp.getFilters()) {
+			String filterName = filter.getFilterName();
+			String filterClass = filter.getFilterClass().trim();
+			officeServletContextMos
+					.addProperty(
+							OfficeServletContextManagedObjectSource.PROPERTY_FILTER_INSTANCE_NAME_PREFIX
+									+ filterName, filterClass);
+			for (InitParamModel initParam : filter.getInitParams()) {
+				officeServletContextMos
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_INSTANCE_INIT_PREFIX
+										+ filterName
+										+ "."
+										+ initParam.getName(), initParam
+										.getValue());
+			}
+		}
+
+		// Configure the filter mappings
+		int filterMappingIndex = 0;
+		for (FilterMappingModel filterMapping : webApp.getFilterMappings()) {
+			String filterName = filterMapping.getFilterName();
+
+			// Create the mapping types
+			String dispatchers = null;
+			for (String dispatcher : filterMapping.getDispatchers()) {
+				dispatchers = (dispatchers == null ? "" : dispatchers + ",")
+						+ dispatcher;
+			}
+
+			// Configure the filter URL pattern
+			for (String urlPattern : filterMapping.getUrlPatterns()) {
+				String index = String.valueOf(filterMappingIndex++);
+				officeServletContextMos
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_INDEX_PREFIX
+										+ index, filterName);
+				officeServletContextMos
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_URL_PREFIX
+										+ index, urlPattern);
+				if (dispatchers != null) {
+					officeServletContextMos
+							.addProperty(
+									OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_TYPE_PREFIX
+											+ index, dispatchers);
+				}
+			}
+
+			// Configure the filter servlet names
+			for (String servletName : filterMapping.getServletNames()) {
+				String index = String.valueOf(filterMappingIndex++);
+				officeServletContextMos
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_INDEX_PREFIX
+										+ index, filterName);
+				officeServletContextMos
+						.addProperty(
+								OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_SERVLET_PREFIX
+										+ index, servletName);
+				if (dispatchers != null) {
+					officeServletContextMos
+							.addProperty(
+									OfficeServletContextManagedObjectSource.PROPERTY_FILTER_MAPPING_TYPE_PREFIX
+											+ index, dispatchers);
+				}
+			}
+		}
 
 		// Provide servicer to route requests to Servlets
 		SectionWork routeWork = designer.addSectionWork("Route",

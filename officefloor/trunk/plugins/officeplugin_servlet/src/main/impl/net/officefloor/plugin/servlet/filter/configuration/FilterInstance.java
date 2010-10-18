@@ -81,7 +81,7 @@ public class FilterInstance {
 	/**
 	 * Init parameters for the {@link Filter}.
 	 */
-	private final Map<String, String> initParameters = new HashMap<String, String>();
+	private final List<InitParam> initParameters = new LinkedList<InitParam>();
 
 	/**
 	 * Initiate.
@@ -108,8 +108,8 @@ public class FilterInstance {
 		this.name = name;
 		this.className = className;
 		for (int i = 0; i < initParameterNameValues.length; i += 2) {
-			this.initParameters.put(initParameterNameValues[i],
-					initParameterNameValues[i + 1]);
+			this.initParameters.add(new InitParam(initParameterNameValues[i],
+					initParameterNameValues[i + 1]));
 		}
 	}
 
@@ -152,12 +152,28 @@ public class FilterInstance {
 	}
 
 	/**
+	 * Adds an init parameter.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 */
+	public void addInitParameter(String name, String value) {
+		this.initParameters.add(new InitParam(name, value));
+	}
+
+	/**
 	 * Obtains the init parameters for the {@link Filter}.
 	 * 
 	 * @return Init parameters for the {@link Filter}.
 	 */
 	public Map<String, String> getInitParameters() {
-		return this.initParameters;
+		Map<String, String> params = new HashMap<String, String>();
+		for (InitParam initParam : this.initParameters) {
+			params.put(initParam.name, initParam.value);
+		}
+		return params;
 	}
 
 	/**
@@ -176,9 +192,9 @@ public class FilterInstance {
 		// Write out the filter init parameters
 		String initParameterPrefix = OfficeServletContextManagedObjectSource.PROPERTY_FILTER_INSTANCE_INIT_PREFIX
 				+ this.name + ".";
-		for (String name : this.initParameters.keySet()) {
-			String value = this.initParameters.get(name);
-			properties.addProperty(initParameterPrefix + name).setValue(value);
+		for (InitParam initParam : this.initParameters) {
+			properties.addProperty(initParameterPrefix + initParam.name)
+					.setValue(initParam.value);
 		}
 	}
 
@@ -211,7 +227,36 @@ public class FilterInstance {
 			String value = property.getValue();
 
 			// Configure in the init parameter
-			this.initParameters.put(name, value);
+			this.initParameters.add(new InitParam(name, value));
+		}
+	}
+
+	/**
+	 * Init-param for the {@link Filter}.
+	 */
+	private static class InitParam {
+
+		/**
+		 * Name.
+		 */
+		public final String name;
+
+		/**
+		 * Value.
+		 */
+		public final String value;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param value
+		 *            Value.
+		 */
+		public InitParam(String name, String value) {
+			this.name = name;
+			this.value = value;
 		}
 	}
 

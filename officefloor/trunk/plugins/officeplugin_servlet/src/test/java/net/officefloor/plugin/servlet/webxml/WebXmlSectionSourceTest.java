@@ -20,13 +20,18 @@ package net.officefloor.plugin.servlet.webxml;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
+import net.officefloor.plugin.servlet.filter.configuration.FilterMappings;
 import net.officefloor.plugin.servlet.host.ServletServer;
+import net.officefloor.plugin.servlet.mapping.MappingType;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.session.HttpSession;
@@ -123,6 +128,82 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 				this.recordOfficeServletContext();
 				this.recordRouteService();
 				this.recordHttpServlet("Test", "/", "one", "A", "two", "B");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can load a {@link Filter}.
+	 */
+	public void testFilter() {
+		this.doDesignTest("Filter.xml", new DesignRecorder() {
+			@Override
+			void record(SectionDesigner designer) {
+				// Record filter
+				this.recordInit();
+				this.recordFilter(new FilterInstance("Filter", MockFilter.class
+						.getName(), "ONE", "a", "TWO", "b"));
+				this.getFilterMappings().addFilterMapping("Filter", "/", null);
+				this.recordOfficeServletContext();
+				this.recordRouteService();
+				this.recordHttpServlet("Servlet", "/");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can load a {@link Filter}.
+	 */
+	public void testComplexFilterMappings() {
+		this.doDesignTest("ComplexFilterMappings.xml", new DesignRecorder() {
+			@Override
+			void record(SectionDesigner designer) {
+				// Record filter
+				this.recordInit();
+				this.recordFilter(new FilterInstance("Filter", MockFilter.class
+						.getName()));
+				FilterMappings mappings = this.getFilterMappings();
+				mappings.addFilterMapping("Filter", "/path/*", null);
+				mappings.addFilterMapping("Filter", "*.extension", null);
+				mappings.addFilterMapping("Filter", null, "Servlet",
+						MappingType.REQUEST, MappingType.FORWARD,
+						MappingType.INCLUDE);
+				this.recordOfficeServletContext();
+				this.recordRouteService();
+				this.recordHttpServlet("Servlet", "/");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can configure MIME mappings.
+	 */
+	public void testMimeMappings() {
+		this.doDesignTest("MimeMappings.xml", new DesignRecorder() {
+			@Override
+			void record(SectionDesigner designer) {
+				// Record MIME mappings
+				this.recordInit();
+				this.recordMimeMapping("test", "plain/test");
+				this.recordOfficeServletContext();
+				this.recordRouteService();
+				this.recordHttpServlet("Servlet", "/");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can configure {@link ServletContext} init parameters.
+	 */
+	public void testContextParams() {
+		this.doDesignTest("ContextParams.xml", new DesignRecorder() {
+			@Override
+			void record(SectionDesigner designer) {
+				// Record context params
+				this.recordInit();
+				this.recordOfficeServletContext("one", "A", "two", "B");
+				this.recordRouteService();
+				this.recordHttpServlet("Servlet", "/");
 			}
 		});
 	}
