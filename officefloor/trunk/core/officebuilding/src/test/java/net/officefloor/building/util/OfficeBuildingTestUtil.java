@@ -25,16 +25,16 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 /**
- * Utility methods for testing the {@link OfficeBuilding} functionality.
+ * Utility methods for testing the {@link OfficeBuildingMain} functionality.
  * 
  * @author Daniel Sagenschneider
  */

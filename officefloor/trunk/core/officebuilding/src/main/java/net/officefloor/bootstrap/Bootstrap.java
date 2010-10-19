@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.building.bootstrap;
+package net.officefloor.bootstrap;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

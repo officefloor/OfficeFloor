@@ -17,12 +17,12 @@
  */
 package net.officefloor.building.process.officefloor;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * Indicates failure to compile the {@link OfficeFloor} for opening within the
- * {@link OfficeBuilding}.
+ * {@link OfficeBuildingMain}.
  * 
  * @author Daniel Sagenschneider
  */

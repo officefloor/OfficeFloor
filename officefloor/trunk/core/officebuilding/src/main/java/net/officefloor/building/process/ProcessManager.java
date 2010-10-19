@@ -45,7 +45,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 
 import mx4j.tools.remote.proxy.RemoteMBeanProxy;
-import net.officefloor.building.OfficeBuilding;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * Manages a {@link Process}.
@@ -126,14 +126,14 @@ public class ProcessManager implements ProcessManagerMBean {
 		// Obtain the class path
 		String classPath = System.getProperty("java.class.path");
 		String additionalClassPath = configuration.getAdditionalClassPath();
-		if (!OfficeBuilding.isBlank(additionalClassPath)) {
+		if (!OfficeBuildingMain.isBlank(additionalClassPath)) {
 			classPath = classPath + File.pathSeparator + additionalClassPath;
 		}
 
 		// Add the JVM Options
 		String[] jvmOptions = new String[0];
 		String jvmOptionText = configuration.getJvmOptions();
-		if (!OfficeBuilding.isBlank(jvmOptionText)) {
+		if (!OfficeBuildingMain.isBlank(jvmOptionText)) {
 			// Split the options for the command (by white spacing)
 			jvmOptions = jvmOptionText.split("(\\s)+");
 		}

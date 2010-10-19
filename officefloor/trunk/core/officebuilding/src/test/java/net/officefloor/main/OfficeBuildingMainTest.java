@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.building;
+package net.officefloor.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,16 +34,17 @@ import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
- * Tests the {@link OfficeBuilding}.
+ * Tests the {@link OfficeBuildingMain}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingTest extends OfficeFrameTestCase {
+public class OfficeBuildingMainTest extends OfficeFrameTestCase {
 
 	/**
-	 * Default {@link OfficeBuilding} port.
+	 * Default {@link OfficeBuildingMain} port.
 	 */
 	public static final int DEFAULT_OFFICE_BUILDING_PORT = 13778;
 
@@ -71,24 +72,24 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Flag that testing
-		OfficeBuilding.isTesting = true;
+		OfficeBuildingMain.isTesting = true;
 
 		// Provide OfficeBuilding Home
 		File officeBuildingHomeDir = this.findFile(
-				OfficeBuilding.PROPERTIES_FILE_RELATIVE_PATH).getParentFile()
+				OfficeBuildingMain.PROPERTIES_FILE_RELATIVE_PATH).getParentFile()
 				.getParentFile();
-		System.setProperty(OfficeBuilding.OFFICE_BUILDING_HOME,
+		System.setProperty(OfficeBuildingMain.OFFICE_BUILDING_HOME,
 				officeBuildingHomeDir.getAbsolutePath());
 
 		// Provide the local repository
-		System.setProperty(OfficeBuilding.PROPERTY_LOCAL_REPOSITORY_PATH,
+		System.setProperty(OfficeBuildingMain.PROPERTY_LOCAL_REPOSITORY_PATH,
 				OfficeBuildingTestUtil.getLocalRepositoryDirectory()
 						.getAbsolutePath());
 
 		// Provide remote repository path (use local to stop download)
 		String localRepositoryUrl = ClassPathBuilderFactory
 				.getLocalRepositoryDirectory(null).toURI().toURL().toString();
-		System.setProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL,
+		System.setProperty(OfficeBuildingMain.PROPERTY_REMOTE_REPOSITORY_URL,
 				localRepositoryUrl);
 
 		// Collect output
@@ -103,14 +104,14 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 
 		// Ensure stop the OfficeFloor
 		try {
-			OfficeBuilding.main("stop");
+			OfficeBuildingMain.main("stop");
 		} catch (Throwable ex) {
 		}
 
 		// Clear the system properties specified for test
-		System.clearProperty(OfficeBuilding.OFFICE_BUILDING_HOME);
-		System.clearProperty(OfficeBuilding.PROPERTY_LOCAL_REPOSITORY_PATH);
-		System.clearProperty(OfficeBuilding.PROPERTY_REMOTE_REPOSITORY_URL);
+		System.clearProperty(OfficeBuildingMain.OFFICE_BUILDING_HOME);
+		System.clearProperty(OfficeBuildingMain.PROPERTY_LOCAL_REPOSITORY_PATH);
+		System.clearProperty(OfficeBuildingMain.PROPERTY_REMOTE_REPOSITORY_URL);
 
 		// Reinstate output streams
 		System.setOut(this._stdout);
@@ -118,13 +119,13 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can start and then stop the {@link OfficeBuilding}.
+	 * Ensure can start and then stop the {@link OfficeBuildingMain}.
 	 */
 	public void testOfficeBuildingLifecycle_start_stop() throws Throwable {
 
 		// Start the Office Building
 		long beforeStartTime = System.currentTimeMillis();
-		OfficeBuilding.main("start");
+		OfficeBuildingMain.main("start");
 		long afterStartTime = System.currentTimeMillis();
 
 		// Ensure started
@@ -136,7 +137,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 				((beforeStartTime <= startTime) && (startTime <= afterStartTime)));
 
 		// Stop the Office Building (pulls in default stop time)
-		OfficeBuilding.main("stop");
+		OfficeBuildingMain.main("stop");
 
 		// Ensure stopped
 		try {
@@ -157,7 +158,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		final String HOST = "server";
 
 		// Obtain the URL
-		OfficeBuilding.main("url", HOST, String
+		OfficeBuildingMain.main("url", HOST, String
 				.valueOf(DEFAULT_OFFICE_BUILDING_PORT));
 
 		// Validate output URL
@@ -175,13 +176,13 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 
 		// Attempt with no command
 		try {
-			OfficeBuilding.main();
+			OfficeBuildingMain.main();
 			fail("Should not succeed as requires command");
 		} catch (Error ex) {
 			validateStreamContent("Should provide usage message",
-					OfficeBuilding.USAGE_MESSAGE + "\n", this.stderr);
+					OfficeBuildingMain.USAGE_MESSAGE + "\n", this.stderr);
 			assertEquals("Incorrect requires command cause", "Exit: "
-					+ OfficeBuilding.USAGE_MESSAGE, ex.getMessage());
+					+ OfficeBuildingMain.USAGE_MESSAGE, ex.getMessage());
 		}
 	}
 
@@ -192,16 +193,16 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 
 		// Attempt with unknown command
 		try {
-			OfficeBuilding.main("unknown");
+			OfficeBuildingMain.main("unknown");
 			fail("Should not succeed as unknown command");
 		} catch (Error ex) {
 			String errorMessage = "ERROR: unknown command 'unknown'\n\n"
-					+ OfficeBuilding.USAGE_MESSAGE + "\n";
+					+ OfficeBuildingMain.USAGE_MESSAGE + "\n";
 			validateStreamContent("Should provide usage message", errorMessage,
 					this.stderr);
 			assertEquals("Incorrect unknown command cause",
 					"Exit: ERROR: unknown command 'unknown'\n\n"
-							+ OfficeBuilding.USAGE_MESSAGE, ex.getMessage());
+							+ OfficeBuildingMain.USAGE_MESSAGE, ex.getMessage());
 		}
 	}
 
@@ -216,11 +217,11 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		File jarFilePath = this.findFile("lib/MockCore.jar");
 
 		// Start the OfficeBuilding
-		OfficeBuilding.main("start");
+		OfficeBuildingMain.main("start");
 		this.stdout.reset(); // ignore output
 
 		// Open the OfficeFloor (via a Jar)
-		OfficeBuilding
+		OfficeBuildingMain
 				.main("open", PROCESS_NAME, jarFilePath.getAbsolutePath(),
 						"net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor");
 		validateStreamContent("Should be no error output", "", this.stderr);
@@ -234,7 +235,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		processes.append(PROCESS_NAME + "\n");
 
 		// List the tasks for the OfficeFloor
-		OfficeBuilding.main("list");
+		OfficeBuildingMain.main("list");
 		validateStreamContent("Incorrect process listing",
 				processes.toString(), this.stdout);
 		this.stdout.reset(); // reset for next listing
@@ -247,12 +248,12 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 				+ ")\n");
 
 		// List the tasks for the OfficeFloor
-		OfficeBuilding.main("list", PROCESS_NAME);
+		OfficeBuildingMain.main("list", PROCESS_NAME);
 		validateStreamContent("Incorrect task listing", tasks.toString(),
 				this.stdout);
 
 		// Stop the OfficeBuilding
-		OfficeBuilding.main("stop");
+		OfficeBuildingMain.main("stop");
 	}
 
 	/**
@@ -265,11 +266,11 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 				.getOfficeFloorArtifactVersion("officecompiler");
 
 		// Start the OfficeBuilding
-		OfficeBuilding.main("start");
+		OfficeBuildingMain.main("start");
 		this.stdout.reset(); // ignore output
 
 		// Open the OfficeFloor (via an Artifact)
-		OfficeBuilding
+		OfficeBuildingMain
 				.main("open", PROCESS_NAME,
 						"net.officefloor.core:officecompiler:"
 								+ OFFICE_FLOOR_VERSION,
@@ -283,7 +284,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the Task (to ensure OfficeFloor is open by writing to file)
-		OfficeBuilding.main("invoke", PROCESS_NAME, "OFFICE", "SECTION.WORK",
+		OfficeBuildingMain.main("invoke", PROCESS_NAME, "OFFICE", "SECTION.WORK",
 				"writeMessage", tempFile.getAbsolutePath());
 		validateStreamContent("Should be no errors", "", this.stderr);
 
@@ -293,7 +294,7 @@ public class OfficeBuildingTest extends OfficeFrameTestCase {
 				fileContent);
 
 		// Stop the OfficeBuilding
-		OfficeBuilding.main("stop");
+		OfficeBuildingMain.main("stop");
 	}
 
 	/**

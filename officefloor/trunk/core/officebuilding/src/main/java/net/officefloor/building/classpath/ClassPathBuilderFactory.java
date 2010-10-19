@@ -20,7 +20,7 @@ package net.officefloor.building.classpath;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import net.officefloor.building.OfficeBuilding;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
@@ -99,7 +99,7 @@ public class ClassPathBuilderFactory {
 
 		// No fall back path so use temporary directory
 		localRepositoryDirectory = new File(System
-				.getProperty("java.io.tmpdir"), OfficeBuilding.class
+				.getProperty("java.io.tmpdir"), OfficeBuildingMain.class
 				.getSimpleName()
 				+ "Repository");
 		ensureDirectoryExists(localRepositoryDirectory);

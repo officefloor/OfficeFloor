@@ -26,7 +26,7 @@
 							<tasks>
 								<jar basedir="${project.build.outputDirectory}" 
 									destFile="${project.build.directory}/boot.jar" 
-									includes="net/officefloor/building/bootstrap/*" />
+									includes="net/officefloor/bootstrap/*" />
 							</tasks>
 						</configuration>
 					</execution>

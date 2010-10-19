@@ -22,7 +22,7 @@ import java.rmi.registry.Registry;
 
 import javax.management.MBeanServer;
 
-import net.officefloor.building.OfficeBuilding;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * MBean interface for the {@link ProcessManager}.
@@ -50,7 +50,7 @@ public interface ProcessManagerMBean {
 	 * Obtains the unique name space for {@link Process}.
 	 * <p>
 	 * This is the unique name that identifies the {@link Process} running
-	 * within the {@link OfficeBuilding}. The name is derived from the
+	 * within the {@link OfficeBuildingMain}. The name is derived from the
 	 * {@link #getProcessName()} however to maintain uniqueness the process name
 	 * may be adjusted (typically by providing a unique suffix).
 	 * 
