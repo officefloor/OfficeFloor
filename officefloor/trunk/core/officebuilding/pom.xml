@@ -13,6 +13,26 @@
 	<build>
 		<plugins>
 			<plugin>
+				<!-- Include additional source directories -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin
+				</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/main/impl</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<!-- Generate the boot jar -->
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -24,8 +44,7 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<jar basedir="${project.build.outputDirectory}" 
-									destFile="${project.build.directory}/boot.jar" 
+								<jar basedir="${project.build.outputDirectory}" destFile="${project.build.directory}/boot.jar"
 									includes="net/officefloor/bootstrap/*" />
 							</tasks>
 						</configuration>
