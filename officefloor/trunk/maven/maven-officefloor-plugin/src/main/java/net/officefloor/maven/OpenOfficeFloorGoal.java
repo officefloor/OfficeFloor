@@ -20,11 +20,11 @@ package net.officefloor.maven;
 import java.io.File;
 import java.util.List;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathSeed;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -98,7 +98,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Ensure have required values
 		assertNotNull("Must have project", this.project);
 		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
+				+ OfficeBuildingMain.class.getSimpleName(), this.port);
 		assertNotNull(OfficeFloor.class.getSimpleName()
 				+ " configuration location not specified",
 				this.officeFloorLocation);
@@ -114,7 +114,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 					.getOfficeBuildingManager(null, this.port.intValue());
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed accessing the "
-					+ OfficeBuilding.class.getSimpleName(), ex);
+					+ OfficeBuildingMain.class.getSimpleName(), ex);
 		}
 
 		// Create the Seed
