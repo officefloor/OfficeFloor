@@ -17,13 +17,13 @@
  */
 package net.officefloor.maven;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -94,11 +94,11 @@ public class InvokeGoal extends AbstractGoal {
 
 		// Ensure have required values
 		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
+				+ OfficeBuildingMain.class.getSimpleName(), this.port);
 		assertNotNull("Office not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.office);
+				+ OfficeBuildingMain.class.getSimpleName(), this.office);
 		assertNotNull("Work not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.office);
+				+ OfficeBuildingMain.class.getSimpleName(), this.office);
 
 		// Ensure default non-required values
 		this.processName = defaultValue(this.processName,

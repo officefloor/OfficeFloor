@@ -20,9 +20,9 @@ package net.officefloor.maven;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,7 +63,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Ensure have configured values
 		assertNotNull("Must have project", this.project);
 		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
+				+ OfficeBuildingMain.class.getSimpleName(), this.port);
 
 		// Obtain the remote repository URLs
 		String[] remoteRepositoryURLs;
@@ -97,7 +97,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
-					+ OfficeBuilding.class.getSimpleName();
+					+ OfficeBuildingMain.class.getSimpleName();
 			this.getLog().error(
 					MESSAGE + ": " + ex.getMessage() + " ["
 							+ ex.getClass().getSimpleName() + "]");
@@ -111,7 +111,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Log started OfficeBuilding
 		this.getLog().info(
-				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
-						+ this.port.intValue());
+				"Started " + OfficeBuildingMain.class.getSimpleName()
+						+ " on port " + this.port.intValue());
 	}
 }
