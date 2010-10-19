@@ -113,7 +113,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
-		assertEquals("Incorrect stop details", "OfficeBuilding stopped\n",
+		assertEquals("Incorrect stop details", "OfficeBuildingMain stopped\n",
 				stopDetails);
 	}
 
@@ -305,7 +305,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String expectedStopDetails = "Stopping processes:\n\t"
 				+ processManager.getProcessName() + " ["
 				+ processManager.getProcessNamespace()
-				+ "]\n\nOfficeBuilding stopped\n";
+				+ "]\n\nOfficeBuildingMain stopped\n";
 
 		// Stop the OfficeBuilding
 		String stopDetails = buildingManager.stopOfficeBuilding(10000);

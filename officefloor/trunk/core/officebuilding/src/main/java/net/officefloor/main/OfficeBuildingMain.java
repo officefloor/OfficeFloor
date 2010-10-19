@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.building;
+package net.officefloor.main;
 
 import java.io.File;
 import java.io.FileReader;
@@ -39,7 +39,7 @@ import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuilding {
+public class OfficeBuildingMain {
 
 	/**
 	 * Environment property to specify where the Office Building home directory
@@ -54,14 +54,14 @@ public class OfficeBuilding {
 	public static final String PROPERTIES_FILE_RELATIVE_PATH = "config/OfficeBuilding.properties";
 
 	/**
-	 * Name of the property defining the host that the {@link OfficeBuilding} is
+	 * Name of the property defining the host that the {@link OfficeBuildingMain} is
 	 * residing on. This property is ignored if starting the
-	 * {@link OfficeBuilding} as always run on localhost.
+	 * {@link OfficeBuildingMain} as always run on localhost.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_HOST = "office.building.host";
 
 	/**
-	 * Name of the property defining the port that the {@link OfficeBuilding} is
+	 * Name of the property defining the port that the {@link OfficeBuildingMain} is
 	 * to run or is running on.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_PORT = "office.building.port";
@@ -77,7 +77,7 @@ public class OfficeBuilding {
 	public static final String PROPERTY_REMOTE_REPOSITORY_URL = "remote.repository.url";
 
 	/**
-	 * Wait time to stop the {@link OfficeBuilding}.
+	 * Wait time to stop the {@link OfficeBuildingMain}.
 	 */
 	public static final String PROPERTY_STOP_WAIT_TIME = "stop.wait.time";
 
@@ -85,7 +85,7 @@ public class OfficeBuilding {
 	 * Usage message.
 	 */
 	static final String USAGE_MESSAGE = "USAGE: java ... "
-			+ OfficeBuilding.class.getName()
+			+ OfficeBuildingMain.class.getName()
 			+ " <command>\n"
 			+ "\n"
 			+ "commands:\n"
@@ -98,7 +98,7 @@ public class OfficeBuilding {
 			+ "\tinvoke <process name space> <office name> <work name> [<task name>] [<parameter>]\tInvokes the Task within the OfficeFloor\n";
 
 	/**
-	 * Main method for running the {@link OfficeBuilding}.
+	 * Main method for running the {@link OfficeBuildingMain}.
 	 * 
 	 * @param arguments
 	 *            Command line arguments.
@@ -353,7 +353,7 @@ public class OfficeBuilding {
 			}
 
 			// Always provide usage
-			message.append(OfficeBuilding.USAGE_MESSAGE);
+			message.append(OfficeBuildingMain.USAGE_MESSAGE);
 
 			// Display usage (and possible error).
 			// Never successful as checking code should be running commands.
@@ -416,7 +416,7 @@ public class OfficeBuilding {
 	/**
 	 * Should only use the <code>main</code> method.
 	 */
-	private OfficeBuilding() {
+	private OfficeBuildingMain() {
 	}
 
 	/**
@@ -445,7 +445,7 @@ public class OfficeBuilding {
 			// Ensure have properties file
 			this.propertiesFile = propertiesFile;
 			if (!this.propertiesFile.isFile()) {
-				OfficeBuilding.errorAndExit("Can not find properties file "
+				OfficeBuildingMain.errorAndExit("Can not find properties file "
 						+ this.propertiesFile.getAbsolutePath());
 			}
 
@@ -465,12 +465,12 @@ public class OfficeBuilding {
 
 			// System properties always override file properties
 			String value = System.getProperty(name);
-			if (OfficeBuilding.isBlank(value)) {
+			if (OfficeBuildingMain.isBlank(value)) {
 				value = this.fileProperties.getProperty(name);
 			}
 
 			// Return the property value (or default if no value)
-			return (OfficeBuilding.isBlank(value) ? defaultValue : value);
+			return (OfficeBuildingMain.isBlank(value) ? defaultValue : value);
 		}
 
 		/**
@@ -486,7 +486,7 @@ public class OfficeBuilding {
 			String value = this.getProperty(name, null);
 
 			// Ensure have the property value
-			OfficeBuilding.errorAndExitOnBlankValue(value,
+			OfficeBuildingMain.errorAndExitOnBlankValue(value,
 					"Must provide property value for '" + name + "' in "
 							+ this.propertiesFile.getAbsolutePath());
 

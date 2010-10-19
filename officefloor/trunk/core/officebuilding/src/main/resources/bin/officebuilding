@@ -21,6 +21,6 @@ cd ${OFFICE_BUILDING_HOME}
 java \
 	${OFFICE_BUILDING_JVM_OPTIONS} \
 	-cp lib/boot.jar \
-	net.officefloor.building.bootstrap.Bootstrap \
-	net.officefloor.building.OfficeBuilding \
+	net.officefloor.bootstrap.Bootstrap \
+	net.officefloor.main.OfficeBuildingMain \
 	$@

@@ -22,11 +22,11 @@ import java.util.Date;
 
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathSeed;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * MBean interface for the {@link OfficeBuildingManager}.
@@ -37,45 +37,45 @@ public interface OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
-	 * Obtains the time the {@link OfficeBuilding} was started.
+	 * Obtains the time the {@link OfficeBuildingMain} was started.
 	 * <p>
-	 * The time is specific to the host the {@link OfficeBuilding} is running
+	 * The time is specific to the host the {@link OfficeBuildingMain} is running
 	 * on.
 	 * 
-	 * @return Time the {@link OfficeBuilding} was started.
+	 * @return Time the {@link OfficeBuildingMain} was started.
 	 */
 	Date getStartTime();
 
 	/**
 	 * <p>
-	 * Obtains the {@link JMXServiceURL} of the {@link OfficeBuilding} being
+	 * Obtains the {@link JMXServiceURL} of the {@link OfficeBuildingMain} being
 	 * managed by this {@link OfficeBuildingManager}.
 	 * <p>
 	 * The returned value can be used as is for the construction of a
-	 * {@link JMXServiceURL} to the {@link OfficeBuilding}.
+	 * {@link JMXServiceURL} to the {@link OfficeBuildingMain}.
 	 * 
-	 * @return {@link JMXServiceURL} of the {@link OfficeBuilding} being managed
+	 * @return {@link JMXServiceURL} of the {@link OfficeBuildingMain} being managed
 	 *         by this {@link OfficeBuildingManager}.
 	 */
 	String getOfficeBuildingJmxServiceUrl();
 
 	/**
-	 * Obtains the name of the host running the {@link OfficeBuilding}.
+	 * Obtains the name of the host running the {@link OfficeBuildingMain}.
 	 * 
-	 * @return Name of the host running the {@link OfficeBuilding}.
+	 * @return Name of the host running the {@link OfficeBuildingMain}.
 	 */
 	String getOfficeBuildingHostName();
 
 	/**
-	 * Obtains the port that the {@link OfficeBuilding} is listening on.
+	 * Obtains the port that the {@link OfficeBuildingMain} is listening on.
 	 * 
-	 * @return Port that the {@link OfficeBuilding} is listening on.
+	 * @return Port that the {@link OfficeBuildingMain} is listening on.
 	 */
 	int getOfficeBuildingPort();
 
 	/**
 	 * <p>
-	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}. Uses
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuildingMain}. Uses
 	 * location of a Jar file to seed the class path for the {@link OfficeFloor}.
 	 * <p>
 	 * Open type parameters for JMX invocation.
@@ -100,7 +100,7 @@ public interface OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
-	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}. Uses
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuildingMain}. Uses
 	 * Maven artifact reference to seed the class path for the
 	 * {@link OfficeFloor}.
 	 * <p>
@@ -137,7 +137,7 @@ public interface OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
-	 * Opens an {@link OfficeFloor} within the {@link OfficeBuilding}. Uses
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuildingMain}. Uses
 	 * {@link ClassPathSeed} to seed the class path for the {@link OfficeFloor}.
 	 * <p>
 	 * The complex {@link ClassPathSeed} means that may only programmatically
@@ -165,10 +165,10 @@ public interface OfficeBuildingManagerMBean {
 
 	/**
 	 * Provides a listing of the {@link Process} name spaces currently running
-	 * within the {@link OfficeBuilding}.
+	 * within the {@link OfficeBuildingMain}.
 	 * 
 	 * @return Listing of the {@link Process} name spaces currently running
-	 *         within the {@link OfficeBuilding}.
+	 *         within the {@link OfficeBuildingMain}.
 	 */
 	String listProcessNamespaces();
 
@@ -190,14 +190,14 @@ public interface OfficeBuildingManagerMBean {
 			throws Exception;
 
 	/**
-	 * Stops the {@link OfficeBuilding}.
+	 * Stops the {@link OfficeBuildingMain}.
 	 * 
 	 * @param waitTime
 	 *            Time to wait for {@link ManagedProcess} instances to stop
 	 *            before being destroyed.
-	 * @return Details of stopping the {@link OfficeBuilding}.
+	 * @return Details of stopping the {@link OfficeBuildingMain}.
 	 * @throws Exception
-	 *             If fails to stop the {@link OfficeBuilding}.
+	 *             If fails to stop the {@link OfficeBuildingMain}.
 	 */
 	String stopOfficeBuilding(long waitTime) throws Exception;
 

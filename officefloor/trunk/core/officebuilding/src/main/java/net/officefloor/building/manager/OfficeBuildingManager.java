@@ -41,7 +41,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.building.classpath.ClassPathBuilder;
 import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.classpath.ClassPathSeed;
@@ -54,9 +53,10 @@ import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 /**
- * {@link OfficeBuilding} Manager.
+ * {@link OfficeBuildingMain} Manager.
  * 
  * @author Daniel Sagenschneider
  */
@@ -87,16 +87,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
-	 * Starts the {@link OfficeBuilding}.
+	 * Starts the {@link OfficeBuildingMain}.
 	 * 
 	 * @param port
-	 *            Port for the {@link OfficeBuilding}.
+	 *            Port for the {@link OfficeBuildingMain}.
 	 * @param classPathBuilderFactory
 	 *            {@link ClassPathBuilderFactory}.
 	 * @return {@link OfficeBuildingManager} managing the started Office
 	 *         Building.
 	 * @throws Exception
-	 *             If fails to start the {@link OfficeBuilding}.
+	 *             If fails to start the {@link OfficeBuildingMain}.
 	 */
 	public static OfficeBuildingManager startOfficeBuilding(int port,
 			ClassPathBuilderFactory classPathBuilderFactory) throws Exception {
@@ -137,16 +137,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link OfficeBuildingManagerMBean} for the
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * <p>
 	 * This a utility method to obtain the {@link OfficeBuildingManagerMBean} of
-	 * an existing {@link OfficeBuilding}.
+	 * an existing {@link OfficeBuildingMain}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            Name of the host where the {@link OfficeBuildingMain} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuilding} resides.
+	 *            Port where the {@link OfficeBuildingMain} resides.
 	 * @return {@link OfficeBuildingManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
@@ -161,17 +161,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link ProcessManagerMBean} by the process name for the
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * <p>
 	 * This a utility method to obtain the {@link ProcessManagerMBean} of an
 	 * existing {@link Process} currently running within the
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            Name of the host where the {@link OfficeBuildingMain} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuilding} resides.
+	 *            Port where the {@link OfficeBuildingMain} resides.
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessManagerMBean}.
@@ -190,17 +190,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link ProcessShellMBean} by the process name for the
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * <p>
 	 * This a utility method to obtain the {@link ProcessShellMBean} of an
 	 * existing {@link Process} currently being managed within the
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            Name of the host where the {@link OfficeBuildingMain} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuilding} resides.
+	 *            Port where the {@link OfficeBuildingMain} resides.
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessShellMBean}.
@@ -221,15 +221,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Obtains the {@link OfficeFloorManagerMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
-	 * {@link OfficeBuilding} managing the {@link OfficeFloor} {@link Process}.
+	 * {@link OfficeBuildingMain} managing the {@link OfficeFloor} {@link Process}.
 	 * They are <i>not</i> of the specific {@link Process} containing the
 	 * {@link OfficeFloor}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            Name of the host where the {@link OfficeBuildingMain} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuilding} resides.
+	 *            Port where the {@link OfficeBuildingMain} resides.
 	 * @param officeFloorManagerUrl
 	 *            URL of the {@link OfficeFloorManagerMBean}.
 	 * @return {@link OfficeFloorManagerMBean}.
@@ -248,18 +248,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeBuilding} {@link JMXConnectorServer}
+	 * Obtains the {@link OfficeBuildingMain} {@link JMXConnectorServer}
 	 * {@link JMXServiceURL}.
 	 * <p>
 	 * This a utility method to obtain the {@link JMXServiceURL} of an existing
-	 * {@link OfficeBuilding}.
+	 * {@link OfficeBuildingMain}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuilding} resides.
+	 *            Name of the host where the {@link OfficeBuildingMain} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port the {@link OfficeBuilding} is residing on.
-	 * @return {@link JMXServiceURL} to the {@link OfficeBuilding}
+	 *            Port the {@link OfficeBuildingMain} is residing on.
+	 * @return {@link JMXServiceURL} to the {@link OfficeBuildingMain}
 	 *         {@link JMXConnectorServer}.
 	 * @throws IOException
 	 *             If fails to obtain the {@link JMXServiceURL}.
@@ -286,9 +286,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Building.
 	 * 
 	 * @param hostName
-	 *            Host where the {@link OfficeBuilding} resides.
+	 *            Host where the {@link OfficeBuildingMain} resides.
 	 * @param port
-	 *            Port where the {@link OfficeBuilding} resides.
+	 *            Port where the {@link OfficeBuildingMain} resides.
 	 * @param mbeanName
 	 *            {@link ObjectName} for the MBean.
 	 * @param mbeanInterface
@@ -326,22 +326,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	private final List<ProcessManager> processManagers = new LinkedList<ProcessManager>();
 
 	/**
-	 * Flags if the {@link OfficeBuilding} is open.
+	 * Flags if the {@link OfficeBuildingMain} is open.
 	 */
 	private boolean isOfficeBuildingOpen = true;
 
 	/**
-	 * Start time of the {@link OfficeBuilding}.
+	 * Start time of the {@link OfficeBuildingMain}.
 	 */
 	private final Date startTime;
 
 	/**
-	 * {@link OfficeBuilding} {@link JMXServiceURL}.
+	 * {@link OfficeBuildingMain} {@link JMXServiceURL}.
 	 */
 	private final JMXServiceURL officeBuildingServiceUrl;
 
 	/**
-	 * {@link JMXConnectorServer} for the {@link OfficeBuilding}.
+	 * {@link JMXConnectorServer} for the {@link OfficeBuildingMain}.
 	 */
 	private final JMXConnectorServer connectorServer;
 
@@ -354,11 +354,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * May only create by starting.
 	 * 
 	 * @param startTime
-	 *            Start time of the {@link OfficeBuilding}.
+	 *            Start time of the {@link OfficeBuildingMain}.
 	 * @param officeBuildingServiceUrl
-	 *            {@link OfficeBuilding} {@link JMXServiceURL}.
+	 *            {@link OfficeBuildingMain} {@link JMXServiceURL}.
 	 * @param connectorServer
-	 *            {@link JMXConnectorServer} for the {@link OfficeBuilding}.
+	 *            {@link JMXConnectorServer} for the {@link OfficeBuildingMain}.
 	 * @param classPathBuilderFactory
 	 *            {@link ClassPathBuilderFactory}.
 	 */
@@ -668,7 +668,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			}
 
 			// Return status of stopping
-			status.append(OfficeBuilding.class.getSimpleName() + " stopped\n");
+			status.append(OfficeBuildingMain.class.getSimpleName() + " stopped\n");
 			return status.toString();
 
 		} finally {

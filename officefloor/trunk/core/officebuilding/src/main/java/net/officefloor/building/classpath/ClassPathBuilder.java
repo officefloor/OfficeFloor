@@ -35,8 +35,8 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import net.officefloor.building.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -245,7 +245,7 @@ public class ClassPathBuilder {
 
 		// Make the POM contents available as file for reading
 		File pomFile = File.createTempFile(
-				OfficeBuilding.class.getSimpleName(), "pom");
+				OfficeBuildingMain.class.getSimpleName(), "pom");
 		OutputStream pomOutput = new FileOutputStream(pomFile);
 		for (int value = pomContents.read(); value != -1; value = pomContents
 				.read()) {
@@ -456,7 +456,7 @@ public class ClassPathBuilder {
 			distribution.setStatus(null);
 
 			// Create another POM file without the status
-			File tempPomFile = File.createTempFile(OfficeBuilding.class
+			File tempPomFile = File.createTempFile(OfficeBuildingMain.class
 					.getSimpleName(), "pom");
 			FileWriter writer = new FileWriter(tempPomFile);
 			this.maven.writeModel(writer, model);
