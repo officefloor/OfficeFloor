@@ -19,7 +19,10 @@
 package net.officefloor.building.process;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 
@@ -27,15 +30,15 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the management of a {@link Process}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessManagerTest extends TestCase {
+public class ProcessManagerTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ProcessManager}.
@@ -53,7 +56,7 @@ public class ProcessManagerTest extends TestCase {
 	/**
 	 * Ensure able to start a {@link Process}.
 	 */
-	public void testStartProcess() throws Exception {
+	public void test_start_Process() throws Exception {
 
 		final String TEST_CONTENT = "test content";
 
@@ -70,6 +73,32 @@ public class ProcessManagerTest extends TestCase {
 		// Ensure content in file
 		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
 				TEST_CONTENT, file);
+	}
+
+	/**
+	 * Ensure able to run a {@link Process}.
+	 */
+	public void test_run_Process() throws Exception {
+
+		final String TEST_CONTENT = "test content";
+
+		// Obtain temporary file to write content
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+
+		// Capture class path
+		String classPath = System.getProperty("java.class.path");
+
+		// Start the process
+		ProcessManager.runProcess(new WriteToFileProcess(
+				file.getAbsolutePath(), TEST_CONTENT), null);
+
+		// Ensure content in file
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				TEST_CONTENT, file);
+
+		// Ensure class path not changed
+		assertEquals("Class path should not be changed", classPath, System
+				.getProperty("java.class.path"));
 	}
 
 	/**
@@ -123,9 +152,130 @@ public class ProcessManagerTest extends TestCase {
 	}
 
 	/**
+	 * Ensure able to configure the class path.
+	 */
+	public void test_start_Classpath() throws Exception {
+
+		// Obtain the file on class path
+		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
+		File classpathFile = this.findFile(this.getClass(),
+				CLASS_PATH_FILE_PATH);
+		String testContent = this.getFileContents(classpathFile).trim();
+
+		// Obtain temporary file to write content
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+
+		// Create process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		File additionalClasspathDir = classpathFile.getParentFile()
+				.getParentFile();
+		configuration.setAdditionalClassPath(additionalClasspathDir
+				.getAbsolutePath());
+
+		// Start the process
+		this.manager = ProcessManager.startProcess(new ClassPathProcess(
+				CLASS_PATH_FILE_PATH, file.getAbsolutePath()), null);
+
+		// Wait until process writes content to file
+		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
+
+		// Ensure content in file
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				testContent, file);
+	}
+
+	/**
+	 * Ensure able to configure the class path.
+	 */
+	public void test_run_Classpath() throws Exception {
+
+		// Obtain the file on class path
+		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
+		File classpathFile = this.findFile(this.getClass(),
+				CLASS_PATH_FILE_PATH);
+		String testContent = this.getFileContents(classpathFile).trim();
+
+		// Obtain temporary file to write content
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+
+		// Create process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		File additionalClasspathDir = classpathFile.getParentFile()
+				.getParentFile();
+		configuration.setAdditionalClassPath(additionalClasspathDir
+				.getAbsolutePath());
+
+		// Run local process
+		ProcessManager.runProcess(new ClassPathProcess(CLASS_PATH_FILE_PATH,
+				file.getAbsolutePath()), null);
+
+		// Ensure content in file
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				testContent, file);
+	}
+
+	/**
+	 * {@link ManagedProcess} to validate class path.
+	 */
+	public static class ClassPathProcess implements ManagedProcess {
+
+		/**
+		 * Path on class path to find {@link File}.
+		 */
+		private final String classpathFilePath;
+
+		/**
+		 * Path to the target {@link File} to write content.
+		 */
+		private final String targetFilePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param classpathFilePath
+		 *            Path on class path to find {@link File}.
+		 * @param targetFilePath
+		 *            Path to the target {@link File} to write content.
+		 */
+		public ClassPathProcess(String classpathFilePath, String targetFilePath) {
+			this.classpathFilePath = classpathFilePath;
+			this.targetFilePath = targetFilePath;
+		}
+
+		/*
+		 * =================== ManagedProcess ==============================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			// Nothing to initialise
+		}
+
+		@Override
+		public void main() throws Throwable {
+
+			// Obtain the file content via class path
+			InputStream fileContent = this.getClass().getResourceAsStream(
+					this.classpathFilePath);
+			assertNotNull("Should find file on class path", fileContent);
+
+			// Obtain the file
+			File file = new File(this.targetFilePath);
+
+			// Write the content to the file
+			OutputStream output = new FileOutputStream(file);
+			for (int value = fileContent.read(); value != -1; value = fileContent
+					.read()) {
+				output.write(value);
+			}
+			output.close();
+		}
+	}
+
+	/**
 	 * Ensure able to stop the {@link Process}.
 	 */
-	public void testStopProcess() throws Exception {
+	public void test_start_TriggerStopProcess() throws Exception {
 
 		// Listen for stopping of process
 		final boolean[] isStopped = new boolean[1];
@@ -170,7 +320,7 @@ public class ProcessManagerTest extends TestCase {
 	 * Ensure on failing to init the {@link ManagedProcess} that the exception
 	 * is feed back.
 	 */
-	public void testFailInitProcess() throws Exception {
+	public void test_start_FailInitProcess() throws Exception {
 
 		final String FAILURE_MESSAGE = "TEST FAILURE";
 		final Throwable failure = new Throwable(FAILURE_MESSAGE);
@@ -184,6 +334,34 @@ public class ProcessManagerTest extends TestCase {
 			// Ensure correct message
 			assertEquals("Incorrect failure message",
 					"Failed to start ProcessShell for " + managedProcess + " ["
+							+ FailInitProcess.class.getName() + "]", ex
+							.getMessage());
+
+			// Ensure correct cause
+			Throwable cause = ex.getCause();
+			assertEquals("Incorrect exception", FAILURE_MESSAGE, cause
+					.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure on failing to init the {@link ManagedProcess} that the exception
+	 * is feed back.
+	 */
+	public void test_run_FailInitProcess() throws Exception {
+
+		final String FAILURE_MESSAGE = "TEST FAILURE";
+		final Throwable failure = new Throwable(FAILURE_MESSAGE);
+
+		// Should fail to start
+		ManagedProcess managedProcess = new FailInitProcess(failure);
+		try {
+			ProcessManager.runProcess(managedProcess, null);
+			fail("Should fail to start");
+		} catch (ProcessException ex) {
+			// Ensure correct message
+			assertEquals("Incorrect failure message",
+					"Failed to run ProcessShell for " + managedProcess + " ["
 							+ FailInitProcess.class.getName() + "]", ex
 							.getMessage());
 
@@ -233,7 +411,7 @@ public class ProcessManagerTest extends TestCase {
 	/**
 	 * Ensure JVM options set for process.
 	 */
-	public void testJvmOptions() throws Exception {
+	public void test_start_JvmOptions() throws Exception {
 
 		// Obtain temporary file to write content
 		File file = OfficeBuildingTestUtil.createTempFile(this);
@@ -312,7 +490,7 @@ public class ProcessManagerTest extends TestCase {
 	/**
 	 * Ensure able to destroy the {@link Process}.
 	 */
-	public void testDestroyProcess() throws Exception {
+	public void test_start_DestroyProcess() throws Exception {
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess(),
@@ -346,6 +524,7 @@ public class ProcessManagerTest extends TestCase {
 
 		@Override
 		public void main() throws Throwable {
+
 			// Loop until informed to stop
 			for (;;) {
 				if (this.context.continueProcessing()) {
@@ -362,7 +541,7 @@ public class ProcessManagerTest extends TestCase {
 	/**
 	 * Ensure {@link ManagedProcess} can register a MBean.
 	 */
-	public void testMBeanRegistration() throws Exception {
+	public void test_start_MBeanRegistration() throws Exception {
 
 		// Obtain the MBean Server
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
@@ -397,44 +576,10 @@ public class ProcessManagerTest extends TestCase {
 	}
 
 	/**
-	 * {@link ManagedProcess} to register the MBean.
-	 */
-	public static class MBeanProcess extends LoopUntilStopProcess {
-
-		/**
-		 * {@link ObjectName}.
-		 */
-		private final ObjectName objectName;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param objectName
-		 *            {@link ObjectName}.
-		 */
-		public MBeanProcess(ObjectName objectName) {
-			this.objectName = objectName;
-		}
-
-		/*
-		 * =================== LoopUntilStopProcess =======================
-		 */
-
-		@Override
-		public void init(ManagedProcessContext context) throws Throwable {
-			this.context = context;
-
-			// Register the mock MBean
-			Mock mbean = new Mock();
-			context.registerMBean(mbean, this.objectName);
-		}
-	}
-
-	/**
 	 * Ensure MBeans are unregistered after the {@link ManagedProcess}
 	 * completes.
 	 */
-	public void testMBeansUnregistered() throws Exception {
+	public void test_start_MBeansUnregistered() throws Exception {
 
 		// Obtain the MBean Server
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
@@ -475,6 +620,205 @@ public class ProcessManagerTest extends TestCase {
 				.isRegistered(processShellLocalMBeanName));
 		assertFalse("Process Manager MBean should be unregistered", server
 				.isRegistered(processManagerLocalMBeanName));
+	}
+
+	/**
+	 * {@link ManagedProcess} to register the MBean.
+	 */
+	public static class MBeanProcess extends LoopUntilStopProcess {
+
+		/**
+		 * {@link ObjectName}.
+		 */
+		private final ObjectName objectName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param objectName
+		 *            {@link ObjectName}.
+		 */
+		public MBeanProcess(ObjectName objectName) {
+			this.objectName = objectName;
+		}
+
+		/*
+		 * =================== LoopUntilStopProcess =======================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			this.context = context;
+
+			// Register the mock MBean
+			Mock mbean = new Mock();
+			context.registerMBean(mbean, this.objectName);
+		}
+	}
+
+	/**
+	 * Ensure {@link ManagedProcess} can register a MBean.
+	 */
+	public void test_run_MBeanRegistration() throws Throwable {
+
+		// Obtain the MBean Server
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+		// Create the process configuration
+		final ObjectName localMBeanName = new ObjectName("local", "type",
+				"mock");
+		final ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setMbeanServer(server);
+
+		// Create location for temporary files
+		String tmpDir = System.getProperty("java.io.tmpdir");
+		assertNotNull("Missing tmp directory", tmpDir);
+		File workDir = null;
+		int index = 0;
+		do {
+			workDir = new File(tmpDir, "OfficeFloorProcessManagerTest"
+					+ String.valueOf(index++));
+		} while (workDir.exists());
+
+		// Create paths for flag files
+		workDir.mkdir();
+		String startFilePath = new File(workDir, "start.txt").getAbsolutePath();
+		String completeFilePath = new File(workDir, "complete.txt")
+				.getAbsolutePath();
+
+		// Managed process to run
+		final LocalMBeanProcess managedProcess = new LocalMBeanProcess(
+				localMBeanName, startFilePath, completeFilePath);
+
+		// Run
+		final boolean[] isComplete = new boolean[1];
+		isComplete[0] = false;
+		final Throwable[] failure = new Throwable[1];
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					// Run the processes
+					ProcessManager.runProcess(managedProcess, configuration);
+				} catch (Throwable ex) {
+					synchronized (failure) {
+						failure[0] = ex;
+					}
+				} finally {
+					// Flag complete
+					synchronized (isComplete) {
+						isComplete[0] = true;
+					}
+				}
+			}
+		}).start();
+
+		try {
+			// Wait until process started
+			long startTime = System.currentTimeMillis();
+			while (!new File(startFilePath).exists()) {
+				synchronized (isComplete) {
+					assertFalse("Process should not yet be completed",
+							isComplete[0]);
+				}
+				assertTrue("Timed out",
+						(System.currentTimeMillis() - startTime) < 50000);
+				Thread.sleep(10);
+			}
+
+			// Ensure can access mock MBean
+			Object value = server.getAttribute(localMBeanName,
+					Mock.TEST_VALUE_ATTRIBUTE_NAME);
+			assertEquals("Incorrect test value", new Mock().getTestValue(),
+					value);
+
+			// Stop execution of the process
+			new File(completeFilePath).createNewFile();
+
+			// Wait until process stopped
+			startTime = System.currentTimeMillis();
+			boolean isFinished = false;
+			while (!isFinished) {
+				synchronized (isComplete) {
+					isFinished = isComplete[0];
+				}
+				assertTrue("Timed out",
+						(System.currentTimeMillis() - startTime) < 50000);
+				Thread.sleep(10);
+			}
+
+			// Ensure mock MBean unregistered after process complete
+			assertFalse("MBean should not be registered", server
+					.isRegistered(localMBeanName));
+
+			// Ensure process did not fail
+			synchronized (failure) {
+				if (failure[0] != null) {
+					throw failure[0];
+				}
+			}
+
+		} finally {
+			// Ensure stop process for test
+			if (!new File(completeFilePath).exists()) {
+				new File(completeFilePath).createNewFile();
+			}
+		}
+	}
+
+	/**
+	 * <p>
+	 * {@link ManagedProcess} to register the MBean.
+	 * <p>
+	 * As {@link ManagedProcess} is serialised then must use files as flags.
+	 */
+	public static class LocalMBeanProcess extends MBeanProcess {
+
+		/**
+		 * Start {@link File} path.
+		 */
+		private final String startFilePath;
+
+		/**
+		 * Complete {@link File} path.
+		 */
+		private final String completeFilePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param objectName
+		 *            {@link ObjectName}.
+		 * @param startFilePath
+		 *            Start {@link File} path.
+		 * @param completeFilePath
+		 *            Complete {@link File} path.
+		 */
+		public LocalMBeanProcess(ObjectName objectName, String startFilePath,
+				String completeFilePath) {
+			super(objectName);
+			this.startFilePath = startFilePath;
+			this.completeFilePath = completeFilePath;
+		}
+
+		/*
+		 * =================== LoopUntilStopProcess =======================
+		 */
+
+		@Override
+		public void main() throws Throwable {
+
+			// Flag started
+			new File(this.startFilePath).createNewFile();
+
+			// Loop until completion file exists
+			for (;;) {
+				if (new File(this.completeFilePath).exists()) {
+					return; // exists so complete
+				}
+				Thread.sleep(10);
+			}
+		}
 	}
 
 }
