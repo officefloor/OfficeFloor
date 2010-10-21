@@ -18,6 +18,7 @@
 
 package net.officefloor.building.process;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +26,13 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +75,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
+	 * System property to get the class path.
+	 */
+	private static final String SYSTEM_PROPERTY_CLASS_PATH = "java.class.path";
+
+	/**
 	 * Obtains the {@link ObjectName} for the {@link ProcessManagerMBean}.
 	 * 
 	 * @return {@link ObjectName} for the {@link ProcessManagerMBean}.
@@ -81,6 +92,149 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * Active set of MBean name spaces.
 	 */
 	private static final Set<String> activeMBeanNamespaces = new HashSet<String>();
+
+	/**
+	 * Runs the {@link ManagedProcess} locally within calling {@link Thread}
+	 * (and subsequently current {@link Process}).
+	 * 
+	 * @param managedProcess
+	 *            {@link ManagedProcess}.
+	 * @param configuration
+	 *            Optional {@link ProcessConfiguration}. May be
+	 *            <code>null</code> to use defaults. Please note that most of
+	 *            the attributes such as JVM options are ignored as the current
+	 *            {@link Process} can not be altered.
+	 * @throws ProcessException
+	 *             if fails to run the {@link ManagedProcess}.
+	 */
+	public static void runProcess(ManagedProcess managedProcess,
+			ProcessConfiguration configuration) throws ProcessException {
+
+		// Ensure have configuration to prevent NPE
+		if (configuration == null) {
+			configuration = new ProcessConfiguration();
+		}
+
+		// Obtain the process class path
+		final String processClassPath = getProcessClasspath(configuration);
+
+		// Create the process class loader
+		List<URL> processClassPathUrls = new LinkedList<URL>();
+		try {
+			for (String classPathEntry : processClassPath
+					.split(File.pathSeparator)) {
+				File classPathFile = new File(classPathEntry);
+				URL classPathUrl = classPathFile.toURI().toURL();
+				processClassPathUrls.add(classPathUrl);
+			}
+		} catch (MalformedURLException ex) {
+			throw new ProcessException(ex);
+		}
+		URLClassLoader processClassLoader = new URLClassLoader(
+				processClassPathUrls.toArray(new URL[processClassPathUrls
+						.size()]));
+
+		// Serialise managed process for use
+		final ByteArrayOutputStream serialisedManagedProcess = new ByteArrayOutputStream();
+		synchronized (serialisedManagedProcess) {
+			try {
+				ObjectOutputStream serialiser = new ObjectOutputStream(
+						serialisedManagedProcess);
+				serialiser.writeObject(managedProcess);
+			} catch (IOException ex) {
+				throw new ProcessException(ex);
+			}
+		}
+
+		// Maintain class path for resetting
+		final String originalClassPath = System
+				.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
+		try {
+
+			// Specify the java class path
+			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, processClassPath);
+
+			// Run the process (in another thread to not change this thread)
+			final boolean[] isComplete = new boolean[1];
+			isComplete[0] = false;
+			final Throwable[] failure = new Throwable[1];
+			Thread localProcess = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+
+						// Obtain the serialised managed process
+						byte[] managedProcessBytes;
+						synchronized (serialisedManagedProcess) {
+							managedProcessBytes = serialisedManagedProcess
+									.toByteArray();
+						}
+
+						// Create the process shell within class loader
+						Class<?> shellClass = Thread.currentThread()
+								.getContextClassLoader().loadClass(
+										ProcessShell.class.getName());
+
+						// Run the process within shell
+						Method runMethod = shellClass.getMethod("run",
+								byte[].class);
+						runMethod.invoke(null, managedProcessBytes);
+
+					} catch (Throwable ex) {
+						// Capture failure to propagate
+						synchronized (failure) {
+							if (ex instanceof InvocationTargetException) {
+								// Provide run failure
+								failure[0] = ex.getCause();
+							} else {
+								// Failure
+								failure[0] = ex;
+							}
+						}
+					} finally {
+						// Flag process complete
+						synchronized (isComplete) {
+							isComplete[0] = true;
+						}
+					}
+				}
+			});
+
+			// Execute the local process
+			localProcess.setContextClassLoader(processClassLoader);
+			localProcess.start();
+
+			// Wait until process complete
+			for (;;) {
+				synchronized (isComplete) {
+					// Propagate failure in process
+					if (failure[0] != null) {
+						throw new ProcessException(
+								"Failed to run ProcessShell for "
+										+ managedProcess + " ["
+										+ managedProcess.getClass().getName()
+										+ "]", failure[0]);
+					}
+
+					// Determine if complete
+					if (isComplete[0]) {
+						return; // completed so finish
+					}
+				}
+
+				// Wait until process complete
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ex) {
+					throw new ProcessException(ex);
+				}
+			}
+
+		} finally {
+			// Reset to original class path
+			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, originalClassPath);
+		}
+	}
 
 	/**
 	 * Starts the {@link Process} for the {@link ManagedProcess} returning the
@@ -124,11 +278,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		}
 
 		// Obtain the class path
-		String classPath = System.getProperty("java.class.path");
-		String additionalClassPath = configuration.getAdditionalClassPath();
-		if (!OfficeBuildingMain.isBlank(additionalClassPath)) {
-			classPath = classPath + File.pathSeparator + additionalClassPath;
-		}
+		String classPath = getProcessClasspath(configuration);
 
 		// Add the JVM Options
 		String[] jvmOptions = new String[0];
@@ -254,6 +404,28 @@ public class ProcessManager implements ProcessManagerMBean {
 		return new ObjectName(processNamespace + "."
 				+ remoteObjectName.getDomain(), remoteObjectName
 				.getKeyPropertyList());
+	}
+
+	/**
+	 * Obtains the class path for the {@link ManagedProcess}.
+	 * 
+	 * @param configuration
+	 *            {@link ProcessConfiguration}.
+	 * @return Class path for the {@link ManagedProcess}.
+	 */
+	private static String getProcessClasspath(ProcessConfiguration configuration) {
+
+		// Obtain the current class path
+		String classPath = System.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
+
+		// Add additional class path entries
+		String additionalClassPath = configuration.getAdditionalClassPath();
+		if (!OfficeBuildingMain.isBlank(additionalClassPath)) {
+			classPath = classPath + File.pathSeparator + additionalClassPath;
+		}
+
+		// Return the class path
+		return classPath;
 	}
 
 	/**

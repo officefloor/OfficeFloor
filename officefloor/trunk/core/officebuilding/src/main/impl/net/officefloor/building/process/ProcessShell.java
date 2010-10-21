@@ -18,6 +18,7 @@
 
 package net.officefloor.building.process;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -28,6 +29,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.server.RMIServerSocketFactory;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -82,6 +85,35 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * JMX communication protocol.
 	 */
 	private static final String JMX_COMMUNICATION_PROTOCOL = "rmi";
+
+	/**
+	 * Entrance point for running the {@link ManagedProcess} in current
+	 * {@link Process}.
+	 * 
+	 * @param serialisedManagedProcess
+	 *            Serialised {@link ManagedProcess} to be run.
+	 * @throws Throwable
+	 *             If failure in running the {@link ManagedProcess}.
+	 */
+	public static void run(byte[] serialisedManagedProcess) throws Throwable {
+
+		// Obtain the managed process to run
+		ObjectInputStream managedProcessInput = new ObjectInputStream(
+				new ByteArrayInputStream(serialisedManagedProcess));
+		ManagedProcess managedProcess = (ManagedProcess) managedProcessInput
+				.readObject();
+
+		// Create the context for the managed process
+		ProcessShell context = new ProcessShell(new String[0],
+				ManagementFactory.getPlatformMBeanServer());
+
+		// Run the process
+		managedProcess.init(context);
+		managedProcess.main();
+
+		// Process complete so unregister MBean instances
+		context.unregisterMBeans();
+	}
 
 	/**
 	 * Entrance point for running the {@link ManagedProcess}.
@@ -216,12 +248,22 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	private final ObjectOutputStream toParentPipe;
 
 	/**
+	 * {@link MBeanServer} for running locally.
+	 */
+	private final MBeanServer mbeanServer;
+
+	/**
+	 * {@link ObjectName} instances of the registered MBeans.
+	 */
+	private final List<ObjectName> registeredMbeanNames;
+
+	/**
 	 * Flag indicating if should continue processing.
 	 */
 	private volatile boolean isContinueProcessing = true;
 
 	/**
-	 * Initiate.
+	 * Initiate for {@link Process}.
 	 * 
 	 * @param commandArguments
 	 *            Command arguments.
@@ -235,6 +277,37 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		this.commandArguments = commandArguments;
 		this.connectorServer = connectorServer;
 		this.toParentPipe = toParentPipe;
+		this.mbeanServer = null;
+		this.registeredMbeanNames = null;
+	}
+
+	/**
+	 * Initiate for running locally.
+	 * 
+	 * @param commandArguments
+	 *            Command arguments.
+	 * @param mbeanServer
+	 *            Local {@link MBeanServer}.
+	 */
+	public ProcessShell(String[] commandArguments, MBeanServer mbeanServer) {
+		this.commandArguments = commandArguments;
+		this.connectorServer = null;
+		this.toParentPipe = null;
+		this.mbeanServer = mbeanServer;
+		this.registeredMbeanNames = new LinkedList<ObjectName>();
+	}
+
+	/**
+	 * Unregisters the MBean instances to the {@link MBeanServer}.
+	 */
+	private void unregisterMBeans() {
+		for (ObjectName name : this.registeredMbeanNames) {
+			try {
+				this.mbeanServer.unregisterMBean(name);
+			} catch (Throwable ex) {
+				// Ignore failure to unregister
+			}
+		}
 	}
 
 	/*
@@ -267,18 +340,30 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			throws InstanceAlreadyExistsException, MBeanRegistrationException,
 			NotCompliantMBeanException {
 
-		// Register the MBean locally
-		this.connectorServer.getMBeanServer().registerMBean(mbean, name);
+		// Determine if running in own process
+		if (this.connectorServer != null) {
 
-		// Notify managing parent process of the MBean
-		JMXServiceURL serviceUrl = this.connectorServer.getAddress();
-		try {
-			this.toParentPipe.writeObject(new MBeanRegistrationNotification(
-					serviceUrl, name));
-			this.toParentPipe.flush();
-		} catch (IOException ex) {
-			// Must be able to register with managing parent process
-			throw new MBeanRegistrationException(ex);
+			// Register the MBean locally
+			this.connectorServer.getMBeanServer().registerMBean(mbean, name);
+
+			// Notify managing parent process of the MBean
+			JMXServiceURL serviceUrl = this.connectorServer.getAddress();
+			try {
+				this.toParentPipe
+						.writeObject(new MBeanRegistrationNotification(
+								serviceUrl, name));
+				this.toParentPipe.flush();
+			} catch (IOException ex) {
+				// Must be able to register with managing parent process
+				throw new MBeanRegistrationException(ex);
+			}
+
+		} else {
+			// Running local process, so register locally
+			this.mbeanServer.registerMBean(mbean, name);
+
+			// Keep track of names for unregistering
+			this.registeredMbeanNames.add(name);
 		}
 	}
 
