@@ -51,6 +51,7 @@ import org.apache.maven.project.ProjectSorter;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class ClassPathBuilder {
 
 	/**

@@ -17,6 +17,8 @@
  */
 package net.officefloor.building.command;
 
+import net.officefloor.building.decorate.OfficeFloorDecorator;
+import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -33,5 +35,34 @@ public interface OfficeFloorCommand {
 	 * @return Possible {@link OfficeFloorCommandParameter} instances.
 	 */
 	OfficeFloorCommandParameter[] getParameters();
+
+	/**
+	 * <p>
+	 * Initialises this command's environment.
+	 * <p>
+	 * This allows to register additional class path entries for the
+	 * {@link ManagedProcess} to be created by this command. It also allows the
+	 * additional class path entries to be decorated by the
+	 * {@link OfficeFloorDecorator} instances.
+	 * 
+	 * @param context
+	 *            {@link OfficeFloorCommandContext}.
+	 * @throws Exception
+	 *             If fails to initialise this command.
+	 */
+	void initialiseEnvironment(OfficeFloorCommandContext context)
+			throws Exception;
+
+	/**
+	 * Creates the {@link ManagedProcess} to undertake the command.
+	 * 
+	 * @param environment
+	 *            {@link OfficeFloorCommandEnvironment}.
+	 * @return {@link ManagedProcess} to undertake the command.
+	 * @throws Exception
+	 *             If fails to create the {@link ManagedProcess}.
+	 */
+	ManagedProcess createManagedProcess(
+			OfficeFloorCommandEnvironment environment) throws Exception;
 
 }
