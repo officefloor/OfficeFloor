@@ -30,7 +30,9 @@ import net.officefloor.building.process.ProcessManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.main.OfficeBuildingMain;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Repository;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 /**
@@ -41,24 +43,30 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 public class OfficeBuildingTestUtil {
 
 	/**
-	 * Group Id for {@link OfficeFloor} core.
+	 * Group Id for test artifacts.
 	 */
-	public static final String GROUP_ID = "net.officefloor.core";
+	public static final String TEST_GROUP_ID = "test.officefloor.test";
 
 	/**
-	 * Path for the Group Id of the {@link OfficeFloor} core.
+	 * Version for the test artifacts.
 	 */
-	private static final String GROUP_ID_PATH = GROUP_ID.replace('.', '/');
+	public static final String TEST_ARTIFACT_VERSION = "1.0.0";
+
+	/**
+	 * Artifact Id of jar with no dependencies.
+	 */
+	public static final String TEST_JAR_ARTIFACT_ID = "JarArtifact";
+
+	/**
+	 * Artifact Id of jar with dependencies.
+	 */
+	public static final String TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID = "JarWithDependenciesArtifact";
 
 	/**
 	 * Artifact Id for ClassPathTestArtifact.
 	 */
+	@Deprecated
 	public static final String CLASS_PATH_TEST_ARTIFACT_ID = "ClassPathTestArtifact";
-
-	/**
-	 * Version for ClassPathTestArtifact.
-	 */
-	public static final String CLASS_PATH_TEST_ARTIFACT_VERSION = "1.0.0";
 
 	/**
 	 * Obtains the local repository directory.
@@ -74,7 +82,7 @@ public class OfficeBuildingTestUtil {
 	 * 
 	 * @return Remote repository directory.
 	 */
-	private static File getRemoteRepositoryDirectory() {
+	public static File getRemoteRepositoryDirectory() {
 		File directory = new File(".", "target/test-classes/remoteRepository");
 		TestCase.assertTrue("Remote repository directory not available: "
 				+ directory.getAbsolutePath(), directory.exists());
@@ -96,6 +104,7 @@ public class OfficeBuildingTestUtil {
 	 * 
 	 * @return Test {@link ClassPathBuilderFactory}.
 	 */
+	@Deprecated
 	public static ClassPathBuilderFactory getClassPathBuilderFactory()
 			throws Exception {
 		return new ClassPathBuilderFactory(null, getRemoteRepositoryUrls());
@@ -113,7 +122,7 @@ public class OfficeBuildingTestUtil {
 
 		// Determine if class path test artifact
 		if (CLASS_PATH_TEST_ARTIFACT_ID.equals(artifactId)) {
-			return CLASS_PATH_TEST_ARTIFACT_VERSION;
+			return TEST_ARTIFACT_VERSION;
 		}
 
 		// Extract the artifact version from the class path
@@ -197,13 +206,42 @@ public class OfficeBuildingTestUtil {
 		String version = getOfficeFloorArtifactVersion(artifactId);
 
 		// Create the path to the Jar
-		File jarFile = new File(getLocalRepositoryDirectory(), GROUP_ID_PATH);
-		jarFile = new File(jarFile, artifactId);
-		jarFile = new File(jarFile, version);
-		jarFile = new File(jarFile, artifactId + "-" + version + ".jar");
+		File jarFile = getArtifactFile(getLocalRepositoryDirectory(),
+				"net.officefloor.core", artifactId, version, "jar");
 
 		// Return Jar file
 		return jarFile;
+	}
+
+	/**
+	 * Obtains the {@link Artifact} {@link File}.
+	 * 
+	 * @param repository
+	 *            {@link Repository} root directory.
+	 * @param groupIdPath
+	 *            Group Id.
+	 * @param artifactId
+	 *            Artifact Id.
+	 * @param version
+	 *            Artifact version.
+	 * @param type
+	 *            Artifact type.
+	 * @return {@link File} to the {@link Artifact}.
+	 */
+	public static File getArtifactFile(File repository, String groupId,
+			String artifactId, String version, String type) {
+
+		// Obtain the group path
+		String groupPath = groupId.replace('.', File.separatorChar);
+
+		// Create the path to the artifact
+		File artifact = new File(repository, groupPath);
+		artifact = new File(artifact, artifactId);
+		artifact = new File(artifact, version);
+		artifact = new File(artifact, artifactId + "-" + version + "." + type);
+
+		// Return the artifact file
+		return artifact;
 	}
 
 	/**
@@ -211,10 +249,16 @@ public class OfficeBuildingTestUtil {
 	 */
 	public static void cleanupClassPathTestArtifactInLocalRepository()
 			throws Exception {
-		File classPathTestArtifactDir = new File(new File(
-				getLocalRepositoryDirectory(), GROUP_ID_PATH),
-				CLASS_PATH_TEST_ARTIFACT_ID);
-		deleteDirectory(classPathTestArtifactDir);
+		// Obtain location of POM file
+		File classPathTestArtifactPom = getArtifactFile(
+				getLocalRepositoryDirectory(), TEST_GROUP_ID,
+				TEST_JAR_ARTIFACT_ID, TEST_ARTIFACT_VERSION, "pom");
+		File classPathTestArtifactVersionDir = classPathTestArtifactPom
+				.getParentFile();
+		File classPathTestArtifactDir = classPathTestArtifactVersionDir
+				.getParentFile();
+		File classPathTestGroupDir = classPathTestArtifactDir.getParentFile();
+		deleteDirectory(classPathTestGroupDir);
 	}
 
 	/**
@@ -226,13 +270,11 @@ public class OfficeBuildingTestUtil {
 		cleanupClassPathTestArtifactInLocalRepository();
 
 		// Obtain location of POM file
-		File pom = new File(getRemoteRepositoryDirectory(), GROUP_ID_PATH + "/"
-				+ CLASS_PATH_TEST_ARTIFACT_ID + "/"
-				+ CLASS_PATH_TEST_ARTIFACT_VERSION + "/"
-				+ CLASS_PATH_TEST_ARTIFACT_ID + "-"
-				+ CLASS_PATH_TEST_ARTIFACT_VERSION + ".pom");
+		File pom = getArtifactFile(getRemoteRepositoryDirectory(),
+				TEST_GROUP_ID, CLASS_PATH_TEST_ARTIFACT_ID,
+				TEST_ARTIFACT_VERSION, "pom");
 		TestCase.assertTrue(CLASS_PATH_TEST_ARTIFACT_ID + "-"
-				+ CLASS_PATH_TEST_ARTIFACT_VERSION
+				+ TEST_ARTIFACT_VERSION
 				+ ".pom not available in remote repository: "
 				+ getRemoteRepositoryDirectory(), pom.exists());
 
@@ -358,4 +400,5 @@ public class OfficeBuildingTestUtil {
 	 */
 	private OfficeBuildingTestUtil() {
 	}
+
 }

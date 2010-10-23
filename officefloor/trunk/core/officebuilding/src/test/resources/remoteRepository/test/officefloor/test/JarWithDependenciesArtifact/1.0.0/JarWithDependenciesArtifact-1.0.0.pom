@@ -2,16 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.officefloor.core</groupId>
-	<artifactId>ClassPathTestArtifact</artifactId>
+	<groupId>test.officefloor.test</groupId>
+	<artifactId>JarWithDependenciesArtifact</artifactId>
 	<version>1.0.0</version>
-	<description>Artifact for testing the ClassPathBuilder</description>
+	<description>Jar Artifact with dependencies for testing</description>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>officecompiler</artifactId>
-			<version>${officecompiler.version}</version>
-			<scope>compile</scope>
+			<groupId>test.officefloor.test</groupId>
+			<artifactId>JarArtifact</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 </project>
