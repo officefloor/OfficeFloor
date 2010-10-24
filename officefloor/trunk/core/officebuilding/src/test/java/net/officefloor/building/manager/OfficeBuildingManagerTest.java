@@ -19,18 +19,18 @@
 package net.officefloor.building.manager;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
 
 import javax.management.JMX;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
-import net.officefloor.building.classpath.ClassPathSeed;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -52,17 +52,40 @@ public class OfficeBuildingManagerTest extends TestCase {
 	/**
 	 * Port to run the current test.
 	 */
-	private static int PORT = 13778;
+	private static final int PORT = 13778;
 
 	/**
-	 * {@link ClassPathBuilderFactory}.
+	 * Local repository directory.
 	 */
-	private ClassPathBuilderFactory classPathBuilderFactory;
+	private File localRepositoryDirectory;
+
+	/**
+	 * Remote repository URLs.
+	 */
+	private String[] remoteRepositoryUrls;
+
+	/**
+	 * {@link MBeanServer}.
+	 */
+	private MBeanServer mbeanServer;
 
 	@Override
 	protected void setUp() throws Exception {
-		this.classPathBuilderFactory = OfficeBuildingTestUtil
-				.getClassPathBuilderFactory();
+		this.localRepositoryDirectory = OfficeBuildingTestUtil
+				.getLocalRepositoryDirectory();
+		this.remoteRepositoryUrls = OfficeBuildingTestUtil
+				.getRemoteRepositoryUrls();
+		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
+	}
+
+	/**
+	 * Starts the Office Building for testing.
+	 * 
+	 * @return {@link OfficeBuildingManager}.
+	 */
+	private OfficeBuildingManager startOfficeBuilding() throws Exception {
+		return OfficeBuildingManager.startOfficeBuilding(PORT,
+				localRepositoryDirectory, remoteRepositoryUrls, mbeanServer);
 	}
 
 	/**
@@ -72,8 +95,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Start the Office Building (recording times before/after)
 		long beforeTime = System.currentTimeMillis();
-		OfficeBuildingManager manager = OfficeBuildingManager
-				.startOfficeBuilding(PORT, this.classPathBuilderFactory);
+		OfficeBuildingManager manager = this.startOfficeBuilding();
 		long afterTime = System.currentTimeMillis();
 
 		// Ensure correct JMX Service URL
@@ -172,25 +194,19 @@ public class OfficeBuildingManagerTest extends TestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} with a {@link ClassPathSeed}.
+	 * Ensure able to open the {@link OfficeFloor} with arguments.
 	 */
-	public void testOfficeFloorSeedManagement() throws Exception {
+	public void testOfficeFloorArgumentsManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
 			@Override
 			public String openOfficeFloor(String processName,
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				ClassPathSeed seed = new ClassPathSeed();
-				seed
-						.includeArtifact(
-								"net.officefloor.core",
-								"officecompiler",
-								OfficeBuildingTestUtil
-										.getOfficeFloorArtifactVersion("officecompiler"),
-								"jar", null);
-				return buildingManager.openOfficeFloor(processName, seed,
-						officeFloorLocation, null);
+				String[] arguments = new String[] { "--officefloor",
+						officeFloorLocation };
+				return buildingManager.openOfficeFloor(processName, arguments,
+						null);
 			}
 		});
 	}
@@ -228,8 +244,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 			throws Exception {
 
 		// Start the OfficeBuilding
-		OfficeBuildingManager.startOfficeBuilding(PORT,
-				this.classPathBuilderFactory);
+		this.startOfficeBuilding();
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
@@ -329,8 +344,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 	public void testCloseOfficeFloor() throws Exception {
 
 		// Start the OfficeBuilding
-		OfficeBuildingManager.startOfficeBuilding(PORT,
-				this.classPathBuilderFactory);
+		this.startOfficeBuilding();
 
 		// Obtain the manager MBean
 		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
@@ -339,10 +353,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
 		String processNamespace = buildingManager.openOfficeFloor(this
-				.getName(), "net.officefloor.core", "officecompiler",
-				OfficeBuildingTestUtil
-						.getOfficeFloorArtifactVersion("officecompiler"),
-				"jar", null, officeFloorLocation, null);
+				.getName(),
+				new String[] { "--officefloor", officeFloorLocation }, null);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
