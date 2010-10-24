@@ -34,7 +34,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 import net.officefloor.main.OfficeBuildingMain;
@@ -68,7 +67,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		try {
 			MavenEmbedder embedder = new MavenEmbedder();
 			try {
-				embedder.setClassLoader(ClassPathBuilderFactory.class
+				embedder.setClassLoader(OfficeFloorCommand.class
 						.getClassLoader());
 				embedder.setAlignWithUserInstallation(true);
 				embedder.start();

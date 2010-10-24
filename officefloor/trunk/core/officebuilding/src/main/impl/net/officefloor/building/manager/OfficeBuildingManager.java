@@ -19,7 +19,6 @@
 package net.officefloor.building.manager;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -41,9 +40,15 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.classpath.ClassPathBuilder;
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
-import net.officefloor.building.classpath.ClassPathSeed;
+import net.officefloor.building.command.OfficeFloorCommand;
+import net.officefloor.building.command.OfficeFloorCommandParser;
+import net.officefloor.building.command.OfficeFloorCommandParserImpl;
+import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
+import net.officefloor.building.decorate.OfficeFloorDecorator;
+import net.officefloor.building.decorate.OfficeFloorDecoratorServiceLoader;
+import net.officefloor.building.execute.OfficeFloorExecutionUnit;
+import net.officefloor.building.execute.OfficeFloorExecutionUnitFactory;
+import net.officefloor.building.execute.OfficeFloorExecutionUnitFactoryImpl;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
@@ -91,21 +96,35 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * 
 	 * @param port
 	 *            Port for the {@link OfficeBuildingMain}.
-	 * @param classPathBuilderFactory
-	 *            {@link ClassPathBuilderFactory}.
-	 * @return {@link OfficeBuildingManager} managing the started Office
-	 *         Building.
+	 * @param localRepositoryDirectory
+	 *            Directory for the local repository. May be <code>null</code>.
+	 *            User settings will typically also override this value.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs. May be <code>null</code> to not
+	 *            resolve dependencies.
+	 * @param mbeanServer
+	 *            {@link MBeanServer}. May be <code>null</code> to use platform
+	 *            {@link MBeanServer}.
+	 * @return {@link OfficeBuildingManager} managing the started
+	 *         {@link OfficeBuildingMain}.
 	 * @throws Exception
 	 *             If fails to start the {@link OfficeBuildingMain}.
 	 */
 	public static OfficeBuildingManager startOfficeBuilding(int port,
-			ClassPathBuilderFactory classPathBuilderFactory) throws Exception {
+			File localRepositoryDirectory, String[] remoteRepositoryUrls,
+			MBeanServer mbeanServer) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
 
-		// Obtain the MBean Server
-		MBeanServer mbeanServer = getMBeanServer();
+		// Ensure remote repositories is not null
+		remoteRepositoryUrls = (remoteRepositoryUrls == null ? new String[0]
+				: remoteRepositoryUrls);
+
+		// Ensure have an the MBean Server
+		if (mbeanServer == null) {
+			mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		}
 
 		// Ensure have Registry on the port
 		Registry registry = LocateRegistry.getRegistry(port);
@@ -125,7 +144,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer, classPathBuilderFactory);
+				serviceUrl, connectorServer, mbeanServer,
+				localRepositoryDirectory, remoteRepositoryUrls);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -221,9 +241,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Obtains the {@link OfficeFloorManagerMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
-	 * {@link OfficeBuildingMain} managing the {@link OfficeFloor} {@link Process}.
-	 * They are <i>not</i> of the specific {@link Process} containing the
-	 * {@link OfficeFloor}.
+	 * {@link OfficeBuildingMain} managing the {@link OfficeFloor}
+	 * {@link Process}. They are <i>not</i> of the specific {@link Process}
+	 * containing the {@link OfficeFloor}.
 	 * 
 	 * @param hostName
 	 *            Name of the host where the {@link OfficeBuildingMain} resides.
@@ -311,15 +331,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
-	 * Obtains the {@link MBeanServer}.
-	 * 
-	 * @return {@link MBeanServer}.
-	 */
-	private static MBeanServer getMBeanServer() {
-		return ManagementFactory.getPlatformMBeanServer();
-	}
-
-	/**
 	 * {@link ProcessManager} instances of currently running {@link Process}
 	 * instances.
 	 */
@@ -346,9 +357,19 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	private final JMXConnectorServer connectorServer;
 
 	/**
-	 * {@link ClassPathBuilderFactory}.
+	 * {@link MBeanServer}.
 	 */
-	private final ClassPathBuilderFactory classPathBuilderFactory;
+	private final MBeanServer mbeanServer;
+
+	/**
+	 * Local repository directory.
+	 */
+	private final File localRepositoryDirectory;
+
+	/**
+	 * Remote repository URLs.
+	 */
+	private final String[] remoteRepositoryUrls;
 
 	/**
 	 * May only create by starting.
@@ -359,17 +380,23 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            {@link OfficeBuildingMain} {@link JMXServiceURL}.
 	 * @param connectorServer
 	 *            {@link JMXConnectorServer} for the {@link OfficeBuildingMain}.
-	 * @param classPathBuilderFactory
-	 *            {@link ClassPathBuilderFactory}.
+	 * @param mbeanServer
+	 *            {@link MBeanServer}.
+	 * @param localRepositoryDirectory
+	 *            Local repository directory.
+	 * @param remoteRepositoryUrls
+	 *            Remote repository URLs.
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
-			JMXConnectorServer connectorServer,
-			ClassPathBuilderFactory classPathBuilderFactory) {
+			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
+			File localRepositoryDirectory, String[] remoteRepositoryUrls) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
-		this.classPathBuilderFactory = classPathBuilderFactory;
+		this.mbeanServer = mbeanServer;
+		this.localRepositoryDirectory = localRepositoryDirectory;
+		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 
 	/*
@@ -397,115 +424,71 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	@Override
+	public String openOfficeFloor(String processName, String jarName,
+			String officeFloorLocation, String jvmOptions) throws Exception {
+
+		// Create the arguments to open the OfficeFloor
+		String[] arguments = OpenOfficeFloorCommand.createArguments(jarName,
+				officeFloorLocation);
+
+		// Open the OfficeFloor
+		return this.openOfficeFloor(processName, arguments, jvmOptions);
+	}
+
+	@Override
 	public String openOfficeFloor(String processName, String groupId,
 			String artifactId, String version, String type, String classifier,
 			String officeFloorLocation, String jvmOptions) throws Exception {
 
-		// Build the class path for the jar
-		ClassPathBuilder builder = this.classPathBuilderFactory
-				.createClassPathBuilder();
-		try {
-			builder.includeArtifact(groupId, artifactId, version, type,
-					classifier);
-		} catch (Exception ex) {
-			// Construct artifact reference
-			String reference = groupId + ":" + artifactId + ":" + version + ":"
-					+ type + (classifier == null ? "" : ":" + classifier);
-
-			// Propagate failure to include artifact.
-			// (Necessary as thrown exception may not be serialisable)
-			throw new FileNotFoundException("Unable to include artifact '"
-					+ reference + "' on class path\n\n" + ex.getMessage());
-		}
+		// Create the arguments to open the OfficeFloor
+		String[] arguments = OpenOfficeFloorCommand.createArguments(groupId,
+				artifactId, version, type, classifier, officeFloorLocation);
 
 		// Open the OfficeFloor
-		return this.openOfficeFloor(processName, builder, officeFloorLocation,
-				jvmOptions);
+		return this.openOfficeFloor(processName, arguments, jvmOptions);
 	}
 
 	@Override
-	public String openOfficeFloor(String processName, String jarName,
-			String officeFloorLocation, String jvmOptions) throws Exception {
-
-		// Build the class path for the jar
-		File jarFile = new File(jarName);
-		ClassPathBuilder builder = this.classPathBuilderFactory
-				.createClassPathBuilder();
-		builder.includeJar(jarFile);
-
-		// Open the OfficeFloor
-		return this.openOfficeFloor(processName, builder, officeFloorLocation,
-				jvmOptions);
-	}
-
-	@Override
-	public String openOfficeFloor(String processName, ClassPathSeed seed,
-			String officeFloorLocation, String jvmOptions) throws Exception {
-
-		// Build the class path for the seed
-		ClassPathBuilder builder = this.classPathBuilderFactory
-				.createClassPathBuilder();
-		try {
-			builder.includeSeed(seed);
-		} catch (Exception ex) {
-			// Propagate failure to seed.
-			// (Necessary as thrown exception may not be serialisable)
-			throw new FileNotFoundException("Unable to seed class path\n\n"
-					+ ex.getMessage());
-		}
-
-		// Open the OfficeFloor
-		return this.openOfficeFloor(processName, builder, officeFloorLocation,
-				jvmOptions);
-	}
-
-	/**
-	 * Opens the {@link OfficeFloor}.
-	 * 
-	 * @param processName
-	 *            Process name.
-	 * @param classPathBuilder
-	 *            {@link ClassPathBuilder} containing the additional class path.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor} on the class path.
-	 * @param jvmOptions
-	 *            JVM options.
-	 * @return Process namespace.
-	 * @throws Exception
-	 *             If fails to open the {@link OfficeFloor}.
-	 */
-	private String openOfficeFloor(String processName,
-			ClassPathBuilder classPathBuilder, String officeFloorLocation,
+	public String openOfficeFloor(String processName, String[] arguments,
 			String jvmOptions) throws Exception {
 
-		ProcessConfiguration configuration;
-		OfficeFloorManager managedProcess;
+		// Ensure the OfficeBuilding is open
 		synchronized (this) {
-
-			// Ensure the OfficeBuilding is open
 			if (!this.isOfficeBuildingOpen) {
 				throw new IllegalStateException("OfficeBuilding closed");
 			}
+		}
 
-			// Obtain the class path
-			String classPath = classPathBuilder.getBuiltClassPath();
-			classPathBuilder.close();
+		// Parse arguments to create command to open the OfficeFloor
+		OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
+				new OpenOfficeFloorCommand());
+		OfficeFloorCommand[] commands = parser.parseCommands(arguments);
 
-			// Create the configuration
-			configuration = new ProcessConfiguration();
+		// Obtain decorators from default class path
+		OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader
+				.loadOfficeFloorDecorators(null);
+
+		// Create the execution unit
+		OfficeFloorExecutionUnitFactory factory = new OfficeFloorExecutionUnitFactoryImpl(
+				this.localRepositoryDirectory, this.remoteRepositoryUrls,
+				decorators);
+		OfficeFloorExecutionUnit executionUnit = factory
+				.createExecutionUnit(commands[0]);
+
+		// Overwritten values for process configuration
+		ProcessConfiguration configuration = executionUnit
+				.getProcessConfiguration();
+		if (processName != null) {
 			configuration.setProcessName(processName);
-			configuration.setAdditionalClassPath(classPath);
+		}
+		if (jvmOptions != null) {
 			configuration.setJvmOptions(jvmOptions);
-			configuration.setProcessCompletionListener(this);
-
-			// Create the OfficeFloor managed process
-			managedProcess = new OfficeFloorManager(officeFloorLocation);
 		}
 
 		// Run the OfficeFloor.
 		// (outside lock as completion listener on failure requires locking)
-		ProcessManager manager = ProcessManager.startProcess(managedProcess,
-				configuration);
+		ProcessManager manager = ProcessManager.startProcess(executionUnit
+				.getManagedProcess(), configuration);
 
 		// Determine if process already complete
 		boolean isProcessComplete;
@@ -668,7 +651,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			}
 
 			// Return status of stopping
-			status.append(OfficeBuildingMain.class.getSimpleName() + " stopped\n");
+			status.append(OfficeBuildingMain.class.getSimpleName()
+					+ " stopped\n");
 			return status.toString();
 
 		} finally {
@@ -676,8 +660,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			this.connectorServer.stop();
 
 			// Unregister the Office Building Manager MBean
-			MBeanServer mbeanServer = getMBeanServer();
-			mbeanServer.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+			this.mbeanServer
+					.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
 		}
 	}
 

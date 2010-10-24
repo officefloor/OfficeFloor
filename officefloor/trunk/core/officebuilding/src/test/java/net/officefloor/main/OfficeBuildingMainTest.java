@@ -27,14 +27,12 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * Tests the {@link OfficeBuildingMain}.
@@ -76,8 +74,8 @@ public class OfficeBuildingMainTest extends OfficeFrameTestCase {
 
 		// Provide OfficeBuilding Home
 		File officeBuildingHomeDir = this.findFile(
-				OfficeBuildingMain.PROPERTIES_FILE_RELATIVE_PATH).getParentFile()
-				.getParentFile();
+				OfficeBuildingMain.PROPERTIES_FILE_RELATIVE_PATH)
+				.getParentFile().getParentFile();
 		System.setProperty(OfficeBuildingMain.OFFICE_BUILDING_HOME,
 				officeBuildingHomeDir.getAbsolutePath());
 
@@ -87,8 +85,8 @@ public class OfficeBuildingMainTest extends OfficeFrameTestCase {
 						.getAbsolutePath());
 
 		// Provide remote repository path (use local to stop download)
-		String localRepositoryUrl = ClassPathBuilderFactory
-				.getLocalRepositoryDirectory(null).toURI().toURL().toString();
+		String localRepositoryUrl = OfficeBuildingTestUtil
+				.getLocalRepositoryDirectory().toURI().toURL().toString();
 		System.setProperty(OfficeBuildingMain.PROPERTY_REMOTE_REPOSITORY_URL,
 				localRepositoryUrl);
 
@@ -284,8 +282,8 @@ public class OfficeBuildingMainTest extends OfficeFrameTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the Task (to ensure OfficeFloor is open by writing to file)
-		OfficeBuildingMain.main("invoke", PROCESS_NAME, "OFFICE", "SECTION.WORK",
-				"writeMessage", tempFile.getAbsolutePath());
+		OfficeBuildingMain.main("invoke", PROCESS_NAME, "OFFICE",
+				"SECTION.WORK", "writeMessage", tempFile.getAbsolutePath());
 		validateStreamContent("Should be no errors", "", this.stderr);
 
 		// Ensure message written to file

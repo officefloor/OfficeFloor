@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
+import net.officefloor.building.command.OfficeFloorCommandContextImpl;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.main.OfficeBuildingMain;
@@ -74,7 +74,7 @@ public class OfficeBuildingTestUtil {
 	 * @return Local repository directory.
 	 */
 	public static File getLocalRepositoryDirectory() throws Exception {
-		return ClassPathBuilderFactory.getLocalRepositoryDirectory(null);
+		return OfficeFloorCommandContextImpl.getLocalRepositoryDirectory(null);
 	}
 
 	/**
@@ -97,17 +97,6 @@ public class OfficeBuildingTestUtil {
 	public static String[] getRemoteRepositoryUrls() throws Exception {
 		return new String[] { "file://"
 				+ getRemoteRepositoryDirectory().getCanonicalPath() };
-	}
-
-	/**
-	 * Obtains the test {@link ClassPathBuilderFactory}.
-	 * 
-	 * @return Test {@link ClassPathBuilderFactory}.
-	 */
-	@Deprecated
-	public static ClassPathBuilderFactory getClassPathBuilderFactory()
-			throws Exception {
-		return new ClassPathBuilderFactory(null, getRemoteRepositoryUrls());
 	}
 
 	/**

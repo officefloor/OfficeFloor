@@ -22,7 +22,7 @@ import java.util.Date;
 
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.classpath.ClassPathSeed;
+import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -39,8 +39,8 @@ public interface OfficeBuildingManagerMBean {
 	 * <p>
 	 * Obtains the time the {@link OfficeBuildingMain} was started.
 	 * <p>
-	 * The time is specific to the host the {@link OfficeBuildingMain} is running
-	 * on.
+	 * The time is specific to the host the {@link OfficeBuildingMain} is
+	 * running on.
 	 * 
 	 * @return Time the {@link OfficeBuildingMain} was started.
 	 */
@@ -54,8 +54,8 @@ public interface OfficeBuildingManagerMBean {
 	 * The returned value can be used as is for the construction of a
 	 * {@link JMXServiceURL} to the {@link OfficeBuildingMain}.
 	 * 
-	 * @return {@link JMXServiceURL} of the {@link OfficeBuildingMain} being managed
-	 *         by this {@link OfficeBuildingManager}.
+	 * @return {@link JMXServiceURL} of the {@link OfficeBuildingMain} being
+	 *         managed by this {@link OfficeBuildingManager}.
 	 */
 	String getOfficeBuildingJmxServiceUrl();
 
@@ -93,6 +93,7 @@ public interface OfficeBuildingManagerMBean {
 	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to open the {@link OfficeFloor}.
+	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
 	String openOfficeFloor(String processName, String jarName,
@@ -122,13 +123,15 @@ public interface OfficeBuildingManagerMBean {
 	 *            <code>null</code> if no classifier.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor} within the artifact to
-	 *            open.
+	 *            open. May be <code>null</code> if provided via
+	 *            {@link OfficeFloorDecorator}.
 	 * @param jvmOptions
 	 *            Options for the JVM of the {@link Process} to contain the
 	 *            {@link OfficeFloor}.
 	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to open the {@link OfficeFloor}.
+	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
 	String openOfficeFloor(String processName, String groupId,
@@ -137,31 +140,32 @@ public interface OfficeBuildingManagerMBean {
 
 	/**
 	 * <p>
-	 * Opens an {@link OfficeFloor} within the {@link OfficeBuildingMain}. Uses
-	 * {@link ClassPathSeed} to seed the class path for the {@link OfficeFloor}.
+	 * Opens an {@link OfficeFloor} within the {@link OfficeBuildingMain}.
 	 * <p>
-	 * The complex {@link ClassPathSeed} means that may only programmatically
-	 * invoke - not for JMX console invocation. Use the other
+	 * The complex arguments means this method will typically only be able to be
+	 * programmatically invoked - not for JMX console invocation. Use the other
 	 * <code>openOfficeFloor</code> for this type of invocation.
+	 * <p>
+	 * Also note that due to this method&apos;s flexibility and non-typed
+	 * interface that caution should be taken in using this programmatically as
+	 * arguments may change.
 	 * 
 	 * @param processName
 	 *            Name identifying the {@link Process} for the
 	 *            {@link OfficeFloor}.
-	 * @param seed
-	 *            {@link ClassPathSeed} to seed the class path for the
-	 *            {@link OfficeFloor}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor} within the JAR to open.
+	 * @param arguments
+	 *            {@link OfficeFloor} arguments.
 	 * @param jvmOptions
 	 *            Options for the JVM of the {@link Process} to contain the
 	 *            {@link OfficeFloor}.
 	 * @return {@link Process} name space of the opened {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to open the {@link OfficeFloor}.
+	 * 
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
-	String openOfficeFloor(String processName, ClassPathSeed seed,
-			String officeFloorLocation, String jvmOptions) throws Exception;
+	String openOfficeFloor(String processName, String[] arguments,
+			String jvmOptions) throws Exception;
 
 	/**
 	 * Provides a listing of the {@link Process} name spaces currently running

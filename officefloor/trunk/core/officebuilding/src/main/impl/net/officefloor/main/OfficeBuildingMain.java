@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
@@ -54,15 +53,15 @@ public class OfficeBuildingMain {
 	public static final String PROPERTIES_FILE_RELATIVE_PATH = "config/OfficeBuilding.properties";
 
 	/**
-	 * Name of the property defining the host that the {@link OfficeBuildingMain} is
-	 * residing on. This property is ignored if starting the
-	 * {@link OfficeBuildingMain} as always run on localhost.
+	 * Name of the property defining the host that the
+	 * {@link OfficeBuildingMain} is residing on. This property is ignored if
+	 * starting the {@link OfficeBuildingMain} as always run on localhost.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_HOST = "office.building.host";
 
 	/**
-	 * Name of the property defining the port that the {@link OfficeBuildingMain} is
-	 * to run or is running on.
+	 * Name of the property defining the port that the
+	 * {@link OfficeBuildingMain} is to run or is running on.
 	 */
 	public static final String PROPERTY_OFFICE_BUILDING_PORT = "office.building.port";
 
@@ -166,14 +165,10 @@ public class OfficeBuildingMain {
 				remoteRepositoryUrls[i] = remoteRepositoryUrls[i].trim();
 			}
 
-			// Create the class path builder factory
-			ClassPathBuilderFactory classPathBuilderFactory = new ClassPathBuilderFactory(
-					localRepositoryPath, remoteRepositoryUrls);
-
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
-					.startOfficeBuilding(officeBuildingPort,
-							classPathBuilderFactory);
+					.startOfficeBuilding(officeBuildingPort, new File(
+							localRepositoryPath), remoteRepositoryUrls, null);
 
 			// Indicate started and location
 			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();

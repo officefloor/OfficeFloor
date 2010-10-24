@@ -298,7 +298,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Obtain the process name
 		String processName = configuration.getProcessName();
-		if (processName == null) {
+		if (OfficeBuildingMain.isBlank(processName)) {
 			processName = "Process";
 		}
 
