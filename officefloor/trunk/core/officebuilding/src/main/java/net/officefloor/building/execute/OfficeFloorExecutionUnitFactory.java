@@ -15,33 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.command;
+package net.officefloor.building.execute;
 
-import net.officefloor.building.process.ManagedProcess;
-import net.officefloor.building.process.ProcessConfiguration;
+import net.officefloor.building.command.OfficeFloorCommand;
 
 /**
- * Environment for the {@link ManagedProcess}.
+ * Factory for the creation of {@link OfficeFloorExecutionUnit} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorCommandEnvironment {
+public interface OfficeFloorExecutionUnitFactory {
 
 	/**
-	 * Obtains the environment property value.
+	 * Creates the {@link OfficeFloorExecutionUnit} for the
+	 * {@link OfficeFloorCommand}.
 	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @return Property value for the name.
+	 * @param command
+	 *            {@link OfficeFloorCommand}.
+	 * @return {@link OfficeFloorExecutionUnit} instance for the
+	 *         {@link OfficeFloorCommand}.
+	 * @throws OfficeFloorExecutionUnitCreateException
+	 *             If fails to create the {@link OfficeFloorExecutionUnit}.
 	 */
-	String getProperty(String name);
-
-	/**
-	 * Specifies the {@link Process} name for the {@link ProcessConfiguration}.
-	 * 
-	 * @param processName
-	 *            {@link Process} name for the {@link ProcessConfiguration}.
-	 */
-	void setProcessName(String processName);
+	OfficeFloorExecutionUnit createExecutionUnit(OfficeFloorCommand command)
+			throws OfficeFloorExecutionUnitCreateException;
 
 }

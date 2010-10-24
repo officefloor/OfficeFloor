@@ -1,0 +1,255 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.building.execute;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import junit.framework.TestCase;
+import net.officefloor.building.command.OfficeFloorCommand;
+import net.officefloor.building.command.OfficeFloorCommandContext;
+import net.officefloor.building.command.OfficeFloorCommandEnvironment;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.process.ManagedProcess;
+
+/**
+ * Mock {@link OfficeFloorCommand} for testing.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class MockCommand implements OfficeFloorCommand {
+
+	/**
+	 * Initialises the environment.
+	 */
+	public static interface MockInitialiser {
+
+		/**
+		 * Initialises the environment.
+		 * 
+		 * @param context
+		 *            {@link OfficeFloorCommandContext}.
+		 * @throws Exception
+		 *             If fails to initialise.
+		 */
+		void initialiseEnvironment(OfficeFloorCommandContext context)
+				throws Exception;
+	}
+
+	/**
+	 * {@link OfficeFloorCommand} name.
+	 */
+	private final String commandName;
+
+	/**
+	 * {@link ManagedProcess}.
+	 */
+	private final ManagedProcess managedProcess;
+
+	/**
+	 * {@link MockInitialiser}.
+	 */
+	private final MockInitialiser initialiser;
+
+	/**
+	 * {@link OfficeFloorCommandParameter} instances.
+	 */
+	private final OfficeFloorCommandParameter[] parameters;
+
+	/**
+	 * {@link OfficeFloorCommandParameter} values.
+	 */
+	private final Map<String, String> parameterValues = new HashMap<String, String>();
+
+	/**
+	 * Expected environment name value pairs.
+	 */
+	private final Map<String, String> expectedEnvironment = new HashMap<String, String>();
+
+	/**
+	 * Expected parameter values.
+	 */
+	private final Map<String, String> expectedParameters = new HashMap<String, String>();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param commandName
+	 *            {@link OfficeFloorCommand} name.
+	 * @param managedProcess
+	 *            {@link ManagedProcess}.
+	 * @param initialiser
+	 *            {@link EnvironmentInitialiser}. May be <code>null</code> to
+	 *            not initialise.
+	 * @param parameters
+	 *            Names for the {@link OfficeFloorCommandParameter} instances.
+	 */
+	public MockCommand(String commandName, ManagedProcess managedProcess,
+			MockInitialiser initialiser, String... parameters) {
+		this.commandName = commandName;
+		this.managedProcess = managedProcess;
+		this.initialiser = initialiser;
+
+		// Create the listing of parameters
+		this.parameters = new OfficeFloorCommandParameter[parameters.length];
+		for (int i = 0; i < this.parameters.length; i++) {
+			this.parameters[i] = new MockCommandParameter(parameters[i]);
+		}
+	}
+
+	/**
+	 * Obtains the command name.
+	 * 
+	 * @return Command name.
+	 */
+	public String getCommandName() {
+		return this.commandName;
+	}
+
+	/**
+	 * Obtains the {@link ManagedProcess}.
+	 * 
+	 * @return {@link ManagedProcess}.
+	 */
+	public ManagedProcess getManagedProcess() {
+		return this.managedProcess;
+	}
+
+	/**
+	 * Adds an expected environment property.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 */
+	public void addExpectedEnvironmentProperty(String name, String value) {
+		this.expectedEnvironment.put(name, value);
+	}
+
+	/**
+	 * Adds an expected {@link OfficeFloorCommandParameter} value.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 */
+	public void addExepctedParameter(String name, String value) {
+		this.expectedParameters.put(name, value);
+	}
+
+	/**
+	 * Obtains the parameters values.
+	 * 
+	 * @return Parameter values.
+	 */
+	public Map<String, String> getParameterValues() {
+		return this.parameterValues;
+	}
+
+	/*
+	 * ==================== OfficeFloorCommand ======================
+	 */
+
+	@Override
+	public OfficeFloorCommandParameter[] getParameters() {
+		return this.parameters;
+	}
+
+	@Override
+	public void initialiseEnvironment(OfficeFloorCommandContext context)
+			throws Exception {
+
+		// Initialise environment only if have initialiser
+		if (this.initialiser != null) {
+			this.initialiser.initialiseEnvironment(context);
+		}
+	}
+
+	@Override
+	public ManagedProcess createManagedProcess(
+			OfficeFloorCommandEnvironment environment) throws Exception {
+
+		// Provide process name
+		environment.setProcessName(this.commandName);
+
+		// Ensure correct environment
+		for (String name : this.expectedEnvironment.keySet()) {
+			String value = this.expectedEnvironment.get(name);
+			TestCase.assertEquals("Incorrect environment property value for "
+					+ name, value, environment.getProperty(name));
+		}
+
+		// Ensure correct property values
+		for (String name : this.expectedParameters.keySet()) {
+			String value = this.expectedParameters.get(name);
+			TestCase.assertEquals("Incorrect parameter value for " + name,
+					value, this.parameterValues.get(name));
+		}
+
+		// Return the managed process
+		return this.managedProcess;
+	}
+
+	/**
+	 * Mock {@link OfficeFloorCommandParameter}.
+	 */
+	private class MockCommandParameter implements OfficeFloorCommandParameter {
+
+		/**
+		 * Name of this {@link OfficeFloorCommandParameter}.
+		 */
+		private final String parameterName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param parameterName
+		 *            Name of this {@link OfficeFloorCommandParameter}.
+		 */
+		public MockCommandParameter(String parameterName) {
+			this.parameterName = parameterName;
+		}
+
+		/*
+		 * ================= OfficeFloorCommandParameter ================
+		 */
+
+		@Override
+		public String getName() {
+			return this.parameterName;
+		}
+
+		@Override
+		public String getShortName() {
+			// Simplified for testing
+			return this.parameterName;
+		}
+
+		@Override
+		public void addValue(String value) {
+			// Only maintain first value
+			if (!MockCommand.this.parameterValues
+					.containsKey(this.parameterName)) {
+				MockCommand.this.parameterValues.put(this.parameterName, value);
+			}
+		}
+	}
+
+}
