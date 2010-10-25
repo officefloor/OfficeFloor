@@ -104,8 +104,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				.readObject();
 
 		// Create the context for the managed process
-		ProcessShell context = new ProcessShell(new String[0],
-				ManagementFactory.getPlatformMBeanServer());
+		ProcessShell context = new ProcessShell(ManagementFactory
+				.getPlatformMBeanServer());
 
 		// Run the process
 		managedProcess.init(context);
@@ -192,7 +192,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			connectorServer.start();
 
 			// Create instance as context
-			ProcessShell context = new ProcessShell(arguments, connectorServer,
+			ProcessShell context = new ProcessShell(connectorServer,
 					toParentPipe);
 
 			// Initialise the managed process
@@ -233,11 +233,6 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	}
 
 	/**
-	 * Command arguments.
-	 */
-	private final String[] commandArguments;
-
-	/**
 	 * {@link JMXConnectorServer}.
 	 */
 	private final JMXConnectorServer connectorServer;
@@ -265,16 +260,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/**
 	 * Initiate for {@link Process}.
 	 * 
-	 * @param commandArguments
-	 *            Command arguments.
 	 * @param connectorServer
 	 *            {@link JMXConnectorServers}.
 	 * @param toParentPipe
 	 *            {@link ObjectOutputStream} to send the notifications.
 	 */
-	public ProcessShell(String[] commandArguments,
-			JMXConnectorServer connectorServer, ObjectOutputStream toParentPipe) {
-		this.commandArguments = commandArguments;
+	public ProcessShell(JMXConnectorServer connectorServer,
+			ObjectOutputStream toParentPipe) {
 		this.connectorServer = connectorServer;
 		this.toParentPipe = toParentPipe;
 		this.mbeanServer = null;
@@ -284,13 +276,10 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/**
 	 * Initiate for running locally.
 	 * 
-	 * @param commandArguments
-	 *            Command arguments.
 	 * @param mbeanServer
 	 *            Local {@link MBeanServer}.
 	 */
-	public ProcessShell(String[] commandArguments, MBeanServer mbeanServer) {
-		this.commandArguments = commandArguments;
+	public ProcessShell(MBeanServer mbeanServer) {
 		this.connectorServer = null;
 		this.toParentPipe = null;
 		this.mbeanServer = mbeanServer;
@@ -329,11 +318,6 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/*
 	 * ==================== ManagedProcessContext =========================
 	 */
-
-	@Override
-	public String[] getCommandArguments() {
-		return this.commandArguments;
-	}
 
 	@Override
 	public void registerMBean(Object mbean, ObjectName name)

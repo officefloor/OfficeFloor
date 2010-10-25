@@ -33,18 +33,6 @@ public interface ManagedProcessContext {
 
 	/**
 	 * <p>
-	 * Obtains the command arguments for the {@link ManagedProcess}.
-	 * <p>
-	 * This is equivalent to the command line arguments for the
-	 * <code>public static void main(String[] args)</code> method for running a
-	 * java program.
-	 * 
-	 * @return Command arguments.
-	 */
-	String[] getCommandArguments();
-
-	/**
-	 * <p>
 	 * Registers a MBean.
 	 * <p>
 	 * This is equivalent to corresponding {@link MBeanServer} method except

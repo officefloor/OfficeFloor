@@ -46,7 +46,7 @@ public class MultiplePathsOfficeFloorCommandParameter extends
 	 */
 	public MultiplePathsOfficeFloorCommandParameter(String name,
 			String shortName) {
-		super(name, shortName);
+		super(name, shortName, true);
 	}
 
 	/**

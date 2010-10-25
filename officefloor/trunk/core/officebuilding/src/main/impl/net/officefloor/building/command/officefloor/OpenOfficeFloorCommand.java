@@ -43,18 +43,18 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	 * Name of {@link OfficeFloorCommandParameter} for the {@link OfficeFloor}
 	 * location.
 	 */
-	private static final String PARAMETER_OFFICE_FLOOR_LOCATION = "officefloor";
+	public static final String PARAMETER_OFFICE_FLOOR_LOCATION = "officefloor";
 
 	/**
 	 * Name of {@link OfficeFloorCommandParameter} for the possible archive
 	 * locations.
 	 */
-	private static final String PARAMETER_ARCHIVE_LOCATION = "jar";
+	public static final String PARAMETER_ARCHIVE_LOCATION = "jar";
 
 	/**
 	 * Name of {@link OfficeFloorCommandParameter} for possible artifacts.
 	 */
-	private static final String PARAMETER_ARTIFACT = "artifact";
+	public static final String PARAMETER_ARTIFACT = "artifact";
 
 	/**
 	 * Convenience method to create arguments for running {@link OfficeFloor}
@@ -69,9 +69,8 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	public static String[] createArguments(String archiveLocation,
 			String officeFloorLocation) {
 		CommandLineBuilder arguments = new CommandLineBuilder();
-		arguments.addArgument(PARAMETER_ARCHIVE_LOCATION, archiveLocation);
-		arguments.addArgument(PARAMETER_OFFICE_FLOOR_LOCATION,
-				officeFloorLocation);
+		arguments.addArchive(archiveLocation);
+		arguments.addOfficeFloor(officeFloorLocation);
 		return arguments.getCommandLine();
 	}
 
@@ -97,12 +96,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 			String version, String type, String classifier,
 			String officeFloorLocation) {
 		CommandLineBuilder arguments = new CommandLineBuilder();
-		arguments.addArgument(PARAMETER_ARTIFACT,
+		arguments.addOption(PARAMETER_ARTIFACT,
 				MultipleArtifactsOfficeFloorCommandParameter
 						.getArtifactArgumentValue(groupId, artifactId, version,
 								type, classifier));
-		arguments.addArgument(PARAMETER_OFFICE_FLOOR_LOCATION,
-				officeFloorLocation);
+		arguments.addOfficeFloor(officeFloorLocation);
 		return arguments.getCommandLine();
 	}
 

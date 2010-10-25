@@ -81,7 +81,7 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 	 */
 	public MultipleArtifactsOfficeFloorCommandParameter(String name,
 			String shortName) {
-		super(name, shortName);
+		super(name, shortName, true);
 	}
 
 	/**

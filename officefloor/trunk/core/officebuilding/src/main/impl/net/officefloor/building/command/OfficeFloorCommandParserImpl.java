@@ -19,6 +19,7 @@ package net.officefloor.building.command;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,16 @@ import java.util.Map;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
+
+	/**
+	 * Prefix of the option for the {@link OfficeFloorCommandParameter}.
+	 */
+	public static final String OPTION_PREFIX = "--";
+
+	/**
+	 * Prefix of the short option for the {@link OfficeFloorCommandParameter}.
+	 */
+	public static final String OPTION_SHORT_PREFIX = "-";
 
 	/**
 	 * Single {@link OfficeFloorCommandFactory}.
@@ -40,6 +51,16 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 	private final Map<String, OfficeFloorCommandFactory> factories;
 
 	/**
+	 * Map indicating whether a parameter name requires a value.
+	 */
+	private final Map<String, Boolean> parameterNameToRequireValue = new HashMap<String, Boolean>();
+
+	/**
+	 * Map indicating whether a parameter short name requires a value.
+	 */
+	private final Map<String, Boolean> parameterShortNameToRequireValue = new HashMap<String, Boolean>();
+
+	/**
 	 * Initiate for the single command.
 	 * 
 	 * @param factory
@@ -48,6 +69,7 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 	public OfficeFloorCommandParserImpl(OfficeFloorCommandFactory factory) {
 		this.singleFactory = factory;
 		this.factories = null;
+		this.populateIfParameterRequiresValue(factory);
 	}
 
 	/**
@@ -68,6 +90,59 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 		for (OfficeFloorCommandFactory factory : factories) {
 			this.factories.put(factory.getCommandName(), factory);
 		}
+		this.populateIfParameterRequiresValue(factories);
+	}
+
+	/**
+	 * Populates whether the {@link OfficeFloorCommandParameter} instances
+	 * require a value.
+	 * 
+	 * @param factories
+	 *            {@link OfficeFloorCommandFactory} instances.
+	 */
+	private void populateIfParameterRequiresValue(
+			OfficeFloorCommandFactory... factories) {
+		for (OfficeFloorCommandFactory factory : factories) {
+
+			// Each time command is same, so create and use to populate
+			OfficeFloorCommand command = factory.createCommand();
+
+			// Populate parameter details
+			for (OfficeFloorCommandParameter parameter : command
+					.getParameters()) {
+				String name = parameter.getName();
+				String shortName = parameter.getShortName();
+				boolean isRequireValue = parameter.isRequireValue();
+
+				// Specify name
+				Boolean isNameRequireValue = this.parameterNameToRequireValue
+						.get(name);
+				if ((isNameRequireValue != null)
+						&& (isRequireValue != isNameRequireValue.booleanValue())) {
+					// Conflict between same parameter requiring value
+					throw new IllegalStateException("Conflict in parameter '"
+							+ name + "' requiring value");
+				}
+				this.parameterNameToRequireValue.put(name, Boolean
+						.valueOf(isRequireValue));
+
+				// Specify short name (if available)
+				if (shortName != null) {
+					Boolean isShortNameRequireValue = this.parameterShortNameToRequireValue
+							.get(shortName);
+					if ((isShortNameRequireValue != null)
+							&& (isRequireValue != isShortNameRequireValue
+									.booleanValue())) {
+						// Conflict between same parameter requiring value
+						throw new IllegalStateException(
+								"Conflict in parameter '" + shortName
+										+ "' requiring value");
+					}
+					this.parameterShortNameToRequireValue.put(shortName,
+							Boolean.valueOf(isRequireValue));
+				}
+			}
+		}
 	}
 
 	/*
@@ -77,9 +152,6 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 	@Override
 	public OfficeFloorCommand[] parseCommands(String[] arguments)
 			throws OfficeFloorCommandParseException {
-
-		final String SHORTENED_PREFIX = "-";
-		final String DESCRIPTIVE_PREFIX = "--";
 
 		// Strip out blank arguments along with trimming values
 		List<String> argList = new ArrayList<String>(arguments.length);
@@ -91,14 +163,43 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 		}
 		arguments = argList.toArray(new String[argList.size()]);
 
-		// Find the starting command (pattern: [option value]* command*)
+		// Find the starting command (pattern: [option [value]]* command*)
 		int commandIndex = -1;
-		FOUND_COMMAND: for (int i = 0; i < arguments.length; i += 2) {
-			String option = arguments[i];
-			if (!option.startsWith(SHORTENED_PREFIX)) {
-				// Found first command
-				commandIndex = i;
+		FOUND_COMMAND: for (int i = (arguments.length - 1); i >= 0; i--) {
+			String argument = arguments[i];
+			if (argument.startsWith(OPTION_SHORT_PREFIX)) {
+				// Found last option, so determine if requires value
+				Boolean isRequireValue;
+				if (argument.startsWith(OPTION_PREFIX)) {
+					// Name option
+					String optionName = argument.substring(OPTION_PREFIX
+							.length());
+					isRequireValue = this.parameterNameToRequireValue
+							.get(optionName);
+				} else {
+					// Short name option
+					String optionShortName = argument
+							.substring(OPTION_SHORT_PREFIX.length());
+					isRequireValue = this.parameterShortNameToRequireValue
+							.get(optionShortName);
+				}
+				if (isRequireValue == null) {
+					// Option is unknown
+					throw new OfficeFloorCommandParseException(
+							"Unknown option '" + argument + "'");
+				}
+
+				// Specify command index (+1 ignore option, [+1 required value])
+				commandIndex = i + 1 + (isRequireValue.booleanValue() ? 1 : 0);
+				if (commandIndex >= arguments.length) {
+					// Index after end of arguments so no commands
+					commandIndex = -1;
+				}
 				break FOUND_COMMAND;
+
+			} else if (i == 0) {
+				// First argument is a command
+				commandIndex = 0;
 			}
 		}
 
@@ -155,45 +256,76 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 		}
 
 		// Populate the commands
-		for (int i = 0; i < commandIndex; i += 2) {
-			String optionName = arguments[i];
-			String value = arguments[i + 1];
+		int parameterIndex = 0;
+		while (parameterIndex < commandIndex) {
 
-			// Handle loading
-			boolean isValueLoaded = false;
-			if (optionName.startsWith(DESCRIPTIVE_PREFIX)) {
+			// Obtain the option name
+			String optionName = arguments[parameterIndex];
+
+			// Obtain the listing of parameters to load
+			List<OfficeFloorCommandParameter> parameters = new LinkedList<OfficeFloorCommandParameter>();
+			if (optionName.startsWith(OPTION_PREFIX)) {
 				// Descriptive name
-				String name = optionName.substring(DESCRIPTIVE_PREFIX.length());
+				String name = optionName.substring(OPTION_PREFIX.length());
 
 				// Load by descriptive name
 				for (CommandStruct command : commands) {
 					OfficeFloorCommandParameter parameter = command.parametersByName
 							.get(name);
 					if (parameter != null) {
-						parameter.addValue(value);
-						isValueLoaded = true;
+						parameters.add(parameter);
 					}
 				}
 
 			} else {
 				// Shortened name
-				String name = optionName.substring(SHORTENED_PREFIX.length());
+				String name = optionName
+						.substring(OPTION_SHORT_PREFIX.length());
 
 				// Load by short name
 				for (CommandStruct command : commands) {
 					OfficeFloorCommandParameter parameter = command.parametersByShortName
 							.get(name);
 					if (parameter != null) {
-						parameter.addValue(value);
-						isValueLoaded = true;
+						parameters.add(parameter);
 					}
 				}
 			}
 
-			// Ensure value loaded (otherwise invalid option)
-			if (!isValueLoaded) {
+			// Ensure parameter for flag/option (otherwise invalid option)
+			if (parameters.size() == 0) {
 				throw new OfficeFloorCommandParseException("Unknown option '"
 						+ optionName + "'");
+			}
+
+			// Load the parameter values
+			boolean isValueRequired = false;
+			for (OfficeFloorCommandParameter parameter : parameters) {
+
+				// Obtain the value
+				String value = null;
+				if (parameter.isRequireValue()) {
+					isValueRequired = true;
+
+					// Ensure value on command line
+					int valueIndex = parameterIndex + 1;
+					if (valueIndex >= commandIndex) {
+						throw new OfficeFloorCommandParseException(
+								"No value for option '" + optionName + "'");
+					}
+
+					// Obtain the value
+					value = arguments[valueIndex];
+				}
+
+				// Load the value
+				parameter.addValue(value);
+			}
+
+			// Increment for next option
+			parameterIndex++; // move past option
+			if (isValueRequired) {
+				parameterIndex++; // move past value
 			}
 		}
 

@@ -1424,28 +1424,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public String getFileContents(File file) throws FileNotFoundException,
 			IOException {
-		// Obtain reader to file
-		BufferedReader reader = new BufferedReader(new FileReader(file));
 
-		// Create the buffer to load contents of the file
-		StringBuffer fileContents = new StringBuffer();
-
-		// Load contents of file
-		String fileLine = reader.readLine();
-		while (fileLine != null) {
-			// Add contents of line
-			fileContents.append(fileLine);
-			fileContents.append((char) Character.LINE_SEPARATOR);
-
-			// Obtain the next line
-			fileLine = reader.readLine();
+		// Read in contents of file
+		StringWriter contents = new StringWriter();
+		Reader reader = new FileReader(file);
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			contents.write(value);
 		}
-
-		// Close the reader (ensure no attachment to file)
 		reader.close();
 
 		// Return file contents
-		return fileContents.toString();
+		return contents.toString();
 	}
 
 	/**

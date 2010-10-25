@@ -38,16 +38,25 @@ public abstract class AbstractOfficeFloorCommandParameter implements
 	private final String shortName;
 
 	/**
+	 * Indicates if a value is required.
+	 */
+	private final boolean isRequireValue;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param name
 	 *            Name.
 	 * @param shortName
 	 *            Short name.
+	 * @param isRequireValue
+	 *            Flag indicating if value required.
 	 */
-	public AbstractOfficeFloorCommandParameter(String name, String shortName) {
+	public AbstractOfficeFloorCommandParameter(String name, String shortName,
+			boolean isRequireValue) {
 		this.name = name;
 		this.shortName = shortName;
+		this.isRequireValue = isRequireValue;
 	}
 
 	/*
@@ -62,6 +71,11 @@ public abstract class AbstractOfficeFloorCommandParameter implements
 	@Override
 	public String getShortName() {
 		return this.shortName;
+	}
+
+	@Override
+	public boolean isRequireValue() {
+		return this.isRequireValue;
 	}
 
 }

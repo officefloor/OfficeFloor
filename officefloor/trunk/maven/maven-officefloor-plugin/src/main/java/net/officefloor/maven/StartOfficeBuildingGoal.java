@@ -20,7 +20,6 @@ package net.officefloor.maven;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.classpath.ClassPathBuilderFactory;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.main.OfficeBuildingMain;
 
@@ -79,21 +78,10 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 					"Failed obtaining Remote Repository URLs", ex);
 		}
 
-		// Create the Class Path Builder
-		ClassPathBuilderFactory classPathBuilderFactory;
-		try {
-			// Creating defaulting the local repository
-			classPathBuilderFactory = new ClassPathBuilderFactory(null,
-					remoteRepositoryURLs);
-		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed resolving the class path",
-					ex);
-		}
-
 		// Start the OfficeBuilding
 		try {
 			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
-					classPathBuilderFactory);
+					null, remoteRepositoryURLs, null);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "

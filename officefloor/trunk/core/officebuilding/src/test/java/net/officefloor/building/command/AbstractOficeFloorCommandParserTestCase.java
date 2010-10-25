@@ -120,31 +120,65 @@ public abstract class AbstractOficeFloorCommandParserTestCase extends
 	}
 
 	/**
-	 * Records creating the necessary {@link OfficeFloorCommandFactory}
-	 * instances for the commands.
+	 * Records creating the necessary {@link OfficeFloorCommandFactory} instance
+	 * for the commands.
 	 * 
-	 * @param commandNames
-	 *            {@link OfficeFloorCommand} names.
+	 * @param commandName
+	 *            {@link OfficeFloorCommand} name.
+	 * @param paramNameShortNameRequireValueEntries
+	 *            Configuration of each {@link OfficeFloorCommandParameter}
+	 *            which are in order name, short name and is require value.
 	 */
-	protected void record_Factories(String... commandNames) {
-		for (String commandName : commandNames) {
+	protected void record_Factory(String commandName,
+			Object... paramNameShortNameRequireValueEntries) {
 
-			// Ensure not already exist
-			assertNull("Command already recorded", this.factories
-					.get(commandName));
+		// Ensure not already exist
+		assertNull("Command already recorded", this.factories.get(commandName));
 
-			// Record the command factory
-			OfficeFloorCommandFactory factory = this
-					.createMock(OfficeFloorCommandFactory.class);
-			if (!this.isSingle) {
-				// Only requires name if multiple commands
-				this.recordReturn(factory, factory.getCommandName(),
-						commandName);
-			}
+		// Record the command factory
+		OfficeFloorCommandFactory factory = this
+				.createMock(OfficeFloorCommandFactory.class);
+		if (!this.isSingle) {
+			// Only requires name if multiple commands
+			this.recordReturn(factory, factory.getCommandName(), commandName);
+		}
 
-			// Register the factory
-			this.factoryList.add(factory);
-			this.factories.put(commandName, factory);
+		// Register the factory
+		this.factoryList.add(factory);
+		this.factories.put(commandName, factory);
+
+		// Record create the command
+		final OfficeFloorCommand command = this
+				.createMock(OfficeFloorCommand.class);
+		this.recordReturn(factory, factory.createCommand(), command);
+
+		// Create the parameters for the command
+		OfficeFloorCommandParameter[] parameters = new OfficeFloorCommandParameter[paramNameShortNameRequireValueEntries.length / 3];
+		for (int i = 0; i < parameters.length; i++) {
+			parameters[i] = this.createMock(OfficeFloorCommandParameter.class);
+		}
+
+		// Record returning the parameter list
+		this.recordReturn(command, command.getParameters(), parameters);
+
+		// Record obtain details regarding the arguments
+		for (int i = 0; i < paramNameShortNameRequireValueEntries.length; i += 3) {
+			String descriptiveName = paramNameShortNameRequireValueEntries[i]
+					.toString();
+			Object shortenedNameObject = paramNameShortNameRequireValueEntries[i + 1];
+			String shortenedName = (shortenedNameObject == null ? null
+					: shortenedNameObject.toString());
+			boolean isRequireValue = Boolean
+					.parseBoolean(paramNameShortNameRequireValueEntries[i + 2]
+							.toString());
+
+			// Record obtaining details from parameter
+			final OfficeFloorCommandParameter parameter = parameters[i / 3];
+			this.recordReturn(parameter, parameter.getName(), descriptiveName);
+			this.recordReturn(parameter, parameter.getShortName(),
+					shortenedName);
+			this.recordReturn(parameter, parameter.isRequireValue(),
+					isRequireValue);
 		}
 	}
 
@@ -153,12 +187,12 @@ public abstract class AbstractOficeFloorCommandParserTestCase extends
 	 * 
 	 * @param factory
 	 *            {@link OfficeFloorCommandFactory}.
-	 * @param optionDescriptiveShortenedPairs
-	 *            Option pairs for the {@link OfficeFloorCommandParameter}
-	 *            instances.
+	 * @param paramNameShortNamePairs
+	 *            Configuration of each {@link OfficeFloorCommandParameter}
+	 *            which are in order name and short name.
 	 */
 	protected void record_Command(String commandName,
-			String... optionDescriptiveShortenedPairs) {
+			Object... paramNameShortNamePairs) {
 
 		// Obtain the factory
 		OfficeFloorCommandFactory factory = this.factories.get(commandName);
@@ -174,7 +208,7 @@ public abstract class AbstractOficeFloorCommandParserTestCase extends
 		this.commands.put(commandName, command);
 
 		// Create the parameters for the command
-		OfficeFloorCommandParameter[] parameters = new OfficeFloorCommandParameter[optionDescriptiveShortenedPairs.length / 2];
+		OfficeFloorCommandParameter[] parameters = new OfficeFloorCommandParameter[paramNameShortNamePairs.length / 2];
 		for (int i = 0; i < parameters.length; i++) {
 			parameters[i] = this.createMock(OfficeFloorCommandParameter.class);
 		}
@@ -183,9 +217,11 @@ public abstract class AbstractOficeFloorCommandParserTestCase extends
 		this.recordReturn(command, command.getParameters(), parameters);
 
 		// Record obtain details regarding the arguments
-		for (int i = 0; i < optionDescriptiveShortenedPairs.length; i += 2) {
-			String descriptiveName = optionDescriptiveShortenedPairs[i];
-			String shortenedName = optionDescriptiveShortenedPairs[i + 1];
+		for (int i = 0; i < paramNameShortNamePairs.length; i += 2) {
+			String descriptiveName = paramNameShortNamePairs[i].toString();
+			Object shortenedNameObject = paramNameShortNamePairs[i + 1];
+			String shortenedName = (shortenedNameObject == null ? null
+					: shortenedNameObject.toString());
 
 			// Record obtaining details from parameter
 			final OfficeFloorCommandParameter parameter = parameters[i / 2];
@@ -224,6 +260,9 @@ public abstract class AbstractOficeFloorCommandParserTestCase extends
 		OfficeFloorCommandParameter argument = commandParams.get(parameterName);
 		assertNotNull("Unknown parameter '" + parameterName + "' on command "
 				+ commandName, argument);
+
+		// Record if requires argument
+		this.recordReturn(argument, argument.isRequireValue(), (value != null));
 
 		// Record loading the value
 		argument.addValue(value);
