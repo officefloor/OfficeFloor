@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
+import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
 
@@ -32,7 +33,8 @@ import net.officefloor.building.process.ManagedProcess;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockCommand implements OfficeFloorCommand {
+public class MockCommand implements OfficeFloorCommand,
+		OfficeFloorCommandFactory {
 
 	/**
 	 * Initialises the environment.
@@ -97,7 +99,7 @@ public class MockCommand implements OfficeFloorCommand {
 	 *            {@link EnvironmentInitialiser}. May be <code>null</code> to
 	 *            not initialise.
 	 * @param parameters
-	 *            Names for the {@link OfficeFloorCommandParameter} instances.
+	 *            Name for the {@link OfficeFloorCommandParameter} instances.
 	 */
 	public MockCommand(String commandName, ManagedProcess managedProcess,
 			MockInitialiser initialiser, String... parameters) {
@@ -110,15 +112,6 @@ public class MockCommand implements OfficeFloorCommand {
 		for (int i = 0; i < this.parameters.length; i++) {
 			this.parameters[i] = new MockCommandParameter(parameters[i]);
 		}
-	}
-
-	/**
-	 * Obtains the command name.
-	 * 
-	 * @return Command name.
-	 */
-	public String getCommandName() {
-		return this.commandName;
 	}
 
 	/**
@@ -161,6 +154,20 @@ public class MockCommand implements OfficeFloorCommand {
 	 */
 	public Map<String, String> getParameterValues() {
 		return this.parameterValues;
+	}
+
+	/*
+	 * ================ OfficeFloorCommandFactory ===================
+	 */
+
+	@Override
+	public String getCommandName() {
+		return this.commandName;
+	}
+
+	@Override
+	public OfficeFloorCommand createCommand() {
+		return this;
 	}
 
 	/*
@@ -238,8 +245,14 @@ public class MockCommand implements OfficeFloorCommand {
 
 		@Override
 		public String getShortName() {
-			// Simplified for testing
-			return this.parameterName;
+			// Simplified for testing (take first character of name)
+			return this.parameterName.substring(0, 1);
+		}
+
+		@Override
+		public boolean isRequireValue() {
+			// For testing always require value
+			return true;
 		}
 
 		@Override

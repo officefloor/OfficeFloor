@@ -20,6 +20,9 @@ package net.officefloor.building.command;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * Builds a command line.
  * 
@@ -28,25 +31,52 @@ import java.util.List;
 public class CommandLineBuilder {
 
 	/**
+	 * Prefix for an option of the {@link OfficeFloorCommandParameter}.
+	 */
+	private static final String OPTION_PREFIX = OfficeFloorCommandParserImpl.OPTION_PREFIX;
+
+	/**
 	 * Command line.
 	 */
 	private final List<String> commandLine = new LinkedList<String>();
 
 	/**
-	 * Adds an argument to the command line.
+	 * Adds an archive to the command line.
 	 * 
-	 * @param name
-	 *            Argument name.
-	 * @param value
-	 *            Argument value.
+	 * @param archiveLocation
+	 *            Archive location.
 	 */
-	public void addArgument(String name, String value) {
-		this.commandLine.add("--" + name);
+	public void addArchive(String archiveLocation) {
+		this.addOption(OpenOfficeFloorCommand.PARAMETER_ARCHIVE_LOCATION,
+				archiveLocation);
+	}
+
+	/**
+	 * Adds an {@link OfficeFloor} location to the command line.
+	 * 
+	 * @param officeFloorLocation
+	 *            {@link OfficeFloor} location.
+	 */
+	public void addOfficeFloor(String officeFloorLocation) {
+		this.addOption(OpenOfficeFloorCommand.PARAMETER_OFFICE_FLOOR_LOCATION,
+				officeFloorLocation);
+	}
+
+	/**
+	 * Adds an {@link OfficeFloorCommandParameter} to the command line.
+	 * 
+	 * @param parameterName
+	 *            Name.
+	 * @param value
+	 *            Value.
+	 */
+	public void addOption(String parameterName, String value) {
+		this.commandLine.add(OPTION_PREFIX + parameterName);
 		this.commandLine.add(value);
 	}
 
 	/**
-	 * Adds a command to the command line.
+	 * Adds an {@link OfficeFloorCommand} to the command line.
 	 * 
 	 * @param commandName
 	 *            Name of the command.

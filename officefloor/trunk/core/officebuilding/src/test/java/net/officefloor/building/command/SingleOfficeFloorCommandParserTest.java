@@ -34,13 +34,13 @@ public class SingleOfficeFloorCommandParserTest extends
 	@Override
 	protected void setUp() throws Exception {
 		this.flagSingle();
-		this.record_Factories(COMMAND);
 	}
 
 	/**
 	 * Ensure no issue if no options nor commands.
 	 */
 	public void testEmptyCommandLine() throws Exception {
+		this.record_Factory(COMMAND);
 		this.record_Command(COMMAND);
 		this.doTest("", COMMAND);
 	}
@@ -49,6 +49,7 @@ public class SingleOfficeFloorCommandParserTest extends
 	 * Ensure issue if single command.
 	 */
 	public void testSingleCommand() throws Exception {
+		this.record_Factory(COMMAND);
 		this.record_Command(COMMAND);
 		try {
 			this.doTest("command");
@@ -63,6 +64,7 @@ public class SingleOfficeFloorCommandParserTest extends
 	 * Ensure issue if multiple commands.
 	 */
 	public void testMultipleCommands() throws Exception {
+		this.record_Factory(COMMAND);
 		this.record_Command(COMMAND);
 		try {
 			this.doTest("a b c");
@@ -74,18 +76,41 @@ public class SingleOfficeFloorCommandParserTest extends
 	}
 
 	/**
+	 * Ensure can parse command with descriptive flag.
+	 */
+	public void testDescriptiveFlag() throws Exception {
+		this.record_Factory(COMMAND, "descriptive", null, false);
+		this.record_Command(COMMAND, "descriptive", null);
+		this.record_Argument(COMMAND, "descriptive", null);
+		this.doTest("--descriptive", COMMAND);
+	}
+
+	/**
 	 * Ensure can parse command with descriptive parameter.
 	 */
 	public void testDescriptiveOption() throws Exception {
+		this.record_Factory(COMMAND, "descriptive", null, true);
 		this.record_Command(COMMAND, "descriptive", null);
 		this.record_Argument(COMMAND, "descriptive", "value");
 		this.doTest("--descriptive value", COMMAND);
 	}
 
 	/**
+	 * Ensure can parse command with repeated descriptive flag.
+	 */
+	public void testRepeatedDescriptiveFlag() throws Exception {
+		this.record_Factory(COMMAND, "descriptive", null, false);
+		this.record_Command(COMMAND, "descriptive", null);
+		this.record_Argument(COMMAND, "descriptive", null);
+		this.record_Argument(COMMAND, "descriptive", null);
+		this.doTest("--descriptive --descriptive", COMMAND);
+	}
+
+	/**
 	 * Ensure can parse command with repeated descriptive parameter.
 	 */
 	public void testRepeatedDescriptiveOption() throws Exception {
+		this.record_Factory(COMMAND, "descriptive", null, true);
 		this.record_Command(COMMAND, "descriptive", null);
 		this.record_Argument(COMMAND, "descriptive", "A");
 		this.record_Argument(COMMAND, "descriptive", "B");
@@ -93,18 +118,41 @@ public class SingleOfficeFloorCommandParserTest extends
 	}
 
 	/**
+	 * Ensure can parse command with short flag.
+	 */
+	public void testShortFlag() throws Exception {
+		this.record_Factory(COMMAND, "short", "s", false);
+		this.record_Command(COMMAND, "short", "s");
+		this.record_Argument(COMMAND, "short", null);
+		this.doTest("-s", COMMAND);
+	}
+
+	/**
 	 * Ensure can parse command with short parameter.
 	 */
 	public void testShortOption() throws Exception {
+		this.record_Factory(COMMAND, "short", "s", true);
 		this.record_Command(COMMAND, "short", "s");
 		this.record_Argument(COMMAND, "short", "value");
 		this.doTest("-s value", COMMAND);
 	}
 
 	/**
+	 * Ensure can parse command with repeated short flag.
+	 */
+	public void testRepeatedShortFlag() throws Exception {
+		this.record_Factory(COMMAND, "short", "s", false);
+		this.record_Command(COMMAND, "short", "s");
+		this.record_Argument(COMMAND, "short", null);
+		this.record_Argument(COMMAND, "short", null);
+		this.doTest("-s -s", COMMAND);
+	}
+
+	/**
 	 * Ensure can parse command with repeated short parameter.
 	 */
 	public void testRepeatedShortOption() throws Exception {
+		this.record_Factory(COMMAND, "short", "s", true);
 		this.record_Command(COMMAND, "short", "s");
 		this.record_Argument(COMMAND, "short", "A");
 		this.record_Argument(COMMAND, "short", "B");
@@ -112,9 +160,23 @@ public class SingleOfficeFloorCommandParserTest extends
 	}
 
 	/**
+	 * Ensure can load multiple flags.
+	 */
+	public void testMultipleFlags() throws Exception {
+		this.record_Factory(COMMAND, "one", "1", false, "two", "2", false);
+		this.record_Command(COMMAND, "one", "1", "two", "2");
+		this.record_Argument(COMMAND, "one", null);
+		this.record_Argument(COMMAND, "one", null);
+		this.record_Argument(COMMAND, "two", null);
+		this.record_Argument(COMMAND, "two", null);
+		this.doTest("--one -1 --two -2", COMMAND);
+	}
+
+	/**
 	 * Ensure can load multiple options.
 	 */
 	public void testMultipleOptions() throws Exception {
+		this.record_Factory(COMMAND, "one", "1", true, "two", "2", true);
 		this.record_Command(COMMAND, "one", "1", "two", "2");
 		this.record_Argument(COMMAND, "one", "a");
 		this.record_Argument(COMMAND, "one", "b");

@@ -48,6 +48,19 @@ public interface OfficeFloorCommandParameter {
 
 	/**
 	 * <p>
+	 * Flags if this {@link OfficeFloorCommandParameter} requires a value.
+	 * <p>
+	 * Should this return <code>false</code> then {@link #addValue(String)} will
+	 * be invoked with a <code>null</code> value. Also the
+	 * {@link OfficeFloorCommandParser} will not expect a value following the
+	 * option.
+	 * 
+	 * @return <code>true</code> if requires value.
+	 */
+	boolean isRequireValue();
+
+	/**
+	 * <p>
 	 * Adds a value for this parameter.
 	 * <p>
 	 * Typically this should only be invoked once however is available to allow
@@ -56,6 +69,8 @@ public interface OfficeFloorCommandParameter {
 	 * 
 	 * @param value
 	 *            Value for this argument.
+	 * 
+	 * @see #isRequireValue()
 	 */
 	void addValue(String value);
 

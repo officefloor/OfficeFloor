@@ -17,10 +17,9 @@
  */
 package net.officefloor.maven;
 
-import java.io.File;
 import java.util.List;
 
-import net.officefloor.building.classpath.ClassPathSeed;
+import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -117,25 +116,13 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 					+ OfficeBuildingMain.class.getSimpleName(), ex);
 		}
 
-		// Create the Seed
-		ClassPathSeed seed = new ClassPathSeed();
-		List<String> seedClasspathElements = null;
+		// Create the arguments for class path
+		CommandLineBuilder arguments = new CommandLineBuilder();
 		try {
 			@SuppressWarnings("unchecked")
 			List<String> elements = this.project.getCompileClasspathElements();
-			seedClasspathElements = elements;
 			for (String element : elements) {
-				File file = new File(element);
-				if (file.isDirectory()) {
-					seed.includeDirectory(file);
-				} else if (file.exists()) {
-					seed.includeJar(file, false);
-				} else {
-					// Ignore as not exists
-					this.getLog().warn(
-							"Missing " + OfficeFloor.class.getSimpleName()
-									+ " class path entry: " + element);
-				}
+				arguments.addArchive(element);
 			}
 		} catch (Throwable ex) {
 			throw new MojoExecutionException(
@@ -143,11 +130,14 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 							+ OfficeFloor.class.getSimpleName(), ex);
 		}
 
+		// Specify location of OfficeFloor
+		arguments.addOfficeFloor(this.officeFloorLocation);
+
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
 			processNameSpace = officeBuildingManager.openOfficeFloor(
-					this.processName, seed, this.officeFloorLocation,
+					this.processName, arguments.getCommandLine(),
 					this.jvmOptions);
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed opening the "
@@ -162,10 +152,13 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Determine if provide verbose output
 		if (this.verbose.booleanValue()) {
-			this.getLog().info("CLASS PATH SEEDING");
-			for (String element : seedClasspathElements) {
-				this.getLog().info("   " + element);
+			StringBuilder message = new StringBuilder();
+			message.append("ARGUMENTS: ");
+			for (String argument : arguments.getCommandLine()) {
+				message.append(" ");
+				message.append(argument);
 			}
+			this.getLog().info(message.toString());
 		}
 	}
 
