@@ -301,8 +301,6 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(this
 				.getClass(), "Template.expected"));
-		expectedOutput = expectedOutput.substring(0,
-				expectedOutput.length() - 1);
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
