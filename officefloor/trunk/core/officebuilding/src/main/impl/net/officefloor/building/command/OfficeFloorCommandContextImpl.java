@@ -317,40 +317,6 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	}
 
 	/**
-	 * Includes the class path entry.
-	 * 
-	 * @param classPathEntry
-	 *            Class path entry.
-	 */
-	private void includeClassPathEntry(String classPathEntry) {
-
-		// Create the decorator context
-		DecoratorContext context = new DecoratorContext(classPathEntry);
-
-		// Decorate for the class path entry
-		for (OfficeFloorDecorator decorator : this.decorators) {
-			try {
-				decorator.decorate(context);
-			} catch (Exception ex) {
-				this.addClassPathWarning("Failed decoration by "
-						+ decorator.getClass().getName()
-						+ " for class path entry " + classPathEntry, ex);
-			}
-		}
-
-		// Determine if class path entry overridden
-		if (context.resolvedClassPathEntries.size() > 0) {
-			// Include the overridden class path entries
-			for (String resolvedClassPathEntry : context.resolvedClassPathEntries) {
-				this.classPathEntries.add(resolvedClassPathEntry);
-			}
-		} else {
-			// Not overridden so include class path entry
-			this.classPathEntries.add(classPathEntry);
-		}
-	}
-
-	/**
 	 * Releases resources.
 	 * 
 	 * @throws Exception
@@ -618,6 +584,35 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	/*
 	 * ======================= OfficeFloorCommandContext ======================
 	 */
+
+	@Override
+	public void includeClassPathEntry(String classPathEntry) {
+
+		// Create the decorator context
+		DecoratorContext context = new DecoratorContext(classPathEntry);
+
+		// Decorate for the class path entry
+		for (OfficeFloorDecorator decorator : this.decorators) {
+			try {
+				decorator.decorate(context);
+			} catch (Exception ex) {
+				this.addClassPathWarning("Failed decoration by "
+						+ decorator.getClass().getName()
+						+ " for class path entry " + classPathEntry, ex);
+			}
+		}
+
+		// Determine if class path entry overridden
+		if (context.resolvedClassPathEntries.size() > 0) {
+			// Include the overridden class path entries
+			for (String resolvedClassPathEntry : context.resolvedClassPathEntries) {
+				this.classPathEntries.add(resolvedClassPathEntry);
+			}
+		} else {
+			// Not overridden so include class path entry
+			this.classPathEntries.add(classPathEntry);
+		}
+	}
 
 	@Override
 	public void includeClassPathArtifact(String artifactLocation) {

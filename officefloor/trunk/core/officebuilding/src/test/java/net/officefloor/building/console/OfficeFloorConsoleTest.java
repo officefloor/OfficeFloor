@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 
+import junit.framework.TestCase;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
@@ -235,6 +236,58 @@ public class OfficeFloorConsoleTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can run {@link OfficeFloorCommand}.
+	 */
+	public void testRunCommand() throws Exception {
+
+		// Run the command (within this process)
+		MockCommand command = this.createCommand("command");
+		this.run("", command);
+
+		// Ensure run
+		assertTrue("Process should be run", isRun(command));
+	}
+
+	/**
+	 * Ensure can start {@link OfficeFloorCommand} within a spawned
+	 * {@link Process}.
+	 */
+	public void testStartCommand() throws Exception {
+
+		final File waitFile = File.createTempFile(OfficeFloorConsoleTest.class
+				.getSimpleName(), "wait");
+
+		// Run the command (within spawned process)
+		MockCommand command = this.createCommand("command");
+		command.setSpawn(true);
+		((MockManagedProcess) command.getManagedProcess())
+				.setWaitFile(waitFile);
+		this.run("", command);
+
+		// Process should not be run
+		assertFalse("Process should not be run", isRun(command));
+
+		// Allow some time and should still be waiting on file
+		Thread.sleep(100);
+		assertFalse("Process should still not be run after some time",
+				isRun(command));
+
+		// Flag for process to run
+		FileWriter writer = new FileWriter(waitFile);
+		writer.write("run");
+		writer.close();
+
+		// Process should now run
+		long startTime = System.currentTimeMillis();
+		while (!isRun(command)) {
+			// Allow some time for waiting
+			Thread.sleep(10);
+			TestCase.assertTrue("Timed out waiting", ((System
+					.currentTimeMillis() - startTime) < 5000));
+		}
+	}
+
+	/**
 	 * Runs the {@link OfficeFloorConsole} for the {@link MockCommand}
 	 * instances.
 	 * 
@@ -321,15 +374,16 @@ public class OfficeFloorConsoleTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Asserts the {@link MockCommand} is run.
+	 * Indicates if the {@link MockCommand} is run.
 	 * 
 	 * @param command
 	 *            {@link MockCommand} to assert is run.
+	 * @return <code>true</code> if is run.
 	 */
-	private static void assertRun(MockCommand command) throws IOException {
+	private static boolean isRun(MockCommand command) throws IOException {
 		MockManagedProcess process = (MockManagedProcess) command
 				.getManagedProcess();
-		process.assertRun();
+		return process.isRun();
 	}
 
 	/**
@@ -343,6 +397,11 @@ public class OfficeFloorConsoleTest extends OfficeFrameTestCase {
 		private String runFilePath;
 
 		/**
+		 * Fail to wait on (if specified).
+		 */
+		private String waitFilePath = null;
+
+		/**
 		 * Initiate.
 		 */
 		public MockManagedProcess() throws IOException {
@@ -352,17 +411,29 @@ public class OfficeFloorConsoleTest extends OfficeFrameTestCase {
 		}
 
 		/**
+		 * Specifies the file to wait on.
+		 * 
+		 * @param waitFile
+		 *            File to wait on.
+		 */
+		public void setWaitFile(File waitFile) {
+			this.waitFilePath = waitFile.getAbsolutePath();
+		}
+
+		/**
 		 * <p>
-		 * Asserts that this {@link ManagedProcess} was run.
+		 * Indicates if this {@link ManagedProcess} was run.
 		 * <p>
 		 * As the {@link ManagedProcess} is serialised to the {@link Process} to
 		 * run, inter {@link Process} communication is required to check if run
 		 * (in this case files on the file system).
+		 * 
+		 * @return <code>true</code> if the {@link ManagedProcess} was run.
 		 */
-		public void assertRun() throws IOException {
+		public boolean isRun() throws IOException {
 			String fileContents = new OfficeFrameTestCase() {
 			}.getFileContents(new File(this.runFilePath));
-			assertEquals("Managed process not run", RUN_DATA, fileContents);
+			return (RUN_DATA.equals(fileContents));
 		}
 
 		/*
@@ -376,6 +447,33 @@ public class OfficeFloorConsoleTest extends OfficeFrameTestCase {
 
 		@Override
 		public void main() throws Throwable {
+
+			// Wait on file if wait file specified
+			if (this.waitFilePath != null) {
+
+				// Ensure the wait file exists
+				assertTrue("Wait file exists", new File(this.waitFilePath)
+						.exists());
+
+				// Wait for content in the wait file
+				long startTime = System.currentTimeMillis();
+				boolean isFinished = false;
+				while (!isFinished) {
+
+					// Allow some time for waiting
+					Thread.sleep(10);
+					TestCase.assertTrue("Timed out waiting", ((System
+							.currentTimeMillis() - startTime) < 5000));
+
+					// Check if content to indicate finished waiting
+					if (new OfficeFrameTestCase() {
+					}.getFileContents(new File(this.waitFilePath)).length() > 0) {
+						// Contents in file so finished waiting
+						isFinished = true;
+					}
+				}
+			}
+
 			// Write test content to run file
 			FileWriter writer = new FileWriter(this.runFilePath);
 			writer.write(RUN_DATA);

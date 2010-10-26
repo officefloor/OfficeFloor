@@ -89,6 +89,11 @@ public class MockCommand implements OfficeFloorCommand,
 	private final Map<String, String> expectedParameters = new HashMap<String, String>();
 
 	/**
+	 * Flag indicating if spawning.
+	 */
+	private boolean isSpawn = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param commandName
@@ -132,6 +137,16 @@ public class MockCommand implements OfficeFloorCommand,
 
 		// Must ensure parameter is a flag
 		TestCase.fail("Unknown parameter '" + parameterName + "'");
+	}
+
+	/**
+	 * Flags whether to spawn.
+	 * 
+	 * @param isSpawn
+	 *            <code>true</code> to spawn.
+	 */
+	public void setSpawn(boolean isSpawn) {
+		this.isSpawn = isSpawn;
 	}
 
 	/**
@@ -218,8 +233,9 @@ public class MockCommand implements OfficeFloorCommand,
 	public ManagedProcess createManagedProcess(
 			OfficeFloorCommandEnvironment environment) throws Exception {
 
-		// Provide process name
+		// Provide process name and whether to spawn
 		environment.setProcessName(this.commandName);
+		environment.setSpawnProcess(this.isSpawn);
 
 		// Ensure correct environment
 		for (String name : this.expectedEnvironment.keySet()) {

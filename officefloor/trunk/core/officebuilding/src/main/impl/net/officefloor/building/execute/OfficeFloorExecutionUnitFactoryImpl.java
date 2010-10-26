@@ -141,7 +141,8 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		}
 
 		// Create and return the execution unit
-		return new OfficeFloorExecutionUnitImpl(managedProcess, configuration);
+		return new OfficeFloorExecutionUnitImpl(managedProcess, configuration,
+				commandEnvironment.isSpawnProcess);
 	}
 
 	/**
@@ -154,6 +155,11 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		 * {@link Process} name.
 		 */
 		public String processName = null;
+
+		/**
+		 * Flag to spawn a {@link Process}.
+		 */
+		public boolean isSpawnProcess = false;
 
 		/**
 		 * Environment properties.
@@ -182,6 +188,11 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		@Override
 		public void setProcessName(String processName) {
 			this.processName = processName;
+		}
+
+		@Override
+		public void setSpawnProcess(boolean isSpawn) {
+			this.isSpawnProcess = isSpawn;
 		}
 	}
 

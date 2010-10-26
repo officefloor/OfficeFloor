@@ -52,6 +52,17 @@ public class CommandLineBuilder {
 	}
 
 	/**
+	 * Adds a class path entry to the command line.
+	 * 
+	 * @param classPathEntry
+	 *            Class path entry.
+	 */
+	public void addClassPathEntry(String classPathEntry) {
+		this.addOption(OpenOfficeFloorCommand.PARAMETER_CLASS_PATH,
+				classPathEntry);
+	}
+
+	/**
 	 * Adds an {@link OfficeFloor} location to the command line.
 	 * 
 	 * @param officeFloorLocation

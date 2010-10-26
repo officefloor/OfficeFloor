@@ -42,7 +42,41 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testSimpleCommand() throws Exception {
 		MockCommand command = this.createCommand("test", null);
-		this.doTest(command, null);
+		this.doTest(command, null, false);
+	}
+
+	/**
+	 * Ensure {@link OfficeFloorDecorator} can specify environment value.
+	 */
+	public void testDecorateClassPathEntry() throws Exception {
+
+		final String CLASS_PATH_ENTRY = "entry";
+		final String NAME = "name";
+		final String VALUE = "value";
+
+		// Create the command expecting environment property
+		MockCommand command = this.createCommand("test", new MockInitialiser() {
+			@Override
+			public void initialiseEnvironment(OfficeFloorCommandContext context)
+					throws Exception {
+				context.includeClassPathEntry(CLASS_PATH_ENTRY);
+			}
+		});
+		command.addExpectedEnvironmentProperty(NAME, VALUE);
+
+		// Decorate the environment property
+		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
+			@Override
+			public void decorate(OfficeFloorDecoratorContext context)
+					throws Exception {
+				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
+						.getRawClassPathEntry());
+				context.setEnvironmentProperty(NAME, VALUE);
+			}
+		};
+
+		// Test
+		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
 	}
 
 	/**
@@ -76,7 +110,7 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		};
 
 		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, decorator);
+		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
 	}
 
 	/**
@@ -111,7 +145,20 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		};
 
 		// Test
-		this.doTest(command, CLASS_PATH_ENTRY, decorator);
+		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
+	}
+
+	/**
+	 * Ensure can configure the {@link ProcessConfiguration}.
+	 */
+	public void testConfigureProcessEnvironment() throws Exception {
+
+		// Create command and expected to spawn
+		MockCommand command = this.createCommand("test", null);
+		command.setSpawn(true);
+
+		// Test
+		this.doTest(command, null, true);
 	}
 
 	/**
@@ -121,13 +168,15 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	 *            {@link MockCommand}.
 	 * @param additionalClassPath
 	 *            Additional class path.
+	 * @param isSpawnProcess
+	 *            Indicating if spawning process.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 * @return {@link OfficeFloorExecutionUnit}.
 	 */
 	private OfficeFloorExecutionUnit doTest(MockCommand command,
-			String additionalClassPath, OfficeFloorDecorator... decorators)
-			throws Exception {
+			String additionalClassPath, boolean isSpawnProcess,
+			OfficeFloorDecorator... decorators) throws Exception {
 
 		// Obtain execution factory details
 		File localRepositoryDirectory = OfficeBuildingTestUtil
@@ -150,7 +199,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Validate the execution unit
-		assertExecutionUnit(executionUnit, command, additionalClassPath);
+		assertExecutionUnit(executionUnit, command, additionalClassPath,
+				isSpawnProcess);
 
 		// Return the execution units for further validation
 		return executionUnit;
@@ -184,10 +234,12 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	 *            Corresponding {@link MockCommand}.
 	 * @param additionalClassPath
 	 *            Additional class path.
+	 * @param isSpawnProcess
+	 *            Spawn process flag.
 	 */
 	private static void assertExecutionUnit(
 			OfficeFloorExecutionUnit executionUnit, MockCommand command,
-			String additionalClassPath) {
+			String additionalClassPath, boolean isSpawnProcess) {
 		assertEquals("Incorrect managed process", executionUnit
 				.getManagedProcess(), command.getManagedProcess());
 		ProcessConfiguration configuration = executionUnit
@@ -196,6 +248,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 				configuration.getProcessName());
 		assertEquals("Incorrect additional class path", additionalClassPath,
 				configuration.getAdditionalClassPath());
+		assertEquals("Incorrectly spawning process", isSpawnProcess,
+				executionUnit.isSpawnProcess());
 	}
 
 }

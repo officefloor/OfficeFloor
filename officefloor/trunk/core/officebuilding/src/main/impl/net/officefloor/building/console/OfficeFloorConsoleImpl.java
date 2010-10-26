@@ -32,6 +32,9 @@ import net.officefloor.building.execute.OfficeFloorExecutionUnitCreateException;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitFactory;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitFactoryImpl;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ProcessConfiguration;
+import net.officefloor.building.process.ProcessException;
+import net.officefloor.building.process.ProcessManager;
 
 /**
  * {@link OfficeFloorConsole} implementation.
@@ -143,9 +146,22 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 				continue; // help message written
 			}
 
-			// TODO execute the managed process
-			throw new UnsupportedOperationException(
-					"TODO execute ManagedProcess");
+			// Execute the managed process for command
+			ProcessConfiguration configuration = executionUnit
+					.getProcessConfiguration();
+			try {
+				if (executionUnit.isSpawnProcess()) {
+					// Requires to be run within a spawned process
+					ProcessManager.startProcess(managedProcess, configuration);
+				} else {
+					// Run locally
+					ProcessManager.runProcess(managedProcess, configuration);
+				}
+			} catch (ProcessException ex) {
+				// Failed to execute within process
+				err.println(ex.getMessage());
+				return false;
+			}
 		}
 
 		// Successfully run all commands

@@ -44,4 +44,16 @@ public interface OfficeFloorCommandEnvironment {
 	 */
 	void setProcessName(String processName);
 
+	/**
+	 * <p>
+	 * Flags whether to spawn a {@link Process} to run the
+	 * {@link OfficeFloorCommand}.
+	 * <p>
+	 * Default behaviour is to not spawn a {@link Process}.
+	 * 
+	 * @param isSpawn
+	 *            <code>true</code> to spawn a {@link Process}.
+	 */
+	void setSpawnProcess(boolean isSpawn);
+
 }

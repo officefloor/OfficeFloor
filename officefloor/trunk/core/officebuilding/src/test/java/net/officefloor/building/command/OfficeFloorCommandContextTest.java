@@ -99,6 +99,25 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to include class path entry but does not include
+	 * dependencies.
+	 */
+	public void testIncludeClassPathEntry() throws Exception {
+
+		// Obtain path to jar
+		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(true,
+				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
+
+		// Include jar
+		this.context.includeClassPathEntry(JAR_WITH_DEPENDENCIES
+				.getCanonicalPath());
+
+		// Ensure jar on class path but not its dependencies
+		assertNoWarnings(this.context);
+		assertClassPath(this.context, JAR_WITH_DEPENDENCIES);
+	}
+
+	/**
 	 * Ensure can include a directory in class path.
 	 */
 	public void testIncludeDir() throws Exception {

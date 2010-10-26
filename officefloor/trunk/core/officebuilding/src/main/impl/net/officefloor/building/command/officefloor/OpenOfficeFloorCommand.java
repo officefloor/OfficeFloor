@@ -57,6 +57,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	public static final String PARAMETER_ARTIFACT = "artifact";
 
 	/**
+	 * Name of {@link OfficeFloorCommandParameter} for possible class path.
+	 */
+	public static final String PARAMETER_CLASS_PATH = "classpath";
+
+	/**
 	 * Convenience method to create arguments for running {@link OfficeFloor}
 	 * from an archive.
 	 * 
@@ -124,6 +129,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter(
 			"artifact", "a", "Artifact to include on the class path");
 
+	/**
+	 * Addition to the class path.
+	 */
+	private final MultiplePathsOfficeFloorCommandParameter classpath = new MultiplePathsOfficeFloorCommandParameter(
+			PARAMETER_CLASS_PATH, "cp", "Addition to the class path");
+
 	/*
 	 * ================ OfficeFloorCommandFactory =====================
 	 */
@@ -150,12 +161,17 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeFloorLocation,
-				this.archives, this.artifacts };
+				this.archives, this.artifacts, this.classpath };
 	}
 
 	@Override
 	public void initialiseEnvironment(OfficeFloorCommandContext context)
 			throws Exception {
+
+		// Include the raw class paths
+		for (String classPathEntry : this.classpath.getPaths()) {
+			context.includeClassPathEntry(classPathEntry);
+		}
 
 		// Include the archives on the class path
 		for (String archive : this.archives.getPaths()) {
@@ -173,6 +189,9 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	@Override
 	public ManagedProcess createManagedProcess(
 			OfficeFloorCommandEnvironment environment) throws Exception {
+
+		// OfficeFloor must run in spawned process
+		environment.setSpawnProcess(true);
 
 		// Create the managed process to open the office floor
 		String officeFloorLocation = this.officeFloorLocation.getValue();
