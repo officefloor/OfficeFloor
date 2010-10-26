@@ -40,9 +40,12 @@ public class SingleValueOfficeFloorCommandParameter extends
 	 *            Name.
 	 * @param shortName
 	 *            Short name.
+	 * @param description
+	 *            Description.
 	 */
-	public SingleValueOfficeFloorCommandParameter(String name, String shortName) {
-		super(name, shortName, true);
+	public SingleValueOfficeFloorCommandParameter(String name,
+			String shortName, String description) {
+		super(name, shortName, description, true);
 	}
 
 	/**
