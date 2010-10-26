@@ -108,19 +108,21 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	 * Location of the {@link OfficeFloor}.
 	 */
 	private final SingleValueOfficeFloorCommandParameter officeFloorLocation = new SingleValueOfficeFloorCommandParameter(
-			PARAMETER_OFFICE_FLOOR_LOCATION, "o");
+			PARAMETER_OFFICE_FLOOR_LOCATION, "o",
+			"Class path location of the OfficeFloor");
 
 	/**
 	 * Archives to include on the class path.
 	 */
 	private final MultiplePathsOfficeFloorCommandParameter archives = new MultiplePathsOfficeFloorCommandParameter(
-			PARAMETER_ARCHIVE_LOCATION, "j");
+			PARAMETER_ARCHIVE_LOCATION, "j",
+			"Archive to include on the class path");
 
 	/**
 	 * Artifacts to include on the class path.
 	 */
 	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter(
-			"artifact", "a");
+			"artifact", "a", "Artifact to include on the class path");
 
 	/*
 	 * ================ OfficeFloorCommandFactory =====================
@@ -139,6 +141,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	/*
 	 * =================== OfficeFloorCommand =========================
 	 */
+
+	@Override
+	public String getDescription() {
+		return "Opens an OfficeFloor";
+	}
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {

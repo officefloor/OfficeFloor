@@ -29,6 +29,13 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public interface OfficeFloorCommand {
 
 	/**
+	 * Obtains a description of this {@link OfficeFloorCommand}.
+	 * 
+	 * @return Description of this {@link OfficeFloorCommand}.
+	 */
+	String getDescription();
+
+	/**
 	 * Obtains the possible {@link OfficeFloorCommandParameter} instances for
 	 * this {@link OfficeFloorCommand}.
 	 * 

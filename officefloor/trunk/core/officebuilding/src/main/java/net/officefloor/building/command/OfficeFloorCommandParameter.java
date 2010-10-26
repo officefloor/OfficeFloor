@@ -47,6 +47,13 @@ public interface OfficeFloorCommandParameter {
 	String getShortName();
 
 	/**
+	 * Obtains a description for this {@link OfficeFloorCommandParameter}.
+	 * 
+	 * @return Description for this {@link OfficeFloorCommandParameter}.
+	 */
+	String getDescription();
+
+	/**
 	 * <p>
 	 * Flags if this {@link OfficeFloorCommandParameter} requires a value.
 	 * <p>

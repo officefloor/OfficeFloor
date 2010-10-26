@@ -62,10 +62,12 @@ public interface OfficeFloorConsole {
 	 * @param out
 	 *            Console out.
 	 * @param err
-	 *            Console error.
+	 *            Console err.
 	 * @param arguments
 	 *            Arguments for the {@link OfficeFloorCommand} instances.
+	 * @return <code>true</code> if successfully run/started
+	 *         {@link OfficeFloorCommand}.
 	 */
-	void run(PrintStream out, PrintStream err, String... arguments);
+	boolean run(PrintStream out, PrintStream err, String... arguments);
 
 }

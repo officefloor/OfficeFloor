@@ -71,7 +71,7 @@ public class MockCommand implements OfficeFloorCommand,
 	/**
 	 * {@link OfficeFloorCommandParameter} instances.
 	 */
-	private final OfficeFloorCommandParameter[] parameters;
+	private final MockCommandParameter[] parameters;
 
 	/**
 	 * {@link OfficeFloorCommandParameter} values.
@@ -108,10 +108,30 @@ public class MockCommand implements OfficeFloorCommand,
 		this.initialiser = initialiser;
 
 		// Create the listing of parameters
-		this.parameters = new OfficeFloorCommandParameter[parameters.length];
+		this.parameters = new MockCommandParameter[parameters.length];
 		for (int i = 0; i < this.parameters.length; i++) {
 			this.parameters[i] = new MockCommandParameter(parameters[i]);
 		}
+	}
+
+	/**
+	 * Sets an {@link OfficeFloorCommandParameter} as flag (i.e. no value).
+	 * 
+	 * @param parameterName
+	 *            Name of {@link OfficeFloorCommandParameter} to be a flag.
+	 */
+	public void setParameterAsFlag(String parameterName) {
+
+		// Set parameter by name as flag
+		for (MockCommandParameter parameter : this.parameters) {
+			if (parameter.getName().equals(parameterName)) {
+				parameter.isRequireValue = false;
+				return; // flagged as parameter
+			}
+		}
+
+		// Must ensure parameter is a flag
+		TestCase.fail("Unknown parameter '" + parameterName + "'");
 	}
 
 	/**
@@ -175,6 +195,11 @@ public class MockCommand implements OfficeFloorCommand,
 	 */
 
 	@Override
+	public String getDescription() {
+		return "command " + this.commandName.toUpperCase();
+	}
+
+	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return this.parameters;
 	}
@@ -225,6 +250,11 @@ public class MockCommand implements OfficeFloorCommand,
 		private final String parameterName;
 
 		/**
+		 * Require value by default.
+		 */
+		public boolean isRequireValue = true;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param parameterName
@@ -250,9 +280,13 @@ public class MockCommand implements OfficeFloorCommand,
 		}
 
 		@Override
+		public String getDescription() {
+			return "parameter " + this.parameterName.toUpperCase();
+		}
+
+		@Override
 		public boolean isRequireValue() {
-			// For testing always require value
-			return true;
+			return this.isRequireValue;
 		}
 
 		@Override
