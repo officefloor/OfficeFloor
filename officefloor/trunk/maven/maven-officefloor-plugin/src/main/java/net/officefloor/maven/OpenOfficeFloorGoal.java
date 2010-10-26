@@ -122,7 +122,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			@SuppressWarnings("unchecked")
 			List<String> elements = this.project.getCompileClasspathElements();
 			for (String element : elements) {
-				arguments.addArchive(element);
+				arguments.addClassPathEntry(element);
 			}
 		} catch (Throwable ex) {
 			throw new MojoExecutionException(

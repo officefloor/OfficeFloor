@@ -38,17 +38,25 @@ public class OfficeFloorExecutionUnitImpl implements OfficeFloorExecutionUnit {
 	private final ProcessConfiguration processConfiguration;
 
 	/**
+	 * Flags to spawn a {@link Process}.
+	 */
+	private final boolean isSpawnProcess;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedProcess
 	 *            {@link ManagedProcess}.
 	 * @param processConfiguration
 	 *            {@link ProcessConfiguration}.
+	 * @param isSpawnProcess
+	 *            Flags whether to spawn a {@link Process}.
 	 */
 	public OfficeFloorExecutionUnitImpl(ManagedProcess managedProcess,
-			ProcessConfiguration processConfiguration) {
+			ProcessConfiguration processConfiguration, boolean isSpawnProcess) {
 		this.managedProcess = managedProcess;
 		this.processConfiguration = processConfiguration;
+		this.isSpawnProcess = isSpawnProcess;
 	}
 
 	/*
@@ -67,9 +75,7 @@ public class OfficeFloorExecutionUnitImpl implements OfficeFloorExecutionUnit {
 
 	@Override
 	public boolean isSpawnProcess() {
-		// TODO implement OfficeFloorExecutionUnit.isSpawnProcess
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorExecutionUnit.isSpawnProcess");
+		return this.isSpawnProcess;
 	}
 
 }

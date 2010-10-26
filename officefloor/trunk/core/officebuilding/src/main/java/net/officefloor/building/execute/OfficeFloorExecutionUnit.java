@@ -43,7 +43,10 @@ public interface OfficeFloorExecutionUnit {
 	ProcessConfiguration getProcessConfiguration();
 
 	/**
+	 * <p>
 	 * Flags to spawn a {@link Process} to execute.
+	 * <p>
+	 * Spawning will not wait for the {@link Process} to complete.
 	 * 
 	 * @return <code>true</code> to spawn a {@link Process}.
 	 */
