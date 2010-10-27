@@ -121,14 +121,22 @@ public class OfficeBuildingMainTest extends OfficeFrameTestCase {
 	 */
 	public void testOfficeBuildingLifecycle_start_stop() throws Throwable {
 
+		// Ensure stopped
+		try {
+			OfficeBuildingMain.main("stop");
+		} catch (IOException ex) {
+		}
+
 		// Start the Office Building
 		long beforeStartTime = System.currentTimeMillis();
 		OfficeBuildingMain.main("start");
-		long afterStartTime = System.currentTimeMillis();
 
-		// Ensure started
+		// Ensure started by obtaining manager
 		OfficeBuildingManagerMBean manager = OfficeBuildingManager
 				.getOfficeBuildingManager(null, DEFAULT_OFFICE_BUILDING_PORT);
+
+		// Ensure correct start time
+		long afterStartTime = System.currentTimeMillis();
 		long startTime = manager.getStartTime().getTime();
 		assertTrue(
 				"Office Building should be just started",
