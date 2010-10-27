@@ -28,6 +28,7 @@ import java.rmi.registry.Registry;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
@@ -102,6 +103,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs. May be <code>null</code> to not
 	 *            resolve dependencies.
+	 * @param environment
+	 *            Environment {@link Properties}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}. May be <code>null</code> to use platform
 	 *            {@link MBeanServer}.
@@ -112,7 +115,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 */
 	public static OfficeBuildingManager startOfficeBuilding(int port,
 			File localRepositoryDirectory, String[] remoteRepositoryUrls,
-			MBeanServer mbeanServer) throws Exception {
+			Properties environment, MBeanServer mbeanServer) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
@@ -145,7 +148,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
 				serviceUrl, connectorServer, mbeanServer,
-				localRepositoryDirectory, remoteRepositoryUrls);
+				localRepositoryDirectory, remoteRepositoryUrls, environment);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -372,6 +375,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	private final String[] remoteRepositoryUrls;
 
 	/**
+	 * Environment {@link Properties}.
+	 */
+	private final Properties environment;
+
+	/**
 	 * May only create by starting.
 	 * 
 	 * @param startTime
@@ -386,17 +394,21 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 *            Local repository directory.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
+	 * @param environment
+	 *            Environment {@link Properties}.
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
 			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
-			File localRepositoryDirectory, String[] remoteRepositoryUrls) {
+			File localRepositoryDirectory, String[] remoteRepositoryUrls,
+			Properties environment) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
 		this.mbeanServer = mbeanServer;
 		this.localRepositoryDirectory = localRepositoryDirectory;
 		this.remoteRepositoryUrls = remoteRepositoryUrls;
+		this.environment = environment;
 	}
 
 	/*
@@ -471,7 +483,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Create the execution unit
 		OfficeFloorExecutionUnitFactory factory = new OfficeFloorExecutionUnitFactoryImpl(
 				this.localRepositoryDirectory, this.remoteRepositoryUrls,
-				decorators);
+				this.environment, decorators);
 		OfficeFloorExecutionUnit executionUnit = factory
 				.createExecutionUnit(commands[0]);
 

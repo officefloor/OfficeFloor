@@ -20,6 +20,7 @@ package net.officefloor.building.console;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
@@ -74,13 +75,15 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 *            Local repository directory.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
+	 * @param environment
+	 *            Environment {@link Properties}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
 	public OfficeFloorConsoleImpl(String scriptName,
 			OfficeFloorCommandFactory[] commandFactories,
 			File localRepositoryDirectory, String[] remoteRepositoryUrls,
-			OfficeFloorDecorator[] decorators) {
+			Properties environment, OfficeFloorDecorator[] decorators) {
 		this.scriptName = scriptName;
 
 		// Create the OfficeFloor command parser
@@ -103,7 +106,8 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 
 		// Create the OfficeFloor execution unit factory
 		this.executionUnitFactory = new OfficeFloorExecutionUnitFactoryImpl(
-				localRepositoryDirectory, remoteRepositoryUrls, decorators);
+				localRepositoryDirectory, remoteRepositoryUrls, environment,
+				decorators);
 	}
 
 	/*

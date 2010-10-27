@@ -49,6 +49,11 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 	private final String[] remoteRepositoryUrls;
 
 	/**
+	 * Environment {@link Properties}.
+	 */
+	private final Properties environment;
+
+	/**
 	 * {@link OfficeFloorDecorator} instances.
 	 */
 	private final OfficeFloorDecorator[] decorators;
@@ -60,13 +65,17 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 	 *            Local repository directory.
 	 * @param remoteRepositoryUrls
 	 *            Remote repository URLs.
+	 * @param environment
+	 *            Environment {@link Properties}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
 	public OfficeFloorExecutionUnitFactoryImpl(File localRepositoryDirectory,
-			String[] remoteRepositoryUrls, OfficeFloorDecorator[] decorators) {
+			String[] remoteRepositoryUrls, Properties environment,
+			OfficeFloorDecorator[] decorators) {
 		this.localRepositoryDirectory = localRepositoryDirectory;
 		this.remoteRepositoryUrls = remoteRepositoryUrls;
+		this.environment = environment;
 		this.decorators = decorators;
 	}
 
@@ -110,11 +119,15 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 					.toString());
 		}
 
+		// Create the environment (enriched from decorators)
+		Properties env = new Properties();
+		env.putAll(this.environment);
+		env.putAll(context.getCommandEnvironment());
+
 		// Load environment properties onto parameters
-		Properties environment = context.getCommandEnvironment();
 		for (OfficeFloorCommandParameter parameter : command.getParameters()) {
 			String parameterName = parameter.getName();
-			String value = environment.getProperty(parameterName);
+			String value = env.getProperty(parameterName);
 			if (value != null) {
 				parameter.addValue(value);
 			}
@@ -122,8 +135,7 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 
 		// Create the managed object process
 		ManagedProcess managedProcess;
-		CommandEnvironment commandEnvironment = new CommandEnvironment(
-				environment);
+		CommandEnvironment commandEnvironment = new CommandEnvironment(env);
 		try {
 			managedProcess = command.createManagedProcess(commandEnvironment);
 		} catch (Exception ex) {

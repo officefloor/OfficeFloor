@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
+import java.util.Properties;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
@@ -65,6 +66,11 @@ public class OfficeBuildingManagerTest extends TestCase {
 	private String[] remoteRepositoryUrls;
 
 	/**
+	 * Environment {@link Properties}.
+	 */
+	private final Properties environment = new Properties();
+
+	/**
 	 * {@link MBeanServer}.
 	 */
 	private MBeanServer mbeanServer;
@@ -85,7 +91,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 	 */
 	private OfficeBuildingManager startOfficeBuilding() throws Exception {
 		return OfficeBuildingManager.startOfficeBuilding(PORT,
-				localRepositoryDirectory, remoteRepositoryUrls, mbeanServer);
+				this.localRepositoryDirectory, this.remoteRepositoryUrls,
+				this.environment, this.mbeanServer);
 	}
 
 	/**
