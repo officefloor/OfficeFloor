@@ -19,6 +19,7 @@ package net.officefloor.maven;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.main.OfficeBuildingMain;
@@ -78,10 +79,13 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 					"Failed obtaining Remote Repository URLs", ex);
 		}
 
+		// Obtain the properties for the project
+		Properties properties = this.project.getProperties();
+
 		// Start the OfficeBuilding
 		try {
 			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
-					null, remoteRepositoryURLs, null);
+					null, remoteRepositoryURLs, properties, null);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
