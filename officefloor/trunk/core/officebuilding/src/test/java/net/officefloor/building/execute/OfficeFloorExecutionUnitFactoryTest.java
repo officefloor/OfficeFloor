@@ -18,6 +18,7 @@
 package net.officefloor.building.execute;
 
 import java.io.File;
+import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
@@ -35,6 +36,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
+
+	/**
+	 * Environment {@link Properties}.
+	 */
+	private final Properties environment = new Properties();
 
 	/**
 	 * Ensure can create an {@link OfficeFloorExecutionUnit} for a simple
@@ -149,6 +155,30 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can configure {@link OfficeFloorCommandParameter} from environment
+	 * property.
+	 */
+	public void testConfigureParameterFromEnvironment() throws Exception {
+
+		final String PARAMETER_NAME = "env-name";
+		final String PARAMETER_VALUE = "env-value";
+
+		// Provide property in environment
+		this.environment.put(PARAMETER_NAME, PARAMETER_VALUE);
+
+		// Create command with parameter
+		MockCommand command = this.createCommand("test", null, PARAMETER_NAME);
+
+		// Test
+		this.doTest(command, null, false);
+
+		// Ensure parameter loaded onto command parameter
+		assertEquals("Parameter value not loaded from environment",
+				PARAMETER_VALUE, command.getParameterValues().get(
+						PARAMETER_NAME));
+	}
+
+	/**
 	 * Ensure can configure the {@link ProcessConfiguration}.
 	 */
 	public void testConfigureProcessEnvironment() throws Exception {
@@ -189,7 +219,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 
 		// Create the factory
 		final OfficeFloorExecutionUnitFactory factory = new OfficeFloorExecutionUnitFactoryImpl(
-				localRepositoryDirectory, remoteRepositoryUrls, decorators);
+				localRepositoryDirectory, remoteRepositoryUrls,
+				this.environment, decorators);
 
 		// Create the execution units
 		OfficeFloorExecutionUnit executionUnit = factory

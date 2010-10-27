@@ -19,9 +19,11 @@ package net.officefloor.building.console;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.officefloor.building.command.OfficeFloorCommand;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.MockCommand;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
@@ -32,6 +34,11 @@ import net.officefloor.building.util.OfficeBuildingTestUtil;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
+
+	/**
+	 * Environment {@link Properties}.
+	 */
+	private final Properties environment = new Properties();
 
 	/**
 	 * Ensure output help information.
@@ -132,6 +139,29 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	}
 
 	/**
+	 * Ensure can load {@link OfficeFloorCommandParameter} from environment.
+	 */
+	public void testLoadCommandParameterFromEnvironment() throws Exception {
+
+		final String NAME = "env-name";
+		final String VALUE = "env-value";
+
+		// Setup environment property
+		this.environment.put(NAME, VALUE);
+
+		// Run the command (within this process)
+		MockCommand command = this.createCommand("command", NAME);
+		this.run("", command);
+
+		// Ensure run
+		assertTrue("Process should be run", isRun(command));
+
+		// Ensure parameter value loaded
+		assertEquals("Parameter not loaded from environment", VALUE, command
+				.getParameterValues().get(NAME));
+	}
+
+	/**
 	 * Ensure can start {@link OfficeFloorCommand} within a spawned
 	 * {@link Process}.
 	 */
@@ -198,7 +228,8 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		// Create the OfficeFloor console
 		OfficeFloorConsole console = new OfficeFloorConsoleImpl(scriptName,
 				commandFactories, localRepositoryDirectory,
-				remoteRepositoryUrls, new OfficeFloorDecorator[0]);
+				remoteRepositoryUrls, this.environment,
+				new OfficeFloorDecorator[0]);
 
 		// Run from console
 		console.run(this.consoleOut, this.consoleErr, arguments);

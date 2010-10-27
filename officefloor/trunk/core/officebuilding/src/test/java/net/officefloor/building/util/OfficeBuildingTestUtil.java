@@ -368,7 +368,7 @@ public class OfficeBuildingTestUtil {
 			throws Exception {
 
 		// Obtain the maximum run time
-		final int MAX_RUN_TIME = 5000;
+		final int MAX_RUN_TIME = 10000;
 
 		// Wait until process completes (or times out)
 		long maxFinishTime = System.currentTimeMillis() + MAX_RUN_TIME;

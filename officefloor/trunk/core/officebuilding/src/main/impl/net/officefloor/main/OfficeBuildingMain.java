@@ -50,7 +50,7 @@ public class OfficeBuildingMain {
 	 * Relative path from the {@link #OFFICE_BUILDING_HOME} to find the
 	 * properties file.
 	 */
-	public static final String PROPERTIES_FILE_RELATIVE_PATH = "config/OfficeBuilding.properties";
+	public static final String PROPERTIES_FILE_RELATIVE_PATH = "todo_remove/OfficeBuilding.properties";
 
 	/**
 	 * Name of the property defining the host that the
@@ -168,7 +168,8 @@ public class OfficeBuildingMain {
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
 					.startOfficeBuilding(officeBuildingPort, new File(
-							localRepositoryPath), remoteRepositoryUrls, null);
+							localRepositoryPath), remoteRepositoryUrls, System
+							.getProperties(), null);
 
 			// Indicate started and location
 			String serviceUrl = manager.getOfficeBuildingJmxServiceUrl();
