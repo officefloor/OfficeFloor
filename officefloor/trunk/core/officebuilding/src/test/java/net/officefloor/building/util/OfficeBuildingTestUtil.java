@@ -27,8 +27,8 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 import net.officefloor.building.command.OfficeFloorCommandContextImpl;
 import net.officefloor.building.process.ProcessManager;
+import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.main.OfficeBuildingMain;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
@@ -36,7 +36,7 @@ import org.apache.maven.model.Repository;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 /**
- * Utility methods for testing the {@link OfficeBuildingMain} functionality.
+ * Utility methods for testing the {@link OfficeBuilding} functionality.
  * 
  * @author Daniel Sagenschneider
  */
