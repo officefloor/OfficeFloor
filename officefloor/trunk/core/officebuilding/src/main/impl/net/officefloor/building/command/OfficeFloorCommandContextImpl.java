@@ -36,7 +36,7 @@ import java.util.zip.ZipFile;
 
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
-import net.officefloor.main.OfficeBuildingMain;
+import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -122,7 +122,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 
 		// No fall back path so use temporary directory
 		File tmplocalRepository = new File(
-				System.getProperty("java.io.tmpdir"), OfficeBuildingMain.class
+				System.getProperty("java.io.tmpdir"), OfficeBuilding.class
 						.getSimpleName()
 						+ "Repository");
 		ensureDirectoryExists(tmplocalRepository);
@@ -435,8 +435,8 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		File pomFile = null;
 		try {
 			InputStream pomContents = archive.getInputStream(pomEntry);
-			pomFile = File.createTempFile(OfficeBuildingMain.class
-					.getSimpleName(), "pom");
+			pomFile = File.createTempFile(OfficeBuilding.class.getSimpleName(),
+					"pom");
 			OutputStream pomOutput = new FileOutputStream(pomFile);
 			for (int value = pomContents.read(); value != -1; value = pomContents
 					.read()) {
