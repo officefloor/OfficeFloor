@@ -51,9 +51,16 @@ public class ProcessShellTest extends TestCase {
 	private static volatile boolean isMainRun = false;
 
 	/**
+	 * Name space of the {@link ManagedProcess}.
+	 */
+	private static volatile String processNamespace = null;
+
+	/**
 	 * Ensure able to run {@link ProcessShell}.
 	 */
 	public void testRunProcess() throws Throwable {
+
+		final String PROCESS_NAMESPACE = "Test";
 
 		// Create the server socket
 		ServerSocket serverSocket = new ServerSocket();
@@ -66,6 +73,7 @@ public class ProcessShellTest extends TestCase {
 		// Provide configuration for shell
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		ObjectOutputStream output = new ObjectOutputStream(buffer);
+		output.writeObject(PROCESS_NAMESPACE);
 		output.writeObject(new RunManagedProcess());
 		output.writeInt(serverPort);
 		output.flush();
@@ -75,6 +83,7 @@ public class ProcessShellTest extends TestCase {
 		// Ensure flagged not run
 		isInitRun = false;
 		isMainRun = false;
+		processNamespace = null;
 
 		// Run the process
 		ProcessShell.main(fromParentPipe);
@@ -82,6 +91,10 @@ public class ProcessShellTest extends TestCase {
 		// Ensure the methods run
 		assertTrue("init() method should be invoked", isInitRun);
 		assertTrue("main() method should be inovked", isMainRun);
+
+		// Ensure correct process name
+		assertEquals("Incorrect process name space", PROCESS_NAMESPACE,
+				processNamespace);
 	}
 
 	/**
@@ -106,6 +119,9 @@ public class ProcessShellTest extends TestCase {
 
 			// Flag run
 			isInitRun = true;
+
+			// Obtain the process name space
+			processNamespace = context.getProcessNamespace();
 		}
 
 		@Override

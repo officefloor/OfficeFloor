@@ -53,7 +53,7 @@ public final class OfficeFloorConsoleMain {
 	 * This is typically only used for testing to not cause the JVM to exit
 	 * while running tests.
 	 */
-	protected static boolean isExit = true;
+	public static boolean isExit = true;
 
 	/**
 	 * Entrance point for running an {@link OfficeFloorCommand}.
@@ -143,7 +143,7 @@ public final class OfficeFloorConsoleMain {
 		// Execute console
 		if ("run".equalsIgnoreCase(consoleRunStart)) {
 			// Run the console
-			boolean isSuccessful = console.run(System.out, System.err,
+			boolean isSuccessful = console.run(System.out, System.err, null,
 					executeArguments);
 
 			// Flag failure if not successful

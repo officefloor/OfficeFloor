@@ -61,7 +61,7 @@ public interface ProcessManagerMBean {
 	/**
 	 * Obtains the host name that the {@link Process} is running on.
 	 * 
-	 * @return Post name that the {@link Process} is running on.
+	 * @return Host name that the {@link Process} is running on.
 	 */
 	String getProcessHostName();
 

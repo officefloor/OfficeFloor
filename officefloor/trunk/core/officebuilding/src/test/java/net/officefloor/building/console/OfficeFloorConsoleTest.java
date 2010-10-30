@@ -19,14 +19,19 @@ package net.officefloor.building.console;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.MockCommand;
-import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ProcessManagerMBean;
 
 /**
  * Tests the {@link OfficeFloorConsole}.
@@ -39,6 +44,23 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment = new Properties();
+
+	/**
+	 * {@link ProcessManagerMBean} instances.
+	 */
+	private final List<ProcessManagerMBean> processManagers = new LinkedList<ProcessManagerMBean>();
+
+	/**
+	 * {@link ProcessStartListener} for testing.
+	 */
+	private ProcessStartListener processStartListener = new ProcessStartListener() {
+		@Override
+		public void processStarted(ProcessManagerMBean processManager) {
+			synchronized (OfficeFloorConsoleTest.this) {
+				OfficeFloorConsoleTest.this.processManagers.add(processManager);
+			}
+		}
+	};
 
 	/**
 	 * Ensure output help information.
@@ -136,6 +158,10 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 
 		// Ensure run
 		assertTrue("Process should be run", isRun(command));
+
+		// Should be no processes started on run
+		assertEquals("Should be no processes started on run", 0,
+				this.processManagers.size());
 	}
 
 	/**
@@ -162,10 +188,111 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	}
 
 	/**
-	 * Ensure can start {@link OfficeFloorCommand} within a spawned
-	 * {@link Process}.
+	 * Ensure extracts local and remote repositories from the
+	 * {@link OfficeFloorCommand}.
 	 */
-	public void testStartCommand() throws Exception {
+	public void testExtractLocalAndRemoteRepositories() throws Exception {
+
+		// Create the mocks
+		LocalRepositoryOfficeFloorCommandParameter localRepository = this
+				.createMock(LocalRepositoryOfficeFloorCommandParameter.class);
+		RemoteRepositoryUrlsOfficeFloorCommandParameter remoteRepositoryUrls = this
+				.createMock(RemoteRepositoryUrlsOfficeFloorCommandParameter.class);
+
+		// Create command with local and remote repository parameters
+		MockCommand command = this.createCommand("command");
+		command.addParameter(localRepository);
+		command.addParameter(remoteRepositoryUrls);
+
+		// Recording initialising parser
+		this.recordReturn(localRepository, localRepository.getName(),
+				"local-repository");
+		this
+				.recordReturn(localRepository, localRepository.getShortName(),
+						null);
+		this.recordReturn(localRepository, localRepository.isRequireValue(),
+				true);
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
+				"remote-repository-urls");
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
+				.getShortName(), null);
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
+				.isRequireValue(), true);
+
+		// Record parsing
+		this.recordReturn(localRepository, localRepository.getName(),
+				"local-repository");
+		this
+				.recordReturn(localRepository, localRepository.getShortName(),
+						null);
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
+				"remote-repository-urls");
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
+				.getShortName(), null);
+
+		// Record obtaining both local and remote repositories
+		this.recordReturn(localRepository,
+				localRepository.getLocalRepository(), new File("."));
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls
+				.getRemoteRepositoryUrls(), new String[0]);
+
+		// Record environment loading onto parameters
+		this.recordReturn(localRepository, localRepository.getName(),
+				"local-repository");
+		this.recordReturn(remoteRepositoryUrls, remoteRepositoryUrls.getName(),
+				"remote-repository-urls");
+
+		// Test
+		this.replayMockObjects();
+
+		// Run command
+		this.run("", command);
+
+		// Verify functionality
+		this.verifyMockObjects();
+
+		// Ensure run
+		assertTrue("Process should be run", isRun(command));
+	}
+
+	/**
+	 * Ensure can start {@link OfficeFloorCommand} within a spawned
+	 * {@link Process} and notified of its start.
+	 */
+	public void testStartCommandWithListener() throws Exception {
+
+		// Start
+		this.doStartCommand();
+
+		// Ensure registered the process manager
+		assertEquals("Should have process manager registered", 1,
+				this.processManagers.size());
+		ProcessManagerMBean processManager = this.processManagers.get(0);
+		assertEquals("Incorrect process manager", "command", processManager
+				.getProcessName());
+	}
+
+	/**
+	 * Ensure can start {@link OfficeFloorCommand} within a spawned
+	 * {@link Process} and ignore starts.
+	 */
+	public void testStartCommandWithoutListener() throws Exception {
+
+		// Clear the listener
+		this.processStartListener = null;
+
+		// Start
+		this.doStartCommand();
+
+		// Ensure test valid by no process manager registered
+		assertEquals("Should have process manager registered", 0,
+				this.processManagers.size());
+	}
+
+	/**
+	 * Undertakes starting a {@link ManagedProcess}.
+	 */
+	private void doStartCommand() throws Exception {
 
 		final File waitFile = File.createTempFile(OfficeFloorConsoleTest.class
 				.getSimpleName(), "wait");
@@ -219,20 +346,13 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		String[] arguments = new String[commandLineSplit.length - 1];
 		System.arraycopy(commandLineSplit, 1, arguments, 0, arguments.length);
 
-		// Obtain details of repositories
-		File localRepositoryDirectory = OfficeBuildingTestUtil
-				.getLocalRepositoryDirectory();
-		String[] remoteRepositoryUrls = OfficeBuildingTestUtil
-				.getRemoteRepositoryUrls();
-
 		// Create the OfficeFloor console
 		OfficeFloorConsole console = new OfficeFloorConsoleImpl(scriptName,
-				commandFactories, localRepositoryDirectory,
-				remoteRepositoryUrls, this.environment,
-				new OfficeFloorDecorator[0]);
+				commandFactories, this.environment, new OfficeFloorDecorator[0]);
 
 		// Run from console
-		console.run(this.consoleOut, this.consoleErr, arguments);
+		console.run(this.consoleOut, this.consoleErr,
+				this.processStartListener, arguments);
 	}
 
 }

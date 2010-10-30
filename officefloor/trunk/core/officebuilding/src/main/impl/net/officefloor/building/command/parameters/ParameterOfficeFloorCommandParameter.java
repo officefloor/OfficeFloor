@@ -20,53 +20,27 @@ package net.officefloor.building.command.parameters;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * {@link OfficeFloorCommandParameter} that provides only the first value
- * specified.
+ * {@link OfficeFloorCommandParameter} for a parameter.
  * 
  * @author Daniel Sagenschneider
  */
-public class SingleValueOfficeFloorCommandParameter extends
-		AbstractOfficeFloorCommandParameter {
-
-	/**
-	 * Value for this parameter.
-	 */
-	private String value = null;
+public class ParameterOfficeFloorCommandParameter extends
+		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param name
-	 *            Name.
-	 * @param shortName
-	 *            Short name.
-	 * @param description
-	 *            Description.
 	 */
-	public SingleValueOfficeFloorCommandParameter(String name,
-			String shortName, String description) {
-		super(name, shortName, description, true);
+	public ParameterOfficeFloorCommandParameter() {
+		super("parameter", null, "Parameter for the Task");
 	}
 
 	/**
-	 * Obtains the value for this parameter.
+	 * Obtains the parameter value.
 	 * 
-	 * @return Value for this parameter.
+	 * @return Parameter value.
 	 */
-	public String getValue() {
-		return this.value;
-	}
-
-	/*
-	 * ================ OfficeFloorCommandParameter =================
-	 */
-
-	@Override
-	public void addValue(String value) {
-		// Take only the first specified value
-		if (this.value == null) {
-			this.value = value;
-		}
+	public String getParameterValue() {
+		return this.getValue();
 	}
 
 }

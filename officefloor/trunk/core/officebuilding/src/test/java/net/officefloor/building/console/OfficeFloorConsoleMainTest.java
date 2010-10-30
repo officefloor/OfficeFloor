@@ -406,7 +406,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		@Override
 		public boolean run(PrintStream out, PrintStream err,
-				String... arguments) {
+				ProcessStartListener listener, String... arguments) {
 
 			// Flag running command
 			out.print("run");

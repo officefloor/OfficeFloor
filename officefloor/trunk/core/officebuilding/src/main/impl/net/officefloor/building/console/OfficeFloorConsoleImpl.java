@@ -20,13 +20,21 @@ package net.officefloor.building.console;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommandParseException;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
+import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.LocalRepositoryOfficeFloorCommandParameterImpl;
+import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.OfficeFloorExecutionUnit;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitCreateException;
@@ -60,9 +68,14 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	private final OfficeFloorCommandParser parser;
 
 	/**
-	 * {@link OfficeFloorExecutionUnitFactory}.
+	 * Environment {@link Properties}.
 	 */
-	private final OfficeFloorExecutionUnitFactory executionUnitFactory;
+	private final Properties environment;
+
+	/**
+	 * {@link OfficeFloorDecorator} instances.
+	 */
+	private final OfficeFloorDecorator[] decorators;
 
 	/**
 	 * Initiate.
@@ -71,10 +84,6 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 *            Name of script invoking this {@link OfficeFloorConsole}.
 	 * @param commandFactories
 	 *            {@link OfficeFloorCommandFactory} instances.
-	 * @param localRepositoryDirectory
-	 *            Local repository directory.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param decorators
@@ -82,9 +91,10 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 */
 	public OfficeFloorConsoleImpl(String scriptName,
 			OfficeFloorCommandFactory[] commandFactories,
-			File localRepositoryDirectory, String[] remoteRepositoryUrls,
 			Properties environment, OfficeFloorDecorator[] decorators) {
 		this.scriptName = scriptName;
+		this.environment = environment;
+		this.decorators = decorators;
 
 		// Create the OfficeFloor command parser
 		if (commandFactories.length == 1) {
@@ -103,11 +113,38 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			this.parser = new OfficeFloorCommandParserImpl(
 					this.commandFactories);
 		}
+	}
 
-		// Create the OfficeFloor execution unit factory
-		this.executionUnitFactory = new OfficeFloorExecutionUnitFactoryImpl(
-				localRepositoryDirectory, remoteRepositoryUrls, environment,
-				decorators);
+	/**
+	 * Write the {@link Exception}.
+	 * 
+	 * @param err
+	 *            Error stream to write {@link Exception}.
+	 * @param ex
+	 *            {@link Exception}.
+	 */
+	private void writeErr(PrintStream err, Exception ex) {
+
+		// Write the error
+		err.print("ERROR: ");
+		err.println(ex.getMessage());
+
+		// Output all the causes
+		Throwable error = ex;
+		Throwable cause = ex.getCause();
+		while ((cause != null) && (error != cause)) {
+
+			// Provide cause
+			err.print("    Caused by ");
+			err.print(cause.getMessage());
+			err.print(" [");
+			err.print(cause.getClass().getSimpleName());
+			err.println("]");
+
+			// Set up for next iteration
+			error = cause;
+			cause = cause.getCause();
+		}
 	}
 
 	/*
@@ -115,7 +152,8 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 */
 
 	@Override
-	public boolean run(PrintStream out, PrintStream err, String... arguments) {
+	public boolean run(PrintStream out, PrintStream err,
+			ProcessStartListener listener, String... arguments) {
 
 		// Parse the commands to execute
 		OfficeFloorCommand[] commands;
@@ -123,21 +161,61 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			commands = this.parser.parseCommands(arguments);
 		} catch (OfficeFloorCommandParseException ex) {
 			// Failed to parse commands
-			err.println(ex.getMessage());
+			this.writeErr(err, ex);
 			return false;
 		}
 
 		// Execute each command
 		for (OfficeFloorCommand command : commands) {
 
+			// Obtain the parameters
+			OfficeFloorCommandParameter[] parameters = command.getParameters();
+
+			// Attempt to obtain local repository
+			File localRepository = null;
+			for (OfficeFloorCommandParameter parameter : parameters) {
+				if (parameter instanceof LocalRepositoryOfficeFloorCommandParameter) {
+					// Have local repository parameter so use
+					LocalRepositoryOfficeFloorCommandParameter localRepositoryParameter = (LocalRepositoryOfficeFloorCommandParameter) parameter;
+					localRepository = localRepositoryParameter
+							.getLocalRepository();
+				}
+			}
+			if (localRepository == null) {
+				// Not available on parameter so try the environment
+				localRepository = LocalRepositoryOfficeFloorCommandParameterImpl
+						.getLocalRepository(this.environment);
+			}
+
+			// Obtain remote repository URLs (from properties and environment)
+			List<String> remoteRepositoryUrls = new LinkedList<String>();
+			for (OfficeFloorCommandParameter parameter : parameters) {
+				if (parameter instanceof RemoteRepositoryUrlsOfficeFloorCommandParameter) {
+					// Have remote repository URLs parameter so use
+					RemoteRepositoryUrlsOfficeFloorCommandParameter remoteRepositoryUrlsParameter = (RemoteRepositoryUrlsOfficeFloorCommandParameter) parameter;
+					remoteRepositoryUrls.addAll(Arrays
+							.asList(remoteRepositoryUrlsParameter
+									.getRemoteRepositoryUrls()));
+				}
+			}
+			remoteRepositoryUrls.addAll(Arrays
+					.asList(RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
+							.getRemoteRepositoryUrls(this.environment)));
+
+			// Create the OfficeFloor execution unit factory
+			OfficeFloorExecutionUnitFactory executionUnitFactory = new OfficeFloorExecutionUnitFactoryImpl(
+					localRepository, remoteRepositoryUrls
+							.toArray(new String[remoteRepositoryUrls.size()]),
+					this.environment, this.decorators);
+
 			// Create execution unit for command
 			OfficeFloorExecutionUnit executionUnit;
 			try {
-				executionUnit = this.executionUnitFactory
+				executionUnit = executionUnitFactory
 						.createExecutionUnit(command);
 			} catch (OfficeFloorExecutionUnitCreateException ex) {
 				// Failed to create execution unit for command
-				err.println(ex.getMessage());
+				this.writeErr(err, ex);
 				return false;
 			}
 
@@ -156,14 +234,21 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			try {
 				if (executionUnit.isSpawnProcess()) {
 					// Requires to be run within a spawned process
-					ProcessManager.startProcess(managedProcess, configuration);
+					ProcessManager processManager = ProcessManager
+							.startProcess(managedProcess, configuration);
+
+					// Notify process started (if listening)
+					if (listener != null) {
+						listener.processStarted(processManager);
+					}
+
 				} else {
 					// Run locally
 					ProcessManager.runProcess(managedProcess, configuration);
 				}
 			} catch (ProcessException ex) {
 				// Failed to execute within process
-				err.println(ex.getMessage());
+				this.writeErr(err, ex);
 				return false;
 			}
 		}

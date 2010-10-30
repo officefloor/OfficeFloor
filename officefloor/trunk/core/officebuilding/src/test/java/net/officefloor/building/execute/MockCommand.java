@@ -18,6 +18,8 @@
 package net.officefloor.building.execute;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -71,7 +73,7 @@ public class MockCommand implements OfficeFloorCommand,
 	/**
 	 * {@link OfficeFloorCommandParameter} instances.
 	 */
-	private final MockCommandParameter[] parameters;
+	private final List<OfficeFloorCommandParameter> parameters = new LinkedList<OfficeFloorCommandParameter>();
 
 	/**
 	 * {@link OfficeFloorCommandParameter} values.
@@ -113,9 +115,8 @@ public class MockCommand implements OfficeFloorCommand,
 		this.initialiser = initialiser;
 
 		// Create the listing of parameters
-		this.parameters = new MockCommandParameter[parameters.length];
-		for (int i = 0; i < this.parameters.length; i++) {
-			this.parameters[i] = new MockCommandParameter(parameters[i]);
+		for (int i = 0; i < parameters.length; i++) {
+			this.parameters.add(new MockCommandParameter(parameters[i]));
 		}
 	}
 
@@ -128,9 +129,10 @@ public class MockCommand implements OfficeFloorCommand,
 	public void setParameterAsFlag(String parameterName) {
 
 		// Set parameter by name as flag
-		for (MockCommandParameter parameter : this.parameters) {
+		for (OfficeFloorCommandParameter parameter : this.parameters) {
 			if (parameter.getName().equals(parameterName)) {
-				parameter.isRequireValue = false;
+				MockCommandParameter mockParameter = (MockCommandParameter) parameter;
+				mockParameter.isRequireValue = false;
 				return; // flagged as parameter
 			}
 		}
@@ -156,6 +158,16 @@ public class MockCommand implements OfficeFloorCommand,
 	 */
 	public ManagedProcess getManagedProcess() {
 		return this.managedProcess;
+	}
+
+	/**
+	 * Adds a {@link OfficeFloorCommandParameter}.
+	 * 
+	 * @param parameter
+	 *            {@link OfficeFloorCommandParameter}.
+	 */
+	public void addParameter(OfficeFloorCommandParameter parameter) {
+		this.parameters.add(parameter);
 	}
 
 	/**
@@ -216,7 +228,8 @@ public class MockCommand implements OfficeFloorCommand,
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
-		return this.parameters;
+		return this.parameters
+				.toArray(new OfficeFloorCommandParameter[this.parameters.size()]);
 	}
 
 	@Override

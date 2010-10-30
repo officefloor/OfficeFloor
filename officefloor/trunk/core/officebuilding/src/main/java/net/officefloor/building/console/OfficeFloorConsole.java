@@ -63,11 +63,14 @@ public interface OfficeFloorConsole {
 	 *            Console out.
 	 * @param err
 	 *            Console err.
+	 * @param listener
+	 *            {@link ProcessStartListener}. May be <code>null</code>.
 	 * @param arguments
 	 *            Arguments for the {@link OfficeFloorCommand} instances.
 	 * @return <code>true</code> if successfully run/started
 	 *         {@link OfficeFloorCommand}.
 	 */
-	boolean run(PrintStream out, PrintStream err, String... arguments);
+	boolean run(PrintStream out, PrintStream err,
+			ProcessStartListener listener, String... arguments);
 
 }

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.process.officefloor;
-
-import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.manage.OfficeFloor;
+package net.officefloor.building.command;
 
 /**
- * Indicates failure to compile the {@link OfficeFloor} for opening within the
- * {@link OfficeBuilding}.
+ * Identifies the {@link OfficeFloorCommandParameter} providing the remote
+ * repository URLs.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompileException extends Error {
+public interface RemoteRepositoryUrlsOfficeFloorCommandParameter extends
+		OfficeFloorCommandParameter {
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param message
-	 *            Message.
-	 * @param cause
-	 *            Cause.
+	 * Parameter name for the remote repository URLs.
 	 */
-	public OfficeFloorCompileException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	String PARAMETER_REMOTE_REPOSITORY_URLS = "remote-repository-urls";
+
+	/**
+	 * Obtains the remote repository URLs.
+	 * 
+	 * @return Remote repository URLs.
+	 */
+	String[] getRemoteRepositoryUrls();
 
 }

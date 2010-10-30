@@ -32,6 +32,9 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
+import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
+import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -56,16 +59,6 @@ public class OfficeBuildingManagerTest extends TestCase {
 	private static final int PORT = 13778;
 
 	/**
-	 * Local repository directory.
-	 */
-	private File localRepositoryDirectory;
-
-	/**
-	 * Remote repository URLs.
-	 */
-	private String[] remoteRepositoryUrls;
-
-	/**
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment = new Properties();
@@ -77,11 +70,22 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.localRepositoryDirectory = OfficeBuildingTestUtil
-				.getLocalRepositoryDirectory();
-		this.remoteRepositoryUrls = OfficeBuildingTestUtil
-				.getRemoteRepositoryUrls();
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
+
+		// Setup the environment
+		File localRepositoryDirectory = OfficeBuildingTestUtil
+				.getLocalRepositoryDirectory();
+		String[] remoteRepositoryUrls = OfficeBuildingTestUtil
+				.getRemoteRepositoryUrls();
+		this.environment
+				.put(
+						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
+						localRepositoryDirectory.getAbsoluteFile());
+		this.environment
+				.put(
+						RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
+						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
+								.transformForParameterValue(remoteRepositoryUrls));
 	}
 
 	/**
@@ -91,7 +95,6 @@ public class OfficeBuildingManagerTest extends TestCase {
 	 */
 	private OfficeBuildingManager startOfficeBuilding() throws Exception {
 		return OfficeBuildingManager.startOfficeBuilding(PORT,
-				this.localRepositoryDirectory, this.remoteRepositoryUrls,
 				this.environment, this.mbeanServer);
 	}
 
@@ -142,7 +145,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
-		assertEquals("Incorrect stop details", "OfficeBuildingMain stopped\n",
+		assertEquals("Incorrect stop details", "OfficeBuilding stopped",
 				stopDetails);
 	}
 
@@ -327,7 +330,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String expectedStopDetails = "Stopping processes:\n\t"
 				+ processManager.getProcessName() + " ["
 				+ processManager.getProcessNamespace()
-				+ "]\n\nOfficeBuildingMain stopped\n";
+				+ "]\n\nOfficeBuilding stopped";
 
 		// Stop the OfficeBuilding
 		String stopDetails = buildingManager.stopOfficeBuilding(10000);

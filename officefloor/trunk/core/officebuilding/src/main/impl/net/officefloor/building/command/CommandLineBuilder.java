@@ -20,7 +20,12 @@ package net.officefloor.building.command;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
+import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -47,8 +52,22 @@ public class CommandLineBuilder {
 	 *            Archive location.
 	 */
 	public void addArchive(String archiveLocation) {
-		this.addOption(OpenOfficeFloorCommand.PARAMETER_ARCHIVE_LOCATION,
+		this.addOption(
+				JarOfficeFloorCommandParameter.PARAMETER_ARCHIVE_LOCATION,
 				archiveLocation);
+	}
+
+	/**
+	 * Adds an artifact to the command line.
+	 * 
+	 * @param artifactIdentifier
+	 *            Artifact identifier.
+	 */
+	public void addArtifact(String artifactIdentifier) {
+		this
+				.addOption(
+						MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
+						artifactIdentifier);
 	}
 
 	/**
@@ -58,7 +77,8 @@ public class CommandLineBuilder {
 	 *            Class path entry.
 	 */
 	public void addClassPathEntry(String classPathEntry) {
-		this.addOption(OpenOfficeFloorCommand.PARAMETER_CLASS_PATH,
+		this.addOption(
+				ClassPathOfficeFloorCommandParameter.PARAMETER_CLASS_PATH,
 				classPathEntry);
 	}
 
@@ -69,8 +89,22 @@ public class CommandLineBuilder {
 	 *            {@link OfficeFloor} location.
 	 */
 	public void addOfficeFloor(String officeFloorLocation) {
-		this.addOption(OpenOfficeFloorCommand.PARAMETER_OFFICE_FLOOR_LOCATION,
-				officeFloorLocation);
+		this
+				.addOption(
+						OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
+						officeFloorLocation);
+	}
+
+	/**
+	 * Adds the {@link ManagedProcess} name.
+	 * 
+	 * @param processName
+	 *            {@link ManagedProcess} name.
+	 */
+	public void addProcessName(String processName) {
+		this.addOption(
+				ProcessNameOfficeFloorCommandParameter.PARAMTER_PROCESS_NAME,
+				processName);
 	}
 
 	/**
@@ -82,6 +116,13 @@ public class CommandLineBuilder {
 	 *            Value.
 	 */
 	public void addOption(String parameterName, String value) {
+
+		// Only include option if have value
+		if ((value == null) || (value.trim().length() == 0)) {
+			return; // no value, no option
+		}
+
+		// Include the option
 		this.commandLine.add(OPTION_PREFIX + parameterName);
 		this.commandLine.add(value);
 	}

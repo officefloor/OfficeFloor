@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.process.officefloor;
+package net.officefloor.building.command;
 
-import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import java.io.File;
 
 /**
- * Indicates failure to compile the {@link OfficeFloor} for opening within the
- * {@link OfficeBuilding}.
+ * Identifies the {@link OfficeFloorCommandParameter} providing the local
+ * repository.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompileException extends Error {
+public interface LocalRepositoryOfficeFloorCommandParameter extends
+		OfficeFloorCommandParameter {
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param message
-	 *            Message.
-	 * @param cause
-	 *            Cause.
+	 * Parameter name for the local repository.
 	 */
-	public OfficeFloorCompileException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	String PARAMETER_LOCAL_REPOSITORY = "local-repository";
+
+	/**
+	 * Obtains the local repository.
+	 * 
+	 * @return Local repository. May be <code>null</code> if not provided.
+	 */
+	File getLocalRepository();
 
 }

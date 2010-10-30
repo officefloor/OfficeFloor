@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.process.officefloor;
+package net.officefloor.building.console;
 
-import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ProcessManagerMBean;
 
 /**
- * Indicates failure to compile the {@link OfficeFloor} for opening within the
- * {@link OfficeBuilding}.
+ * Listens for started {@link ManagedProcess} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompileException extends Error {
+public interface ProcessStartListener {
 
 	/**
-	 * Initiate.
+	 * Invoked to indicate a {@link ManagedProcess} was started.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param cause
-	 *            Cause.
+	 * @param processManager
+	 *            {@link ProcessManagerMBean} for the {@link ManagedProcess}.
 	 */
-	public OfficeFloorCompileException(String message, Throwable cause) {
-		super(message, cause);
-	}
+	void processStarted(ProcessManagerMBean processManager);
 
 }
