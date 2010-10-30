@@ -24,9 +24,11 @@ import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ArtifactArgument;
+import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.MultiplePathsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.SingleValueOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -38,28 +40,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  */
 public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 		OfficeFloorCommand {
-
-	/**
-	 * Name of {@link OfficeFloorCommandParameter} for the {@link OfficeFloor}
-	 * location.
-	 */
-	public static final String PARAMETER_OFFICE_FLOOR_LOCATION = "officefloor";
-
-	/**
-	 * Name of {@link OfficeFloorCommandParameter} for the possible archive
-	 * locations.
-	 */
-	public static final String PARAMETER_ARCHIVE_LOCATION = "jar";
-
-	/**
-	 * Name of {@link OfficeFloorCommandParameter} for possible artifacts.
-	 */
-	public static final String PARAMETER_ARTIFACT = "artifact";
-
-	/**
-	 * Name of {@link OfficeFloorCommandParameter} for possible class path.
-	 */
-	public static final String PARAMETER_CLASS_PATH = "classpath";
 
 	/**
 	 * Convenience method to create arguments for running {@link OfficeFloor}
@@ -101,10 +81,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 			String version, String type, String classifier,
 			String officeFloorLocation) {
 		CommandLineBuilder arguments = new CommandLineBuilder();
-		arguments.addOption(PARAMETER_ARTIFACT,
-				MultipleArtifactsOfficeFloorCommandParameter
-						.getArtifactArgumentValue(groupId, artifactId, version,
-								type, classifier));
+		arguments
+				.addOption(
+						MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
+						MultipleArtifactsOfficeFloorCommandParameter
+								.getArtifactArgumentValue(groupId, artifactId,
+										version, type, classifier));
 		arguments.addOfficeFloor(officeFloorLocation);
 		return arguments.getCommandLine();
 	}
@@ -112,28 +94,27 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	/**
 	 * Location of the {@link OfficeFloor}.
 	 */
-	private final SingleValueOfficeFloorCommandParameter officeFloorLocation = new SingleValueOfficeFloorCommandParameter(
-			PARAMETER_OFFICE_FLOOR_LOCATION, "o",
-			"Class path location of the OfficeFloor");
+	private final OfficeFloorLocationOfficeFloorCommandParameter officeFloorLocation = new OfficeFloorLocationOfficeFloorCommandParameter();
 
 	/**
 	 * Archives to include on the class path.
 	 */
-	private final MultiplePathsOfficeFloorCommandParameter archives = new MultiplePathsOfficeFloorCommandParameter(
-			PARAMETER_ARCHIVE_LOCATION, "j",
-			"Archive to include on the class path");
+	private final JarOfficeFloorCommandParameter archives = new JarOfficeFloorCommandParameter();
 
 	/**
 	 * Artifacts to include on the class path.
 	 */
-	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter(
-			"artifact", "a", "Artifact to include on the class path");
+	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter();
 
 	/**
 	 * Addition to the class path.
 	 */
-	private final MultiplePathsOfficeFloorCommandParameter classpath = new MultiplePathsOfficeFloorCommandParameter(
-			PARAMETER_CLASS_PATH, "cp", "Addition to the class path");
+	private final ClassPathOfficeFloorCommandParameter classpath = new ClassPathOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Process} name.
+	 */
+	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
 
 	/*
 	 * ================ OfficeFloorCommandFactory =====================
@@ -161,7 +142,7 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeFloorLocation,
-				this.archives, this.artifacts, this.classpath };
+				this.archives, this.artifacts, this.classpath, this.processName };
 	}
 
 	@Override
@@ -169,12 +150,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 			throws Exception {
 
 		// Include the raw class paths
-		for (String classPathEntry : this.classpath.getPaths()) {
+		for (String classPathEntry : this.classpath.getClassPathEntries()) {
 			context.includeClassPathEntry(classPathEntry);
 		}
 
 		// Include the archives on the class path
-		for (String archive : this.archives.getPaths()) {
+		for (String archive : this.archives.getArchives()) {
 			context.includeClassPathArtifact(archive);
 		}
 
@@ -193,8 +174,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 		// OfficeFloor must run in spawned process
 		environment.setSpawnProcess(true);
 
+		// Specify the process name
+		environment.setProcessName(this.processName.getProcessName());
+
 		// Create the managed process to open the office floor
-		String officeFloorLocation = this.officeFloorLocation.getValue();
+		String officeFloorLocation = this.officeFloorLocation
+				.getOfficeFloorLocation();
 		OfficeFloorManager managedProcess = new OfficeFloorManager(
 				officeFloorLocation);
 

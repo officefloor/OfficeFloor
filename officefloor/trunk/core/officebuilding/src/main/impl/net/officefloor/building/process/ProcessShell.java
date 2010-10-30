@@ -90,12 +90,15 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * Entrance point for running the {@link ManagedProcess} in current
 	 * {@link Process}.
 	 * 
+	 * @param processNamespace
+	 *            {@link ManagedProcess} name space.
 	 * @param serialisedManagedProcess
 	 *            Serialised {@link ManagedProcess} to be run.
 	 * @throws Throwable
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	public static void run(byte[] serialisedManagedProcess) throws Throwable {
+	public static void run(String processNamespace,
+			byte[] serialisedManagedProcess) throws Throwable {
 
 		// Obtain the managed process to run
 		ObjectInputStream managedProcessInput = new ObjectInputStream(
@@ -104,8 +107,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				.readObject();
 
 		// Create the context for the managed process
-		ProcessShell context = new ProcessShell(ManagementFactory
-				.getPlatformMBeanServer());
+		ProcessShell context = new ProcessShell(processNamespace,
+				ManagementFactory.getPlatformMBeanServer());
 
 		// Run the process
 		managedProcess.init(context);
@@ -149,16 +152,26 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		ObjectOutputStream toParentPipe = null;
 		try {
 
-			// Obtain the Managed Process (always first)
+			// Obtain the name space (always first)
 			Object object = fromParentObjectPipe.readObject();
-			if (!(object instanceof ManagedProcess)) {
+			if (!(object instanceof String)) {
 				throw new IllegalArgumentException("First object must be a "
+						+ String.class.getName() + " (process name space)");
+			}
+			String processName = (String) object;
+
+			// Obtain the Managed Process (always second)
+			object = fromParentObjectPipe.readObject();
+			if (!(object instanceof ManagedProcess)) {
+				throw new IllegalArgumentException("Second object must be a "
 						+ ManagedProcess.class.getName());
 			}
 			ManagedProcess managedProcess = (ManagedProcess) object;
 
-			// Connect to parent to send notifications
+			// Obtain parent port (always third)
 			int parentPort = fromParentObjectPipe.readInt();
+
+			// Connect to parent to send notifications
 			Socket parentSocket = new Socket();
 			parentSocket.connect(new InetSocketAddress(parentPort));
 			toParentPipe = new ObjectOutputStream(parentSocket
@@ -192,8 +205,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			connectorServer.start();
 
 			// Create instance as context
-			ProcessShell context = new ProcessShell(connectorServer,
-					toParentPipe);
+			ProcessShell context = new ProcessShell(processName,
+					connectorServer, toParentPipe);
 
 			// Initialise the managed process
 			managedProcess.init(context);
@@ -233,6 +246,11 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	}
 
 	/**
+	 * {@link ManagedProcess} name space.
+	 */
+	private final String processNamespace;
+
+	/**
 	 * {@link JMXConnectorServer}.
 	 */
 	private final JMXConnectorServer connectorServer;
@@ -260,13 +278,16 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/**
 	 * Initiate for {@link Process}.
 	 * 
+	 * @param processNamespace
+	 *            {@link ManagedProcess} name space.
 	 * @param connectorServer
 	 *            {@link JMXConnectorServers}.
 	 * @param toParentPipe
 	 *            {@link ObjectOutputStream} to send the notifications.
 	 */
-	public ProcessShell(JMXConnectorServer connectorServer,
-			ObjectOutputStream toParentPipe) {
+	public ProcessShell(String processNamespace,
+			JMXConnectorServer connectorServer, ObjectOutputStream toParentPipe) {
+		this.processNamespace = processNamespace;
 		this.connectorServer = connectorServer;
 		this.toParentPipe = toParentPipe;
 		this.mbeanServer = null;
@@ -276,10 +297,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/**
 	 * Initiate for running locally.
 	 * 
+	 * @param processNamespace
+	 *            {@link ManagedProcess} name space.
 	 * @param mbeanServer
 	 *            Local {@link MBeanServer}.
 	 */
-	public ProcessShell(MBeanServer mbeanServer) {
+	public ProcessShell(String processNamespace, MBeanServer mbeanServer) {
+		this.processNamespace = processNamespace;
 		this.connectorServer = null;
 		this.toParentPipe = null;
 		this.mbeanServer = mbeanServer;
@@ -318,6 +342,11 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	/*
 	 * ==================== ManagedProcessContext =========================
 	 */
+
+	@Override
+	public String getProcessNamespace() {
+		return this.processNamespace;
+	}
 
 	@Override
 	public void registerMBean(Object mbean, ObjectName name)

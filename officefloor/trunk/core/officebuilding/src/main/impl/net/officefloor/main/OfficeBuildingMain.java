@@ -38,6 +38,7 @@ import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class OfficeBuildingMain {
 
 	/**
@@ -167,8 +168,7 @@ public class OfficeBuildingMain {
 
 			// Start the OfficeBuilding
 			OfficeBuildingManager manager = OfficeBuildingManager
-					.startOfficeBuilding(officeBuildingPort, new File(
-							localRepositoryPath), remoteRepositoryUrls, System
+					.startOfficeBuilding(officeBuildingPort, System
 							.getProperties(), null);
 
 			// Indicate started and location

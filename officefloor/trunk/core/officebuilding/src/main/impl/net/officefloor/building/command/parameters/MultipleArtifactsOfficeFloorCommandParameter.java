@@ -33,6 +33,11 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 		AbstractOfficeFloorCommandParameter {
 
 	/**
+	 * Parameter name for possible artifacts.
+	 */
+	public static final String PARAMETER_ARTIFACT = "artifact";
+
+	/**
 	 * Obtains the command line argument value for an {@link ArtifactArgument}.
 	 * 
 	 * @param groupId
@@ -73,17 +78,10 @@ public class MultipleArtifactsOfficeFloorCommandParameter extends
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param name
-	 *            Name.
-	 * @param shortName
-	 *            Short name.
-	 * @param description
-	 *            Description.
 	 */
-	public MultipleArtifactsOfficeFloorCommandParameter(String name,
-			String shortName, String description) {
-		super(name, shortName, description, true);
+	public MultipleArtifactsOfficeFloorCommandParameter() {
+		super(PARAMETER_ARTIFACT, "a", "Artifact to include on the class path",
+				true);
 	}
 
 	/**

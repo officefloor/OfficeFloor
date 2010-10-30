@@ -32,6 +32,13 @@ import javax.management.ObjectName;
 public interface ManagedProcessContext {
 
 	/**
+	 * Obtains the name space for the {@link ManagedProcess}.
+	 * 
+	 * @return Name space for the {@link ManagedProcess}.
+	 */
+	String getProcessNamespace();
+
+	/**
 	 * <p>
 	 * Registers a MBean.
 	 * <p>

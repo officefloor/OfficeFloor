@@ -164,8 +164,8 @@ public final class HelpManagedProcess implements ManagedProcess {
 		Arrays.sort(options, new Comparator<Option>() {
 			@Override
 			public int compare(Option a, Option b) {
-				return String.CASE_INSENSITIVE_ORDER.compare(a.details,
-						b.details);
+				return String.CASE_INSENSITIVE_ORDER.compare(a.sortKey,
+						b.sortKey);
 			}
 		});
 
@@ -235,6 +235,11 @@ public final class HelpManagedProcess implements ManagedProcess {
 		public final OfficeFloorCommandParameter parameter;
 
 		/**
+		 * Key of this {@link Option} for sorting.
+		 */
+		public final String sortKey;
+
+		/**
 		 * Details.
 		 */
 		public final String details;
@@ -261,8 +266,9 @@ public final class HelpManagedProcess implements ManagedProcess {
 			}
 
 			// Write out the name
+			String name = parameter.getName();
 			out.print(OfficeFloorCommandParserImpl.OPTION_PREFIX);
-			out.print(parameter.getName());
+			out.print(name);
 
 			// Write out if requires value
 			if (parameter.isRequireValue()) {
@@ -271,6 +277,9 @@ public final class HelpManagedProcess implements ManagedProcess {
 
 			// Specify details for parameter
 			this.details = details.toString();
+
+			// Specify the sort key (short before name if available)
+			this.sortKey = (shortName != null ? shortName : name);
 		}
 	}
 

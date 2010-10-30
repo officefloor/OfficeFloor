@@ -235,6 +235,8 @@ public class OfficeFloorManager implements ManagedProcess,
 
 		// OfficeFloor now open
 		this.isOpen = true;
+		System.out.println("OfficeFloor open under process name space '"
+				+ this.context.getProcessNamespace() + "'");
 
 		// Ensure close OfficeFloor
 		try {

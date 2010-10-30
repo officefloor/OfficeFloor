@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.process.officefloor;
+package net.officefloor.building.command.parameters;
 
-import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Indicates failure to compile the {@link OfficeFloor} for opening within the
- * {@link OfficeBuilding}.
+ * {@link OfficeFloorCommandParameter} for the {@link Task} name.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCompileException extends Error {
+public class TaskNameOfficeFloorCommandParameter extends
+		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param message
-	 *            Message.
-	 * @param cause
-	 *            Cause.
 	 */
-	public OfficeFloorCompileException(String message, Throwable cause) {
-		super(message, cause);
+	public TaskNameOfficeFloorCommandParameter() {
+		super("task", "t", "Name of the Task");
+	}
+
+	/**
+	 * Obtains the {@link Task} name.
+	 * 
+	 * @return {@link Task} name.
+	 */
+	public String getTaskName() {
+		return this.getValue();
 	}
 
 }

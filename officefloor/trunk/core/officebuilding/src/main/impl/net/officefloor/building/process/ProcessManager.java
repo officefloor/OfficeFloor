@@ -51,7 +51,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 
 import mx4j.tools.remote.proxy.RemoteMBeanProxy;
-import net.officefloor.main.OfficeBuildingMain;
 
 /**
  * Manages a {@link Process}.
@@ -75,6 +74,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	}
 
 	/**
+	 * Default {@link ManagedProcess} name.
+	 */
+	public static final String DEFAULT_PROCESS_NAME = "Process";
+
+	/**
 	 * System property to get the class path.
 	 */
 	private static final String SYSTEM_PROPERTY_CLASS_PATH = "java.class.path";
@@ -86,6 +90,17 @@ public class ProcessManager implements ProcessManagerMBean {
 	 */
 	public static ObjectName getProcessManagerObjectName() {
 		return PROCESS_MANAGER_OBJECT_NAME;
+	}
+
+	/**
+	 * Determines if the value is blank (<code>null</code> or empty string).
+	 * 
+	 * @param value
+	 *            Value.
+	 * @return <code>true</code> if blank.
+	 */
+	private static boolean isBlank(String value) {
+		return ((value == null) || (value.trim().length() == 0));
 	}
 
 	/**
@@ -134,6 +149,13 @@ public class ProcessManager implements ProcessManagerMBean {
 				processClassPathUrls.toArray(new URL[processClassPathUrls
 						.size()]));
 
+		// Obtain the process name (also name space as not register MBeans)
+		String processName = configuration.getProcessName();
+		if (isBlank(processName)) {
+			processName = DEFAULT_PROCESS_NAME;
+		}
+		final String processNamespace = processName;
+
 		// Serialise managed process for use
 		final ByteArrayOutputStream serialisedManagedProcess = new ByteArrayOutputStream();
 		synchronized (serialisedManagedProcess) {
@@ -177,8 +199,9 @@ public class ProcessManager implements ProcessManagerMBean {
 
 						// Run the process within shell
 						Method runMethod = shellClass.getMethod("run",
-								byte[].class);
-						runMethod.invoke(null, managedProcessBytes);
+								String.class, byte[].class);
+						runMethod.invoke(null, processNamespace,
+								managedProcessBytes);
 
 					} catch (Throwable ex) {
 						// Capture failure to propagate
@@ -283,7 +306,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		// Add the JVM Options
 		String[] jvmOptions = new String[0];
 		String jvmOptionText = configuration.getJvmOptions();
-		if (!OfficeBuildingMain.isBlank(jvmOptionText)) {
+		if (!isBlank(jvmOptionText)) {
 			// Split the options for the command (by white spacing)
 			jvmOptions = jvmOptionText.split("(\\s)+");
 		}
@@ -298,8 +321,8 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Obtain the process name
 		String processName = configuration.getProcessName();
-		if (OfficeBuildingMain.isBlank(processName)) {
-			processName = "Process";
+		if (isBlank(processName)) {
+			processName = DEFAULT_PROCESS_NAME;
 		}
 
 		// Obtain the unique MBean name space
@@ -351,6 +374,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			// Send managed process and response port to process
 			ObjectOutputStream toProcessPipe = new ObjectOutputStream(process
 					.getOutputStream());
+			toProcessPipe.writeObject(mbeanNamespace);
 			toProcessPipe.writeObject(managedProcess);
 			toProcessPipe.writeInt(fromProcessPort);
 			toProcessPipe.flush();
@@ -420,7 +444,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Add additional class path entries
 		String additionalClassPath = configuration.getAdditionalClassPath();
-		if (!OfficeBuildingMain.isBlank(additionalClassPath)) {
+		if (!isBlank(additionalClassPath)) {
 			classPath = classPath + File.pathSeparator + additionalClassPath;
 		}
 

@@ -18,8 +18,9 @@
 
 package net.officefloor.building.manager;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
@@ -41,28 +42,22 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.command.OfficeFloorCommand;
-import net.officefloor.building.command.OfficeFloorCommandParser;
-import net.officefloor.building.command.OfficeFloorCommandParserImpl;
 import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
-import net.officefloor.building.decorate.OfficeFloorDecorator;
-import net.officefloor.building.decorate.OfficeFloorDecoratorServiceLoader;
-import net.officefloor.building.execute.OfficeFloorExecutionUnit;
-import net.officefloor.building.execute.OfficeFloorExecutionUnitFactory;
-import net.officefloor.building.execute.OfficeFloorExecutionUnitFactoryImpl;
+import net.officefloor.building.console.OfficeFloorConsole;
+import net.officefloor.building.console.ProcessStartListener;
 import net.officefloor.building.process.ProcessCompletionListener;
-import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
+import net.officefloor.console.OfficeBuilding;
+import net.officefloor.console.OpenOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.main.OfficeBuildingMain;
 
 /**
- * {@link OfficeBuildingMain} Manager.
+ * {@link OfficeBuilding} Manager.
  * 
  * @author Daniel Sagenschneider
  */
@@ -93,36 +88,25 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
-	 * Starts the {@link OfficeBuildingMain}.
+	 * Starts the {@link OfficeBuilding}.
 	 * 
 	 * @param port
-	 *            Port for the {@link OfficeBuildingMain}.
-	 * @param localRepositoryDirectory
-	 *            Directory for the local repository. May be <code>null</code>.
-	 *            User settings will typically also override this value.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs. May be <code>null</code> to not
-	 *            resolve dependencies.
+	 *            Port for the {@link OfficeBuilding}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}. May be <code>null</code> to use platform
 	 *            {@link MBeanServer}.
 	 * @return {@link OfficeBuildingManager} managing the started
-	 *         {@link OfficeBuildingMain}.
+	 *         {@link OfficeBuilding}.
 	 * @throws Exception
-	 *             If fails to start the {@link OfficeBuildingMain}.
+	 *             If fails to start the {@link OfficeBuilding}.
 	 */
 	public static OfficeBuildingManager startOfficeBuilding(int port,
-			File localRepositoryDirectory, String[] remoteRepositoryUrls,
 			Properties environment, MBeanServer mbeanServer) throws Exception {
 
 		// Obtain the start time
 		Date startTime = new Date(System.currentTimeMillis());
-
-		// Ensure remote repositories is not null
-		remoteRepositoryUrls = (remoteRepositoryUrls == null ? new String[0]
-				: remoteRepositoryUrls);
 
 		// Ensure have an the MBean Server
 		if (mbeanServer == null) {
@@ -147,8 +131,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer, mbeanServer,
-				localRepositoryDirectory, remoteRepositoryUrls, environment);
+				serviceUrl, connectorServer, mbeanServer, environment);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -160,16 +143,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link OfficeBuildingManagerMBean} for the
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * <p>
 	 * This a utility method to obtain the {@link OfficeBuildingManagerMBean} of
-	 * an existing {@link OfficeBuildingMain}.
+	 * an existing {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuildingMain} resides.
+	 *            Name of the host where the {@link OfficeBuilding} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuildingMain} resides.
+	 *            Port where the {@link OfficeBuilding} resides.
 	 * @return {@link OfficeBuildingManagerMBean}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
@@ -184,17 +167,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link ProcessManagerMBean} by the process name for the
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * <p>
 	 * This a utility method to obtain the {@link ProcessManagerMBean} of an
 	 * existing {@link Process} currently running within the
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuildingMain} resides.
+	 *            Name of the host where the {@link OfficeBuilding} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuildingMain} resides.
+	 *            Port where the {@link OfficeBuilding} resides.
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessManagerMBean}.
@@ -213,17 +196,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	/**
 	 * <p>
 	 * Obtains the {@link ProcessShellMBean} by the process name for the
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * <p>
 	 * This a utility method to obtain the {@link ProcessShellMBean} of an
 	 * existing {@link Process} currently being managed within the
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuildingMain} resides.
+	 *            Name of the host where the {@link OfficeBuilding} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuildingMain} resides.
+	 *            Port where the {@link OfficeBuilding} resides.
 	 * @param processNamespace
 	 *            Name of the {@link Process} to obtain its
 	 *            {@link ProcessShellMBean}.
@@ -244,15 +227,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Obtains the {@link OfficeFloorManagerMBean}.
 	 * <p>
 	 * The <code>hostName</code> and <code>port</code> are of the
-	 * {@link OfficeBuildingMain} managing the {@link OfficeFloor}
-	 * {@link Process}. They are <i>not</i> of the specific {@link Process}
-	 * containing the {@link OfficeFloor}.
+	 * {@link OfficeBuilding} managing the {@link OfficeFloor} {@link Process}.
+	 * They are <i>not</i> of the specific {@link Process} containing the
+	 * {@link OfficeFloor}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuildingMain} resides.
+	 *            Name of the host where the {@link OfficeBuilding} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port where the {@link OfficeBuildingMain} resides.
+	 *            Port where the {@link OfficeBuilding} resides.
 	 * @param officeFloorManagerUrl
 	 *            URL of the {@link OfficeFloorManagerMBean}.
 	 * @return {@link OfficeFloorManagerMBean}.
@@ -271,18 +254,18 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeBuildingMain} {@link JMXConnectorServer}
+	 * Obtains the {@link OfficeBuilding} {@link JMXConnectorServer}
 	 * {@link JMXServiceURL}.
 	 * <p>
 	 * This a utility method to obtain the {@link JMXServiceURL} of an existing
-	 * {@link OfficeBuildingMain}.
+	 * {@link OfficeBuilding}.
 	 * 
 	 * @param hostName
-	 *            Name of the host where the {@link OfficeBuildingMain} resides.
+	 *            Name of the host where the {@link OfficeBuilding} resides.
 	 *            <code>null</code> indicates localhost.
 	 * @param port
-	 *            Port the {@link OfficeBuildingMain} is residing on.
-	 * @return {@link JMXServiceURL} to the {@link OfficeBuildingMain}
+	 *            Port the {@link OfficeBuilding} is residing on.
+	 * @return {@link JMXServiceURL} to the {@link OfficeBuilding}
 	 *         {@link JMXConnectorServer}.
 	 * @throws IOException
 	 *             If fails to obtain the {@link JMXServiceURL}.
@@ -309,9 +292,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Building.
 	 * 
 	 * @param hostName
-	 *            Host where the {@link OfficeBuildingMain} resides.
+	 *            Host where the {@link OfficeBuilding} resides.
 	 * @param port
-	 *            Port where the {@link OfficeBuildingMain} resides.
+	 *            Port where the {@link OfficeBuilding} resides.
 	 * @param mbeanName
 	 *            {@link ObjectName} for the MBean.
 	 * @param mbeanInterface
@@ -334,28 +317,28 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
-	 * {@link ProcessManager} instances of currently running {@link Process}
-	 * instances.
+	 * {@link ProcessManagerMBean} instances of currently running
+	 * {@link Process} instances.
 	 */
-	private final List<ProcessManager> processManagers = new LinkedList<ProcessManager>();
+	private final List<ProcessManagerMBean> processManagers = new LinkedList<ProcessManagerMBean>();
 
 	/**
-	 * Flags if the {@link OfficeBuildingMain} is open.
+	 * Flags if the {@link OfficeBuilding} is open.
 	 */
 	private boolean isOfficeBuildingOpen = true;
 
 	/**
-	 * Start time of the {@link OfficeBuildingMain}.
+	 * Start time of the {@link OfficeBuilding}.
 	 */
 	private final Date startTime;
 
 	/**
-	 * {@link OfficeBuildingMain} {@link JMXServiceURL}.
+	 * {@link OfficeBuilding} {@link JMXServiceURL}.
 	 */
 	private final JMXServiceURL officeBuildingServiceUrl;
 
 	/**
-	 * {@link JMXConnectorServer} for the {@link OfficeBuildingMain}.
+	 * {@link JMXConnectorServer} for the {@link OfficeBuilding}.
 	 */
 	private final JMXConnectorServer connectorServer;
 
@@ -363,16 +346,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * {@link MBeanServer}.
 	 */
 	private final MBeanServer mbeanServer;
-
-	/**
-	 * Local repository directory.
-	 */
-	private final File localRepositoryDirectory;
-
-	/**
-	 * Remote repository URLs.
-	 */
-	private final String[] remoteRepositoryUrls;
 
 	/**
 	 * Environment {@link Properties}.
@@ -383,31 +356,24 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * May only create by starting.
 	 * 
 	 * @param startTime
-	 *            Start time of the {@link OfficeBuildingMain}.
+	 *            Start time of the {@link OfficeBuilding}.
 	 * @param officeBuildingServiceUrl
-	 *            {@link OfficeBuildingMain} {@link JMXServiceURL}.
+	 *            {@link OfficeBuilding} {@link JMXServiceURL}.
 	 * @param connectorServer
-	 *            {@link JMXConnectorServer} for the {@link OfficeBuildingMain}.
+	 *            {@link JMXConnectorServer} for the {@link OfficeBuilding}.
 	 * @param mbeanServer
 	 *            {@link MBeanServer}.
-	 * @param localRepositoryDirectory
-	 *            Local repository directory.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 */
 	private OfficeBuildingManager(Date startTime,
 			JMXServiceURL officeBuildingServiceUrl,
 			JMXConnectorServer connectorServer, MBeanServer mbeanServer,
-			File localRepositoryDirectory, String[] remoteRepositoryUrls,
 			Properties environment) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
 		this.mbeanServer = mbeanServer;
-		this.localRepositoryDirectory = localRepositoryDirectory;
-		this.remoteRepositoryUrls = remoteRepositoryUrls;
 		this.environment = environment;
 	}
 
@@ -471,53 +437,64 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			}
 		}
 
-		// Parse arguments to create command to open the OfficeFloor
-		OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
-				new OpenOfficeFloorCommand());
-		OfficeFloorCommand[] commands = parser.parseCommands(arguments);
+		// Create the console to open OfficeFloor
+		OfficeFloorConsole console = new OpenOfficeFloor()
+				.createOfficeFloorConsole(processName, this.environment);
 
-		// Obtain decorators from default class path
-		OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader
-				.loadOfficeFloorDecorators(null);
+		// Handle to load the process manager
+		final ProcessManagerMBean[] manager = new ProcessManagerMBean[1];
 
-		// Create the execution unit
-		OfficeFloorExecutionUnitFactory factory = new OfficeFloorExecutionUnitFactoryImpl(
-				this.localRepositoryDirectory, this.remoteRepositoryUrls,
-				this.environment, decorators);
-		OfficeFloorExecutionUnit executionUnit = factory
-				.createExecutionUnit(commands[0]);
+		// Create the listener
+		ProcessStartListener listener = new ProcessStartListener() {
+			@Override
+			public void processStarted(ProcessManagerMBean processManager) {
 
-		// Overwritten values for process configuration
-		ProcessConfiguration configuration = executionUnit
-				.getProcessConfiguration();
-		if (processName != null) {
-			configuration.setProcessName(processName);
-		}
-		if (jvmOptions != null) {
-			configuration.setJvmOptions(jvmOptions);
-		}
+				// Register the process manager
+				synchronized (manager) {
+					manager[0] = processManager;
+				}
 
-		// Run the OfficeFloor.
-		// (outside lock as completion listener on failure requires locking)
-		ProcessManager manager = ProcessManager.startProcess(executionUnit
-				.getManagedProcess(), configuration);
+				// Determine if process already complete
+				boolean isProcessComplete;
+				synchronized (processManager) {
+					isProcessComplete = processManager.isProcessComplete();
+				}
 
-		// Determine if process already complete
-		boolean isProcessComplete;
-		synchronized (manager) {
-			isProcessComplete = manager.isProcessComplete();
-		}
-
-		synchronized (this) {
-			// Only register if process not already complete
-			if (!isProcessComplete) {
-				// Register the manager for the running process
-				this.processManagers.add(manager);
+				synchronized (OfficeBuildingManager.this) {
+					// Only register if process not already complete
+					if (!isProcessComplete) {
+						// Register the manager for the running process
+						OfficeBuildingManager.this.processManagers
+								.add(processManager);
+					}
+				}
 			}
+		};
 
-			// Return the process name space
-			return manager.getProcessNamespace();
+		// Create streams for out and err
+		ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
+		PrintStream out = new PrintStream(stdOut);
+		ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
+		PrintStream err = new PrintStream(stdErr);
+
+		// Run the command
+		boolean isSuccessful = console.run(out, err, listener, arguments);
+
+		// Ensure successful
+		if (!isSuccessful) {
+			// Failed, so provide error
+			String message = new String(stdErr.toByteArray());
+			throw new Exception(message);
 		}
+
+		// Obtain the process manager
+		ProcessManagerMBean processManager;
+		synchronized (manager) {
+			processManager = manager[0];
+		}
+
+		// Return the process name space
+		return processManager.getProcessNamespace();
 	}
 
 	@Override
@@ -525,13 +502,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		// Create listing of process name spaces
 		StringBuilder namespaces = new StringBuilder();
 		boolean isFirst = true;
-		for (ProcessManager manager : this.processManagers) {
-			String namespace = manager.getProcessNamespace();
-			namespaces.append(namespace);
+		for (ProcessManagerMBean manager : this.processManagers) {
+
+			// Separate name spaces by end of line
 			if (!isFirst) {
 				namespaces.append("\n");
 			}
 			isFirst = false;
+
+			// Output the name space
+			String namespace = manager.getProcessNamespace();
+			namespaces.append(namespace);
 		}
 
 		// Return the listing of process name spaces
@@ -543,8 +524,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			long waitTime) throws Exception {
 
 		// Find the process manager for the OfficeFloor
-		ProcessManager processManager = null;
-		for (ProcessManager manager : this.processManagers) {
+		ProcessManagerMBean processManager = null;
+		for (ProcessManagerMBean manager : this.processManagers) {
 			if (manager.getProcessNamespace().equals(processNamespace)) {
 				processManager = manager;
 			}
@@ -598,7 +579,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			// Stop the running processes (if any)
 			if (this.processManagers.size() > 0) {
 				status.append("Stopping processes:\n");
-				for (ProcessManager processManager : this.processManagers) {
+				for (ProcessManagerMBean processManager : this.processManagers) {
 					try {
 						// Stop process, keeping track if successful
 						status.append("\t" + processManager.getProcessName()
@@ -621,7 +602,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 				// Determine if all processes complete
 				boolean isAllComplete = true;
-				for (ProcessManager processManager : this.processManagers) {
+				for (ProcessManagerMBean processManager : this.processManagers) {
 					if (!processManager.isProcessComplete()) {
 						// Process still running so not all complete
 						isAllComplete = false;
@@ -638,7 +619,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 				if ((currentTime - startTime) > waitTime) {
 					// Timed out waiting, so destroy processes
 					status.append("\nStop timeout, destroying processes:\n");
-					for (ProcessManager processManager : this.processManagers) {
+					for (ProcessManagerMBean processManager : this.processManagers) {
 						try {
 							status.append("\t"
 									+ processManager.getProcessName() + " ["
@@ -663,8 +644,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			}
 
 			// Return status of stopping
-			status.append(OfficeBuildingMain.class.getSimpleName()
-					+ " stopped\n");
+			status.append(OfficeBuilding.class.getSimpleName() + " stopped");
 			return status.toString();
 
 		} finally {

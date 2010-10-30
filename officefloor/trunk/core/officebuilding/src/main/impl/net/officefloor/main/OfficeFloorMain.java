@@ -35,6 +35,7 @@ import net.officefloor.frame.api.manage.WorkManager;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class OfficeFloorMain {
 
 	/**

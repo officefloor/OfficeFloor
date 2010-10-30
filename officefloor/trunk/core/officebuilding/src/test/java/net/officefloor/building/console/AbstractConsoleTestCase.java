@@ -104,14 +104,14 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 		this.in = new PrintWriter(pipeIn);
 		this.consoleIn = new PipedReader(pipeIn);
 
-		// Console 'out'
-		PipedInputStream pipeOut = new PipedInputStream();
+		// Console 'out' (make large buffer to stop blocking)
+		PipedInputStream pipeOut = new PipedInputStream(1024 * 1024);
 		this.out = new BufferedReader(new InputStreamReader(pipeOut));
 		this.consoleOut = new PrintStream(new PipedOutputStream(pipeOut));
 		System.setOut(this.consoleOut);
 
-		// Console 'err'
-		PipedInputStream pipeErr = new PipedInputStream();
+		// Console 'err' (make large buffer to stop blocking)
+		PipedInputStream pipeErr = new PipedInputStream(1024 * 1024);
 		this.err = new BufferedReader(new InputStreamReader(pipeErr));
 		this.consoleErr = new PrintStream(new PipedOutputStream(pipeErr));
 		System.setErr(this.consoleErr);

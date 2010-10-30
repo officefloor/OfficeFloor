@@ -17,24 +17,21 @@
  */
 package net.officefloor.building.command.parameters;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
 /**
- * {@link OfficeFloorCommandParameter} allowing multiple paths.
+ * {@link OfficeFloorCommandParameter} that provides only the first value
+ * specified.
  * 
  * @author Daniel Sagenschneider
  */
-public class MultiplePathsOfficeFloorCommandParameter extends
+public abstract class AbstractSingleValueOfficeFloorCommandParameter extends
 		AbstractOfficeFloorCommandParameter {
 
 	/**
-	 * Listing of the paths.
+	 * Value for this parameter.
 	 */
-	private final List<String> paths = new LinkedList<String>();
+	private String value = null;
 
 	/**
 	 * Initiate.
@@ -46,33 +43,29 @@ public class MultiplePathsOfficeFloorCommandParameter extends
 	 * @param description
 	 *            Description.
 	 */
-	public MultiplePathsOfficeFloorCommandParameter(String name,
+	public AbstractSingleValueOfficeFloorCommandParameter(String name,
 			String shortName, String description) {
 		super(name, shortName, description, true);
 	}
 
 	/**
-	 * Obtains the listing of paths.
+	 * Obtains the value for this parameter.
 	 * 
-	 * @return Listing of paths.
+	 * @return Value for this parameter.
 	 */
-	public String[] getPaths() {
-		return this.paths.toArray(new String[this.paths.size()]);
+	protected String getValue() {
+		return this.value;
 	}
 
 	/*
-	 * =================== OfficeFloorCommandParameter =================
+	 * ================ OfficeFloorCommandParameter =================
 	 */
 
 	@Override
 	public void addValue(String value) {
-
-		// Split value by path separator as may contain multiple paths
-		String[] entries = value.split(File.pathSeparator);
-
-		// Load all paths for value
-		for (String entry : entries) {
-			this.paths.add(entry);
+		// Take only the first specified value
+		if (this.value == null) {
+			this.value = value;
 		}
 	}
 

@@ -75,6 +75,18 @@ public class ArtifactArgument {
 	}
 
 	/**
+	 * Obtains the {@link Artifact} identifier.
+	 * 
+	 * @return {@link Artifact} identifier.
+	 */
+	public String getId() {
+		return this.groupId + ":" + this.artifactId
+				+ (this.type != null ? ":" + this.type : "")
+				+ (this.classifier != null ? ":" + this.classifier : "") + ":"
+				+ this.version;
+	}
+
+	/**
 	 * Obtains the Group Id.
 	 * 
 	 * @return Group Id.
