@@ -144,7 +144,7 @@ public final class OfficeFloorConsoleMain {
 		if ("run".equalsIgnoreCase(consoleRunStart)) {
 			// Run the console
 			boolean isSuccessful = console.run(System.out, System.err, null,
-					executeArguments);
+					null, executeArguments);
 
 			// Flag failure if not successful
 			if (!isSuccessful) {

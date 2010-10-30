@@ -29,10 +29,11 @@ public interface ProcessCompletionListener {
 	 * Notifies that the {@link ManagedProcess} is complete.
 	 * 
 	 * @param manager
-	 *            {@link ProcessManager} of completed {@link ManagedProcess}.
-	 *            This allows using the same {@link ProcessCompletionListener}
-	 *            for multiple {@link ManagedProcess} instances.
+	 *            {@link ProcessManagerMBean} of completed
+	 *            {@link ManagedProcess}. This allows using the same
+	 *            {@link ProcessCompletionListener} for multiple
+	 *            {@link ManagedProcess} instances.
 	 */
-	void notifyProcessComplete(ProcessManager manager);
+	void processCompleted(ProcessManagerMBean manager);
 
 }

@@ -20,6 +20,7 @@ package net.officefloor.console;
 import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommandFactory;
+import net.officefloor.building.command.officefloor.OfficeBuildingCloseOfficeFloorCommand;
 import net.officefloor.building.command.officefloor.OfficeBuildingInvokeOfficeFloorCommand;
 import net.officefloor.building.command.officefloor.OfficeBuildingListOfficeFloorCommand;
 import net.officefloor.building.command.officefloor.OfficeBuildingOpenOfficeFloorCommand;
@@ -55,6 +56,7 @@ public class OfficeBuilding implements OfficeFloorConsoleFactory {
 				new OfficeBuildingOpenOfficeFloorCommand(),
 				new OfficeBuildingListOfficeFloorCommand(),
 				new OfficeBuildingInvokeOfficeFloorCommand(),
+				new OfficeBuildingCloseOfficeFloorCommand(),
 				new StopOfficeBuildingCommand() };
 
 		// Obtain the decorators

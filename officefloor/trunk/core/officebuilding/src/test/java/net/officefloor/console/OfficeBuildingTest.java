@@ -23,10 +23,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
-import net.officefloor.building.console.AbstractConsoleTestCase;
-import net.officefloor.building.console.OfficeFloorConsoleMain;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.officefloor.MockWork;
@@ -38,36 +35,24 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingTest extends AbstractConsoleTestCase {
+public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 	/**
 	 * Start line for {@link OfficeBuilding}.
 	 */
 	private String officeBuildingStartLine;
 
+	/**
+	 * Initiate.
+	 */
+	public OfficeBuildingTest() {
+		super(OfficeBuilding.class);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 
-		// Testing
-		OfficeFloorConsoleMain.isExit = false;
-
-		// Specify the OFFICE_FLOOR_HOME
-		File propertiesFile = this.findFile(this.getClass(),
-				OfficeFloorConsoleMain.PROPERTIES_FILE_RELATIVE_PATH);
-		File officeFloorHome = propertiesFile.getParentFile().getParentFile();
-		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
-				officeFloorHome.getAbsolutePath());
-
-		// Ensure OfficeBuilding not running (before output to pipes)
-		try {
-			this.doMain("stop");
-		} catch (Throwable ex) {
-			// Ignore failure to stop office
-			System.err
-					.println("NOTE: Ignore previous error as ensuring OfficeBuilding not running.");
-		}
-
-		// Setup pipes
+		// Setup console main
 		super.setUp();
 
 		// Obtain the office building start line
@@ -77,16 +62,6 @@ public class OfficeBuildingTest extends AbstractConsoleTestCase {
 								null,
 								OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT)
 						.toString();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Clear the OFFICE_FLOOR_HOME
-		System.clearProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME);
-
-		// Remove pipes
-		super.tearDown();
 	}
 
 	/**
@@ -187,11 +162,15 @@ public class OfficeBuildingTest extends AbstractConsoleTestCase {
 		out.add("\tSECTION.WORK");
 		out.add("\t\twriteMessage (String)");
 
+		// Close the OfficeFloor
+		this.doMain("--process-name " + PROCESS_NAME + " close");
+		// TODO only provide a single close OfficeFloor message
+		out.add("OfficeFloor within process name space '" + PROCESS_NAME
+				+ "' closed");
+		out.add("Closed");
+
 		// Stop the OfficeBuilding
 		this.doMain("stop");
-		out.add("Stopping processes:");
-		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
-		out.add("");
 		out.add("OfficeBuilding stopped");
 
 		// Validate no error and correct output
@@ -242,8 +221,11 @@ public class OfficeBuildingTest extends AbstractConsoleTestCase {
 		assertEquals("Message should be written to file", MockWork.MESSAGE,
 				fileContent);
 
-		// Stop the OfficeBuilding
+		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doMain("stop");
+		// TODO do not provide process space massage
+		out.add("OfficeFloor within process name space '" + PROCESS_NAME
+				+ "' closed");
 		out.add("Stopping processes:");
 		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
 		out.add("");
@@ -308,6 +290,13 @@ public class OfficeBuildingTest extends AbstractConsoleTestCase {
 						"        -t,--task <arg>                   Name of the Task",
 						"        -w,--work <arg>                   Name of the Work",
 						"                                                         ",
+						"close : Closes an OfficeFloor within the OfficeBuilding  ",
+						"      Options:                                           ",
+						"       --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+						"       -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+						"       --process-name <arg>              Process name space. Default is Process",
+						"       --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
+						"                                                         ",
 						"stop : Stops the OfficeBuilding                          ",
 						"     Options:                                            ",
 						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
@@ -315,31 +304,6 @@ public class OfficeBuildingTest extends AbstractConsoleTestCase {
 						"      --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
 						"                                                         ",
 						"help : This help message                                 ");
-	}
-
-	/**
-	 * Does the {@link OfficeFloorCommand}.
-	 * 
-	 * @param arguments
-	 *            Arguments for {@link OfficeBuilding}.
-	 */
-	private void doMain(String arguments) throws Throwable {
-
-		// Create the command line
-		String commandLine = "script " + OfficeBuilding.class.getName()
-				+ " run " + arguments;
-
-		// Obtain the arguments
-		String[] executeArguments = commandLine.split("\\s+");
-
-		try {
-			// Execute the command
-			OfficeFloorConsoleMain.main(executeArguments);
-		} catch (Error error) {
-			// Cause EXIT error with details of failure
-			this.assertErr("EXIT: " + error.getMessage());
-			throw error;
-		}
 	}
 
 }

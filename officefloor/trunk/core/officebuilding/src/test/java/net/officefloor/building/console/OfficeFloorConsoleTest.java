@@ -31,7 +31,9 @@ import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandPa
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.MockCommand;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.ProcessStartListener;
 
 /**
  * Tests the {@link OfficeFloorConsole}.
@@ -51,6 +53,11 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	private final List<ProcessManagerMBean> processManagers = new LinkedList<ProcessManagerMBean>();
 
 	/**
+	 * Completed {@link ProcessManagerMBean}.
+	 */
+	private final List<ProcessManagerMBean> completed = new LinkedList<ProcessManagerMBean>();
+
+	/**
 	 * {@link ProcessStartListener} for testing.
 	 */
 	private ProcessStartListener processStartListener = new ProcessStartListener() {
@@ -58,6 +65,18 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		public void processStarted(ProcessManagerMBean processManager) {
 			synchronized (OfficeFloorConsoleTest.this) {
 				OfficeFloorConsoleTest.this.processManagers.add(processManager);
+			}
+		}
+	};
+
+	/**
+	 * {@link ProcessCompletionListener} for testing.
+	 */
+	private ProcessCompletionListener processCompletionListener = new ProcessCompletionListener() {
+		@Override
+		public void processCompleted(ProcessManagerMBean manager) {
+			synchronized (OfficeFloorConsoleTest.this) {
+				OfficeFloorConsoleTest.this.completed.add(manager);
 			}
 		}
 	};
@@ -159,9 +178,17 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		// Ensure run
 		assertTrue("Process should be run", isRun(command));
 
-		// Should be no processes started on run
-		assertEquals("Should be no processes started on run", 0,
-				this.processManagers.size());
+		// Ensure notified of runs
+		synchronized (this) {
+			assertEquals("Should be notified of start", 1, this.processManagers
+					.size());
+			assertEquals("Should notified of completion", 1, this.completed
+					.size());
+			assertEquals("Incorrect process manager", "command",
+					this.processManagers.get(0).getProcessName());
+			assertEquals("Ensure same process", this.processManagers.get(0),
+					this.completed.get(0));
+		}
 	}
 
 	/**
@@ -264,12 +291,16 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 		// Start
 		this.doStartCommand();
 
-		// Ensure registered the process manager
-		assertEquals("Should have process manager registered", 1,
-				this.processManagers.size());
-		ProcessManagerMBean processManager = this.processManagers.get(0);
-		assertEquals("Incorrect process manager", "command", processManager
-				.getProcessName());
+		// Ensure only notified of start of process
+		synchronized (this) {
+			assertEquals("Should have process manager registered", 1,
+					this.processManagers.size());
+			ProcessManagerMBean processManager = this.processManagers.get(0);
+			assertEquals("Incorrect process manager", "command", processManager
+					.getProcessName());
+			assertEquals("Should not yet be completed", 0, this.completed
+					.size());
+		}
 	}
 
 	/**
@@ -278,15 +309,20 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	 */
 	public void testStartCommandWithoutListener() throws Exception {
 
-		// Clear the listener
+		// Clear the listeners
 		this.processStartListener = null;
+		this.processCompletionListener = null;
 
 		// Start
 		this.doStartCommand();
 
 		// Ensure test valid by no process manager registered
-		assertEquals("Should have process manager registered", 0,
-				this.processManagers.size());
+		synchronized (this) {
+			assertEquals("Should not have process manager registered", 0,
+					this.processManagers.size());
+			assertEquals("Should not have process manager registered", 0,
+					this.completed.size());
+		}
 	}
 
 	/**
@@ -352,7 +388,8 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 
 		// Run from console
 		console.run(this.consoleOut, this.consoleErr,
-				this.processStartListener, arguments);
+				this.processStartListener, this.processCompletionListener,
+				arguments);
 	}
 
 }

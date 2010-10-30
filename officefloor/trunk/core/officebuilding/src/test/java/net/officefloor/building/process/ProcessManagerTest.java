@@ -102,6 +102,69 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure listeners notified for running a {@link Process}.
+	 */
+	public void test_run_ProcessWithListeners() throws Exception {
+
+		// Listen for starting of process
+		final boolean[] isStarted = new boolean[] { false };
+		ProcessStartListener startListener = new ProcessStartListener() {
+			@Override
+			public void processStarted(ProcessManagerMBean processManager) {
+				// Flag started
+				synchronized (isStarted) {
+					isStarted[0] = true;
+				}
+
+				// Flag started process
+				ProcessManagerTest.this.manager = (ProcessManager) processManager;
+			}
+		};
+
+		// Listen for stopping of process
+		final boolean[] isStopped = new boolean[] { false };
+		ProcessCompletionListener completionListener = new ProcessCompletionListener() {
+			@Override
+			public void processCompleted(ProcessManagerMBean manager) {
+				// Flag complete
+				synchronized (isStopped) {
+					isStopped[0] = true;
+				}
+
+				// Ensure same completed process as started process
+				assertSame("Incorrect manager",
+						ProcessManagerTest.this.manager, manager);
+			}
+		};
+
+		// Provide listeners to process
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setProcessStartListener(startListener);
+		configuration.setProcessCompletionListener(completionListener);
+
+		final String TEST_CONTENT = "test content";
+
+		// Obtain temporary file to write content
+		File file = OfficeBuildingTestUtil.createTempFile(this);
+
+		// Start the process
+		ProcessManager.runProcess(new WriteToFileProcess(
+				file.getAbsolutePath(), TEST_CONTENT), configuration);
+
+		// Ensure content in file
+		OfficeBuildingTestUtil.validateFileContent("Content should be in file",
+				TEST_CONTENT, file);
+
+		// Ensure listeners notified
+		synchronized (isStarted) {
+			assertTrue("Start listener must be notified", isStarted[0]);
+		}
+		synchronized (isStopped) {
+			assertTrue("Completion listener must be notified", isStopped[0]);
+		}
+	}
+
+	/**
 	 * {@link ManagedProcess} to write to a file.
 	 */
 	public static class WriteToFileProcess implements ManagedProcess {
@@ -275,16 +338,29 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to stop the {@link Process}.
 	 */
-	public void test_start_TriggerStopProcess() throws Exception {
+	public void test_start_TriggerStopProcessWithListeners() throws Exception {
+
+		// Listen for starting of process
+		final boolean[] isStarted = new boolean[] { false };
+		ProcessStartListener startListener = new ProcessStartListener() {
+			@Override
+			public void processStarted(ProcessManagerMBean processManager) {
+				// Flag started
+				synchronized (isStarted) {
+					isStarted[0] = true;
+				}
+
+				// Ensure the correct manager
+				assertSame("Incorrect manager",
+						ProcessManagerTest.this.manager, manager);
+			}
+		};
 
 		// Listen for stopping of process
-		final boolean[] isStopped = new boolean[1];
-		synchronized (isStopped) {
-			isStopped[0] = false;
-		}
-		ProcessCompletionListener listener = new ProcessCompletionListener() {
+		final boolean[] isStopped = new boolean[] { false };
+		ProcessCompletionListener completionListener = new ProcessCompletionListener() {
 			@Override
-			public void notifyProcessComplete(ProcessManager manager) {
+			public void processCompleted(ProcessManagerMBean manager) {
 				// Flag complete
 				synchronized (isStopped) {
 					isStopped[0] = true;
@@ -296,9 +372,10 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			}
 		};
 
-		// Provide listener to process
+		// Provide listeners to process
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		configuration.setProcessCompletionListener(listener);
+		configuration.setProcessStartListener(startListener);
+		configuration.setProcessCompletionListener(completionListener);
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new LoopUntilStopProcess(),
@@ -310,9 +387,12 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		// Wait until process completes
 		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager);
 
-		// Ensure listener notified of process stopped
+		// Ensure listeners notified
+		synchronized (isStarted) {
+			assertTrue("Start listener must be notified", isStarted[0]);
+		}
 		synchronized (isStopped) {
-			assertTrue("Listener must be notified", isStopped[0]);
+			assertTrue("Completion listener must be notified", isStopped[0]);
 		}
 	}
 

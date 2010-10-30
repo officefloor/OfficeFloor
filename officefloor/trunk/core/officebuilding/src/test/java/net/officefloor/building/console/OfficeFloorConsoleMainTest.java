@@ -23,6 +23,9 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.Properties;
 
+import net.officefloor.building.process.ProcessCompletionListener;
+import net.officefloor.building.process.ProcessStartListener;
+
 /**
  * Tests the {@link OfficeFloorConsoleMain}.
  * 
@@ -406,7 +409,9 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		@Override
 		public boolean run(PrintStream out, PrintStream err,
-				ProcessStartListener listener, String... arguments) {
+				ProcessStartListener startListener,
+				ProcessCompletionListener completionListener,
+				String... arguments) {
 
 			// Flag running command
 			out.print("run");
