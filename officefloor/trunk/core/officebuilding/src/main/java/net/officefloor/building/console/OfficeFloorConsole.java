@@ -21,6 +21,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 
 import net.officefloor.building.command.OfficeFloorCommand;
+import net.officefloor.building.process.ProcessCompletionListener;
+import net.officefloor.building.process.ProcessStartListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -63,14 +65,17 @@ public interface OfficeFloorConsole {
 	 *            Console out.
 	 * @param err
 	 *            Console err.
-	 * @param listener
+	 * @param startListener
 	 *            {@link ProcessStartListener}. May be <code>null</code>.
+	 * @param completionListener
+	 *            {@link ProcessCompletionListener}. May be <code>null</code>.
 	 * @param arguments
 	 *            Arguments for the {@link OfficeFloorCommand} instances.
 	 * @return <code>true</code> if successfully run/started
 	 *         {@link OfficeFloorCommand}.
 	 */
 	boolean run(PrintStream out, PrintStream err,
-			ProcessStartListener listener, String... arguments);
+			ProcessStartListener startListener,
+			ProcessCompletionListener completionListener, String... arguments);
 
 }

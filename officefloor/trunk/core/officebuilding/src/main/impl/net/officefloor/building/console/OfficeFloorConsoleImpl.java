@@ -41,9 +41,11 @@ import net.officefloor.building.execute.OfficeFloorExecutionUnitCreateException;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitFactory;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitFactoryImpl;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessException;
 import net.officefloor.building.process.ProcessManager;
+import net.officefloor.building.process.ProcessStartListener;
 
 /**
  * {@link OfficeFloorConsole} implementation.
@@ -153,7 +155,8 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 
 	@Override
 	public boolean run(PrintStream out, PrintStream err,
-			ProcessStartListener listener, String... arguments) {
+			ProcessStartListener startListener,
+			ProcessCompletionListener completionListener, String... arguments) {
 
 		// Parse the commands to execute
 		OfficeFloorCommand[] commands;
@@ -228,20 +231,17 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 				continue; // help message written
 			}
 
-			// Execute the managed process for command
+			// Enrich configuration with completion listener
 			ProcessConfiguration configuration = executionUnit
 					.getProcessConfiguration();
+			configuration.setProcessStartListener(startListener);
+			configuration.setProcessCompletionListener(completionListener);
+
+			// Execute the managed process for command
 			try {
 				if (executionUnit.isSpawnProcess()) {
 					// Requires to be run within a spawned process
-					ProcessManager processManager = ProcessManager
-							.startProcess(managedProcess, configuration);
-
-					// Notify process started (if listening)
-					if (listener != null) {
-						listener.processStarted(processManager);
-					}
-
+					ProcessManager.startProcess(managedProcess, configuration);
 				} else {
 					// Run locally
 					ProcessManager.runProcess(managedProcess, configuration);

@@ -44,12 +44,12 @@ import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
 import net.officefloor.building.console.OfficeFloorConsole;
-import net.officefloor.building.console.ProcessStartListener;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
+import net.officefloor.building.process.ProcessStartListener;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
@@ -437,8 +437,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			}
 		}
 
-		// Create the console to open OfficeFloor
-		OfficeFloorConsole console = new OpenOfficeFloor()
+		// Create the console to open OfficeFloor in spawned process
+		OfficeFloorConsole console = new OpenOfficeFloor(true)
 				.createOfficeFloorConsole(processName, this.environment);
 
 		// Handle to load the process manager
@@ -478,7 +478,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		PrintStream err = new PrintStream(stdErr);
 
 		// Run the command
-		boolean isSuccessful = console.run(out, err, listener, arguments);
+		boolean isSuccessful = console.run(out, err, listener, this, arguments);
 
 		// Ensure successful
 		if (!isSuccessful) {
@@ -662,7 +662,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 */
 
 	@Override
-	public synchronized void notifyProcessComplete(ProcessManager manager) {
+	public synchronized void processCompleted(ProcessManagerMBean manager) {
 		// Remove manager as process no longer running
 		this.processManagers.remove(manager);
 

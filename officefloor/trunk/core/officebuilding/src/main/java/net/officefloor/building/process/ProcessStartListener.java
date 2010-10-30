@@ -15,10 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.console;
+package net.officefloor.building.process;
 
-import net.officefloor.building.process.ManagedProcess;
-import net.officefloor.building.process.ProcessManagerMBean;
 
 /**
  * Listens for started {@link ManagedProcess} instances.

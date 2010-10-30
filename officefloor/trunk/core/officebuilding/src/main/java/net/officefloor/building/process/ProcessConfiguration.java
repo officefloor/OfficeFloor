@@ -29,7 +29,7 @@ import javax.management.MBeanServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessConfiguration {
+public final class ProcessConfiguration {
 
 	/**
 	 * Name to identify the {@link Process}.
@@ -45,6 +45,11 @@ public class ProcessConfiguration {
 	 * JVM options for the {@link Process}.
 	 */
 	private String jvmOptions = null;
+
+	/**
+	 * {@link ProcessStartListener}.
+	 */
+	private ProcessStartListener startListener = null;
 
 	/**
 	 * {@link ProcessCompletionListener}.
@@ -111,6 +116,25 @@ public class ProcessConfiguration {
 	 */
 	public void setJvmOptions(String jvmOptions) {
 		this.jvmOptions = jvmOptions;
+	}
+
+	/**
+	 * Obtains the {@link ProcessStartListener}.
+	 * 
+	 * @return {@link ProcessStartListener}.
+	 */
+	public ProcessStartListener getProcessStartListener() {
+		return this.startListener;
+	}
+
+	/**
+	 * Specifies the {@link ProcessStartListener}.
+	 * 
+	 * @param startListener
+	 *            {@link ProcessStartListener}.
+	 */
+	public void setProcessStartListener(ProcessStartListener startListener) {
+		this.startListener = startListener;
 	}
 
 	/**

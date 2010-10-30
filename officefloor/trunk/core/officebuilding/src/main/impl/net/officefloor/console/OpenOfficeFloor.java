@@ -35,6 +35,35 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  */
 public class OpenOfficeFloor implements OfficeFloorConsoleFactory {
 
+	/**
+	 * Indicates if to open the {@link OfficeFloor} within a spawned
+	 * {@link Process}.
+	 */
+	private final boolean isOpenInSpawnedProcess;
+
+	/**
+	 * <p>
+	 * Default constructor necessary for using as an
+	 * {@link OfficeFloorConsoleFactory}.
+	 * <p>
+	 * Using this construction will not have the {@link OfficeFloor} open within
+	 * a spawned {@link Process}.
+	 */
+	public OpenOfficeFloor() {
+		this(false);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isOpenInSpawnedProcess
+	 *            <code>true</code> if to open the {@link OfficeFloor} within a
+	 *            spawned {@link Process}.
+	 */
+	public OpenOfficeFloor(boolean isOpenInSpawnedProcess) {
+		this.isOpenInSpawnedProcess = isOpenInSpawnedProcess;
+	}
+
 	/*
 	 * ==================== OfficeFloorConsoleFactory ===================
 	 */
@@ -43,8 +72,9 @@ public class OpenOfficeFloor implements OfficeFloorConsoleFactory {
 	public OfficeFloorConsole createOfficeFloorConsole(String scriptName,
 			Properties environment) throws Exception {
 
-		// Create the listing of commands
-		OfficeFloorCommandFactory[] commandFactories = new OfficeFloorCommandFactory[] { new OpenOfficeFloorCommand() };
+		// Only able to open the OfficeFloor
+		OfficeFloorCommandFactory[] commandFactories = new OfficeFloorCommandFactory[] { new OpenOfficeFloorCommand(
+				this.isOpenInSpawnedProcess) };
 
 		// Obtain the decorators
 		OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader

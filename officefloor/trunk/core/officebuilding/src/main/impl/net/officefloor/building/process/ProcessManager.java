@@ -168,6 +168,10 @@ public class ProcessManager implements ProcessManagerMBean {
 			}
 		}
 
+		// Create the process manager
+		ProcessManager processManager = new ProcessManager(processName,
+				processName, null, null, null);
+
 		// Maintain class path for resetting
 		final String originalClassPath = System
 				.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
@@ -175,6 +179,13 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			// Specify the java class path
 			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, processClassPath);
+
+			// Notify starting listener (if one provided)
+			ProcessStartListener startListener = configuration
+					.getProcessStartListener();
+			if (startListener != null) {
+				startListener.processStarted(processManager);
+			}
 
 			// Run the process (in another thread to not change this thread)
 			final boolean[] isComplete = new boolean[1];
@@ -256,6 +267,13 @@ public class ProcessManager implements ProcessManagerMBean {
 		} finally {
 			// Reset to original class path
 			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, originalClassPath);
+
+			// Notify completion listener (if one provided)
+			ProcessCompletionListener completionListener = configuration
+					.getProcessCompletionListener();
+			if (completionListener != null) {
+				completionListener.processCompleted(processManager);
+			}
 		}
 	}
 
@@ -362,6 +380,13 @@ public class ProcessManager implements ProcessManagerMBean {
 			// Create the process manager for the process
 			processManager = new ProcessManager(processName, mbeanNamespace,
 					process, completionListener, mbeanServer);
+
+			// Notify starting listener (if one provided)
+			ProcessStartListener startListener = configuration
+					.getProcessStartListener();
+			if (startListener != null) {
+				startListener.processStarted(processManager);
+			}
 
 			// Gobble the process's stdout and stderr
 			new StreamGobbler(process.getInputStream()).start();
@@ -661,7 +686,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Notify process complete
 		if (this.completionListener != null) {
-			this.completionListener.notifyProcessComplete(this);
+			this.completionListener.processCompleted(this);
 		}
 	}
 
@@ -692,6 +717,11 @@ public class ProcessManager implements ProcessManagerMBean {
 	@Override
 	public synchronized void triggerStopProcess() throws ProcessException {
 
+		// Do nothing if running locally (i.e. no process)
+		if (this.process == null) {
+			return;
+		}
+
 		// Ignore if already complete
 		if (this.isComplete) {
 			return;
@@ -714,6 +744,13 @@ public class ProcessManager implements ProcessManagerMBean {
 
 	@Override
 	public void destroyProcess() {
+
+		// Do nothing if running locally (i.e. no process)
+		if (this.process == null) {
+			return;
+		}
+
+		// Destroy the process
 		this.process.destroy();
 	}
 

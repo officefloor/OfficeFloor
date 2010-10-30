@@ -28,9 +28,16 @@ import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandPa
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -116,6 +123,43 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	 */
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
 
+	/**
+	 * {@link Office} name.
+	 */
+	private final OfficeNameOfficeFloorCommandParameter officeName = new OfficeNameOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Work} name.
+	 */
+	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Task} name.
+	 */
+	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
+
+	/**
+	 * Parameter for {@link Task}.
+	 */
+	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
+
+	/**
+	 * Indicates if {@link OfficeFloor} is to be opened within a spawned
+	 * {@link Process}.
+	 */
+	private final boolean isSpawn;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isSpawn
+	 *            <code>true</code> if {@link OfficeFloor} is to be opened
+	 *            within a spawned {@link Process}.
+	 */
+	public OpenOfficeFloorCommand(boolean isSpawn) {
+		this.isSpawn = isSpawn;
+	}
+
 	/*
 	 * ================ OfficeFloorCommandFactory =====================
 	 */
@@ -127,7 +171,7 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 
 	@Override
 	public OfficeFloorCommand createCommand() {
-		return new OpenOfficeFloorCommand();
+		return new OpenOfficeFloorCommand(this.isSpawn);
 	}
 
 	/*
@@ -142,7 +186,9 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeFloorLocation,
-				this.archives, this.artifacts, this.classpath, this.processName };
+				this.archives, this.artifacts, this.classpath,
+				this.processName, this.officeName, this.workName,
+				this.taskName, this.parameter };
 	}
 
 	@Override
@@ -171,8 +217,8 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	public ManagedProcess createManagedProcess(
 			OfficeFloorCommandEnvironment environment) throws Exception {
 
-		// OfficeFloor must run in spawned process
-		environment.setSpawnProcess(true);
+		// Indicate if OfficeFloor in spawned process
+		environment.setSpawnProcess(this.isSpawn);
 
 		// Specify the process name
 		environment.setProcessName(this.processName.getProcessName());
@@ -182,6 +228,19 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 				.getOfficeFloorLocation();
 		OfficeFloorManager managedProcess = new OfficeFloorManager(
 				officeFloorLocation);
+
+		// Obtain details of the possible task to open
+		String officeName = this.officeName.getOfficeName();
+		String workName = this.workName.getWorkName();
+		String taskName = this.taskName.getTaskName();
+		String parameter = this.parameter.getParameterValue();
+
+		// Determine if invoking task (by checking work name provided)
+		if (workName != null) {
+			// Invoke the task
+			managedProcess
+					.invokeTask(officeName, workName, taskName, parameter);
+		}
 
 		// Return the managed process
 		return managedProcess;
