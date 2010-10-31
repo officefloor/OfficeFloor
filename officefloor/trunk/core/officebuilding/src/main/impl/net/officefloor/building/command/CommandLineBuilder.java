@@ -24,8 +24,15 @@ import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandPa
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -105,6 +112,33 @@ public class CommandLineBuilder {
 		this.addOption(
 				ProcessNameOfficeFloorCommandParameter.PARAMTER_PROCESS_NAME,
 				processName);
+	}
+
+	/**
+	 * Adds invoking a {@link Task}.
+	 * 
+	 * @param officeName
+	 *            {@link Office} name.
+	 * @param workName
+	 *            {@link Work} name.
+	 * @param taskName
+	 *            {@link Task} name. May be <code>null</code> to use initial
+	 *            {@link Task} of {@link Work}.
+	 * @param parameterValue
+	 *            Parameter value. May be <code>null</code>.
+	 */
+	public void addInvokeTask(String officeName, String workName,
+			String taskName, String parameterValue) {
+		this.addOption(
+				OfficeNameOfficeFloorCommandParameter.PARAMETER_OFFICE_NAME,
+				officeName);
+		this.addOption(WorkNameOfficeFloorCommandParameter.PARAMETER_WORK_NAME,
+				workName);
+		this.addOption(TaskNameOfficeFloorCommandParameter.PARAMETER_TASK_NAME,
+				taskName);
+		this.addOption(
+				ParameterOfficeFloorCommandParameter.PARAMETER_PARAMETER_VALUE,
+				parameterValue);
 	}
 
 	/**

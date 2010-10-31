@@ -23,11 +23,15 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.management.InstanceNotFoundException;
+
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -46,7 +50,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	 * Initiate.
 	 */
 	public OfficeBuildingTest() {
-		super(OfficeBuilding.class);
+		super(OfficeBuilding.class, true);
 	}
 
 	@Override
@@ -164,9 +168,6 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Close the OfficeFloor
 		this.doMain("--process-name " + PROCESS_NAME + " close");
-		// TODO only provide a single close OfficeFloor message
-		out.add("OfficeFloor within process name space '" + PROCESS_NAME
-				+ "' closed");
 		out.add("Closed");
 
 		// Stop the OfficeBuilding
@@ -216,19 +217,86 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				.add("Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
 						+ tempFile.getAbsolutePath());
 
-		// Ensure message written to file
+		// Ensure message written to file (passive team so should be done)
 		String fileContent = this.getFileContents(tempFile);
 		assertEquals("Message should be written to file", MockWork.MESSAGE,
 				fileContent);
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doMain("stop");
-		// TODO do not provide process space massage
-		out.add("OfficeFloor within process name space '" + PROCESS_NAME
-				+ "' closed");
 		out.add("Stopping processes:");
 		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
 		out.add("");
+		out.add("OfficeBuilding stopped");
+
+		// Validate no error and correct output
+		this.assertErr();
+		this.assertOut(out.toArray(new String[out.size()]));
+	}
+
+	/**
+	 * Ensure able to open the {@link OfficeFloor} invoking a {@link Task} and
+	 * stops {@link Process} once {@link Task} complete.
+	 */
+	public void testOpenOfficeFloorInvokingTask() throws Throwable {
+
+		final String PROCESS_NAME = this.getName();
+
+		// Expected output
+		List<String> out = new LinkedList<String>();
+
+		// Start the OfficeBuilding
+		this.doMain("start");
+		out.add(this.officeBuildingStartLine);
+
+		// File
+		File tempFile = File.createTempFile(this.getName(), "txt");
+
+		// Open the OfficeFloor (via an Artifact)
+		String openCommand = "--process-name "
+				+ PROCESS_NAME
+				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+				+ " --office OFFICE" + " --work SECTION.WORK"
+				+ " --task writeMessage" + " --parameter "
+				+ tempFile.getAbsolutePath() + " open";
+		this.doMain(openCommand);
+		out
+				.add("OfficeFloor open under process name space '"
+						+ PROCESS_NAME
+						+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+						+ tempFile.getAbsolutePath() + ")");
+
+		// Wait for office floor to complete
+		try {
+			ProcessManagerMBean manager = OfficeBuildingManager
+					.getProcessManager(
+							null,
+							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
+							PROCESS_NAME);
+			long startTime = System.currentTimeMillis();
+			do {
+				// Allow some time for task to run
+				Thread.sleep(100);
+				if ((System.currentTimeMillis() - startTime) > 5000) {
+					assertOut("Timed out waiting for task to run");
+					fail("Ensure failure as timed out");
+				}
+
+			} while (!manager.isProcessComplete());
+		} catch (UndeclaredThrowableException ex) {
+			// May have already finished and unregistered before check
+			assertTrue(
+					"Check failure should only be because finished and unregistered",
+					ex.getCause() instanceof InstanceNotFoundException);
+		}
+
+		// Ensure message written to file (task ran)
+		String fileContent = this.getFileContents(tempFile);
+		assertEquals("Message should be written to file", MockWork.MESSAGE,
+				fileContent);
+
+		// Stop the OfficeBuilding (ensuring running processes are stopped)
+		this.doMain("stop");
 		out.add("OfficeBuilding stopped");
 
 		// Validate no error and correct output
@@ -269,10 +337,14 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 						"      -a,--artifact <arg>               Artifact to include on the class path",
 						"      -cp,--classpath <arg>             Raw entry to include on the class path",
 						"      -j,--jar <arg>                    Archive to include on the class path",
+						"      -o,--office <arg>                 Name of the Office",
 						"      -of,--officefloor <arg>           Location of the OfficeFloor",
 						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
 						"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+						"      --parameter <arg>                 Parameter for the Task",
 						"      --process-name <arg>              Process name space. Default is Process",
+						"      -t,--task <arg>                   Name of the Task ",
+						"      -w,--work <arg>                   Name of the Work ",
 						"                                                         ",
 						"list : Lists details of the OfficeBuilding/OfficeFloor   ",
 						"     Options:                                            ",

@@ -29,10 +29,15 @@ public class WorkNameOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
+	 * Parameter name for the {@link Work} name.
+	 */
+	public static final String PARAMETER_WORK_NAME = "work";
+
+	/**
 	 * Initiate.
 	 */
 	public WorkNameOfficeFloorCommandParameter() {
-		super("work", "w", "Name of the Work");
+		super(PARAMETER_WORK_NAME, "w", "Name of the Work");
 	}
 
 	/**

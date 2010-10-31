@@ -30,12 +30,19 @@ import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorC
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.console.OfficeBuilding;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -82,6 +89,26 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 */
 	private final ClassPathOfficeFloorCommandParameter classpath = new ClassPathOfficeFloorCommandParameter();
 
+	/**
+	 * {@link Office} name.
+	 */
+	private final OfficeNameOfficeFloorCommandParameter officeName = new OfficeNameOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Work} name.
+	 */
+	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Task} name.
+	 */
+	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
+
+	/**
+	 * Parameter for {@link Task}.
+	 */
+	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
+
 	/*
 	 * ======================= OfficeFloorCommandFactory =====================
 	 */
@@ -110,7 +137,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.processName,
 				this.officeFloorLocation, this.archives, this.artifacts,
-				this.classpath };
+				this.classpath, this.officeName, this.workName, this.taskName,
+				this.parameter };
 	}
 
 	@Override
@@ -172,12 +200,40 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 			arguments.addClassPathEntry(classPathEntry);
 		}
 
+		// Obtain details to invoke a task
+		String officeName = this.officeName.getOfficeName();
+		String workName = this.workName.getWorkName();
+		String taskName = this.taskName.getTaskName();
+		String parameterValue = this.parameter.getParameterValue();
+
+		// Add the invoke task arguments (arguments only added if available)
+		arguments.addInvokeTask(officeName, workName, taskName, parameterValue);
+
 		// TODO provide JVM options
 		String jvmOptions = null;
 
+		// Generate the output suffix
+		StringBuilder outputSuffix = new StringBuilder();
+		if (workName != null) {
+			outputSuffix.append(" for work (office=");
+			outputSuffix.append(officeName);
+			outputSuffix.append(", work=");
+			outputSuffix.append(workName);
+			if (taskName != null) {
+				outputSuffix.append(", task=");
+				outputSuffix.append(taskName);
+			}
+			if (parameterValue != null) {
+				outputSuffix.append(", parameter=");
+				outputSuffix.append(parameterValue);
+			}
+			outputSuffix.append(")");
+		}
+
 		// Create and return managed process to open OfficeFloor
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
-				processName, arguments.getCommandLine(), jvmOptions);
+				processName, arguments.getCommandLine(), jvmOptions,
+				outputSuffix.toString());
 	}
 
 	/**
@@ -212,6 +268,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		private final String jvmOptions;
 
 		/**
+		 * Suffix of output indicating the opening of the {@link OfficeFloor}.
+		 */
+		private final String outputSuffix;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param officeBuildingHost
@@ -224,15 +285,19 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            Arguments to open the {@link OfficeFloor}.
 		 * @param jvmOptions
 		 *            JVM options.
+		 * @param outputSuffix
+		 *            Suffix of output indicating the opening of the
+		 *            {@link OfficeFloor}.
 		 */
 		public OpenManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, String processName, String[] arguments,
-				String jvmOptions) {
+				String jvmOptions, String outputSuffix) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
 			this.processName = processName;
 			this.arguments = arguments;
 			this.jvmOptions = jvmOptions;
+			this.outputSuffix = outputSuffix;
 		}
 
 		/*
@@ -253,8 +318,18 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 							this.officeBuildingPort);
 
 			// Open the OfficeFloor
-			manager.openOfficeFloor(this.processName, this.arguments,
-					this.jvmOptions);
+			String processNamespace = manager.openOfficeFloor(this.processName,
+					this.arguments, this.jvmOptions);
+
+			// Construct message for OfficeFloor
+			StringBuilder message = new StringBuilder();
+			message.append("OfficeFloor open under process name space '");
+			message.append(processNamespace);
+			message.append("'");
+			message.append(this.outputSuffix);
+
+			// Output opened OfficeFloor
+			System.out.println(message.toString());
 		}
 	}
 

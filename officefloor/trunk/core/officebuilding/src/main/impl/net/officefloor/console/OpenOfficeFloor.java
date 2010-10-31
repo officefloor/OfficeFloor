@@ -24,6 +24,7 @@ import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.building.console.OfficeFloorConsoleFactory;
 import net.officefloor.building.console.OfficeFloorConsoleImpl;
+import net.officefloor.building.console.OfficeFloorConsoleMain;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorServiceLoader;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -33,7 +34,34 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OpenOfficeFloor implements OfficeFloorConsoleFactory {
+public final class OpenOfficeFloor implements OfficeFloorConsoleFactory {
+
+	/**
+	 * <p>
+	 * Convenience entrance point for just opening an {@link OfficeFloor}.
+	 * <p>
+	 * This does not configure the environment from
+	 * {@link OfficeFloorConsoleMain#OFFICE_FLOOR_HOME}.
+	 * 
+	 * @param arguments
+	 *            Arguments to open the {@link OfficeFloor}.
+	 * @throws Throwable
+	 *             If fails to open the {@link OfficeFloor}.
+	 */
+	public static void main(String[] arguments) throws Throwable {
+
+		// Obtain the environment
+		Properties environment = new Properties();
+		environment.putAll(System.getProperties());
+
+		// Create the console
+		OfficeFloorConsole console = new OpenOfficeFloor()
+				.createOfficeFloorConsole(
+						OpenOfficeFloor.class.getSimpleName(), environment);
+
+		// Open the OfficeFloor
+		console.run(System.out, System.err, null, null, arguments);
+	}
 
 	/**
 	 * Indicates if to open the {@link OfficeFloor} within a spawned
@@ -74,7 +102,7 @@ public class OpenOfficeFloor implements OfficeFloorConsoleFactory {
 
 		// Only able to open the OfficeFloor
 		OfficeFloorCommandFactory[] commandFactories = new OfficeFloorCommandFactory[] { new OpenOfficeFloorCommand(
-				this.isOpenInSpawnedProcess) };
+				this.isOpenInSpawnedProcess, !this.isOpenInSpawnedProcess) };
 
 		// Obtain the decorators
 		OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader

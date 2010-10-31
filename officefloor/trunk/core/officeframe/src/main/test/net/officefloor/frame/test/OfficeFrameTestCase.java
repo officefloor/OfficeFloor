@@ -107,6 +107,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		} catch (TestFail ex) {
 			// Propagate cause of wrapper
 			throw ex.getCause();
+		} finally {
+			// Provide start of verbose output
+			if (this.isVerbose) {
+				System.out.println("++++++++++++++++++++++++++ END:"
+						+ this.getName() + " ++++++++++++++++++++++++++");
+			}
 		}
 	}
 
@@ -1010,6 +1016,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public void setVerbose(boolean isVerbose) {
 		this.isVerbose = isVerbose;
+
+		// Provide start of verbose output
+		if (this.isVerbose) {
+			System.out.println("++++++++++++++++++++++++++ START:"
+					+ this.getName() + " ++++++++++++++++++++++++++");
+		}
 	}
 
 	/**

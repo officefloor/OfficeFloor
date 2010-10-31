@@ -29,10 +29,15 @@ public class OfficeNameOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
+	 * Parameter name to obtain the {@link Office} name.
+	 */
+	public static final String PARAMETER_OFFICE_NAME = "office";
+
+	/**
 	 * Initiate.
 	 */
 	public OfficeNameOfficeFloorCommandParameter() {
-		super("office", "o", "Name of the Office");
+		super(PARAMETER_OFFICE_NAME, "o", "Name of the Office");
 	}
 
 	/**
