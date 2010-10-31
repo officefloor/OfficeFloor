@@ -343,6 +343,12 @@ public class ProcessManager implements ProcessManagerMBean {
 			processName = DEFAULT_PROCESS_NAME;
 		}
 
+		// Obtain the MBean Server
+		MBeanServer mbeanServer = configuration.getMbeanServer();
+		if (mbeanServer == null) {
+			mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		}
+
 		// Obtain the unique MBean name space
 		String mbeanNamespace = processName;
 		synchronized (activeMBeanNamespaces) {
@@ -358,43 +364,28 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		ProcessManager processManager;
 		try {
-			// Create the from process communication pipe
-			ServerSocket fromProcessServerSocket = new ServerSocket();
-			fromProcessServerSocket.bind(null); // bind to any available port
-			int fromProcessPort = fromProcessServerSocket.getLocalPort();
 
 			// Invoke the process
 			ProcessBuilder builder = new ProcessBuilder(command);
 			Process process = builder.start();
 
+			// Gobble the process's stdout and stderr
+			new StreamGobbler(process.getInputStream()).start();
+			new StreamGobbler(process.getErrorStream()).start();
+
 			// Obtain the process completion listener
 			ProcessCompletionListener completionListener = configuration
 					.getProcessCompletionListener();
-
-			// Obtain the MBean Server
-			MBeanServer mbeanServer = configuration.getMbeanServer();
-			if (mbeanServer == null) {
-				mbeanServer = ManagementFactory.getPlatformMBeanServer();
-			}
 
 			// Create the process manager for the process
 			processManager = new ProcessManager(processName, mbeanNamespace,
 					process, completionListener, mbeanServer);
 
-			// Notify starting listener (if one provided)
-			ProcessStartListener startListener = configuration
-					.getProcessStartListener();
-			if (startListener != null) {
-				startListener.processStarted(processManager);
-			}
-
-			// Gobble the process's stdout and stderr
-			new StreamGobbler(process.getInputStream()).start();
-			new StreamGobbler(process.getErrorStream()).start();
-
 			// Handle process responses
-			new ProcessNotificationHandler(processManager,
-					fromProcessServerSocket).start();
+			ProcessNotificationHandler handler = new ProcessNotificationHandler(
+					processManager);
+			int fromProcessPort = handler.getFromProcessPort();
+			handler.start();
 
 			// Send managed process and response port to process
 			ObjectOutputStream toProcessPipe = new ObjectOutputStream(process
@@ -403,6 +394,13 @@ public class ProcessManager implements ProcessManagerMBean {
 			toProcessPipe.writeObject(managedProcess);
 			toProcessPipe.writeInt(fromProcessPort);
 			toProcessPipe.flush();
+
+			// Notify starting listener (if one provided)
+			ProcessStartListener startListener = configuration
+					.getProcessStartListener();
+			if (startListener != null) {
+				startListener.processStarted(processManager);
+			}
 
 		} catch (IOException ex) {
 			// Propagate failure
@@ -786,17 +784,32 @@ public class ProcessManager implements ProcessManagerMBean {
 		 * 
 		 * @param processManager
 		 *            {@link ProcessManager}.
-		 * @param fromProcessServerSocket
-		 *            {@link ServerSocket} to receive {@link ProcessResponse}
-		 *            instances.
 		 */
-		public ProcessNotificationHandler(ProcessManager processManager,
-				ServerSocket fromProcessServerSocket) {
+		public ProcessNotificationHandler(ProcessManager processManager)
+				throws IOException {
 			this.processManager = processManager;
-			this.fromProcessServerSocket = fromProcessServerSocket;
+
+			// Create the from process communication pipe.
+			// Must synchronise as used by another Thread.
+			synchronized (this) {
+				// Bind socket on any available port for listening to shell
+				this.fromProcessServerSocket = new ServerSocket();
+				fromProcessServerSocket.bind(null);
+			}
 
 			// Flag as daemon (should not stop process finishing)
 			this.setDaemon(true);
+		}
+
+		/**
+		 * Obtains the {@link ServerSocket} port to receive
+		 * {@link ProcessResponse} instances.
+		 * 
+		 * @return {@link ServerSocket} port to receive {@link ProcessResponse}
+		 *         instances.
+		 */
+		public synchronized int getFromProcessPort() {
+			return this.fromProcessServerSocket.getLocalPort();
 		}
 
 		/*
@@ -804,7 +817,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		 */
 
 		@Override
-		public void run() {
+		public synchronized void run() {
 			try {
 				// Accept only the first connection (from process)
 				Socket socket = this.fromProcessServerSocket.accept();
@@ -889,7 +902,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 			} catch (Throwable ex) {
 				// Indicate failure, as not process complete
-				ex.printStackTrace();
+				this.processManager.setProcessShellFailure(ex);
 
 			} finally {
 				// Flag that process is now complete
@@ -922,7 +935,11 @@ public class ProcessManager implements ProcessManagerMBean {
 		 *            {@link InputStream} to gobble.
 		 */
 		public StreamGobbler(InputStream stream) {
-			this.stream = stream;
+
+			// Must synchronize as used by another Thread
+			synchronized (this) {
+				this.stream = stream;
+			}
 
 			// Flag as deamon (should not stop process finishing)
 			this.setDaemon(true);
@@ -933,7 +950,7 @@ public class ProcessManager implements ProcessManagerMBean {
 		 */
 
 		@Override
-		public void run() {
+		public synchronized void run() {
 			try {
 				// Consume from stream until EOF
 				for (int value = this.stream.read(); value != -1; value = this.stream

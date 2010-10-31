@@ -235,8 +235,6 @@ public class OfficeFloorManager implements ManagedProcess,
 
 		// OfficeFloor now open
 		this.isOpen = true;
-		System.out.println("OfficeFloor open under process name space '"
-				+ this.context.getProcessNamespace() + "'");
 
 		// Ensure close OfficeFloor
 		try {
@@ -258,21 +256,6 @@ public class OfficeFloorManager implements ManagedProcess,
 			} else {
 				// Invoke the work and stop once the work is complete
 				for (WorkState workState : this.workStates) {
-
-					// Output invoking the work
-					System.out
-							.println("Invoking work "
-									+ workState.workName
-									+ (workState.taskName == null ? ""
-											: " (task " + workState.taskName
-													+ ")")
-									+ " on office "
-									+ workState.officeName
-									+ (workState.parameter == null ? ""
-											: " with parameter "
-													+ workState.parameter));
-
-					// Invoke the work
 					workState.invoke(this.officeFloor);
 				}
 
@@ -306,8 +289,6 @@ public class OfficeFloorManager implements ManagedProcess,
 			// Close the OfficeFloor
 			this.officeFloor.closeOfficeFloor();
 			this.isOpen = false;
-			System.out.println("OfficeFloor within process name space '"
-					+ this.context.getProcessNamespace() + "' closed");
 		}
 	}
 

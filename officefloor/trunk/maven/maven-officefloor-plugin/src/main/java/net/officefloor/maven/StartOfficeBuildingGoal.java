@@ -21,8 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
-import net.officefloor.main.OfficeBuildingMain;
+import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,7 +65,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Ensure have configured values
 		assertNotNull("Must have project", this.project);
 		assertNotNull("Port not configured for the "
-				+ OfficeBuildingMain.class.getSimpleName(), this.port);
+				+ OfficeBuilding.class.getSimpleName(), this.port);
 
 		// Obtain the remote repository URLs
 		String[] remoteRepositoryURLs;
@@ -79,17 +81,23 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 					"Failed obtaining Remote Repository URLs", ex);
 		}
 
-		// Obtain the properties for the project
-		Properties properties = this.project.getProperties();
+		// Create the environment properties
+		Properties environment = new Properties();
+		environment.putAll(this.project.getProperties());
+		environment
+				.put(
+						RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
+						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
+								.transformForParameterValue(remoteRepositoryURLs));
 
 		// Start the OfficeBuilding
 		try {
 			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
-					null, remoteRepositoryURLs, properties, null);
+					environment, null);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
-					+ OfficeBuildingMain.class.getSimpleName();
+					+ OfficeBuilding.class.getSimpleName();
 			this.getLog().error(
 					MESSAGE + ": " + ex.getMessage() + " ["
 							+ ex.getClass().getSimpleName() + "]");
@@ -103,7 +111,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Log started OfficeBuilding
 		this.getLog().info(
-				"Started " + OfficeBuildingMain.class.getSimpleName()
-						+ " on port " + this.port.intValue());
+				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
+						+ this.port.intValue());
 	}
 }

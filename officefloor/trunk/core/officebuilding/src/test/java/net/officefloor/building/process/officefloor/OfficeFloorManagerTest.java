@@ -25,20 +25,20 @@ import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link OfficeFloorManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorManagerTest extends TestCase {
+public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures the {@link OfficeFloor} configuration is correct by running it.
@@ -86,6 +86,8 @@ public class OfficeFloorManagerTest extends TestCase {
 		// Run process ensuring it completes
 		ProcessManager manager = ProcessManager.startProcess(managedProcess,
 				null);
+
+		// Waiting until OfficeFloor completes
 		OfficeBuildingTestUtil.waitUntilProcessComplete(manager);
 
 		// Validate content in file

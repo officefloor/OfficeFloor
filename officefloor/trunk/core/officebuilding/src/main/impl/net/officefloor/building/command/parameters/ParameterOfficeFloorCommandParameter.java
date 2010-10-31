@@ -28,10 +28,15 @@ public class ParameterOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
+	 * Parameter name for the parameter value.
+	 */
+	public static final String PARAMETER_PARAMETER_VALUE = "parameter";
+
+	/**
 	 * Initiate.
 	 */
 	public ParameterOfficeFloorCommandParameter() {
-		super("parameter", null, "Parameter for the Task");
+		super(PARAMETER_PARAMETER_VALUE, null, "Parameter for the Task");
 	}
 
 	/**

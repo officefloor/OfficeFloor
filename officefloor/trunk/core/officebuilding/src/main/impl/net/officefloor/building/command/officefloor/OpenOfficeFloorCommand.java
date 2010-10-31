@@ -34,6 +34,8 @@ import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommand
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -150,14 +152,23 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	private final boolean isSpawn;
 
 	/**
+	 * Indicates if report on open/close of {@link OfficeFloor}.
+	 */
+	private final boolean isReportOpenClose;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param isSpawn
 	 *            <code>true</code> if {@link OfficeFloor} is to be opened
 	 *            within a spawned {@link Process}.
+	 * @param isReportOpenClose
+	 *            <code>true</code> to report on open/close of
+	 *            {@link OfficeFloor}.
 	 */
-	public OpenOfficeFloorCommand(boolean isSpawn) {
+	public OpenOfficeFloorCommand(boolean isSpawn, boolean isReportOpenClose) {
 		this.isSpawn = isSpawn;
+		this.isReportOpenClose = isReportOpenClose;
 	}
 
 	/*
@@ -171,7 +182,7 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 
 	@Override
 	public OfficeFloorCommand createCommand() {
-		return new OpenOfficeFloorCommand(this.isSpawn);
+		return new OpenOfficeFloorCommand(this.isSpawn, this.isReportOpenClose);
 	}
 
 	/*
@@ -221,29 +232,137 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 		environment.setSpawnProcess(this.isSpawn);
 
 		// Specify the process name
-		environment.setProcessName(this.processName.getProcessName());
+		String processName = this.processName.getProcessName();
+		environment.setProcessName(processName);
 
 		// Create the managed process to open the office floor
 		String officeFloorLocation = this.officeFloorLocation
 				.getOfficeFloorLocation();
-		OfficeFloorManager managedProcess = new OfficeFloorManager(
+		OfficeFloorManager officeFloorManager = new OfficeFloorManager(
 				officeFloorLocation);
 
 		// Obtain details of the possible task to open
 		String officeName = this.officeName.getOfficeName();
 		String workName = this.workName.getWorkName();
 		String taskName = this.taskName.getTaskName();
-		String parameter = this.parameter.getParameterValue();
+		String parameterValue = this.parameter.getParameterValue();
 
 		// Determine if invoking task (by checking work name provided)
 		if (workName != null) {
 			// Invoke the task
-			managedProcess
-					.invokeTask(officeName, workName, taskName, parameter);
+			officeFloorManager.invokeTask(officeName, workName, taskName,
+					parameterValue);
+		}
+
+		// Report progress on running locally (not spawned in another process)
+		ManagedProcess managedProcess;
+		if (this.isReportOpenClose) {
+
+			// Ensure have process name
+			processName = (processName == null ? ProcessManager.DEFAULT_PROCESS_NAME
+					: processName);
+
+			// Obtain the open message
+			StringBuilder openMessage = new StringBuilder();
+			openMessage
+					.append("Opening OfficeFloor within process name space '");
+			openMessage.append(processName);
+			openMessage.append("'");
+			if (workName != null) {
+				openMessage.append(" for work (office=");
+				openMessage.append(officeName);
+				openMessage.append(", work=");
+				openMessage.append(workName);
+				if (taskName != null) {
+					openMessage.append(", task=");
+					openMessage.append(taskName);
+				}
+				if (parameterValue != null) {
+					openMessage.append(", parameter=");
+					openMessage.append(parameterValue);
+				}
+				openMessage.append(")");
+			}
+
+			// Obtain the close message
+			String successMessage = "OfficeFloor within process name space '"
+					+ processName + "' closed";
+
+			// Wrap for reporting
+			managedProcess = new ReportManagedProcess(officeFloorManager,
+					openMessage.toString(), successMessage);
+
+		} else {
+			// No reporting so use directly
+			managedProcess = officeFloorManager;
 		}
 
 		// Return the managed process
 		return managedProcess;
+	}
+
+	/**
+	 * {@link ManagedProcess} to provide output regarding progress of the
+	 * {@link OfficeFloorManager} {@link ManagedProcess}.
+	 */
+	public static class ReportManagedProcess implements ManagedProcess {
+
+		/**
+		 * Delegate {@link ManagedProcess}.
+		 */
+		private final ManagedProcess delegate;
+
+		/**
+		 * Message to output on starting the {@link ManagedProcess}.
+		 */
+		private final String startMessage;
+
+		/**
+		 * Message to output on successful completion of the
+		 * {@link ManagedProcess}.
+		 */
+		private final String successMessage;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link ManagedProcess}.
+		 * @param startMessage
+		 *            Message to output on starting the {@link ManagedProcess}.
+		 * @param successMessage
+		 *            Message to output on successful completion of the
+		 *            {@link ManagedProcess}.
+		 */
+		public ReportManagedProcess(ManagedProcess delegate,
+				String startMessage, String successMessage) {
+			this.delegate = delegate;
+			this.startMessage = startMessage;
+			this.successMessage = successMessage;
+		}
+
+		/*
+		 * ====================== ManagedProcess =========================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			// Initialise delegate
+			this.delegate.init(context);
+		}
+
+		@Override
+		public void main() throws Throwable {
+
+			// Output the start message
+			System.out.println(this.startMessage);
+
+			// Run the delegate
+			this.delegate.main();
+
+			// As here completed successfully, so output success message
+			System.out.println(this.successMessage);
+		}
 	}
 
 }

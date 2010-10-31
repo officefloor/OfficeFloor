@@ -38,14 +38,25 @@ public abstract class AbstractConsoleMainTestCase extends
 	private final Class<? extends OfficeFloorConsoleFactory> consoleFactoryClass;
 
 	/**
+	 * Flag indicating if to ensure the {@link OfficeBuilding} is not running on
+	 * setup.
+	 */
+	private final boolean isEnsureOfficeBuildingNotRunningForTest;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param consoleFactoryClass
 	 *            {@link OfficeFloorConsoleFactory} class.
+	 * @param isEnsureOfficeBuildingNotRunningForTest
+	 *            Flag indicating if to ensure the {@link OfficeBuilding} is not
+	 *            running on setup.
 	 */
 	public AbstractConsoleMainTestCase(
-			Class<? extends OfficeFloorConsoleFactory> consoleFactoryClass) {
+			Class<? extends OfficeFloorConsoleFactory> consoleFactoryClass,
+			boolean isEnsureOfficeBuildingNotRunningForTest) {
 		this.consoleFactoryClass = consoleFactoryClass;
+		this.isEnsureOfficeBuildingNotRunningForTest = isEnsureOfficeBuildingNotRunningForTest;
 	}
 
 	@Override
@@ -62,12 +73,14 @@ public abstract class AbstractConsoleMainTestCase extends
 				officeFloorHome.getAbsolutePath());
 
 		// Ensure OfficeBuilding not running (before output to pipes)
-		try {
-			this.doMain("stop");
-		} catch (Throwable ex) {
-			// Ignore failure to stop office
-			System.err
-					.println("NOTE: Ignore previous error as ensuring OfficeBuilding not running.");
+		if (this.isEnsureOfficeBuildingNotRunningForTest) {
+			try {
+				this.doMain("stop");
+			} catch (Throwable ex) {
+				// Ignore failure to stop office
+				System.err
+						.println("NOTE: Ignore previous error as ensuring OfficeBuilding not running.");
+			}
 		}
 
 		// Setup pipes

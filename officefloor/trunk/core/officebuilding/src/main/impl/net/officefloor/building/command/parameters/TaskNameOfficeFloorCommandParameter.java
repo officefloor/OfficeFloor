@@ -29,10 +29,15 @@ public class TaskNameOfficeFloorCommandParameter extends
 		AbstractSingleValueOfficeFloorCommandParameter {
 
 	/**
+	 * Parameter name for the {@link Task} name.
+	 */
+	public static final String PARAMETER_TASK_NAME = "task";
+
+	/**
 	 * Initiate.
 	 */
 	public TaskNameOfficeFloorCommandParameter() {
-		super("task", "t", "Name of the Task");
+		super(PARAMETER_TASK_NAME, "t", "Name of the Task");
 	}
 
 	/**

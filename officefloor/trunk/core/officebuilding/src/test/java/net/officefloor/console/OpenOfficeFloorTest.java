@@ -36,7 +36,7 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 	 * Initiate.
 	 */
 	public OpenOfficeFloorTest() {
-		super(OpenOfficeFloor.class);
+		super(OpenOfficeFloor.class, false);
 	}
 
 	/**
@@ -62,11 +62,11 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				+ tempFile.getAbsolutePath()
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor";
 		this.doMain(openCommand);
-		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
-				+ "'");
 		out
-				.add("Invoking work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
-						+ tempFile.getAbsolutePath());
+				.add("Opening OfficeFloor within process name space '"
+						+ PROCESS_NAME
+						+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+						+ tempFile.getAbsolutePath() + ")");
 		out.add("OfficeFloor within process name space '" + PROCESS_NAME
 				+ "' closed");
 

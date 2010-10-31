@@ -19,7 +19,7 @@ package net.officefloor.maven;
 
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
-import net.officefloor.main.OfficeBuildingMain;
+import net.officefloor.console.OfficeBuilding;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -57,7 +57,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 
 		// Ensure have required values
 		assertNotNull("Port not configured for the "
-				+ OfficeBuildingMain.class.getSimpleName(), this.port);
+				+ OfficeBuilding.class.getSimpleName(), this.port);
 
 		// Ensure default non-required values
 		long stopWaitTime = defaultValue(this.waitTime, new Long(10000))
@@ -70,7 +70,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 					.getOfficeBuildingManager(null, this.port.intValue());
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed accessing the "
-					+ OfficeBuildingMain.class.getSimpleName(), ex);
+					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
 		// Stop the OfficeBuilding
@@ -78,12 +78,12 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 			officeBuildingManager.stopOfficeBuilding(stopWaitTime);
 		} catch (Throwable ex) {
 			throw new MojoExecutionException("Failed stopping the "
-					+ OfficeBuildingMain.class.getSimpleName(), ex);
+					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
 		// Log started OfficeBuilding
 		this.getLog().info(
-				"Stopped the " + OfficeBuildingMain.class.getSimpleName()
+				"Stopped the " + OfficeBuilding.class.getSimpleName()
 						+ " running on port " + this.port.intValue());
 	}
 
