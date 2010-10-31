@@ -209,9 +209,6 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		// Add the invoke task arguments (arguments only added if available)
 		arguments.addInvokeTask(officeName, workName, taskName, parameterValue);
 
-		// TODO provide JVM options
-		String jvmOptions = null;
-
 		// Generate the output suffix
 		StringBuilder outputSuffix = new StringBuilder();
 		if (workName != null) {
@@ -232,8 +229,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 		// Create and return managed process to open OfficeFloor
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
-				processName, arguments.getCommandLine(), jvmOptions,
-				outputSuffix.toString());
+				arguments.getCommandLine(), outputSuffix.toString());
 	}
 
 	/**
@@ -253,19 +249,9 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		private final int officeBuildingPort;
 
 		/**
-		 * {@link ManagedProcess} name.
-		 */
-		private final String processName;
-
-		/**
 		 * Arguments to open the {@link OfficeFloor}.
 		 */
 		private final String[] arguments;
-
-		/**
-		 * JVM options.
-		 */
-		private final String jvmOptions;
 
 		/**
 		 * Suffix of output indicating the opening of the {@link OfficeFloor}.
@@ -279,24 +265,17 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		 *            {@link OfficeBuilding} host.
 		 * @param officeBuildingPort
 		 *            {@link OfficeBuilding} port.
-		 * @param processName
-		 *            {@link ManagedProcess} name.
 		 * @param arguments
 		 *            Arguments to open the {@link OfficeFloor}.
-		 * @param jvmOptions
-		 *            JVM options.
 		 * @param outputSuffix
 		 *            Suffix of output indicating the opening of the
 		 *            {@link OfficeFloor}.
 		 */
 		public OpenManagedProcess(String officeBuildingHost,
-				int officeBuildingPort, String processName, String[] arguments,
-				String jvmOptions, String outputSuffix) {
+				int officeBuildingPort, String[] arguments, String outputSuffix) {
 			this.officeBuildingHost = officeBuildingHost;
 			this.officeBuildingPort = officeBuildingPort;
-			this.processName = processName;
 			this.arguments = arguments;
-			this.jvmOptions = jvmOptions;
 			this.outputSuffix = outputSuffix;
 		}
 
@@ -318,8 +297,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 							this.officeBuildingPort);
 
 			// Open the OfficeFloor
-			String processNamespace = manager.openOfficeFloor(this.processName,
-					this.arguments, this.jvmOptions);
+			String processNamespace = manager.openOfficeFloor(this.arguments);
 
 			// Construct message for OfficeFloor
 			StringBuilder message = new StringBuilder();

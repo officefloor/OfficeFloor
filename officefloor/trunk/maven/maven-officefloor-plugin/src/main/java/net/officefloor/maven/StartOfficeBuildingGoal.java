@@ -77,7 +77,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			}
 			remoteRepositoryURLs = urls.toArray(new String[0]);
 		} catch (Throwable ex) {
-			throw new MojoExecutionException(
+			throw this.newMojoExecutionException(
 					"Failed obtaining Remote Repository URLs", ex);
 		}
 
@@ -106,7 +106,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 							+ System.getProperty("java.class.path") + "'");
 
 			// Propagate the failure
-			throw new MojoExecutionException(MESSAGE, ex);
+			throw this.newMojoExecutionException(MESSAGE, ex);
 		}
 
 		// Log started OfficeBuilding
@@ -114,4 +114,5 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
 						+ this.port.intValue());
 	}
+
 }

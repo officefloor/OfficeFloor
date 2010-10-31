@@ -112,7 +112,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			officeBuildingManager = OfficeBuildingManager
 					.getOfficeBuildingManager(null, this.port.intValue());
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed accessing the "
+			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
@@ -125,7 +125,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				arguments.addClassPathEntry(element);
 			}
 		} catch (Throwable ex) {
-			throw new MojoExecutionException(
+			throw this.newMojoExecutionException(
 					"Failed creating class path for the "
 							+ OfficeFloor.class.getSimpleName(), ex);
 		}
@@ -133,14 +133,16 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Specify location of OfficeFloor
 		arguments.addOfficeFloor(this.officeFloorLocation);
 
+		// Specify the process name
+		arguments.addProcessName(this.processName);
+
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
-			processNameSpace = officeBuildingManager.openOfficeFloor(
-					this.processName, arguments.getCommandLine(),
-					this.jvmOptions);
+			processNameSpace = officeBuildingManager.openOfficeFloor(arguments
+					.getCommandLine());
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed opening the "
+			throw this.newMojoExecutionException("Failed opening the "
 					+ OfficeFloor.class.getSimpleName(), ex);
 		}
 

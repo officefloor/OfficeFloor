@@ -117,7 +117,7 @@ public class InvokeGoal extends AbstractGoal {
 			manager = OfficeBuildingManager.getOfficeFloorManager(null,
 					this.port.intValue(), this.processName);
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed accessing the "
+			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeFloor.class.getSimpleName(), ex);
 		}
 
@@ -126,15 +126,14 @@ public class InvokeGoal extends AbstractGoal {
 			manager.invokeTask(this.office, this.work, this.task,
 					this.parameter);
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed invoking task "
-					+ referenceName, ex);
+			throw this.newMojoExecutionException("Failed invoking task "
+					+ referenceName + ": " + ex.getMessage(), ex);
 		}
 
 		// Log opened the OfficeFloor
 		this.getLog().info(
 				"Invoked " + referenceName + " in process name space '"
 						+ this.processName + "'");
-
 	}
 
 }
