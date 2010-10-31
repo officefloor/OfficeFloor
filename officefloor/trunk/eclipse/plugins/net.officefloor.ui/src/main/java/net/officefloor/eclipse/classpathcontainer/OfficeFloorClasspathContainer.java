@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.console.OfficeBuilding;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.main.OfficeFloorMain;
 import net.officefloor.plugin.xml.XmlMarshaller;
 import net.officefloor.plugin.xml.XmlOutput;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
@@ -62,7 +62,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	 */
 	private static final Class<?>[] CORE_CLASSES = new Class<?>[] {
 			OfficeFrame.class, OfficeFloorCompiler.class,
-			XmlUnmarshaller.class, OfficeFloorMain.class };
+			XmlUnmarshaller.class, OfficeBuilding.class };
 
 	/**
 	 * {@link IPath} for this {@link OfficeFloorClasspathContainer}.
