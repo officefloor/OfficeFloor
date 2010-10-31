@@ -21,8 +21,8 @@ package net.officefloor.eclipse.launch;
 import java.io.File;
 import java.util.Map;
 
+import net.officefloor.console.OpenOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.main.OfficeFloorMain;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,7 +37,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
 /**
  * {@link ILaunchConfigurationDelegate} for the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorLaunchConfigurationDelegate extends
@@ -61,7 +61,8 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 		IVMRunner runner = this.getVMRunner(configuration, mode);
 
 		// Obtain the main type name
-		String mainTypeName = OfficeFloorMain.class.getName();
+		// TODO validate can open OfficeFloor
+		String mainTypeName = OpenOfficeFloor.class.getName();
 
 		// Create class path
 		String[] classpath = this.getClasspath(configuration);
