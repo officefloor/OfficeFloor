@@ -17,7 +17,6 @@
  */
 package net.officefloor.building.command.officefloor;
 
-import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
@@ -49,56 +48,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  */
 public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 		OfficeFloorCommand {
-
-	/**
-	 * Convenience method to create arguments for running {@link OfficeFloor}
-	 * from an archive.
-	 * 
-	 * @param archiveLocation
-	 *            Location of the archive.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @return Arguments.
-	 */
-	public static String[] createArguments(String archiveLocation,
-			String officeFloorLocation) {
-		CommandLineBuilder arguments = new CommandLineBuilder();
-		arguments.addArchive(archiveLocation);
-		arguments.addOfficeFloor(officeFloorLocation);
-		return arguments.getCommandLine();
-	}
-
-	/**
-	 * Convenience method to create arguments for running {@link OfficeFloor}
-	 * from an artifact.
-	 * 
-	 * @param groupId
-	 *            Group Id of the artifact.
-	 * @param artifactId
-	 *            Artifact Id.
-	 * @param version
-	 *            Version of the artifact.
-	 * @param type
-	 *            Type of artifact.
-	 * @param classifier
-	 *            Classifier for the artifact.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @return Arguments.
-	 */
-	public static String[] createArguments(String groupId, String artifactId,
-			String version, String type, String classifier,
-			String officeFloorLocation) {
-		CommandLineBuilder arguments = new CommandLineBuilder();
-		arguments
-				.addOption(
-						MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
-						MultipleArtifactsOfficeFloorCommandParameter
-								.getArtifactArgumentValue(groupId, artifactId,
-										version, type, classifier));
-		arguments.addOfficeFloor(officeFloorLocation);
-		return arguments.getCommandLine();
-	}
 
 	/**
 	 * Location of the {@link OfficeFloor}.

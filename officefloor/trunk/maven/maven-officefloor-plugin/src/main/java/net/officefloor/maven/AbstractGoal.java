@@ -18,6 +18,7 @@
 package net.officefloor.maven;
 
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -71,6 +72,42 @@ public abstract class AbstractGoal extends AbstractMojo {
 			// Not string and not null so use value
 			return value;
 		}
+	}
+
+	/**
+	 * Creates a new {@link MojoExecutionException}.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param cause
+	 *            Cause.
+	 * @return {@link MojoExecutionException}.
+	 */
+	protected MojoExecutionException newMojoExecutionException(String message,
+			Throwable cause) {
+
+		// Create the message
+		StringBuilder msg = new StringBuilder();
+		msg.append(message);
+
+		// Provide the causes
+		Throwable parent = null;
+		while ((cause != null) && (cause != parent)) {
+
+			// Output the cause
+			msg.append("\n   Caused by ");
+			msg.append(cause.getMessage());
+			msg.append(" [");
+			msg.append(cause.getClass().getSimpleName());
+			msg.append("]");
+
+			// Obtain the cause for the next iteration
+			parent = cause;
+			cause = cause.getCause();
+		}
+
+		// Create and return the Mojo Execution Exception
+		return new MojoExecutionException(msg.toString());
 	}
 
 }

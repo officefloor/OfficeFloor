@@ -32,6 +32,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import junit.framework.TestCase;
+import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
@@ -172,17 +173,20 @@ public class OfficeBuildingManagerTest extends TestCase {
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				String jarName = OfficeBuildingTestUtil
+				CommandLineBuilder arguments = new CommandLineBuilder();
+				arguments.addProcessName(processName);
+				arguments.addOfficeFloor(officeFloorLocation);
+				arguments.addArchive(OfficeBuildingTestUtil
 						.getOfficeFloorArtifactJar("officecompiler")
-						.getAbsolutePath();
-				return buildingManager.openOfficeFloor(processName, jarName,
-						officeFloorLocation, null);
+						.getAbsolutePath());
+				return buildingManager.openOfficeFloor(arguments
+						.getCommandLine());
 			}
 		});
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} with a Artifact.
+	 * Ensure able to open the {@link OfficeFloor} for JMX.
 	 */
 	public void testOfficeFloorArtifactManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
@@ -191,14 +195,15 @@ public class OfficeBuildingManagerTest extends TestCase {
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				return buildingManager
-						.openOfficeFloor(
-								processName,
-								"net.officefloor.core",
-								"officecompiler",
-								OfficeBuildingTestUtil
-										.getOfficeFloorArtifactVersion("officecompiler"),
-								"jar", null, officeFloorLocation, null);
+				CommandLineBuilder arguments = new CommandLineBuilder();
+				arguments.addProcessName(processName);
+				arguments.addOfficeFloor(officeFloorLocation);
+				arguments
+						.addArtifact("net.officefloor.core:officecompiler:"
+								+ OfficeBuildingTestUtil
+										.getOfficeFloorArtifactVersion("officecompiler"));
+				return buildingManager.openOfficeFloor(arguments
+						.getCommandLine());
 			}
 		});
 	}
@@ -206,17 +211,15 @@ public class OfficeBuildingManagerTest extends TestCase {
 	/**
 	 * Ensure able to open the {@link OfficeFloor} with arguments.
 	 */
-	public void testOfficeFloorArgumentsManagement() throws Exception {
+	public void testOfficeFloorJmxManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
 			@Override
 			public String openOfficeFloor(String processName,
 					String officeFloorLocation,
 					OfficeBuildingManagerMBean buildingManager)
 					throws Exception {
-				String[] arguments = new String[] { "--officefloor",
-						officeFloorLocation };
-				return buildingManager.openOfficeFloor(processName, arguments,
-						null);
+				return buildingManager.openOfficeFloor("--officefloor "
+						+ officeFloorLocation);
 			}
 		});
 	}
@@ -362,9 +365,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
-		String processNamespace = buildingManager.openOfficeFloor(this
-				.getName(),
-				new String[] { "--officefloor", officeFloorLocation }, null);
+		String processNamespace = buildingManager
+				.openOfficeFloor("--officefloor " + officeFloorLocation);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager

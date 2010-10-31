@@ -42,7 +42,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import net.officefloor.building.command.officefloor.OpenOfficeFloorCommand;
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessManager;
@@ -402,33 +401,17 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	@Override
-	public String openOfficeFloor(String processName, String jarName,
-			String officeFloorLocation, String jvmOptions) throws Exception {
+	public String openOfficeFloor(String arguments) throws Exception {
 
-		// Create the arguments to open the OfficeFloor
-		String[] arguments = OpenOfficeFloorCommand.createArguments(jarName,
-				officeFloorLocation);
+		// Split out the arguments
+		String[] argumentEntries = arguments.trim().split("\\s+");
 
 		// Open the OfficeFloor
-		return this.openOfficeFloor(processName, arguments, jvmOptions);
+		return this.openOfficeFloor(argumentEntries);
 	}
 
 	@Override
-	public String openOfficeFloor(String processName, String groupId,
-			String artifactId, String version, String type, String classifier,
-			String officeFloorLocation, String jvmOptions) throws Exception {
-
-		// Create the arguments to open the OfficeFloor
-		String[] arguments = OpenOfficeFloorCommand.createArguments(groupId,
-				artifactId, version, type, classifier, officeFloorLocation);
-
-		// Open the OfficeFloor
-		return this.openOfficeFloor(processName, arguments, jvmOptions);
-	}
-
-	@Override
-	public String openOfficeFloor(String processName, String[] arguments,
-			String jvmOptions) throws Exception {
+	public String openOfficeFloor(String[] arguments) throws Exception {
 
 		// Ensure the OfficeBuilding is open
 		synchronized (this) {
@@ -439,7 +422,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 
 		// Create the console to open OfficeFloor in spawned process
 		OfficeFloorConsole console = new OpenOfficeFloor(true)
-				.createOfficeFloorConsole(processName, this.environment);
+				.createOfficeFloorConsole("JMX", this.environment);
 
 		// Handle to load the process manager
 		final ProcessManagerMBean[] manager = new ProcessManagerMBean[1];

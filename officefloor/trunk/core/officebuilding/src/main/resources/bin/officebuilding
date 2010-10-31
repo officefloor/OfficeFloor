@@ -3,24 +3,27 @@
 # Fail immediately
 set -e
 
-# Default OFFICE_BUILDING_HOME to bin/..
-if [ -z ${OFFICE_BUILDING_HOME} ]; then
-	# Move to OFFICE_BUILDING_HOME directory
+# Default OFFICE_FLOOR_HOME to bin/..
+if [ -z ${OFFICE_FLOOR_HOME} ]; then
+	# Move to OFFICE_FLOOR_HOME directory
 	SCRIPT=`readlink -f $0`
 	BIN_DIR=`dirname $SCRIPT`
 	cd ${BIN_DIR}/..
 
-	# Obtain the OFFICE_BUILDING_HOME location
-	export OFFICE_BUILDING_HOME=$PWD
+	# Obtain the OFFICE_FLOOR_HOME location
+	export OFFICE_FLOOR_HOME=$PWD
 fi
 
-# Execute from OFFICE_BUILDING_HOME
-cd ${OFFICE_BUILDING_HOME}
+# Execute from OFFICE_FLOOR_HOME
+cd ${OFFICE_FLOOR_HOME}
 
-# Run OfficeBuilding
+# Run OfficeFloor
 java \
 	${OFFICE_BUILDING_JVM_OPTIONS} \
 	-cp lib/boot.jar \
 	net.officefloor.bootstrap.Bootstrap \
-	net.officefloor.main.OfficeBuildingMain \
+	net.officefloor.building.console.OfficeFloorConsoleMain \
+	$0 \
+	net.officefloor.console.OfficeBuilding \
+	run \
 	$@

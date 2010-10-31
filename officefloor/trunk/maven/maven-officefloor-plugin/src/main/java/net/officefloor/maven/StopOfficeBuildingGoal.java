@@ -69,7 +69,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 			officeBuildingManager = OfficeBuildingManager
 					.getOfficeBuildingManager(null, this.port.intValue());
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed accessing the "
+			throw this.newMojoExecutionException("Failed accessing the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
@@ -77,7 +77,7 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 		try {
 			officeBuildingManager.stopOfficeBuilding(stopWaitTime);
 		} catch (Throwable ex) {
-			throw new MojoExecutionException("Failed stopping the "
+			throw this.newMojoExecutionException("Failed stopping the "
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 

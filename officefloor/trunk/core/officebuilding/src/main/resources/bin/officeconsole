@@ -3,24 +3,6 @@
 # Fail immediately
 set -e
 
-# Default OFFICE_BUILDING_HOME to bin/..
-if [ -z ${OFFICE_BUILDING_HOME} ]; then
-	# Move to OFFICE_BUILDING_HOME directory
-	SCRIPT=`readlink -f $0`
-	BIN_DIR=`dirname $SCRIPT`
-	cd ${BIN_DIR}/..
-
-	# Obtain the OFFICE_BUILDING_HOME location
-	export OFFICE_BUILDING_HOME=$PWD
-fi
-
-# Execute from OFFICE_BUILDING_HOME
-cd ${OFFICE_BUILDING_HOME}
-
-# Run OfficeFloor
-java \
-	${OFFICE_BUILDING_JVM_OPTIONS} \
-	-cp lib/boot.jar \
-	net.officefloor.bootstrap.Bootstrap \
-	net.officefloor.main.OfficeFloorMain \
-	$@
+# TODO implement to call OfficeFloorConsoleMain with start
+echo "TODO implement to call OfficeFloorConsoleMain with start"
+exit 1
