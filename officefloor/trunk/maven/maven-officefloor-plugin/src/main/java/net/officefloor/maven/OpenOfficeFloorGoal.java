@@ -78,7 +78,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 * 
 	 * @parameter
 	 */
-	private String jvmOptions;
+	private String[] jvmOptions;
 
 	/**
 	 * Indicates whether to provide verbose output.
@@ -104,7 +104,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Ensure default non-required values
 		this.processName = defaultValue(this.processName, DEFAULT_PROCESS_NAME);
-		this.jvmOptions = defaultValue(this.jvmOptions, null);
 
 		// Obtain the OfficeBuilding manager
 		OfficeBuildingManagerMBean officeBuildingManager;
@@ -136,6 +135,13 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Specify the process name
 		arguments.addProcessName(this.processName);
 
+		// Provide JVM options (if specified)
+		if (this.jvmOptions != null) {
+			for (String jvmOption : this.jvmOptions) {
+				arguments.addJvmOption(jvmOption);
+			}
+		}
+
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
@@ -163,5 +169,4 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			this.getLog().info(message.toString());
 		}
 	}
-
 }
