@@ -186,9 +186,25 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		// Create command and expected to spawn
 		MockCommand command = this.createCommand("test", null);
 		command.setSpawn(true);
+		command.addJvmOption("-Done=a");
+		command.addJvmOption("-Dtwo=b");
 
 		// Test
-		this.doTest(command, null, true);
+		OfficeFloorExecutionUnit executionUnit = this.doTest(command, null,
+				true);
+
+		// Ensure will spawn
+		assertTrue("Should spawn process", executionUnit.isSpawnProcess());
+
+		// Ensure correct configuration
+		ProcessConfiguration configuration = executionUnit
+				.getProcessConfiguration();
+		assertEquals("Incorrect process name", "test", configuration
+				.getProcessName());
+		String[] jvmOptions = configuration.getJvmOptions();
+		assertEquals("Incorrect number of JVM options", 2, jvmOptions.length);
+		assertEquals("Incorrect first JVM option", "-Done=a", jvmOptions[0]);
+		assertEquals("Incorrect second JVM option", "-Dtwo=b", jvmOptions[1]);
 	}
 
 	/**

@@ -22,6 +22,7 @@ import java.util.List;
 
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
@@ -112,6 +113,18 @@ public class CommandLineBuilder {
 		this.addOption(
 				ProcessNameOfficeFloorCommandParameter.PARAMTER_PROCESS_NAME,
 				processName);
+	}
+
+	/**
+	 * Adds a JVM option.
+	 * 
+	 * @param jvmOption
+	 *            JVM option.
+	 */
+	public void addJvmOption(String jvmOption) {
+		this.addOption(
+				JvmOptionOfficeFloorCommandParameter.PARAMETER_JVM_OPTION,
+				jvmOption);
 	}
 
 	/**

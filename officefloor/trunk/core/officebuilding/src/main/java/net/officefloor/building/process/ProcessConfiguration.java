@@ -18,6 +18,9 @@
 
 package net.officefloor.building.process;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.management.MBeanServer;
 
 /**
@@ -44,7 +47,7 @@ public final class ProcessConfiguration {
 	/**
 	 * JVM options for the {@link Process}.
 	 */
-	private String jvmOptions = null;
+	private List<String> jvmOptions = new LinkedList<String>();
 
 	/**
 	 * {@link ProcessStartListener}.
@@ -104,18 +107,18 @@ public final class ProcessConfiguration {
 	 * 
 	 * @return JVM options for the {@link Process}.
 	 */
-	public String getJvmOptions() {
-		return this.jvmOptions;
+	public String[] getJvmOptions() {
+		return this.jvmOptions.toArray(new String[this.jvmOptions.size()]);
 	}
 
 	/**
-	 * Specifies the JVM options for the {@link Process}.
+	 * Adds a JVM options for the {@link Process}.
 	 * 
-	 * @param jvmOptions
-	 *            JVM options for the {@link Process}.
+	 * @param jvmOption
+	 *            JVM option for the {@link Process}.
 	 */
-	public void setJvmOptions(String jvmOptions) {
-		this.jvmOptions = jvmOptions;
+	public void addJvmOption(String jvmOption) {
+		this.jvmOptions.add(jvmOption);
 	}
 
 	/**

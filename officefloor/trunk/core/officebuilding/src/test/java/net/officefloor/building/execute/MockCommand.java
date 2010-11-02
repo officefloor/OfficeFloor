@@ -96,6 +96,11 @@ public class MockCommand implements OfficeFloorCommand,
 	private boolean isSpawn = false;
 
 	/**
+	 * Listng of JVM options to add to environment.
+	 */
+	private final List<String> jvmOptions = new LinkedList<String>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param commandName
@@ -149,6 +154,16 @@ public class MockCommand implements OfficeFloorCommand,
 	 */
 	public void setSpawn(boolean isSpawn) {
 		this.isSpawn = isSpawn;
+	}
+
+	/**
+	 * Adds a JVM option to be loaded to the environment.
+	 * 
+	 * @param jvmOption
+	 *            JVM option.
+	 */
+	public void addJvmOption(String jvmOption) {
+		this.jvmOptions.add(jvmOption);
 	}
 
 	/**
@@ -249,6 +264,11 @@ public class MockCommand implements OfficeFloorCommand,
 		// Provide process name and whether to spawn
 		environment.setProcessName(this.commandName);
 		environment.setSpawnProcess(this.isSpawn);
+
+		// Provide the JVM option
+		for (String jvmOption : this.jvmOptions) {
+			environment.addJvmOption(jvmOption);
+		}
 
 		// Ensure correct environment
 		for (String name : this.expectedEnvironment.keySet()) {

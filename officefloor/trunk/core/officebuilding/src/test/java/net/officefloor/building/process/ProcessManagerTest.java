@@ -498,8 +498,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Provide the JVM options
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		configuration
-				.setJvmOptions("-Dtest.property1=One -Dtest.property2=Two");
+		configuration.addJvmOption("-Dtest.property1=One");
+		configuration.addJvmOption("-Dtest.property2=Two");
 
 		// Ensure properties not available
 		System.clearProperty("test.property1");

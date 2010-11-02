@@ -330,13 +330,15 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 	 */
 	private void doStartCommand() throws Exception {
 
-		final File waitFile = File.createTempFile(OfficeFloorConsoleTest.class
-				.getSimpleName(), "wait");
+		final File waitFile = File.createTempFile(this.getName(), ".wait");
+		final File resultFile = File.createTempFile(this.getName(), ".result");
 
-		// Run the command (within spawned process)
+		// Run the command (within spawned process and JVM option)
 		MockCommand command = this.createCommand("command");
 		command.setSpawn(true);
 		setWaitFile(command, waitFile);
+		setSystemPropertyCheck(command, "test-jvm-option", resultFile);
+		command.addJvmOption("-Dtest-jvm-option=available");
 		this.run("", command);
 
 		// Process should not be run
@@ -360,6 +362,11 @@ public class OfficeFloorConsoleTest extends AbstractConsoleTestCase {
 			TestCase.assertTrue("Timed out waiting", ((System
 					.currentTimeMillis() - startTime) < 5000));
 		}
+
+		// Ensure JVM option made available
+		String jvmOptionValue = this.getFileContents(resultFile);
+		assertEquals("Should have JVM option system property value",
+				"available", jvmOptionValue);
 	}
 
 	/**

@@ -252,8 +252,12 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		// File
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
-		// Open the OfficeFloor (via an Artifact)
-		String openCommand = "--process-name "
+		// Open the OfficeFloor (via an Artifact).
+		// Use system property to specify office.
+		String openCommand = "--jvm-option -D"
+				+ MockWork.INCLUDE_SYSTEM_PROPERTY
+				+ "=SYS_PROP_TEST"
+				+ " --process-name "
 				+ PROCESS_NAME
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --office OFFICE" + " --work SECTION.WORK"
@@ -292,8 +296,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Ensure message written to file (task ran)
 		String fileContent = this.getFileContents(tempFile);
-		assertEquals("Message should be written to file", MockWork.MESSAGE,
-				fileContent);
+		assertEquals("Message should be written to file", MockWork.MESSAGE
+				+ "SYS_PROP_TEST", fileContent);
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doMain("stop");
@@ -337,6 +341,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 						"      -a,--artifact <arg>               Artifact to include on the class path",
 						"      -cp,--classpath <arg>             Raw entry to include on the class path",
 						"      -j,--jar <arg>                    Archive to include on the class path",
+						"      --jvm-option <arg>                JVM option       ",
 						"      -o,--office <arg>                 Name of the Office",
 						"      -of,--officefloor <arg>           Location of the OfficeFloor",
 						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
