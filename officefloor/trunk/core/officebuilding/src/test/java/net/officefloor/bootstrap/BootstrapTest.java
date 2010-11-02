@@ -40,6 +40,7 @@ import javax.tools.JavaFileObject.Kind;
 
 import junit.framework.TestCase;
 import net.officefloor.bootstrap.Bootstrap;
+import net.officefloor.building.console.OfficeFloorConsoleMain;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 
 /**
@@ -49,21 +50,18 @@ import net.officefloor.building.util.OfficeBuildingTestUtil;
  */
 public class BootstrapTest extends TestCase {
 
-	/**
-	 * user.dir to rollback to after test.
-	 */
-	private String rollbackUsrDirValue = null;
-
 	@Override
 	protected void setUp() throws Exception {
 		// Flag testing
 		Bootstrap.isTesting = true;
 
-		// Setup to be test directory
-		this.rollbackUsrDirValue = System.getProperty("user.dir");
-		File userDir = new File(this.rollbackUsrDirValue, "target/test-classes");
+		// Setup to be test directory.
+		// (Ensure use same property as Console)
+		String usrDirValue = System.getProperty("user.dir");
+		File userDir = new File(usrDirValue, "target/test-classes");
 		String userDirValue = userDir.getAbsolutePath();
-		System.setProperty("user.dir", userDirValue);
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
+				userDirValue);
 
 		// Reset for testing
 		MockMain.reset();
@@ -71,8 +69,28 @@ public class BootstrapTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Reinstate the user.dir
-		System.setProperty("user.dir", this.rollbackUsrDirValue);
+		// Clear the OFFICE_FLOOR_HOME
+		System.clearProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME);
+	}
+
+	/**
+	 * Ensure issue if {@link Bootstrap#OFFICE_FLOOR_HOME} is not specified.
+	 */
+	public void testEnsureOfficeFloorHomeSet() throws Throwable {
+
+		// Clear the OFFICE_FLOOR_HOME (so not specified)
+		System.clearProperty(Bootstrap.OFFICE_FLOOR_HOME);
+
+		try {
+			// Should not Bootstrap as require OFFICE_FLOOR_HOME
+			Bootstrap.main();
+			fail("Should not be successful");
+		} catch (Error ex) {
+			assertEquals(
+					"Incorrect cause",
+					"Exit: ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.",
+					ex.getMessage());
+		}
 	}
 
 	/**
@@ -232,7 +250,8 @@ public class BootstrapTest extends TestCase {
 		};
 
 		// Compile the Java source file to class file
-		String destDir = System.getProperty("user.dir") + "/lib/directory";
+		String destDir = System.getProperty(Bootstrap.OFFICE_FLOOR_HOME)
+				+ "/lib/directory";
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		CompilationTask task = compiler.getTask(null, null, diagnostics, Arrays
 				.asList("-d", destDir), null, Arrays.asList(sourceFile));
