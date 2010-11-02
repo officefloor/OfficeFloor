@@ -26,6 +26,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ArtifactArgument;
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
@@ -63,6 +64,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * {@link OfficeBuilding} port.
 	 */
 	private final OfficeBuildingPortOfficeFloorCommandParameter officeBuildingPort = new OfficeBuildingPortOfficeFloorCommandParameter();
+
+	/**
+	 * JVM options.
+	 */
+	private final JvmOptionOfficeFloorCommandParameter jvmOptions = new JvmOptionOfficeFloorCommandParameter();
 
 	/**
 	 * {@link Process} name.
@@ -135,7 +141,7 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
-				this.officeBuildingPort, this.processName,
+				this.officeBuildingPort, this.jvmOptions, this.processName,
 				this.officeFloorLocation, this.archives, this.artifacts,
 				this.classpath, this.officeName, this.workName, this.taskName,
 				this.parameter };
@@ -175,6 +181,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 		// Construct the arguments
 		CommandLineBuilder arguments = new CommandLineBuilder();
+
+		// Add the JVM options
+		for (String jvmOption : this.jvmOptions.getJvmOptions()) {
+			arguments.addJvmOption(jvmOption);
+		}
 
 		// Specify process name
 		String processName = this.processName.getProcessName();

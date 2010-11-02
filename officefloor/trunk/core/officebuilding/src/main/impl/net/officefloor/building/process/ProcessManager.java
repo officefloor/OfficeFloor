@@ -321,13 +321,8 @@ public class ProcessManager implements ProcessManagerMBean {
 		// Obtain the class path
 		String classPath = getProcessClasspath(configuration);
 
-		// Add the JVM Options
-		String[] jvmOptions = new String[0];
-		String jvmOptionText = configuration.getJvmOptions();
-		if (!isBlank(jvmOptionText)) {
-			// Split the options for the command (by white spacing)
-			jvmOptions = jvmOptionText.split("(\\s)+");
-		}
+		// Obtain the JVM options
+		String[] jvmOptions = configuration.getJvmOptions();
 
 		// Create the command to invoke process
 		List<String> command = new ArrayList<String>(4 + jvmOptions.length);

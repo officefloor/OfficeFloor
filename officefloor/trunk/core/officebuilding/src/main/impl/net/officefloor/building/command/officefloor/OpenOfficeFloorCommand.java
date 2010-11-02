@@ -17,6 +17,10 @@
  */
 package net.officefloor.building.command.officefloor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
@@ -25,6 +29,7 @@ import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ArtifactArgument;
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
@@ -65,6 +70,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	private final MultipleArtifactsOfficeFloorCommandParameter artifacts = new MultipleArtifactsOfficeFloorCommandParameter();
 
 	/**
+	 * JVM options.
+	 */
+	private final JvmOptionOfficeFloorCommandParameter jvmOptions = new JvmOptionOfficeFloorCommandParameter();
+
+	/**
 	 * Addition to the class path.
 	 */
 	private final ClassPathOfficeFloorCommandParameter classpath = new ClassPathOfficeFloorCommandParameter();
@@ -95,6 +105,12 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 
 	/**
+	 * {@link OfficeFloorCommandParameter} instances for this
+	 * {@link OfficeFloorCommand}.
+	 */
+	private final OfficeFloorCommandParameter[] parameters;
+
+	/**
 	 * Indicates if {@link OfficeFloor} is to be opened within a spawned
 	 * {@link Process}.
 	 */
@@ -118,6 +134,20 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	public OpenOfficeFloorCommand(boolean isSpawn, boolean isReportOpenClose) {
 		this.isSpawn = isSpawn;
 		this.isReportOpenClose = isReportOpenClose;
+
+		// Create the listing of parameters (max 10 parameters)
+		List<OfficeFloorCommandParameter> parameters = new ArrayList<OfficeFloorCommandParameter>(
+				10);
+		parameters.addAll(Arrays.asList(new OfficeFloorCommandParameter[] {
+				this.officeFloorLocation, this.archives, this.artifacts,
+				this.classpath, this.processName, this.officeName,
+				this.workName, this.taskName, this.parameter }));
+		if (isSpawn) {
+			// Spawning so include JVM options
+			parameters.add(this.jvmOptions);
+		}
+		this.parameters = parameters
+				.toArray(new OfficeFloorCommandParameter[parameters.size()]);
 	}
 
 	/*
@@ -145,10 +175,7 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 
 	@Override
 	public OfficeFloorCommandParameter[] getParameters() {
-		return new OfficeFloorCommandParameter[] { this.officeFloorLocation,
-				this.archives, this.artifacts, this.classpath,
-				this.processName, this.officeName, this.workName,
-				this.taskName, this.parameter };
+		return this.parameters;
 	}
 
 	@Override
@@ -183,6 +210,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 		// Specify the process name
 		String processName = this.processName.getProcessName();
 		environment.setProcessName(processName);
+
+		// Specify the JVM options
+		for (String jvmOption : this.jvmOptions.getJvmOptions()) {
+			environment.addJvmOption(jvmOption);
+		}
 
 		// Create the managed process to open the office floor
 		String officeFloorLocation = this.officeFloorLocation

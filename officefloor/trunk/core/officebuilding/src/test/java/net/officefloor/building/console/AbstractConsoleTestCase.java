@@ -181,6 +181,26 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * <P>
+	 * Specifies to output a particular System property to the result file.
+	 * <p>
+	 * Allows for testing JVM option.
+	 * 
+	 * @param command
+	 *            {@link MockCommand}.
+	 * @param systemPropertyName
+	 *            Name of the system property.
+	 * @param resultFile
+	 *            Result file.
+	 */
+	protected static void setSystemPropertyCheck(MockCommand command,
+			String systemPropertyName, File resultFile) {
+		MockManagedProcess process = (MockManagedProcess) command
+				.getManagedProcess();
+		process.setSystemPropertyCheck(systemPropertyName, resultFile);
+	}
+
+	/**
 	 * Indicates if the {@link MockCommand} is run.
 	 * 
 	 * @param command
@@ -209,6 +229,16 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 		private String waitFilePath = null;
 
 		/**
+		 * Name of the System property to check (if specified).
+		 */
+		private String systemPropertyName = null;
+
+		/**
+		 * Name of file to write the result of the System property check.
+		 */
+		private String systemPropertyValueResultFilePath = null;
+
+		/**
 		 * Initiate.
 		 */
 		public MockManagedProcess() throws IOException {
@@ -225,6 +255,21 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 		 */
 		public void setWaitFile(File waitFile) {
 			this.waitFilePath = waitFile.getAbsolutePath();
+		}
+
+		/**
+		 * Specifies to output a particular System property to the result file.
+		 * 
+		 * @param systemPropertyName
+		 *            Name of the system property.
+		 * @param resultFile
+		 *            Result file.
+		 */
+		public void setSystemPropertyCheck(String systemPropertyName,
+				File resultFile) {
+			this.systemPropertyName = systemPropertyName;
+			this.systemPropertyValueResultFilePath = resultFile
+					.getAbsolutePath();
 		}
 
 		/**
@@ -279,6 +324,20 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase {
 						isFinished = true;
 					}
 				}
+			}
+
+			// Write the system property if required
+			if (this.systemPropertyName != null) {
+
+				// Obtain the system property value
+				String systemPropertyValue = System.getProperty(
+						this.systemPropertyName, "");
+
+				// Write system property value to the result file
+				FileWriter writer = new FileWriter(
+						this.systemPropertyValueResultFilePath);
+				writer.write(systemPropertyValue);
+				writer.close();
 			}
 
 			// Write test content to run file

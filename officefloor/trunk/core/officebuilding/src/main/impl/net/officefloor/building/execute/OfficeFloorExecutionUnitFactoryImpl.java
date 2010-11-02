@@ -20,6 +20,8 @@ package net.officefloor.building.execute;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommand;
@@ -151,6 +153,9 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 				&& (additionalClassPath.trim().length() > 0)) {
 			configuration.setAdditionalClassPath(additionalClassPath);
 		}
+		for (String jvmOption : commandEnvironment.jvmOptions) {
+			configuration.addJvmOption(jvmOption);
+		}
 
 		// Create and return the execution unit
 		return new OfficeFloorExecutionUnitImpl(managedProcess, configuration,
@@ -172,6 +177,11 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		 * Flag to spawn a {@link Process}.
 		 */
 		public boolean isSpawnProcess = false;
+
+		/**
+		 * JVM options.
+		 */
+		public final List<String> jvmOptions = new LinkedList<String>();
 
 		/**
 		 * Environment properties.
@@ -205,6 +215,11 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		@Override
 		public void setSpawnProcess(boolean isSpawn) {
 			this.isSpawnProcess = isSpawn;
+		}
+
+		@Override
+		public void addJvmOption(String jvmOption) {
+			this.jvmOptions.add(jvmOption);
 		}
 	}
 

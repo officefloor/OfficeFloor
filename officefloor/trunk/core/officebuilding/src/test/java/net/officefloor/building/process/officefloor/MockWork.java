@@ -37,6 +37,11 @@ public class MockWork {
 	public static final String MESSAGE = "test message";
 
 	/**
+	 * Obtains System property by this name to include message to be written.
+	 */
+	public static final String INCLUDE_SYSTEM_PROPERTY = "test-system-property";
+
+	/**
 	 * Writes the message to the file.
 	 * 
 	 * @param filePath
@@ -44,14 +49,18 @@ public class MockWork {
 	 */
 	public void writeMessage(String filePath) {
 		try {
+
+			// Obtain the system property value
+			String value = System.getProperty(INCLUDE_SYSTEM_PROPERTY, "");
+
 			// Write the message to the file
 			Writer writer = new FileWriter(filePath);
 			writer.write(MESSAGE);
+			writer.write(value);
 			writer.close();
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 	}
-
 }

@@ -56,4 +56,20 @@ public interface OfficeFloorCommandEnvironment {
 	 */
 	void setSpawnProcess(boolean isSpawn);
 
+	/**
+	 * <p>
+	 * Adds a JVM option for the spawned {@link Process} JVM. The value is
+	 * provided as is to the JVM and as such care must be taken to use options
+	 * available to the underlying specific JVM.
+	 * <p>
+	 * These values are only utilised if spawning a process - otherwise they are
+	 * ignored.
+	 * 
+	 * @param jvmOption
+	 *            JVM option for the spawned {@link Process} JVM.
+	 * 
+	 * @see #setSpawnProcess(boolean)
+	 */
+	void addJvmOption(String jvmOption);
+
 }
