@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Bootstraps the applications within the deployment.
@@ -32,6 +33,12 @@ import java.util.List;
  * @author Daniel Sagenschneider
  */
 public class Bootstrap {
+
+	/**
+	 * Environment property to specify where the OfficeFloor home directory is
+	 * located.
+	 */
+	public static final String OFFICE_FLOOR_HOME = "OFFICE_FLOOR_HOME";
 
 	/**
 	 * Bootstraps the application within the deployment.
@@ -53,13 +60,21 @@ public class Bootstrap {
 			entries.addClassPathEntry(bootClassPathEntry);
 		}
 
-		// Obtain the current directory
-		String currentDirectoryPath = System.getProperty("user.dir");
-		File currentDirectory = new File(currentDirectoryPath);
-		ensureDirectoryExists(currentDirectory);
+		// Obtain the environment properties
+		Properties environment = new Properties();
+		environment.putAll(System.getenv());
+		environment.putAll(System.getProperties());
+
+		// Obtain the OFFICE_FLOOR_HOME for boot libraries
+		String officeFloorHomePath = environment.getProperty(OFFICE_FLOOR_HOME);
+		if (officeFloorHomePath == null) {
+			errorAndExit("ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
+		}
+		File officeFloorHome = new File(officeFloorHomePath);
+		ensureDirectoryExists(officeFloorHome);
 
 		// Add the lib class path entries
-		File libDir = new File(currentDirectory, "lib");
+		File libDir = new File(officeFloorHome, "lib");
 		entries.loadDirectoryClassPathEntries(libDir, true, true);
 
 		// Specify the java class path
@@ -126,7 +141,7 @@ public class Bootstrap {
 
 		// Handle if testing
 		if (isTesting) {
-			throw new Error("Exit");
+			throw new Error("Exit: " + message);
 		}
 
 		// Not testing so exit process
