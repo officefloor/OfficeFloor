@@ -19,6 +19,9 @@
 					<work>SECTION.WORK</work>
 					<task>createFile</task>
 					<parameter>${project.build.directory}/OfficeFloorRun.txt</parameter>
+					<jvmOptions>
+						<jvmOption>-Done=a</jvmOption>
+					</jvmOptions>
 				</configuration>
 				<executions>
 					<execution>

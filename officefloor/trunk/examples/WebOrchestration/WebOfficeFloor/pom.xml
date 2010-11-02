@@ -20,8 +20,10 @@
 					<port>13778</port>
 					<processName>example</processName>
 					<officeFloorLocation>net/officefloor/example/weborchestration/WebOfficeFloor.officefloor</officeFloorLocation>
-					<jvmOptions>-Djava.naming.factory.initial=org.apache.openejb.client.LocalInitialContextFactory
-						-Dopenejb.deployments.classpath.include=.*WebOrchestration.*</jvmOptions>
+					<jvmOptions>
+						<jvmOption>-Djava.naming.factory.initial=org.apache.openejb.client.LocalInitialContextFactory</jvmOption>
+						<jvmOption>-Dopenejb.deployments.classpath.include=.*WebOrchestration.*</jvmOption>
+					</jvmOptions>
 					<verbose>false</verbose>
 				</configuration>
 				<executions>

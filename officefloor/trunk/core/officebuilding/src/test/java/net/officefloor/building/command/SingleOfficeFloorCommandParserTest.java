@@ -185,4 +185,57 @@ public class SingleOfficeFloorCommandParserTest extends
 		this.doTest("--one a -1 b --two c -2 d", COMMAND);
 	}
 
+	/**
+	 * Ensure can end options with a JVM option value for a system property. In
+	 * other words a parameter value starting with '-' (e.g. <code>--jvm-option
+	 * -Done=a</code>).
+	 */
+	public void testDescriptiveJvmOption() throws Exception {
+		this.record_Factory(COMMAND, "jvm-option", null, true);
+		this.record_Command(COMMAND, "jvm-option", null);
+		this.record_Argument(COMMAND, "jvm-option", "-Done=a");
+		this.doTest("--jvm-option -Done=a", COMMAND);
+	}
+
+	/**
+	 * Ensure can end short options with a JVM option value for a system
+	 * property.
+	 */
+	public void testShortJvmOption() throws Exception {
+		this.record_Factory(COMMAND, "jvm-option", "jo", true);
+		this.record_Command(COMMAND, "jvm-option", "jo");
+		this.record_Argument(COMMAND, "jvm-option", "-Done=a");
+		this.doTest("-jo -Done=a", COMMAND);
+	}
+
+	/**
+	 * Ensure issue if flag followed by JVM option.
+	 */
+	public void testDescriptiveFlagFollowedByJvmOption() throws Exception {
+		this.record_Factory(COMMAND, "flag", null, false);
+		this.record_Command(COMMAND, "flag", null);
+		try {
+			this.doTest("--flag -Done=a");
+			fail("Should not parse");
+		} catch (OfficeFloorCommandParseException ex) {
+			assertEquals("Incorrect cause", "Unknown option -Done=a", ex
+					.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure issue if flag followed by JVM option.
+	 */
+	public void testShortFlagFollowedByJvmOption() throws Exception {
+		this.record_Factory(COMMAND, "flag", "f", false);
+		this.record_Command(COMMAND, "flag", null);
+		try {
+			this.doTest("-f -Done=a");
+			fail("Should not parse");
+		} catch (OfficeFloorCommandParseException ex) {
+			assertEquals("Incorrect cause", "Unknown option -Done=a", ex
+					.getMessage());
+		}
+	}
+
 }

@@ -167,21 +167,29 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 		int commandIndex = -1;
 		FOUND_COMMAND: for (int i = (arguments.length - 1); i >= 0; i--) {
 			String argument = arguments[i];
+
+			// Determine if option
 			if (argument.startsWith(OPTION_SHORT_PREFIX)) {
 				// Found last option, so determine if requires value
-				Boolean isRequireValue;
-				if (argument.startsWith(OPTION_PREFIX)) {
-					// Name option
-					String optionName = argument.substring(OPTION_PREFIX
-							.length());
-					isRequireValue = this.parameterNameToRequireValue
-							.get(optionName);
-				} else {
-					// Short name option
-					String optionShortName = argument
-							.substring(OPTION_SHORT_PREFIX.length());
-					isRequireValue = this.parameterShortNameToRequireValue
-							.get(optionShortName);
+				Boolean isRequireValue = this.isRequireValue(argument);
+				if (isRequireValue == null) {
+					// Argument may be parameter value so try one more argument.
+					// Example being JVM option: --jvm-option -Done=a
+					if (i > 0) {
+						// Attempt to obtain previous parameter
+						argument = arguments[i - 1];
+						isRequireValue = this.isRequireValue(argument);
+						if ((isRequireValue != null)
+								&& (!isRequireValue.booleanValue())) {
+							// Option does not require value
+							throw new OfficeFloorCommandParseException(
+									"Unknown option " + arguments[i]);
+
+						}
+
+						// Index already at value so do not require value
+						isRequireValue = Boolean.FALSE;
+					}
 				}
 				if (isRequireValue == null) {
 					// Option is unknown
@@ -336,6 +344,30 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 			officeFloorCommands[i] = commands.get(i).command;
 		}
 		return officeFloorCommands;
+	}
+
+	/**
+	 * Returns whether the parameter for the argument requires a value.
+	 * 
+	 * @param argument
+	 *            Argument to determine if requires value.
+	 * @return <code>true</code> if argument requires a value. Also
+	 *         <code>null</code> if unknown parameter.
+	 */
+	private Boolean isRequireValue(String argument) {
+		Boolean isRequireValue;
+		if (argument.startsWith(OPTION_PREFIX)) {
+			// Name option
+			String optionName = argument.substring(OPTION_PREFIX.length());
+			isRequireValue = this.parameterNameToRequireValue.get(optionName);
+		} else {
+			// Short name option
+			String optionShortName = argument.substring(OPTION_SHORT_PREFIX
+					.length());
+			isRequireValue = this.parameterShortNameToRequireValue
+					.get(optionShortName);
+		}
+		return isRequireValue;
 	}
 
 	/**
