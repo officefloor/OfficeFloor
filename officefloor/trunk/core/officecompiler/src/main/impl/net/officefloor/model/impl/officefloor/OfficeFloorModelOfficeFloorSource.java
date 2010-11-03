@@ -18,9 +18,17 @@
 
 package net.officefloor.model.impl.officefloor;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
@@ -69,6 +77,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -109,6 +118,58 @@ public class OfficeFloorModelOfficeFloorSource extends
 			throw new FileNotFoundException("Can not find office floor '"
 					+ context.getOfficeFloorLocation() + "'");
 		}
+
+		// Read in the configuration
+		Reader reader = new InputStreamReader(configuration.getConfiguration());
+		StringWriter configurationBuffer = new StringWriter();
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			configurationBuffer.write(value);
+		}
+		String config = configurationBuffer.toString();
+
+		// Replace the tags
+		Properties properties = context.getProperties();
+		for (String name : properties.stringPropertyNames()) {
+			String tag = "${" + name + "}";
+			String value = properties.getProperty(name);
+			config = config.replace(tag, value);
+		}
+
+		// Ensure all tags are replaced
+		int tagStart = -1;
+		int tagEnd = -1;
+		Set<String> warnedTagNames = new HashSet<String>();
+		do {
+			// Increment tag start past previous tag
+			tagStart++;
+
+			// Search for another tag
+			tagStart = config.indexOf("${", tagStart);
+			if (tagStart >= 0) {
+				tagEnd = config.indexOf("}", tagStart);
+				if (tagEnd >= 0) {
+					// Obtain the missing tag name
+					String tagName = config.substring(tagStart + "${".length(),
+							tagEnd);
+
+					// Only warn once about a missing tag
+					if (!warnedTagNames.contains(tagName)) {
+
+						// Provide warning of missing tag
+						deployer.addIssue("Property '" + tagName
+								+ "' must be specified",
+								AssetType.OFFICE_FLOOR, "OfficeFloor");
+
+						// Now warned of missing tag
+						warnedTagNames.add(tagName);
+					}
+				}
+			}
+		} while ((tagStart >= 0) && (tagEnd >= 0));
+
+		// Utilised the tag replaced configuration
+		configuration = new TagReplacedOfficeFloorConfigurationItem(config,
+				configuration);
 
 		// Retrieve the office floor model
 		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
@@ -598,4 +659,61 @@ public class OfficeFloorModelOfficeFloorSource extends
 				AssetType.MANAGED_OBJECT, managedObjectName);
 		return null;
 	}
+
+	/**
+	 * Tag replaced {@link ConfigurationItem}.
+	 */
+	private class TagReplacedOfficeFloorConfigurationItem implements
+			ConfigurationItem {
+
+		/**
+		 * Tag replaced configuration.
+		 */
+		private final String configuration;
+
+		/**
+		 * Delegate {@link ConfigurationItem}.
+		 */
+		private final ConfigurationItem delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param configuration
+		 *            Tag replaced configuration.
+		 * @param delegate
+		 *            Delegate {@link ConfigurationItem}.
+		 */
+		public TagReplacedOfficeFloorConfigurationItem(String configuration,
+				ConfigurationItem delegate) {
+			this.configuration = configuration;
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ======================== ConfigurationItem =====================
+		 */
+
+		@Override
+		public ConfigurationContext getContext() {
+			return this.delegate.getContext();
+		}
+
+		@Override
+		public String getLocation() {
+			return this.delegate.getLocation();
+		}
+
+		@Override
+		public InputStream getConfiguration() throws Exception {
+			return new ByteArrayInputStream(this.configuration.getBytes());
+		}
+
+		@Override
+		public void setConfiguration(InputStream configuration)
+				throws Exception {
+			this.delegate.setConfiguration(configuration);
+		}
+	}
+
 }
