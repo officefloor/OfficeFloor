@@ -17,7 +17,9 @@
  */
 package net.officefloor.building.decorate;
 
+import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
+import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -53,5 +55,20 @@ public interface OfficeFloorDecoratorContext {
 	 *            {@link Property} value.
 	 */
 	void setEnvironmentProperty(String name, String value);
+
+	/**
+	 * <p>
+	 * Adds an additional {@link OfficeFloorCommandParameter} value.
+	 * <p>
+	 * This allows for adding multiple values for a single
+	 * {@link OfficeFloorCommandParameter}. It also allows for enriching the
+	 * {@link OfficeFloorCommand} without enriching the environment.
+	 * 
+	 * @param parameterName
+	 *            Name of the {@link OfficeFloorCommandParameter}.
+	 * @param value
+	 *            Value.
+	 */
+	void addCommandOption(String parameterName, String value);
 
 }

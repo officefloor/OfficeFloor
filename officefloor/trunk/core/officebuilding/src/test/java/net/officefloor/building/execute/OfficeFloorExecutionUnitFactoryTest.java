@@ -123,7 +123,8 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 	 * Ensure {@link OfficeFloorDecorator} can specify environment value that is
 	 * also mapped onto an {@link OfficeFloorCommandParameter}.
 	 */
-	public void testDecorateCommandParameter() throws Exception {
+	public void testDecorateCommandParameterFromEnvironmentProperty()
+			throws Exception {
 		final String CLASS_PATH_ENTRY = "entry";
 		final String NAME = "name";
 		final String VALUE = "value";
@@ -176,6 +177,40 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 		assertEquals("Parameter value not loaded from environment",
 				PARAMETER_VALUE, command.getParameterValues().get(
 						PARAMETER_NAME));
+	}
+
+	/**
+	 * Ensure can configure {@link OfficeFloorCommandParameter} from decorated
+	 * command option.
+	 */
+	public void testDecorateCommandOption() throws Exception {
+		final String CLASS_PATH_ENTRY = "entry";
+		final String NAME = "name";
+		final String VALUE = "value";
+
+		// Create the command expecting command option
+		MockCommand command = this.createCommand("test", new MockInitialiser() {
+			@Override
+			public void initialiseEnvironment(OfficeFloorCommandContext context)
+					throws Exception {
+				context.includeClassPathArtifact(CLASS_PATH_ENTRY);
+			}
+		}, NAME);
+		command.addExepctedParameter(NAME, VALUE);
+
+		// Decorate the environment property
+		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
+			@Override
+			public void decorate(OfficeFloorDecoratorContext context)
+					throws Exception {
+				assertEquals("Incorrect class path", CLASS_PATH_ENTRY, context
+						.getRawClassPathEntry());
+				context.addCommandOption(NAME, VALUE);
+			}
+		};
+
+		// Test
+		this.doTest(command, CLASS_PATH_ENTRY, false, decorator);
 	}
 
 	/**
