@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.building.command.OfficeFloorCommand;
@@ -121,6 +122,9 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 					.toString());
 		}
 
+		// Obtain the decorated command options
+		Map<String, List<String>> options = context.getCommandOptions();
+
 		// Create the environment (enriched from decorators)
 		Properties env = new Properties();
 		env.putAll(this.environment);
@@ -129,6 +133,16 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		// Load environment properties onto parameters
 		for (OfficeFloorCommandParameter parameter : command.getParameters()) {
 			String parameterName = parameter.getName();
+
+			// Add the decorated command option
+			List<String> values = options.get(parameterName);
+			if (values != null) {
+				for (String value : values) {
+					parameter.addValue(value);
+				}
+			}
+
+			// Add the environment property
 			String value = env.getProperty(parameterName);
 			if (value != null) {
 				parameter.addValue(value);

@@ -198,6 +198,11 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	private final Properties environment = new Properties();
 
 	/**
+	 * {@link OfficeFloorCommandParameter} options.
+	 */
+	private final Map<String, List<String>> options = new HashMap<String, List<String>>();
+
+	/**
 	 * Warnings regarding building the class path.
 	 */
 	private final List<String> classPathWarnings = new LinkedList<String>();
@@ -282,6 +287,15 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 */
 	public Properties getCommandEnvironment() {
 		return this.environment;
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCommandParameter} values.
+	 * 
+	 * @return {@link OfficeFloorCommandParameter} values.
+	 */
+	public Map<String, List<String>> getCommandOptions() {
+		return this.options;
 	}
 
 	/**
@@ -709,6 +723,22 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 				OfficeFloorCommandContextImpl.this.environment.setProperty(
 						name, value);
 			}
+		}
+
+		@Override
+		public void addCommandOption(String parameterName, String value) {
+
+			// Lazy obtain the values for the parameter
+			List<String> values = OfficeFloorCommandContextImpl.this.options
+					.get(parameterName);
+			if (values == null) {
+				values = new LinkedList<String>();
+				OfficeFloorCommandContextImpl.this.options.put(parameterName,
+						values);
+			}
+
+			// Add the value
+			values.add(value);
 		}
 	}
 
