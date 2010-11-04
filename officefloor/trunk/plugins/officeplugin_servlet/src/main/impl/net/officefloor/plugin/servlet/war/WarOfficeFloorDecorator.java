@@ -31,6 +31,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 
@@ -91,12 +92,19 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			isWar = this.decorateArchive(rawClassPathFile, context);
 		}
 
-		// Include WAR OfficeFloor location if WAR
+		// If WAR, default details for running
 		if (isWar) {
+
+			// Default OfficeFloor configuration for running a WAR
 			context
-					.setEnvironmentProperty(
+					.addCommandOption(
 							OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
 							"net/officefloor/plugin/servlet/war/WarOfficeFloor.officefloor");
+
+			// Default properties values for default OfficeFloor configuration
+			context.addCommandOption(
+					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
+					"http.port=8080");
 		}
 	}
 
