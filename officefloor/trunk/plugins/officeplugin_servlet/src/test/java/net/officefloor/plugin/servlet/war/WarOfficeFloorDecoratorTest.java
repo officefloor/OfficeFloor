@@ -23,12 +23,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -53,6 +54,11 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	 * Environment {@link Properties}.
 	 */
 	private final Properties environment = new Properties();
+
+	/**
+	 * Command options.
+	 */
+	private final Map<String, List<String>> commandOptions = new HashMap<String, List<String>>();
 
 	/**
 	 * Ensure can restructure WAR.
@@ -137,17 +143,34 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 					.size());
 			assertEquals("Should not decorate environment", 0, this.environment
 					.size());
+			assertEquals("Should not decorate command options", 0,
+					this.commandOptions.size());
 
 		} else {
 			// Validate archive decoration
 			this.assertResolvedArchives(expectedDirectoryName);
 
-			// Should provide WAR OfficeFloor location to the environment
+			// Should provide appropriate properties
+			assertEquals("Incorrect number command option types", 2,
+					this.commandOptions.size());
+
+			// Validate the officefloor command options
+			List<String> officefloor = this.commandOptions.get("officefloor");
+			assertNotNull("Should have officefloor command option", officefloor);
+			assertEquals("Expecting only one officefloor command option", 1,
+					officefloor.size());
 			assertEquals(
-					"Incorrect officefloor for environment",
+					"Incorrect officefloor",
 					"net/officefloor/plugin/servlet/war/WarOfficeFloor.officefloor",
-					this.environment
-							.get(OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION));
+					officefloor.get(0));
+
+			// Validate the property command options
+			List<String> properties = this.commandOptions.get("property");
+			assertNotNull("Should have property command options", properties);
+			assertEquals("Incorrect number of property command options", 1,
+					properties.size());
+			assertEquals("Incorrect http.port", "http.port=8080", properties
+					.get(0));
 		}
 	}
 
@@ -167,13 +190,17 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		File expectedDirectory = this.findFile(this.getClass(),
 				expectedDirectoryName);
 
-		// Obtain the expected archive listings
-		File[] expectedArchiveDirectories = expectedDirectory.listFiles();
-		assertEquals("Incorrect number of resolved archives",
-				expectedArchiveDirectories.length, this.resolvedArchives.size());
-
 		// Ensure archives are correct
-		for (File expectedArchiveDirectory : expectedArchiveDirectories) {
+		int expectedArchiveCount = 0;
+		for (File expectedArchiveDirectory : expectedDirectory.listFiles()) {
+
+			// Ignore SVN files
+			if (".svn".equalsIgnoreCase(expectedArchiveDirectory.getName())) {
+				continue; // ignore SVN files
+			}
+
+			// Increment the number of expected archives
+			expectedArchiveCount++;
 
 			// Obtain the resolved archive name
 			String resolvedArchiveName = expectedArchiveDirectory.getName();
@@ -190,6 +217,10 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			// Ensure archive is correct
 			assertJar(expectedArchiveDirectory, archiveFile);
 		}
+
+		// Ensure correct number of resolved archives
+		assertEquals("Incorrect number of resolved archives",
+				expectedArchiveCount, this.resolvedArchives.size());
 	}
 
 	/**
@@ -225,9 +256,15 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		@Override
 		public void includeResolvedClassPathEntry(String classpathEntry) {
 
+			// Ignore SVN entries
+			if (classpathEntry.toLowerCase().endsWith(".svn")) {
+				return; // ignore SVN entries
+			}
+
 			// Ensure the class path jar entry exists
 			File resolvedJarFile = new File(classpathEntry);
-			assertTrue("Ensure JAR file exists", resolvedJarFile.isFile());
+			assertTrue("Ensure JAR file exists: " + classpathEntry,
+					resolvedJarFile.isFile());
 
 			// Obtain the archive name for comparison
 			String archiveName = resolvedJarFile.getName();
@@ -243,6 +280,18 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		public void setEnvironmentProperty(String name, String value) {
 			// Register the properties
 			WarOfficeFloorDecoratorTest.this.environment.put(name, value);
+		}
+
+		@Override
+		public void addCommandOption(String parameterName, String value) {
+			List<String> options = WarOfficeFloorDecoratorTest.this.commandOptions
+					.get(parameterName);
+			if (options == null) {
+				options = new LinkedList<String>();
+				WarOfficeFloorDecoratorTest.this.commandOptions.put(
+						parameterName, options);
+			}
+			options.add(value);
 		}
 	}
 
@@ -332,9 +381,17 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		// Load the children of the directory
 		for (File child : directory.listFiles()) {
 
+			// Obtain the child name
+			String childName = child.getName();
+
+			// Ignore SVN files
+			if (".svn".equalsIgnoreCase(childName)) {
+				continue; // ignore SVN files
+			}
+
 			// Create the child path
 			String childPath = (parentPath == null ? "" : parentPath + "/")
-					+ child.getName();
+					+ childName;
 
 			// Load based on type (directory/file)
 			if (child.isDirectory()) {
@@ -377,6 +434,14 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		for (JarEntry entry = input.getNextJarEntry(); entry != null; entry = input
 				.getNextJarEntry()) {
 
+			// Obtain the entry name
+			String entryName = entry.getName();
+
+			// Ignore SVN entries
+			if (entryName.toLowerCase().contains(".svn")) {
+				continue; // ignore SVN files
+			}
+
 			// Obtain the data for the entry
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			for (int value = input.read(); value != -1; value = input.read()) {
@@ -385,7 +450,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			byte[] data = buffer.toByteArray();
 
 			// Load the entry
-			entries.put(entry.getName(), data);
+			entries.put(entryName, data);
 		}
 		input.close();
 	}
