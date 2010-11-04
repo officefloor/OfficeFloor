@@ -20,6 +20,7 @@ package net.officefloor.building.process.officefloor;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.util.Properties;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
@@ -29,6 +30,7 @@ import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.test.issues.FailCompilerIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -48,7 +50,9 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(new FailCompilerIssues());
 		compiler.addSourceAliases();
+		compiler.addProperty("team.name", "TEAM");
 
 		// Compile the test OfficeFloor
 		OfficeFloor officeFloor = compiler.compile(this
@@ -79,7 +83,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
 		OfficeFloorManager managedProcess = new OfficeFloorManager(this
-				.getOfficeFloorLocation());
+				.getOfficeFloorLocation(), this.getOfficeFloorProperties());
 		managedProcess.invokeTask("OFFICE", "SECTION.WORK", "writeMessage",
 				file.getAbsolutePath());
 
@@ -103,7 +107,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Create the OfficeFloor managed process
 		File file = OfficeBuildingTestUtil.createTempFile(this);
 		OfficeFloorManager managedProcess = new OfficeFloorManager(this
-				.getOfficeFloorLocation());
+				.getOfficeFloorLocation(), this.getOfficeFloorProperties());
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
@@ -148,6 +152,17 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 				.replace('.', '/')
 				+ "/TestOfficeFloor.officefloor";
 		return officeFloorLocation;
+	}
+
+	/**
+	 * Obtains the {@link Properties} for the {@link OfficeFloor}.
+	 * 
+	 * @return {@link Properties} for the {@link OfficeFloor}.
+	 */
+	private Properties getOfficeFloorProperties() {
+		Properties properties = new Properties();
+		properties.setProperty("team.name", "TEAM");
+		return properties;
 	}
 
 }

@@ -152,7 +152,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				.doMain("--jar "
 						+ jarFilePath.getParentFile().getAbsolutePath()
 						+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-						+ " open");
+						+ " --property team.name=TEAM" + " open");
 		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
 				+ "'");
 
@@ -201,7 +201,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ " --process-name "
 				+ PROCESS_NAME
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-				+ " open";
+				+ " --property team.name=TEAM" + " open";
 		this.doMain(openCommand);
 		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
 				+ "'");
@@ -262,7 +262,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --office OFFICE" + " --work SECTION.WORK"
 				+ " --task writeMessage" + " --parameter "
-				+ tempFile.getAbsolutePath() + " open";
+				+ tempFile.getAbsolutePath() + " --property team.name=TEAM"
+				+ " open";
 		this.doMain(openCommand);
 		out
 				.add("OfficeFloor open under process name space '"
@@ -348,6 +349,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 						"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
 						"      --parameter <arg>                 Parameter for the Task",
 						"      --process-name <arg>              Process name space. Default is Process",
+						"      --property <arg>                  Property for the OfficeFloor in the form of name=value",
 						"      -t,--task <arg>                   Name of the Task ",
 						"      -w,--work <arg>                   Name of the Work ",
 						"                                                         ",

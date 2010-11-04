@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -77,6 +78,11 @@ public class OfficeFloorManager implements ManagedProcess,
 	private final String officeFloorLocation;
 
 	/**
+	 * Properties for the {@link OfficeFloor}.
+	 */
+	private final Properties officeFloorProperties;
+
+	/**
 	 * Listing of the {@link WorkState}.
 	 */
 	private final List<WorkState> workStates = new LinkedList<WorkState>();
@@ -102,9 +108,13 @@ public class OfficeFloorManager implements ManagedProcess,
 	 * 
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor} configuration.
+	 * @param officeFloorProperties
+	 *            Properties for the {@link OfficeFloor}.
 	 */
-	public OfficeFloorManager(String officeFloorLocation) {
+	public OfficeFloorManager(String officeFloorLocation,
+			Properties officeFloorProperties) {
 		this.officeFloorLocation = officeFloorLocation;
+		this.officeFloorProperties = officeFloorProperties;
 	}
 
 	/*
@@ -197,9 +207,16 @@ public class OfficeFloorManager implements ManagedProcess,
 		// Create the OfficeFloor compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.addEnvProperties();
+
+		// Add properties for the compiler
+		for (String name : this.officeFloorProperties.stringPropertyNames()) {
+			String value = this.officeFloorProperties.getProperty(name);
+			compiler.addProperty(name, value);
+		}
 		compiler.addSystemProperties();
-		compiler.addSourceAliases();
+		compiler.addEnvProperties();
+
+		// Ensure fail if not compiles
 		compiler.setCompilerIssues(new CompilerIssues() {
 			@Override
 			public void addIssue(LocationType locationType, String location,

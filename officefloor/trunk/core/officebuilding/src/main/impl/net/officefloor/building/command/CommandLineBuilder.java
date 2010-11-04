@@ -19,6 +19,7 @@ package net.officefloor.building.command;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JarOfficeFloorCommandParameter;
@@ -28,6 +29,7 @@ import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloo
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
@@ -101,6 +103,22 @@ public class CommandLineBuilder {
 				.addOption(
 						OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
 						officeFloorLocation);
+	}
+
+	/**
+	 * Adds the {@link Properties} for the {@link OfficeFloor} to the command
+	 * line.
+	 * 
+	 * @param properties
+	 *            {@link Properties} for the {@link OfficeFloor}.
+	 */
+	public void addOfficeFloorProperties(Properties properties) {
+		for (String name : properties.stringPropertyNames()) {
+			String value = properties.getProperty(name);
+			this.addOption(
+					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
+					name + "=" + value);
+		}
 	}
 
 	/**

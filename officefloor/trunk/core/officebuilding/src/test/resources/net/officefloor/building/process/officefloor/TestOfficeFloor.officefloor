@@ -1,6 +1,7 @@
 <office-floor>
     <teams>
-        <team name="TEAM" source="PASSIVE"/>
+        <!-- Put in tag to ensure tests provide property -->
+        <team name="${team.name}" source="PASSIVE"/>
     </teams>
     <offices>
         <office name="OFFICE" source="OFFICE"
