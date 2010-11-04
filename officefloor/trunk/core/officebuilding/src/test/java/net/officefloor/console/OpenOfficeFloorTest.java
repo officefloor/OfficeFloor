@@ -60,7 +60,8 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				+ " --task writeMessage"
 				+ " --parameter "
 				+ tempFile.getAbsolutePath()
-				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor";
+				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+				+ " --property team.name=TEAM";
 		this.doMain(openCommand);
 		out
 				.add("Opening OfficeFloor within process name space '"
@@ -106,6 +107,7 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 						" -of,--officefloor <arg>   Location of the OfficeFloor           ",
 						" --parameter <arg>         Parameter for the Task                ",
 						" --process-name <arg>      Process name space. Default is Process",
+						" --property <arg>          Property for the OfficeFloor in the form of name=value",
 						" -t,--task <arg>           Name of the Task                      ",
 						" -w,--work <arg>           Name of the Work                      ");
 	}

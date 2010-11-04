@@ -177,18 +177,19 @@ public class OfficeFloorCommandParserImpl implements OfficeFloorCommandParser {
 					// Example being JVM option: --jvm-option -Done=a
 					if (i > 0) {
 						// Attempt to obtain previous parameter
-						argument = arguments[i - 1];
-						isRequireValue = this.isRequireValue(argument);
-						if ((isRequireValue != null)
-								&& (!isRequireValue.booleanValue())) {
-							// Option does not require value
-							throw new OfficeFloorCommandParseException(
-									"Unknown option " + arguments[i]);
+						String previousArgument = arguments[i - 1];
+						isRequireValue = this.isRequireValue(previousArgument);
+						if (isRequireValue != null) {
+							// Determine if previous parameter requires value
+							if (!isRequireValue.booleanValue()) {
+								// Option does not require value
+								throw new OfficeFloorCommandParseException(
+										"Unknown option " + argument);
+							}
 
+							// Index already at value so do not require value
+							isRequireValue = Boolean.FALSE;
 						}
-
-						// Index already at value so do not require value
-						isRequireValue = Boolean.FALSE;
 					}
 				}
 				if (isRequireValue == null) {

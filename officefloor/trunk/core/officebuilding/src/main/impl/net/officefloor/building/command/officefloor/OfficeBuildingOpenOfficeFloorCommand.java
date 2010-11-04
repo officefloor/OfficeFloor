@@ -17,6 +17,8 @@
  */
 package net.officefloor.building.command.officefloor;
 
+import java.util.Properties;
+
 import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -34,6 +36,7 @@ import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloo
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -79,6 +82,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * Location of the {@link OfficeFloor}.
 	 */
 	private final OfficeFloorLocationOfficeFloorCommandParameter officeFloorLocation = new OfficeFloorLocationOfficeFloorCommandParameter();
+
+	/**
+	 * {@link Properties} for the {@link OfficeFloor}.
+	 */
+	private final PropertiesOfficeFloorCommandParameter officeFloorProperties = new PropertiesOfficeFloorCommandParameter();
 
 	/**
 	 * Archives to include on the class path.
@@ -142,9 +150,9 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.jvmOptions, this.processName,
-				this.officeFloorLocation, this.archives, this.artifacts,
-				this.classpath, this.officeName, this.workName, this.taskName,
-				this.parameter };
+				this.officeFloorLocation, this.officeFloorProperties,
+				this.archives, this.artifacts, this.classpath, this.officeName,
+				this.workName, this.taskName, this.parameter };
 	}
 
 	@Override
@@ -195,6 +203,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		// Add the OfficeFloor
 		arguments.addOfficeFloor(this.officeFloorLocation
 				.getOfficeFloorLocation());
+
+		// Add the properties for the OfficeFloor
+		arguments.addOfficeFloorProperties(this.officeFloorProperties
+				.getProperties());
 
 		// Add archives
 		for (String archive : this.archives.getArchives()) {
