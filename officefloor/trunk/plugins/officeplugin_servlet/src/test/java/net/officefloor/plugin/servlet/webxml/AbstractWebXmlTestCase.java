@@ -120,7 +120,6 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Obtain the location of password file and resource root
 			File passwordFile = this.findFile(this.getClass(), "password.txt");
-			File resourceRoot = passwordFile.getParentFile();
 
 			// Create the configuration context
 			XmlConfigurationContext xmlContext = new XmlConfigurationContext(
@@ -128,8 +127,6 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			xmlContext.addTag("port", String.valueOf(this.port));
 			xmlContext.addTag("web.xml.file.name", webXmlFileName);
 			xmlContext.addTag("password.file.location", passwordFile
-					.getAbsolutePath());
-			xmlContext.addTag("resource.root.location", resourceRoot
 					.getAbsolutePath());
 			ConfigurationContext context = new MockConfigurationContext(
 					xmlContext, new ClassLoaderConfigurationContext(this

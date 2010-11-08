@@ -46,20 +46,13 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT,
 				"Server Port",
 				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"Context Path",
-				ServletServerManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-				"Resource Path Root");
+				"Context Path");
 	}
 
 	/**
 	 * Ensure correct type.
 	 */
 	public void testType() throws Exception {
-
-		// Obtain resource path root
-		final String RESOURCE_NAME = "resource.txt";
-		final String RESOURCE_PATH_ROOT = this.findFile(this.getClass(),
-				RESOURCE_NAME).getParentFile().getAbsolutePath();
 
 		// Create expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
@@ -73,9 +66,7 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 				"officefloor.net",
 				ServletServerManagedObjectSource.PROPERTY_SERVER_PORT, "80",
 				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
-				"/context",
-				ServletServerManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-				RESOURCE_PATH_ROOT);
+				"/context");
 	}
 
 	/**
@@ -89,8 +80,6 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Obtain resource path root
 		final String RESOURCE_NAME = "resource.txt";
-		final String RESOURCE_PATH_ROOT = this.findFile(this.getClass(),
-				RESOURCE_NAME).getParentFile().getAbsolutePath();
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
@@ -104,8 +93,8 @@ public class ServletServerManagedObjectSourceTest extends OfficeFrameTestCase {
 				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH,
 				CONTEXT_PATH);
 		loader.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-				RESOURCE_PATH_ROOT);
+				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
+				this.getClass().getPackage().getName());
 		ServletServerManagedObjectSource source = loader
 				.loadManagedObjectSource(ServletServerManagedObjectSource.class);
 
