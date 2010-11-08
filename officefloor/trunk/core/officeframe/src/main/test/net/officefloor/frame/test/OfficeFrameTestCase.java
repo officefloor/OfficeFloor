@@ -1223,13 +1223,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Create the listing of paths to find the file
 		List<File> paths = new LinkedList<File>();
 		paths.add(new File(currentDirectory, relativePath));
-		paths.add(new File(new File(currentDirectory, "src/test/resources/"),
-				relativePath)); // use src as target resources not copied
 		paths.add(new File(new File(currentDirectory, "target/test-classes"),
 				relativePath));
 		paths.add(new File(new File(currentDirectory, "target/classes"),
 				relativePath));
-		paths.add(new File(new File(currentDirectory, "target"), relativePath));
+		
+		// TODO remove as should not find directly in build directory
+		// paths.add(new File(new File(currentDirectory, "target"), relativePath));
+
+		// As last resource, use src as target resources not copied
+		paths.add(new File(new File(currentDirectory, "src/test/resources/"),
+				relativePath));
 
 		// Obtain the file
 		for (File path : paths) {

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,22 @@
  */
 package net.officefloor.plugin.servlet.resource;
 
-import java.io.File;
-
 /**
- * Tests the {@link FileSystemResourceLocator}.
+ * Tests the {@link ClassPathResourceLocator}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FileSystemResourceLocatorTest extends
+public class ClassPathResourceLocatorTest extends
 		AbstractResourceLocatorTestCase {
 
 	@Override
 	protected ResourceLocator createResourceLocator() throws Exception {
 
-		// Obtain file system root
-		File root = this.findFile(this.getClass(), ".");
+		// Obtain the class path prefix
+		String classPathPrefix = this.getClass().getPackage().getName();
 
 		// Create and return the resource locator
-		return new FileSystemResourceLocator(root);
+		return new ClassPathResourceLocator(classPathPrefix);
 	}
 
 }
