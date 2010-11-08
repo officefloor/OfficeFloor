@@ -16,7 +16,7 @@
 	<publishDate position="right" />
 	<version position="right" />
 	<skin>
-		<groupId>net.officefloor</groupId>
+		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven-officefloor-skin</artifactId>
 		<version>0.1.2</version>
 	</skin>
