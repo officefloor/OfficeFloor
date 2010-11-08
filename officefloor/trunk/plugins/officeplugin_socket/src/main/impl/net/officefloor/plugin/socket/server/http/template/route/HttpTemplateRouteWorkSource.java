@@ -28,7 +28,7 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.socket.server.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;

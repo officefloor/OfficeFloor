@@ -36,7 +36,7 @@
       <task-flow name="NON_MATCHED_REQUEST" key="NON_MATCHED_REQUEST" argument-type="">
         <task name="template" link="SEQUENTIAL"/>
       </task-flow>
-      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException">
+      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException">
         <external-flow name="Exception"/>
       </task-escalation>
       <task-escalation escalation-type="net.officefloor.frame.api.manage.UnknownWorkException">

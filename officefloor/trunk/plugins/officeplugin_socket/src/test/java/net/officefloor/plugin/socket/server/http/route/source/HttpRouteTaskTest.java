@@ -28,8 +28,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
 import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 

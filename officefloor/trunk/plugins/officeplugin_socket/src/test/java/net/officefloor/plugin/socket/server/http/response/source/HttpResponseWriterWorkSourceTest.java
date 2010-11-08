@@ -31,7 +31,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.file.HttpFile;
+import net.officefloor.plugin.socket.server.http.resource.HttpFile;
 import net.officefloor.plugin.socket.server.http.response.source.HttpFileWriterTaskFactory.HttpFileWriterTaskDependencies;
 import net.officefloor.plugin.stream.OutputBufferStream;
 
