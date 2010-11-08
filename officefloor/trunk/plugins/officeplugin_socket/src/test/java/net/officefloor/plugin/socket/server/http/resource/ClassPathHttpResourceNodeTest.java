@@ -57,8 +57,8 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 	public void testDirectoryTree() throws IOException {
 
 		// Specify java.class.path for isolation of testing
-		File resourceDirectory = this.findFile(this.getClass(), "index.html")
-				.getParentFile();
+		File resourceDirectory = this.findFile(this.getClass(),
+				"directory/index.html").getParentFile();
 		System.setProperty("java.class.path", resourceDirectory
 				.getAbsolutePath());
 
@@ -67,11 +67,10 @@ public class ClassPathHttpResourceNodeTest extends OfficeFrameTestCase {
 				.createClassPathResourceTree(null);
 
 		// Validate the tree (checking directory, sub directory, file)
-		assertNode(tree, "/", "", true, "/directory/", "/empty/",
-				"/index.html", "/source/", "/test.jar");
-		ClassPathHttpResourceNode directory = tree.getChild("directory");
-		assertNode(directory, "/directory/", "directory", true,
-				"/directory/index.html", "/directory/sub_directory/");
+		assertNode(tree, "/", "", true, "/index.html", "/sub_directory/");
+		ClassPathHttpResourceNode directory = tree.getChild("sub_directory");
+		assertNode(directory, "/sub_directory/", "sub_directory", true,
+				"/sub_directory/index.html");
 		ClassPathHttpResourceNode file = tree.getChild("index.html");
 		assertNode(file, "/index.html", "index.html", false);
 	}

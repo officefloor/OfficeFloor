@@ -300,6 +300,16 @@ public class ClassPathHttpResourceNode implements Serializable {
 	}
 
 	/**
+	 * Obtains the path of this {@link ClassPathHttpResourceNode} from its
+	 * parent.
+	 * 
+	 * @return Path of this {@link ClassPathHttpResourceNode} from its parent.
+	 */
+	public String getNodePath() {
+		return this.nodePath;
+	}
+
+	/**
 	 * Obtains the {@link HttpResource} path.
 	 * 
 	 * @return {@link HttpResource} path.
