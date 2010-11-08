@@ -26,8 +26,8 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.file.HttpFileUtil;
-import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.resource.HttpResourceUtil;
+import net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException;
 
 /**
  * {@link Task} for routing a {@link HttpRequest}.
@@ -77,7 +77,7 @@ public class HttpRouteTask
 
 		// Obtain the canonical path from request
 		String path = request.getRequestURI();
-		path = HttpFileUtil.transformToCanonicalPath(path);
+		path = HttpResourceUtil.transformToCanonicalPath(path);
 
 		// Route to appropriate path
 		for (int i = 0; i < this.routings.length; i++) {

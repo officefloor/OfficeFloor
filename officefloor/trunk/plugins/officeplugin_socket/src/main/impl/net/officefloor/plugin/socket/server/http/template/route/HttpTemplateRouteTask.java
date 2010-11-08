@@ -36,8 +36,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.file.HttpFileUtil;
-import net.officefloor.plugin.socket.server.http.file.InvalidHttpRequestUriException;
+import net.officefloor.plugin.socket.server.http.resource.HttpResourceUtil;
+import net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.socket.server.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
@@ -124,7 +124,7 @@ public class HttpTemplateRouteTask
 
 		// Obtain the canonical path from request
 		String path = request.getRequestURI();
-		path = HttpFileUtil.transformToCanonicalPath(path);
+		path = HttpResourceUtil.transformToCanonicalPath(path);
 
 		// Determine if link task request
 		if (path.endsWith(HttpTemplateWorkSource.LINK_URL_EXTENSION)) {
