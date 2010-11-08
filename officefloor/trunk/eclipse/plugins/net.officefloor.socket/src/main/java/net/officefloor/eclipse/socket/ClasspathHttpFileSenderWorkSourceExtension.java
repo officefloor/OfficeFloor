@@ -17,18 +17,18 @@
  */
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.widgets.Composite;
-
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.file.HttpFile;
-import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileFactoryWorkSource;
-import net.officefloor.plugin.socket.server.http.file.source.ClasspathHttpFileSenderWorkSource;
-import net.officefloor.plugin.socket.server.http.file.source.HttpFileFactoryTask;
+import net.officefloor.plugin.socket.server.http.resource.HttpFile;
+import net.officefloor.plugin.socket.server.http.resource.source.ClasspathHttpFileFactoryWorkSource;
+import net.officefloor.plugin.socket.server.http.resource.source.ClasspathHttpFileSenderWorkSource;
+import net.officefloor.plugin.socket.server.http.resource.source.HttpFileFactoryTask;
+
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkSourceExtension} for {@link ClasspathHttpFileSenderWorkSource}.
