@@ -18,7 +18,6 @@
 					<property name="server.name" value="officefloor.net" />
 					<property name="server.port" value="${port}" />
 					<property name="context.path" value="/" />
-					<property name="resource.path.root" value="${resource.root.location}" />
 				</properties>
 				<managing-office name="OFFICE" />
 			</managed-object-source>

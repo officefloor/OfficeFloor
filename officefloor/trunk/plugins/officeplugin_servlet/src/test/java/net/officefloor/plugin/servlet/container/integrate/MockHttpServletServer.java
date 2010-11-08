@@ -248,8 +248,8 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		servletServer.addProperty(
 				ServletServerManagedObjectSource.PROPERTY_CONTEXT_PATH, "/");
 		servletServer.addProperty(
-				ServletServerManagedObjectSource.PROPERTY_RESOURCE_PATH_ROOT,
-				this.resourcePathRoot.getAbsolutePath());
+				ServletServerManagedObjectSource.PROPERTY_CLASS_PATH_PREFIX,
+				this.getClass().getPackage().getName());
 		servletServer.setManagingOffice(officeName);
 		this.getOfficeBuilder().addProcessManagedObject(SERVLET_SERVER_NAME,
 				SERVLET_SERVER_NAME);

@@ -17,9 +17,6 @@
  */
 package net.officefloor.plugin.servlet.host.source;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -29,7 +26,7 @@ import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerImpl;
 import net.officefloor.plugin.servlet.log.Logger;
 import net.officefloor.plugin.servlet.log.StdoutLogger;
-import net.officefloor.plugin.servlet.resource.FileSystemResourceLocator;
+import net.officefloor.plugin.servlet.resource.ClassPathResourceLocator;
 import net.officefloor.plugin.servlet.resource.ResourceLocator;
 
 /**
@@ -56,9 +53,15 @@ public class ServletServerManagedObjectSource extends
 	public static final String PROPERTY_CONTEXT_PATH = "context.path";
 
 	/**
-	 * Property name to specify the resource path root.
+	 * Property name to specify the class path prefix for locating resources.
 	 */
-	public static final String PROPERTY_RESOURCE_PATH_ROOT = "resource.path.root";
+	public static final String PROPERTY_CLASS_PATH_PREFIX = "class.path.prefix";
+
+	/**
+	 * Following in the naming convention of <code>WEB-INF</code> this is the
+	 * default class path prefix.
+	 */
+	public static final String DEFAULT_CLASS_PATH_PREFIX = "WEB-PUBLIC";
 
 	/**
 	 * {@link ServletServer}.
@@ -74,7 +77,6 @@ public class ServletServerManagedObjectSource extends
 		context.addProperty(PROPERTY_SERVER_NAME, "Server Name");
 		context.addProperty(PROPERTY_SERVER_PORT, "Server Port");
 		context.addProperty(PROPERTY_CONTEXT_PATH, "Context Path");
-		context.addProperty(PROPERTY_RESOURCE_PATH_ROOT, "Resource Path Root");
 	}
 
 	@Override
@@ -90,15 +92,10 @@ public class ServletServerManagedObjectSource extends
 		String contextPath = mosContext.getProperty(PROPERTY_CONTEXT_PATH);
 
 		// Create the resource locator
-		File resourcePathRoot = new File(mosContext
-				.getProperty(PROPERTY_RESOURCE_PATH_ROOT));
-		if (!resourcePathRoot.isDirectory()) {
-			throw new FileNotFoundException(
-					"Resource path root is not a directory: "
-							+ resourcePathRoot.getPath());
-		}
-		ResourceLocator resourceLocator = new FileSystemResourceLocator(
-				resourcePathRoot);
+		String classPathPrefix = mosContext.getProperty(
+				PROPERTY_CLASS_PATH_PREFIX, DEFAULT_CLASS_PATH_PREFIX);
+		ResourceLocator resourceLocator = new ClassPathResourceLocator(
+				classPathPrefix);
 
 		// Create the logger
 		Logger logger = new StdoutLogger();
