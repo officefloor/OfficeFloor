@@ -43,6 +43,11 @@ import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
 public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 
 	/**
+	 * {@link System} property for the password file location.
+	 */
+	public static final String SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION = "password.file.location";
+
+	/**
 	 * WEB-INF directory name.
 	 */
 	public static final String WEB_INF = "WEB-INF/";
@@ -105,6 +110,19 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			context.addCommandOption(
 					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
 					"http.port=8080");
+
+			// Provide password file location (determine if specified)
+			String passwordFileLocation = System
+					.getProperty(SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
+			if ((passwordFileLocation == null)
+					|| (passwordFileLocation.trim().length() == 0)) {
+				// No password file, so utilise temporary password file
+				File passwordFile = File.createTempFile("password", ".txt");
+				passwordFileLocation = passwordFile.getAbsolutePath();
+			}
+			context.addCommandOption(
+					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
+					"password.file.location=" + passwordFileLocation);
 		}
 	}
 
