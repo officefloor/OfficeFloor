@@ -84,8 +84,14 @@ public abstract class AbstractResourceLocatorTestCase extends
 		// Ensure able to obtain resource URL
 		URL expected = this.findFile(this.getClass(), "test.txt")
 				.getCanonicalFile().toURI().toURL();
-		assertEquals("Incorrect resource URL", expected, this.resourceLocator
-				.getResource("test.txt"));
+		String expectedPath = expected.toString();
+		expectedPath = expectedPath.substring(expectedPath
+				.indexOf("test-classes"));
+		URL actual = this.resourceLocator.getResource("test.txt");
+		String actualPath = actual.toString();
+		actualPath = actualPath.substring(actualPath.indexOf("test-classes"));
+		assertEquals("Incorrect resource URL (path from class-path)",
+				expectedPath, actualPath);
 	}
 
 	/**
