@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -46,6 +47,11 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 	 * {@link System} property for the password file location.
 	 */
 	public static final String SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION = "password.file.location";
+
+	/**
+	 * {@link System} property for the HTTP port.
+	 */
+	public static final String SYSTEM_PROPERTY_HTTP_PORT = "http.port";
 
 	/**
 	 * WEB-INF directory name.
@@ -107,9 +113,11 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 							"net/officefloor/plugin/servlet/war/WarOfficeFloor.officefloor");
 
 			// Default properties values for default OfficeFloor configuration
+			String httpPort = System.getProperty(SYSTEM_PROPERTY_HTTP_PORT,
+					"8080");
 			context.addCommandOption(
 					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,
-					"http.port=8080");
+					"http.port=" + httpPort);
 
 			// Provide password file location (determine if specified)
 			String passwordFileLocation = System
@@ -119,6 +127,11 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 				// No password file, so utilise temporary password file
 				File passwordFile = File.createTempFile("password", ".txt");
 				passwordFileLocation = passwordFile.getAbsolutePath();
+
+				// Write content for using password file
+				FileWriter writer = new FileWriter(passwordFileLocation);
+				writer.write("algorithm=-");
+				writer.close();
 			}
 			context.addCommandOption(
 					PropertiesOfficeFloorCommandParameter.PARAMETER_PROPERTY,

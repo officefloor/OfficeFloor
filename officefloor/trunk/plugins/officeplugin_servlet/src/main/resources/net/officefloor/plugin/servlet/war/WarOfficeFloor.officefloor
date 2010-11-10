@@ -37,15 +37,23 @@
 				<office-floor-team name="SERVLET_TEAM" />
 			</team>
 		</managed-object-source>
+		<managed-object-source name="HTTP_SESSION"
+			source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource"
+			object-type="net.officefloor.plugin.socket.server.http.session.HttpSession"
+			timeout="10000">
+			<managing-office name="OFFICE" />
+		</managed-object-source>
 		<managed-object-source name="HTTP_SECURITY_SOURCE"
 			source="net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource"
 			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity"
 			timeout="10000">
+			<managing-office name="OFFICE" />
+			<input-managed-object name="INPUT_HTTP_SECURITY_SOURCE" />
 			<input-dependency name="HTTP_SECURITY_SERVICE">
 				<managed-object name="HTTP_SECURITY_SERVICE" />
 			</input-dependency>
 			<team name="AUTHENTICATOR">
-				<office-team name="SERVLET_TEAM" />
+				<office-floor-team name="SERVLET_TEAM" />
 			</team>
 		</managed-object-source>
 		<managed-object-source name="HTTP_SECURITY_SERVICE"
@@ -56,6 +64,7 @@
 					value="BASIC" />
 				<property name="http.security.basic.realm" value="OfficeFloor" />
 			</properties>
+			<managing-office name="OFFICE" />
 		</managed-object-source>
 		<managed-object-source name="CREDENTIAL_STORE"
 			source="net.officefloor.plugin.socket.server.http.security.store.PasswordFileManagedObjectSource"
@@ -63,6 +72,7 @@
 			<properties>
 				<property name="password.file.path" value="${password.file.location}" />
 			</properties>
+			<managing-office name="OFFICE" />
 		</managed-object-source>
 	</managed-object-sources>
 	<input-managed-objects>
@@ -70,10 +80,21 @@
 			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 			<bound-managed-object-source name="HTTP_CONNECTION" />
 		</input-managed-object>
+		<input-managed-object name="INPUT_HTTP_SECURITY_SOURCE"
+			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
+			<bound-managed-object-source name="INPUT_HTTP_SECURITY_SOURCE" />
+		</input-managed-object>
 	</input-managed-objects>
 	<managed-objects>
 		<managed-object name="SERVLET_SERVER" scope="PROCESS">
 			<managed-object-source name="SERVLET_SERVER" />
+		</managed-object>
+		<managed-object name="HTTP_SESSION" scope="PROCESS">
+			<managed-object-source name="HTTP_SESSION" />
+			<dependency name="HTTP_CONNECTION"
+				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+				<input-managed-object name="HTTP_CONNECTION" />
+			</dependency>
 		</managed-object>
 		<managed-object name="HTTP_SECURITY" scope="PROCESS">
 			<managed-object-source name="HTTP_SECURITY_SOURCE" />
@@ -86,7 +107,7 @@
 			<managed-object-source name="HTTP_SECURITY_SERVICE" />
 			<dependency name="HTTP_CONNECTION"
 				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
-				<external-managed-object name="HTTP_CONNECTION" />
+				<input-managed-object name="HTTP_CONNECTION" />
 			</dependency>
 			<dependency name="HTTP_SESSION"
 				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
@@ -111,6 +132,10 @@
 			<object name="HTTP_CONNECTION"
 				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 				<input-managed-object name="HTTP_CONNECTION" />
+			</object>
+			<object name="HTTP_SESSION"
+				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
+				<managed-object name="HTTP_SESSION" />
 			</object>
 			<object name="HTTP_SECURITY"
 				object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
