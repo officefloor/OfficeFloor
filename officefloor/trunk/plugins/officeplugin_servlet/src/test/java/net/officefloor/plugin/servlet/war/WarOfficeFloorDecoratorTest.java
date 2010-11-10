@@ -65,6 +65,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		// Clean up test
 		System
 				.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_PASSWORD_FILE_LOCATION);
+		System.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
 	}
 
 	/**
@@ -79,9 +80,8 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 		this.archiveNameMappings.put("war", "WebArchive_war");
 
 		// Test decoration
-		this
-				.doTest(webArchive.getAbsolutePath(), "ExpectedWarDecoration",
-						null);
+		this.doTest(webArchive.getAbsolutePath(), "ExpectedWarDecoration",
+				null, null);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				"ExtractedDirectory/WEB-INF/lib/test.jar");
 
 		// Test no decoration
-		this.doTest(jarArchive.getAbsolutePath(), null, null);
+		this.doTest(jarArchive.getAbsolutePath(), null, null, null);
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 				new File(notExistRawClassPathEntry).exists());
 
 		// Test no decoration
-		this.doTest(notExistRawClassPathEntry, null, null);
+		this.doTest(notExistRawClassPathEntry, null, null, null);
 	}
 
 	/**
@@ -126,13 +126,13 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 
 		// Test decoration
 		this.doTest(extractedDirectory.getAbsolutePath(),
-				"ExpectedWarDecoration", null);
+				"ExpectedWarDecoration", null, null);
 	}
 
 	/**
-	 * Ensure can specify the password file.
+	 * Ensure can configure by system properties.
 	 */
-	public void testPasswordFileSpecified() throws Exception {
+	public void testConfigurationBySystemProperties() throws Exception {
 
 		// Obtain the extracted directory
 		File extractedDirectory = this.findFile(this.getClass(),
@@ -147,7 +147,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 
 		// Test decoration
 		this.doTest(extractedDirectory.getAbsolutePath(),
-				"ExpectedWarDecoration", passwordFile.getAbsolutePath());
+				"ExpectedWarDecoration", "80", passwordFile.getAbsolutePath());
 	}
 
 	/**
@@ -158,14 +158,31 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 	 * @param expectedDirectoryName
 	 *            Expected directory name. <code>null</code> indicates no
 	 *            decoration.
+	 * @param expectedHttpPort
+	 *            Expected HTTP port.
 	 * @param expectedPasswordFileLocation
 	 *            Expected password file location. <code>null</code> indicates
 	 *            temporary password file created.
 	 */
 	private void doTest(String rawClassPathEntry, String expectedDirectoryName,
-			String expectedPasswordFileLocation) throws Exception {
+			String expectedHttpPort, String expectedPasswordFileLocation)
+			throws Exception {
 
 		// Specify the system properties for decoration
+		if (expectedHttpPort == null) {
+			// Ensure HTTP port not specified
+			System
+					.clearProperty(WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT);
+
+			// Default HTTP port
+			expectedHttpPort = "8080";
+
+		} else {
+			// Ensure HTTP port specified
+			System.setProperty(
+					WarOfficeFloorDecorator.SYSTEM_PROPERTY_HTTP_PORT,
+					expectedHttpPort);
+		}
 		if (expectedPasswordFileLocation == null) {
 			// Ensure password file not specified
 			System
@@ -215,17 +232,22 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 			assertNotNull("Should have property command options", properties);
 			assertEquals("Incorrect number of property command options", 2,
 					properties.size());
-			assertEquals("Incorrect http.port", "http.port=8080", properties
-					.get(0));
+			assertEquals("Incorrect http.port",
+					"http.port=" + expectedHttpPort, properties.get(0));
 
 			// Determine if temporary directory
 			String passwordProperty = properties.get(1);
 			if (expectedPasswordFileLocation == null) {
 				// Validate temporary password file created
 				final String tmpDir = System.getProperty("java.io.tmpdir");
+				String passwordFileLocation = passwordProperty
+						.substring("password.file.location=".length());
 				assertTrue("Should be temporary password file",
-						passwordProperty.startsWith("password.file.location="
-								+ tmpDir));
+						passwordFileLocation.startsWith(tmpDir));
+				assertEquals("Incorrect temporary password file content",
+						"algorithm=-", this.getFileContents(new File(
+								passwordFileLocation)));
+
 			} else {
 				// Validate specified location
 				assertEquals("Incorrect password file location",

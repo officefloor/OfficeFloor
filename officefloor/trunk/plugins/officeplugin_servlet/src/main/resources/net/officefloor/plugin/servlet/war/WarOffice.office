@@ -1,4 +1,3 @@
-
 <office>
 	<teams>
 		<team name="SERVLET_TEAM" />
@@ -10,6 +9,9 @@
 		<external-managed-object name="HTTP_CONNECTION"
 			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection"
 			object-scope="PROCESS" />
+		<external-managed-object name="HTTP_SESSION"
+			object-type="net.officefloor.plugin.socket.server.http.session.HttpSession"
+			object-scope="PROCESS" />
 		<external-managed-object name="HTTP_SECURITY"
 			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity"
 			object-scope="PROCESS" />
@@ -18,21 +20,10 @@
 		<managed-object-source name="REQUEST_ATTRIBUTES"
 			source="net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource"
 			object-type="java.util.Map" />
-		<managed-object-source name="HTTP_SESSION"
-			source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource"
-			object-type="net.officefloor.plugin.socket.server.http.session.HttpSession"
-			timeout="10000" />
 	</managed-object-sources>
 	<managed-objects>
 		<managed-object name="REQUEST_ATTRIBUTES" scope="PROCESS">
 			<managed-object-source name="REQUEST_ATTRIBUTES" />
-		</managed-object>
-		<managed-object name="HTTP_SESSION" scope="PROCESS">
-			<managed-object-source name="HTTP_SESSION" />
-			<dependency name="HTTP_CONNECTION"
-				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
-				<external-managed-object name="HTTP_CONNECTION" />
-			</dependency>
 		</managed-object>
 	</managed-objects>
 	<sections>
@@ -41,7 +32,7 @@
 			location="WEB-INF/web.xml">
 			<input name="service" />
 			<output name="unhandled" escalation-only="false">
-				<section-input section="DESK" input="unhandled" />
+				<section-input section="UNHANDLED" input="unhandled" />
 			</output>
 			<object name="SERVLET_SERVER"
 				object-type="net.officefloor.plugin.servlet.host.ServletServer">
@@ -51,23 +42,29 @@
 				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
 				<external-managed-object name="HTTP_CONNECTION" />
 			</object>
-			<object name="REQUEST_ATTRIBUTES" object-type="java.util.Map">
-				<managed-object name="REQUEST_ATTRIBUTES" />
-			</object>
 			<object name="HTTP_SESSION"
 				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
-				<managed-object name="HTTP_SESSION" />
+				<external-managed-object name="HTTP_SESSION" />
 			</object>
 			<object name="HTTP_SECURITY"
 				object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
 				<external-managed-object name="HTTP_SECURITY" />
 			</object>
+			<object name="REQUEST_ATTRIBUTES" object-type="java.util.Map">
+				<managed-object name="REQUEST_ATTRIBUTES" />
+			</object>
 			<responsibility name="RESPONSIBILITY">
 				<team name="SERVLET_TEAM" />
 			</responsibility>
 		</section>
-		<section name="DESK" source="DESK" location="desk">
+		<section name="UNHANDLED" source="DESK" location="net/officefloor/plugin/servlet/war/WarDesk.desk">
 			<input name="unhandled" />
+			<output name="escalation" argument-type="java.lang.Exception"
+				escalation-only="true" />
+			<object name="HTTP_CONNECTION"
+				object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
+				<external-managed-object name="HTTP_CONNECTION" />
+			</object>
 			<responsibility name="RESPONSIBILITY">
 				<team name="SERVLET_TEAM" />
 			</responsibility>
