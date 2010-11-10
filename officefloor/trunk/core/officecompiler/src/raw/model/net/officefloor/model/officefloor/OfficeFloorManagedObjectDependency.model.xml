@@ -5,4 +5,7 @@
     <field
         type="OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel"
         name="office floor managed object" />
+    <field
+        type="OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel"
+        name="office floor input managed object" />
 </model>

@@ -88,6 +88,10 @@
 				class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel">
 				<value method="setOfficeFloorManagedObjectName" node="managed-object@name" />
 			</object>
+			<object method="setOfficeFloorInputManagedObject" node="input-managed-object"
+				class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel">
+				<value method="setOfficeFloorInputManagedObjectName" node="input-managed-object@name" />
+			</object>
 		</object>
 	</object>
 

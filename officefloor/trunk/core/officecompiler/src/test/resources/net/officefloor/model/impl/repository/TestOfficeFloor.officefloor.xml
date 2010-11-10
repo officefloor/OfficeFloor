@@ -31,8 +31,11 @@
 		<managed-object name="MANAGED_OBJECT_ONE" scope="THREAD"
 			x="300" y="301">
 			<managed-object-source name="MANAGED_OBJECT_SOURCE" />
-			<dependency name="DEPENDENCY" object-type="java.sql.Connection">
+			<dependency name="DEPENDENCY_ONE" object-type="java.sql.Connection">
 				<managed-object name="MANAGED_OBJECT_TWO" />
+			</dependency>
+			<dependency name="DEPENDENCY_TWO" object-type="net.orm.Session">
+				<input-managed-object name="INPUT_MANAGED_OBJECT" />
 			</dependency>
 		</managed-object>
 		<managed-object name="MANAGED_OBJECT_TWO" scope="PROCESS"

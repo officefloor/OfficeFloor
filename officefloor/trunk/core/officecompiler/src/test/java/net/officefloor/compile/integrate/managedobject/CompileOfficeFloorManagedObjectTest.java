@@ -195,6 +195,43 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Tests compiling a {@link ManagedObject} with a dependency as an
+	 * {@link InputManagedObject}.
+	 */
+	public void testManagedObjectDependencyLinkedToInputManagedObject() {
+
+		// Record building the office floor
+
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
+				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> inputManagingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
+		inputManagingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
+		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject("MO_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				InputDependencyManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MO", "MO_SOURCE");
+		DependencyMappingBuilder dependencies = this
+				.record_officeBuilder_addProcessManagedObject("MO", "MO");
+		dependencies.mapDependency(0, "INPUT");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensure issue if {@link ManagedObjectFlow} of
 	 * {@link OfficeFloorManagedObjectSource} is not linked.
 	 */
@@ -462,6 +499,16 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 		@ProcessInterface
 		Processes processes;
+	}
+
+	/**
+	 * Class for {@link ClassManagedObjectSource} containing an input
+	 * {@link Dependency}.
+	 */
+	public static class InputDependencyManagedObject {
+
+		@Dependency
+		ProcessManagedObject dependency;
 	}
 
 	/**

@@ -35,6 +35,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
@@ -56,7 +57,7 @@ import net.officefloor.model.repository.ModelRepository;
 /**
  * Tests the marshaling/unmarshaling of the {@link OfficeFloorModel} via the
  * {@link ModelRepository}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
@@ -68,7 +69,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -166,7 +167,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getObjectType", "getX", "getY" }, officeFloor
 				.getOfficeFloorInputManagedObjects(),
 				new OfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT",
-						"net.orm.Session", null, null, null, 200, 201));
+						"net.orm.Session", null, null, null, null, 200, 201));
 		OfficeFloorInputManagedObjectModel inputMo = officeFloor
 				.getOfficeFloorInputManagedObjects().get(0);
 		assertProperties(
@@ -199,15 +200,24 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorManagedObjectDependencyName",
 				"getDependencyType" }, mo
 				.getOfficeFloorManagedObjectDependencies(),
-				new OfficeFloorManagedObjectDependencyModel("DEPENDENCY",
-						Connection.class.getName()));
-		OfficeFloorManagedObjectDependencyModel dependency = mo
+				new OfficeFloorManagedObjectDependencyModel("DEPENDENCY_ONE",
+						Connection.class.getName()),
+				new OfficeFloorManagedObjectDependencyModel("DEPENDENCY_TWO",
+						"net.orm.Session"));
+		OfficeFloorManagedObjectDependencyModel dependencyOne = mo
 				.getOfficeFloorManagedObjectDependencies().get(0);
 		assertProperties(
 				new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel(
-						"MANAGED_OBJECT_TWO"), dependency
+						"MANAGED_OBJECT_TWO"), dependencyOne
 						.getOfficeFloorManagedObject(),
 				"getOfficeFloorManagedObjectName");
+		OfficeFloorManagedObjectDependencyModel dependencyTwo = mo
+				.getOfficeFloorManagedObjectDependencies().get(1);
+		assertProperties(
+				new OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel(
+						"INPUT_MANAGED_OBJECT"), dependencyTwo
+						.getOfficeFloorInputManagedObject(),
+				"getOfficeFloorInputManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the office floor teams
