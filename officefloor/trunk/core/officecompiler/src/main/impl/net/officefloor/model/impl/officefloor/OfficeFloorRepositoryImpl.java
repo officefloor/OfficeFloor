@@ -32,6 +32,7 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
@@ -52,7 +53,7 @@ import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link OfficeFloorRepository} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
@@ -64,7 +65,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -288,6 +289,26 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Connect the dependencies to the office floor input managed objects
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectDependencyModel dependency : managedObject
+					.getOfficeFloorManagedObjectDependencies()) {
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel conn = dependency
+						.getOfficeFloorInputManagedObject();
+				if (conn != null) {
+					OfficeFloorInputManagedObjectModel dependentManagedObject = inputManagedObjects
+							.get(conn.getOfficeFloorInputManagedObjectName());
+					if (dependentManagedObject != null) {
+						conn.setOfficeFloorManagedObjectDependency(dependency);
+						conn
+								.setOfficeFloorInputManagedObject(dependentManagedObject);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the set of office floor teams
 		Map<String, OfficeFloorTeamModel> teams = new HashMap<String, OfficeFloorTeamModel>();
 		for (OfficeFloorTeamModel team : officeFloor.getOfficeFloorTeams()) {
@@ -427,6 +448,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					.getDependentOfficeFloorManagedObjects()) {
 				conn.setOfficeFloorManagedObjectName(managedObject
 						.getOfficeFloorManagedObjectName());
+			}
+		}
+
+		// Specify dependencies to office floor input managed objects
+		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor
+				.getOfficeFloorInputManagedObjects()) {
+			for (OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel conn : inputManagedObject
+					.getDependentOfficeFloorManagedObjects()) {
+				conn.setOfficeFloorInputManagedObjectName(inputManagedObject
+						.getOfficeFloorInputManagedObjectName());
 			}
 		}
 

@@ -62,6 +62,7 @@ import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
@@ -343,7 +344,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 				ManagedObjectDependency dependency = managedObject
 						.getManagedObjectDependency(dependencyName);
 
-				// Obtain the dependent managed object
+				// Link the dependent managed object
 				OfficeFloorManagedObject dependentManagedObject = null;
 				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel dependencyToMo = dependencyModel
 						.getOfficeFloorManagedObject();
@@ -356,12 +357,28 @@ public class OfficeFloorModelOfficeFloorSource extends
 										.getOfficeFloorManagedObjectName());
 					}
 				}
-				if (dependentManagedObject == null) {
-					continue; // must have dependent managed object
+				if (dependentManagedObject != null) {
+					// Link the dependency to the managed object
+					deployer.link(dependency, dependentManagedObject);
 				}
 
-				// Link the dependency to the managed object
-				deployer.link(dependency, dependentManagedObject);
+				// Link the dependent input managed object
+				OfficeFloorInputManagedObject inputManagedObject = null;
+				OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel dependencyToInput = dependencyModel
+						.getOfficeFloorInputManagedObject();
+				if (dependencyToInput != null) {
+					OfficeFloorInputManagedObjectModel inputMoModel = dependencyToInput
+							.getOfficeFloorInputManagedObject();
+					if (inputMoModel != null) {
+						inputManagedObject = officeFloorInputManagedObjects
+								.get(inputMoModel
+										.getOfficeFloorInputManagedObjectName());
+					}
+				}
+				if (inputManagedObject != null) {
+					// Link the dependency to the input managed object
+					deployer.link(dependency, inputManagedObject);
+				}
 			}
 		}
 

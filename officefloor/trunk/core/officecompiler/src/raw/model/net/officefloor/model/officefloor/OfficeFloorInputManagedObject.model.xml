@@ -8,6 +8,9 @@
 	<list
 		type="OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel"
 		name="office floor managed object source" />
+	<list
+		type="OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel"
+		name="dependent office floor managed object" />
 	<list type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
 		name="deployed office object" />
 </model>
