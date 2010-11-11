@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="OfficeXml">
+<project name="OfficeFrame">
 	<bannerLeft>
 		<src>./images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="OfficeXml">
-			<item name="Overview" href="./index.html" />
-		</menu>
-        <menu ref="parent" />
+		<menu ref="modules" />
+		<menu ref="parent" />
 	</body>
 </project>

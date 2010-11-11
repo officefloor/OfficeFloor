@@ -9,7 +9,8 @@
 			img="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
-		<logo name="Eclipse" href="http://www.eclipse.org/" img="./images/EclipseReady.jpg" />
+		<logo name="Eclipse" href="http://www.eclipse.org/"
+			img="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg" />
 	</poweredBy>
 	<publishDate position="right" />
 	<version position="right" />

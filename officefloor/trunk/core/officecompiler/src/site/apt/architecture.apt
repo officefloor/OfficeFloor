@@ -81,7 +81,5 @@ Starting points
 *---------------------------------------------+---------------------------------------------------------------------------------+
 | net.officefloor.compile.OfficeFloorCompiler | Provides the starting point to compile an OfficeFloor.  It also provides access to the Loaders which enable obtaining the types for the Sources. |
 *---------------------------------------------+---------------------------------------------------------------------------------+
-| net.officefloor.main.OfficeFloorMain        | Provides command line running of OfficeFloor                                    |
-*---------------------------------------------+---------------------------------------------------------------------------------+
 | net.officefloor.compile.test package        | Provides utility classes for testing Sources                                    |
 *---------------------------------------------+---------------------------------------------------------------------------------+
