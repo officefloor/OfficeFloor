@@ -1,4 +1,4 @@
-                       ------------------
+                                       ------------------
 				             Welcome
 				       ------------------
 				      Daniel Sagenschneider
@@ -6,7 +6,7 @@
 
   <<Welcome to OfficeFloor>>
 
-  OfficeFloor simplifies the development of high performance applications.  It uses a {{{officeframe/job-based-architecture.html}Job Based Architecture}} and manages application functionality with {{{eclipse/plugins/net.officefloor.ui/graphical-configuration.html}Graphical Configuration}}, allowing:
+  OfficeFloor simplifies the development of high performance applications.  It uses a {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} and manages application functionality with {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}Graphical Configuration}}, allowing:
 
    * Developers to write code rather than configuration
 
@@ -18,10 +18,10 @@ Find out more
 
   To find out more about OfficeFloor:
 
-   * Watch the {{{demo.html}Demo}}
+   * Watch the {{{./demo.html}Demo}}
 
-   * Read about the {{{architecture.html}Architecture}}
+   * Read about the {{{./architecture.html}Architecture}}
 
-   * Understand the {{{principles.html}Principles}}
+   * Understand the {{{./principles.html}Principles}}
 
-   * Start using in {{{eclipse.html}Eclipse}}
+   * Start using in {{{./eclipse.html}Eclipse}}

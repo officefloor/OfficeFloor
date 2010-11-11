@@ -64,7 +64,7 @@ Verbatim text
 
   --- instead of +-- suppresses the box around verbatim text.
 
-[Figure name] Figure caption
+[./images/OfficeFloorBannerImage.png] Figure caption
 
 *----------*--------------+----------------:
 || Header  || Another     || Header        |
@@ -88,12 +88,11 @@ Table caption
 
 =======================================================================
 
-^L
   New page.
 
   <Italic> font. <<Bold>> font. <<<Monospaced>>> font.
 
-  {Anchor}. Link to {{anchor}}. Link to {{http://www.officefloor.net}}.
+  {anchor}. Link to {{anchor}}. Link to {{http://www.officefloor.net}}.
   Link to {{{anchor}showing alternate text}}.
   Link to {{{http://www.officefloor.net}OfficeFloor home page}}.
 
