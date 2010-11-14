@@ -6,9 +6,9 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="${project.name}">
+        <menu name="${project.name}">
 			<item name="Overview" href="./index.html" />
 		</menu>
-        <menu ref="parent" />
+		<menu ref="parent" />
 	</body>
 </project>

@@ -6,14 +6,22 @@
 
   <<Welcome to OfficeFloor>>
 
-  OfficeFloor simplifies the development of high performance applications.  It uses a {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} and manages application functionality with {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}Graphical Configuration}}, allowing:
+  OfficeFloor is an Inversion of Control 2.0 implementation that focuses on dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - there by really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
 
-   * Developers to write code rather than configuration
+So why another framework?
+  
+  Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
+  
+  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enbles {{{./promote-good-design.html}promoting good designs}}.
 
-   * Architects to tune applications to the hardware
+Get going with OfficeFloor in under 10 minutes
 
-   * Businesses to gain transparency into their applications
-
+  TODO provide download and install via maven details to get going
+  
+  TODO provide download and running example
+  
+  TODO provide hook into eclipse to install and view example
+  
 Find out more
 
   To find out more about OfficeFloor:
@@ -25,3 +33,4 @@ Find out more
    * Understand the {{{./principles.html}Principles}}
 
    * Start using in {{{./eclipse.html}Eclipse}}
+

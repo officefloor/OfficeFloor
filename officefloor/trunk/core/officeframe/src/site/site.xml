@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="OfficeFrame">
+<project>
 	<bannerLeft>
 		<src>./images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="OfficeFrame">
+		<menu name="${project.name}">
 			<item name="Overview" href="./index.html" />
 			<item name="Job Based Architecture" href="./job-based-architecture.html" />
 		</menu>

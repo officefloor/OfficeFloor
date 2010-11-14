@@ -4,10 +4,24 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module provides a ManagedObjectSource to support JDBC.  The implementation expects that connections will be pooled and requires to be configured with a database vendor's <<<javax.sql.ConnectionPoolDataSource>>>.  The object provided from the ManagedObjectSource is a <<<java.sql.Connection>>>.  The implementation also provides a Recycle Task that closes connections no longer in use so that the developers need not close the connections.
+  <<JDBC Plug-in>>
 
-*-----------------------------------------------------+----------------------+
-|| ManagedObjectSource                                || Interface of object |
-*-----------------------------------------------------+----------------------+
-| net.officefloor.plugin.jdbc.JdbcManagedObjectSource | java.sql.Connection  |
-*-----------------------------------------------------+----------------------+
+  This module provides ManagedObjectSource implementations to support JDBC.
+  
+*----------------------------------------------------------------------+----------------------+
+|| ManagedObjectSource                                                 || Interface of object |
+*----------------------------------------------------------------------+----------------------+
+| net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource | javax.sql.DataSource |
+*----------------------------------------------------------------------+----------------------+
+| net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource       | java.sql.Connection  |
+*----------------------------------------------------------------------+----------------------+
+
+  The <<<JdbcManagedObjectSource>>> implementation utilises the OfficeFloor framework to provide a <<<Connection>>> object that is managed by OfficeFloor so that your application code need only use the <<<Connection>>> and not write code for:
+  
+   * obtaining a <<<Connection>>> (as it is directly dependency injected)
+   
+   * administering transactions
+   
+   * closing the <<<Connection>>>
+
+  The <<<DataSourceManagedObjectSource>>> enables working with existing frameworks that depend on a <<<DataSource>>>. 

@@ -4,6 +4,8 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
+  <<JMS Plug-in>>
+
   This module provides ManagedObjectSources to support JMS.  The module supports both consuming messages and publishing messages.
 
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
