@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="OfficeCompiler">
+<project>
 	<bannerLeft>
 		<src>./images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-		<menu name="OfficeBuilding">
+		<menu name="${project.name}">
 			<item name="Overview" href="./index.html" />
 		</menu>
 		<menu name="Administration">

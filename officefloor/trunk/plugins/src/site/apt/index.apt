@@ -1,0 +1,26 @@
+                                       ------------------
+				           Plug-ins
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  This provides the plug-in functionality for OfficeFloor.
+
+   * {{{./officeplugin_jndi/index.html}JNDI}} provides JNDI based functionality.
+
+   * {{{./officeplugin_jdbc/index.html}JDBC}} provides database connectivity functionality.
+    
+   * {{{./officeplugin_jms/index.html}JMS}} provides queue connectivity functionality.  
+
+   * {{{./officeplugin_socket/index.html}Socket}} provides socket functionality, in particular HTTP functionality.
+
+  The following plug-ins provide re-use of existing java enterprise components and easier ability to migrate applications to the advantages of OfficeFloor: 
+   
+   * {{{./officeplugin_ejb/index.html}EJB}} provides interaction with EJBs.
+
+   * {{{./officeplugin_servlet/index.html}Servlet}} allows running a WAR application and re-use of HttpServlet implementations within OfficeFloor.
+
+   * {{{./officeplugin_spring/index.html}Spring}} allows re-using Spring beans.
+
+   * {{{./officeplugin_hibernate/index.html}Hibernate}} allows re-using Hibernate mappings.
+
