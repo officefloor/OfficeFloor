@@ -4,8 +4,54 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
+  <<Socket Plug-in>>
+
   This module provides both ManagedObjectSources and WorkSources for working with sockets (and HTTP over sockets).
 
+  * net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoaderManagedObjectSource
+  
+  * net.officefloor.plugin.socket.server.http.parameters.HttpParametersLoaderWorkSource
+  
+  * net.officefloor.plugin.socket.server.http.resource.source.ClasspathHttpFileFactoryWorkSource
+
+  * net.officefloor.plugin.socket.server.http.resource.source.ClasspathHttpFileSenderWorkSource
+
+  * net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource
+
+  * net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWorkSource
+  
+  * net.officefloor.plugin.socket.server.http.route.HttpRouteWorkSource
+  
+  * net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.security.HttpSecurityWorkSource
+  
+  * net.officefloor.plugin.socket.server.http.security.HttpSecurityServiceManagedObjectSource
+  
+  * net.officefloor.plugin.socket.server.http.security.store.JndiLdapManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.security.store.PasswordFileManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.session.object.HttpSessionObjectManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.session.object.ObjectRetrieverManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource
+
+  * net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource
+  
+  * net.officefloor.plugin.socket.server.tcp.source.SecureTcpServerSocketManagedObjectSource
+
+  * net.officefloor.plugin.socket.server.tcp.source.TcpServerSocketManagedObjectSource
+  
+
+  
 *-------------------------------------------------------------------------------+---------------------------------------------------------+
 || ManagedObjectSource                                                          || Interface of object                                    |
 *-------------------------------------------------------------------------------+---------------------------------------------------------+

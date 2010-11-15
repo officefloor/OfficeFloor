@@ -90,15 +90,15 @@ Writing your own ManagedObjectSource implementation
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
 || Class                                                                               || Description                                     |
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
-| net.officefloor.frame.spi.managedobject.source.ManagedObjectSource                   | This is the interface that all ManagedObjectSource implementations must implement |
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}}                   | This is the interface that all ManagedObjectSource implementations must implement |
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
-| net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource | Provides abstract functionality to simplify implementing a ManagedObjectSource |
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/impl/AbstractAsyncManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource}} | Provides abstract functionality to simplify implementing a ManagedObjectSource |
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
-| net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource      | Provides abstract functionality to create a factory like ManagedObjectSource.  This should only be used if creation of the ManagedObject is not an 'expensive' operation.|
+| {{{/apidocs/net/officefloor/frame/spi/managedobject/source/impl/AbstractManagedObjectSource.html}net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource}}      | Provides abstract functionality to create a factory like ManagedObjectSource.  This should only be used if creation of the ManagedObject is not an 'expensive' operation.|
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
-| net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil                   | Utility class to aid in testing your implemented ManagedObjectSource |
+| {{{/apidocs/net/officefloor/compile/test/managedobject/ManagedObjectLoaderUtil.html}net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil}}                   | Utility class to aid in testing your implemented ManagedObjectSource |
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
-| net.officefloor.compile.ManagedObjectSourceService                                   | Allows using the ServiceLoader functionality to provide additional meta-data about your ManagedObjectSource. Providing this is optional. |
+| {{{/apidocs/net/officefloor/compile/ManagedObjectSourceService.html}net.officefloor.compile.ManagedObjectSourceService}}                                   | Allows using the ServiceLoader functionality to provide additional meta-data about your ManagedObjectSource. Providing this is optional. |
 *--------------------------------------------------------------------------------------+--------------------------------------------------+
 
   Also see the graphical editors for details on how you can also provide customised graphical configuration of your ManagedObjectSource.

@@ -79,7 +79,7 @@ Starting points
 *---------------------------------------------+---------------------------------------------------------------------------------+
 || Class                                      || Description                                                                    |
 *---------------------------------------------+---------------------------------------------------------------------------------+
-| net.officefloor.compile.OfficeFloorCompiler | Provides the starting point to compile an OfficeFloor.  It also provides access to the Loaders which enable obtaining the types for the Sources. |
+| {{{/apidocs/net/officefloor/compile/OfficeFloorCompiler.html}net.officefloor.compile.OfficeFloorCompiler}} | Provides the starting point to compile an OfficeFloor.  It also provides access to the Loaders which enable obtaining the types for the Sources. |
 *---------------------------------------------+---------------------------------------------------------------------------------+
-| net.officefloor.compile.test package        | Provides utility classes for testing Sources                                    |
+| {{{/apidocs/net/officefloor/compile/test.html}net.officefloor.compile.test}} package        | Provides utility classes for testing Sources                                    |
 *---------------------------------------------+---------------------------------------------------------------------------------+

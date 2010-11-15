@@ -31,15 +31,15 @@ Writing your own AdministratorSource implementation
 *----------------------------------------------------------------------------------+----------------------------------------------------+
 || Class                                                                           || Description                                       |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
-| net.officefloor.frame.spi.administration.source.AdministratorSource              | This is the interface that all AdministratorSource implementations must implement |
+| {{{/apidocs/net/officefloor/frame/spi/administration/source/AdministratorSource.html}net.officefloor.frame.spi.administration.source.AdministratorSource}}              | This is the interface that all AdministratorSource implementations must implement |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
-| net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource | Provides abstract functionality to simplify implementing a AdministratorSource |
+| {{{/apidocs/net/officefloor/frame/spi/administration/source/impl/AbstractAdministratorSource.html}net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource}} | Provides abstract functionality to simplify implementing a AdministratorSource |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
-| net.officefloor.compile.test.administrator.AdministratorLoaderUtil               | Provides utility methods to test your AdministratorSource implementation |
+| {{{/apidocs/net/officefloor/compile/test/administrator/AdministratorLoaderUtil.html}net.officefloor.compile.test.administrator.AdministratorLoaderUtil}}               | Provides utility methods to test your AdministratorSource implementation |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
-| net.officefloor.compile.AdministratorSourceService                               | Allows using the ServiceLoader functionality to provide additional meta-data about your AdministratorSource.  Providing this is optional. |
+| {{{/apidocs/net/officefloor/compile/AdministratorSourceService.html}net.officefloor.compile.AdministratorSourceService}}                               | Allows using the ServiceLoader functionality to provide additional meta-data about your AdministratorSource.  Providing this is optional. |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
-| net.officefloor.plugin.administrator.clazz.ClassAdministratorSource              | Provides the 'plumbing' to use POJOs as administrators.  You may want to consider using this rather than writing a full implementation. |
+| {{{/apidocs/net/officefloor/plugin/administrator/clazz/ClassAdministratorSource.html}net.officefloor.plugin.administrator.clazz.ClassAdministratorSource}}              | Provides the 'plumbing' to use POJOs as administrators.  You may want to consider using this rather than writing a full implementation. |
 *----------------------------------------------------------------------------------+----------------------------------------------------+
 
   Also see the graphical editors for details on how you can also provide customised graphical configuration of your AdministratorSource.

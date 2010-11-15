@@ -30,11 +30,11 @@ Starting points
 
   As long as you are familiar with the {{{./job-based-architecture.html}Job Based Architecture}}, you need not delve into the specifics of OfficeFrame.  If however, you want a deeper understanding some recommended places to start looking into the code are:
 
-*-------------------------------------------------------------+----------------------------------------------------------------------+
-|| Class                                                      || Description                                                          |
-*-------------------------------------------------------------+----------------------------------------------------------------------+
-| net.officefloor.frame.api.OfficeFrame                       | The starting point for the OfficeFrame configuration API             |
-*-------------------------------------------------------------+----------------------------------------------------------------------+
-| net.officefloor.frame.impl.execute.job.AbstractJobContainer | The core class providing functionality to manage execution of jobs   |
-*-------------------------------------------------------------+----------------------------------------------------------------------+
+*-------------------------------------------------------------+-------------------------------------------------------+
+|| Class                                                      || Description                                          |
+*-------------------------------------------------------------+-------------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/api/OfficeFrame.html}net.officefloor.frame.api.OfficeFloor}} | The starting point for the OfficeFrame configuration API |
+*-------------------------------------------------------------+-------------------------------------------------------+
+| {{{/apidocs/net/officefloor/frame/impl/execute/job/AbstractJobContainer.html}net.officefloor.frame.impl.execute.job.AbstractJobContainer}} | The core class providing functionality to manage execution of jobs |
+*-------------------------------------------------------------+-------------------------------------------------------+
 

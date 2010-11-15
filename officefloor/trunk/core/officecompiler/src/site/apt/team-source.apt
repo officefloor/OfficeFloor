@@ -20,11 +20,11 @@ Writing your own TeamSource implementation
 *---------------------------------------------------------------+-------------------------------------------------------------------------+
 || Class                                                        || Description                                                            |
 *---------------------------------------------------------------+-------------------------------------------------------------------------+
-| net.officefloor.frame.spi.team.source.TeamSource              | This is the interface that all TeamSource implementations must implement |
+| {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}net.officefloor.frame.spi.team.source.TeamSource}}              | This is the interface that all TeamSource implementations must implement |
 *---------------------------------------------------------------+-------------------------------------------------------------------------+
-| net.officefloor.frame.spi.team.source.impl.AbstractTeamSource | Provides abstract functionality to simplify implementing a TeamSource |
+| {{{/apidocs/net/officefloor/frame/spi/team/source/impl/AbstractTeamSource.html}net.officefloor.frame.spi.team.source.impl.AbstractTeamSource}} | Provides abstract functionality to simplify implementing a TeamSource |
 *---------------------------------------------------------------+-------------------------------------------------------------------------+
-| net.officefloor.compile.TeamSourceService                     | Allows using the ServiceLoader functionality to provide additional meta-data about your TeamSource. Providing this is optional. |
+| {{{/apidocs/net/officefloor/compile/TeamSourceService.html}net.officefloor.compile.TeamSourceService}}                     | Allows using the ServiceLoader functionality to provide additional meta-data about your TeamSource. Providing this is optional. |
 *---------------------------------------------------------------+-------------------------------------------------------------------------+
 
   Also see the graphical editors for details on how you can also provide customised graphical configuration of your TeamSource.

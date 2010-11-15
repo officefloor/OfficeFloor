@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Socket Plug-in">
+<project>
 	<bannerLeft>
-		<src>images/OfficeFloorBannerImage.png
+		<src>./images/OfficeFloorBannerImage.png
 		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<body>
-        <breadcrumbs>
-            <item name="Socket Plug-in" href="index.html" />
-        </breadcrumbs>
-		<menu name="Socket Plug-in">
+		<menu name="${project.name}">
 			<item name="Overview" href="index.html" />
 		</menu>
         <menu ref="parent" />
