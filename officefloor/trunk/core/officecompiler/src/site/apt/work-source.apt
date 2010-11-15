@@ -41,15 +41,15 @@ Writing your own WorkSource implementation
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
 || Class                                                          || Description                                                           |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| net.officefloor.compile.spi.work.source.WorkSource              |  This is the interface that all WorkSource implementations must implement. |
+| {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}net.officefloor.compile.spi.work.source.WorkSource}}              |  This is the interface that all WorkSource implementations must implement. |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| net.officefloor.compile.spi.work.source.impl.AbstractWorkSource | Provides abstract functionality to simplify implementing a WorkSource  |
+| {{{/apidocs/net.officefloor/compile/spi/work/source/impl/AbstractWorkSource.html}net.officefloor.compile.spi.work.source.impl.AbstractWorkSource}} | Provides abstract functionality to simplify implementing a WorkSource  |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| net.officefloor.compile.test.work.WorkLoaderUtil                | Utility class to aid in testing your implemented WorkSource            |
+| {{{/apidocs/net/officefloor/compile/test/work/WorkLoaderUtil.html}net.officefloor.compile.test.work.WorkLoaderUtil}}                | Utility class to aid in testing your implemented WorkSource            |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| net.officefloor.compile.WorkSourceService                       | Allows using the ServiceLoader functionality to provide additional meta-data about your WorkSource.  Providing this is optional. |
+| {{{/apidocs/net/officefloor/compile/WorkSourceService.html}net.officefloor.compile.WorkSourceService}}                       | Allows using the ServiceLoader functionality to provide additional meta-data about your WorkSource.  Providing this is optional. |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| net.officefloor.plugin.work.clazz.ClassWorkSource               | Provides the 'plumbing' to use POJOs for Work and Tasks.  You may want to consider using this rather than writing a full implementation. |
+| {{{/apidocs/net/officefloor/plugin/work/clazz/ClassWorkSource.html}net.officefloor.plugin.work.clazz.ClassWorkSource}}               | Provides the 'plumbing' to use POJOs for Work and Tasks.  You may want to consider using this rather than writing a full implementation. |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
 
   Also see the graphical editors for details on how you can also provide customised graphical configuration of your WorkSource.

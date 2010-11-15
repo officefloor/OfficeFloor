@@ -3,7 +3,9 @@
 				       ------------------
 				      Daniel Sagenschneider
 				       ------------------
-
+  
+  <<Core>>
+  
   This provides the core functionality for OfficeFloor.
 
    * {{{./officeframe/index.html}OfficeFrame}} is the run time engine.
@@ -15,3 +17,4 @@
    * {{{./officebuilding/index.html}OfficeBuilding}} provides controls (both command line and JMX) for running OfficeFloor instances.
 
   The {{{./officemodelgen/index.html}Model Generator}} is a code generator for the configuration objects.  This only produces boiler plate configuration code to reduce manual coding.
+

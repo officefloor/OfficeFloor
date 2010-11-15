@@ -59,20 +59,11 @@
 	<reporting>
 		<plugins>
 			<plugin>
-				<!-- Report on broken links -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.0.1</version>
-				<configuration>
-					<!-- Not generating as causes hanging in Hudson -->
-					<forceSite>false</forceSite>
-				</configuration>
-			</plugin>
-			<plugin>
 				<!-- Fix for failing site generation via Hudson -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>2.2</version>
+				<inherited>true</inherited>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -83,6 +74,31 @@
 						</reports>
 					</reportSet>
 				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Generate Javadoc for referencing in site documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
+				<inherited>false</inherited> <!-- only top level aggregation -->
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<!-- Report on broken links -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-linkcheck-plugin</artifactId>
+				<version>1.0.1</version>
+				<inherited>true</inherited>
+				<configuration>
+					<!-- Not generating as site is being generated -->
+					<forceSite>false</forceSite>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>

@@ -4,7 +4,9 @@
                                          Daniel Sagenschneider
                                          --------------------
 
-  OfficeCompiler compiles the Sources of OfficeFloor ready for execution by the OfficeFrame.
+  <<OfficeCompiler>>
+
+  OfficeCompiler compiles the Sources of OfficeFloor for execution by the OfficeFrame.
 
 [images/OfficeCompiler.png] OfficeCompiler
 

@@ -4,6 +4,8 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
+  <<OfficeXml>>
+
   OfficeXml is an OXM (object to XML mapper) and is used by the OfficeCompiler to load and store the configuration of OfficeFloor.  It does not force the use of any class structure and focuses on providing mapping between the XML and the java objects.  It is even possible to map the XML into differing object structures and object structures into differing XML (hence its <mapping> nature).
 
   On loading the mapping configuration for OfficeXml, it validates the configuration against the classes so that it provides type safe mapping.  In doing so it ensures that as the object model changes the mapping configuration is changed to map to the new model.  This coupling ensures that the mappings are validated at start up of application rather than during execution time, providing fail quick validation.
@@ -20,12 +22,12 @@ XML Configuration
 
 ManagedObjectSource
 
-  As XML mapping is required by many applications, the XML mapping of OfficeXml is also provided as <<<ManagedObjectSources>>>.  The two classes providing this functionality are:
+  As XML mapping is required by many applications, the XML mapping of OfficeXml is also provided as <<<ManagedObjectSources>>>.  The classes providing this functionality are:
 
 *-----------------------------------------------------------------------------------+--------------------------------------------+
 || ManagedObjectSource                                                              || Interface of object                       |
 *-----------------------------------------------------------------------------------+--------------------------------------------+
-| net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerManagedObjectSource     | net.officefloor.plugin.xml.XmlMarshaller   |
+| {{{/apidocs/net/officefloor/plugin/xml/marshall/tree/TreeXmlMarshallerManagedObjectSource.html}net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerManagedObjectSource}}     | {{{/apidocs/net/officefloor/plugin/xml/XmlMarshaller.html}net.officefloor.plugin.xml.XmlMarshaller}}   |
 *-----------------------------------------------------------------------------------+--------------------------------------------+
-| net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerManagedObjectSource | net.officefloor.plugin.xml.XmlUnmarshaller |
+| {{{/apidocs/net/officefloor/plugin/xml/unmarshall/tree/TreeXmlUnmarshallerManagedObjectSource.html}net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerManagedObjectSource}} | {{{/apidocs/net/officefloor/plugin/xml/XmlUnmarshaller.html}net.officefloor.plugin.xml.XmlUnmarshaller}} |
 *-----------------------------------------------------------------------------------+--------------------------------------------+

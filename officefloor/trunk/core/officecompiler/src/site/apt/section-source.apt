@@ -57,17 +57,17 @@ Writing your own SectionSource implementation
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
 || Class                                                                || Description                                                    |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.compile.spi.section.source.SectionSource              | This is the interface that all SectionSource implementations must implement |
+| {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}net.officefloor.compile.spi.section.source.SectionSource}}              | This is the interface that all SectionSource implementations must implement |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.compile.spi.section.source.impl.AbstractSectionSource | Provides abstract functionality to simplify implementing a SectionSource |
+| {{{/apidocs/net/officefloor/compile/spi/section/source/impl/AbstractSectionSource.html}net.officefloor.compile.spi.section.source.impl.AbstractSectionSource}} | Provides abstract functionality to simplify implementing a SectionSource |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.compile.test.section.SectionLoaderUtil                | Provides utility methods to test your SectionSource implementation |
+| {{{/apidocs/net/officefloor/compile/test/section/SectionLoaderUtil.html}net.officefloor.compile.test.section.SectionLoaderUtil}}                | Provides utility methods to test your SectionSource implementation |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.compile.SectionSourceService                          | Allows using the ServiceLoader functionality to provide additional meta-data about your SectionSource. Providing this is optional. |
+| {{{/apidocs/net/officefloor/compile/SectionSourceService.html}net.officefloor.compile.SectionSourceService}}                          | Allows using the ServiceLoader functionality to provide additional meta-data about your SectionSource. Providing this is optional. |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.model.impl.desk.DeskModelSectionSource                | Implementation that configures how Tasks are connected together.  It gets its name from the idea that all Work must be done at a Desk.  See the IDE for more details. |
+| {{{/apidocs/net/officefloor/model/impl/desk/DeskModelSectionSource.html}net.officefloor.model.impl.desk.DeskModelSectionSource}}                | Implementation that configures how Tasks are connected together.  It gets its name from the idea that all Work must be done at a Desk.  See the IDE for more details. |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
-| net.officefloor.model.impl.section.SectionModelSectionSource          | Implementation that allows connecting Desks and Sections together.  It provides for the abstractions in organising the functionality of an application by allowing to arrange the Desks and Sections of an office. See the IDE for more details. |
+| {{{/apidocs/net/officefloor/model/impl/section/SectionModelSectionSource.html}net.officefloor.model.impl.section.SectionModelSectionSource}}          | Implementation that allows connecting Desks and Sections together.  It provides for the abstractions in organising the functionality of an application by allowing to arrange the Desks and Sections of an office. See the IDE for more details. |
 *-----------------------------------------------------------------------+-----------------------------------------------------------------+
 
   Please note that in writing you own implementation you are expected to provide a graphical editor to configure your implementation.

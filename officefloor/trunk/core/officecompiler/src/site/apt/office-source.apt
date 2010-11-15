@@ -21,15 +21,15 @@ Writing your own OfficeSource implementation
 *---------------------------------------------------------------------+------------------------------------------------------------------+
 || Class                                                              || Description                                                     |
 *---------------------------------------------------------------------+------------------------------------------------------------------+
-| net.officefloor.compile.spi.office.source.OfficeSource              | This is the interface that all OfficeSource implementations must implement |
+| {{{/apidocs/net/officefloor/compile/spi/office/source/OfficeSource.html}net.officefloor.compile.spi.office.source.OfficeSource}}              | This is the interface that all OfficeSource implementations must implement |
 *---------------------------------------------------------------------+------------------------------------------------------------------+
-| net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource | Provides abstract functionality to simplify implementing a OfficeSource |
+| {{{/apidocs/net/officefloor/compile/spi/office/source/impl/AbstractOfficeSource.html}net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource}} | Provides abstract functionality to simplify implementing a OfficeSource |
 *---------------------------------------------------------------------+------------------------------------------------------------------+
-| net.officefloor.compile.test.office.OfficeLoaderUtil                | Provides utility methods to test your OfficeSource implementation |
+| {{{/apidocs/net/officefloor/compile/test/office/OfficeLoaderUtil.html}net.officefloor.compile.test.office.OfficeLoaderUtil}}                | Provides utility methods to test your OfficeSource implementation |
 *---------------------------------------------------------------------+------------------------------------------------------------------+
-| net.officefloor.compile.OfficeSourceService                         | Allows using the ServiceLoader functionality to provide additional meta-data about your OfficeSource. Providing this is optional. | 
+| {{{/apidocs/net/officefloor/compile/OfficeSourceService.html}net.officefloor.compile.OfficeSourceService}}                         | Allows using the ServiceLoader functionality to provide additional meta-data about your OfficeSource. Providing this is optional. | 
 *---------------------------------------------------------------------+------------------------------------------------------------------+
-| net.officefloor.model.impl.office.OfficeModelOfficeSource           | Implementation of the OfficeSource.  See the IDE for more details |
+| {{{/apidocs/net/officefloor/model/impl/office/OfficeModelOfficeSource.html}net.officefloor.model.impl.office.OfficeModelOfficeSource}}           | Implementation of the OfficeSource.  See the IDE for more details |
 *---------------------------------------------------------------------+------------------------------------------------------------------+
 
   Please note that in writing you own implementation you are expected to provide a graphical editor to configure your implementation.
