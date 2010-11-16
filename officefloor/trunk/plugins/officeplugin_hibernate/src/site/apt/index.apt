@@ -4,6 +4,8 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
+  <<Hibernate Plug-in>>
+  
   This module provides integration with Hibernate.
 
   The implementation provides a hibernate session that is given a user <<<java.sql.Connection>>>.  The <<<java.sql.Connection>>> is specified as a dependency for the implementation so that it can integrate with the <non-blocking> connection pooling of OfficeFloor.
@@ -11,5 +13,5 @@
 *---------------------------------------------------------------+-----------------------+---------------------+
 || ManagedObjectSource                                          || Interface of object  || Dependencies       |
 *---------------------------------------------------------------+-----------------------+---------------------+
-| net.officefloor.plugin.hibernate.HibernateManagedObjectSource | org.hibernate.Session | java.sql.Connection |
+| {{{/apidocs/net/officefloor/plugin/hibernate/HibernateManagedObjectSource.html}net.officefloor.plugin.hibernate.HibernateManagedObjectSource}} | <<<org.hibernate.Session>>> | <<<java.sql.Connection>>> |
 *---------------------------------------------------------------+-----------------------+---------------------+
