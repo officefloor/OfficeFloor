@@ -11,9 +11,9 @@
 *----------------------------------------------------------------------+----------------------+
 || ManagedObjectSource                                                 || Interface of object |
 *----------------------------------------------------------------------+----------------------+
-| net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource | javax.sql.DataSource |
+| {{{/apidocs/net/officefloor/plugin/jdbc/datasource/DataSourceManagedObjectSource.html}net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource}} | <<<javax.sql.DataSource>>> |
 *----------------------------------------------------------------------+----------------------+
-| net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource       | java.sql.Connection  |
+| {{{/apidocs/net.officefloor/plugin/jdbc/connection/JdbcManagedObjectSource.html}net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource}}       | <<<java.sql.Connection>>>  |
 *----------------------------------------------------------------------+----------------------+
 
   The <<<JdbcManagedObjectSource>>> implementation utilises the OfficeFloor framework to provide a <<<Connection>>> object that is managed by OfficeFloor so that your application code need only use the <<<Connection>>> and not write code for:

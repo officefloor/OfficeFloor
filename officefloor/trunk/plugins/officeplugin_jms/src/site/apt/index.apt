@@ -11,7 +11,7 @@
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
 || ManagedObjectSource                                           || Interface of object                                      || Extension interfaces |
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
-| net.officefloor.plugin.jms.JmsManagedObjectSource              | net.officefloor.plugin.jms.TextMessageProducer            |            |
+| {{{/apidocs/net/officefloor/plugin/jms/JmsManagedObjectSource.html}net.officefloor.plugin.jms.JmsManagedObjectSource}}              | {{{/apidocs/net/officefloor/plugin/jms/TextMessageProducer.html}net.officefloor.plugin.jms.TextMessageProducer}}            |            |
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
-| net.officefloor.plugin.jms.server.JmsServerManagedObjectSource | Input only invoking task with argument: javax.jms.Message | net.officefloor.admin.transaction.Transaction | 
+| {{{/apidocs/net/officefloor/plugin/jms/server/JmsServerManagedObjectSource.html}net.officefloor.plugin.jms.server.JmsServerManagedObjectSource}} | Input only invoking task with argument: <<<javax.jms.Message>>> | {{{/apidocs/net/officefloor/admin/transaction/Transaction.html}net.officefloor.admin.transaction.Transaction}} | 
 *----------------------------------------------------------------+-----------------------------------------------------------+------------+
