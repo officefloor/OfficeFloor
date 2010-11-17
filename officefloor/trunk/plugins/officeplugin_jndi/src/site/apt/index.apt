@@ -34,20 +34,18 @@ Using JNDI within OfficeFloor
 *------------------------------------------------------------------+------------------------------------+
 || Source                                                          || Description                       |
 *------------------------------------------------------------------+------------------------------------+
-| net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource | To retrieve a JNDI object.   |
+| {{{/apidocs/net/officefloor/plugin/jndi/object/JndiObjectManagedObjectSource.html}net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource}} | To retrieve a JNDI object.   |
 *------------------------------------------------------------------+------------------------------------+
-| net.officefloor.plugin.jndi.work.JndiWorkSource                  | To utilise a JNDI object's method as a task to execute.  This is useful to call methods on an EJB. |
+| {{{/apidocs/net/officefloor/plugin/jndi/work/JndiWorkSource.html}net.officefloor.plugin.jndi.work.JndiWorkSource}}                  | To utilise a JNDI object's method as a task to execute.  This is useful to call methods on an EJB. |
 *------------------------------------------------------------------+------------------------------------+
-| net.officefloor.plugin.jndi.ldap.JndiLdapManagedObjectSource     | To retrieve an LDAP DirContext. |
+| {{{/apidocs/net/officefloor/plugin/jndi/ldap/JndiLdapManagedObjectSource.html}net.officefloor.plugin.jndi.ldap.JndiLdapManagedObjectSource}}     | To retrieve an LDAP DirContext. |
 *------------------------------------------------------------------+------------------------------------+
 
 Thread context expectations of JNDI within JEE containers
 
   Typically JEE implementations of JNDI rely on ThreadLocal which limits execution of JEE components to single threads.  See the following team source in overcoming this limitation when utilising OfficeFloor within a JEE container:
   
--------------------------------------------------
-      net.officefloor.frame.impl.spi.team.ProcessContextTeamSource
--------------------------------------------------
+  {{{/apidocs/net/officefloor/frame/impl/spi/team/ProcessContextTeamSource.html}net.officefloor.frame.impl.spi.team.ProcessContextTeamSource}}
 
   and in particular the <<<ProcessContextTeam.doWork(...)>>> method.
 

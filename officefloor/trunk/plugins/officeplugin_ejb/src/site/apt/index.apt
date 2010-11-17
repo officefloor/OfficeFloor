@@ -6,7 +6,7 @@
 
   <<EJB Plug-in>>
   
-  Provides the <<<OfficeFloorEbj>>> which wraps an OfficeFloor in an EJB for running within an Application Server.
+  Provides the {{{/apidocs/net/officefloor/plugin/ejb/OfficeFloorEjb.html}net.officefloor.plugin.ejb.OfficeFloorEjb}} which wraps an OfficeFloor in an EJB for running within an Application Server.
   
   This allows OfficeFloor to be introduced slowly into your applications without having to make significant changes.
 

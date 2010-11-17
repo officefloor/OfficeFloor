@@ -8,7 +8,7 @@
   
   This module provides integration with Spring to enable the Spring beans to be dependency injected into Tasks.  This reduces the cost of adopting OfficeFloor by Spring applications by allowing the existing bean libraries to be re-used within OfficeFloor.
 
-  Over time you may wish to consider moving your management of beans to use ClassManagedObjectSource and ClassWorkSource as these Sources allow the beans to be graphically configured together and not necessitate writing the configuration by hand in Spring.
+  Over time you may wish to consider moving your management of beans to use {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}} and {{{/apidocs/net/officefloor/plugin/work/clazz/ClassWorkSource.html}ClassWorkSource}} as these Sources allow the beans to be graphically configured together and not necessitate writing the configuration by hand in Spring.
 
 *--------------------------------------------------------------------------+-----------------------------------------------+---------------+
 || ManagedObjectSource                                                     || Interface of object                          || Description  |
