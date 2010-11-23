@@ -93,11 +93,15 @@
 				<!-- Report on broken links -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.0.1</version>
+				<version>1.1</version>
 				<inherited>true</inherited>
 				<configuration>
 					<!-- Not generating as site is being generated -->
 					<forceSite>false</forceSite>
+					<excludedPages>
+						<!-- Ignore checking javadoc -->
+						<excludedPage>apidocs/**</excludedPage>
+					</excludedPages>
 				</configuration>
 			</plugin>
 		</plugins>
