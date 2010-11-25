@@ -4,12 +4,8 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module packages the core jars of OfficeFloor into an Eclipse plugin.  The jars packaged into the Eclipse plugin are:
-
-   * officeframe.jar
-
-   * officemodel.jar
-
-   * officexml.jar
-
-   * officecompiler.jar
+  <<net.officefloor.core>>
+  
+  This module packages the core jars of OfficeFloor into an Eclipse plug-in.
+  
+  This allows other Eclipse plug-ins (such as the {{{../net.officefloor.ui/index.html}OfficeFloor Eclipse UI}}) to depend on this plug-in for OfficeFloor functionality.

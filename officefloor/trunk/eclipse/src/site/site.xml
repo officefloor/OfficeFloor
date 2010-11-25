@@ -7,8 +7,8 @@
 	</bannerLeft>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="index.html" />
-			<item name="Graphical Configuration" href="graphical-configuration.html" />
+			<item name="Overview" href="./index.html" />
+			<item name="Graphical Configuration" href="./graphical-configuration.html" />
 		</menu>
 		<menu ref="modules" />
 		<menu ref="parent" />

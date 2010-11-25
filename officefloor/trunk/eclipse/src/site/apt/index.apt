@@ -10,6 +10,16 @@
   
   It also provides bundling these Eclipse features/plug-ins for release to the OfficeFloor Eclipse update site to allow you easier installation of OfficeFloor to Eclipse.
   
+  See {{{/eclipse.html}intall within Eclipse}} for details of installation of OfficeFloor within Eclipse.
+  
 Why Eclipse?
 
-  <<TODO provide write up for why Eclipse>>
+  Eclipse was choosen as it:
+  
+   * provides GEF for building graphical editors
+   
+   * is a widely adopted integrated development environment (IDE)
+   
+   * is free
+   
+  OfficeFloor has been kept modular to allow integration into other IDE's.  Time and effort is the only reasons for not supporting other IDE's.  Please contribute if you would like to see OfficeFloor on alternate IDE's. 
