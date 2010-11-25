@@ -12,19 +12,19 @@
 
   The editors can be recognised by the following icons:
 
-[images/Desk.png] Desk Editor
+[./images/Desk.png] Desk Editor
 
   Desk Editor that focuses on configuring WorkSources
 
-[images/Section.png] Section Editor
+[./images/Section.png] Section Editor
 
   Section Editor configures the coordination of Desks and Sub-Sections.
 
-[images/Office.png] Office Editor
+[./images/Office.png] Office Editor
 
   Office Editor provides application assembly configuration.
 
-[images/OfficeFloor.png] OfficeFloor Editor
+[./images/OfficeFloor.png] OfficeFloor Editor
 
   OfficeFloor Editor configures the deployment of Offices (applications).
 
