@@ -4,4 +4,6 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module provides an Eclipse plugin that adds a UI button to run the Filing Cabinet tool functionality.
+  <<Eclipse Filing Cabinet>>
+  
+  This module provides an Eclipse plug-in that adds a UI button to run the Filing Cabinet tool functionality for the {{{/tools/officetool_filingcabinet}OfficeFloor Filing Cabinet tool}}.

@@ -4,4 +4,6 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module provides an Eclipse plugin to enable custom graphical configuration for the Socket (and HTTP) functionality.
+  <<Eclipse Socket>>
+  
+  This module provides an Eclipse plug-in to enable custom graphical configuration for the Socket (and HTTP) functionality of {{{/plugins/officeplugin_socket/index.html}OfficeFloor Socket plug-in}}.

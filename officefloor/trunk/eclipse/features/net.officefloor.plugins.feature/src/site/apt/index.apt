@@ -4,10 +4,18 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  This module packages up optional Eclipse plugins into an Eclipse feature.  The included plugins are:
+  <<Eclipse Plug-ins Feature>>
+  
+  This module packages up optional Eclipse plugins into an Eclipse feature.  
+  
+  The included plugins are:
 
    * Eclipse JDBC
+   
+   * Eclipse JNDI
 
    * Eclipse Socket
 
    * Eclipse Filing Cabinet
+   
+   * Eclipse OfficeFloor Demo
