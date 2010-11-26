@@ -8,11 +8,26 @@
 	</parent>
 	<artifactId>maven-officefloor-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<name>OfficeFloor maven plugin</name>
+	<name>Maven OfficeFloor Plugin</name>
 	<description>Maven plug-in to start/stop an OfficeFloor instance</description>
+	<reporting>
+		<plugins>
+			<plugin>
+				<!-- Generate Maven plug-in documentation -->
+				<artifactId>maven-plugin-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
+	<properties>
+		<!-- Properties for reporting -->
+		<projectGroupId>${project.groupId}</projectGroupId>
+		<projectArtifactId>${project.artifactId}</projectArtifactId>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
+				<!-- Test the plugin -->
 				<artifactId>maven-invoker-plugin</artifactId>
 				<configuration>
 					<projectsDirectory>src/it</projectsDirectory>

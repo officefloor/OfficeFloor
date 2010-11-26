@@ -9,6 +9,7 @@
 		<menu name="${project.name}">
 			<item name="Overview" href="./index.html" />
 		</menu>
-        <menu ref="parent" />
+		<menu ref="modules" />
+		<menu ref="parent" />
 	</body>
 </project>
