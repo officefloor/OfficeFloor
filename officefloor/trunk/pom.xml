@@ -31,7 +31,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
+		<connection>scm:svn:http://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
+		<developerConnection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</developerConnection>
 		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk</url>
 	</scm>
 	<distributionManagement>
@@ -325,6 +326,14 @@
 				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Allow SVN tagging via command: mvn scm:tag -->
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<connectionType>developerConnection</connectionType>
+					<tag>release-${project.version}</tag>
 				</configuration>
 			</plugin>
 			<plugin>

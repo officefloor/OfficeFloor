@@ -1,15 +1,9 @@
                                        ---------------------------
-                                            Eclipse Feature
+                                         Eclipse OfficeFloor Demo
                                        ---------------------------
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse Feature>>
+  <<Eclipse OfficeFloor Demo>>
   
-  This module packages up the core Eclipse plugins to create the core Eclipse feature for OfficeFloor.
-  
-  The Eclipse plugins included are:
-
-   * Eclipse Core
-
-   * Eclipse UI
+  This module provides an Eclipse plug-in that adds a UI button to run the Demo tool functionality for the {{{/tools/officetool_demo}OfficeFloor Demo tool}}.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Eclipse UI">
+<project>
 	<bannerLeft>
 		<src>./images/OfficeFloorBannerImage.png
 		</src>
@@ -7,13 +7,13 @@
 	</bannerLeft>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="index.html" />
+			<item name="Overview" href="./index.html" />
 		</menu>
 		<menu name="Editors">
-			<item name="Desk" href="desk-editor.html" />
-			<item name="Section" href="section-editor.html" />
-			<item name="Office" href="office-editor.html" />
-			<item name="OfficeFloor" href="office-floor-editor.html" />
+			<item name="Desk" href="./desk-editor.html" />
+			<item name="Section" href="./section-editor.html" />
+			<item name="Office" href="./office-editor.html" />
+			<item name="OfficeFloor" href="./office-floor-editor.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>
