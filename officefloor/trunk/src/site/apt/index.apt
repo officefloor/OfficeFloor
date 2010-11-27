@@ -14,14 +14,22 @@ So why another framework?
   
   Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enbles {{{./promote-good-design.html}promoting good designs}}.
 
-Get going with OfficeFloor in under 10 minutes
+  The following is an example of the graphical configuration of OfficeFloor within Eclipse:
 
-  TODO provide download and install via maven details to get going
+[./images/screenshot.png] Example graphical configuration of OfficeFloor
   
-  TODO provide download and running example
-  
-  TODO provide hook into eclipse to install and view example
-  
+Get going with OfficeFloor
+
+  OfficeFloor (much like other frameworks) has initial learning curves to adopt.  Even though the graphical configuration of OfficeFloor is aimed at making development with OfficeFloor intuitive, the initial concepts still need to be understood.  Current work at the moment by the development team is to provide simple example uses of OfficeFloor to allow you easier understanding of both OfficeFloor's capabilities and how to start using OfficeFloor to build your applications.
+
+  The following active tasks are providing this detail and this page will be updated shortly with their outcomes:
+
+   * {{{http://sourceforge.net/tracker/?func=detail&aid=3120549&group_id=156349&atid=799429}Quick installation of OfficeFloor from Maven}}
+
+   * {{{http://sourceforge.net/tracker/index.php?func=detail&aid=3109862&group_id=156349&atid=799429}HTTP template links implementated as object methods}}
+
+  Once the above tasks are available, the examples will also be available within Eclipse (see {{{./eclipse.html}installing OfficeFloor within Eclipse}}) for making graphical configuration changes to the examples.
+
 Find out more
 
   To find out more about OfficeFloor:
