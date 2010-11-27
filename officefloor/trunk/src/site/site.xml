@@ -71,7 +71,6 @@
 		</menu>
 		<menu name="Technical">
 			<item name="Architecture" href="./architecture.html" />
-			<item name="Wiki" href="http://sourceforge.net/apps/trac/officefloor" />
 			<item name="Source Repository" href="./source-repository.html" />
 			<item name="SourceForge Page" href="http://sourceforge.net/projects/officefloor" />
 		</menu>
@@ -79,6 +78,7 @@
 			<item name="Getting Help" href="./getting-help.html" />
 			<item name="Forum"
 				href="http://sourceforge.net/search/?group_id=156349&amp;type_of_search=forums" />
+			<item name="Wiki" href="http://sourceforge.net/apps/trac/officefloor" />
 			<item name="Issue Tracking" href="./issue-tracking.html" />
 		</menu>
 		<menu ref="modules" />
