@@ -25,7 +25,7 @@
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
-		
+
 		<!-- Deploy to Update Site -->
 		<module>update.site</module>
 	</modules>
@@ -63,15 +63,14 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<pde>true</pde>
-					<!-- useProjectReferences = false ? -->
 				</configuration>
 			</plugin>
 			<plugin>
 				<!-- Work around as PDE headless build not using linked resources -->
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>Provide dependencies for PDE headless build</id>
 						<phase>process-sources</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
@@ -92,14 +91,27 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 				<extensions>true</extensions>
 				<configuration>
 					<eclipseInstall>${eclipse.install.dir}</eclipseInstall>
+					<!--  
+					<antVerbose>true</antVerbose>
+					-->
 					<buildProperties>
 						<javacSource>1.6</javacSource>
 						<javacTarget>1.6</javacTarget>
 					</buildProperties>
 				</configuration>
+				<executions>
+					<execution>
+						<!-- PDE clean also -->
+						<id>clean-pde</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+			<!-- Skip tests compilation as requires PDE environment -->
 			<plugin>
-				<!-- Skip tests compilation as requires PDE environment -->
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>

@@ -43,7 +43,7 @@ Writing your own WorkSource implementation
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
 | {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}net.officefloor.compile.spi.work.source.WorkSource}}              |  This is the interface that all WorkSource implementations must implement. |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
-| {{{/apidocs/net.officefloor/compile/spi/work/source/impl/AbstractWorkSource.html}net.officefloor.compile.spi.work.source.impl.AbstractWorkSource}} | Provides abstract functionality to simplify implementing a WorkSource  |
+| {{{/apidocs/net/officefloor/compile/spi/work/source/impl/AbstractWorkSource.html}net.officefloor.compile.spi.work.source.impl.AbstractWorkSource}} | Provides abstract functionality to simplify implementing a WorkSource  |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
 | {{{/apidocs/net/officefloor/compile/test/work/WorkLoaderUtil.html}net.officefloor.compile.test.work.WorkLoaderUtil}}                | Utility class to aid in testing your implemented WorkSource            |
 *-----------------------------------------------------------------+------------------------------------------------------------------------+
