@@ -29,5 +29,9 @@
 			<location>META-INF/MANIFEST.MF</location>
 			<contains>Bundle-ClassPath:([^:]*)officecompiler-@{officecompiler_version}.jar</contains>
 		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains>Bundle-ClassPath:([^:]*)officebuilding-@{officebuilding_version}.jar</contains>
+		</file>
 	</files>
 </verifications>

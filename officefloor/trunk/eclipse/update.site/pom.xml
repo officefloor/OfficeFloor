@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
-		<version>0.1.2</version>
+		<version>0.2.0</version>
 	</parent>
 	<artifactId>update.site</artifactId>
 	<name>Eclipse Update Site</name>
@@ -163,12 +163,10 @@
 		<dependency>
 			<groupId>net.officefloor.eclipse</groupId>
 			<artifactId>net.officefloor.feature</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.eclipse</groupId>
 			<artifactId>net.officefloor.plugins.feature</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ant-contrib</groupId>
