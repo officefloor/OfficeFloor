@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.tool</groupId>
-		<artifactId>tool</artifactId>
+		<artifactId>tools</artifactId>
 		<version>0.1.2</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>

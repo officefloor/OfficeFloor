@@ -8,9 +8,9 @@
 		<version>0.1.2</version>
 	</parent>
 	<groupId>net.officefloor.tool</groupId>
-	<artifactId>tool</artifactId>
+	<artifactId>tools</artifactId>
 	<packaging>pom</packaging>
-	<name>Tool</name>
+	<name>Tools</name>
 	<description>Tools for OfficeFloor</description>
 	<modules>
 		<module>officetool_demo</module>

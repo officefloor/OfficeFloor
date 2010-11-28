@@ -8,9 +8,9 @@
 		<version>0.1.2</version>
 	</parent>
 	<groupId>net.officefloor.plugin</groupId>
-	<artifactId>plugin</artifactId>
+	<artifactId>plugins</artifactId>
 	<packaging>pom</packaging>
-	<name>Plugin</name>
+	<name>Plugins</name>
 	<description>Plugin components for OfficeFloor</description>
 	<modules>
 		<module>officeplugin_jndi</module>

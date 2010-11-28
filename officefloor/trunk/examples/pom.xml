@@ -8,10 +8,10 @@
 		<version>0.1.2</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
-	<artifactId>example</artifactId>
+	<artifactId>examples</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
-	<name>Example</name>
+	<name>Examples</name>
 	<description>Example uses of OfficeFloor</description>
 	<modules>
 		<module>WebOrchestration</module>

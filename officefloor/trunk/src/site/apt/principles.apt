@@ -6,7 +6,7 @@
 
   The principals behind OfficeFloor are:
 
-   * Use {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}Graphical Configuration}} to allow developers to be more productive by focusing on code instead of writing time consuming and error prone configuration by hand.
+   * Use {{{./eclipse/graphical-configuration.html}Graphical Configuration}} to allow developers to be more productive by focusing on code instead of writing time consuming and error prone configuration by hand.
 
    * Organise information around the decisions made in building software applications to avoid information overload.  See {{{./promote-good-design.html}Promote good design vs policing a good design}} for further information.
 

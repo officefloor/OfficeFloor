@@ -12,7 +12,7 @@ So why another framework?
   
   Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
   
-  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/plugins/net.officefloor.ui/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enbles {{{./promote-good-design.html}promoting good designs}}.
+  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enbles {{{./promote-good-design.html}promoting good designs}}.
 
   The following is an example of the graphical configuration of OfficeFloor within Eclipse:
 
