@@ -92,6 +92,9 @@
 		</antcall>
 
 		<!-- Download existing releases for digest/content/artifacts jar -->
+		<antcall target="downloadReleaseFrom0.1.2">
+			<param name="DOWNLOAD_RELEASE_VERSION" value="0.1.2" />
+		</antcall>
 		<antcall target="downloadReleaseFrom0.1.0">
 			<param name="DOWNLOAD_RELEASE_VERSION" value="0.1.1" />
 		</antcall>

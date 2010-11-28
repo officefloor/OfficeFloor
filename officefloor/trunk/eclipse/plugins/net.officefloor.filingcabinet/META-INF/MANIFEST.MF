@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Filing Cabinet
 Bundle-SymbolicName: net.officefloor.filingcabinet;singleton:=true
-Bundle-Version: 0.1.2
+Bundle-Version: 0.2.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: net.officefloor.core;bundle-version="0.1.2",
- net.officefloor.ui;bundle-version="0.1.2"
+Require-Bundle: net.officefloor.core;bundle-version="0.2.0",
+ net.officefloor.ui;bundle-version="0.2.0"
 Import-Package: org.eclipse.core.resources,
  org.eclipse.core.runtime;version="3.4.0",
  org.eclipse.core.runtime.jobs,
@@ -49,7 +49,7 @@ Bundle-ClassPath: .,
  officeplugin_spring-0.1.2.jar,
  latest_tools-SNAPSHOT.jar,
  officetool_demo-0.1.2.jar,
- officetool_filingcabinet-0.1.2.jar,
+ officetool_filingcabinet-0.2.0.jar,
  activeio-core-3.1.0.jar,
  activeio-core-3.1.0-tests.jar,
  geronimo-j2ee-management_1.0_spec-1.0.jar,

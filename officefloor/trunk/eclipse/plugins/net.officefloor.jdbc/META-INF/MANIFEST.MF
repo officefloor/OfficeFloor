@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse JDBC
 Bundle-SymbolicName: net.officefloor.jdbc;singleton:=true
-Bundle-Version: 0.1.2
+Bundle-Version: 0.2.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.ui;bundle-version="0.1.2",
- net.officefloor.core;bundle-version="0.1.2"
+Require-Bundle: net.officefloor.ui;bundle-version="0.2.0",
+ net.officefloor.core;bundle-version="0.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui
@@ -46,7 +46,7 @@ Bundle-ClassPath: .,
  latest_plugins-SNAPSHOT.jar,
  officeplugin_ejb-0.1.2.jar,
  officeplugin_hibernate-0.1.2.jar,
- officeplugin_jdbc-0.1.2.jar,
+ officeplugin_jdbc-0.2.0.jar,
  officeplugin_jms-0.1.2.jar,
  officeplugin_jndi-0.1.2.jar,
  officeplugin_socket-0.1.2.jar,
