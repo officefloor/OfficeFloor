@@ -5,10 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 	</parent>
 	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>eclipse</artifactId>
+	<version>0.2.0</version>
 	<packaging>pom</packaging>
 	<name>Eclipse</name>
 	<description>Eclipse plugins and features for OfficeFloor</description>

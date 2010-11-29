@@ -1,11 +1,5 @@
 <verifications>
 	<files>
-		<!-- Ensure using correct version of OfficeFloor site skin -->
-		<file>
-			<location>src/site/site.xml</location>
-			<contains><![CDATA[<skin>[^_]*<version>${project.version}</version>[^_]*</skin>]]></contains>
-		</file>
-
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
 			<location>core/pom.xml</location>
