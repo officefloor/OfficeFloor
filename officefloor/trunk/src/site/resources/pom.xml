@@ -13,7 +13,7 @@
 		<repository>
 			<id>officefloor</id>
 			<name>OfficeFloor</name>
-			<url>http://www.officefloor.net/maven/maven2</url>
+			<url>http://www.officefloor.net/maven2</url>
 			<layout>default</layout>
 			<releases>
 				<enabled>true</enabled>
