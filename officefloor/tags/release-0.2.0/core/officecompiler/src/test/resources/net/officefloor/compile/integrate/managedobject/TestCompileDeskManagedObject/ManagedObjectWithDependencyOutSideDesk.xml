@@ -1,0 +1,52 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<managed-object-sources>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$SimpleManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="SIMPLE" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<sections>
+			<section name="DESK" source="DESK" location="desk">
+				<object name="EXTERNAL_MANAGED_OBJECT" object-type="${testcase}$SimpleManagedObject">
+					<managed-object name="SIMPLE" />
+				</object>
+			</section>
+		</sections>
+	</office>
+	<desk>
+		<external-managed-objects>
+			<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
+				object-type="${testcase}$SimpleManagedObject" object-scope="PROCESS" />
+		</external-managed-objects>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$DependencyManagedObject" />
+				</properties>
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="DEPENDENT" scope="PROCESS">
+				<managed-object-source name="DEPENDENT_SOURCE" />
+				<dependency name="dependency">
+					<external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+				</dependency>
+			</managed-object>
+		</managed-objects>
+	</desk>
+</context>

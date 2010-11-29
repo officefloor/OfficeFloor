@@ -1,0 +1,4 @@
+<model>
+	<field type="String" name="name" />
+	<field type="String" name="value" />
+</model>
