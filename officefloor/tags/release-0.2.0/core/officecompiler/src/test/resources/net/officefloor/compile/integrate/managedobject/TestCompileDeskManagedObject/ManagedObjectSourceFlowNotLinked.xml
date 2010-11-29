@@ -1,0 +1,23 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="DESK" source="DESK" location="desk" />
+		</sections>
+	</office>
+	<desk>
+		<managed-object-sources>
+			<managed-object-source name="MANAGED_OBJECT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name" value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<flow name="doProcess" />
+			</managed-object-source>
+		</managed-object-sources>
+	</desk>
+</context>

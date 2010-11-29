@@ -1,0 +1,15 @@
+<office>
+	<external-managed-objects>
+		<external-managed-object name="EXTERNAL_MANAGED_OBJECT"
+			object-type="java.sql.Connection" object-scope="PROCESS" />
+	</external-managed-objects>
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="LOCATION" />
+		<section name="SECTION_TARGET" source="net.another.AnotherSectionSource"
+			location="ANOTHER_LOCATION">
+			<input name="SECTION_INPUT" parameter-type="java.lang.Float" />
+			<output name="SECTION_OUTPUT" argument-type="java.lang.Integer" />
+		</section>
+	</sections>
+</office>
