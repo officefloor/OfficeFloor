@@ -20,11 +20,24 @@ So why another framework?
   
 Get going with OfficeFloor
 
+* OfficeFloor quick install
+
+  The simplest means of installing OfficeFloor is via Maven as follows:
+  
++----------------------------
+      wget http://www.officefloor.net/pom.xml
+      mvn install
++----------------------------
+
+  If <<<wget>>> is not available download this {{{/pom.xml}pom.xml}} (right click and save as) and run <<<mvn install>>> in same directory.
+
+  Once run, OfficeFloor will be installed in the current directory.
+
+* Run example OfficeFloor application
+  
   OfficeFloor (much like other frameworks) has initial learning curves to adopt.  Even though the graphical configuration of OfficeFloor is aimed at making development with OfficeFloor intuitive, the initial concepts still need to be understood.  Current work at the moment by the development team is to provide simple example uses of OfficeFloor to allow you easier understanding of both OfficeFloor's capabilities and how to start using OfficeFloor to build your applications.
 
   The following active tasks are providing this detail and this page will be updated shortly with their outcomes:
-
-   * {{{http://sourceforge.net/tracker/?func=detail&aid=3120549&group_id=156349&atid=799429}Quick installation of OfficeFloor from Maven}}
 
    * {{{http://sourceforge.net/tracker/index.php?func=detail&aid=3109862&group_id=156349&atid=799429}HTTP template links implementated as object methods}}
 

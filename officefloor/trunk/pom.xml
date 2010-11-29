@@ -57,6 +57,10 @@
 		<module>maven</module>
 		<module>examples</module>
 	</modules>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<officefloor.skin.version>0.2.0</officefloor.skin.version>
+	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ===================== Core ===================== -->
@@ -222,7 +226,7 @@
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-officefloor-skin</artifactId>
-				<version>0.2.0</version>
+				<version>${officefloor.skin.version}</version>
 			</dependency>
 			<!-- ================ Additional dependencies ======= -->
 			<dependency>
@@ -347,10 +351,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.skin.version>0.2.0</officefloor.skin.version>
-	</properties>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -421,6 +421,26 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Test the install pom.xml -->
+				<artifactId>maven-invoker-plugin</artifactId>
+				<configuration>
+					<projectsDirectory>src/site</projectsDirectory>
+					<cloneProjectsTo>${project.build.directory}/install</cloneProjectsTo>
+					<pomIncludes>
+						<pomInclude>*/pom.xml</pomInclude>
+					</pomIncludes>
+					<postBuildHookScript>verify.bsh</postBuildHookScript>
+				</configuration>
+				<executions>
+					<execution>
+						<id>test-install</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<!-- Run HTTP server for staged site content for linkcheck report -->
 				<groupId>org.mortbay.jetty</groupId>
