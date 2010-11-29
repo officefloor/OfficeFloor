@@ -5,10 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 	</parent>
 	<groupId>net.officefloor.maven</groupId>
 	<artifactId>maven</artifactId>
+	<version>0.2.0</version>
 	<packaging>pom</packaging>
 	<name>Maven</name>
 	<description>Maven components for OfficeFloor</description>

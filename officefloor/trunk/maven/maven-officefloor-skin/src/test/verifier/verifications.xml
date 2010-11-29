@@ -5,5 +5,11 @@
 			<location>${basedir}/../../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
+
+		<!-- Ensuring generating site with latest version of skin -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<officefloor.skin.version>${project.version}</officefloor.skin.version>]]></contains>
+		</file>
 	</files>
 </verifications>

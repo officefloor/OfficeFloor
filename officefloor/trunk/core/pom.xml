@@ -5,10 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 	</parent>
 	<groupId>net.officefloor.core</groupId>
 	<artifactId>core</artifactId>
+	<version>0.2.0</version>
 	<packaging>pom</packaging>
 	<name>Core</name>
 	<description>Core components for OfficeFloor</description>

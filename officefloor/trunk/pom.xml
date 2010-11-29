@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -349,6 +349,7 @@
 	</dependencyManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<officefloor.skin.version>0.2.0</officefloor.skin.version>
 	</properties>
 	<reporting>
 		<plugins>
@@ -477,16 +478,17 @@
 				<configuration>
 					<connectionType>developerConnection</connectionType>
 					<tag>release-${project.version}</tag>
+					<!-- Provide following in your settings.xml -->
+					<username>${developer.svn.username}</username>
+					<password>${developer.svn.password}</password>
 				</configuration>
 			</plugin>
 			<plugin>
 				<!-- Ensure correct licensing -->
-				<groupId>com.mycila.maven-license-plugin
-				</groupId>
+				<groupId>com.mycila.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
 				<configuration>
-					<header>src/license/license-header.txt
-					</header>
+					<header>src/license/license-header.txt</header>
 					<aggregate>true</aggregate>
 					<excludes>
 						<exclude>**/META-INF/services/**</exclude>
@@ -514,8 +516,7 @@
 						<currentYear>2010</currentYear>
 					</properties>
 					<headerDefinitions>
-						<headerDefinition>src/license/java-header-style.xml
-						</headerDefinition>
+						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
 					</headerDefinitions>
 				</configuration>
 			</plugin>

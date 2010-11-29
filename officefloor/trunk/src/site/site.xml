@@ -20,7 +20,7 @@
 	<skin>
 		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven-officefloor-skin</artifactId>
-		<version>0.2.0</version>
+		<version>${officefloor.skin.version}</version>
 	</skin>
 	<body>
 		<head>
