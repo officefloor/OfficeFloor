@@ -2,7 +2,7 @@
 <feature
       label="OfficeFloor Plugins Feature"
       id="net.officefloor.plugins.feature"
-      version="0.2.0"
+      version="0.2.1"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -48,7 +48,7 @@
 
    <plugin
          id="net.officefloor.socket"
-         version="0.2.0"
+         version="0.2.1"
          download-size="0"
          install-size="0"
          unpack="true"/>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Socket
 Bundle-SymbolicName: net.officefloor.socket;singleton:=true
-Bundle-Version: 0.2.0
+Bundle-Version: 0.2.1
 Bundle-Vendor: OfficeFloor
 Require-Bundle: net.officefloor.core;bundle-version="0.2.0",
  net.officefloor.ui;bundle-version="0.2.0"
@@ -50,7 +50,7 @@ Bundle-ClassPath: .,
  officeplugin_jdbc-0.1.2.jar,
  officeplugin_jms-0.1.2.jar,
  officeplugin_jndi-0.1.2.jar,
- officeplugin_socket-0.2.0.jar,
+ officeplugin_socket-0.2.1.jar,
  officeplugin_spring-0.1.2.jar,
  latest_tools-SNAPSHOT.jar,
  officetool_demo-0.1.2.jar,

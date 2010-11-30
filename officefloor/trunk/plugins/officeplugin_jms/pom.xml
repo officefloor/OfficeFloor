@@ -5,9 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.plugin</groupId>
 		<artifactId>plugins</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 	</parent>
 	<artifactId>officeplugin_jms</artifactId>
+	<version>0.2.0</version>
 	<name>JMS Plug-in</name>
 	<description>OfficeFloor plug-in for JMS</description>
 	<dependencies>

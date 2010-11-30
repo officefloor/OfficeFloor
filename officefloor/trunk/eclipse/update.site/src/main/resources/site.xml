@@ -25,6 +25,9 @@
 	</feature>
 	
 	<!-- OfficeFloor plug-ins feature -->
+	<feature url="features/net.officefloor.plugins.feature_0.2.1.jar" id="net.officefloor.plugins.feature" version="0.2.1">
+		<category name="officefloor_plugin_latest" />
+	</feature>
 	<feature url="features/net.officefloor.plugins.feature_0.2.0.jar" id="net.officefloor.plugins.feature" version="0.2.0">
 		<category name="officefloor_plugin_latest" />
 	</feature>

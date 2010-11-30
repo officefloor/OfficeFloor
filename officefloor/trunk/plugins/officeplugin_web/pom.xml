@@ -7,14 +7,13 @@
 		<artifactId>plugins</artifactId>
 		<version>0.2.1</version>
 	</parent>
-	<artifactId>officeplugin_jndi</artifactId>
-	<version>0.2.0</version>
-	<name>JNDI Plug-in</name>
-	<description>OfficeFloor plug-in for JNDI</description>
+	<artifactId>officeplugin_web</artifactId>
+	<version>0.2.1</version>
+	<name>Web Plug-in</name>
+	<description>OfficeFloor plug-in for Web</description>
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Include additional source -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
@@ -26,6 +25,7 @@
 						</goals>
 						<configuration>
 							<sources>
+								<source>src/main/impl</source>
 								<source>src/main/test</source>
 							</sources>
 						</configuration>
@@ -36,29 +36,9 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.openejb</groupId>
-			<artifactId>openejb-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-servlet-tester</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-all</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<scope>test</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
