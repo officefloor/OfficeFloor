@@ -99,7 +99,7 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>plugins</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
@@ -135,12 +135,17 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_socket</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_spring</artifactId>
 				<version>0.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_web</artifactId>
+				<version>0.2.1</version>
 			</dependency>
 			<!-- ===================== Tools ==================== -->
 			<dependency>
@@ -163,7 +168,7 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>eclipse</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
@@ -179,7 +184,7 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.plugins.feature</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
@@ -204,7 +209,7 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.socket</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>

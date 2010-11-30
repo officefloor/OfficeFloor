@@ -5,9 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.plugin</groupId>
 		<artifactId>plugins</artifactId>
-		<version>0.2.0</version>
+		<version>0.2.1</version>
 	</parent>
 	<artifactId>officeplugin_servlet</artifactId>
+	<version>0.2.0</version>
 	<name>Servlet Plug-in</name>
 	<description>OfficeFloor plug-in for Servlet</description>
 	<build>
