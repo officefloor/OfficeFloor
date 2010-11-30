@@ -27,6 +27,26 @@
 	<build>
 		<plugins>
 			<plugin>
+				<!-- Test the install pom.xml (as officebuilding should now be built)-->
+				<artifactId>maven-invoker-plugin</artifactId>
+				<configuration>
+					<projectsDirectory>${project.basedir}/../src/site</projectsDirectory>
+					<cloneProjectsTo>${project.build.directory}/install</cloneProjectsTo>
+					<pomIncludes>
+						<pomInclude>*/pom.xml</pomInclude>
+					</pomIncludes>
+					<postBuildHookScript>verify.bsh</postBuildHookScript>
+				</configuration>
+				<executions>
+					<execution>
+						<id>test-install</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<!-- Allow for quick build by ignoring stress tests -->
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
