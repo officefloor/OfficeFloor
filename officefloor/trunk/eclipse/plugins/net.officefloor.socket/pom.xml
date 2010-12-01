@@ -46,5 +46,9 @@
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_socket</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_web</artifactId>
+		</dependency>
 	</dependencies>
 </project>
