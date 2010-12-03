@@ -34,6 +34,7 @@
 		<plugins>
 			<plugin>
 				<!-- Ensure location of Eclipse install is provided -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
 					<execution>
@@ -61,6 +62,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 			</plugin>
 			<plugin>
 				<!-- All projects are PDEs -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<pde>true</pde>
@@ -68,6 +70,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 			</plugin>
 			<plugin>
 				<!-- Work around as PDE headless build not using linked resources -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
@@ -113,6 +116,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 			</plugin>
 			<!-- Skip tests compilation as requires PDE environment -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
@@ -122,6 +126,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 				<!--
 					Skip possibles tests (built via IDE) as requires PDE environment
 				-->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<skipTests>true</skipTests>
@@ -129,6 +134,7 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 			</plugin>
 			<plugin>
 				<!-- Full clean after PDE build -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets>
@@ -150,15 +156,14 @@ Also ensure the 'startup.jar' is available in the installed directory. This may 
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- OfficeFloor dependencies -->
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officebuilding</artifactId>
 		</dependency>
-		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

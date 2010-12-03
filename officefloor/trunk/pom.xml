@@ -61,6 +61,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>0.2.0</officefloor.skin.version>
 	</properties>
+	<repositories>
+		<repository>
+			<!-- Access JEE APIs -->
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Repository for Maven</name>
+			<url>http://download.java.net/maven/2/</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ===================== Core ===================== -->
@@ -356,6 +364,341 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Fix for failing site generation via Hudson -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-verifier-plugin</artifactId>
+					<version>1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.4.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-plugin</artifactId>
+					<version>1.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-eclipse-plugin</artifactId>
+					<version>2.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-invoker-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ejb-plugin</artifactId>
+					<version>2.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.4.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>failsafe-maven-plugin</artifactId>
+					<version>2.4.3-alpha-1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>selenium-maven-plugin</artifactId>
+					<version>1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>pde-maven-plugin</artifactId>
+					<version>1.0-alpha-1</version>
+				</plugin>
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>maven-jetty-plugin</artifactId>
+					<version>6.1.26</version>
+				</plugin>
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>8.0.0.M1</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>maven-officefloor-plugin</artifactId>
+					<version>0.2.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<!-- Run HTTP server for staged site content for linkcheck report -->
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<inherited>false</inherited> <!-- run only at top level (not each module) -->
+				<configuration>
+					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</webAppSourceDirectory>
+					<stopKey>OfficeFloor</stopKey>
+					<stopPort>9966</stopPort>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>9999</port>
+						</connector>
+					</connectors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>Start HTTP Server of staged site for linkcheck</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<daemon>true</daemon>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Stop HTTP Server of staged site for linkcheck</id>
+						<phase>post-site</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Standard JVM for compilation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Always include sources and javadoc for Eclipse -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Allow SVN tagging via command: mvn scm:tag -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<connectionType>developerConnection</connectionType>
+					<tag>release-${project.version}</tag>
+					<!-- Provide following in your settings.xml -->
+					<username>${developer.svn.username}</username>
+					<password>${developer.svn.password}</password>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Ensure correct licensing -->
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<configuration>
+					<header>src/license/license-header.txt</header>
+					<aggregate>true</aggregate>
+					<excludes>
+						<exclude>**/META-INF/services/**</exclude>
+						<exclude>**/src/test/resources/**
+						</exclude>
+						<exclude>**/src/auto/**</exclude>
+						<exclude>**/*.xml</exclude>
+						<exclude>**/*.xsd</exclude>
+						<exclude>**/*.exsd</exclude>
+						<exclude>**/*.txt</exclude>
+						<exclude>**/*.ofp</exclude>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.apt</exclude>
+						<exclude>**/*.xcf</exclude>
+						<exclude>**/*.odg</exclude>
+						<exclude>**/*.zip</exclude>
+						<exclude>**/*.jar</exclude>
+						<exclude>**/*.css</exclude>
+						<exclude>**/*.js</exclude>
+						<exclude>**/*.log</exclude>
+						<exclude>**/*.args</exclude>
+						<exclude>**/officebuilding</exclude>
+					</excludes>
+					<properties>
+						<currentYear>2010</currentYear>
+					</properties>
+					<headerDefinitions>
+						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
+					</headerDefinitions>
+				</configuration>
+			</plugin>
+			<!-- START: project validation -->
+			<plugin>
+				<!-- Copy verifications file for use -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Copy verifications file for use</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/verifier</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Provide validation xml file with dependency versions -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Provide validation xml file with dependency versions</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<!--
+									Obtain the raw test class path which has greatest number of
+									dependencies (plus ensure a property is always available for
+									replacefilterfile functionality to not fail)
+								-->
+								<property name="maven_classpath" refid="maven.test.classpath" />
+								<echo file="${project.build.directory}/verifier/dependencies.raw"
+									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
+
+								<!--
+									Remove the compile and test classes directory from the class
+									path
+								-->
+								<replace file="${project.build.directory}/verifier/dependencies.raw"
+									token="${project.build.outputDirectory}" value="" />
+								<replace file="${project.build.directory}/verifier/dependencies.raw"
+									token="${project.build.testOutputDirectory}" value="" />
+
+								<!--
+									Transform into properties file of:
+									${artifactId}_version=${version}
+								-->
+								<copy file="${project.build.directory}/verifier/dependencies.raw"
+									tofile="${project.build.directory}/verifier/dependencies.properties">
+									<filterchain>
+										<tokenfilter>
+											<stringtokenizer delims="${path.separator}"
+												suppressdelims="true" />
+											<replaceregex
+												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
+												replace="@{\2_version}=\3${line.separator}" />
+										</tokenfilter>
+									</filterchain>
+								</copy>
+
+								<!-- Replace dependency versions in verifications file -->
+								<replace file="${project.build.directory}/verifier/verifications.xml"
+									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-optional</artifactId>
+						<version>1.5.3-1</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<!--
+					Verification done during initialise to allow further setup in
+					validation
+				-->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-verifier-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Verify projects to ensure correct linkages</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<verificationFile>${project.build.directory}/verifier/verifications.xml</verificationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- END: project validation -->
+		</plugins>
+	</build>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -414,223 +757,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<!-- Fix for failing site generation via Hudson -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>2.1</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck report -->
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<inherited>false</inherited> <!-- run only at top level (not each module) -->
-				<configuration>
-					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</webAppSourceDirectory>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>9966</stopPort>
-					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>9999</port>
-						</connector>
-					</connectors>
-				</configuration>
-				<executions>
-					<execution>
-						<id>Start HTTP Server of staged site for linkcheck</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>Stop HTTP Server of staged site for linkcheck</id>
-						<phase>post-site</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Standard JVM for compilation -->
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Always include sources and javadoc for Eclipse -->
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>true</downloadJavadocs>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Allow SVN tagging via command: mvn scm:tag -->
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<connectionType>developerConnection</connectionType>
-					<tag>release-${project.version}</tag>
-					<!-- Provide following in your settings.xml -->
-					<username>${developer.svn.username}</username>
-					<password>${developer.svn.password}</password>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Ensure correct licensing -->
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<configuration>
-					<header>src/license/license-header.txt</header>
-					<aggregate>true</aggregate>
-					<excludes>
-						<exclude>**/META-INF/services/**</exclude>
-						<exclude>**/src/test/resources/**
-						</exclude>
-						<exclude>**/src/auto/**</exclude>
-						<exclude>**/*.xml</exclude>
-						<exclude>**/*.xsd</exclude>
-						<exclude>**/*.exsd</exclude>
-						<exclude>**/*.txt</exclude>
-						<exclude>**/*.ofp</exclude>
-						<exclude>**/*.properties</exclude>
-						<exclude>**/*.apt</exclude>
-						<exclude>**/*.xcf</exclude>
-						<exclude>**/*.odg</exclude>
-						<exclude>**/*.zip</exclude>
-						<exclude>**/*.jar</exclude>
-						<exclude>**/*.css</exclude>
-						<exclude>**/*.js</exclude>
-						<exclude>**/*.log</exclude>
-						<exclude>**/*.args</exclude>
-						<exclude>**/officebuilding</exclude>
-					</excludes>
-					<properties>
-						<currentYear>2010</currentYear>
-					</properties>
-					<headerDefinitions>
-						<headerDefinition>src/license/java-header-style.xml</headerDefinition>
-					</headerDefinitions>
-				</configuration>
-			</plugin>
-			<!-- START: project validation -->
-			<plugin>
-				<!-- Copy verifications file for use -->
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Copy verifications file for use</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/test/verifier</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Provide validation xml file with dependency versions -->
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Provide validation xml file with dependency versions</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<!--
-									Obtain the raw test class path which has greatest number of
-									dependencies (plus ensure a property is always available for
-									replacefilterfile functionality to not fail)
-								-->
-								<property name="maven_classpath" refid="maven.test.classpath" />
-								<echo file="${project.build.directory}/verifier/dependencies.raw"
-									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
-
-								<!--
-									Remove the compile and test classes directory from the class
-									path
-								-->
-								<replace file="${project.build.directory}/verifier/dependencies.raw"
-									token="${project.build.outputDirectory}" value="" />
-								<replace file="${project.build.directory}/verifier/dependencies.raw"
-									token="${project.build.testOutputDirectory}" value="" />
-
-								<!--
-									Transform into properties file of:
-									${artifactId}_version=${version}
-								-->
-								<copy file="${project.build.directory}/verifier/dependencies.raw"
-									tofile="${project.build.directory}/verifier/dependencies.properties">
-									<filterchain>
-										<tokenfilter>
-											<stringtokenizer delims="${path.separator}"
-												suppressdelims="true" />
-											<replaceregex
-												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
-												replace="@{\2_version}=\3${line.separator}" />
-										</tokenfilter>
-									</filterchain>
-								</copy>
-
-								<!-- Replace dependency versions in verifications file -->
-								<replace file="${project.build.directory}/verifier/verifications.xml"
-									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ant</groupId>
-						<artifactId>ant-optional</artifactId>
-						<version>1.5.3-1</version>
-						<scope>runtime</scope>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<!--
-					Verification done during initialise to allow further setup in
-					validation
-				-->
-				<artifactId>maven-verifier-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Verify projects to ensure correct linkages</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<verificationFile>${project.build.directory}/verifier/verifications.xml</verificationFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- END: project validation -->
-		</plugins>
-	</build>
 </project>

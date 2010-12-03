@@ -8,6 +8,7 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>WebOfficeFloor</artifactId>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 	<name>WebOfficeFloor</name>
 	<description>Web components of the OfficeFloor Example</description>
@@ -71,6 +72,10 @@
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_socket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

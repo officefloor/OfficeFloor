@@ -7,6 +7,7 @@
 		<version>0.2.0</version>
 	</parent>
 	<artifactId>maven-officefloor-plugin</artifactId>
+	<version>0.2.0</version>
 	<packaging>maven-plugin</packaging>
 	<name>Maven OfficeFloor Plugin</name>
 	<description>Maven plug-in to start/stop an OfficeFloor instance</description>
@@ -14,7 +15,9 @@
 		<plugins>
 			<plugin>
 				<!-- Generate Maven plug-in documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
+				<version>2.6</version>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -28,6 +31,7 @@
 		<plugins>
 			<plugin>
 				<!-- Test the plugin -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-invoker-plugin</artifactId>
 				<configuration>
 					<projectsDirectory>src/it</projectsDirectory>
@@ -54,12 +58,12 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-plugin-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officebuilding</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
 		</dependency>
 	</dependencies>
 </project>

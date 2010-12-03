@@ -100,33 +100,33 @@
 										<include name="digest.zip" />
 
 										<!-- Core feature and its Eclipse plug-ins -->
-										<include name="features/net.officefloor.feature_${pom.version}.jar" />
-										<include name="plugins/net.officefloor.core_${pom.version}.jar" />
+										<include name="features/net.officefloor.feature_${project.version}.jar" />
+										<include name="plugins/net.officefloor.core_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.core_${pom.version}.jar.pack.gz" />
-										<include name="plugins/net.officefloor.ui_${pom.version}.jar" />
+											name="plugins/net.officefloor.core_${project.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.ui_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.ui_${pom.version}.jar.pack.gz" />
+											name="plugins/net.officefloor.ui_${project.version}.jar.pack.gz" />
 
 										<!-- Plug-ins feature and its Eclipse plug-ins -->
 										<include
-											name="features/net.officefloor.plugins.feature_${pom.version}.jar" />
-										<include name="plugins/net.officefloor.jdbc_${pom.version}.jar" />
+											name="features/net.officefloor.plugins.feature_${project.version}.jar" />
+										<include name="plugins/net.officefloor.jdbc_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.jdbc_${pom.version}.jar.pack.gz" />
-										<include name="plugins/net.officefloor.jndi_${pom.version}.jar" />
+											name="plugins/net.officefloor.jdbc_${project.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.jndi_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.jndi_${pom.version}.jar.pack.gz" />
-										<include name="plugins/net.officefloor.socket_${pom.version}.jar" />
+											name="plugins/net.officefloor.jndi_${project.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.socket_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.socket_${pom.version}.jar.pack.gz" />
+											name="plugins/net.officefloor.socket_${project.version}.jar.pack.gz" />
 										<include
-											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar" />
+											name="plugins/net.officefloor.filingcabinet_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.filingcabinet_${pom.version}.jar.pack.gz" />
-										<include name="plugins/net.officefloor.demo_${pom.version}.jar" />
+											name="plugins/net.officefloor.filingcabinet_${project.version}.jar.pack.gz" />
+										<include name="plugins/net.officefloor.demo_${project.version}.jar" />
 										<include
-											name="plugins/net.officefloor.demo_${pom.version}.jar.pack.gz" />
+											name="plugins/net.officefloor.demo_${project.version}.jar.pack.gz" />
 									</fileset>
 								</copy>
 

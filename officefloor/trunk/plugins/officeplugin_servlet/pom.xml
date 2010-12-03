@@ -25,7 +25,7 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
+							<target>
 								<!-- Specifying properties -->
 								<property name="modelprojectdir" value="${basedir}" />
 								<property name="compile_classpath" refid="maven.compile.classpath" />
@@ -37,7 +37,7 @@
 										<pathelement path="${compile_classpath}" />
 									</classpath>
 								</java>
-							</tasks>
+							</target>
 						</configuration>
 					</execution>
 				</executions>
@@ -45,8 +45,7 @@
 			<plugin>
 				<!-- Include additional source and resource directories -->
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin
-				</artifactId>
+				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>add-source</id>

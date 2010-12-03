@@ -11,6 +11,7 @@
 			<plugin>
 				<groupId>@project.groupId@</groupId>
 				<artifactId>@project.artifactId@</artifactId>
+				<version>@project.version@</version>
 				<configuration>
 					<port>10102</port>
 					<processName>@project.artifactId@</processName>
@@ -37,11 +38,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>@project.groupId@</groupId>
-			<artifactId>@project.artifactId@</artifactId>
-			<version>@project.version@</version>
-		</dependency>
-	</dependencies>
 </project>
