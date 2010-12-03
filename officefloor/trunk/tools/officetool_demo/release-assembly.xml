@@ -1,4 +1,5 @@
 <assembly>
+	<id>release</id>
 	<formats>
 		<format>zip</format>
 		<format>dir</format>

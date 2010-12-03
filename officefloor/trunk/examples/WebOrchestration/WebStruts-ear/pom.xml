@@ -8,12 +8,14 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>WebStruts-ear</artifactId>
+	<version>0.0.1</version>
 	<packaging>ear</packaging>
 	<name>WebStruts-ear</name>
 	<description>EAR generation of the Web Struts Example</description>
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ear-plugin</artifactId>
 				<configuration>
 					<modules>

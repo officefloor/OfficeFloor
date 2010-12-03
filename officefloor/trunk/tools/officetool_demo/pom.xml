@@ -8,6 +8,7 @@
 		<version>0.2.0</version>
 	</parent>
 	<artifactId>officetool_demo</artifactId>
+	<version>0.2.0</version>
 	<name>Demo Tool</name>
 	<description>OfficeFloor tool for creating demo
 	</description>
@@ -15,6 +16,7 @@
 		<plugins>
 			<plugin>
 				<!-- Generates the release -->
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>

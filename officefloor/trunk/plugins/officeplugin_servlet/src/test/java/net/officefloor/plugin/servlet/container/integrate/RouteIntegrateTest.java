@@ -20,7 +20,6 @@ package net.officefloor.plugin.servlet.container.integrate;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import javax.resource.spi.work.Work;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;

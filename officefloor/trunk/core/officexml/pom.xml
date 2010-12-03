@@ -8,6 +8,7 @@
         <version>0.2.0</version>
     </parent>
     <artifactId>officexml</artifactId>
+    <version>0.2.0</version>
     <name>OfficeXml</name>
     <description>
 		OXM (Object to XML Mapping) for OfficeFloor

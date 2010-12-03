@@ -8,6 +8,7 @@
 		<version>0.2.0</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>
+	<version>0.2.0</version>
 	<name>Filing Cabinet Tool</name>
 	<description>OfficeFloor tool for filing cabinet</description>
 	<dependencies>

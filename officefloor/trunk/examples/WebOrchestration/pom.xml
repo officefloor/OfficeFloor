@@ -61,26 +61,11 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
-			<plugin>
-				<!-- Keep standard JVM for compilation -->
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Always include sources and javadoc for Eclipse -->
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>true</downloadJavadocs>
-				</configuration>
-			</plugin>
 			<plugin>
 				<!-- Ensure integration tests included -->
 				<groupId>org.codehaus.mojo</groupId>
@@ -135,7 +120,7 @@
 						<configuration>
 							<background>true</background>
 							<logOutput>true</logOutput>
-<!--  
+							<!--  
 							<debug>true</debug>
 -->
 							<browserSideLog>true</browserSideLog>

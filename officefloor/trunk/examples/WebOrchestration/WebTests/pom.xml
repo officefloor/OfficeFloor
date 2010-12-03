@@ -8,19 +8,20 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>WebTests</artifactId>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 	<name>WebTests</name>
 	<description>Set of tests to validate the Web examples</description>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.seleniumhq.selenium.client-drivers</groupId>
 			<artifactId>selenium-java-client-driver</artifactId>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
