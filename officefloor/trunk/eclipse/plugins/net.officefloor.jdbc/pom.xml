@@ -10,42 +10,23 @@
 	<artifactId>net.officefloor.jdbc</artifactId>
 	<version>0.2.0</version>
 	<name>Eclipse JDBC</name>
-	<description>Provides Eclipse extensions for JDBC configuration.
-	</description>
-	<packaging>zip</packaging>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>plugin</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-							</archive>
-							<descriptors>
-								<descriptor>plugin-assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+	<description>Provides Eclipse extensions for JDBC configuration.</description>
+	<packaging>eclipse-plugin</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.feature</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_jdbc</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>net.officefloor.core</groupId>
+					<artifactId>officebuilding</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

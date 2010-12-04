@@ -15,23 +15,5 @@
 			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="@{net.officefloor.core_version}"]]></contains>
 		</file>
-
-		<!-- Ensure correct versions on build class path -->
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeframe-@{officeframe_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officexml-@{officexml_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officecompiler-@{officecompiler_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officebuilding-@{officebuilding_version}.jar]]></contains>
-		</file>
 	</files>
 </verifications>
