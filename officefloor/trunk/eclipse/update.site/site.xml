@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site
+	url="http://downloads.sourceforge.net/project/officefloor/eclipse/update"
+	pack200="true" digestURL="http://www.officefloor.net/update">
+
+	<description name="OfficeFloor" url="http://www.officefloor.net"><![CDATA[Eclipse update site for OfficeFloor]]></description>
+
+	<!-- OfficeFloor feature -->
+	<feature url="features/net.officefloor.feature_0.2.0.jar" id="net.officefloor.feature"
+		version="0.2.0">
+		<category name="OfficeFloor" />
+	</feature>
+
+
+	<!-- OfficeFloor plug-ins feature -->
+	<feature url="features/net.officefloor.plugins.feature_0.2.1.jar"
+		id="net.officefloor.plugins.feature" version="0.2.1">
+		<category name="OfficeFloor_Plugins" />
+	</feature>
+
+	<!-- Categories -->
+	<category-def name="OfficeFloor" label="OfficeFloor">
+		<description>OfficeFloor</description>
+	</category-def>
+	<category-def name="OfficeFloor_Plugins" label="OfficeFloor Plug-ins">
+		<description>OfficeFloor plug-ins</description>
+	</category-def>
+
+</site>

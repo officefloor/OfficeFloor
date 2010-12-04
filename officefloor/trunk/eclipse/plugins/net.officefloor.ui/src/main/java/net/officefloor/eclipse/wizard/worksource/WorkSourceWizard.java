@@ -42,10 +42,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.ui.part.EditorPart;
 
 /**
  * {@link IWizard} to add and manage {@link Work} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkSourceWizard extends Wizard implements
@@ -53,7 +54,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link WorkInstance}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link WorkSourceWizard}.
@@ -80,7 +81,7 @@ public class WorkSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link WorkSource} class name to its
 	 * {@link WorkSourceInstance}.
-	 *
+	 * 
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -190,7 +191,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link WorkInstance}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 */
@@ -200,7 +201,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param workInstance
@@ -212,8 +213,9 @@ public class WorkSourceWizard extends Wizard implements
 		this.editPart = editPart;
 
 		// Obtain the project
-		IProject project = ProjectConfigurationContext.getProject(editPart
-				.getEditor().getEditorInput());
+		EditorPart editorPart = editPart.getEditor();
+		IProject project = ProjectConfigurationContext.getProject(editorPart
+				.getEditorInput());
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -275,7 +277,7 @@ public class WorkSourceWizard extends Wizard implements
 
 	/**
 	 * Obtains the {@link WorkInstance}.
-	 *
+	 * 
 	 * @return {@link WorkInstance}.
 	 */
 	public WorkInstance getWorkInstance() {
