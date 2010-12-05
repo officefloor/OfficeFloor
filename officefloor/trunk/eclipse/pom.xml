@@ -30,6 +30,20 @@
 		<!-- Deploy to Update Site -->
 		<module>update.site</module>
 	</modules>
+	<repositories>
+		<repository>
+			<!-- Eclipse -->
+			<id>eclipse-helios</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/helios</url>
+		</repository>
+		<repository>
+			<!-- OfficeFloor Eclipse -->
+			<id>eclipse-OfficeFloor</id>
+			<layout>p2</layout>
+			<url>http://www.officefloor.net/update</url>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
 			<plugin>
