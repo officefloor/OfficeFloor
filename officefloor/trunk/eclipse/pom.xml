@@ -103,6 +103,7 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
 					<resolver>p2</resolver>
+					<pomDependencies>consider</pomDependencies>
 					<environments>
 						<environment>
 							<os>linux</os>
