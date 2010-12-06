@@ -2,7 +2,7 @@
   <managed-object-sources>
     <managed-object-source name="HTTP" source="net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" timeout="0" x="678" y="301">
       <properties>
-        <property name="port" value="8080"/>
+        <property name="port" value="18989"/>
         <property name="buffer.size" value="1024"/>
         <property name="max.connections.per.listener" value="-1"/>
         <property name="is.send.stack.trace.on.failure" value="true"/>
