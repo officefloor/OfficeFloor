@@ -125,7 +125,7 @@ public abstract class AbstractSeleniumTestCase extends TestCase {
 	 */
 	private static DefaultSelenium createSeleniumClient() {
 		return new DefaultSelenium("localhost", 4444, "*firefox",
-				"http://localhost:8080/");
+				"http://localhost:18989/");
 	}
 
 	/**

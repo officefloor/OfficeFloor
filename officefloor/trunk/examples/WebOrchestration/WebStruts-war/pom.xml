@@ -19,6 +19,17 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 				<dependencies>
+					<dependency>
+						<groupId>${project.groupId}</groupId>
+						<artifactId>WebOrchestration-ejb</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<!-- Use OpenEJB to incorporate EJBs for orchestration -->
+					<dependency>
+						<groupId>org.apache.openejb</groupId>
+						<artifactId>openejb-core</artifactId>
+						<version>3.1.3</version>
+					</dependency>
 					<!-- To use OpenEJB, must exclude ANT from jsp-2.1-jetty -->
 					<dependency>
 						<groupId>org.mortbay.jetty</groupId>
@@ -31,25 +42,18 @@
 							</exclusion>
 						</exclusions>
 					</dependency>
-					<!-- Use OpenEJB to incorporate EJBs for orchestration -->
-					<dependency>
-						<groupId>org.apache.openejb</groupId>
-						<artifactId>openejb-core</artifactId>
-						<version>3.1.3</version>
-					</dependency>
-					<dependency>
-						<groupId>${project.groupId}</groupId>
-						<artifactId>WebOrchestration-ejb</artifactId>
-						<version>${project.version}</version>
-					</dependency>
 				</dependencies>
 				<configuration>
 					<jettyConfig>${basedir}/src/main/jetty/jetty.xml</jettyConfig>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<stopPort>8005</stopPort>
 					<stopKey>STOP</stopKey>
 					<contextPath>/</contextPath>
 					<systemProperties>
+						<!-- Specify port for running -->
+						<systemProperty>
+							<name>jetty.port</name>
+							<value>18989</value>
+						</systemProperty>
 						<!-- Properties to use OpenEJB -->
 						<systemProperty>
 							<name>java.naming.factory.initial</name>
