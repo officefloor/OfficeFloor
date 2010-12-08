@@ -90,7 +90,7 @@ public class WebOfficeFloorTest extends OfficeFrameTestCase {
 		officeFloor.openOfficeFloor();
 		try {			
 			// Connect to OfficeFloor instance
-			method = new GetMethod("http://localhost:8080/initialState.task");
+			method = new GetMethod("http://localhost:18989/initialState.task");
 
 			// Ensure able to obtain initial state information
 			int status = client.executeMethod(method);
