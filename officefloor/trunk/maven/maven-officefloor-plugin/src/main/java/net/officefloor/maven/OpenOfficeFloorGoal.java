@@ -118,7 +118,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Create the arguments for class path
 		CommandLineBuilder arguments = new CommandLineBuilder();
 		try {
-			@SuppressWarnings("unchecked")
 			List<String> elements = this.project.getCompileClasspathElements();
 			for (String element : elements) {
 				arguments.addClassPathEntry(element);
