@@ -20,20 +20,19 @@ package net.officefloor.building.util;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import net.officefloor.building.command.OfficeFloorCommandContextImpl;
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.ModelReader;
+import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * Utility methods for testing the {@link OfficeBuilding} functionality.
@@ -43,76 +42,60 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 public class OfficeBuildingTestUtil {
 
 	/**
-	 * Group Id for test artifacts.
+	 * Index to obtain a unique local repository for testing.
 	 */
-	public static final String TEST_GROUP_ID = "test.officefloor.test";
+	private static int localRepositoryTestIndex = 1;
 
 	/**
-	 * Version for the test artifacts.
-	 */
-	public static final String TEST_ARTIFACT_VERSION = "1.0.0";
-
-	/**
-	 * Artifact Id of jar with no dependencies.
-	 */
-	public static final String TEST_JAR_ARTIFACT_ID = "JarArtifact";
-
-	/**
-	 * Artifact Id of jar with dependencies.
-	 */
-	public static final String TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID = "JarWithDependenciesArtifact";
-
-	/**
-	 * Artifact Id for ClassPathTestArtifact.
-	 */
-	@Deprecated
-	public static final String CLASS_PATH_TEST_ARTIFACT_ID = "ClassPathTestArtifact";
-
-	/**
-	 * Obtains the local repository directory.
+	 * Obtains the test local repository for testing.
 	 * 
-	 * @return Local repository directory.
+	 * @return Test local repository.
 	 */
-	public static File getLocalRepositoryDirectory() throws Exception {
-		return OfficeFloorCommandContextImpl.getLocalRepositoryDirectory(null);
+	public static File getTestLocalRepository() {
+
+		// Obtain new directory for the test local repository
+		File tempDir = new File(System.getProperty("java.io.tmpdir"));
+		File localRepository;
+		do {
+			localRepository = new File(tempDir, "test-local-repository-"
+					+ localRepositoryTestIndex);
+			localRepositoryTestIndex++;
+		} while (localRepository.exists());
+
+		// Ensure the directory exists
+		TestCase.assertTrue("Failed to create local repository",
+				localRepository.mkdirs());
+
+		// Return the local repository
+		return localRepository;
 	}
 
 	/**
-	 * Obtains the Remote repository directory.
+	 * Obtains the local repository of user executing the tests.
 	 * 
-	 * @return Remote repository directory.
+	 * @return Local repository.
 	 */
-	public static File getRemoteRepositoryDirectory() {
-		File directory = new File(".", "target/test-classes/remoteRepository");
-		TestCase.assertTrue("Remote repository directory not available: "
-				+ directory.getAbsolutePath(), directory.exists());
-		return directory;
+	public static File getUserLocalRepository() {
+		try {
+			return ClassPathFactoryImpl
+					.getUserLocalRepository(new DefaultPlexusContainer());
+		} catch (Exception ex) {
+			throw OfficeFrameTestCase.fail(ex);
+		}
 	}
 
 	/**
-	 * Obtains the remote repository URLs.
+	 * <p>
+	 * Obtains the version for the {@link OfficeFloor} compiler artifact.
+	 * <p>
+	 * OfficeCompiler should be built before OfficeBuilding so should be
+	 * available within the repository.
 	 * 
-	 * @return Remote repository URLs.
-	 */
-	public static String[] getRemoteRepositoryUrls() throws Exception {
-		return new String[] { "file://"
-				+ getRemoteRepositoryDirectory().getCanonicalPath() };
-	}
-
-	/**
-	 * Obtains the version for the {@link OfficeFloor} artifact.
-	 * 
-	 * @param artifactId
-	 *            Id of the {@link OfficeFloor} artifact.
 	 * @return Version of the {@link OfficeFloor} artifact.
 	 */
-	public static String getOfficeFloorArtifactVersion(String artifactId)
-			throws Exception {
+	public static String getOfficeCompilerArtifactVersion() throws Exception {
 
-		// Determine if class path test artifact
-		if (CLASS_PATH_TEST_ARTIFACT_ID.equals(artifactId)) {
-			return TEST_ARTIFACT_VERSION;
-		}
+		final String ARTIFACT_ID = "officecompiler";
 
 		// Extract the artifact version from the class path
 		String classPath = System.getProperty("java.class.path");
@@ -121,9 +104,9 @@ public class OfficeBuildingTestUtil {
 
 			// Determine if entry
 			String name = new File(entry).getName();
-			if ((name.endsWith("jar")) && (name.startsWith(artifactId))) {
+			if ((name.endsWith("jar")) && (name.startsWith(ARTIFACT_ID))) {
 				// Found the artifact, so extract version
-				String version = name.substring(artifactId.length()
+				String version = name.substring(ARTIFACT_ID.length()
 						+ "-".length());
 				version = version.substring(0, version.length()
 						- ".jar".length());
@@ -133,8 +116,9 @@ public class OfficeBuildingTestUtil {
 			}
 		}
 
-		// Not found, likely running in Eclipse with directory
-		MavenXpp3Reader reader = new MavenXpp3Reader();
+		// Not found, likely running in Eclipse with project import
+		ModelReader reader = new DefaultPlexusContainer()
+				.lookup(ModelReader.class);
 		for (String entry : classPathEntries) {
 
 			// Ignore non-directories
@@ -157,11 +141,11 @@ public class OfficeBuildingTestUtil {
 			}
 
 			// Read in the pom.xml file for the version
-			Model pom = reader.read(new FileReader(pomFile));
+			Model pom = reader.read(new FileReader(pomFile), null);
 
 			// Ignore if not correct artifact
 			String pomArtifactId = pom.getArtifactId();
-			if (!pomArtifactId.equals(artifactId)) {
+			if (!pomArtifactId.equals(ARTIFACT_ID)) {
 				continue;
 			}
 
@@ -176,7 +160,7 @@ public class OfficeBuildingTestUtil {
 		}
 
 		// Not able to obtain the version
-		TestCase.fail("Unable to extract version for artifact '" + artifactId
+		TestCase.fail("Unable to extract version for artifact '" + ARTIFACT_ID
 				+ "' from class path: " + classPath);
 		return null; // fail to throw exception
 	}
@@ -188,22 +172,21 @@ public class OfficeBuildingTestUtil {
 	 *            Id of the {@link OfficeFloor} artifact.
 	 * @return {@link File} to the the {@link OfficeFloor} artifact Jar.
 	 */
-	public static File getOfficeFloorArtifactJar(String artifactId)
-			throws Exception {
+	public static File getOfficeCompilerArtifactJar() throws Exception {
 
 		// Obtain version for artifact
-		String version = getOfficeFloorArtifactVersion(artifactId);
+		String version = getOfficeCompilerArtifactVersion();
 
 		// Create the path to the Jar
-		File jarFile = getArtifactFile(getLocalRepositoryDirectory(),
-				"net.officefloor.core", artifactId, version, "jar");
+		File jarFile = getArtifactFile(getUserLocalRepository(),
+				"net.officefloor.core", "officecompiler", version, "jar");
 
 		// Return Jar file
 		return jarFile;
 	}
 
 	/**
-	 * Obtains the {@link Artifact} {@link File}.
+	 * Obtains the Artifact {@link File}.
 	 * 
 	 * @param repository
 	 *            {@link Repository} root directory.
@@ -215,7 +198,7 @@ public class OfficeBuildingTestUtil {
 	 *            Artifact version.
 	 * @param type
 	 *            Artifact type.
-	 * @return {@link File} to the {@link Artifact}.
+	 * @return {@link File} to the Artifact.
 	 */
 	public static File getArtifactFile(File repository, String groupId,
 			String artifactId, String version, String type) {
@@ -231,88 +214,6 @@ public class OfficeBuildingTestUtil {
 
 		// Return the artifact file
 		return artifact;
-	}
-
-	/**
-	 * Remove the ClassPathTestArtifact from local repository.
-	 */
-	public static void cleanupClassPathTestArtifactInLocalRepository()
-			throws Exception {
-		// Obtain location of POM file
-		File classPathTestArtifactPom = getArtifactFile(
-				getLocalRepositoryDirectory(), TEST_GROUP_ID,
-				TEST_JAR_ARTIFACT_ID, TEST_ARTIFACT_VERSION, "pom");
-		File classPathTestArtifactVersionDir = classPathTestArtifactPom
-				.getParentFile();
-		File classPathTestArtifactDir = classPathTestArtifactVersionDir
-				.getParentFile();
-		File classPathTestGroupDir = classPathTestArtifactDir.getParentFile();
-		deleteDirectory(classPathTestGroupDir);
-	}
-
-	/**
-	 * Setup for ClassPathTestArtifact for download.
-	 */
-	public static void setupClassPathTestArtifactForDownload() throws Exception {
-
-		// Clean up
-		cleanupClassPathTestArtifactInLocalRepository();
-
-		// Obtain location of POM file
-		File pom = getArtifactFile(getRemoteRepositoryDirectory(),
-				TEST_GROUP_ID, CLASS_PATH_TEST_ARTIFACT_ID,
-				TEST_ARTIFACT_VERSION, "pom");
-		TestCase.assertTrue(CLASS_PATH_TEST_ARTIFACT_ID + "-"
-				+ TEST_ARTIFACT_VERSION
-				+ ".pom not available in remote repository: "
-				+ getRemoteRepositoryDirectory(), pom.exists());
-
-		// Read in POM contents
-		StringWriter writer = new StringWriter();
-		FileReader reader = new FileReader(pom);
-		for (int value = reader.read(); value != -1; value = reader.read()) {
-			writer.write(value);
-		}
-		reader.close();
-
-		// Replace officecompiler version in POM file
-		String officeCompilerVersion = getOfficeFloorArtifactVersion("officecompiler");
-		String contents = writer.toString();
-		contents = contents.replace("${officecompiler.version}",
-				officeCompilerVersion);
-		FileWriter pomWriter = new FileWriter(pom, false);
-		pomWriter.write(contents);
-		pomWriter.close();
-	}
-
-	/**
-	 * Deletes the directory.
-	 * 
-	 * @param directory
-	 *            Directory to be deleted.
-	 */
-	private static void deleteDirectory(File directory) {
-
-		// Ensure exists
-		if (!directory.exists()) {
-			return; // not exists so do not delete
-		}
-
-		// Delete the child files
-		for (File child : directory.listFiles()) {
-			if (child.isDirectory()) {
-				// Recursively delete the directory
-				deleteDirectory(child);
-			} else {
-				// Delete the file
-				TestCase.assertTrue("Failed to clear file: " + child, child
-						.delete());
-			}
-		}
-
-		// Child files deleted, so now delete the directory
-		TestCase.assertTrue("Failed to clear directory: " + directory,
-				directory.delete());
 	}
 
 	/**

@@ -21,7 +21,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<install.version>0.2.0</install.version>
+		<install.version>0.2.1</install.version>
 	</properties>
 	<build>
 		<plugins>

@@ -41,6 +41,7 @@
 					</pomIncludes>
 					<settingsFile>src/it/settings.xml</settingsFile>
 					<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+					<debug>true</debug>
 					<preBuildHookScript>setup.bsh</preBuildHookScript>
 					<postBuildHookScript>verify.bsh</postBuildHookScript>
 				</configuration>

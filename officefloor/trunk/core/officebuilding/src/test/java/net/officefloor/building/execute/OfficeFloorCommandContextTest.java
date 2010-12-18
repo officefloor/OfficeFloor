@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.command;
+package net.officefloor.building.execute;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import net.officefloor.building.classpath.ClassPathFactory;
+import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
-import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.building.execute.OfficeFloorCommandContextImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -36,6 +38,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link ClassPathFactory}.
+	 */
+	private final ClassPathFactory classPathFactory = this
+			.createMock(ClassPathFactory.class);
+
+	/**
 	 * {@link OfficeFloorCommandContext} to test.
 	 */
 	private OfficeFloorCommandContextImpl context;
@@ -43,60 +51,49 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
-		// Ensure clean starting point for test
-		OfficeBuildingTestUtil.cleanupClassPathTestArtifactInLocalRepository();
-
 		// Create non-decorated context for testing
 		this.context = this.createContext();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Clean up after test to keep local repository tidy
-		OfficeBuildingTestUtil.cleanupClassPathTestArtifactInLocalRepository();
-
-		// Ensure clean up of context
-		if (this.context != null) {
-			this.context.close();
-		}
-	}
-
 	/**
-	 * Ensure able to include a jar in class path.
+	 * Ensure can include artifact in class path.
 	 */
-	public void testIncludeJar() throws Exception {
+	public void testIncludeArtifact() throws Exception {
 
-		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String PATH = "path.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath("group.id", "artifact", "1.0.0",
+						"jar", "test"), new String[] { PATH });
 
 		// Include jar
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact("group.id", "artifact", "1.0.0",
+				"jar", "test");
+		this.verifyMockObjects();
 
 		// Ensure jar on class path with no warnings
 		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
+		assertClassPath(this.context, PATH);
 	}
 
 	/**
-	 * Ensure able to include a jar with dependencies in class path.
+	 * Ensure able to include an artifact location.
 	 */
-	public void testIncludeJarWithDependencies() throws Exception {
+	public void testIncludeArtifactLocation() throws Exception {
 
-		// Obtain paths to jars
-		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
-		final File JAR = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String LOCATION = "test.jar";
+		final String PATH = "path.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(LOCATION), new String[] { PATH });
 
-		// Include jar with dependencies
-		this.context.includeClassPathArtifact(JAR_WITH_DEPENDENCIES
-				.getCanonicalPath());
+		// Include jar
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(LOCATION);
+		this.verifyMockObjects();
 
-		// Ensure jars on class path with no warnings
+		// Ensure jar on class path with no warnings
 		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_WITH_DEPENDENCIES, JAR);
+		assertClassPath(this.context, PATH);
 	}
 
 	/**
@@ -106,75 +103,14 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	public void testIncludeClassPathEntry() throws Exception {
 
 		// Obtain path to jar
-		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
+		final String ENTRY_PATH = "test.jar";
 
 		// Include jar
-		this.context.includeClassPathEntry(JAR_WITH_DEPENDENCIES
-				.getCanonicalPath());
+		this.context.includeClassPathEntry(ENTRY_PATH);
 
 		// Ensure jar on class path but not its dependencies
 		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_WITH_DEPENDENCIES);
-	}
-
-	/**
-	 * Ensure can include a directory in class path.
-	 */
-	public void testIncludeDir() throws Exception {
-
-		// Obtain path to directory
-		final File DIR = this.findFile(this.getClass(), "DirArtifact/Test.txt")
-				.getParentFile();
-
-		// Include jar
-		this.context.includeClassPathArtifact(DIR.getCanonicalPath());
-
-		// Ensure directory on class path with no warnings
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, DIR);
-	}
-
-	/**
-	 * Ensure can include artifact in class path.
-	 */
-	public void testIncludeArtifact() throws Exception {
-
-		// Obtain path to artifact
-		final File JAR = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
-
-		// Include jar
-		this.context.includeClassPathArtifact(
-				OfficeBuildingTestUtil.TEST_GROUP_ID,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID,
-				OfficeBuildingTestUtil.TEST_ARTIFACT_VERSION, null, null);
-
-		// Ensure jar on class path with no warnings
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR);
-	}
-
-	/**
-	 * Ensure able to include a artifact with dependencies in class path.
-	 */
-	public void testIncludeArtifactWithDependencies() throws Exception {
-
-		// Obtain paths to jars
-		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
-		final File JAR = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
-
-		// Include artifact
-		this.context.includeClassPathArtifact(
-				OfficeBuildingTestUtil.TEST_GROUP_ID,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID,
-				OfficeBuildingTestUtil.TEST_ARTIFACT_VERSION, null, null);
-
-		// Ensure jars on class path with no warnings
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_WITH_DEPENDENCIES, JAR);
+		assertClassPath(this.context, ENTRY_PATH);
 	}
 
 	/**
@@ -187,15 +123,16 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		final String VALUE = "value";
 
 		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR = "test.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(JAR), new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR.getCanonicalPath(), context
+				assertEquals("Incorrect entry", JAR, context
 						.getRawClassPathEntry());
 				context.setEnvironmentProperty(NAME, VALUE);
 			}
@@ -205,7 +142,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decorator);
 
 		// Include jar for decoration
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(JAR);
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
@@ -228,8 +167,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		final String VALUE_TWO = "two";
 
 		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR = "test.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(JAR), new String[] { JAR });
 
 		// Create the decorators
 		final OfficeFloorDecorator decoratorOne = new OfficeFloorDecorator() {
@@ -251,7 +191,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decoratorOne, decoratorTwo);
 
 		// Include jar for decoration
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(JAR);
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
@@ -272,15 +214,16 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		final String VALUE = "value";
 
 		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR = "test.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(JAR), new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR.getCanonicalPath(), context
+				assertEquals("Incorrect entry", JAR, context
 						.getRawClassPathEntry());
 				context.addCommandOption(NAME, VALUE);
 			}
@@ -290,7 +233,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decorator);
 
 		// Include jar for decoration
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(JAR);
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
@@ -314,15 +259,16 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		final String VALUE_FOUR = "four";
 
 		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR = "test.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(JAR), new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR.getCanonicalPath(), context
+				assertEquals("Incorrect entry", JAR, context
 						.getRawClassPathEntry());
 				context.addCommandOption(NAME, VALUE_ONE);
 				context.addCommandOption(NAME, VALUE_TWO);
@@ -335,7 +281,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decorator);
 
 		// Include jar for decoration
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(JAR);
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
@@ -353,21 +301,21 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	public void testDecoratorOverrideClassPathEntry() throws Exception {
 
 		// Override class path entry
-		final File CLASS_PATH_OVERRIDE = new File("/test/override.jar");
+		final String CLASS_PATH_OVERRIDE = "/test/override.jar";
 
 		// Obtain path to jar
-		final File JAR = getTestArtifactJar(true,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR = "test.jar";
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath(JAR), new String[] { JAR });
 
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
 			public void decorate(OfficeFloorDecoratorContext context)
 					throws Exception {
-				assertEquals("Incorrect entry", JAR.getCanonicalPath(), context
+				assertEquals("Incorrect entry", JAR, context
 						.getRawClassPathEntry());
-				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE
-						.getCanonicalPath());
+				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE);
 			}
 		};
 
@@ -375,7 +323,9 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decorator);
 
 		// Include jar for decoration
-		this.context.includeClassPathArtifact(JAR.getCanonicalPath());
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact(JAR);
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
@@ -390,10 +340,13 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	public void testDecoratingAllDependencies() throws Exception {
 
 		// Obtain paths to jars
-		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
-		final File JAR = getTestArtifactJar(false,
-				OfficeBuildingTestUtil.TEST_JAR_ARTIFACT_ID);
+		final String JAR_ONE = "one.jar";
+		final String JAR_TWO = "two.jar";
+
+		// Record creating two class path entries
+		this.recordReturn(this.classPathFactory, this.classPathFactory
+				.createArtifactClassPath("group.id", "artifact", "1.0.0",
+						"jar", "test"), new String[] { JAR_ONE, JAR_TWO });
 
 		// Create the decorator
 		final List<String> rawClassPathEntries = new LinkedList<String>();
@@ -409,14 +362,14 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		this.context = this.createContext(decorator);
 
 		// Include artifact with dependencies
-		this.context.includeClassPathArtifact(
-				OfficeBuildingTestUtil.TEST_GROUP_ID,
-				OfficeBuildingTestUtil.TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID,
-				OfficeBuildingTestUtil.TEST_ARTIFACT_VERSION, null, null);
+		this.replayMockObjects();
+		this.context.includeClassPathArtifact("group.id", "artifact", "1.0.0",
+				"jar", "test");
+		this.verifyMockObjects();
 
 		// Ensure class path not changed (not decorated)
 		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_WITH_DEPENDENCIES, JAR);
+		assertClassPath(this.context, JAR_ONE, JAR_TWO);
 		assertEnvironment(this.context);
 		assertCommandOptions(this.context);
 
@@ -424,11 +377,10 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		assertEquals(
 				"Incorrect number of raw class path entries for decoration", 2,
 				rawClassPathEntries.size());
-		assertEquals("Incorrect first raw class path entry",
-				JAR_WITH_DEPENDENCIES.getCanonicalPath(), rawClassPathEntries
-						.get(0));
-		assertEquals("Incorrect second raw class path entry", JAR
-				.getCanonicalPath(), rawClassPathEntries.get(1));
+		assertEquals("Incorrect first raw class path entry", JAR_ONE,
+				rawClassPathEntries.get(0));
+		assertEquals("Incorrect second raw class path entry", JAR_TWO,
+				rawClassPathEntries.get(1));
 	}
 
 	/**
@@ -440,31 +392,8 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorCommandContextImpl createContext(
 			OfficeFloorDecorator... decorators) throws Exception {
-		return new OfficeFloorCommandContextImpl(null, OfficeBuildingTestUtil
-				.getRemoteRepositoryUrls(), decorators);
-	}
-
-	/**
-	 * Obtain the path to the test artifact jar.
-	 * 
-	 * @param isResolved
-	 *            Indicates if the artifact is already resolved.
-	 * @param artifactId
-	 *            Test artifact id.
-	 * @return Path to the test artifact jar.
-	 */
-	private static File getTestArtifactJar(boolean isResolved, String artifactId)
-			throws Exception {
-
-		// Use appropriate repository
-		File repository = (isResolved ? OfficeBuildingTestUtil
-				.getRemoteRepositoryDirectory() : OfficeBuildingTestUtil
-				.getLocalRepositoryDirectory());
-
-		// Return artifact file
-		return OfficeBuildingTestUtil.getArtifactFile(repository,
-				OfficeBuildingTestUtil.TEST_GROUP_ID, artifactId,
-				OfficeBuildingTestUtil.TEST_ARTIFACT_VERSION, "jar");
+		return new OfficeFloorCommandContextImpl(this.classPathFactory,
+				decorators);
 	}
 
 	/**
@@ -493,17 +422,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	 *            Expected class path entries.
 	 */
 	private static void assertClassPath(OfficeFloorCommandContextImpl context,
-			File... expectedClassPathEntries) throws Exception {
+			String... expectedClassPathEntries) throws Exception {
 
 		// Create the expected class path
 		StringBuilder path = new StringBuilder();
 		boolean isFirst = true;
-		for (File expectedClassPathEntry : expectedClassPathEntries) {
+		for (String expectedClassPathEntry : expectedClassPathEntries) {
 			if (!isFirst) {
 				path.append(File.pathSeparator);
 			}
 			isFirst = false;
-			path.append(expectedClassPathEntry.getCanonicalPath());
+			path.append(expectedClassPathEntry);
 		}
 		String expectedClassPath = path.toString();
 

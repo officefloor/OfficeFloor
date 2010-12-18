@@ -20,6 +20,9 @@ package net.officefloor.building.execute;
 import java.io.File;
 import java.util.Properties;
 
+import org.codehaus.plexus.DefaultPlexusContainer;
+
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
@@ -261,17 +264,21 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 
 		// Obtain execution factory details
 		File localRepositoryDirectory = OfficeBuildingTestUtil
-				.getLocalRepositoryDirectory();
-		String[] remoteRepositoryUrls = OfficeBuildingTestUtil
-				.getRemoteRepositoryUrls();
+				.getTestLocalRepository();
+		String remoteRepositoryUrl = "file://"
+				+ OfficeBuildingTestUtil.getUserLocalRepository()
+						.getAbsolutePath();
+		ClassPathFactoryImpl classPathFactory = new ClassPathFactoryImpl(
+				new DefaultPlexusContainer(), localRepositoryDirectory);
+		classPathFactory.registerRemoteRepository("test", "default",
+				remoteRepositoryUrl);
 
 		// Test
 		this.replayMockObjects();
 
 		// Create the factory
 		final OfficeFloorExecutionUnitFactory factory = new OfficeFloorExecutionUnitFactoryImpl(
-				localRepositoryDirectory, remoteRepositoryUrls,
-				this.environment, decorators);
+				classPathFactory, this.environment, decorators);
 
 		// Create the execution units
 		OfficeFloorExecutionUnit executionUnit = factory

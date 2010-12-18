@@ -186,7 +186,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		final String PROCESS_NAME = this.getName();
 		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
-				.getOfficeFloorArtifactVersion("officecompiler");
+				.getOfficeCompilerArtifactVersion();
 
 		// Expected output
 		List<String> out = new LinkedList<String>();
