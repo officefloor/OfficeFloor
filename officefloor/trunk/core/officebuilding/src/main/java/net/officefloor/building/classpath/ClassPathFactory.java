@@ -15,42 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.command;
-
-import net.officefloor.building.process.ManagedProcess;
+package net.officefloor.building.classpath;
 
 /**
- * Context for the {@link OfficeFloorCommand} to create a {@link ManagedProcess}
- * to undertake the command.
+ * Factory for the creation of artifact class path entries.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorCommandContext {
+public interface ClassPathFactory {
 
 	/**
-	 * <p>
-	 * Provides support for including a class path entry.
-	 * <p>
-	 * The class path entry is included as specified without interrogation for
-	 * dependencies.
-	 * 
-	 * @param classPathEntry
-	 *            Class path entry.
-	 */
-	void includeClassPathEntry(String classPathEntry);
-
-	/**
-	 * Provides support for including an Artifact and its dependencies (via
-	 * <code>META-INF/maven/.../pom.xml</code>) on the class path.
+	 * Creates the class path for the Artifact and its dependencies (via
+	 * <code>META-INF/maven/.../pom.xml</code>) on input location.
 	 * 
 	 * @param artifactLocation
 	 *            Artifact location.
+	 * @throws Exception
+	 *             If fails to construct class path.
 	 */
-	void includeClassPathArtifact(String artifactLocation);
+	String[] createArtifactClassPath(String artifactLocation) throws Exception;
 
 	/**
-	 * Provides support for including an Artifact and its dependencies on the
-	 * class path.
+	 * Creates the class path for the Artifact and its dependencies.
 	 * 
 	 * @param groupId
 	 *            Group Id.
@@ -62,8 +48,10 @@ public interface OfficeFloorCommandContext {
 	 *            Type. <code>null</code> will default to <code>jar</code>.
 	 * @param classifier
 	 *            Classifier, may be <code>null</code>.
+	 * @throws Exception
+	 *             If fails to construct class path.
 	 */
-	void includeClassPathArtifact(String groupId, String artifactId,
-			String version, String type, String classifier);
+	String[] createArtifactClassPath(String groupId, String artifactId,
+			String version, String type, String classifier) throws Exception;
 
 }

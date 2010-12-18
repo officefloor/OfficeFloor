@@ -22,10 +22,8 @@ import java.util.List;
 
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 
-import org.apache.maven.artifact.Artifact;
-
 /**
- * {@link OfficeFloorCommandParameter} for multiple {@link Artifact} instances.
+ * {@link OfficeFloorCommandParameter} for multiple Artifact instances.
  * 
  * @author Daniel Sagenschneider
  */

@@ -75,9 +75,10 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Setup the environment
 		File localRepositoryDirectory = OfficeBuildingTestUtil
-				.getLocalRepositoryDirectory();
-		String[] remoteRepositoryUrls = OfficeBuildingTestUtil
-				.getRemoteRepositoryUrls();
+				.getTestLocalRepository();
+		String[] remoteRepositoryUrls = new String[] { "file://"
+				+ OfficeBuildingTestUtil.getUserLocalRepository()
+						.getAbsolutePath() };
 		this.environment
 				.put(
 						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
@@ -177,8 +178,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 				arguments.addProcessName(processName);
 				arguments.addOfficeFloor(officeFloorLocation);
 				arguments.addArchive(OfficeBuildingTestUtil
-						.getOfficeFloorArtifactJar("officecompiler")
-						.getAbsolutePath());
+						.getOfficeCompilerArtifactJar().getAbsolutePath());
 				return buildingManager.openOfficeFloor(arguments
 						.getCommandLine());
 			}
@@ -198,10 +198,9 @@ public class OfficeBuildingManagerTest extends TestCase {
 				CommandLineBuilder arguments = new CommandLineBuilder();
 				arguments.addProcessName(processName);
 				arguments.addOfficeFloor(officeFloorLocation);
-				arguments
-						.addArtifact("net.officefloor.core:officecompiler:"
-								+ OfficeBuildingTestUtil
-										.getOfficeFloorArtifactVersion("officecompiler"));
+				arguments.addArtifact("net.officefloor.core:officecompiler:"
+						+ OfficeBuildingTestUtil
+								.getOfficeCompilerArtifactVersion());
 				return buildingManager.openOfficeFloor(arguments
 						.getCommandLine());
 			}

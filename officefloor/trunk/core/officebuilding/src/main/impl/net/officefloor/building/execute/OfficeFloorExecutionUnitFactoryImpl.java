@@ -17,7 +17,6 @@
  */
 package net.officefloor.building.execute;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedList;
@@ -25,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommand;
-import net.officefloor.building.command.OfficeFloorCommandContextImpl;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
@@ -42,14 +41,9 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		OfficeFloorExecutionUnitFactory {
 
 	/**
-	 * Local repository directory.
+	 * {@link ClassPathFactory}.
 	 */
-	private final File localRepositoryDirectory;
-
-	/**
-	 * Remote repository URLs.
-	 */
-	private final String[] remoteRepositoryUrls;
+	private final ClassPathFactory classPathFactory;
 
 	/**
 	 * Environment {@link Properties}.
@@ -64,20 +58,17 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param localRepositoryDirectory
-	 *            Local repository directory.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs.
+	 * @param classPathFactory
+	 *            {@link ClassPathFactory}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
-	public OfficeFloorExecutionUnitFactoryImpl(File localRepositoryDirectory,
-			String[] remoteRepositoryUrls, Properties environment,
+	public OfficeFloorExecutionUnitFactoryImpl(
+			ClassPathFactory classPathFactory, Properties environment,
 			OfficeFloorDecorator[] decorators) {
-		this.localRepositoryDirectory = localRepositoryDirectory;
-		this.remoteRepositoryUrls = remoteRepositoryUrls;
+		this.classPathFactory = classPathFactory;
 		this.environment = environment;
 		this.decorators = decorators;
 	}
@@ -92,19 +83,15 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 			throws OfficeFloorExecutionUnitCreateException {
 
 		// Create the command context
-		OfficeFloorCommandContextImpl context;
-		try {
-			context = new OfficeFloorCommandContextImpl(
-					this.localRepositoryDirectory, this.remoteRepositoryUrls,
-					this.decorators);
-		} catch (Exception ex) {
-			throw new OfficeFloorExecutionUnitCreateException(
-					"Failed to create command context", ex);
-		}
+		OfficeFloorCommandContextImpl context = new OfficeFloorCommandContextImpl(
+				this.classPathFactory, this.decorators);
 
 		// Initialise the environment
 		try {
 			command.initialiseEnvironment(context);
+		} catch (ClassPathError ex) {
+			throw new OfficeFloorExecutionUnitCreateException(
+					"Failed to initialise command class path", ex);
 		} catch (Exception ex) {
 			throw new OfficeFloorExecutionUnitCreateException(
 					"Failed to initialise environment", ex);

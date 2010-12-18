@@ -17,10 +17,9 @@
  */
 package net.officefloor.building.command.parameters;
 
-import org.apache.maven.artifact.Artifact;
 
 /**
- * {@link Artifact} argument.
+ * Artifact argument.
  * 
  * @author Daniel Sagenschneider
  */
@@ -75,9 +74,9 @@ public class ArtifactArgument {
 	}
 
 	/**
-	 * Obtains the {@link Artifact} identifier.
+	 * Obtains the Artifact identifier.
 	 * 
-	 * @return {@link Artifact} identifier.
+	 * @return Artifact identifier.
 	 */
 	public String getId() {
 		return this.groupId + ":" + this.artifactId

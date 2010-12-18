@@ -25,6 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.codehaus.plexus.DefaultPlexusContainer;
+
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
 import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
@@ -205,11 +208,26 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 					.asList(RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
 							.getRemoteRepositoryUrls(this.environment)));
 
+			// Create the class path factory
+			ClassPathFactoryImpl classPathFactory;
+			try {
+				classPathFactory = new ClassPathFactoryImpl(
+						new DefaultPlexusContainer(), localRepository);
+				int remoteRepositoryIndex = 1;
+				for (String remoteRepositoryUrl : remoteRepositoryUrls) {
+					classPathFactory.registerRemoteRepository("repo"
+							+ (remoteRepositoryIndex++), "default",
+							remoteRepositoryUrl);
+				}
+			} catch (Exception ex) {
+				// Failed to create execution unit for command
+				this.writeErr(err, ex);
+				return false;
+			}
+
 			// Create the OfficeFloor execution unit factory
 			OfficeFloorExecutionUnitFactory executionUnitFactory = new OfficeFloorExecutionUnitFactoryImpl(
-					localRepository, remoteRepositoryUrls
-							.toArray(new String[remoteRepositoryUrls.size()]),
-					this.environment, this.decorators);
+					classPathFactory, this.environment, this.decorators);
 
 			// Create execution unit for command
 			OfficeFloorExecutionUnit executionUnit;
