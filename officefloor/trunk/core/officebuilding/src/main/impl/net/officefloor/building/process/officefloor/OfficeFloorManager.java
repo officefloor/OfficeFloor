@@ -249,7 +249,7 @@ public class OfficeFloorManager implements ManagedProcess,
 
 		// Open the OfficeFloor
 		this.officeFloor.openOfficeFloor();
-		
+
 		// OfficeFloor now open
 		this.isOpen = true;
 

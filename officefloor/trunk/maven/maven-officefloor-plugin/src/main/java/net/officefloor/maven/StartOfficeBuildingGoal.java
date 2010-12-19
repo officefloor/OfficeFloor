@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.building.command.LocalRepositoryOfficeFloorCommandParameter;
 import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
@@ -44,8 +45,17 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * {@link MavenProject}.
 	 * 
 	 * @parameter expression="${project}"
+	 * @required
 	 */
 	private MavenProject project;
+
+	/**
+	 * Local repository.
+	 * 
+	 * @parameter expression="${localRepository}"
+	 * @required
+	 */
+	private ArtifactRepository localRepository;
 
 	/**
 	 * Port to run the {@link OfficeBuilding} on.
@@ -64,6 +74,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Ensure have configured values
 		assertNotNull("Must have project", this.project);
+		assertNotNull("Must have local repository", this.localRepository);
 		assertNotNull("Port not configured for the "
 				+ OfficeBuilding.class.getSimpleName(), this.port);
 
@@ -84,6 +95,10 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Create the environment properties
 		Properties environment = new Properties();
 		environment.putAll(this.project.getProperties());
+		environment
+				.put(
+						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
+						this.localRepository.getBasedir());
 		environment
 				.put(
 						RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
