@@ -389,10 +389,9 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Fix for failing site generation via Hudson -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.1</version>
+					<version>3.0-beta-3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -487,7 +486,7 @@
 				<plugin>
 					<groupId>com.mycila.maven-license-plugin</groupId>
 					<artifactId>maven-license-plugin</artifactId>
-					<version>1.8</version>
+					<version>1.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
@@ -497,7 +496,7 @@
 				<plugin>
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>8.0.0.M1</version>
+					<version>7.2.1.v20101111</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.tycho</groupId>
@@ -517,41 +516,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck report -->
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<inherited>false</inherited> <!-- run only at top level (not each module) -->
-				<configuration>
-					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</webAppSourceDirectory>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>9966</stopPort>
-					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>9999</port>
-						</connector>
-					</connectors>
-				</configuration>
-				<executions>
-					<execution>
-						<id>Start HTTP Server of staged site for linkcheck</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>Stop HTTP Server of staged site for linkcheck</id>
-						<phase>post-site</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<!-- Standard JVM for compilation -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -728,64 +692,106 @@
 				</executions>
 			</plugin>
 			<!-- END: project validation -->
-		</plugins>
-	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<!-- Fix for failing site generation via Hudson -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.2</version>
-				<inherited>true</inherited>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>project-team</report>
-							<report>mailing-list</report>
-							<report>issue-tracking</report>
-							<report>scm</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
+
 			<plugin>
 				<!-- Generate Javadoc for referencing in site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.7</version>
-				<inherited>false</inherited> <!-- only top level aggregation -->
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>aggregate</report>
-						</reports>
-					</reportSet>
-				</reportSets>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<phase>site</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
-				<!-- Report on broken links in site. -->
-				<!-- To obtain link check report for stage site: -->
-				<!-- 1) mvn install -->
-				<!-- 2) mvn site:stage -->
-				<!-- 3) mvn -N site -->
-				<!-- 4) report available at ${basedir}/target/site/linkcheck.html -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.1</version>
-				<inherited>false</inherited> <!-- only stage -->
+				<!-- Run HTTP server for staged site content for linkcheck report -->
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<inherited>false</inherited> <!-- run only at top level (not each module) -->
 				<configuration>
-					<!-- Check staged content (jetty started for absolute HTTP paths) -->
-					<baseURL>http://localhost:9999</baseURL>
-					<outputDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</outputDirectory>
-					<!-- Not generating as site is being generated/staged -->
-					<forceSite>false</forceSite>
-					<excludedPages>
-						<!-- Ignore checking javadoc -->
-						<excludedPage>apidocs/**</excludedPage>
-					</excludedPages>
+					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</webAppSourceDirectory>
+					<stopKey>OfficeFloor</stopKey>
+					<stopPort>9966</stopPort>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>9999</port>
+						</connector>
+					</connectors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>Start HTTP Server of staged site for linkcheck</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<daemon>true</daemon>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Stop HTTP Server of staged site for linkcheck</id>
+						<phase>post-site</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Generate the site documentation -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<!-- Generate Reports -->
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.3</version>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>project-team</report>
+										<report>mailing-list</report>
+										<report>issue-tracking</report>
+										<report>scm</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+						<plugin>
+							<!-- Report on broken links in site. -->
+							<!-- To obtain link check report for stage site: -->
+							<!-- 1) mvn install -->
+							<!-- 2) mvn site:stage -->
+							<!-- 3) Copy target/site/apidocs to staging site -->
+							<!-- 4) mvn site -->
+							<!-- 5) report available at ${basedir}/target/site/linkcheck.html -->
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-linkcheck-plugin</artifactId>
+							<version>1.1</version>
+							<configuration>
+								<!-- Check staged content (jetty started for absolute HTTP paths) -->
+								<baseURL>http://localhost:9999</baseURL>
+								<outputDirectory>${basedir}/target/staging/shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</outputDirectory>
+								<!-- Not generating as site is being generated/staged -->
+								<forceSite>false</forceSite>
+								<excludedPages>
+									<!-- Ignore checking javadoc -->
+									<excludedPage>apidocs/**</excludedPage>
+								</excludedPages>
+							</configuration>
+						</plugin>
+					</reportPlugins>
 				</configuration>
 			</plugin>
 		</plugins>
-	</reporting>
+	</build>
 </project>
