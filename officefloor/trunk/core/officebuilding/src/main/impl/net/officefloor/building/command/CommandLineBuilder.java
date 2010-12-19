@@ -56,6 +56,19 @@ public class CommandLineBuilder {
 	private final List<String> commandLine = new LinkedList<String>();
 
 	/**
+	 * Adds the local repository.
+	 * 
+	 * @param localRepository
+	 *            Local repository.
+	 */
+	public void addLocalRepository(String localRepository) {
+		this
+				.addOption(
+						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
+						localRepository);
+	}
+
+	/**
 	 * Adds an archive to the command line.
 	 * 
 	 * @param archiveLocation

@@ -25,6 +25,7 @@ import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
@@ -33,6 +34,7 @@ import org.apache.maven.project.MavenProject;
  * Maven goal to open the {@link OfficeFloor}.
  * 
  * @goal open
+ * @requiresDependencyResolution compile
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,8 +49,17 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 * {@link MavenProject}.
 	 * 
 	 * @parameter expression="${project}"
+	 * @required
 	 */
 	private MavenProject project;
+
+	/**
+	 * Plug-in dependencies.
+	 * 
+	 * @parameter expression="${plugin.artifacts}"
+	 * @required
+	 */
+	private List<Artifact> pluginDependencies;
 
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
@@ -96,6 +107,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 		// Ensure have required values
 		assertNotNull("Must have project", this.project);
+		assertNotNull("Must have plug-in dependencies", this.pluginDependencies);
 		assertNotNull("Port not configured for the "
 				+ OfficeBuilding.class.getSimpleName(), this.port);
 		assertNotNull(OfficeFloor.class.getSimpleName()
@@ -115,7 +127,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 					+ OfficeBuilding.class.getSimpleName(), ex);
 		}
 
-		// Create the arguments for class path
+		// Create the arguments for class path of project
 		CommandLineBuilder arguments = new CommandLineBuilder();
 		try {
 			List<String> elements = this.project.getCompileClasspathElements();
@@ -126,6 +138,11 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			throw this.newMojoExecutionException(
 					"Failed creating class path for the "
 							+ OfficeFloor.class.getSimpleName(), ex);
+		}
+
+		// Add plug-in dependencies (makes OfficeFloor functionality available)
+		for (Artifact artifact : this.pluginDependencies) {
+			arguments.addClassPathEntry(artifact.getFile().getAbsolutePath());
 		}
 
 		// Specify location of OfficeFloor
@@ -168,4 +185,5 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 			this.getLog().info(message.toString());
 		}
 	}
+
 }
