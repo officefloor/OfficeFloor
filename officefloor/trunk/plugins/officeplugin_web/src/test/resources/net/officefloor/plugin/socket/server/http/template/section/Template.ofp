@@ -1,0 +1,20 @@
+<html>
+<body>
+Template ${TemplateName}:
+<table>
+    <tr>
+        <td>Name</td>
+        <td>Description</td>
+    </tr>
+    <!-- [List] -->
+    <tr>
+        <td>${Name}</td>
+        <td>${description}</td>
+    </tr>
+    <!-- [Tail] -->
+</table>
+<form action="#{submit}">
+    <input type="submit" />
+</form>
+</body>
+</html>
