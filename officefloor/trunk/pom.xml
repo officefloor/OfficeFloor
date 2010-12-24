@@ -97,7 +97,7 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
-				<version>0.2.0</version>
+				<version>0.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
