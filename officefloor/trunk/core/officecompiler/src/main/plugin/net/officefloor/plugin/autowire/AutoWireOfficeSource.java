@@ -47,30 +47,53 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 	/**
+	 * {@link OfficeFloorCompiler}.
+	 */
+	private final OfficeFloorCompiler compiler;
+
+	/**
 	 * {@link Section} instances.
 	 */
 	private final List<Section> sections = new LinkedList<Section>();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 */
+	public AutoWireOfficeSource(OfficeFloorCompiler compiler) {
+		this.compiler = compiler;
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public AutoWireOfficeSource() {
+		this(OfficeFloorCompiler.newOfficeFloorCompiler());
+	}
 
 	/**
 	 * Adds an {@link OfficeSection}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClassName
-	 *            {@link SectionSource} class name.
+	 * @param sectionSourceClass
+	 *            {@link SectionSource} class.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
 	 * @return {@link PropertyList} to configure properties for the
 	 *         {@link OfficeSection}.
 	 */
-	public PropertyList addSection(String sectionName,
-			String sectionSourceClassName, String sectionLocation) {
+	public <S extends SectionSource> PropertyList addSection(
+			String sectionName, Class<S> sectionSourceClass,
+			String sectionLocation) {
 
 		// Create the properties
-		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the section
-		Section section = new Section(sectionName, sectionSourceClassName,
+		Section section = new Section(sectionName, sectionSourceClass,
 				sectionLocation, properties);
 		this.sections.add(section);
 
@@ -105,8 +128,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
-					section.name, section.sourceClassName, section.location,
-					section.properties);
+					section.name, section.sourceClass.getName(),
+					section.location, section.properties);
 
 			// Link section tasks to team
 			for (OfficeTask task : officeSection.getOfficeTasks()) {
@@ -231,9 +254,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		private final String name;
 
 		/**
-		 * {@link SectionSource} class name.
+		 * {@link SectionSource} class.
 		 */
-		private final String sourceClassName;
+		private final Class<?> sourceClass;
 
 		/**
 		 * Location of section.
@@ -250,17 +273,17 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 * 
 		 * @param name
 		 *            Name of section.
-		 * @param sourceClassName
-		 *            {@link SectionSource} class name.
+		 * @param sourceClass
+		 *            {@link SectionSource} class.
 		 * @param location
 		 *            Location of section.
 		 * @param properties
 		 *            Properties for the section.
 		 */
-		public Section(String name, String sourceClassName, String location,
+		public Section(String name, Class<?> sourceClass, String location,
 				PropertyList properties) {
 			this.name = name;
-			this.sourceClassName = sourceClassName;
+			this.sourceClass = sourceClass;
 			this.location = location;
 			this.properties = properties;
 		}
