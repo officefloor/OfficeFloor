@@ -36,6 +36,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AmbiguousException;
 import net.officefloor.plugin.autowire.AutoWireOfficeSource;
@@ -276,8 +277,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 */
 	private void addSection(AutoWireOfficeSource source, String sectionName,
 			String... propertyNameValues) {
-		PropertyList properties = source.addSection(sectionName, sectionName
-				+ "Source", sectionName + "Location");
+		PropertyList properties = source.addSection(sectionName,
+				SectionSource.class, sectionName + "Location");
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
@@ -307,8 +308,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record creating the section
 		OfficeSection section = this.createMock(OfficeSection.class);
 		this.recordReturn(this.architect, this.architect.addOfficeSection(
-				sectionName, sectionName + "Source", sectionName + "Location",
-				properties), section);
+				sectionName, SectionSource.class.getName(), sectionName
+						+ "Location", properties), section);
 		this.sections.put(sectionName, section);
 
 		// Record task on section
