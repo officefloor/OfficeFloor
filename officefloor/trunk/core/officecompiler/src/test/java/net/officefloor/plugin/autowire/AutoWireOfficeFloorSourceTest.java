@@ -140,7 +140,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				.addProperty(
 						ThreadLocalDelegateManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 						"0");
-		ThreadLocalDelegateManagedObjectSource source = loader
+		ThreadLocalDelegateManagedObjectSource source = (ThreadLocalDelegateManagedObjectSource) loader
 				.loadManagedObjectSource((Class) ThreadLocalDelegateManagedObjectSource.class);
 		ManagedObject mo = new ManagedObjectUserStandAlone()
 				.sourceManagedObject(source);
