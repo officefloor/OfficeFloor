@@ -38,6 +38,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
@@ -214,9 +215,6 @@ public class ClassManagedObjectSource extends
 			// Obtain the name for the dependency
 			String dependencyName = retrieveDependencyName(dependencyField,
 					dependencyFields);
-
-			// Obtain the type for the dependency
-			Class<?> dependencyType = dependencyField.getType();
 
 			// Add the dependency meta-data, ensuring can access field
 			dependencyField.setAccessible(true);
@@ -538,8 +536,8 @@ public class ClassManagedObjectSource extends
 		while ((interrogateClass != null)
 				&& (!Object.class.equals(interrogateClass))) {
 			for (Field field : interrogateClass.getDeclaredFields()) {
-				if (field.getAnnotation(ProcessInterface.class) != null) {
-					// Annotated as a process field
+				if (field.getType().getAnnotation(FlowInterface.class) != null) {
+					// Annotated as a flow interface field
 					processFields.add(field);
 				}
 			}
@@ -559,8 +557,8 @@ public class ClassManagedObjectSource extends
 				throw new Exception(
 						"Type for field "
 								+ processField.getName()
-								+ " must be an interface as the fields is annotated with "
-								+ ProcessInterface.class.getSimpleName()
+								+ " must be an interface as the type is annotated with "
+								+ FlowInterface.class.getSimpleName()
 								+ " (type=" + type.getName() + ")");
 			}
 

@@ -33,12 +33,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ClassManagedObjectSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
@@ -288,6 +289,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ProcessInterface}.
 	 */
+	@FlowInterface
 	public static interface MockProcessInterface {
 
 		/**
@@ -297,7 +299,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Method to invoke a {@link ProcessState} with a parameter.
-		 *
+		 * 
 		 * @param parameter
 		 *            Parameter to the {@link ProcessState}.
 		 */
@@ -317,7 +319,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the dependencies.
-		 *
+		 * 
 		 * @param sqlQuery
 		 *            Expected SQL query.
 		 * @param connection
@@ -349,7 +351,6 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Ensure can invoke {@link ProcessState}.
 		 */
-		@ProcessInterface
 		private MockProcessInterface processes;
 
 		/**
@@ -359,7 +360,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the dependencies injected.
-		 *
+		 * 
 		 * @param connection
 		 *            Expected {@link Connection}.
 		 */
@@ -371,7 +372,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Verifies the processes injected.
-		 *
+		 * 
 		 * @param processParameter
 		 *            Parameter for the invoked processes.
 		 */
@@ -396,7 +397,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Overriding process field.
 		 */
-		@ProcessInterface
 		protected MockProcessInterface processes;
 	}
+
 }

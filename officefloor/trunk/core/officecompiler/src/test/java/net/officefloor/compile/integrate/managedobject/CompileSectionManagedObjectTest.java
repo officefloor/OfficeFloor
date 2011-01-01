@@ -37,12 +37,12 @@ import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link SectionManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
@@ -299,15 +299,15 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 
 	/**
 	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link ProcessInterface}.
+	 * {@link FlowInterface}.
 	 */
 	public static class ProcessManagedObject {
 
+		@FlowInterface
 		public static interface Processes {
 			void doProcess(Integer parameter);
 		}
 
-		@ProcessInterface
 		Processes processes;
 	}
 

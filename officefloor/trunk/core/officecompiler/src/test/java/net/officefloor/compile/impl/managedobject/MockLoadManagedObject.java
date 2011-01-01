@@ -24,7 +24,7 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Class for {@link ClassManagedObjectSource} that enables validating loading a
@@ -37,6 +37,7 @@ public class MockLoadManagedObject {
 	/**
 	 * Mock process interface.
 	 */
+	@FlowInterface
 	public static interface MockProcessInterface {
 		void doProcess(Integer parameter);
 	}
@@ -50,7 +51,6 @@ public class MockLoadManagedObject {
 	/**
 	 * {@link MockProcessInterface}.
 	 */
-	@ProcessInterface
 	MockProcessInterface processes;
 
 	/**
