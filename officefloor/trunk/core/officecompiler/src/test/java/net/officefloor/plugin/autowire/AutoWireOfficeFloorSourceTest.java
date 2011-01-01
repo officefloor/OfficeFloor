@@ -329,7 +329,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record the office
 		this.recordReturn(this.deployer, this.deployer.addDeployedOffice(
-				"office", ThreadLocalDelegateOfficeSource.class.getName(), ""),
+				"OFFICE", ThreadLocalDelegateOfficeSource.class.getName(), ""),
 				this.office);
 		this.office
 				.addProperty(

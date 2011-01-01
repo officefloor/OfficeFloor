@@ -64,6 +64,15 @@ public class ClassTaskFactory implements
 		this.parameters = parameters;
 	}
 
+	/**
+	 * Obtains the {@link Method}.
+	 * 
+	 * @return {@link Method}.
+	 */
+	public Method getMethod() {
+		return this.method;
+	}
+
 	/*
 	 * =============== TaskFactory ===========================================
 	 */

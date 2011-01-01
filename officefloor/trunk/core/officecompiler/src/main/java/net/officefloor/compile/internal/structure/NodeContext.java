@@ -20,10 +20,14 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -72,6 +76,13 @@ public interface NodeContext {
 	OfficeFrame getOfficeFrame();
 
 	/**
+	 * Creates a new {@link PropertyList}.
+	 * 
+	 * @return New {@link PropertyList}.
+	 */
+	PropertyList createPropertyList();
+
+	/**
 	 * Obtains the {@link OfficeSource} class.
 	 * 
 	 * @param officeSourceName
@@ -106,6 +117,13 @@ public interface NodeContext {
 			String sectionSourceName, String sectionLocation, String sectionName);
 
 	/**
+	 * Obtains the {@link SectionLoader}.
+	 * 
+	 * @return {@link SectionLoader}.
+	 */
+	SectionLoader getSectionLoader();
+
+	/**
 	 * Obtains the {@link WorkSource} class.
 	 * 
 	 * @param workSourceName
@@ -122,6 +140,18 @@ public interface NodeContext {
 	 */
 	<S extends WorkSource<?>> Class<S> getWorkSourceClass(
 			String workSourceName, String sectionLocation, String workName);
+
+	/**
+	 * Obtains the {@link WorkLoader}.
+	 * 
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} requiring the
+	 *            {@link Work} for reporting issues.
+	 * @param workName
+	 *            Name of the {@link Work} for reporting issues.
+	 * @return {@link WorkLoader}.
+	 */
+	WorkLoader getWorkLoader(String sectionLocation, String workName);
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} class.
@@ -142,6 +172,20 @@ public interface NodeContext {
 	 */
 	<S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(
 			String managedObjectSourceName, LocationType locationType,
+			String location, String managedObjectName);
+
+	/**
+	 * Obtains the {@link ManagedObjectLoader}.
+	 * 
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @return {@link ManagedObjectLoader}.
+	 */
+	ManagedObjectLoader getManagedObjectLoader(LocationType locationType,
 			String location, String managedObjectName);
 
 	/**

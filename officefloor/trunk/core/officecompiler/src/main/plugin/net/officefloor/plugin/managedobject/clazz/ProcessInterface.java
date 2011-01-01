@@ -23,18 +23,18 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
- * <p>
  * Annotates a field to be process interface to invoke processes.
- * <p>
- * The type of the field must adhere to the rules of being a
- * {@link ProcessInterface}:
- * <ol>
- * <li>TODO provide the rules of a ProcessInterface</li>
- * </ol>
+ * 
+ * TODO replace with {@link FlowInterface} on the {@link Field} type.
  * 
  * @author Daniel Sagenschneider
+ * 
+ * @deprecated
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

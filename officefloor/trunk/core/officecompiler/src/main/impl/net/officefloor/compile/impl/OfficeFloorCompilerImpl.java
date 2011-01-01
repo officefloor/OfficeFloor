@@ -370,6 +370,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public WorkLoader getWorkLoader(String sectionLocation, String workName) {
+		return new WorkLoaderImpl(sectionLocation, workName, this);
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(
 			String managedObjectSourceName, LocationType locationType,
@@ -379,6 +384,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 				this.getClassLoader(), locationType, location,
 				AssetType.MANAGED_OBJECT, managedObjectName, this
 						.getCompilerIssues());
+	}
+
+	@Override
+	public ManagedObjectLoader getManagedObjectLoader(
+			LocationType locationType, String location, String managedObjectName) {
+		return new ManagedObjectLoaderImpl(locationType, location,
+				managedObjectName, this);
 	}
 
 	@Override

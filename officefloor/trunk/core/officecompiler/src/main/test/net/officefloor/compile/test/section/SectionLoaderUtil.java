@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -417,6 +418,10 @@ public class SectionLoaderUtil {
 					.getOfficeSectionManagedObjectSourceName());
 			String managedObjectSourceName = eMoSource
 					.getOfficeSectionManagedObjectSourceName();
+
+			// Ensure load the managed object type to have list of teams
+			ManagedObjectSourceNode mosNode = (ManagedObjectSourceNode) eMoSource;
+			mosNode.loadManagedObjectType();
 
 			// Validate the managed object source teams
 			ManagedObjectTeam[] eTeams = eMoSource

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
@@ -198,8 +197,8 @@ public class WorkNodeImpl implements WorkNode {
 		}
 
 		// Load the work type
-		WorkLoader workLoader = new WorkLoaderImpl(this.sectionLocation,
-				this.workName, this.context);
+		WorkLoader workLoader = this.context.getWorkLoader(
+				this.sectionLocation, this.workName);
 		WorkType workType = workLoader.loadWorkType(workSourceClass,
 				this.propertyList);
 

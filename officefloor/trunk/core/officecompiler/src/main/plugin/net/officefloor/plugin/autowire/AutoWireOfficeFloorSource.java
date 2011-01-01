@@ -46,7 +46,13 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -54,6 +60,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
+import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeFloorSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
 
 /**
@@ -72,6 +79,11 @@ import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
 public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 	/**
+	 * Name of the single {@link Office}.
+	 */
+	private static final String OFFICE_NAME = "OFFICE";
+
+	/**
 	 * {@link OfficeFloorCompiler}.
 	 */
 	private final OfficeFloorCompiler compiler;
@@ -87,6 +99,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	private final List<AutoWireContext> objectContexts = new LinkedList<AutoWireContext>();
 
 	/**
+	 * Opened {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param compiler
@@ -95,6 +112,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	public AutoWireOfficeFloorSource(OfficeFloorCompiler compiler) {
 		this.compiler = compiler;
 		this.officeSource = new AutoWireOfficeSource(this.compiler);
+
+		// Override the OfficeFloorSource
+		ThreadLocalDelegateOfficeFloorSource.bindDelegate(this, this.compiler);
 	}
 
 	/**
@@ -201,6 +221,68 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		}
 	}
 
+	/**
+	 * Opens the {@link OfficeFloor}.
+	 * 
+	 * @return {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to open the {@link OfficeFloor}.
+	 */
+	public OfficeFloor openOfficeFloor() throws Exception {
+
+		// Lazy open the OfficeFloor
+		if (this.officeFloor == null) {
+			this.officeFloor = this.compiler.compile("auto-wire");
+		}
+
+		// Ensure the OfficeFloor is open
+		if (this.officeFloor != null) {
+			this.officeFloor.openOfficeFloor();
+		}
+
+		// Return the OfficeFloor
+		return this.officeFloor;
+	}
+
+	/**
+	 * <p>
+	 * Invokes a {@link Task} on the {@link OfficeFloor}.
+	 * <p>
+	 * Should the {@link OfficeFloor} not be open, it is opened before invoking
+	 * the {@link Task}. Please note however the {@link OfficeFloor} will not be
+	 * re-opened after being closed.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param parameter
+	 *            Parameter for the {@link Task}. May be <code>null</code>.
+	 * @throws Exception
+	 *             If fails invoking the {@link Task}.
+	 */
+	public void invokeTask(String workName, String taskName, Object parameter)
+			throws Exception {
+
+		// Ensure OfficeFloor is open
+		if (this.officeFloor == null) {
+			this.openOfficeFloor();
+
+			// Ensure opened
+			if (this.officeFloor == null) {
+				throw new IllegalStateException("Failed opening OfficeFloor");
+			}
+		}
+
+		// Obtain the Task
+		Office office = this.officeFloor.getOffice(OFFICE_NAME);
+		WorkManager workManager = office.getWorkManager(workName);
+		TaskManager taskManager = workManager.getTaskManager(taskName);
+
+		// Invoke the task
+		ProcessContextTeam.doTask(taskManager, parameter);
+	}
+
 	/*
 	 * =================== OfficeFloorSource =========================
 	 */
@@ -231,7 +313,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 		// Add the auto-wiring office
 		DeployedOffice office = ThreadLocalDelegateOfficeSource.bindDelegate(
-				"office", this.officeSource, deployer);
+				OFFICE_NAME, this.officeSource, deployer);
 
 		// Link team for office
 		OfficeTeam officeTeam = office.getDeployedOfficeTeam("team");
