@@ -22,6 +22,7 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -99,6 +100,13 @@ public interface NodeContext {
 	 */
 	<S extends OfficeSource> Class<S> getOfficeSourceClass(
 			String officeSourceName, String officeLocation, String officeName);
+
+	/**
+	 * Obtains the {@link OfficeLoader}.
+	 * 
+	 * @return {@link OfficeLoader}.
+	 */
+	OfficeLoader getOfficeLoader();
 
 	/**
 	 * Obtains the {@link SectionSource} class.

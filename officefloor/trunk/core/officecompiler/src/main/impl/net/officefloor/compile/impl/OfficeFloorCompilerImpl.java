@@ -303,7 +303,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 				: OfficeFloorModelOfficeFloorSource.class);
 
 		// Create the office floor loader
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(this);
+		OfficeFloorLoader officeFloorLoader = this.getOfficeFloorLoader();
 
 		// Compile, build and return the office floor
 		return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
