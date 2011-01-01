@@ -22,12 +22,18 @@ import java.util.Properties;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeLoader;
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorUnknownPropertyError;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -43,43 +49,34 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	private final String officeFloorLocation;
 
 	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext;
-
-	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList propertyList;
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link NodeContext}.
 	 */
-	private final ClassLoader classLoader;
+	private final NodeContext context;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
 	public OfficeFloorSourceContextImpl(String officeFloorLocation,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader) {
+			PropertyList propertyList, NodeContext nodeContext) {
 		this.officeFloorLocation = officeFloorLocation;
-		this.configurationContext = configurationContext;
 		this.propertyList = propertyList;
-		this.classLoader = classLoader;
+		this.context = nodeContext;
 	}
 
 	/*
-	 * ================= OfficeFloorLoaderContext ================================
+	 * =============== OfficeFloorLoaderContext ============================
 	 */
 
 	@Override
@@ -90,7 +87,8 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	@Override
 	public ConfigurationItem getConfiguration(String location) {
 		try {
-			return this.configurationContext.getConfigurationItem(location);
+			return this.context.getConfigurationContext().getConfigurationItem(
+					location);
 		} catch (Throwable ex) {
 			// Propagate failure to office floor loader
 			throw new ConfigurationContextPropagateError(location, ex);
@@ -103,11 +101,12 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	}
 
 	@Override
-	public String getProperty(String name) throws OfficeFloorUnknownPropertyError {
+	public String getProperty(String name)
+			throws OfficeFloorUnknownPropertyError {
 		String value = this.getProperty(name, null);
 		if (value == null) {
-			throw new OfficeFloorUnknownPropertyError("Unknown property '" + name
-					+ "'", name);
+			throw new OfficeFloorUnknownPropertyError("Unknown property '"
+					+ name + "'", name);
 		}
 		return value;
 	}
@@ -129,7 +128,75 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return this.classLoader;
+		return this.context.getClassLoader();
+	}
+
+	@Override
+	public PropertyList createPropertyList() {
+		return this.context.createPropertyList();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ManagedObjectType<?> loadManagedObjectType(
+			String managedObjectSourceClassName, PropertyList properties) {
+
+		// Obtain the managed object source class
+		Class managedObjectSourceClass = this.context
+				.getManagedObjectSourceClass(managedObjectSourceClassName,
+						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+						"loadManagedObjectType");
+
+		// Ensure have the managed object source class
+		if (managedObjectSourceClass == null) {
+			throw new LoadTypeError(ManagedObjectType.class,
+					managedObjectSourceClassName);
+		}
+
+		// Load the managed object type
+		ManagedObjectLoader managedObjectLoader = this.context
+				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, "loadManagedObjectType");
+		ManagedObjectType<?> managedObjectType = managedObjectLoader
+				.loadManagedObjectType(managedObjectSourceClass, properties);
+
+		// Ensure have the managed object type
+		if (managedObjectType == null) {
+			throw new LoadTypeError(ManagedObjectType.class,
+					managedObjectSourceClassName);
+		}
+
+		// Return the managed object type
+		return managedObjectType;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public OfficeType loadOfficeType(String officeSourceClassName,
+			String location, PropertyList properties) {
+
+		// Obtain the office source class
+		Class officeSourceClass = this.context.getOfficeSourceClass(
+				officeSourceClassName, this.officeFloorLocation,
+				"loadOfficeType");
+
+		// Ensure have the office source class
+		if (officeSourceClass == null) {
+			throw new LoadTypeError(OfficeType.class, officeSourceClassName);
+		}
+
+		// Load the office type
+		OfficeLoader officeLoader = this.context.getOfficeLoader();
+		OfficeType officeType = officeLoader.loadOfficeType(officeSourceClass,
+				location, properties);
+
+		// Ensure have the office type
+		if (officeType == null) {
+			throw new LoadTypeError(OfficeType.class, officeSourceClassName);
+		}
+
+		// Return the office type
+		return officeType;
 	}
 
 }

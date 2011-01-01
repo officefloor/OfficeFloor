@@ -22,6 +22,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -198,9 +199,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the office floor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				officeFloorLocation,
-				this.nodeContext.getConfigurationContext(), propertyList,
-				this.nodeContext.getClassLoader());
+				officeFloorLocation, propertyList, this.nodeContext);
 
 		// Create the required properties
 		final PropertyList requiredPropertyList = new PropertyListImpl();
@@ -286,9 +285,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the office floor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				officeFloorLocation,
-				this.nodeContext.getConfigurationContext(), propertyList,
-				this.nodeContext.getClassLoader());
+				officeFloorLocation, propertyList, this.nodeContext);
 
 		// Create the office floor deployer
 		OfficeFloorNode deployer = new OfficeFloorNodeImpl(officeFloorLocation,
@@ -309,6 +306,12 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 					+ ex.getLocation() + "'", ex.getCause(),
 					officeFloorLocation);
 			return null; // must not fail in getting configurations
+
+		} catch (LoadTypeError ex) {
+			this.addIssue("Failure loading " + ex.getType().getSimpleName()
+					+ " from source " + ex.getSourceClassName(),
+					officeFloorLocation);
+			return null; // must not fail in loading types
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source "

@@ -20,7 +20,14 @@ package net.officefloor.compile.spi.officefloor.source;
 
 import java.util.Properties;
 
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -102,5 +109,52 @@ public interface OfficeFloorSourceContext {
 	 * @return {@link ClassLoader} for the {@link OfficeFloorSource}.
 	 */
 	ClassLoader getClassLoader();
+
+	/**
+	 * Creates a new {@link PropertyList}.
+	 * 
+	 * @return New {@link PropertyList}.
+	 */
+	PropertyList createPropertyList();
+
+	/**
+	 * <p>
+	 * Loads the {@link ManagedObjectType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link ManagedObject} to allow reflective configuration by the
+	 * {@link OfficeFloorSource}.
+	 * 
+	 * @param managedObjectSourceClassName
+	 *            Name of the implementing {@link ManagedObjectSource} class.
+	 *            May also be an alias.
+	 * @param properties
+	 *            {@link PropertyList} to configure the
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
+	 *         the {@link ManagedObjectType}.
+	 */
+	ManagedObjectType<?> loadManagedObjectType(
+			String managedObjectSourceClassName, PropertyList properties);
+
+	/**
+	 * <p>
+	 * Loads the {@link OfficeType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the {@link Office}
+	 * to allow reflective configuration by the {@link OfficeFloorSource}.
+	 * 
+	 * @param officeSourceClassName
+	 *            Name of the implementing {@link OfficeSource} class. May also
+	 *            be an alias.
+	 * @param location
+	 *            Location of the {@link Office}.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link OfficeSource}.
+	 * @return {@link OfficeType} or <code>null</code> if fails to load the
+	 *         {@link OfficeType}.
+	 */
+	OfficeType loadOfficeType(String officeSourceClassName, String location,
+			PropertyList properties);
 
 }
