@@ -28,6 +28,7 @@ import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
@@ -491,8 +492,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
-				issueDescription);
+		this.issues.addIssue(LocationType.OFFICE, null,
+				AssetType.ADMINISTRATOR, null, issueDescription);
 	}
 
 	/**
@@ -504,8 +505,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
-				issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE, null,
+				AssetType.ADMINISTRATOR, null, issueDescription, cause);
 	}
 
 	/**

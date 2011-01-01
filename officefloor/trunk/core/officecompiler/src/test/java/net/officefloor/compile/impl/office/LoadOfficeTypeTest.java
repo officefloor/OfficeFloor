@@ -25,9 +25,13 @@ import java.util.Properties;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.impl.administrator.MockLoadAdministrator;
+import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -41,9 +45,12 @@ import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * Tests loading the {@link OfficeType}.
@@ -410,6 +417,114 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				.getOfficeSectionInputName());
 		assertEquals("Incorrect parameter type", String.class.getName(), input
 				.getParameterType());
+	}
+
+	/**
+	 * Ensure can obtain the {@link ManagedObjectType}.
+	 */
+	public void testLoadManagedObjectType() {
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Load the managed object type
+				PropertyList properties = context.createPropertyList();
+				properties.addProperty(
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadManagedObject.class.getName());
+				ManagedObjectType<?> managedObjectType = context
+						.loadManagedObjectType(ClassManagedObjectSource.class
+								.getName(), properties);
+
+				// Ensure correct managed object type
+				MockLoadManagedObject
+						.assertManagedObjectType(managedObjectType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link ManagedObjectType}.
+	 */
+	public void testFailLoadingManagedObjectType() {
+
+		// Ensure issue in not loading managed object type
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.MANAGED_OBJECT, "loadManagedObjectType",
+				"Missing property 'class.name'");
+		this.record_issue("Failure loading ManagedObjectType from source "
+				+ ClassManagedObjectSource.class.getName());
+
+		// Fail to load the managed object type
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = context.createPropertyList();
+				context.loadManagedObjectType(ClassManagedObjectSource.class
+						.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load managed object type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can obtain the {@link AdministratorType}.
+	 */
+	public void testLoadAdministratorType() {
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Load the managed object type
+				PropertyList properties = context.createPropertyList();
+				properties.addProperty(
+						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadAdministrator.class.getName());
+				AdministratorType<?, ?> administratorType = context
+						.loadAdministratorType(ClassAdministratorSource.class
+								.getName(), properties);
+
+				// Ensure correct administrator type
+				MockLoadAdministrator
+						.assertAdministratorType(administratorType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link AdministratorType}.
+	 */
+	public void testFailLoadingAdministratorType() {
+
+		// Ensure issue in not loading managed object type
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.ADMINISTRATOR, "loadAdministratorType",
+				"Missing property 'class.name'");
+		this.record_issue("Failure loading AdministratorType from source "
+				+ ClassAdministratorSource.class.getName());
+
+		// Fail to load the administrator type
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect architect,
+					OfficeSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = context.createPropertyList();
+				context.loadAdministratorType(ClassAdministratorSource.class
+						.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load administrator type");
+			}
+		});
 	}
 
 	/**

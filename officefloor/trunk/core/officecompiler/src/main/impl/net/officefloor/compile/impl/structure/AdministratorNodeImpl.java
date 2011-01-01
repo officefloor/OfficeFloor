@@ -25,7 +25,6 @@ import java.util.Map;
 
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -181,9 +180,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			}
 
 			// Load the administrator type
-			AdministratorLoader loader = new AdministratorLoaderImpl(
-					LocationType.OFFICE, this.officeLocation,
-					this.administratorName, this.context);
+			AdministratorLoader loader = this.context.getAdministratorLoader(
+					this.officeLocation, this.administratorName);
 			this.administratorType = loader.loadAdministrator(
 					administratorSourceClass, this.properties);
 		}

@@ -18,6 +18,7 @@
 
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -205,6 +206,18 @@ public interface NodeContext {
 	 */
 	<S extends AdministratorSource<?, ?>> Class<S> getAdministratorSourceClass(
 			String administratorSourceName, String officeLocation,
+			String administratorName);
+
+	/**
+	 * Obtains the {@link AdministratorLoader}.
+	 * 
+	 * @param officeLocation
+	 *            {@link Office} location.
+	 * @param administratorName
+	 *            Name of the {@link Administrator}.
+	 * @return {@link AdministratorLoader}.
+	 */
+	AdministratorLoader getAdministratorLoader(String officeLocation,
 			String administratorName);
 
 	/**

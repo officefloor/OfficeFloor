@@ -406,6 +406,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public AdministratorLoader getAdministratorLoader(String officeLocation,
+			String administratorName) {
+		return new AdministratorLoaderImpl(officeLocation, administratorName,
+				this);
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends TeamSource> Class<S> getTeamSourceClass(
 			String teamSourceName, String officeFloorLocation, String teamName) {

@@ -31,6 +31,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
@@ -78,7 +79,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link OfficeNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
@@ -153,7 +154,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Allows loading the {@link OfficeType}.
-	 *
+	 * 
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 * @param context
@@ -168,7 +169,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Allow adding the {@link DeployedOffice}.
-	 *
+	 * 
 	 * @param officeName
 	 *            Name of this {@link DeployedOffice}.
 	 * @param officeSourceClassName
@@ -192,7 +193,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	/**
 	 * Adds an issue.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
@@ -282,8 +283,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		// Create the office source context
 		OfficeSourceContext context = new OfficeSourceContextImpl(
-				this.officeLocation, this.context.getConfigurationContext(),
-				properties, this.context.getClassLoader());
+				this.officeLocation, properties, this.context);
 
 		try {
 			// Source the office
@@ -299,6 +299,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			this.addIssue("Failure obtaining configuration '"
 					+ ex.getLocation() + "'", ex.getCause());
 			return false; // must not fail in getting configurations
+
+		} catch (LoadTypeError ex) {
+			this.addIssue("Failure loading " + ex.getType().getSimpleName()
+					+ " from source " + ex.getSourceClassName());
+			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source "
@@ -537,11 +542,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			}
 		}
 		return struct.team;
-	}
-
-	@Override
-	public PropertyList createPropertyList() {
-		return new PropertyListImpl();
 	}
 
 	@Override
@@ -807,7 +807,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param officeObject
 		 *            {@link OfficeObjectNode}.
 		 * @param isAdded
@@ -837,7 +837,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param team
 		 *            {@link OfficeTeamNode}.
 		 * @param isAdded
