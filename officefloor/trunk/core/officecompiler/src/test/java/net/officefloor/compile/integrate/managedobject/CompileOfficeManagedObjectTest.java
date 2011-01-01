@@ -45,8 +45,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
-import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling an {@link Office} {@link ManagedObject}.
@@ -391,24 +391,25 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 
 	/**
 	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link ProcessInterface}.
+	 * {@link FlowInterface}.
 	 */
 	public static class ProcessManagedObject {
 
+		@FlowInterface
 		public static interface Processes {
 			void doProcess(Integer parameter);
 		}
 
-		@ProcessInterface
 		Processes processes;
 	}
 
 	/**
 	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link ProcessInterface} and a {@link Dependency}.
+	 * {@link FlowInterface} and a {@link Dependency}.
 	 */
 	public static class InputManagedObject {
 
+		@FlowInterface
 		public static interface Processes {
 			void doProcess(String parameter);
 		}
@@ -416,7 +417,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		@Dependency
 		SimpleManagedObject dependency;
 
-		@ProcessInterface
 		Processes processes;
 	}
 

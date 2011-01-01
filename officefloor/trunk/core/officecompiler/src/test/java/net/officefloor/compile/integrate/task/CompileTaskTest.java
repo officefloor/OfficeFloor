@@ -48,7 +48,6 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
 import net.officefloor.plugin.work.clazz.ClassTaskFactory;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkFactory;
@@ -726,11 +725,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public static class InputManagedObject {
 
+		@FlowInterface
 		public static interface InputProcesses {
 			void doProcess(Integer parameter);
 		}
 
-		@ProcessInterface
 		InputProcesses processes;
 	}
 
