@@ -20,14 +20,20 @@ package net.officefloor.compile.impl.office;
 
 import java.util.Properties;
 
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -43,39 +49,30 @@ public class OfficeSourceContextImpl implements OfficeSourceContext {
 	private final String officeLocation;
 
 	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext;
-
-	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList propertyList;
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link NodeContext}.
 	 */
-	private final ClassLoader classLoader;
+	private final NodeContext context;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
 	public OfficeSourceContextImpl(String officeLocation,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader) {
+			PropertyList propertyList, NodeContext nodeContext) {
 		this.officeLocation = officeLocation;
-		this.configurationContext = configurationContext;
 		this.propertyList = propertyList;
-		this.classLoader = classLoader;
+		this.context = nodeContext;
 	}
 
 	/*
@@ -90,7 +87,8 @@ public class OfficeSourceContextImpl implements OfficeSourceContext {
 	@Override
 	public ConfigurationItem getConfiguration(String location) {
 		try {
-			return this.configurationContext.getConfigurationItem(location);
+			return this.context.getConfigurationContext().getConfigurationItem(
+					location);
 		} catch (Throwable ex) {
 			// Propagate failure to office loader
 			throw new ConfigurationContextPropagateError(location, ex);
@@ -129,7 +127,78 @@ public class OfficeSourceContextImpl implements OfficeSourceContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return this.classLoader;
+		return this.context.getClassLoader();
 	}
 
+	@Override
+	public PropertyList createPropertyList() {
+		return this.context.createPropertyList();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ManagedObjectType<?> loadManagedObjectType(
+			String managedObjectSourceClassName, PropertyList properties) {
+
+		// Obtain the managed object source class
+		Class managedObjectSourceClass = this.context
+				.getManagedObjectSourceClass(managedObjectSourceClassName,
+						LocationType.OFFICE, this.officeLocation,
+						"loadManagedObjectType");
+
+		// Ensure have the managed object source class
+		if (managedObjectSourceClass == null) {
+			throw new LoadTypeError(ManagedObjectType.class,
+					managedObjectSourceClassName);
+		}
+
+		// Load the managed object type
+		ManagedObjectLoader managedObjectLoader = this.context
+				.getManagedObjectLoader(LocationType.OFFICE,
+						this.officeLocation, "loadManagedObjectType");
+		ManagedObjectType<?> managedObjectType = managedObjectLoader
+				.loadManagedObjectType(managedObjectSourceClass, properties);
+
+		// Ensure have the managed object type
+		if (managedObjectType == null) {
+			throw new LoadTypeError(ManagedObjectType.class,
+					managedObjectSourceClassName);
+		}
+
+		// Return the managed object type
+		return managedObjectType;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public AdministratorType<?, ?> loadAdministratorType(
+			String administratorSourceClassName, PropertyList properties) {
+
+		// Obtain the administrator source class
+		Class administratorSourceClass = this.context
+				.getAdministratorSourceClass(administratorSourceClassName,
+						this.officeLocation, "loadAdministratorType");
+
+		// Ensure have the administrator source class
+		if (administratorSourceClass == null) {
+			throw new LoadTypeError(AdministratorType.class,
+					administratorSourceClassName);
+		}
+
+		// Load the administrator type
+		AdministratorLoader administratorLoader = this.context
+				.getAdministratorLoader(this.officeLocation,
+						"loadAdministratorType");
+		AdministratorType<?, ?> administratorType = administratorLoader
+				.loadAdministrator(administratorSourceClass, properties);
+
+		// Ensure have the administrator type
+		if (administratorType == null) {
+			throw new LoadTypeError(AdministratorType.class,
+					administratorSourceClassName);
+		}
+
+		// Return the administrator type
+		return administratorType;
+	}
 }

@@ -18,7 +18,6 @@
 
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -56,14 +55,6 @@ public interface OfficeArchitect {
 	 * @return Added {@link OfficeTeam}.
 	 */
 	OfficeTeam addOfficeTeam(String officeTeamName);
-
-	/**
-	 * Creates a {@link PropertyList} to be populated with {@link Property}
-	 * instances and passed to add an {@link OfficeSection}.
-	 * 
-	 * @return {@link PropertyList}.
-	 */
-	PropertyList createPropertyList();
 
 	/**
 	 * Adds an {@link OfficeSection}.

@@ -21,6 +21,7 @@ package net.officefloor.compile.impl.administrator;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
@@ -296,8 +297,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
-				issueDescription);
+		this.issues.addIssue(LocationType.OFFICE, null,
+				AssetType.ADMINISTRATOR, null, issueDescription);
 	}
 
 	/**
@@ -309,8 +310,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
-				issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE, null,
+				AssetType.ADMINISTRATOR, null, issueDescription, cause);
 	}
 
 	/**

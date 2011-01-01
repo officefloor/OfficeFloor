@@ -344,7 +344,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
 			// Create the property list to add the section
-			PropertyList propertyList = architect.createPropertyList();
+			PropertyList propertyList = context.createPropertyList();
 			for (PropertyModel property : sectionModel.getProperties()) {
 				propertyList.addProperty(property.getName()).setValue(
 						property.getValue());

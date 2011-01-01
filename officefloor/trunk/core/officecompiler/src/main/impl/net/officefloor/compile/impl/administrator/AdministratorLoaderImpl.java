@@ -36,6 +36,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
@@ -54,14 +55,9 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknow
 public class AdministratorLoaderImpl implements AdministratorLoader {
 
 	/**
-	 * {@link LocationType}.
+	 * {@link Office} location.
 	 */
-	private LocationType locationType;
-
-	/**
-	 * Location.
-	 */
-	private final String location;
+	private final String officeLocation;
 
 	/**
 	 * Name of the {@link Administrator}.
@@ -76,19 +72,16 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
+	 * @param officeLocation
+	 *            {@link Office} location.
 	 * @param administratorName
 	 *            Name of the {@link Administrator}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public AdministratorLoaderImpl(LocationType locationType, String location,
+	public AdministratorLoaderImpl(String officeLocation,
 			String administratorName, NodeContext nodeContext) {
-		this.locationType = locationType;
-		this.location = location;
+		this.officeLocation = officeLocation;
 		this.administratorName = administratorName;
 		this.nodeContext = nodeContext;
 	}
@@ -100,7 +93,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            {@link NodeContext}.
 	 */
 	public AdministratorLoaderImpl(NodeContext nodeContext) {
-		this(null, null, null, nodeContext);
+		this(null, null, nodeContext);
 	}
 
 	/*
@@ -114,8 +107,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		// Instantiate the administrator source
 		AdministratorSource<I, A> administratorSource = CompileUtil
 				.newInstance(administratorSourceClass,
-						AdministratorSource.class, this.locationType,
-						this.location, AssetType.ADMINISTRATOR,
+						AdministratorSource.class, LocationType.OFFICE,
+						this.officeLocation, AssetType.ADMINISTRATOR,
 						this.administratorName, this.nodeContext
 								.getCompilerIssues());
 		if (administratorSource == null) {
@@ -236,8 +229,9 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		// Create an instance of the administrator source
 		AS administratorSource = CompileUtil.newInstance(
 				administratorSourceClass, AdministratorSource.class,
-				this.locationType, this.location, AssetType.ADMINISTRATOR,
-				this.administratorName, this.nodeContext.getCompilerIssues());
+				LocationType.OFFICE, this.officeLocation,
+				AssetType.ADMINISTRATOR, this.administratorName,
+				this.nodeContext.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
@@ -409,9 +403,9 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.ADMINISTRATOR, this.administratorName,
-				issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
+				this.officeLocation, AssetType.ADMINISTRATOR,
+				this.administratorName, issueDescription);
 	}
 
 	/**
@@ -423,9 +417,9 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.ADMINISTRATOR, this.administratorName,
-				issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
+				this.officeLocation, AssetType.ADMINISTRATOR,
+				this.administratorName, issueDescription, cause);
 	}
 
 }
