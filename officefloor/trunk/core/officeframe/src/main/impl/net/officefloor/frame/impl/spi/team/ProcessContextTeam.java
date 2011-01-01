@@ -25,6 +25,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
+import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
@@ -102,6 +103,54 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 			// Invoke the work
 			ProcessFuture future = workManager.invokeWork(parameter);
+
+			// Blocking call to execute the Jobs
+			executor.executeJobs(future);
+
+		} finally {
+			// Ensure unregister current Thread
+			synchronized (threadToExecutor) {
+				threadToExecutor.remove(currentThread);
+			}
+
+			// All Jobs should be completed with completion of Process
+		}
+	}
+
+	/**
+	 * <p>
+	 * Wrap invoking {@link Task} on the {@link TaskManager} to allow the
+	 * {@link Thread} to be available to execute the {@link Task} instances of
+	 * the {@link ProcessState}.
+	 * <p>
+	 * This method blocks until the invoked {@link ProcessState} of the invoked
+	 * {@link Task} is complete.
+	 * 
+	 * @param taskManager
+	 *            {@link TaskManager} managing the {@link Task} to invoked.
+	 * @param parameter
+	 *            Parameter for the {@link Task}.
+	 * @throws InvalidParameterTypeException
+	 *             Should the parameter type be invalid for the {@link Task}.
+	 * @throws InterruptedException
+	 *             Should this blocking call be interrupted.
+	 */
+	public static void doTask(TaskManager taskManager, Object parameter)
+			throws InvalidParameterTypeException, InterruptedException {
+
+		// Obtain the current Thread
+		Thread currentThread = Thread.currentThread();
+		try {
+
+			// Register the Job Queue Executor for the Thread.
+			// Must be done before invoking task to ensure available.
+			JobQueueExecutor executor = new JobQueueExecutor();
+			synchronized (threadToExecutor) {
+				threadToExecutor.put(currentThread, executor);
+			}
+
+			// Invoke the task
+			ProcessFuture future = taskManager.invokeTask(parameter);
 
 			// Blocking call to execute the Jobs
 			executor.executeJobs(future);
