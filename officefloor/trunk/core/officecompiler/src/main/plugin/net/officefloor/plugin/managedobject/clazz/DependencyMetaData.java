@@ -30,6 +30,11 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 public class DependencyMetaData {
 
 	/**
+	 * Name of the dependency.
+	 */
+	public final String name;
+
+	/**
 	 * Index of the dependency within the {@link ObjectRegistry}.
 	 */
 	public final int index;
@@ -42,12 +47,15 @@ public class DependencyMetaData {
 	/**
 	 * Initiate.
 	 * 
+	 * @param name
+	 *            Name of the dependency.
 	 * @param index
 	 *            Index of the dependency within the {@link ObjectRegistry}.
 	 * @param field
 	 *            {@link Field} to receive the injected dependency.
 	 */
-	public DependencyMetaData(int index, Field field) {
+	public DependencyMetaData(String name, int index, Field field) {
+		this.name = name;
 		this.index = index;
 		this.field = field;
 	}

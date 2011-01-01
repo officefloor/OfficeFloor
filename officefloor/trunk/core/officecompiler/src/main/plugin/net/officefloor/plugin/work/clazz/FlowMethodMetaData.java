@@ -31,6 +31,16 @@ import net.officefloor.frame.internal.structure.Flow;
 public class FlowMethodMetaData {
 
 	/**
+	 * Type declaring the {@link Method} of this flow.
+	 */
+	private final Class<?> flowType;
+
+	/**
+	 * {@link Method}.
+	 */
+	private final Method method;
+
+	/**
 	 * Index of the {@link Flow} to invoke for this {@link Method}.
 	 */
 	private final int flowIndex;
@@ -48,6 +58,10 @@ public class FlowMethodMetaData {
 	/**
 	 * Initiate.
 	 * 
+	 * @param flowType
+	 *            Type declaring the {@link Method} of this flow.
+	 * @param method
+	 *            {@link Method}.
 	 * @param flowIndex
 	 *            Index of the {@link Flow} to invoke for this {@link Method}.
 	 * @param isParameter
@@ -55,11 +69,31 @@ public class FlowMethodMetaData {
 	 * @param isReturnFlowFuture
 	 *            <code>true</code> if to return the {@link FlowFuture}.
 	 */
-	public FlowMethodMetaData(int flowIndex, boolean isParameter,
-			boolean isReturnFlowFuture) {
+	public FlowMethodMetaData(Class<?> flowType, Method method, int flowIndex,
+			boolean isParameter, boolean isReturnFlowFuture) {
+		this.flowType = flowType;
+		this.method = method;
 		this.flowIndex = flowIndex;
 		this.isParameter = isParameter;
 		this.isReturnFlowFuture = isReturnFlowFuture;
+	}
+
+	/**
+	 * Obtains the Type declaring the {@link Method} of this flow.
+	 * 
+	 * @return Type declaring the {@link Method} of this flow.
+	 */
+	public Class<?> getFlowType() {
+		return this.flowType;
+	}
+
+	/**
+	 * Obtains the {@link Method}.
+	 * 
+	 * @return {@link Method}.
+	 */
+	public Method getMethod() {
+		return this.method;
 	}
 
 	/**

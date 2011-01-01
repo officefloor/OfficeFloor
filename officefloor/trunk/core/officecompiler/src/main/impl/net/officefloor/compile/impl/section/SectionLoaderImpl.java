@@ -22,6 +22,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -181,8 +182,7 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(
-				sectionLocation, this.nodeContext.getConfigurationContext(),
-				propertyList, this.nodeContext.getClassLoader());
+				sectionLocation, propertyList, this.nodeContext);
 
 		// Create the section designer
 		SectionNode sectionType = new SectionNodeImpl(SectionType.class
@@ -202,6 +202,12 @@ public class SectionLoaderImpl implements SectionLoader {
 			this.addIssue("Failure obtaining configuration '"
 					+ ex.getLocation() + "'", ex.getCause(), sectionLocation);
 			return null; // must not fail in getting configurations
+
+		} catch (LoadTypeError ex) {
+			this.addIssue("Failure loading " + ex.getType().getSimpleName()
+					+ " from source " + ex.getSourceClassName(),
+					sectionLocation);
+			return null; // must not fail in loading types
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source "

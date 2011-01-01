@@ -22,13 +22,16 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
+import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
+import net.officefloor.compile.impl.work.MockLoadWork;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
@@ -40,10 +43,16 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests loading the {@link SectionType} from the {@link SectionSource}.
@@ -510,6 +519,184 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load {@link WorkType}.
+	 */
+	public void testLoadWorkType() {
+
+		// Load the section type which loads the work type
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Load the work type
+				PropertyList properties = context.createPropertyList();
+				properties
+						.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadWork.class.getName());
+				WorkType<?> workType = context.loadWorkType(
+						ClassWorkSource.class.getName(), properties);
+
+				// Ensure correct work type
+				MockLoadWork.assertWorkType(workType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link WorkType}.
+	 */
+	public void testFailLoadingWorkType() {
+
+		// Ensure issue in not loading work type
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.WORK, "loadWorkType",
+				"Missing property 'class.name' for WorkSource "
+						+ ClassWorkSource.class.getName());
+		this.record_issue("Failure loading WorkType from source "
+				+ ClassWorkSource.class.getName());
+
+		// Fail to load the work type
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load work type
+				PropertyList properties = context.createPropertyList();
+				context.loadWorkType(ClassWorkSource.class.getName(),
+						properties);
+
+				// Should not reach this point
+				fail("Should not successfully load work type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can load {@link ManagedObjectType}.
+	 */
+	public void testLoadManagedObjectType() {
+
+		// Load the section type which loads the managed object type
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Load the managed object type
+				PropertyList properties = context.createPropertyList();
+				properties.addProperty(
+						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
+						.setValue(MockLoadManagedObject.class.getName());
+				ManagedObjectType<?> managedObjectType = context
+						.loadManagedObjectType(ClassManagedObjectSource.class
+								.getName(), properties);
+
+				// Ensure correct managed object type
+				MockLoadManagedObject
+						.assertManagedObjectType(managedObjectType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link ManagedObjectType}.
+	 */
+	public void testFailLoadingManagedObjectType() {
+
+		// Ensure issue in not loading managed object type
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.MANAGED_OBJECT, "loadManagedObjectType",
+				"Missing property 'class.name'");
+		this.record_issue("Failure loading ManagedObjectType from source "
+				+ ClassManagedObjectSource.class.getName());
+
+		// Fail to load the managed object type
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = context.createPropertyList();
+				context.loadManagedObjectType(ClassManagedObjectSource.class
+						.getName(), properties);
+
+				// Should not reach this point
+				fail("Should not successfully load managed object type");
+			}
+		});
+	}
+
+	/**
+	 * Ensure can load {@link SectionType}.
+	 */
+	public void testLoadSubSectionType() {
+
+		// Load the section type which loads the sub section type
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Load the sub section type
+				PropertyList properties = context.createPropertyList();
+				SectionType sectionType = context.loadSectionType(
+						ClassSectionSource.class.getName(),
+						MockLoadSection.class.getName(), properties);
+
+				// Ensure correct section type
+				MockLoadSection.assertSectionType(sectionType);
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if fails to load the {@link SectionType}.
+	 */
+	public void testIssueLoadingSectionType() {
+
+		// Ensure issue in not loading managed object type
+		this.issues.addIssue(LocationType.SECTION, "FailLocation", null, null,
+				"Missing property 'missing' for SectionSource "
+						+ FailSectionSource.class.getName());
+		this.record_issue("Failure loading SectionType from source "
+				+ FailSectionSource.class.getName());
+
+		// Fail to load the managed object type
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionDesigner section,
+					SectionSourceContext context) throws Exception {
+
+				// Do not specify class causing failure to load type
+				PropertyList properties = context.createPropertyList();
+				context.loadSectionType(FailSectionSource.class.getName(),
+						"FailLocation", properties);
+			}
+		});
+	}
+
+	public static class FailSectionSource extends AbstractSectionSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer,
+				SectionSourceContext context) throws Exception {
+			// Obtain property causing failure
+			context.getProperty("missing");
+
+			// Ensure failed
+			TestCase.fail("Should not successfully obtain a missing property");
+		}
+	}
+
+	/**
 	 * Records an issue.
 	 * 
 	 * @param issueDescription
@@ -550,8 +737,12 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Replay mock objects
 		this.replayMockObjects();
 
+		// Create the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+
 		// Create the property list
-		PropertyList propertyList = new PropertyListImpl();
+		PropertyList propertyList = compiler.createPropertyList();
 		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
 			String name = propertyNameValuePairs[i];
 			String value = propertyNameValuePairs[i + 1];
@@ -559,8 +750,6 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the section loader and load the section
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.issues);
 		compiler.setConfigurationContext(this.configurationContext);
 		SectionLoader sectionLoader = compiler.getSectionLoader();

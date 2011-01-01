@@ -81,7 +81,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link SectionNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionNodeImpl extends AbstractNode implements SectionNode {
@@ -177,7 +177,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for loading the {@link SectionType}.
-	 *
+	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionLocation
@@ -198,7 +198,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	/**
 	 * Allows for obtaining {@link DeployedOfficeInput} from the
 	 * {@link OfficeFloorDeployer}.
-	 *
+	 * 
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param office
@@ -216,7 +216,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for loading top level {@link OfficeSection} to an {@link Office}.
-	 *
+	 * 
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param sectionSource
@@ -246,7 +246,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for adding a top level {@link OfficeSection} to an {@link Office}.
-	 *
+	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName
@@ -275,7 +275,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Allows for the creation of {@link SubSection} instances.
-	 *
+	 * 
 	 * @param sectionName
 	 *            Name of this {@link SectionNode} as a {@link SubSection}.
 	 * @param sectionSourceClassName
@@ -309,7 +309,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
@@ -381,8 +381,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(
-				this.sectionLocation, this.context.getConfigurationContext(),
-				this.propertyList, this.context.getClassLoader());
+				this.sectionLocation, this.propertyList, this.context);
 
 		try {
 			// Source the section
@@ -743,7 +742,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Adds a {@link SubSection}.
-	 *
+	 * 
 	 * @param subSectionName
 	 *            Name of the {@link SubSection}.
 	 * @param sectionSourceClassName
@@ -865,7 +864,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Loads the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
-	 *
+	 * 
 	 * @param taskFlow
 	 *            {@link TaskFlow}.
 	 * @param instigationStrategy

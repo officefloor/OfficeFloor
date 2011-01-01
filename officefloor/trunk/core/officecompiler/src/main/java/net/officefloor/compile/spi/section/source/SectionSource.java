@@ -46,7 +46,7 @@ public interface SectionSource {
 	 * Sources the {@link OfficeSection} by constructing it via the input
 	 * {@link SectionDesigner}.
 	 * 
-	 * @param sectionBuilder
+	 * @param designer
 	 *            {@link SectionDesigner} to construct the structure of the
 	 *            {@link OfficeSection}.
 	 * @param context
@@ -55,7 +55,7 @@ public interface SectionSource {
 	 * @throws Exception
 	 *             If fails to construct the {@link OfficeSection}.
 	 */
-	void sourceSection(SectionDesigner sectionBuilder,
-			SectionSourceContext context) throws Exception;
+	void sourceSection(SectionDesigner designer, SectionSourceContext context)
+			throws Exception;
 
 }

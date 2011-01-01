@@ -67,6 +67,16 @@ public class FlowParameterFactory implements ParameterFactory {
 				.getConstructor(InvocationHandler.class);
 	}
 
+	/**
+	 * Obtains the {@link FlowMethodMetaData}.
+	 * 
+	 * @return {@link FlowMethodMetaData}.
+	 */
+	public FlowMethodMetaData[] getFlowMethodMetaData() {
+		return this.methodMetaDatas.values().toArray(
+				new FlowMethodMetaData[this.methodMetaDatas.size()]);
+	}
+
 	/*
 	 * ==================== ParameterFactory ========================
 	 */

@@ -18,11 +18,14 @@
 
 package net.officefloor.plugin.work.clazz;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.WorkSourceService;
@@ -34,6 +37,8 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -42,7 +47,7 @@ import net.officefloor.frame.api.execute.Work;
 /**
  * {@link WorkSource} for a {@link Class} having the {@link Object} as the
  * {@link Work} and {@link Method} instances as the {@link Task} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
@@ -52,6 +57,96 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	 * Property name providing the {@link Class} name.
 	 */
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
+
+	/**
+	 * {@link ParameterManufacturer} instances.
+	 */
+	private final List<ParameterManufacturer> manufacturers = new LinkedList<ParameterManufacturer>();
+
+	/**
+	 * Initiate.
+	 */
+	public ClassWorkSource() {
+		// Add the default manufacturers
+		this.manufacturers.add(new TaskContextParameterManufacturer());
+		this.manufacturers
+				.add(new FlowInterfaceParameterManufacturer<FlowInterface>(
+						FlowInterface.class));
+
+		// Load any additional manufacturers
+		this.loadParameterManufacturers(this.manufacturers);
+	}
+
+	/**
+	 * Override to add additional {@link ParameterManufacturer} instances.
+	 * 
+	 * @param manufacturers
+	 *            List of {@link ParameterManufacturer} instances to use.
+	 */
+	protected void loadParameterManufacturers(
+			List<ParameterManufacturer> manufacturers) {
+		// By default adds no further manufacturers
+	}
+
+	/**
+	 * Allows overriding the creation of the {@link TaskFactory}.
+	 * 
+	 * @param clazz
+	 *            {@link Work} class.
+	 * @return {@link WorkFactory}.
+	 */
+	protected WorkFactory<ClassWork> createWorkFactory(Class<?> clazz) {
+		return new ClassWorkFactory(clazz);
+	}
+
+	/**
+	 * Allows overriding the creation of the {@link TaskFactory}.
+	 * 
+	 * @param clazz
+	 *            {@link Work} class.
+	 * @param method
+	 *            {@link Method} on the class.
+	 * @param isStatic
+	 *            Indicates if the {@link Method} is static.
+	 * @param parameters
+	 *            {@link ParameterFactory} instances.
+	 * @return {@link TaskFactory}.
+	 */
+	protected TaskFactory<ClassWork, Indexed, Indexed> createTaskFactory(
+			Class<?> clazz, Method method, boolean isStatic,
+			ParameterFactory[] parameters) {
+		return new ClassTaskFactory(method, isStatic, parameters);
+	}
+
+	/**
+	 * Allows overriding the addition of the {@link TaskTypeBuilder}.
+	 * 
+	 * @param clazz
+	 *            {@link Work} class.
+	 * @param workTypeBuilder
+	 *            {@link WorkTypeBuilder}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param taskFactory
+	 *            {@link TaskFactory}.
+	 * @param objectSequence
+	 *            Object {@link Sequence}.
+	 * @param flowSequence
+	 *            Flow {@link Sequence}.
+	 * @return Added {@link TaskTypeBuilder}.
+	 */
+	protected TaskTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
+			WorkTypeBuilder<ClassWork> workTypeBuilder, String taskName,
+			TaskFactory<ClassWork, Indexed, Indexed> taskFactory,
+			Sequence objectSequence, Sequence flowSequence) {
+
+		// Include method as task in type definition
+		TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
+				.addTaskType(taskName, taskFactory, null, null);
+
+		// Return the task type builder
+		return taskTypeBuilder;
+	}
 
 	/*
 	 * =================== WorkSourceService ================================
@@ -88,7 +183,8 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 		Class<?> clazz = classLoader.loadClass(className);
 
 		// Define the work factory
-		workTypeBuilder.setWorkFactory(new ClassWorkFactory(clazz));
+		WorkFactory<ClassWork> workFactory = this.createWorkFactory(clazz);
+		workTypeBuilder.setWorkFactory(workFactory);
 
 		// Obtain the listing of tasks from the methods of the class
 		for (Method method : clazz.getMethods()) {
@@ -113,10 +209,18 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 			// Determine if the method is static
 			boolean isStatic = Modifier.isStatic(method.getModifiers());
 
+			// Create the sequences for indexes to the objects and flows
+			Sequence objectSequence = new Sequence();
+			Sequence flowSequence = new Sequence();
+
+			// Create the task factory
+			TaskFactory<ClassWork, Indexed, Indexed> taskFactory = this
+					.createTaskFactory(clazz, method, isStatic, parameters);
+
 			// Include method as task in type definition
-			TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
-					.addTaskType(methodName, new ClassTaskFactory(method,
-							isStatic, parameters), null, null);
+			TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
+					.addTaskType(clazz, workTypeBuilder, methodName,
+							taskFactory, objectSequence, flowSequence);
 
 			// Define the return type (it not void)
 			Class<?> returnType = method.getReturnType();
@@ -125,126 +229,35 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 			}
 
 			// Define the listing of task objects and flows
-			int objectIndex = 0;
-			int flowIndex = 0;
 			for (int i = 0; i < paramTypes.length; i++) {
+
 				// Obtain the parameter type
 				Class<?> paramType = paramTypes[i];
 
-				// Determine if task context
-				if (TaskContext.class.equals(paramType)) {
-					// Parameter is a task context
-					parameters[i] = new TaskContextParameterFactory();
-					continue;
+				// Obtain the parameter factory
+				ParameterFactory parameterFactory = null;
+				CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
+					parameterFactory = manufacturer.createParameterFactory(
+							methodName, paramType, taskTypeBuilder,
+							objectSequence, flowSequence, classLoader);
+					if (parameterFactory != null) {
+						// Created parameter factory, so use
+						break CREATED;
+					}
 				}
 
-				// Determine if flows
-				if (paramType.getAnnotation(FlowInterface.class) != null) {
-					// Ensure is an interface
-					if (!paramType.isInterface()) {
-						throw new Exception(
-								"Parameter "
-										+ paramType.getSimpleName()
-										+ " on method "
-										+ methodName
-										+ " must be an interface as parameter type is annotated with "
-										+ FlowInterface.class.getName());
-					}
-
-					// Obtain the methods sorted (deterministic order)
-					Method[] flowMethods = paramType.getMethods();
-					Arrays.sort(flowMethods, new Comparator<Method>() {
-						@Override
-						public int compare(Method a, Method b) {
-							return a.getName().compareTo(b.getName());
-						}
-					});
-
-					// Create a flow for each method of the interface
-					Map<String, FlowMethodMetaData> flowMethodMetaDatas = new HashMap<String, FlowMethodMetaData>(
-							flowMethods.length);
-					for (int m = 0; m < flowMethods.length; m++) {
-						Method flowMethod = flowMethods[m];
-						String flowMethodName = flowMethod.getName();
-
-						// Not include object methods
-						if (Object.class.equals(flowMethod.getDeclaringClass())) {
-							continue;
-						}
-
-						// Ensure not duplicate flow names
-						if (flowMethodMetaDatas.containsKey(flowMethodName)) {
-							throw new Exception(
-									"May not have duplicate flow method names (task="
-											+ methodName + ", flow="
-											+ paramType.getSimpleName() + "."
-											+ flowMethodName + ")");
-						}
-
-						// Ensure at most one parameter
-						Class<?> flowParameterType;
-						Class<?>[] flowMethodParams = flowMethod
-								.getParameterTypes();
-						if (flowMethodParams.length == 0) {
-							flowParameterType = null;
-						} else if (flowMethodParams.length == 1) {
-							flowParameterType = flowMethodParams[0];
-						} else {
-							// Invalid to have more than one parameter
-							throw new Exception(
-									"Flow methods may only have at most one parameter (task "
-											+ methodName + ", flow "
-											+ paramType.getSimpleName() + "."
-											+ flowMethodName + ")");
-						}
-
-						// Ensure correct return type
-						boolean isReturnFlowFuture;
-						Class<?> flowReturnType = flowMethod.getReturnType();
-						if (FlowFuture.class.equals(flowReturnType)) {
-							// Returns a flow future
-							isReturnFlowFuture = true;
-						} else if (Void.TYPE.equals(flowReturnType)
-								|| (flowReturnType == null)) {
-							// Does not return value
-							isReturnFlowFuture = false;
-						} else {
-							// Invalid return type
-							throw new Exception("Flow method "
-									+ paramType.getSimpleName() + "."
-									+ methodName
-									+ " return type is invalid (return type="
-									+ flowReturnType.getName() + ", task="
-									+ methodName + ")");
-						}
-
-						// Create and register the flow method meta-data
-						FlowMethodMetaData flowMethodMetaData = new FlowMethodMetaData(
-								flowIndex++, (flowParameterType != null),
-								isReturnFlowFuture);
-						flowMethodMetaDatas.put(flowMethodName,
-								flowMethodMetaData);
-
-						// Register the flow
-						TaskFlowTypeBuilder<Indexed> flowTypeBuilder = taskTypeBuilder
-								.addFlow();
-						flowTypeBuilder.setLabel(flowMethodName);
-						if (flowParameterType != null) {
-							flowTypeBuilder.setArgumentType(flowParameterType);
-						}
-					}
-
-					// Parameter is a flow
-					parameters[i] = new FlowParameterFactory(classLoader,
-							paramType, flowMethodMetaDatas);
-					continue;
+				// Default to object if no parameter factory
+				if (parameterFactory == null) {
+					// Otherwise must be an object
+					parameterFactory = new ObjectParameterFactory(
+							objectSequence.nextIndex());
+					TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
+							.addObject(paramType);
+					objectTypeBuilder.setLabel(paramType.getSimpleName());
 				}
 
-				// Otherwise must be an object
-				parameters[i] = new ObjectParameterFactory(objectIndex++);
-				TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
-						.addObject(paramType);
-				objectTypeBuilder.setLabel(paramType.getSimpleName());
+				// Load the parameter factory
+				parameters[i] = parameterFactory;
 			}
 
 			// Define the escalation listing
@@ -252,6 +265,196 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 				taskTypeBuilder
 						.addEscalation((Class<Throwable>) escalationType);
 			}
+		}
+	}
+
+	/**
+	 * Manufactures the {@link ParameterFactory}.
+	 */
+	protected static interface ParameterManufacturer {
+
+		/**
+		 * Creates the {@link ParameterFactory}.
+		 * 
+		 * @param taskName
+		 *            Name of the {@link Task}.
+		 * @param parameterType
+		 *            Parameter type.
+		 * @param taskTypeBuilder
+		 *            {@link TaskTypeBuilder}.
+		 * @param objectSequence
+		 *            Object {@link Sequence}.
+		 * @param flowSequence
+		 *            Flow {@link Sequence}.
+		 * @param classLoader
+		 *            {@link ClassLoader}.
+		 * @return {@link ParameterFactory} or <code>null</code> if not
+		 *         appropriate for this to manufacture a
+		 *         {@link ParameterFactory}.
+		 * @throws Exception
+		 *             If fails to create the {@link ParameterFactory}.
+		 */
+		ParameterFactory createParameterFactory(String taskName,
+				Class<?> parameterType,
+				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				Sequence objectSequence, Sequence flowSequence,
+				ClassLoader classLoader) throws Exception;
+	}
+
+	/**
+	 * {@link ParameterManufacturer} for the {@link TaskContext}.
+	 */
+	protected static class TaskContextParameterManufacturer implements
+			ParameterManufacturer {
+		@Override
+		public ParameterFactory createParameterFactory(String taskName,
+				Class<?> parameterType,
+				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				Sequence objectSequence, Sequence flowSequence,
+				ClassLoader classLoader) {
+
+			// Determine if task context
+			if (TaskContext.class.equals(parameterType)) {
+				// Parameter is a task context
+				return new TaskContextParameterFactory();
+			}
+
+			// Not task context
+			return null;
+		}
+	}
+
+	/**
+	 * {@link ParameterManufacturer} for the {@link FlowInterface}.
+	 */
+	protected static class FlowInterfaceParameterManufacturer<A extends Annotation>
+			implements ParameterManufacturer {
+
+		/**
+		 * Annotation class expected on the parameter type.
+		 */
+		private final Class<A> annotationClass;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param annotationClass
+		 *            Annotation class expected on the parameter type.
+		 */
+		public FlowInterfaceParameterManufacturer(Class<A> annotationClass) {
+			this.annotationClass = annotationClass;
+		}
+
+		/*
+		 * ================== ParameterManufacturer ====================
+		 */
+
+		@Override
+		public ParameterFactory createParameterFactory(String taskName,
+				Class<?> parameterType,
+				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				Sequence objectSequence, Sequence flowSequence,
+				ClassLoader classLoader) throws Exception {
+
+			// Determine if flow interface
+			if (parameterType.getAnnotation(this.annotationClass) == null) {
+				return null; // not a flow interface
+			}
+
+			// Ensure is an interface
+			if (!parameterType.isInterface()) {
+				throw new Exception(
+						"Parameter "
+								+ parameterType.getSimpleName()
+								+ " on method "
+								+ taskName
+								+ " must be an interface as parameter type is annotated with "
+								+ this.annotationClass.getSimpleName());
+			}
+
+			// Obtain the methods sorted (deterministic order)
+			Method[] flowMethods = parameterType.getMethods();
+			Arrays.sort(flowMethods, new Comparator<Method>() {
+				@Override
+				public int compare(Method a, Method b) {
+					return a.getName().compareTo(b.getName());
+				}
+			});
+
+			// Create a flow for each method of the interface
+			Map<String, FlowMethodMetaData> flowMethodMetaDatas = new HashMap<String, FlowMethodMetaData>(
+					flowMethods.length);
+			for (int m = 0; m < flowMethods.length; m++) {
+				Method flowMethod = flowMethods[m];
+				String flowMethodName = flowMethod.getName();
+
+				// Not include object methods
+				if (Object.class.equals(flowMethod.getDeclaringClass())) {
+					continue;
+				}
+
+				// Ensure not duplicate flow names
+				if (flowMethodMetaDatas.containsKey(flowMethodName)) {
+					throw new Exception(
+							"May not have duplicate flow method names (task="
+									+ taskName + ", flow="
+									+ parameterType.getSimpleName() + "."
+									+ flowMethodName + ")");
+				}
+
+				// Ensure at most one parameter
+				Class<?> flowParameterType;
+				Class<?>[] flowMethodParams = flowMethod.getParameterTypes();
+				if (flowMethodParams.length == 0) {
+					flowParameterType = null;
+				} else if (flowMethodParams.length == 1) {
+					flowParameterType = flowMethodParams[0];
+				} else {
+					// Invalid to have more than one parameter
+					throw new Exception(
+							"Flow methods may only have at most one parameter (task "
+									+ taskName + ", flow "
+									+ parameterType.getSimpleName() + "."
+									+ flowMethodName + ")");
+				}
+
+				// Ensure correct return type
+				boolean isReturnFlowFuture;
+				Class<?> flowReturnType = flowMethod.getReturnType();
+				if (FlowFuture.class.equals(flowReturnType)) {
+					// Returns a flow future
+					isReturnFlowFuture = true;
+				} else if (Void.TYPE.equals(flowReturnType)
+						|| (flowReturnType == null)) {
+					// Does not return value
+					isReturnFlowFuture = false;
+				} else {
+					// Invalid return type
+					throw new Exception("Flow method "
+							+ parameterType.getSimpleName() + "." + taskName
+							+ " return type is invalid (return type="
+							+ flowReturnType.getName() + ", task=" + taskName
+							+ ")");
+				}
+
+				// Create and register the flow method meta-data
+				FlowMethodMetaData flowMethodMetaData = new FlowMethodMetaData(
+						parameterType, flowMethod, flowSequence.nextIndex(),
+						(flowParameterType != null), isReturnFlowFuture);
+				flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
+
+				// Register the flow
+				TaskFlowTypeBuilder<Indexed> flowTypeBuilder = taskTypeBuilder
+						.addFlow();
+				flowTypeBuilder.setLabel(flowMethodName);
+				if (flowParameterType != null) {
+					flowTypeBuilder.setArgumentType(flowParameterType);
+				}
+			}
+
+			// Create and return the flow interface parameter factory
+			return new FlowParameterFactory(classLoader, parameterType,
+					flowMethodMetaDatas);
 		}
 	}
 

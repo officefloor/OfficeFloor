@@ -105,7 +105,8 @@ public class ClassManagedObjectSource extends
 		T object = clazz.newInstance();
 
 		// Obtain the listing of dependency fields
-		List<Field> dependencyFields = retrieveOrderedDependencyFields(clazz);
+		List<Field> dependencyFields = retrieveDependencyFields(clazz);
+		orderFields(dependencyFields);
 
 		// Inject the dependencies
 		for (Field dependencyField : dependencyFields) {
@@ -178,6 +179,57 @@ public class ClassManagedObjectSource extends
 	 */
 	private ProcessMetaData[] processMetaData;
 
+	/**
+	 * Allows overriding the extraction of the dependency {@link Field}
+	 * instances.
+	 * 
+	 * @param objectClass
+	 *            Class to extract dependency {@link Field} instances.
+	 * @return Listing of {@link Field} instances to be dependency injected.
+	 */
+	protected List<Field> extractDependencyFields(Class<?> objectClass) {
+		return retrieveDependencyFields(objectClass);
+	}
+
+	/**
+	 * Extracts the {@link DependencyMetaData} from the object class.
+	 * 
+	 * @param objectClass
+	 *            Object class to interrogate for the {@link DependencyMetaData}
+	 *            instances.
+	 * @return {@link DependencyMetaData} instances.
+	 */
+	public DependencyMetaData[] extractDependencyMetaData(Class<?> objectClass) {
+
+		// Obtains the ordered dependency fields
+		List<Field> dependencyFields = this
+				.extractDependencyFields(objectClass);
+		orderFields(dependencyFields);
+
+		// Create the dependency meta-data and register the dependencies
+		List<DependencyMetaData> dependencyListing = new LinkedList<DependencyMetaData>();
+		int dependencyIndex = 0;
+		for (Field dependencyField : dependencyFields) {
+
+			// Obtain the name for the dependency
+			String dependencyName = retrieveDependencyName(dependencyField,
+					dependencyFields);
+
+			// Obtain the type for the dependency
+			Class<?> dependencyType = dependencyField.getType();
+
+			// Add the dependency meta-data, ensuring can access field
+			dependencyField.setAccessible(true);
+			dependencyListing.add(new DependencyMetaData(dependencyName,
+					dependencyIndex++, dependencyField));
+		}
+		DependencyMetaData[] dependencyMetaData = dependencyListing
+				.toArray(new DependencyMetaData[dependencyListing.size()]);
+
+		// Return the dependency meta-data
+		return dependencyMetaData;
+	}
+
 	/*
 	 * =================== ManagedObjectSourceService ==========================
 	 */
@@ -217,31 +269,14 @@ public class ClassManagedObjectSource extends
 		// Class is the object type returned from the managed object
 		context.setObjectClass(this.objectClass);
 
-		// Obtains the dependency fields
-		List<Field> dependencyFields = retrieveOrderedDependencyFields(this.objectClass);
-
 		// Create the dependency meta-data and register the dependencies
-		List<DependencyMetaData> dependencyListing = new LinkedList<DependencyMetaData>();
-		int dependencyIndex = 0;
-		for (Field dependencyField : dependencyFields) {
-
-			// Obtain the name for the dependency
-			String dependencyName = retrieveDependencyName(dependencyField,
-					dependencyFields);
-
-			// Obtain the type for the dependency
-			Class<?> dependencyType = dependencyField.getType();
-
+		this.dependencyMetaData = this
+				.extractDependencyMetaData(this.objectClass);
+		for (DependencyMetaData dependency : this.dependencyMetaData) {
 			// Register the dependency
-			context.addDependency(dependencyType).setLabel(dependencyName);
-
-			// Add the dependency meta-data, ensuring can access field
-			dependencyField.setAccessible(true);
-			dependencyListing.add(new DependencyMetaData(dependencyIndex++,
-					dependencyField));
+			context.addDependency(dependency.field.getType()).setLabel(
+					dependency.name);
 		}
-		this.dependencyMetaData = dependencyListing
-				.toArray(new DependencyMetaData[0]);
 
 		// Obtain the process details
 		this.processStructs = retrieveOrderedProcessStructs(this.objectClass);
@@ -377,15 +412,7 @@ public class ClassManagedObjectSource extends
 	}
 
 	/**
-	 * <p>
-	 * Retrieves the {@link Dependency} {@link Field} instances ordered by:
-	 * <ol>
-	 * <li>field name</li>
-	 * <li>simple class name . field name</li>
-	 * <li>fully qualified class . field name</li>
-	 * </ol>
-	 * <p>
-	 * Ordering is necessary to ensure similar indexes each time loaded.
+	 * Retrieves the {@link Dependency} {@link Field} instances.
 	 * 
 	 * @param clazz
 	 *            {@link Class} to interrogate for {@link Dependency}
@@ -393,7 +420,7 @@ public class ClassManagedObjectSource extends
 	 * @return Listing of {@link Dependency} {@link Field} instances ordered by
 	 *         their names.
 	 */
-	private static List<Field> retrieveOrderedDependencyFields(Class<?> clazz) {
+	private static List<Field> retrieveDependencyFields(Class<?> clazz) {
 
 		// Create the listing of dependency fields (excluding Object fields)
 		List<Field> dependencyFields = new LinkedList<Field>();
@@ -408,9 +435,6 @@ public class ClassManagedObjectSource extends
 			}
 			interrogateClass = interrogateClass.getSuperclass();
 		}
-
-		// Order the dependency fields
-		orderFields(dependencyFields);
 
 		// Return the dependency fields
 		return dependencyFields;
@@ -631,7 +655,17 @@ public class ClassManagedObjectSource extends
 	}
 
 	/**
+	 * <p>
 	 * Orders the {@link Field} instances.
+	 * <p>
+	 * {@link Dependency} {@link Field} instances are ordered by:
+	 * <ol>
+	 * <li>field name</li>
+	 * <li>simple class name . field name</li>
+	 * <li>fully qualified class . field name</li>
+	 * </ol>
+	 * <p>
+	 * Ordering is necessary to ensure similar indexes each time loaded.
 	 * 
 	 * @param fields
 	 *            {@link Field} instances to order.

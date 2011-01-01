@@ -21,7 +21,6 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -321,9 +320,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Create the loader to obtain the managed object type
-		ManagedObjectLoader loader = new ManagedObjectLoaderImpl(
-				this.locationType, this.location, this.managedObjectSourceName,
-				this.context);
+		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
+				this.locationType, this.location, this.managedObjectSourceName);
 
 		// Load the managed object type
 		this.managedObjectType = loader.loadManagedObjectType(
