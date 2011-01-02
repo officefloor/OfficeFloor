@@ -38,14 +38,14 @@
 			</team>
 		</managed-object-source>
 		<managed-object-source name="HTTP_SESSION"
-			source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource"
-			object-type="net.officefloor.plugin.socket.server.http.session.HttpSession"
+			source="net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.session.HttpSession"
 			timeout="10000">
 			<managing-office name="OFFICE" />
 		</managed-object-source>
 		<managed-object-source name="HTTP_SECURITY_SOURCE"
-			source="net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource"
-			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity"
+			source="net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.security.HttpSecurity"
 			timeout="10000">
 			<managing-office name="OFFICE" />
 			<input-managed-object name="INPUT_HTTP_SECURITY_SOURCE" />
@@ -57,8 +57,8 @@
 			</team>
 		</managed-object-source>
 		<managed-object-source name="HTTP_SECURITY_SERVICE"
-			source="net.officefloor.plugin.socket.server.http.security.HttpSecurityServiceManagedObjectSource"
-			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurityService">
+			source="net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.security.HttpSecurityService">
 			<properties>
 				<property name="http.security.service.authentication.scheme"
 					value="BASIC" />
@@ -67,8 +67,8 @@
 			<managing-office name="OFFICE" />
 		</managed-object-source>
 		<managed-object-source name="CREDENTIAL_STORE"
-			source="net.officefloor.plugin.socket.server.http.security.store.PasswordFileManagedObjectSource"
-			object-type="net.officefloor.plugin.socket.server.http.security.store.CredentialStore">
+			source="net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource"
+			object-type="net.officefloor.plugin.web.http.security.store.CredentialStore">
 			<properties>
 				<property name="password.file.path" value="${password.file.location}" />
 			</properties>
@@ -81,7 +81,7 @@
 			<bound-managed-object-source name="HTTP_CONNECTION" />
 		</input-managed-object>
 		<input-managed-object name="INPUT_HTTP_SECURITY_SOURCE"
-			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
+			object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
 			<bound-managed-object-source name="INPUT_HTTP_SECURITY_SOURCE" />
 		</input-managed-object>
 	</input-managed-objects>
@@ -99,7 +99,7 @@
 		<managed-object name="HTTP_SECURITY" scope="PROCESS">
 			<managed-object-source name="HTTP_SECURITY_SOURCE" />
 			<dependency name="HTTP_SECURITY_SERVICE"
-				object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurityService">
+				object-type="net.officefloor.plugin.web.http.security.HttpSecurityService">
 				<managed-object name="HTTP_SECURITY_SERVICE" />
 			</dependency>
 		</managed-object>
@@ -110,11 +110,11 @@
 				<input-managed-object name="HTTP_CONNECTION" />
 			</dependency>
 			<dependency name="HTTP_SESSION"
-				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
+				object-type="net.officefloor.plugin.web.http.session.HttpSession">
 				<managed-object name="HTTP_SESSION" />
 			</dependency>
 			<dependency name="Dependency-CREDENTIAL_STORE"
-				object-type="net.officefloor.plugin.socket.server.http.security.store.CredentialStore">
+				object-type="net.officefloor.plugin.web.http.security.store.CredentialStore">
 				<managed-object name="CREDENTIAL_STORE" />
 			</dependency>
 		</managed-object>
@@ -134,11 +134,11 @@
 				<input-managed-object name="HTTP_CONNECTION" />
 			</object>
 			<object name="HTTP_SESSION"
-				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
+				object-type="net.officefloor.plugin.web.http.session.HttpSession">
 				<managed-object name="HTTP_SESSION" />
 			</object>
 			<object name="HTTP_SECURITY"
-				object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
+				object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
 				<managed-object name="HTTP_SECURITY" />
 			</object>
 			<team name="SERVLET_TEAM">
