@@ -137,7 +137,7 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties) {
 
@@ -171,7 +171,7 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public OfficeType loadOfficeType(String officeSourceClassName,
 			String location, PropertyList properties) {
 

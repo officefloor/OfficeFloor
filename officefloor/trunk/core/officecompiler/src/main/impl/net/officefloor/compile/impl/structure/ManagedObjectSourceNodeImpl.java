@@ -301,7 +301,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadManagedObjectType() {
 
 		// Only load the managed object type once (whether successful or not)
@@ -442,7 +442,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedObject(OfficeFloorBuilder builder,
 			OfficeNode managingOffice, OfficeBuilder officeBuilder) {
 

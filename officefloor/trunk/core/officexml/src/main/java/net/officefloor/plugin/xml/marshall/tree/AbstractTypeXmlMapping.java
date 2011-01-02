@@ -134,16 +134,17 @@ public abstract class AbstractTypeXmlMapping extends AbstractXmlMapping {
 			this.items.add(new TypeItem(upperBound, context));
 
 			// Load the configuration (new context each time)
-			this.contexts.put(upperBound, context
-					.getSpecificContext(upperBound));
+			this.contexts.put(upperBound,
+					context.getSpecificContext(upperBound));
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.XmlWriter#writeXml(java.lang.Object,
-	 *      net.officefloor.plugin.xml.XmlOutput)
+	 * @see
+	 * net.officefloor.plugin.xml.marshall.tree.XmlWriter#writeXml(java.lang
+	 * .Object, net.officefloor.plugin.xml.XmlOutput)
 	 */
 	public void writeXml(Object object, XmlOutput output)
 			throws XmlMarshallException {
@@ -184,7 +185,7 @@ public abstract class AbstractTypeXmlMapping extends AbstractXmlMapping {
 	 * @throws XmlMarshallException
 	 *             If fails to obtain a matching {@link XmlSpecificContext}.
 	 */
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	protected XmlSpecificContext getMatchingContext(Object specificObject)
 			throws XmlMarshallException {
 

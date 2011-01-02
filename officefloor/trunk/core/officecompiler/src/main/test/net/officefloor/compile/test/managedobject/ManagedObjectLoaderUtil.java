@@ -78,7 +78,7 @@ public class ManagedObjectLoaderUtil {
 	 * 
 	 * @return {@link ManagedObjectTypeBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static ManagedObjectTypeBuilder createManagedObjectTypeBuilder() {
 		return new ManagedObjectTypeBuilderImpl();
 	}
@@ -98,8 +98,7 @@ public class ManagedObjectLoaderUtil {
 
 		// Cast to obtain expected managed object type
 		if (!(expectedManagedObjectType instanceof ManagedObjectType)) {
-			TestCase
-					.fail("builder must be created from createManagedObjectTypeBuilder");
+			TestCase.fail("builder must be created from createManagedObjectTypeBuilder");
 		}
 		ManagedObjectType<D> eType = (ManagedObjectType<D>) expectedManagedObjectType;
 
@@ -122,11 +121,11 @@ public class ManagedObjectLoaderUtil {
 			ManagedObjectDependencyType<D> eDependency = eDependencies[i];
 			ManagedObjectDependencyType<D> aDependency = aDependencies[i];
 			TestCase.assertEquals("Incorrect name for dependency " + i,
-					eDependency.getDependencyName(), aDependency
-							.getDependencyName());
+					eDependency.getDependencyName(),
+					aDependency.getDependencyName());
 			TestCase.assertEquals("Incorrect type for dependency " + i,
-					eDependency.getDependencyType(), aDependency
-							.getDependencyType());
+					eDependency.getDependencyType(),
+					aDependency.getDependencyType());
 			TestCase.assertEquals("Incorrect index for dependency " + i,
 					eDependency.getIndex(), aDependency.getIndex());
 			TestCase.assertEquals("Incorrect key for dependency " + i,
@@ -141,16 +140,16 @@ public class ManagedObjectLoaderUtil {
 		for (int i = 0; i < eFlows.length; i++) {
 			ManagedObjectFlowType<?> eFlow = eFlows[i];
 			ManagedObjectFlowType<?> aFlow = aFlows[i];
-			TestCase.assertEquals("Incorrect name for flow " + i, eFlow
-					.getFlowName(), aFlow.getFlowName());
+			TestCase.assertEquals("Incorrect name for flow " + i,
+					eFlow.getFlowName(), aFlow.getFlowName());
 			TestCase.assertEquals("Incorrect argument type for flow " + i,
 					eFlow.getArgumentType(), aFlow.getArgumentType());
-			TestCase.assertEquals("Incorrect work for flow " + i, eFlow
-					.getWorkName(), aFlow.getWorkName());
-			TestCase.assertEquals("Incorrect task for flow " + i, eFlow
-					.getTaskName(), aFlow.getTaskName());
-			TestCase.assertEquals("Incorrect index for flow " + i, eFlow
-					.getIndex(), aFlow.getIndex());
+			TestCase.assertEquals("Incorrect work for flow " + i,
+					eFlow.getWorkName(), aFlow.getWorkName());
+			TestCase.assertEquals("Incorrect task for flow " + i,
+					eFlow.getTaskName(), aFlow.getTaskName());
+			TestCase.assertEquals("Incorrect index for flow " + i,
+					eFlow.getIndex(), aFlow.getIndex());
 			TestCase.assertEquals("Incorrect key for flow " + i,
 					eFlow.getKey(), aFlow.getKey());
 		}
@@ -163,8 +162,8 @@ public class ManagedObjectLoaderUtil {
 		for (int i = 0; i < eTeams.length; i++) {
 			ManagedObjectTeamType eTeam = eTeams[i];
 			ManagedObjectTeamType aTeam = aTeams[i];
-			TestCase.assertEquals("Incorrect name for team " + i, eTeam
-					.getTeamName(), aTeam.getTeamName());
+			TestCase.assertEquals("Incorrect name for team " + i,
+					eTeam.getTeamName(), aTeam.getTeamName());
 		}
 
 		// Verify the extension interfaces
@@ -341,7 +340,7 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addDependency(String name, Class<?> type, int index,
 				Enum<?> key) {
 			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index,
@@ -354,7 +353,7 @@ public class ManagedObjectLoaderUtil {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addFlow(String name, Class<?> argumentType, int index,
 				Enum<?> key, String workName, String taskName) {
 			this.flows.add(new ManagedObjectFlowTypeImpl(workName, taskName,

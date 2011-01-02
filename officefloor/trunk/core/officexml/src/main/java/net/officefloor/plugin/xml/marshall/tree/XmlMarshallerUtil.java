@@ -114,7 +114,7 @@ public class XmlMarshallerUtil {
 	 * @throws XmlMarshallException
 	 *             If unable to obtain method.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected static Method obtainMethod(Class object, String methodName)
 			throws XmlMarshallException {
 		try {
@@ -157,8 +157,8 @@ public class XmlMarshallerUtil {
 					+ getMethod.getName() + "'", ex);
 		} catch (InvocationTargetException ex) {
 			// Propagate failure
-			throw new XmlMarshallException("Invoked get method failed.", ex
-					.getCause());
+			throw new XmlMarshallException("Invoked get method failed.",
+					ex.getCause());
 		}
 	}
 }

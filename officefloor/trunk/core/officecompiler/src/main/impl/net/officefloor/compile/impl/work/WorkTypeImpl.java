@@ -60,7 +60,7 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
 			String taskName, TaskFactory<? super W, M, F> taskFactory,
 			Class<M> objectKeysClass, Class<F> flowKeysClass) {

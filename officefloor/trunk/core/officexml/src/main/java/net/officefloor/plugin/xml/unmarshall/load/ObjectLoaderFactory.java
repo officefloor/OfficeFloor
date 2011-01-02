@@ -84,7 +84,7 @@ public class ObjectLoaderFactory {
 	 * @throws XmlMarshallException
 	 *             If failed to find method to load.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Method findMethod(Class objectClass, String methodName,
 			Class parameterClass) throws XmlMarshallException {
 

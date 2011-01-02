@@ -81,7 +81,7 @@ public class AdministratorLoaderUtil {
 	 * 
 	 * @return {@link AdministratorTypeBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static AdministratorTypeBuilder createAdministratorTypeBuilder() {
 		return new AdministratorTypeBuilderImpl();
 	}
@@ -101,8 +101,7 @@ public class AdministratorLoaderUtil {
 
 		// Cast to obtain expected administrator type
 		if (!(expectedAdministratorType instanceof AdministratorType)) {
-			TestCase
-					.fail("builder must be created from createAdministratorTypeBuilder");
+			TestCase.fail("builder must be created from createAdministratorTypeBuilder");
 		}
 		AdministratorType<I, A> eType = (AdministratorType<I, A>) expectedAdministratorType;
 
@@ -111,8 +110,8 @@ public class AdministratorLoaderUtil {
 				administratorSourceClass, propertyNameValues);
 
 		// Ensure correct administrator type
-		TestCase.assertEquals("Incorrect extension interface type", eType
-				.getExtensionInterface(), aType.getExtensionInterface());
+		TestCase.assertEquals("Incorrect extension interface type",
+				eType.getExtensionInterface(), aType.getExtensionInterface());
 
 		// Validate the duties
 		DutyType<A, ?>[] eDuties = eType.getDutyTypes();
@@ -124,12 +123,12 @@ public class AdministratorLoaderUtil {
 			DutyType<A, ?> aDuty = aType.getDutyTypes()[d];
 
 			// Validate the duty
-			TestCase.assertEquals("Incorrect name for duty " + d, eDuty
-					.getDutyName(), aDuty.getDutyName());
-			TestCase.assertEquals("Incorrect key for duty " + d, eDuty
-					.getDutyKey(), aDuty.getDutyKey());
-			TestCase.assertEquals("Incorrect flow key class " + d, eDuty
-					.getFlowKeyClass(), aDuty.getFlowKeyClass());
+			TestCase.assertEquals("Incorrect name for duty " + d,
+					eDuty.getDutyName(), aDuty.getDutyName());
+			TestCase.assertEquals("Incorrect key for duty " + d,
+					eDuty.getDutyKey(), aDuty.getDutyKey());
+			TestCase.assertEquals("Incorrect flow key class " + d,
+					eDuty.getFlowKeyClass(), aDuty.getFlowKeyClass());
 
 			// Validate the flows
 			DutyFlowType<?>[] eFlows = eDuty.getFlowTypes();
@@ -141,15 +140,15 @@ public class AdministratorLoaderUtil {
 				String flowLabel = "flow" + f + " (duty " + d + ")";
 
 				// Validate the flow
-				TestCase.assertEquals("Incorrect name for " + flowLabel, eFlow
-						.getFlowName(), aFlow.getFlowName());
-				TestCase.assertEquals("Incorrect index for " + flowLabel, eFlow
-						.getIndex(), aFlow.getIndex());
-				TestCase.assertEquals("Incorrect key for " + flowLabel, eFlow
-						.getKey(), aFlow.getKey());
+				TestCase.assertEquals("Incorrect name for " + flowLabel,
+						eFlow.getFlowName(), aFlow.getFlowName());
+				TestCase.assertEquals("Incorrect index for " + flowLabel,
+						eFlow.getIndex(), aFlow.getIndex());
+				TestCase.assertEquals("Incorrect key for " + flowLabel,
+						eFlow.getKey(), aFlow.getKey());
 				TestCase.assertEquals("Incorrect argument type for "
-						+ flowLabel, eFlow.getArgumentType(), aFlow
-						.getArgumentType());
+						+ flowLabel, eFlow.getArgumentType(),
+						aFlow.getArgumentType());
 			}
 		}
 
@@ -215,7 +214,7 @@ public class AdministratorLoaderUtil {
 		 */
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void setExtensionInterface(Class extensionInterface) {
 			this.extensionInterface = extensionInterface;
 		}

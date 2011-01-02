@@ -160,15 +160,16 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected OfficeBuilder record_officefloor_addOffice(String officeName) {
 		this.officeBuilder = this.createMockOfficeBuilder();
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addOffice(officeName), this.officeBuilder);
+		this.recordReturn(this.officeFloorBuilder,
+				this.officeFloorBuilder.addOffice(officeName),
+				this.officeBuilder);
 		return this.officeBuilder;
 	}
 
 	/**
 	 * Current {@link WorkBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private WorkBuilder workBuilder = null;
 
 	/**
@@ -184,15 +185,16 @@ public abstract class AbstractOfficeFloorTestCase extends
 	protected <W extends Work> WorkBuilder<W> record_office_addWork(
 			String workName, WorkFactory<W> workFactory) {
 		this.workBuilder = this.createMockWorkBuilder();
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
-				workName, workFactory), this.workBuilder);
+		this.recordReturn(this.officeBuilder,
+				this.officeBuilder.addWork(workName, workFactory),
+				this.workBuilder);
 		return this.workBuilder;
 	}
 
 	/**
 	 * Current {@link TaskBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private TaskBuilder taskBuilder = null;
 
 	/**
@@ -213,8 +215,8 @@ public abstract class AbstractOfficeFloorTestCase extends
 
 		// Record adding the task
 		this.taskBuilder = this.createMockTaskBuilder();
-		this.recordReturn(this.workBuilder, this.workBuilder.addTask("TASK",
-				factory), this.taskBuilder);
+		this.recordReturn(this.workBuilder,
+				this.workBuilder.addTask("TASK", factory), this.taskBuilder);
 		return this.taskBuilder;
 	}
 
@@ -296,9 +298,9 @@ public abstract class AbstractOfficeFloorTestCase extends
 			officeFloor = this.createMock(OfficeFloor.class);
 
 			// Record successfully building the office floor
-			this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-					.buildOfficeFloor(null), officeFloor, new TypeMatcher(
-					OfficeFloorIssues.class));
+			this.recordReturn(this.officeFloorBuilder,
+					this.officeFloorBuilder.buildOfficeFloor(null),
+					officeFloor, new TypeMatcher(OfficeFloorIssues.class));
 		}
 
 		// Create the property list

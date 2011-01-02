@@ -62,8 +62,7 @@ public class ValueLoaderFactory {
 	 * 
 	 * @param loadMethodName
 	 *            Name of method to use to load the value.
-	 * @return {@link DynamicValueLoader}to load the value to the target
-	 *         object.
+	 * @return {@link DynamicValueLoader}to load the value to the target object.
 	 * @throws XmlMarshallException
 	 *             Should there be a failure to create the
 	 *             {@link DynamicValueLoader}.
@@ -132,7 +131,7 @@ public class ValueLoaderFactory {
 	 * @throws XmlMarshallException
 	 *             If failed to find method to load.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Method findMethod(Class objectClass, String loadMethodName)
 			throws XmlMarshallException {
 

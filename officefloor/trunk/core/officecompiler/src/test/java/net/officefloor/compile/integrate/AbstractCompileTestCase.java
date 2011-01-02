@@ -117,8 +117,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String teamName, Class<S> teamSourceClass,
 			String... propertyNameValues) {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addTeam(teamName, teamSourceClass), builder);
+		this.recordReturn(this.officeFloorBuilder,
+				this.officeFloorBuilder.addTeam(teamName, teamSourceClass),
+				builder);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
@@ -130,7 +131,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * Current {@link ManagedObjectBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private ManagedObjectBuilder managedObjectBuilder = null;
 
 	/**
@@ -181,8 +182,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			String officeName) {
 		this.managingOfficeBuilder = this
 				.createMock(ManagingOfficeBuilder.class);
-		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder
-				.setManagingOffice(officeName), this.managingOfficeBuilder);
+		this.recordReturn(this.managedObjectBuilder,
+				this.managedObjectBuilder.setManagingOffice(officeName),
+				this.managingOfficeBuilder);
 		return this.managingOfficeBuilder;
 	}
 
@@ -222,8 +224,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Record adding the office
 		this.officeBuilder = this.createMock(OfficeBuilder.class);
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addOffice(officeName), this.officeBuilder);
+		this.recordReturn(this.officeFloorBuilder,
+				this.officeFloorBuilder.addOffice(officeName),
+				this.officeBuilder);
 
 		// Reset add work matcher as new mock office builder
 		this.isMatcherSet_officeBuilder_addWork = false;
@@ -380,8 +383,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Record adding the work
 		this.workBuilder = this.createMock(WorkBuilder.class);
 		WorkFactory<Work> workFactory = null;
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
-				workName, workFactory), this.workBuilder);
+		this.recordReturn(this.officeBuilder,
+				this.officeBuilder.addWork(workName, workFactory),
+				this.workBuilder);
 		if (!this.isMatcherSet_officeBuilder_addWork) {
 			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
 				@Override
@@ -439,8 +443,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Record adding the task
 		this.taskBuilder = this.createMock(TaskBuilder.class);
 		TaskFactory<Work, Indexed, Indexed> taskFactory = null;
-		this.recordReturn(this.workBuilder, this.workBuilder.addTask(taskName,
-				taskFactory), this.taskBuilder);
+		this.recordReturn(this.workBuilder,
+				this.workBuilder.addTask(taskName, taskFactory),
+				this.taskBuilder);
 		if (!this.isMatcherSet_workBuilder_addTask) {
 			this.control(this.workBuilder).setMatcher(new AbstractMatcher() {
 				@Override
@@ -492,8 +497,8 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Move the 'Test' to start of test case name
 		String testCaseName = this.getClass().getSimpleName();
 		testCaseName = "Test"
-				+ testCaseName.substring(0, (testCaseName.length() - "Test"
-						.length()));
+				+ testCaseName.substring(0,
+						(testCaseName.length() - "Test".length()));
 
 		// Remove the 'test' from the start of the test name
 		String testName = this.getName();
@@ -543,9 +548,9 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			officeFloor = this.createMock(OfficeFloor.class);
 
 			// Record successfully building the office floor
-			this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-					.buildOfficeFloor(null), officeFloor, new TypeMatcher(
-					OfficeFloorIssues.class));
+			this.recordReturn(this.officeFloorBuilder,
+					this.officeFloorBuilder.buildOfficeFloor(null),
+					officeFloor, new TypeMatcher(OfficeFloorIssues.class));
 		}
 
 		// Replay the mocks

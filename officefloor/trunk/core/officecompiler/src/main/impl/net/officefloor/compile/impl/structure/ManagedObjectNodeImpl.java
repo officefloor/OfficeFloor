@@ -47,7 +47,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectNodeImpl implements ManagedObjectNode {
@@ -104,7 +104,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of this {@link ManagedObject}.
 	 * @param managedObjectScope
@@ -178,7 +178,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final Set<OfficeNode> builtOffices = new HashSet<OfficeNode>();
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
 
