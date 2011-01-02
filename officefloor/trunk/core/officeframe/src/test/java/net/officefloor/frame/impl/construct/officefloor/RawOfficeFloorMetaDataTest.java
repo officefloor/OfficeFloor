@@ -135,8 +135,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	public void testNoOfficeFloorName() {
 
 		// Record no office floor name
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeFloorName(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeFloorName(), null);
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown",
 				"Name not provided for Office Floor");
 		this.record_constructTeams();
@@ -160,13 +160,11 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record not construct team
 		this.record_officeFloorName();
-		this.recordReturn(this.configuration, this.configuration
-				.getTeamConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
-		this
-				.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-						.constructRawTeamMetaData(teamConfiguration,
-								this.issues), null);
+		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
+				.constructRawTeamMetaData(teamConfiguration, this.issues), null);
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
@@ -197,9 +195,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record construct teams with duplicate name
 		this.record_officeFloorName();
-		this.recordReturn(this.configuration, this.configuration
-				.getTeamConfiguration(), new TeamConfiguration[] {
-				teamConfigurationOne, teamConfigurationTwo });
+		this.recordReturn(this.configuration,
+				this.configuration.getTeamConfiguration(),
+				new TeamConfiguration[] { teamConfigurationOne,
+						teamConfigurationTwo });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
 				.constructRawTeamMetaData(teamConfigurationOne, this.issues),
 				rawTeamOne);
@@ -226,8 +225,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure obtain the only first team
-		assertEquals("Incorrect team", rawTeamOne, metaData
-				.getRawTeamMetaData(DUPLICATE_TEAM_NAME));
+		assertEquals("Incorrect team", rawTeamOne,
+				metaData.getRawTeamMetaData(DUPLICATE_TEAM_NAME));
 	}
 
 	/**
@@ -256,8 +255,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull(metaData.getRawTeamMetaData("THREE"));
 
 		// Should have no Process Context Listeners
-		assertEquals("Should not have Process Context Listeners", 0, metaData
-				.getProcessContextListeners().length);
+		assertEquals("Should not have Process Context Listeners", 0,
+				metaData.getProcessContextListeners().length);
 
 		// Validate the teams
 		assertEquals("Incorrect number of teams", 3, actualTeams.length);
@@ -285,8 +284,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record constructing team registering Process Context Listener
 		this.record_officeFloorName();
-		this.recordReturn(this.configuration, this.configuration
-				.getTeamConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
 				.constructRawTeamMetaData(teamConfiguration, this.issues),
@@ -294,8 +293,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 				TEAM_NAME);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
-		this.recordReturn(rawTeamMetaData, rawTeamMetaData
-				.getProcessContextListeners(),
+		this.recordReturn(rawTeamMetaData,
+				rawTeamMetaData.getProcessContextListeners(),
 				new ProcessContextListener[] { listener });
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
@@ -322,7 +321,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures not construct if not construct {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNotConstructManagedObject() {
 
 		final ManagedObjectSourceConfiguration mosConfiguration = this
@@ -331,8 +330,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record not construct managed object
 		this.record_officeFloorName();
 		this.record_constructTeams();
-		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectSourceConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getManagedObjectSourceConfiguration(),
 				new ManagedObjectSourceConfiguration[] { mosConfiguration });
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory
 				.constructRawManagedObjectMetaData(mosConfiguration,
@@ -349,7 +348,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures issue if two {@link ManagedObjectSource} instances by same name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testDuplicateManagedObjectSourceNames() {
 
 		final String DUPLICATE_MANAGED_OBJECT_SOURCE_NAME = "MANAGED_OBJECT_SOURCE";
@@ -369,8 +368,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Record construct managed object sources with duplicate name
 		this.record_officeFloorName();
 		this.record_constructTeams();
-		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectSourceConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getManagedObjectSourceConfiguration(),
 				new ManagedObjectSourceConfiguration[] { mosConfigurationOne,
 						mosConfigurationTwo });
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory
@@ -380,17 +379,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				DUPLICATE_MANAGED_OBJECT_SOURCE_NAME);
 		this.recordReturn(mosOne, mosOne.getRawManagingOfficeMetaData(),
 				rawOfficeMoMetaData);
-		this.recordReturn(rawOfficeMoMetaData, rawOfficeMoMetaData
-				.getManagingOfficeName(), "OFFICE");
+		this.recordReturn(rawOfficeMoMetaData,
+				rawOfficeMoMetaData.getManagingOfficeName(), "OFFICE");
 		this.constructedManagedObjects.add(mosOne); // constructed later
 		this.recordReturn(this.rawMosFactory, this.rawMosFactory
 				.constructRawManagedObjectMetaData(mosConfigurationTwo,
 						this.issues, this.configuration), mosTwo);
 		this.recordReturn(mosTwo, mosTwo.getManagedObjectName(),
 				DUPLICATE_MANAGED_OBJECT_SOURCE_NAME);
-		this
-				.record_issue("Managed object sources registered with the same name '"
-						+ DUPLICATE_MANAGED_OBJECT_SOURCE_NAME + "'");
+		this.record_issue("Managed object sources registered with the same name '"
+				+ DUPLICATE_MANAGED_OBJECT_SOURCE_NAME + "'");
 		this.record_constructEscalation();
 		this.record_constructOffices("OFFICE",
 				new RawManagingOfficeMetaData[] { rawOfficeMoMetaData });
@@ -406,8 +404,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertEquals(
 				"Incorrect managed object source",
 				mosOne,
-				metaData
-						.getRawManagedObjectMetaData(DUPLICATE_MANAGED_OBJECT_SOURCE_NAME));
+				metaData.getRawManagedObjectMetaData(DUPLICATE_MANAGED_OBJECT_SOURCE_NAME));
 	}
 
 	/**
@@ -428,8 +425,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						managedObjectSourceName)[0];
 		this.record_constructEscalation();
 		this.record_constructOffices();
-		this.recordReturn(managingOffice, managingOffice
-				.getRawManagedObjectMetaData(), rawMoMetaData);
+		this.recordReturn(managingOffice,
+				managingOffice.getRawManagedObjectMetaData(), rawMoMetaData);
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectName(),
 				managedObjectSourceName);
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
@@ -476,8 +473,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				mosInstances.length);
 		for (int i = 0; i < 3; i++) {
 			assertEquals("Incorrect managed object source instance " + i,
-					managedObjectSources[i], mosInstances[i]
-							.getManagedObjectSource());
+					managedObjectSources[i],
+					mosInstances[i].getManagedObjectSource());
 		}
 	}
 
@@ -490,8 +487,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_officeFloorName();
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources("OFFICE");
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalationHandler(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalationHandler(), null);
 		this.record_constructOffices();
 
 		// Attempt to construct office floor
@@ -520,8 +517,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_officeFloorName();
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources("OFFICE");
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalationHandler(), escalationHandler);
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalationHandler(), escalationHandler);
 		this.record_constructOffices();
 
 		// Attempt to construct office floor
@@ -550,11 +547,11 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeConfiguration(),
 				new OfficeConfiguration[] { officeConfiguration });
-		this.recordReturn(officeConfiguration, officeConfiguration
-				.getOfficeName(), null);
+		this.recordReturn(officeConfiguration,
+				officeConfiguration.getOfficeName(), null);
 		this.record_issue("Office added without a name");
 
 		// Attempt to construct office floor
@@ -583,20 +580,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeConfiguration(),
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeConfiguration(),
 				new OfficeConfiguration[] { officeConfiguration });
-		this.recordReturn(officeConfiguration, officeConfiguration
-				.getOfficeName(), "OFFICE");
-		this
-				.recordReturn(this.rawOfficeFactory, this.rawOfficeFactory
-						.constructRawOfficeMetaData(officeConfiguration,
-								this.issues, null, null,
-								this.rawBoundMoFactory,
-								this.rawBoundAdminFactory,
-								this.rawWorkMetaDataFactory,
-								this.rawTaskMetaDataFactory), null,
-						new AlwaysMatcher());
+		this.recordReturn(officeConfiguration,
+				officeConfiguration.getOfficeName(), "OFFICE");
+		this.recordReturn(this.rawOfficeFactory, this.rawOfficeFactory
+				.constructRawOfficeMetaData(officeConfiguration, this.issues,
+						null, null, this.rawBoundMoFactory,
+						this.rawBoundAdminFactory, this.rawWorkMetaDataFactory,
+						this.rawTaskMetaDataFactory), null, new AlwaysMatcher());
 
 		// Attempt to construct office floor
 		this.replayMockObjects();
@@ -640,8 +633,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 * Records obtaining the {@link OfficeFloor} name.
 	 */
 	private void record_officeFloorName() {
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeFloorName(), OFFICE_FLOOR_NAME);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeFloorName(), OFFICE_FLOOR_NAME);
 	}
 
 	/**
@@ -664,8 +657,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record obtaining the team configuration
-		this.recordReturn(this.configuration, this.configuration
-				.getTeamConfiguration(), teamConfigurations);
+		this.recordReturn(this.configuration,
+				this.configuration.getTeamConfiguration(), teamConfigurations);
 
 		// Record constructing the teams
 		for (int i = 0; i < teamNames.length; i++) {
@@ -681,8 +674,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 					teamName);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
-			this.recordReturn(rawTeamMetaData, rawTeamMetaData
-					.getProcessContextListeners(),
+			this.recordReturn(rawTeamMetaData,
+					rawTeamMetaData.getProcessContextListeners(),
 					new ProcessContextListener[0]);
 		}
 
@@ -701,7 +694,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 * @return {@link RawManagingOfficeMetaData} instances for the constructed
 	 *         {@link RawManagedObjectMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private RawManagingOfficeMetaData[] record_constructManagedObjectSources(
 			String officeName, String... managedObjectSourceNames) {
 
@@ -718,8 +711,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record obtaining the managed object source configuration
-		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectSourceConfiguration(), mosConfigurations);
+		this.recordReturn(this.configuration,
+				this.configuration.getManagedObjectSourceConfiguration(),
+				mosConfigurations);
 
 		// Record constructing the managed object sources
 		for (int i = 0; i < managedObjectSourceNames.length; i++) {
@@ -732,12 +726,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.rawMosFactory, this.rawMosFactory
 					.constructRawManagedObjectMetaData(mosConfiguration,
 							this.issues, this.configuration), rawMoMetaData);
-			this.recordReturn(rawMoMetaData, rawMoMetaData
-					.getManagedObjectName(), managedObjectSourceName);
-			this.recordReturn(rawMoMetaData, rawMoMetaData
-					.getRawManagingOfficeMetaData(), managingOffice);
-			this.recordReturn(managingOffice, managingOffice
-					.getManagingOfficeName(), officeName);
+			this.recordReturn(rawMoMetaData,
+					rawMoMetaData.getManagedObjectName(),
+					managedObjectSourceName);
+			this.recordReturn(rawMoMetaData,
+					rawMoMetaData.getRawManagingOfficeMetaData(),
+					managingOffice);
+			this.recordReturn(managingOffice,
+					managingOffice.getManagingOfficeName(), officeName);
 
 			// Add the managed object for later construction
 			this.constructedManagedObjects.add(rawMoMetaData);
@@ -752,8 +748,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloor}.
 	 */
 	private void record_constructEscalation() {
-		this.recordReturn(this.configuration, this.configuration
-				.getEscalationHandler(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getEscalationHandler(), null);
 	}
 
 	/**
@@ -788,8 +784,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record the construction of the offices
-		this.recordReturn(this.configuration, this.configuration
-				.getOfficeConfiguration(), officeConfigurations);
+		this.recordReturn(this.configuration,
+				this.configuration.getOfficeConfiguration(),
+				officeConfigurations);
 		for (int i = 0; i < officeCount; i++) {
 			final OfficeConfiguration officeConfiguration = officeConfigurations[i];
 			final String officeName = officeNames[i];
@@ -799,8 +796,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			final OfficeMetaData officeMetaData = officeMetaDatas[i];
 
 			// Record construction of the office
-			this.recordReturn(officeConfiguration, officeConfiguration
-					.getOfficeName(), officeName);
+			this.recordReturn(officeConfiguration,
+					officeConfiguration.getOfficeName(), officeName);
 			this.recordReturn(this.rawOfficeFactory, this.rawOfficeFactory
 					.constructRawOfficeMetaData(officeConfiguration,
 							this.issues, officeManagingManagedObjects, null,
@@ -844,8 +841,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 							return true;
 						}
 					});
-			this.recordReturn(rawOfficeMetaData, rawOfficeMetaData
-					.getOfficeMetaData(), officeMetaData);
+			this.recordReturn(rawOfficeMetaData,
+					rawOfficeMetaData.getOfficeMetaData(), officeMetaData);
 		}
 
 		// Return the constructed office meta-data
@@ -880,14 +877,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 					.createMock(ManagedObjectExecuteContext.class);
 
 			// Record construction of the managed object instance
-			this.recordReturn(rawMoMetaData, rawMoMetaData
-					.getManagedObjectSource(), managedObjectSource);
-			this.recordReturn(rawMoMetaData, rawMoMetaData
-					.getRawManagingOfficeMetaData(), managingOffice);
-			this.recordReturn(managingOffice, managingOffice
-					.getManagedObjectExecuteContext(), executeContext);
-			this.recordReturn(rawMoMetaData, rawMoMetaData
-					.getManagedObjectPool(), null);
+			this.recordReturn(rawMoMetaData,
+					rawMoMetaData.getManagedObjectSource(), managedObjectSource);
+			this.recordReturn(rawMoMetaData,
+					rawMoMetaData.getRawManagingOfficeMetaData(),
+					managingOffice);
+			this.recordReturn(managingOffice,
+					managingOffice.getManagedObjectExecuteContext(),
+					executeContext);
+			this.recordReturn(rawMoMetaData,
+					rawMoMetaData.getManagedObjectPool(), null);
 		}
 
 		// Return the managed object sources

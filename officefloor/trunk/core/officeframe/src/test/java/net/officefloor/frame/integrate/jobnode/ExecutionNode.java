@@ -278,6 +278,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public ManagedObjectIndex[] getRequiredManagedObjects() {
 		// Create the listing of required managed objects
 		List<ManagedObjectIndex> moListing = new LinkedList<ManagedObjectIndex>();
@@ -293,6 +294,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex) {
 		return ((ManagedObjectTaskProcessItem<?>) this.taskProcessing
 				.get(taskMoIndex)).getManagedObjectIndex();
@@ -442,7 +444,7 @@ public class ExecutionNode<W extends Work> implements
 		 * ==================== TaskProcessItem ==========================
 		 */
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public boolean process(int itemIndex, TaskContext context) {
 			// Obtain the object of the Managed Object
 			O object = (O) context.getObject(itemIndex);

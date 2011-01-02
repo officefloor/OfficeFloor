@@ -779,7 +779,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link DutyConfiguration} for a {@link Duty}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoDutyConfiguration() {
 
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
@@ -1155,7 +1155,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 *
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private RawBoundAdministratorMetaData<?, DutyKey> constructRawAdministratorAndLinkTasks() {
 
 		// Construct the raw administrator meta-data

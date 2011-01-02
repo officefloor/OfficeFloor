@@ -88,7 +88,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Initiate the Test.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void setUp() throws Exception {
 
 		// Create the mock objects
@@ -183,8 +183,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		}
 
 		// Create the next execution node
-		ExecutionNode<W> nextNode = new ExecutionNode<W>(this
-				.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
+		ExecutionNode<W> nextNode = new ExecutionNode<W>(
+				this.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
 
 		// Bind as next execution node
 		currentNode.setNextTask(nextNode);
@@ -248,8 +248,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 			ExecutionNode<W> currentNode) {
 
 		// Create the flow node
-		ExecutionNode<W> flowNode = new ExecutionNode<W>(this
-				.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
+		ExecutionNode<W> flowNode = new ExecutionNode<W>(
+				this.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
 
 		// Bind as flow node
 		currentNode.addFlow(instigationStrategy, flowNode);
@@ -276,7 +276,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Executes the tree.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void execute() {
 
 		// Executing therefore replay mock objects
@@ -346,8 +346,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		}
 
 		// Validate execution order
-		assertEquals("Incorrect execution order [expected: "
-				+ expected.toString() + "actual: " + actual.toString() + "]",
+		assertEquals(
+				"Incorrect execution order [expected: " + expected.toString()
+						+ "actual: " + actual.toString() + "]",
 				expected.toString(), actual.toString());
 	}
 

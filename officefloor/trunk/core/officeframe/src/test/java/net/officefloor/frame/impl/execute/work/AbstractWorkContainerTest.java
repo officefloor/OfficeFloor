@@ -482,26 +482,26 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 				.record_getManagedObjectContainer(managedObjectIndex, false);
 
 		// Record obtaining the object
-		this.recordReturn(managedObjectContainer, managedObjectContainer
-				.getObject(this.threadState), object);
+		this.recordReturn(managedObjectContainer,
+				managedObjectContainer.getObject(this.threadState), object);
 	}
 
 	/**
 	 * Records administering the {@link ManagedObject} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void record_WorkContainer_administerManagedObjects(
 			AdministratorIndex adminIndex, ManagedObjectIndex... moIndexes) {
 
 		// Record obtaining the states
-		this.recordReturn(this.administratorContext, this.administratorContext
-				.getThreadState(), this.threadState);
+		this.recordReturn(this.administratorContext,
+				this.administratorContext.getThreadState(), this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
 
 		// Record obtaining the administrator index
-		this.recordReturn(this.taskDutyAssociation, this.taskDutyAssociation
-				.getAdministratorIndex(), adminIndex);
+		this.recordReturn(this.taskDutyAssociation,
+				this.taskDutyAssociation.getAdministratorIndex(), adminIndex);
 
 		// Record obtaining the process lock
 		this.recordReturn(this.processState,
@@ -521,10 +521,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 						.toArray(new AdministratorMetaData[0]));
 				AdministratorMetaData<?, ?> adminMetaData = this.administratorMetaData
 						.get(scopeIndex);
-				this
-						.recordReturn(adminMetaData, adminMetaData
-								.createAdministratorContainer(),
-								administratorContainer);
+				this.recordReturn(adminMetaData,
+						adminMetaData.createAdministratorContainer(),
+						administratorContainer);
 				this.isAdministratorAvailable[scopeIndex] = true;
 			}
 			break;
@@ -532,16 +531,16 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		case THREAD:
 			administratorContainer = this.threadAdministratorContainers
 					.get(scopeIndex);
-			this.recordReturn(this.threadState, this.threadState
-					.getAdministratorContainer(scopeIndex),
+			this.recordReturn(this.threadState,
+					this.threadState.getAdministratorContainer(scopeIndex),
 					administratorContainer);
 			break;
 
 		case PROCESS:
 			administratorContainer = this.processAdministratorContainers
 					.get(scopeIndex);
-			this.recordReturn(this.processState, this.processState
-					.getAdministratorContainer(scopeIndex),
+			this.recordReturn(this.processState,
+					this.processState.getAdministratorContainer(scopeIndex),
 					administratorContainer);
 			break;
 
@@ -575,8 +574,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			// Record extracting the extension interface
 			ExtensionInterfaceExtractor<?> eiExtractor = this
 					.createMock(ExtensionInterfaceExtractor.class);
-			this.recordReturn(eiMetaData, eiMetaData
-					.getExtensionInterfaceExtractor(), eiExtractor);
+			this.recordReturn(eiMetaData,
+					eiMetaData.getExtensionInterfaceExtractor(), eiExtractor);
 			extensionInterfaces[i] = String.valueOf(i);
 			this.recordReturn(managedObjectContainer, managedObjectContainer
 					.extractExtensionInterface(eiExtractor),
@@ -585,8 +584,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 		try {
 			// Record administering the managed objects
-			administratorContainer.doDuty(this.taskDutyAssociation, Arrays
-					.asList(extensionInterfaces), this.administratorContext);
+			administratorContainer.doDuty(this.taskDutyAssociation,
+					Arrays.asList(extensionInterfaces),
+					this.administratorContext);
 		} catch (Throwable ex) {
 			fail("Recording should not throw exception");
 		}
@@ -649,16 +649,16 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		case THREAD:
 			managedObjectContainer = this.threadManagedObjectContainers
 					.get(scopeIndex);
-			this.recordReturn(this.threadState, this.threadState
-					.getManagedObjectContainer(scopeIndex),
+			this.recordReturn(this.threadState,
+					this.threadState.getManagedObjectContainer(scopeIndex),
 					managedObjectContainer);
 			break;
 
 		case PROCESS:
 			managedObjectContainer = this.processManagedObjectContainers
 					.get(scopeIndex);
-			this.recordReturn(this.processState, this.processState
-					.getManagedObjectContainer(scopeIndex),
+			this.recordReturn(this.processState,
+					this.processState.getManagedObjectContainer(scopeIndex),
 					managedObjectContainer);
 			break;
 
