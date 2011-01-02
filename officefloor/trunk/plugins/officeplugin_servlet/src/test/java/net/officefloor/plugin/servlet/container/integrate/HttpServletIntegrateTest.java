@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

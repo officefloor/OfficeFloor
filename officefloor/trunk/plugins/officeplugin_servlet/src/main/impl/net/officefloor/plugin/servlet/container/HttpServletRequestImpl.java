@@ -52,13 +52,13 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
-import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.plugin.web.http.cookie.HttpCookie;
+import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 
 /**
  * {@link HttpServletRequest} implementation.

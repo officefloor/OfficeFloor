@@ -23,7 +23,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSessionContext;
 
 import net.officefloor.plugin.servlet.time.Clock;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * {@link javax.servlet.http.HttpSession} implementation.

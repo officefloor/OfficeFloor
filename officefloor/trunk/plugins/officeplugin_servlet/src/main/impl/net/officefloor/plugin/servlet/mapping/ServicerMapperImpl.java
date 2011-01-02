@@ -24,10 +24,10 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokenHandler;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniseException;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniser;
-import net.officefloor.plugin.socket.server.http.tokenise.HttpRequestTokeniserImpl;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 
 /**
  * {@link ServicerMapper} implementation.

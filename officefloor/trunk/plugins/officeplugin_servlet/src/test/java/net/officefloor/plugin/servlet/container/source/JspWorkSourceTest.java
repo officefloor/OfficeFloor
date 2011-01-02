@@ -34,8 +34,8 @@ import net.officefloor.plugin.servlet.container.source.HttpServletTask.Dependenc
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.jasper.servlet.JspServlet;
 

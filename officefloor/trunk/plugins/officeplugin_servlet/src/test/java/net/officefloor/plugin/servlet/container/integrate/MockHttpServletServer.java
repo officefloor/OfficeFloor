@@ -49,16 +49,16 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.requestattributes.source.RequestAttributesManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurityServiceManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource.FlowKeys;
-import net.officefloor.plugin.socket.server.http.security.scheme.BasicHttpSecuritySource;
-import net.officefloor.plugin.socket.server.http.security.store.PasswordFileManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
-import net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecurityServiceManagedObjectSource;
+import net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.FlowKeys;
+import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
+import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -334,14 +334,14 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		httpSecurityOffice
 				.setInputManagedObjectName("InputHttpSecurity")
 				.mapDependency(
-						net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
+						net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
 						HTTP_SECURITY_SERVICE_NAME);
 		DependencyMappingBuilder httpSecurityDependencies = this
 				.getOfficeBuilder().addProcessManagedObject(HTTP_SECURITY_NAME,
 						HTTP_SECURITY_NAME);
 		httpSecurityDependencies
 				.mapDependency(
-						net.officefloor.plugin.socket.server.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
+						net.officefloor.plugin.web.http.security.HttpSecurityManagedObjectSource.DependencyKeys.HTTP_SECURITY_SERVICE,
 						HTTP_SECURITY_SERVICE_NAME);
 
 		// Service authentication

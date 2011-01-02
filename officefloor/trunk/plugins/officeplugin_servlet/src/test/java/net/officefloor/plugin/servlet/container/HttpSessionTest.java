@@ -25,8 +25,8 @@ import javax.servlet.ServletContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
-import net.officefloor.plugin.socket.server.http.session.HttpSessionAdministration;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.HttpSessionAdministration;
 
 /**
  * Test the {@link HttpSessionImpl}.

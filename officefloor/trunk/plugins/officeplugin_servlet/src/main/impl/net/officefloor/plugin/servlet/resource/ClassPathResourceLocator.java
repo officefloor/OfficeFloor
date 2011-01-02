@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.plugin.socket.server.http.resource.ClassPathHttpResourceNode;
-import net.officefloor.plugin.socket.server.http.resource.ClasspathHttpResourceFactory;
+import net.officefloor.plugin.web.http.resource.ClassPathHttpResourceNode;
+import net.officefloor.plugin.web.http.resource.ClasspathHttpResourceFactory;
 
 /**
  * {@link ResourceLocator} for the class path.
