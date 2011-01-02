@@ -164,7 +164,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private AdministratorType<?, ?> administratorType = null;
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministratorType<?, ?> getAdministratorType() {
 
 		// Lazy load the administrator type
@@ -191,7 +191,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildAdministrator(OfficeBuilder officeBuilder) {
 
 		// Obtain the administrator source class

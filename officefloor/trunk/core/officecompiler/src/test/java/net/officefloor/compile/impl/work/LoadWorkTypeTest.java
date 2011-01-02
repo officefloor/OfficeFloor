@@ -94,9 +94,9 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockWorkSource.class.getName() + " by default constructor",
-				failure);
+		this.record_issue(
+				"Failed to instantiate " + MockWorkSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockWorkSource.instantiateFailure = failure;
@@ -134,22 +134,22 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 					WorkSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context
-						.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context
-						.getProperty("TWO"));
+				assertEquals("Ensure get property ONE", "1",
+						context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2",
+						context.getProperty("TWO"));
 				String[] names = context.getPropertyNames();
 				assertEquals("Incorrect number of property names", 2,
 						names.length);
 				assertEquals("Incorrect property name 0", "ONE", names[0]);
 				assertEquals("Incorrect property name 1", "TWO", names[1]);
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
-						.size());
-				assertEquals("Incorrect property ONE", "1", properties
-						.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties
-						.get("TWO"));
+				assertEquals("Incorrect number of properties", 2,
+						properties.size());
+				assertEquals("Incorrect property ONE", "1",
+						properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2",
+						properties.get("TWO"));
 
 				// Providing minimal work type
 				work.setWorkFactory(workFactory);
@@ -168,8 +168,9 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
-				assertEquals("Incorrect class loader", LoadWorkTypeTest.class
-						.getClassLoader(), context.getClassLoader());
+				assertEquals("Incorrect class loader",
+						LoadWorkTypeTest.class.getClassLoader(),
+						context.getClassLoader());
 
 				// Providing minimal work type
 				work.setWorkFactory(workFactory);
@@ -247,9 +248,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoTaskName() {
 
 		// Record no tasks
-		this
-				.record_issue("No task name provided for TaskType definition 0 by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No task name provided for TaskType definition 0 by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -268,9 +268,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoTaskFactory() {
 
 		// Record no tasks
-		this
-				.record_issue("No TaskFactory provided for TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No TaskFactory provided for TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -372,9 +371,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("No key provided for an object on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No key provided for an object on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -395,18 +393,17 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 * Ensure issue if incorrect key type for {@link TaskObjectType} by provided
 	 * key class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForObject() {
 
 		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("Incorrect key type ("
-						+ WrongKey.class.getName()
-						+ ") provided for an object on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("Incorrect key type ("
+				+ WrongKey.class.getName()
+				+ ") provided for an object on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -426,16 +423,15 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if more {@link TaskObjectType} instances than keys.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreObjectsThanKeys() {
 
 		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("More objects than keys on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("More objects than keys on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -457,16 +453,15 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if key provided for {@link TaskObjectType} but no key class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectHasKeyButNoKeyClass() {
 
 		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record indexes out of order
-		this
-				.record_issue("Objects are not keyed but object has key on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("Objects are not keyed but object has key on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -489,9 +484,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoObjectType() {
 
 		// Record no object type
-		this
-				.record_issue("No object type provided for object 0 on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No object type provided for object 0 on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -537,25 +531,25 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Validate the key class
 		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
-		assertEquals("Incorrect object key class", ObjectKey.class, task
-				.getObjectKeyClass());
+		assertEquals("Incorrect object key class", ObjectKey.class,
+				task.getObjectKeyClass());
 
 		// Validate the object type order
 		TaskObjectType<?>[] objects = task.getObjectTypes();
 		assertEquals("Incorrect number of objects", 2, objects.length);
 		TaskObjectType<?> one = objects[0];
 		assertEquals("Incorrect key one", ObjectKey.ONE, one.getKey());
-		assertEquals("Incorrect index one", ObjectKey.ONE.ordinal(), one
-				.getIndex());
-		assertEquals("Incorrect name one", ObjectKey.ONE.toString(), one
-				.getObjectName());
+		assertEquals("Incorrect index one", ObjectKey.ONE.ordinal(),
+				one.getIndex());
+		assertEquals("Incorrect name one", ObjectKey.ONE.toString(),
+				one.getObjectName());
 		assertEquals("Incorrect type one", oneType, one.getObjectType());
 		TaskObjectType<?> two = objects[1];
 		assertEquals("Incorrect key two", ObjectKey.TWO, two.getKey());
-		assertEquals("Incorrect index two", ObjectKey.TWO.ordinal(), two
-				.getIndex());
-		assertEquals("Incorrect name two", ObjectKey.TWO.toString(), two
-				.getObjectName());
+		assertEquals("Incorrect index two", ObjectKey.TWO.ordinal(),
+				two.getIndex());
+		assertEquals("Incorrect name two", ObjectKey.TWO.toString(),
+				two.getObjectName());
 		assertEquals("Incorrect type two", twoType, two.getObjectType());
 	}
 
@@ -602,9 +596,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("No key provided for a flow on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No key provided for a flow on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -625,18 +618,17 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 * Ensure issue if incorrect key type for {@link TaskFlowType} but provided
 	 * key class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForFlow() {
 
 		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("Incorrect key type ("
-						+ WrongKey.class.getName()
-						+ ") provided for a flow on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("Incorrect key type ("
+				+ WrongKey.class.getName()
+				+ ") provided for a flow on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -656,16 +648,15 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if more {@link TaskFlowType} instances than keys.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreFlowsThanKeys() {
 
 		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this
-				.record_issue("More flows than keys on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("More flows than keys on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -687,16 +678,15 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if key provided for {@link TaskFlowType} but no key class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testFlowHasKeyButNoKeyClass() {
 
 		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
 				.createMock(TaskFactory.class);
 
 		// Record indexes out of order
-		this
-				.record_issue("Flows are not keyed but flow has key on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("Flows are not keyed but flow has key on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -743,26 +733,26 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Validate the key class
 		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
-		assertEquals("Incorrect flow key class", FlowKey.class, task
-				.getFlowKeyClass());
+		assertEquals("Incorrect flow key class", FlowKey.class,
+				task.getFlowKeyClass());
 
 		// Validate the flow type order
 		TaskFlowType<?>[] flows = task.getFlowTypes();
 		assertEquals("Incorrect number of flows", 2, flows.length);
 		TaskFlowType<?> one = flows[0];
 		assertEquals("Incorrect key one", FlowKey.ONE, one.getKey());
-		assertEquals("Incorrect index one", FlowKey.ONE.ordinal(), one
-				.getIndex());
-		assertEquals("Incorrect name one", FlowKey.ONE.toString(), one
-				.getFlowName());
-		assertEquals("Incorrect argument type one", oneType, one
-				.getArgumentType());
+		assertEquals("Incorrect index one", FlowKey.ONE.ordinal(),
+				one.getIndex());
+		assertEquals("Incorrect name one", FlowKey.ONE.toString(),
+				one.getFlowName());
+		assertEquals("Incorrect argument type one", oneType,
+				one.getArgumentType());
 		TaskFlowType<?> two = flows[1];
 		assertEquals("Incorrect key two", FlowKey.TWO, two.getKey());
-		assertEquals("Incorrect index two", FlowKey.TWO.ordinal(), two
-				.getIndex());
-		assertEquals("Incorrect name two", FlowKey.TWO.toString(), two
-				.getFlowName());
+		assertEquals("Incorrect index two", FlowKey.TWO.ordinal(),
+				two.getIndex());
+		assertEquals("Incorrect name two", FlowKey.TWO.toString(),
+				two.getFlowName());
 		assertNull("Should be no argument for two", two.getArgumentType());
 	}
 
@@ -779,9 +769,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoEscalationType() {
 
 		// Record no escalation type
-		this
-				.record_issue("No escalation type on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.record_issue("No escalation type on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -824,12 +813,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of escalation", 2, escalations.length);
 		assertEquals("Incorrect first escalation type", Error.class,
 				escalations[0].getEscalationType());
-		assertEquals("Incorrect first escalation name", Error.class
-				.getSimpleName(), escalations[0].getEscalationName());
+		assertEquals("Incorrect first escalation name",
+				Error.class.getSimpleName(), escalations[0].getEscalationName());
 		assertEquals("Incorrect second escalation type",
 				RuntimeException.class, escalations[1].getEscalationType());
-		assertEquals("Incorrect second escalation name", RuntimeException.class
-				.getSimpleName(), escalations[1].getEscalationName());
+		assertEquals("Incorrect second escalation name",
+				RuntimeException.class.getSimpleName(),
+				escalations[1].getEscalationName());
 	}
 
 	/**
@@ -865,12 +855,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Validate the names
 		assertEquals("Incorrect task name", TASK_NAME, task.getTaskName());
-		assertEquals("Incorrect object name", OBJECT_NAME, task
-				.getObjectTypes()[0].getObjectName());
-		assertEquals("Incorrect flow name", FLOW_NAME, task.getFlowTypes()[0]
-				.getFlowName());
-		assertEquals("Incorrect escalation name", ESCALATION_NAME, task
-				.getEscalationTypes()[0].getEscalationName());
+		assertEquals("Incorrect object name", OBJECT_NAME,
+				task.getObjectTypes()[0].getObjectName());
+		assertEquals("Incorrect flow name", FLOW_NAME,
+				task.getFlowTypes()[0].getFlowName());
+		assertEquals("Incorrect escalation name", ESCALATION_NAME,
+				task.getEscalationTypes()[0].getEscalationName());
 	}
 
 	/**

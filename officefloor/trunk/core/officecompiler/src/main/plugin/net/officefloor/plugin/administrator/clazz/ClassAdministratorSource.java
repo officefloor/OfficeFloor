@@ -123,7 +123,7 @@ public class ClassAdministratorSource extends
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(MetaDataContext<Object, Indexed> context)
 			throws Exception {
 		AdministratorSourceContext adminContext = context

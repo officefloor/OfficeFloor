@@ -136,7 +136,7 @@ public class OfficeSourceContextImpl implements OfficeSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties) {
 
@@ -170,7 +170,7 @@ public class OfficeSourceContextImpl implements OfficeSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministratorType<?, ?> loadAdministratorType(
 			String administratorSourceClassName, PropertyList properties) {
 

@@ -36,7 +36,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ThreadLocalDelegateManagedObjectSource implements
 		ManagedObjectSource {
 
@@ -89,8 +89,8 @@ public class ThreadLocalDelegateManagedObjectSource implements
 		OfficeFloorManagedObjectSource source = deployer
 				.addManagedObjectSource(managedObjectSourceName,
 						ThreadLocalDelegateManagedObjectSource.class.getName());
-		source.addProperty(PROPERTY_INSTANCE_IDENTIFIER, String
-				.valueOf(identifier));
+		source.addProperty(PROPERTY_INSTANCE_IDENTIFIER,
+				String.valueOf(identifier));
 
 		// Return the managed object source
 		return source;

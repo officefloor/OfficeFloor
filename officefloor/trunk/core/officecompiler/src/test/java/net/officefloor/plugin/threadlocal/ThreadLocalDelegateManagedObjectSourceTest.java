@@ -32,7 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ThreadLocalDelegateManagedObjectSourceTest extends
 		OfficeFrameTestCase {
 
@@ -72,12 +72,10 @@ public class ThreadLocalDelegateManagedObjectSourceTest extends
 				"0");
 
 		// Record delegation
-		this
-				.recordReturn(
-						context,
-						context
-								.getProperty(ThreadLocalDelegateOfficeSource.PROPERTY_INSTANCE_IDENTIFIER),
-						"0");
+		this.recordReturn(
+				context,
+				context.getProperty(ThreadLocalDelegateOfficeSource.PROPERTY_INSTANCE_IDENTIFIER),
+				"0");
 		this.delegate.init(context);
 		this.recordReturn(this.delegate, this.delegate.getMetaData(), metaData);
 		this.delegate.start(executeContext);
@@ -92,8 +90,8 @@ public class ThreadLocalDelegateManagedObjectSourceTest extends
 		ThreadLocalDelegateManagedObjectSource source = new ThreadLocalDelegateManagedObjectSource();
 		ManagedObjectSourceSpecification specification = source
 				.getSpecification();
-		assertEquals("Should be no properties", 0, specification
-				.getProperties().length);
+		assertEquals("Should be no properties", 0,
+				specification.getProperties().length);
 		source.init(context);
 		ManagedObjectSourceMetaData<?, ?> returnedMetaData = source
 				.getMetaData();

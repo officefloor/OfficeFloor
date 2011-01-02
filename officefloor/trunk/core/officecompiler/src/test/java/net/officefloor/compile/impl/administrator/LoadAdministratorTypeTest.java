@@ -122,17 +122,17 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 			public void init(AdministratorSourceContext context) {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context
-						.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context
-						.getProperty("TWO"));
+				assertEquals("Ensure get property ONE", "1",
+						context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2",
+						context.getProperty("TWO"));
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
-						.size());
-				assertEquals("Incorrect property ONE", "1", properties
-						.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties
-						.get("TWO"));
+				assertEquals("Incorrect number of properties", 2,
+						properties.size());
+				assertEquals("Incorrect property ONE", "1",
+						properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2",
+						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -211,8 +211,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record null duty meta-data array
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(), null);
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(), null);
 		this.record_issue("Must have at least one duty");
 
 		// Attempt to load
@@ -226,8 +226,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record null duty meta-data array
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[0]);
 		this.record_issue("Must have at least one duty");
 
@@ -243,8 +243,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record null duty meta-data entry in the array
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { null });
 		this.record_issue("Null meta data for duty 0");
 
@@ -280,8 +280,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record missing type
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
 		this.recordReturn(dutyOne, dutyOne.getDutyName(), DUPLICATE_NAME);
 		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
@@ -322,8 +322,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record missing type
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
 		this.recordReturn(dutyOne, dutyOne.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
@@ -348,8 +348,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record missing type
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { dutyOne, dutyTwo });
 		this.recordReturn(dutyOne, dutyOne.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(dutyOne, dutyOne.getKey(), null);
@@ -381,12 +381,12 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of duties", 2, dutyTypes.length);
 		assertEquals("Incorrect name for first duty", DutyKey.ONE.name(),
 				dutyTypes[0].getDutyName());
-		assertEquals("Incorrect key for first duty", DutyKey.ONE, dutyTypes[0]
-				.getDutyKey());
+		assertEquals("Incorrect key for first duty", DutyKey.ONE,
+				dutyTypes[0].getDutyKey());
 		assertEquals("Incorrect name for second duty", DutyKey.TWO.name(),
 				dutyTypes[1].getDutyName());
-		assertEquals("Incorrect key for second duty", DutyKey.TWO, dutyTypes[1]
-				.getDutyKey());
+		assertEquals("Incorrect key for second duty", DutyKey.TWO,
+				dutyTypes[1].getDutyKey());
 	}
 
 	/**
@@ -409,12 +409,12 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of duties", 2, dutyTypes.length);
 		assertEquals("Incorrect name for first duty", DutyKey.ONE.name(),
 				dutyTypes[0].getDutyName());
-		assertNull("Should not have key for first duty", dutyTypes[0]
-				.getDutyKey());
+		assertNull("Should not have key for first duty",
+				dutyTypes[0].getDutyKey());
 		assertEquals("Incorrect name for second duty", DutyKey.TWO.name(),
 				dutyTypes[1].getDutyName());
-		assertNull("Should not have key for second duty", dutyTypes[1]
-				.getDutyKey());
+		assertNull("Should not have key for second duty",
+				dutyTypes[1].getDutyKey());
 	}
 
 	/**
@@ -468,8 +468,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record loading the administrator type
 		this.record_extensionInterface();
-		this.recordReturn(this.metaData, this.metaData
-				.getAdministratorDutyMetaData(), duties);
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(), duties);
 		for (int i = 0; i < duties.length; i++) {
 			AdministratorDutyMetaData<?, ?> duty = duties[i];
 			Enum<?> key = keys[i];
@@ -576,7 +576,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 * Mock {@link AdministratorSource}.
 	 */
 	@TestSource
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static class MockAdministratorSource implements
 			AdministratorSource<Object, Indexed> {
 

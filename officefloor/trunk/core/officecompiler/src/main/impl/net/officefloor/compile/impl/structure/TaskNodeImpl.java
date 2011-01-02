@@ -195,7 +195,7 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <W extends Work> void buildTask(WorkType<W> workType,
 			WorkBuilder<W> workBuilder) {
 
@@ -292,8 +292,8 @@ public class TaskNodeImpl implements TaskNode {
 			// Have next task so link to it
 			TaskNode nextTask = LinkUtil.retrieveTarget(this, TaskNode.class,
 					"Next task ", LocationType.SECTION, this.sectionLocation,
-					AssetType.TASK, this.taskName, this.context
-							.getCompilerIssues());
+					AssetType.TASK, this.taskName,
+					this.context.getCompilerIssues());
 			if (nextTask != null) {
 
 				// Obtain next details for linking

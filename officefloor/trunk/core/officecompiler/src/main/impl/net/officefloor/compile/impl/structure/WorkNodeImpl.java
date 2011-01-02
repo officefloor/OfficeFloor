@@ -185,7 +185,7 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildWork(OfficeBuilder builder) {
 
 		// Obtain the work source class

@@ -137,7 +137,7 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public WorkType<?> loadWorkType(String workSourceClassName,
 			PropertyList properties) {
 
@@ -166,7 +166,7 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties) {
 
@@ -200,7 +200,7 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SectionType loadSectionType(String sectionSourceClassName,
 			String location, PropertyList properties) {
 

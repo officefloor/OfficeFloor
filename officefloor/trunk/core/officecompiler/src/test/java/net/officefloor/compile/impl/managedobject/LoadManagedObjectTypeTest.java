@@ -154,17 +154,17 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					InitUtil util) {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context
-						.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context
-						.getProperty("TWO"));
+				assertEquals("Ensure get property ONE", "1",
+						context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2",
+						context.getProperty("TWO"));
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
-						.size());
-				assertEquals("Incorrect property ONE", "1", properties
-						.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties
-						.get("TWO"));
+				assertEquals("Incorrect number of properties", 2,
+						properties.size());
+				assertEquals("Incorrect property ONE", "1",
+						properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2",
+						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -186,7 +186,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				assertEquals("Incorrect resource locator",
+				assertEquals(
+						"Incorrect resource locator",
 						LoadWorkTypeTest.class.getClassLoader().getResource(
 								objectPath), context.getClassLoader()
 								.getResource(objectPath));
@@ -311,8 +312,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new ManagedObjectDependencyMetaData[] { null });
-		this
-				.record_issue("Null ManagedObjectDependencyMetaData for dependency 0");
+		this.record_issue("Null ManagedObjectDependencyMetaData for dependency 0");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -333,8 +333,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getLabel(), "NO TYPE");
 		this.recordReturn(dependency, dependency.getKey(), null);
 		this.recordReturn(dependency, dependency.getType(), null);
-		this
-				.record_issue("No type for dependency 0 (key=<indexed>, label=NO TYPE)");
+		this.record_issue("No type for dependency 0 (key=<indexed>, label=NO TYPE)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -480,10 +479,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
-		this
-				.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
-						new ManagedObjectFlowMetaData[] { flowDefaulted,
-								flowProvided });
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
+				new ManagedObjectFlowMetaData[] { flowDefaulted, flowProvided });
 		this.recordReturn(flowDefaulted, flowDefaulted.getLabel(), "DEFAULTED");
 		this.recordReturn(flowDefaulted, flowDefaulted.getKey(), null);
 		this.recordReturn(flowDefaulted, flowDefaulted.getArgumentType(), null);
@@ -491,8 +488,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowProvided, flowProvided.getKey(), null);
 		this.recordReturn(flowProvided, flowProvided.getArgumentType(),
 				Connection.class);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(), null);
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
@@ -504,11 +501,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED",
 				defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class, defaulted
-				.getArgumentType());
+		assertEquals("Incorrect defaulted argument type", Void.class,
+				defaulted.getArgumentType());
 		ManagedObjectFlowType<?> provided = flowTypes[1];
-		assertEquals("Incorrect name for provided argument flow", "1", provided
-				.getFlowName());
+		assertEquals("Incorrect name for provided argument flow", "1",
+				provided.getFlowName());
 		assertEquals("Incorrect provided argument type", Connection.class,
 				provided.getArgumentType());
 	}
@@ -643,9 +640,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), TwoKey.TWO); // order
-		this
-				.recordReturn(dependencyOne, dependencyOne.getType(),
-						Integer.class);
+		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
@@ -658,8 +653,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(), null);
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
@@ -671,8 +666,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of dependencies", 2,
 				dependencyTypes.length);
 		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
-		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne
-				.getKey());
+		assertEquals("Keys should be ordered", TwoKey.ONE,
+				dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(),
 				dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(),
@@ -680,8 +675,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect first dependency type", Connection.class,
 				dependencyTypeOne.getDependencyType());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
-		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo
-				.getKey());
+		assertEquals("Keys should be ordered", TwoKey.TWO,
+				dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(),
 				dependencyTypeTwo.getIndex());
 		assertEquals("Incorrect second dependency name", TwoKey.TWO.toString(),
@@ -732,9 +727,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 						dependencyTwo });
 		this.recordReturn(dependencyOne, dependencyOne.getLabel(), null);
 		this.recordReturn(dependencyOne, dependencyOne.getKey(), null);
-		this
-				.recordReturn(dependencyOne, dependencyOne.getType(),
-						Integer.class);
+		this.recordReturn(dependencyOne, dependencyOne.getType(), Integer.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(),
@@ -747,8 +740,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(), null);
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
@@ -760,19 +753,21 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of dependencies", 2,
 				dependencyTypes.length);
 		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
-		assertEquals("Incorrect first dependency index", 0, dependencyTypeOne
-				.getIndex());
+		assertEquals("Incorrect first dependency index", 0,
+				dependencyTypeOne.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
-		assertEquals("Incorrect first dependency name", Integer.class
-				.getSimpleName(), dependencyTypeOne.getDependencyName());
+		assertEquals("Incorrect first dependency name",
+				Integer.class.getSimpleName(),
+				dependencyTypeOne.getDependencyName());
 		assertEquals("Incorrect first dependency type", Integer.class,
 				dependencyTypeOne.getDependencyType());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
-		assertEquals("Incorrect second dependency index", 1, dependencyTypeTwo
-				.getIndex());
+		assertEquals("Incorrect second dependency index", 1,
+				dependencyTypeTwo.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeTwo.getKey());
-		assertEquals("Incorrect second dependency name", Connection.class
-				.getSimpleName(), dependencyTypeTwo.getDependencyName());
+		assertEquals("Incorrect second dependency name",
+				Connection.class.getSimpleName(),
+				dependencyTypeTwo.getDependencyName());
 		assertEquals("Incorrect second dependency type", Connection.class,
 				dependencyTypeTwo.getDependencyType());
 
@@ -782,15 +777,15 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectFlowType<?> flowTypeOne = flowTypes[0];
 		assertEquals("Incorrect first flow index", 0, flowTypeOne.getIndex());
 		assertNull("Should be no flow key", flowTypeOne.getKey());
-		assertEquals("Incorrect first flow name", "0", flowTypeOne
-				.getFlowName());
+		assertEquals("Incorrect first flow name", "0",
+				flowTypeOne.getFlowName());
 		assertEquals("Incorrect first flow argument type", Long.class,
 				flowTypeOne.getArgumentType());
 		ManagedObjectFlowType<?> flowTypeTwo = flowTypes[1];
 		assertEquals("Incorrect second flow index", 1, flowTypeTwo.getIndex());
 		assertNull("Should be no dependency key", flowTypeTwo.getKey());
-		assertEquals("Incorrect second flow name", "1", flowTypeTwo
-				.getFlowName());
+		assertEquals("Incorrect second flow name", "1",
+				flowTypeTwo.getFlowName());
 		assertEquals("Incorrect second flow argument type", String.class,
 				flowTypeTwo.getArgumentType());
 	}
@@ -805,8 +800,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionInterfaceMetaData[] { null });
 		this.record_issue("Null extension interface meta-data");
 
@@ -827,8 +822,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(),
 				null);
@@ -852,8 +847,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(),
 				XAResource.class);
@@ -881,8 +876,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(),
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(),
 				XAResource.class);
@@ -894,8 +889,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				(Init<None>) null);
 
 		// Ensure provide extension interface
-		assertEquals("Incorrect number of extension interfaces", 1, moType
-				.getExtensionInterfaces().length);
+		assertEquals("Incorrect number of extension interfaces", 1,
+				moType.getExtensionInterfaces().length);
 		assertEquals("Incorrect extension interface type", XAResource.class,
 				moType.getExtensionInterfaces()[0]);
 	}
@@ -994,8 +989,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					@Override
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
-						context.addWork("WORK", util.getWorkFactory()).addTask(
-								"TASK", util.getTaskFactory()).setTeam("TEAM");
+						context.addWork("WORK", util.getWorkFactory())
+								.addTask("TASK", util.getTaskFactory())
+								.setTeam("TEAM");
 					}
 				});
 
@@ -1021,8 +1017,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					@Override
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
-						context.getRecycleWork(util.getWorkFactory()).addTask(
-								"TASK", util.getTaskFactory()).setTeam("TEAM");
+						context.getRecycleWork(util.getWorkFactory())
+								.addTask("TASK", util.getTaskFactory())
+								.setTeam("TEAM");
 					}
 				});
 
@@ -1051,9 +1048,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
 						// Recycle task uses same team
-						context.getRecycleWork(util.getWorkFactory()).addTask(
-								"TASK", util.getTaskFactory()).setTeam(
-								TEAM_NAME);
+						context.getRecycleWork(util.getWorkFactory())
+								.addTask("TASK", util.getTaskFactory())
+								.setTeam(TEAM_NAME);
 
 						// Work with two tasks (both using team)
 						ManagedObjectWorkBuilder<Work> work = context.addWork(
@@ -1116,8 +1113,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this
-				.record_issue("No instigation strategy for flow (work=WORK, task=TASK, flow=0)");
+		this.record_issue("No instigation strategy for flow (work=WORK, task=TASK, flow=0)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1141,8 +1137,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this
-				.record_issue("No task name for flow (work=WORK, task=TASK, flow=0, link work=LINK_WORK)");
+		this.record_issue("No task name for flow (work=WORK, task=TASK, flow=0, link work=LINK_WORK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1167,8 +1162,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this
-				.record_issue("Unknown task being linked (work=WORK, task=TASK, flow=0, link work=LINK_WORK, link task=LINK_TASK)");
+		this.record_issue("Unknown task being linked (work=WORK, task=TASK, flow=0, link work=LINK_WORK, link task=LINK_TASK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1258,8 +1252,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect flow name", "0", flow.getFlowName());
 		assertEquals("Incorrect index", 0, flow.getIndex());
 		assertNull("Flow should not have key", flow.getKey());
-		assertEquals("Incorrect argument type", Connection.class, flow
-				.getArgumentType());
+		assertEquals("Incorrect argument type", Connection.class,
+				flow.getArgumentType());
 	}
 
 	/**
@@ -1271,8 +1265,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this
-				.record_issue("ManagedObjectFlowMetaData requires linking by keys (not indexes)");
+		this.record_issue("ManagedObjectFlowMetaData requires linking by keys (not indexes)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<OneKey>() {
@@ -1288,18 +1281,17 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Ensures issue if {@link ManagedObjectSourceMetaData} uses keys for
 	 * {@link ManagedObjectFlowMetaData} but linking by different key type.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testLinkProcessWithInvalidKey() {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this
-				.record_issue("Link key does not match type for ManagedObjectFlowMetaData (meta-data key type="
-						+ OneKey.class.getName()
-						+ ", link key type="
-						+ InvalidKey.class.getName()
-						+ ", link key="
-						+ InvalidKey.INVALID + ")");
+		this.record_issue("Link key does not match type for ManagedObjectFlowMetaData (meta-data key type="
+				+ OneKey.class.getName()
+				+ ", link key type="
+				+ InvalidKey.class.getName()
+				+ ", link key="
+				+ InvalidKey.INVALID + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init() {
@@ -1315,13 +1307,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * {@link ManagedObjectFlowMetaData} but linking a process is done with a
 	 * key.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testLinkProcessWithKeyWhenIndexed() {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this
-				.record_issue("ManagedObjectFlowMetaData requires linking by indexes (not keys)");
+		this.record_issue("ManagedObjectFlowMetaData requires linking by indexes (not keys)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init() {
@@ -1340,8 +1331,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this
-				.record_issue("ManagedObjectFlowMetaData does not define index (index=1)");
+		this.record_issue("ManagedObjectFlowMetaData does not define index (index=1)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<Indexed>() {
@@ -1352,8 +1342,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				context.linkProcess(1, "WORK", "TASK");
 
 				// Add the linked task
-				context.addWork("LINKED", util.getWorkFactory()).addTask(
-						"LINKED", util.getTaskFactory()).setTeam("TEAM");
+				context.addWork("LINKED", util.getWorkFactory())
+						.addTask("LINKED", util.getTaskFactory())
+						.setTeam("TEAM");
 			}
 		});
 	}
@@ -1365,8 +1356,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this
-				.record_issue("Must provide work name for linked process 0 (key=<indexed>)");
+		this.record_issue("Must provide work name for linked process 0 (key=<indexed>)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<Indexed>() {
@@ -1437,8 +1427,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 							ManagedObjectSourceContext<Indexed> context,
 							InitUtil util) {
 						// Add task being linked too
-						context.addWork("WORK", util.getWorkFactory()).addTask(
-								"TASK", util.getTaskFactory()).setTeam("TEAM");
+						context.addWork("WORK", util.getWorkFactory())
+								.addTask("TASK", util.getTaskFactory())
+								.setTeam("TEAM");
 
 						// Link to task
 						context.linkProcess(0, "WORK", "TASK");
@@ -1449,8 +1440,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Should have not flows", 0, moType.getFlowTypes().length);
 		assertEquals("Incorrect number of teams", 1,
 				moType.getTeamTypes().length);
-		assertEquals("Incorrect team", "TEAM", moType.getTeamTypes()[0]
-				.getTeamName());
+		assertEquals("Incorrect team", "TEAM",
+				moType.getTeamTypes()[0].getTeamName());
 	}
 
 	/**
@@ -1527,8 +1518,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Record no supported extension interfaces
-		this.recordReturn(this.metaData, this.metaData
-				.getExtensionInterfacesMetaData(), null);
+		this.recordReturn(this.metaData,
+				this.metaData.getExtensionInterfacesMetaData(), null);
 	}
 
 	/**
@@ -1648,7 +1639,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static class MockManagedObjectSource implements
 			ManagedObjectSource<None, None> {
 

@@ -35,7 +35,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Test the {@link ClassWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClassWorkSourceTest extends OfficeFrameTestCase {
@@ -43,12 +43,12 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * {@link TaskContext}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final TaskContext taskContext = this.createMock(TaskContext.class);
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	@Override
@@ -102,8 +102,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate the work type
 		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
-						.getName());
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
 	}
 
 	/**
@@ -125,13 +125,13 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
-						.getName());
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[1];
 		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
-		assertEquals("Incorrect task", "taskInstanceMethod", taskType
-				.getTaskName());
+		assertEquals("Incorrect task", "taskInstanceMethod",
+				taskType.getTaskName());
 
 		// Record invoking method
 		MockClass.expectedParameter = PARAMETER_VALUE;
@@ -139,10 +139,12 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.taskContext, this.taskContext.getWork(), work);
 		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
 				PARAMETER_VALUE);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(
-				SEQUENTIAL_FLOW_INDEX, null), ignoreFlowFuture);
-		this.recordReturn(this.taskContext, this.taskContext.doFlow(
-				PARALLEL_FLOW_INDEX, new Integer(1)), ignoreFlowFuture);
+		this.recordReturn(this.taskContext,
+				this.taskContext.doFlow(SEQUENTIAL_FLOW_INDEX, null),
+				ignoreFlowFuture);
+		this.recordReturn(this.taskContext,
+				this.taskContext.doFlow(PARALLEL_FLOW_INDEX, new Integer(1)),
+				ignoreFlowFuture);
 		this.recordReturn(this.taskContext, this.taskContext.doFlow(
 				ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE), flowFuture);
 		this.taskContext.join(flowFuture, 1000, "TOKEN");
@@ -169,8 +171,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
-						.getName());
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[0];
 		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
@@ -206,13 +208,13 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
-						.getName());
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
 		ClassWork work = workType.getWorkFactory().createWork();
 		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[2];
 		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
-		assertEquals("Incorrect task", "taskStaticMethod", taskType
-				.getTaskName());
+		assertEquals("Incorrect task", "taskStaticMethod",
+				taskType.getTaskName());
 
 		// Record invoking method
 		MockClass.returnValue = RETURN_VALUE;
@@ -255,7 +257,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Resets for the next test.
-		 *
+		 * 
 		 * @param expectedContext
 		 *            Expected {@link TaskContext}.
 		 */
@@ -325,7 +327,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Parallel invocation.
-		 *
+		 * 
 		 * @param parameter
 		 *            Parameter.
 		 */
@@ -333,7 +335,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		/**
 		 * Asynchronous invocation.
-		 *
+		 * 
 		 * @param parameter
 		 *            Parameter.
 		 * @return {@link FlowFuture}.

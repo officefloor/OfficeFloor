@@ -263,7 +263,7 @@ public abstract class AbstractDeskChangesTestCase extends
 		 */
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public TaskObjectTypeBuilder<?> addObject(Class<?> objectType,
 				Enum<?> key) {
 			TaskObjectTypeBuilder object = this.taskTypeBuilder
@@ -275,7 +275,7 @@ public abstract class AbstractDeskChangesTestCase extends
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public TaskFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key) {
 			TaskFlowTypeBuilder flow = this.taskTypeBuilder.addFlow();
 			flow.setArgumentType(argumentType);

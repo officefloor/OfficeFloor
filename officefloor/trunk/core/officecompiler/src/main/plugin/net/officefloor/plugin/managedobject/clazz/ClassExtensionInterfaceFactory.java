@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ClassExtensionInterfaceFactory implements
 		ExtensionInterfaceFactory {
 

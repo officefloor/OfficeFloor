@@ -92,7 +92,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	 * @param methodName
 	 *            Name of administration method.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void doInvokeAdministrationTest(int dutyIndex, String methodName)
 			throws Throwable {
 
