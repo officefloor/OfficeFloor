@@ -310,8 +310,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 				// Do deep display
 				displayGraph(value, displayedObjects, (depth + 1), root
-						.getClass().getSimpleName()
-						+ "." + methodName + "()", ignoreMethodNames, writer);
+						.getClass().getSimpleName() + "." + methodName + "()",
+						ignoreMethodNames, writer);
 			}
 		}
 	}
@@ -353,8 +353,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			throw ex;
 		} catch (Throwable ex) {
 			// Ensure the correct type
-			assertEquals("Incorrect cause of failure", expectedFailureType, ex
-					.getClass());
+			assertEquals("Incorrect cause of failure", expectedFailureType,
+					ex.getClass());
 			return (F) ex;
 		}
 	}
@@ -599,8 +599,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				return;
 			} else if ((expectedRoot != null) && (actualRoot != null)) {
 				// Both not null therefore ensure of same type
-				assertEquals("Path " + path + " type mismatch", expectedRoot
-						.getClass(), actualRoot.getClass());
+				assertEquals("Path " + path + " type mismatch",
+						expectedRoot.getClass(), actualRoot.getClass());
 
 				if (expectedRoot instanceof Class) {
 					// Validate the same class
@@ -781,8 +781,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			O... expectedItems) {
 
 		// Ensure similar number of items in each list
-		assertEquals("List lengths not match", expectedItems.length, list
-				.size());
+		assertEquals("List lengths not match", expectedItems.length,
+				list.size());
 
 		// Ensure similar items
 		for (int i = 0; i < expectedItems.length; i++) {
@@ -865,7 +865,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Sort the list
 		Collections.sort(list, new Comparator<O>() {
 			@Override
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public int compare(O a, O b) {
 
 				// Obtain the property values
@@ -897,8 +897,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			String... methods) {
 		// Match the properties
 		for (String method : methods) {
-			assertEquals("Incorrect property " + method, getProperty(expected,
-					method), getProperty(actual, method));
+			assertEquals("Incorrect property " + method,
+					getProperty(expected, method), getProperty(actual, method));
 		}
 	}
 
@@ -1032,7 +1032,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public final <M> M createMock(Class<M> classToMock) {
 		// Create the control
 		MockControl mockControl = MockControl.createStrictControl(classToMock);
@@ -1134,9 +1134,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				control.setReturnValue(((Boolean) recordedReturn)
 						.booleanValue());
 			} else if (recordedReturn instanceof Character) {
-				control
-						.setReturnValue(((Character) recordedReturn)
-								.charValue());
+				control.setReturnValue(((Character) recordedReturn).charValue());
 			} else if (recordedReturn instanceof Short) {
 				control.setReturnValue(((Short) recordedReturn).shortValue());
 			} else if (recordedReturn instanceof Integer) {
@@ -1227,9 +1225,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				relativePath));
 		paths.add(new File(new File(currentDirectory, "target/classes"),
 				relativePath));
-		
+
 		// TODO remove as should not find directly in build directory
-		// paths.add(new File(new File(currentDirectory, "target"), relativePath));
+		// paths.add(new File(new File(currentDirectory, "target"),
+		// relativePath));
 
 		// As last resource, use src as target resources not copied
 		paths.add(new File(new File(currentDirectory, "src/test/resources/"),
@@ -1525,8 +1524,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	private boolean isPrintMessages() {
 		return Boolean.parseBoolean(System.getProperty("print.messages",
-				Boolean.FALSE.toString()))
-				|| this.isVerbose;
+				Boolean.FALSE.toString())) || this.isVerbose;
 	}
 
 	/**

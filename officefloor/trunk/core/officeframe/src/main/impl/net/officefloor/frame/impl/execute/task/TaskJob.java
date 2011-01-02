@@ -173,7 +173,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public void doFlow(String workName, String taskName, Object parameter)
 				throws UnknownWorkException, UnknownTaskException,
 				InvalidParameterTypeException {

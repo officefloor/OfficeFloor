@@ -121,7 +121,7 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 *            {@link ManagedObjectSourceContext}.
 	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectTaskBuilder<D, F> registerTask(String workName,
 			String taskName, String teamName,
 			ManagedObjectSourceContext<F> context) {
@@ -146,7 +146,7 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 *            Name of the {@link Team} to recycle the {@link ManagedObject}.
 	 * @see #getRecycleManagedObjectParameter(TaskContext)
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void registerAsRecycleTask(ManagedObjectSourceContext context,
 			String teamName) {
 

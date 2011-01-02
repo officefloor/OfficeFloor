@@ -378,8 +378,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 			}
 
 			// Validate appropriate methods called
-			assertEquals("Incorrect methods invoked [ "
-					+ actualMethods.toString() + "]", actualMethods.toString(),
+			assertEquals(
+					"Incorrect methods invoked [ " + actualMethods.toString()
+							+ "]", actualMethods.toString(),
 					expectedMethods.toString());
 		}
 	}
@@ -389,7 +390,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
 			String taskName, TaskFactory<W, D, F> taskFactory, String teamName) {
 
@@ -409,7 +410,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
 			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
 			String moName, Class<?> moType, String nextTaskName,
@@ -436,7 +437,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
 			String taskName, final Task<W, D, F> task, String teamName,
 			String nextTaskName, Class<?> nextTaskArgumentType) {
@@ -533,7 +534,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public ManagedObjectBuilder<?> constructManagedObject(
 			String managedObjectName, ManagedObject managedObject,
 			String managingOffice) {

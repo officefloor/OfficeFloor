@@ -132,7 +132,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawOfficeFloorMetaData constructRawOfficeFloorMetaData(
 			OfficeFloorConfiguration configuration, OfficeFloorIssues issues,
 			RawTeamMetaDataFactory rawTeamFactory,

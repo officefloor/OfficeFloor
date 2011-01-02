@@ -69,7 +69,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 *
 	 * @return {@link RawWorkMetaDataFactory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawWorkMetaDataFactory getFactory() {
 		return new RawWorkMetaDataImpl(null, null, null, null, null, null);
 	}

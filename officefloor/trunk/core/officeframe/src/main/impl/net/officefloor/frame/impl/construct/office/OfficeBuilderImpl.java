@@ -54,14 +54,14 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * Implements the {@link OfficeBuilder}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
 	 * Obtains the name with the added namespace.
-	 *
+	 * 
 	 * @param namespace
 	 *            Namespace.
 	 * @param name
@@ -147,7 +147,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeName
 	 *            Name of this {@link Office}.
 	 */
@@ -188,7 +188,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public DependencyMappingBuilder addThreadManagedObject(
 			String threadManagedObjectName, String officeManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
@@ -198,7 +198,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public DependencyMappingBuilder addProcessManagedObject(
 			String processManagedObjectName, String officeManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(

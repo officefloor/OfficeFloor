@@ -98,7 +98,7 @@ public class AdministratorSourceStandAlone {
 	 *            Index identifying the {@link Duty}.
 	 * @return {@link Duty} for the index.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <I> Duty<I, ?> getDuty(Administrator<I, ?> administrator,
 			int dutyIndex) {
 		return administrator.getDuty(new DutyKeyImpl(dutyIndex));

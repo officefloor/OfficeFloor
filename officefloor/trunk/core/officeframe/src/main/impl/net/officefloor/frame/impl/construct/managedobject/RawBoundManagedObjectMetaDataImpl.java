@@ -113,7 +113,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addInstance(String boundManagedObjectName,
 			RawManagedObjectMetaData rawMoMetaData,
 			ManagedObjectDependencyConfiguration[] dependenciesConfiguration) {

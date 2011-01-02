@@ -101,28 +101,17 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
-	 * getSpecification()
+	 * =================== ManagedObjectSource ===============================
 	 */
+
 	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
 		throw new UnsupportedOperationException(
 				"Not supported by mock implementation");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init
-	 * (java.util.Properties,
-	 * net.officefloor.frame.spi.managedobject.source.ResourceLocator,
-	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectPoolFactory)
-	 */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void init(ManagedObjectSourceContext context) throws Exception {
 
 		// Obtain the name of the Managed Object
@@ -139,36 +128,19 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		this.managedObjectSourceState = REGISTRY.get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
-	 * getMetaData()
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public ManagedObjectSourceMetaData<None, None> getMetaData() {
 		return this.managedObjectSourceState.managedObjectSourceMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
-	 * (net
-	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
-	 */
+	@Override
 	public void start(ManagedObjectExecuteContext<None> context)
 			throws Exception {
 		// Mock not require starting
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
-	 * getManagedObject()
-	 */
+	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
 		user.setManagedObject(this.managedObjectSourceState.managedObject);
 	}
@@ -188,7 +160,7 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		/**
 		 * {@link ManagedObject}.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public ManagedObjectSourceMetaData managedObjectSourceMetaData;
 
 	}

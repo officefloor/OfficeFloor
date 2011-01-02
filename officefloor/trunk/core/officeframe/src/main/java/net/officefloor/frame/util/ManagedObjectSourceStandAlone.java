@@ -86,7 +86,7 @@ public class ManagedObjectSourceStandAlone {
 	 * @throws Exception
 	 *             If fails to initialise {@link ManagedObjectSource}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
@@ -122,7 +122,7 @@ public class ManagedObjectSourceStandAlone {
 	 * @throws Exception
 	 *             If fails to start the {@link ManagedObjectSource}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void startManagedObjectSource(
 			MS managedObjectSource) throws Exception {
 		// Start the managed object source
@@ -229,7 +229,7 @@ public class ManagedObjectSourceStandAlone {
 		 * @param escalationHandler
 		 *            {@link EscalationHandler}. May be <code>null</code>.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void process(int processIndex,
 				EscalationHandler escalationHandler) {
 

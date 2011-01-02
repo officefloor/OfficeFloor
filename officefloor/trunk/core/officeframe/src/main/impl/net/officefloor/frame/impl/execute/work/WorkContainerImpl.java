@@ -81,7 +81,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	 * @param processState
 	 *            {@link ProcessState}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public WorkContainerImpl(W work, WorkMetaData<W> workMetaData,
 			ProcessState processState) {
 		this.work = work;
@@ -258,7 +258,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
 			AdministratorContext adminContext) throws Throwable {
 
