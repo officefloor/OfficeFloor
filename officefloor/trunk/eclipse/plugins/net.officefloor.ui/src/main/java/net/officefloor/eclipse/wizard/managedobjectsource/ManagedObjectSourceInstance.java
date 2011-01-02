@@ -87,7 +87,7 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * {@link ManagedObjectSource} class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private Class managedObjectSourceClass;
 
 	/**

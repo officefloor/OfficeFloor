@@ -44,7 +44,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * {@link IWizard} to add and manage {@link Office} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeSourceWizard extends Wizard implements
@@ -52,7 +52,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link OfficeInstance}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link OfficeSourceWizard}.
@@ -84,7 +84,7 @@ public class OfficeSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link OfficeSource} class name to its
 	 * {@link OfficeSourceInstance}.
-	 *
+	 * 
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -94,7 +94,7 @@ public class OfficeSourceWizard extends Wizard implements
 	 * @return Mapping of {@link OfficeSource} class name to its
 	 *         {@link OfficeSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, OfficeSourceInstance> createOfficeSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			OfficeSourceInstanceContext context) {
@@ -105,8 +105,8 @@ public class OfficeSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project, OfficeSource.class
-					.getName());
+			IType[] types = JavaUtil.getSubTypes(project,
+					OfficeSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isTestSource(className, classLoader)) {
@@ -174,7 +174,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link OfficeInstance}.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject}.
 	 */
@@ -184,7 +184,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject}.
 	 * @param officeInstance
@@ -235,7 +235,7 @@ public class OfficeSourceWizard extends Wizard implements
 
 	/**
 	 * Obtains the {@link OfficeInstance}.
-	 *
+	 * 
 	 * @return {@link OfficeInstance}.
 	 */
 	public OfficeInstance getOfficeInstance() {

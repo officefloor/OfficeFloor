@@ -74,7 +74,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for the {@link WorkSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<WorkSourceExtension> WORK_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<WorkSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(WorkSourceExtension sourceExtension) {
@@ -89,7 +89,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link WorkSourceExtension} instances by their respective
 	 *         {@link WorkSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, WorkSourceExtension> createWorkSourceExtensionMap() {
 		return createSourceExtensionMap(WorkSourceExtension.EXTENSION_ID,
 				WorkSourceExtension.class, WORK_SOURCE_CLASS_EXTRACTOR);
@@ -100,7 +100,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link WorkSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<WorkSourceExtension> createWorkSourceExtensionList() {
 		return createSourceExtensionList(createWorkSourceExtensionMap());
 	}
@@ -108,7 +108,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for {@link ManagedObjectSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<ManagedObjectSourceExtension> MANAGED_OBJECT_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<ManagedObjectSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(
@@ -124,7 +124,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link ManagedObjectSourceExtension} instances by their
 	 *         respective {@link ManagedObjectSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, ManagedObjectSourceExtension> createManagedObjectSourceExtensionMap() {
 		return createSourceExtensionMap(
 				ManagedObjectSourceExtension.EXTENSION_ID,
@@ -137,7 +137,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link ManagedObjectSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<ManagedObjectSourceExtension> createManagedObjectSourceExtensionList() {
 		return createSourceExtensionList(createManagedObjectSourceExtensionMap());
 	}
@@ -145,7 +145,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for {@link AdministratorSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<AdministratorSourceExtension> ADMINISTRATOR_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<AdministratorSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(
@@ -161,7 +161,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link AdministratorSourceExtension} instances by their
 	 *         respective {@link AdministratorSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, AdministratorSourceExtension> createAdministratorSourceExtensionMap() {
 		return createSourceExtensionMap(
 				AdministratorSourceExtension.EXTENSION_ID,
@@ -174,7 +174,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link AdministratorSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<AdministratorSourceExtension> createAdministratorSourceExtensionList() {
 		return createSourceExtensionList(createAdministratorSourceExtensionMap());
 	}
@@ -182,7 +182,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for the {@link TeamSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<TeamSourceExtension> TEAM_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<TeamSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(TeamSourceExtension sourceExtension) {
@@ -197,7 +197,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link TeamSourceExtension} instances by their respective
 	 *         {@link TeamSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, TeamSourceExtension> createTeamSourceExtensionMap() {
 		return createSourceExtensionMap(TeamSourceExtension.EXTENSION_ID,
 				TeamSourceExtension.class, TEAM_SOURCE_CLASS_EXTRACTOR);
@@ -208,7 +208,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link TeamSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<TeamSourceExtension> createTeamSourceExtensionList() {
 		return createSourceExtensionList(createTeamSourceExtensionMap());
 	}
@@ -216,7 +216,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for the {@link SectionSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<SectionSourceExtension> SECTION_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<SectionSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(SectionSourceExtension sourceExtension) {
@@ -231,7 +231,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link SectionSourceExtension} instances by their
 	 *         respective {@link SectionSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, SectionSourceExtension> createSectionSourceExtensionMap() {
 		return createSourceExtensionMap(SectionSourceExtension.EXTENSION_ID,
 				SectionSourceExtension.class, SECTION_SOURCE_CLASS_EXTRACTOR);
@@ -242,7 +242,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link SectionSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<SectionSourceExtension> createSectionSourceExtensionList() {
 		return createSourceExtensionList(createSectionSourceExtensionMap());
 	}
@@ -250,7 +250,7 @@ public class ExtensionUtil {
 	/**
 	 * {@link SourceClassExtractor} for the {@link OfficeSourceExtension}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final SourceClassExtractor<OfficeSourceExtension> OFFICE_SOURCE_CLASS_EXTRACTOR = new SourceClassExtractor<OfficeSourceExtension>() {
 		@Override
 		public Class<?> getSourceClass(OfficeSourceExtension sourceExtension) {
@@ -265,7 +265,7 @@ public class ExtensionUtil {
 	 * @return Map of {@link OfficeSourceExtension} instances by their
 	 *         respective {@link OfficeSource} class name.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, OfficeSourceExtension> createOfficeSourceExtensionMap() {
 		return createSourceExtensionMap(OfficeSourceExtension.EXTENSION_ID,
 				OfficeSourceExtension.class, OFFICE_SOURCE_CLASS_EXTRACTOR);
@@ -276,7 +276,7 @@ public class ExtensionUtil {
 	 * 
 	 * @return Listing of {@link OfficeSourceExtension} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static List<OfficeSourceExtension> createOfficeSourceExtensionList() {
 		return createSourceExtensionList(createOfficeSourceExtensionMap());
 	}
@@ -689,9 +689,10 @@ public class ExtensionUtil {
 			return isTestSource(sourceClass);
 
 		} catch (Throwable ex) {
-			LogUtil.logError("Failed to load source class " + sourceClassName
-					+ " to determine if annotated with "
-					+ TestSource.class.getSimpleName(), ex);
+			LogUtil.logError(
+					"Failed to load source class " + sourceClassName
+							+ " to determine if annotated with "
+							+ TestSource.class.getSimpleName(), ex);
 			return false; // benefit of the doubt that not source class
 		}
 	}
@@ -730,12 +731,10 @@ public class ExtensionUtil {
 					typedExecutableExtensions.add((T) executableExtension);
 				} else {
 					// Indicate error in configuring the extension
-					LogUtil
-							.logError("Executable extension did not adhere to type "
-									+ type.getName()
-									+ " [executable extension="
-									+ executableExtension.getClass().getName()
-									+ "]");
+					LogUtil.logError("Executable extension did not adhere to type "
+							+ type.getName()
+							+ " [executable extension="
+							+ executableExtension.getClass().getName() + "]");
 				}
 
 			} catch (Throwable ex) {

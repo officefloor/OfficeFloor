@@ -43,7 +43,7 @@ import org.eclipse.ui.IEditorPart;
 
 /**
  * {@link ILaunchShortcut} for the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
@@ -88,8 +88,7 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 				// Contained within a package
 				IPackageFragment packageFragment = (IPackageFragment) javaElement;
 				officeFloorLaunchPath = packageFragment.getElementName()
-						.replace('.', '/')
-						+ "/" + resource.getName();
+						.replace('.', '/') + "/" + resource.getName();
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				// Contained in the default package (no package)
 				officeFloorLaunchPath = resource.getName();
@@ -125,7 +124,7 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			if (launchConfig == null) {
 				// Ensure unique configuration name for launch
 				String uniqueConfigName = launchManager
-						.generateUniqueLaunchConfigurationNameFrom(resourceName);
+						.generateLaunchConfigurationName(resourceName);
 
 				// Create launch configuration (include project for defaults)
 				ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType

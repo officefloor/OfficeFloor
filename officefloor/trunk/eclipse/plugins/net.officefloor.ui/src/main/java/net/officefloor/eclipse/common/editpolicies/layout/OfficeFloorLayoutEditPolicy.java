@@ -101,7 +101,7 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	protected Command getCreateCommand(CreateRequest request) {
 
 		// Obtain the details of the create
@@ -126,7 +126,7 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Command getDeleteDependantCommand(Request request) {
 
 		// Obtain the model to delete

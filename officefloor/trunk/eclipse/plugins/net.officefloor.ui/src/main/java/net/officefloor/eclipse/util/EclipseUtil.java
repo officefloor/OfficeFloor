@@ -57,7 +57,7 @@ public class EclipseUtil {
 	 *            {@link AbstractOfficeFloorEditor} to report issues.
 	 * @return {@link Class} or <code>null</code> if could not obtain.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <S> Class<S> obtainClass(String className,
 			Class<S> superType, AbstractOfficeFloorEditor<?, ?> editor) {
 		try {

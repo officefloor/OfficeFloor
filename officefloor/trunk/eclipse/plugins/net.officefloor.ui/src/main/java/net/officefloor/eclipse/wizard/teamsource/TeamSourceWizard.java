@@ -93,7 +93,7 @@ public class TeamSourceWizard extends Wizard implements
 	 * @return Mapping of {@link TeamSource} class name to its
 	 *         {@link TeamSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, TeamSourceInstance> createTeamSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			TeamSourceInstanceContext context) {
@@ -104,8 +104,8 @@ public class TeamSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project, TeamSource.class
-					.getName());
+			IType[] types = JavaUtil.getSubTypes(project,
+					TeamSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isTestSource(className, classLoader)) {

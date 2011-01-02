@@ -44,7 +44,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 /**
  * {@link IWizard} to add and manage {@link OfficeSection} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SectionSourceWizard extends Wizard implements
@@ -53,7 +53,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Facade method to obtain the {@link SectionInstance} containing the loaded
 	 * {@link SectionType}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -71,7 +71,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Facade method to obtain the {@link SectionInstance} containing the loaded
 	 * {@link OfficeSection}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -88,7 +88,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Facade method to obtain the {@link SectionInstance}.
-	 *
+	 * 
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.
@@ -120,7 +120,7 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Creates the mapping of {@link SectionSource} class name to its
 	 * {@link SectionSourceInstance}.
-	 *
+	 * 
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -130,7 +130,7 @@ public class SectionSourceWizard extends Wizard implements
 	 * @return Mapping of {@link SectionSource} class name to its
 	 *         {@link SectionSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, SectionSourceInstance> createSectionSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			SectionSourceInstanceContext context) {
@@ -141,8 +141,8 @@ public class SectionSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project, SectionSource.class
-					.getName());
+			IType[] types = JavaUtil.getSubTypes(project,
+					SectionSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isTestSource(className, classLoader)) {
@@ -217,7 +217,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate to create a new {@link SectionInstance}.
-	 *
+	 * 
 	 * @param isLoadType
 	 *            Flag indicating to load {@link SectionType} rather than
 	 *            {@link OfficeSection}.
@@ -230,7 +230,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param isLoadType
 	 *            Flag indicating to load {@link SectionType} rather than
 	 *            {@link OfficeSection}.
@@ -286,7 +286,7 @@ public class SectionSourceWizard extends Wizard implements
 
 	/**
 	 * Obtains the {@link SectionInstance}.
-	 *
+	 * 
 	 * @return {@link SectionInstance}.
 	 */
 	public SectionInstance getSectionInstance() {

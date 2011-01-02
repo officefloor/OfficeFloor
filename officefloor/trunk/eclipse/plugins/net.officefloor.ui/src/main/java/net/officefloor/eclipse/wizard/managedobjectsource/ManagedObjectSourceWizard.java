@@ -91,7 +91,7 @@ public class ManagedObjectSourceWizard extends Wizard implements
 	 * @return Mapping of {@link ManagedObjectSource} class name to its
 	 *         {@link ManagedObjectSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, ManagedObjectSourceInstance> createManagedObjectSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			ManagedObjectSourceInstanceContext context) {
@@ -132,10 +132,8 @@ public class ManagedObjectSourceWizard extends Wizard implements
 								managedObjectSourceExtension, classLoader,
 								project, context));
 			} catch (Throwable ex) {
-				LogUtil
-						.logError("Failed to create source instance for "
-								+ managedObjectSourceExtension.getClass()
-										.getName(), ex);
+				LogUtil.logError("Failed to create source instance for "
+						+ managedObjectSourceExtension.getClass().getName(), ex);
 			}
 		}
 
