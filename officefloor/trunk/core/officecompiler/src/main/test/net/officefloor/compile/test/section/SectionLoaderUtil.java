@@ -92,18 +92,18 @@ public class SectionLoaderUtil {
 	/**
 	 * Convenience method to obtain the class path location.
 	 * 
-	 * @param offsetObject
-	 *            Object indicating the package that the resource is within.
+	 * @param offsetClass
+	 *            Class indicating the package that the resource is within.
 	 *            Typically this will be the {@link TestCase} instance.
 	 * @param resourceName
 	 *            Name of the resource.
 	 * @return Class path location of the resource.
 	 */
-	public static String getClassPathLocation(Object offsetObject,
+	public static String getClassPathLocation(Class<?> offsetClass,
 			String resourceName) {
 
 		// Obtain the package location
-		String packageLocation = offsetObject.getClass().getPackage().getName();
+		String packageLocation = offsetClass.getPackage().getName();
 		packageLocation = packageLocation.replace('.', '/');
 
 		// Provide the class path location
@@ -135,7 +135,7 @@ public class SectionLoaderUtil {
 	 *            {@link SectionType}/{@link OfficeSection}.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource} being tested.
-	 * @param offsetObject
+	 * @param offsetClass
 	 *            Object indicating the package that the resource is within.
 	 *            Typically this will be the {@link TestCase} instance.
 	 * @param resourceName
@@ -147,12 +147,11 @@ public class SectionLoaderUtil {
 	 */
 	public static <S extends SectionSource> void validateSection(
 			SectionDesigner designer, Class<S> sectionSourceClass,
-			Object offsetObject, String resourceName,
+			Class<?> offsetClass, String resourceName,
 			String... propertyNameValuePairs) {
 
 		// Obtain the section location
-		String sectionLocation = getClassPathLocation(offsetObject,
-				resourceName);
+		String sectionLocation = getClassPathLocation(offsetClass, resourceName);
 
 		// Validate the section
 		validateSection(designer, sectionSourceClass, sectionLocation,

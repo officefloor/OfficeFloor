@@ -57,7 +57,7 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 
 		// Validate the section is as expected
 		SectionLoaderUtil.validateSection(designer,
-				SectionModelSectionSource.class, this,
+				SectionModelSectionSource.class, this.getClass(),
 				"SectionModelSectionSourceTest.section.xml");
 	}
 

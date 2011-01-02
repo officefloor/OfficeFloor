@@ -62,7 +62,7 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 
 		// Validates the section is as expected
 		SectionLoaderUtil.validateSection(designer,
-				DeskModelSectionSource.class, this,
+				DeskModelSectionSource.class, this.getClass(),
 				"DeskModelSectionSourceTest.desk.xml");
 	}
 
