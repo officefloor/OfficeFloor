@@ -46,14 +46,14 @@ import org.eclipse.core.resources.IProject;
 
 /**
  * Utility class for working with the {@link Model} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ModelUtil {
 
 	/**
 	 * Obtains the {@link WorkType} for the {@link WorkModel}.
-	 *
+	 * 
 	 * @param workModel
 	 *            {@link WorkModel}.
 	 * @param editor
@@ -61,7 +61,7 @@ public class ModelUtil {
 	 *            {@link WorkType}.
 	 * @return {@link WorkType} or <code>null</code> if issue obtaining it.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static WorkType<?> getWorkType(WorkModel workModel,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
@@ -76,9 +76,9 @@ public class ModelUtil {
 		ClassLoader classLoader = compiler.getClassLoader();
 
 		// Obtain the work class
-		Class<? extends WorkSource> workSourceClass = obtainClass(workModel
-				.getWorkSourceClassName(), WorkSource.class, classLoader,
-				editor);
+		Class<? extends WorkSource> workSourceClass = obtainClass(
+				workModel.getWorkSourceClassName(), WorkSource.class,
+				classLoader, editor);
 		if (workSourceClass == null) {
 			return null; // must have work source class
 		}
@@ -99,7 +99,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link OfficeFloorManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link OfficeFloorManagedObjectSourceModel}.
 	 * @param editor
@@ -136,7 +136,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link OfficeManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link OfficeManagedObjectSourceModel}.
 	 * @param editor
@@ -173,7 +173,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link SectionManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link SectionManagedObjectSourceModel}.
 	 * @param editor
@@ -210,7 +210,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link DeskManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link DeskManagedObjectSourceModel}.
 	 * @param editor
@@ -247,7 +247,7 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link ManagedObjectType} for the
 	 * {@link OfficeManagedObjectSourceModel}.
-	 *
+	 * 
 	 * @param managedObjectSourceClassName
 	 *            Class name of the {@link ManagedObjectSource}.
 	 * @param properties
@@ -260,7 +260,7 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ManagedObjectType<?> getManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties,
 			OfficeFloorCompiler compiler, AbstractOfficeFloorEditor<?, ?> editor) {
@@ -288,7 +288,7 @@ public class ModelUtil {
 
 	/**
 	 * Obtains the {@link OfficeSection} for the {@link OfficeSectionModel}.
-	 *
+	 * 
 	 * @param officeSection
 	 *            {@link OfficeSectionModel}.
 	 * @param compiler
@@ -323,14 +323,14 @@ public class ModelUtil {
 			SectionLoader sectionLoader = compiler.getSectionLoader();
 
 			// Load and return the section
-			return sectionLoader.loadOfficeSection(officeSection
-					.getOfficeSectionName(), sectionSourceClass, officeSection
-					.getSectionLocation(), propertyList);
+			return sectionLoader.loadOfficeSection(
+					officeSection.getOfficeSectionName(), sectionSourceClass,
+					officeSection.getSectionLocation(), propertyList);
 
 		} catch (Throwable ex) {
 			// Report issue in loading section
-			issues.addIssue(LocationType.SECTION, officeSection
-					.getSectionLocation(), null, null,
+			issues.addIssue(LocationType.SECTION,
+					officeSection.getSectionLocation(), null, null,
 					"Failed to load office section: " + ex.getMessage() + " ["
 							+ ex.getClass().getSimpleName() + "]");
 			return null;
@@ -339,7 +339,7 @@ public class ModelUtil {
 
 	/**
 	 * Obtains the {@link Class} by its name.
-	 *
+	 * 
 	 * @param className
 	 *            Fully qualified name of the class.
 	 * @param superType
@@ -351,7 +351,7 @@ public class ModelUtil {
 	 *            the {@link IProject}.
 	 * @return {@link Class} or <code>null</code> if could not obtain.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <S> Class<S> obtainClass(String className,
 			Class<S> superType, ClassLoader classLoader,
 			AbstractOfficeFloorEditor<?, ?> editor) {

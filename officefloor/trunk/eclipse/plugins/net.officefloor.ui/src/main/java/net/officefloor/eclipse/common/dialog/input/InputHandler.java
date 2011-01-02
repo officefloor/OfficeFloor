@@ -34,7 +34,7 @@ public class InputHandler<T> implements InputContext {
 	/**
 	 * {@link Input} being handled.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final Input input;
 
 	/**

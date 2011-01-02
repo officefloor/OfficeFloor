@@ -89,7 +89,7 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Command getConnectionCompleteCommand(
 			final CreateConnectionRequest request) {
 
@@ -190,7 +190,7 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 		/**
 		 * {@link ConnectionChangeFactory}.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public final ConnectionChangeFactory factory;
 
 		/**

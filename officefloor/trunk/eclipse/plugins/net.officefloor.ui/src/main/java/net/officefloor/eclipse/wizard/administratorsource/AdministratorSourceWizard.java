@@ -96,7 +96,7 @@ public class AdministratorSourceWizard extends Wizard implements
 	 * @return Mapping of {@link AdministratorSource} class name to its
 	 *         {@link AdministratorSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, AdministratorSourceInstance> createAdministratorSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			AdministratorSourceInstanceContext context) {
@@ -137,10 +137,8 @@ public class AdministratorSourceWizard extends Wizard implements
 								administratorSourceExtension, classLoader,
 								project, context));
 			} catch (Throwable ex) {
-				LogUtil
-						.logError("Failed to create source instance for "
-								+ administratorSourceExtension.getClass()
-										.getName(), ex);
+				LogUtil.logError("Failed to create source instance for "
+						+ administratorSourceExtension.getClass().getName(), ex);
 			}
 		}
 

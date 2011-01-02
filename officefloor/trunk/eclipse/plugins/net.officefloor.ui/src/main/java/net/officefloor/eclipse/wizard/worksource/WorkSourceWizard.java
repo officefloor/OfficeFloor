@@ -91,7 +91,7 @@ public class WorkSourceWizard extends Wizard implements
 	 * @return Mapping of {@link WorkSource} class name to its
 	 *         {@link WorkSourceInstance}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<String, WorkSourceInstance> createWorkSourceInstanceMap(
 			ClassLoader classLoader, IProject project,
 			WorkSourceInstanceContext context) {
@@ -102,8 +102,8 @@ public class WorkSourceWizard extends Wizard implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project, WorkSource.class
-					.getName());
+			IType[] types = JavaUtil.getSubTypes(project,
+					WorkSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isTestSource(className, classLoader)) {

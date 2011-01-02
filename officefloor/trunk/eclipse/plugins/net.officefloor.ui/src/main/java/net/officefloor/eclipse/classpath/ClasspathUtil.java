@@ -104,8 +104,8 @@ public class ClasspathUtil {
 	 */
 	public static Class<?> loadPluginClass(String className)
 			throws ClassNotFoundException {
-		return Thread.currentThread().getContextClassLoader().loadClass(
-				className);
+		return Thread.currentThread().getContextClassLoader()
+				.loadClass(className);
 	}
 
 	/**
@@ -126,10 +126,9 @@ public class ClasspathUtil {
 							monitor);
 		} catch (Throwable ex) {
 			// Indicate failure to update class path
-			LogUtil
-					.logError(
-							"Failed to ensure OfficeFloor class path container on project",
-							ex);
+			LogUtil.logError(
+					"Failed to ensure OfficeFloor class path container on project",
+					ex);
 		}
 	}
 
@@ -404,9 +403,12 @@ public class ClasspathUtil {
 
 		} catch (Throwable ex) {
 			// Failed to open file
-			MessageDialog.openInformation(editor.getEditorSite().getShell(),
-					"Open", "Failed to open '" + resourcePath + "': "
-							+ ex.getMessage());
+			MessageDialog
+					.openInformation(
+							editor.getEditorSite().getShell(),
+							"Open",
+							"Failed to open '" + resourcePath + "': "
+									+ ex.getMessage());
 		}
 	}
 
@@ -552,12 +554,6 @@ public class ClasspathUtil {
 			javaElement = javaElement.getParent();
 
 		} while (fragmentRoot == null);
-
-		// Ensure have a package fragment root
-		if (fragmentRoot == null) {
-			// Did not find the fragment root
-			return null;
-		}
 
 		// Obtain the fragment root full path
 		String fragmentPath = fragmentRoot.getResource().getFullPath()

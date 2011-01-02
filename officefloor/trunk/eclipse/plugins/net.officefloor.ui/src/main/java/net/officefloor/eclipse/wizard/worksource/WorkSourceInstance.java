@@ -92,7 +92,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	/**
 	 * {@link WorkSource} class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private Class workSourceClass;
 
 	/**

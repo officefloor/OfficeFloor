@@ -63,7 +63,7 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 	/**
 	 * {@link DirectEditChangeFactory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private DirectEditChangeFactory factory;
 
 	/**

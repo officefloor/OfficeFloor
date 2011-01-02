@@ -181,8 +181,7 @@ public class TaskEditPart extends
 				// Ensure have the work
 				if (work == null) {
 					// Must have connected work
-					context
-							.getEditPart()
+					context.getEditPart()
 							.messageError(
 									"Can not open task.\n"
 											+ "\nPlease ensure the task is connected to a work source.");
@@ -305,8 +304,8 @@ public class TaskEditPart extends
 		DeskModel desk = TaskEditPart.getDesk(this);
 
 		// Return task documentation
-		return TaskDocumentationContextImpl.getTaskDocumentation(desk, this
-				.getCastedModel(), this);
+		return TaskDocumentationContextImpl.getTaskDocumentation(desk,
+				this.getCastedModel(), this);
 	}
 
 	/**
@@ -326,7 +325,7 @@ public class TaskEditPart extends
 		 *            {@link AbstractOfficeFloorEditPart}.
 		 * @return Documentation for the {@link Task}.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		public static String getTaskDocumentation(DeskModel desk,
 				TaskModel task, AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 

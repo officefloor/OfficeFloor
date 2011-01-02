@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link AdministratorSource} instance.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorSourceInstance implements
@@ -84,7 +84,7 @@ public class AdministratorSourceInstance implements
 	/**
 	 * {@link AdministratorSource} class.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private Class administratorSourceClass;
 
 	/**
@@ -109,7 +109,7 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param administratorSourceClassName
 	 *            Fully qualified class name of the {@link AdministratorSource}.
 	 * @param administratorSourceExtension
@@ -143,7 +143,7 @@ public class AdministratorSourceInstance implements
 	/**
 	 * Specifies the name and {@link AdministratorScope} of the
 	 * {@link OfficeAdministrator}.
-	 *
+	 * 
 	 * @param administratorName
 	 *            Name of the {@link OfficeAdministrator}.
 	 * @param administratorScope
@@ -188,7 +188,7 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Obtains the label for the {@link AdministratorSource}.
-	 *
+	 * 
 	 * @return Label for the {@link AdministratorSource}.
 	 */
 	public String getAdministratorSourceLabel() {
@@ -209,7 +209,7 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Obtains fully qualified class name of the {@link AdministratorSource}.
-	 *
+	 * 
 	 * @return {@link AdministratorSource} class name.
 	 */
 	public String getAdministratorSourceClassName() {
@@ -218,7 +218,7 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Obtains the name of the {@link OfficeAdministrator}.
-	 *
+	 * 
 	 * @return Name of the {@link OfficeAdministrator}.
 	 */
 	public String getAdministratorName() {
@@ -228,7 +228,7 @@ public class AdministratorSourceInstance implements
 	/**
 	 * Obtains the {@link PropertyList} to source the
 	 * {@link OfficeAdministrator} from the {@link AdministratorSource}.
-	 *
+	 * 
 	 * @return Populated {@link PropertyList}.
 	 */
 	public PropertyList getPropertyList() {
@@ -238,7 +238,7 @@ public class AdministratorSourceInstance implements
 	/**
 	 * Obtains the {@link AdministratorScope} for the
 	 * {@link OfficeAdministrator}.
-	 *
+	 * 
 	 * @return {@link AdministratorScope} for the {@link OfficeAdministrator}.
 	 */
 	public AdministratorScope getAdministratorScope() {
@@ -247,7 +247,7 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Obtains the loaded {@link AdministratorType}.
-	 *
+	 * 
 	 * @return Loaded {@link AdministratorType} or <code>null</code> if issue
 	 *         loading.
 	 */
@@ -258,7 +258,7 @@ public class AdministratorSourceInstance implements
 	/**
 	 * Creates the {@link Control} instances to populate the
 	 * {@link AdministratorLoaderProperty} instances.
-	 *
+	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
 	 * @param context
