@@ -517,8 +517,8 @@ public class ClassSectionSource extends AbstractSectionSource {
 					.getEscalationTypes()) {
 
 				// Obtain the escalation class
-				Class<?> escalationClass = escalationType.getEscalationType();
-				String escalationTypeName = escalationClass.getName();
+				String escalationTypeName = escalationType.getEscalationType()
+						.getName();
 
 				// Obtain the task escalation
 				TaskFlow taskEscalation = task
