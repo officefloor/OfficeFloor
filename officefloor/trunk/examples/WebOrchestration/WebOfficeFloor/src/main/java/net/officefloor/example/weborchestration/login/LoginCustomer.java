@@ -3,7 +3,7 @@ package net.officefloor.example.weborchestration.login;
 import net.officefloor.example.weborchestration.Customer;
 import net.officefloor.example.weborchestration.SalesLocal;
 import net.officefloor.example.weborchestration.WebUtil;
-import net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject;
+import net.officefloor.plugin.web.http.session.object.HttpSessionObject;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
