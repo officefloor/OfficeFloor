@@ -46,7 +46,7 @@ public class ReflectionUtil {
 	 * @throws Exception
 	 *             If fails to create and populate the Bean.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <T> T createInitialisedBean(String beanClassName,
 			ClassLoader classLoader, Class<T> beanExpectedType,
 			Properties properties) throws Exception {

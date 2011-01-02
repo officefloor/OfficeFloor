@@ -76,7 +76,7 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can trigger sending the {@link HttpResponse} with no content.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTriggerSendWithNoContent() throws Throwable {
 
 		final int status = 204;
@@ -88,12 +88,11 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		HttpResponse response = this.createMock(HttpResponse.class);
 
 		// Record
-		this
-				.recordReturn(
-						taskContext,
-						taskContext
-								.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
-						connection);
+		this.recordReturn(
+				taskContext,
+				taskContext
+						.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		response.send();
@@ -104,8 +103,8 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task
 		WorkType<Work> work = WorkLoaderUtil.loadWorkType(
 				HttpResponseSenderWorkSource.class,
-				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS, String
-						.valueOf(status));
+				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
+				String.valueOf(status));
 		Task task = work.getTaskTypes()[0].getTaskFactory().createTask(
 				work.getWorkFactory().createWork());
 
@@ -117,14 +116,13 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can trigger sending the {@link HttpResponse} with content.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTriggerSendWithContent() throws Throwable {
 
 		final int status = 204;
 		final String testContentFileName = "TestContent.html";
 		final String testContentFilePath = this.getPackageRelativePath(this
-				.getClass())
-				+ "/" + testContentFileName;
+				.getClass()) + "/" + testContentFileName;
 		File testContentFile = this.findFile(this.getClass(),
 				"TestContent.html");
 		String testContentFileContents = this.getFileContents(testContentFile);
@@ -137,12 +135,11 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		OutputBufferStream body = this.createMock(OutputBufferStream.class);
 
 		// Record
-		this
-				.recordReturn(
-						taskContext,
-						taskContext
-								.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
-						connection);
+		this.recordReturn(
+				taskContext,
+				taskContext
+						.getObject(HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		response.setStatus(status);
 		this.recordReturn(response, response.getBody(), body);

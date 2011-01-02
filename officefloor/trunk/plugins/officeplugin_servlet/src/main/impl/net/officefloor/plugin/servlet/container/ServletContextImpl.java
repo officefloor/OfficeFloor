@@ -93,7 +93,7 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Set getResourcePaths(String path) {
 		return this.context.getResourcePaths(this.office, path);
 	}
@@ -144,7 +144,7 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getInitParameterNames() {
 		return this.context.getInitParameterNames(this.office);
 	}
@@ -160,7 +160,7 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getAttributeNames() {
 		return this.context.getAttributeNames(this.office);
 	}
@@ -186,14 +186,14 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getServletNames() {
 		throw new UnsupportedOperationException(
 				"ServletContext.getServletNames deprecated as of version 2.1");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getServlets() {
 		throw new UnsupportedOperationException(
 				"ServletContext.getServlets deprecated as of version 2.0");

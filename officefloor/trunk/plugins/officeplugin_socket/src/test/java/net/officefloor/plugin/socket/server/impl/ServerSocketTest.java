@@ -87,7 +87,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/**
 	 * Ensures a message is sent and received by the server.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void testSendingMessage() throws Exception {
 
 		// Obtain the office name and builder
@@ -117,8 +117,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 
 		// Open socket to Office
 		synchronized (this.socket) {
-			this.socket.connect(new InetSocketAddress(InetAddress
-					.getLocalHost(), 12345), 100);
+			this.socket.connect(
+					new InetSocketAddress(InetAddress.getLocalHost(), 12345),
+					100);
 		}
 
 		// Write a message
@@ -160,10 +161,11 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 			InetSocketAddress expectedLocalAddress;
 			InetSocketAddress expectedRemoteAddress;
 			synchronized (this.socket) {
-				expectedLocalAddress = new InetSocketAddress(this.socket
-						.getInetAddress(), this.socket.getPort());
-				expectedRemoteAddress = new InetSocketAddress(this.socket
-						.getLocalAddress(), this.socket.getLocalPort());
+				expectedLocalAddress = new InetSocketAddress(
+						this.socket.getInetAddress(), this.socket.getPort());
+				expectedRemoteAddress = new InetSocketAddress(
+						this.socket.getLocalAddress(),
+						this.socket.getLocalPort());
 			}
 
 			// Validate local address
@@ -193,8 +195,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 
 		// Obtain the data (for small amount should all be available)
 		byte[] data = new byte[REQUEST_MSG.length];
-		int readSize = context.getInputBufferStream().getBrowseStream().read(
-				data);
+		int readSize = context.getInputBufferStream().getBrowseStream()
+				.read(data);
 		assertEquals("Message missing data", readSize, REQUEST_MSG.length);
 
 		// Validate message is correct

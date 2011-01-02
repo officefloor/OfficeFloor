@@ -132,7 +132,7 @@ public class HttpSessionImpl implements javax.servlet.http.HttpSession {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getAttributeNames() {
 		return new IteratorEnumeration<String>(this.session.getAttributeNames());
 	}

@@ -75,7 +75,7 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can write a {@link HttpFile}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWriteHttpFile() throws Throwable {
 
 		TaskContext<HttpResponseWriterWork, HttpFileWriterTaskDependencies, None> taskContext = this
@@ -88,14 +88,15 @@ public class HttpResponseWriterWorkSourceTest extends OfficeFrameTestCase {
 		OutputBufferStream body = this.createMock(OutputBufferStream.class);
 
 		// Record
-		this.recordReturn(taskContext, taskContext
-				.getObject(HttpFileWriterTaskDependencies.HTTP_FILE), httpFile);
-		this
-				.recordReturn(
-						taskContext,
-						taskContext
-								.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION),
-						connection);
+		this.recordReturn(
+				taskContext,
+				taskContext.getObject(HttpFileWriterTaskDependencies.HTTP_FILE),
+				httpFile);
+		this.recordReturn(
+				taskContext,
+				taskContext
+						.getObject(HttpFileWriterTaskDependencies.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpResponse(), response);
 		this.recordReturn(httpFile, httpFile.getContentEncoding(), "");
 		this.recordReturn(httpFile, httpFile.getContentType(), "");

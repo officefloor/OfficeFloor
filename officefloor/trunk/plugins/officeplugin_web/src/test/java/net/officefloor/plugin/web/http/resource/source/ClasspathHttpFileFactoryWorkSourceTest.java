@@ -70,7 +70,7 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 	/**
 	 * Validates the type.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testType() {
 
 		// Provide work type
@@ -104,7 +104,7 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 	/**
 	 * Validate load and create {@link HttpFile}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCreateHttpFile() throws Throwable {
 
 		TaskContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
@@ -114,8 +114,9 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		HttpRequest request = this.createMock(HttpRequest.class);
 
 		// Record
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION), connection);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(), "/index.html");
 
@@ -138,8 +139,8 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		HttpFile httpFile = (HttpFile) task.doTask(taskContext);
 		assertTrue("Ensure locates the file", httpFile.isExist());
 		assertEquals("Ensure correct file", "/index.html", httpFile.getPath());
-		assertEquals("Ensure default description", "text/html", httpFile
-				.getContentType());
+		assertEquals("Ensure default description", "text/html",
+				httpFile.getContentType());
 
 		this.verifyMockObjects();
 	}
@@ -148,7 +149,7 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 	 * Validate load and create default {@link HttpFile} from
 	 * {@link HttpDirectory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testDefaultHttpFile() throws Throwable {
 
 		TaskContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
@@ -158,8 +159,9 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		HttpRequest request = this.createMock(HttpRequest.class);
 
 		// Record
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION), connection);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(), "/");
 
@@ -182,8 +184,8 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		HttpFile httpFile = (HttpFile) task.doTask(taskContext);
 		assertTrue("Ensure locates the file", httpFile.isExist());
 		assertEquals("Ensure correct file", "/index.html", httpFile.getPath());
-		assertEquals("Ensure default description", "text/html", httpFile
-				.getContentType());
+		assertEquals("Ensure default description", "text/html",
+				httpFile.getContentType());
 
 		this.verifyMockObjects();
 	}
@@ -191,7 +193,7 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 	/**
 	 * Handles the {@link HttpFile} not being found.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHttpFileNotFound() throws Throwable {
 
 		TaskContext<HttpFileFactoryTask, DependencyKeys, HttpFileFactoryTaskFlows> taskContext = this
@@ -202,15 +204,14 @@ public class ClasspathHttpFileFactoryWorkSourceTest extends OfficeFrameTestCase 
 		FlowFuture flowFuture = this.createMock(FlowFuture.class);
 
 		// Record
-		this.recordReturn(taskContext, taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION), connection);
+		this.recordReturn(taskContext,
+				taskContext.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				connection);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getRequestURI(),
 				"/missing-file.html");
-		this
-				.recordReturn(taskContext, taskContext.doFlow(
-						HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null),
-						flowFuture);
+		this.recordReturn(taskContext, taskContext.doFlow(
+				HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND, null), flowFuture);
 
 		// Test
 		this.replayMockObjects();

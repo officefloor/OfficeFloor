@@ -449,7 +449,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Map getParameterMap() {
 
 		// Lazy load the parameter map
@@ -481,7 +481,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getParameterNames() {
 
 		// Create the unique set of names
@@ -633,7 +633,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getHeaderNames() {
 
 		// Obtain the headers
@@ -654,7 +654,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getHeaders(String name) {
 
 		// Obtain the headers
@@ -858,7 +858,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getAttributeNames() {
 		return new IteratorEnumeration<String>(this.attributes.keySet()
 				.iterator());
@@ -904,7 +904,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getLocales() {
 		return new IteratorEnumeration<Locale>(Arrays
 				.asList(this.defaultLocale).iterator());

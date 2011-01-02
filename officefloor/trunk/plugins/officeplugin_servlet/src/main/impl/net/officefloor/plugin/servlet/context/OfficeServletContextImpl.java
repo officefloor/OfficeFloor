@@ -190,8 +190,8 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 				}
 
 				// Create the context for the office
-				context = new OfficeContext(servicers
-						.toArray(new HttpServletServicer[0]));
+				context = new OfficeContext(
+						servicers.toArray(new HttpServletServicer[0]));
 
 				// Register the context against the office
 				this.contexts.put(office, context);
@@ -278,7 +278,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Set getResourcePaths(Office office, String path) {
 		return this.servletServer.getResourceLocator()
 				.getResourceChildren(path);
@@ -368,7 +368,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getInitParameterNames(Office office) {
 		return new IteratorEnumeration<String>(this.initParameters.keySet()
 				.iterator());
@@ -386,7 +386,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getAttributeNames(Office office) {
 		// Obtain the context
 		OfficeContext context = this.getOfficeContext(office);
@@ -394,8 +394,8 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		// Return the attribute
 		synchronized (context) {
 			// Create copy of names to stop concurrency issues
-			List<String> names = new ArrayList<String>(context.attributes
-					.keySet());
+			List<String> names = new ArrayList<String>(
+					context.attributes.keySet());
 
 			// Return the iterator over the names
 			return new IteratorEnumeration<String>(names.iterator());
@@ -608,10 +608,10 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 			// Ensure have forwarder
 			if (forwarder == null) {
-				throw new IllegalStateException(ServletRequestForwarder.class
-						.getSimpleName()
-						+ " must be available from the "
-						+ ServletRequest.class.getSimpleName());
+				throw new IllegalStateException(
+						ServletRequestForwarder.class.getSimpleName()
+								+ " must be available from the "
+								+ ServletRequest.class.getSimpleName());
 			}
 
 			// Forward the Servlet Request

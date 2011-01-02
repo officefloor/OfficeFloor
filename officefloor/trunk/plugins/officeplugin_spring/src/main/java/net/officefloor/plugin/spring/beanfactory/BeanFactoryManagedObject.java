@@ -29,7 +29,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * {@link ManagedObject} {@link BeanFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanFactoryManagedObject implements
@@ -47,7 +47,7 @@ public class BeanFactoryManagedObject implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param delegate
 	 *            {@link BeanFactory} to delegate functionality.
 	 */
@@ -85,7 +85,7 @@ public class BeanFactoryManagedObject implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Object getBean(String name, Class requiredType)
 			throws BeansException {
 
@@ -124,7 +124,7 @@ public class BeanFactoryManagedObject implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public boolean isTypeMatch(String name, Class targetType)
 			throws NoSuchBeanDefinitionException {
 		return this.delegate.isTypeMatch(name, targetType);

@@ -81,7 +81,7 @@ public class HttpTemplateTask extends
 	 * @throws Exception
 	 *             If fails to prepare the template.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static String[] loadTaskType(HttpTemplateSection section,
 			String contentType, Charset charset,
 			HttpResponseWriterFactory writerFactory,
@@ -153,9 +153,9 @@ public class HttpTemplateTask extends
 		boolean isRequireBean = (valueRetriever != null);
 
 		// Create the task factory
-		HttpTemplateTask task = new HttpTemplateTask(contentWriterList
-				.toArray(new HttpTemplateWriter[0]), isRequireBean,
-				writerFactory);
+		HttpTemplateTask task = new HttpTemplateTask(
+				contentWriterList.toArray(new HttpTemplateWriter[0]),
+				isRequireBean, writerFactory);
 
 		// Define the task to write the section
 		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
