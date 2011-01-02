@@ -75,17 +75,17 @@ public class OfficeLoaderUtil {
 	/**
 	 * Convenience method to obtain the class path location.
 	 * 
-	 * @param offsetObject
-	 *            Object indicating the package that the resource is within.
+	 * @param offsetClass
+	 *            Class indicating the package that the resource is within.
 	 *            Typically this will be the {@link TestCase} instance.
 	 * @param resourceName
 	 *            Name of the resource.
 	 * @return Class path location of the resource.
 	 */
-	public static String getClassPathLocation(Object offsetObject,
+	public static String getClassPathLocation(Class<?> offsetClass,
 			String resourceName) {
-		return SectionLoaderUtil.getClassPathLocation(offsetObject,
-				resourceName);
+		return SectionLoaderUtil
+				.getClassPathLocation(offsetClass, resourceName);
 	}
 
 	/**
@@ -112,8 +112,8 @@ public class OfficeLoaderUtil {
 	 *            {@link OfficeType}.
 	 * @param officeSourceClass
 	 *            {@link OfficeSource} class.
-	 * @param offsetObject
-	 *            Object indicating the package that the resource is within.
+	 * @param offsetClass
+	 *            Class indicating the package that the resource is within.
 	 *            Typically this will be the {@link TestCase} instance.
 	 * @param resourceName
 	 *            Name of the resource for the {@link Office} location.
@@ -123,11 +123,11 @@ public class OfficeLoaderUtil {
 	 */
 	public static <O extends OfficeSource> OfficeType validateOffice(
 			OfficeArchitect architect, Class<O> officeSourceClass,
-			Object offsetObject, String resourceName,
+			Class<?> offsetClass, String resourceName,
 			String... propertyNameValuePairs) {
 
 		// Obtain the location of the office
-		String officeLocation = getClassPathLocation(offsetObject, resourceName);
+		String officeLocation = getClassPathLocation(offsetClass, resourceName);
 
 		// Validate the office type
 		return validateOffice(architect, officeSourceClass, officeLocation,

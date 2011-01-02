@@ -52,7 +52,7 @@ public class OfficeModelOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Validate the office is as expected
 		OfficeLoaderUtil.validateOffice(architect,
-				OfficeModelOfficeSource.class, this,
+				OfficeModelOfficeSource.class, this.getClass(),
 				"OfficeModelOfficeSourceTest.office.xml");
 	}
 
