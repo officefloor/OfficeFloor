@@ -117,13 +117,13 @@ public class MockAdministratorSource implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AdministratorSourceMetaData getMetaData() {
 		return this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Administrator createAdministrator() {
 		return this.taskAdministratorSourceState.taskAdministrator;
 	}

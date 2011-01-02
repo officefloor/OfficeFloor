@@ -93,7 +93,7 @@ public class TaskManagerImpl implements TaskManager {
 	 * {@link FlowMetaData} for invoking a {@link Task} by this
 	 * {@link TaskManager}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private class TaskManagerFlowMetaData implements FlowMetaData {
 
 		@Override

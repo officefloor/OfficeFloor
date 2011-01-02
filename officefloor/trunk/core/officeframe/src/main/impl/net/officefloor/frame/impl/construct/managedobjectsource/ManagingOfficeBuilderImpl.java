@@ -76,7 +76,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public DependencyMappingBuilder setInputManagedObjectName(
 			String inputManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(

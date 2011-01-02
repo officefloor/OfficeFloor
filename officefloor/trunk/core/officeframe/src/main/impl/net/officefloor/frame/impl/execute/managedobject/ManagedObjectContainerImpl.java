@@ -311,7 +311,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean coordinateManagedObject(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
 			JobNodeActivateSet activateSet) {
@@ -422,7 +422,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public boolean isManagedObjectReady(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
 			JobNodeActivateSet activateSet) {
@@ -457,7 +457,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *            to be in any other state other than this one.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private boolean checkManagedObjectReady(JobContext executionContext,
 			WorkContainer workContainer, JobNode jobNode,
 			JobNodeActivateSet activateSet,
@@ -575,10 +575,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		// Incorrect state if here
 		throw new PropagateEscalationError(
-				new FailedToSourceManagedObjectEscalation(this.metaData
-						.getObjectType(), new IllegalStateException(
-						"ManagedObject in incorrect state "
-								+ this.containerState + " to obtain Object")));
+				new FailedToSourceManagedObjectEscalation(
+						this.metaData.getObjectType(),
+						new IllegalStateException(
+								"ManagedObject in incorrect state "
+										+ this.containerState
+										+ " to obtain Object")));
 	}
 
 	@Override
@@ -691,8 +693,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Determine if container in failed state
 			if (this.failure != null) {
 				// Discard the managed object and no further processing
-				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleJobNode(managedObject));
+				this.unloadManagedObject(managedObject,
+						this.metaData.createRecycleJobNode(managedObject));
 				return;
 			}
 
@@ -704,8 +706,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			switch (this.containerState) {
 			case NOT_LOADED:
 				// Discard the managed object
-				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleJobNode(managedObject));
+				this.unloadManagedObject(managedObject,
+						this.metaData.createRecycleJobNode(managedObject));
 
 				// Should never be called before loadManagedObject
 				throw new IllegalStateException(
@@ -715,8 +717,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Determine if already loaded
 				if (this.managedObject != null) {
 					// Discard managed object as already loaded
-					this.unloadManagedObject(managedObject, this.metaData
-							.createRecycleJobNode(managedObject));
+					this.unloadManagedObject(managedObject,
+							this.metaData.createRecycleJobNode(managedObject));
 					return; // discarded, nothing further
 				}
 
@@ -776,15 +778,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			case COORDINATING:
 			case OBJECT_AVAILABLE:
 				// Discard the managed object as already have a Managed Object
-				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleJobNode(managedObject));
+				this.unloadManagedObject(managedObject,
+						this.metaData.createRecycleJobNode(managedObject));
 				break;
 
 			case UNLOADING:
 				// Discard as managed object already flagged for unloading
 				// (if unloading nothing should be waiting on it)
-				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleJobNode(managedObject));
+				this.unloadManagedObject(managedObject,
+						this.metaData.createRecycleJobNode(managedObject));
 				break;
 
 			default:

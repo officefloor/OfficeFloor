@@ -80,7 +80,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * 
 	 * @return {@link RawTaskMetaDataFactory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawTaskMetaDataFactory getFactory() {
 		return new RawTaskMetaDataImpl(null, null, null, null);
 	}
@@ -147,8 +147,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Obtain the task factory
 		TaskFactory<w, d, f> taskFactory = configuration.getTaskFactory();
 		if (taskFactory == null) {
-			issues.addIssue(AssetType.TASK, taskName, "No "
-					+ TaskFactory.class.getSimpleName() + " provided");
+			issues.addIssue(AssetType.TASK, taskName,
+					"No " + TaskFactory.class.getSimpleName() + " provided");
 			return null; // no task factory
 		}
 
@@ -257,15 +257,19 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				if (!objectType.isAssignableFrom(moObjectType)) {
 					// Incompatible managed object
 					isCompatibleIssue = true;
-					issues.addIssue(AssetType.TASK, taskName, "Managed object "
-							+ scopeMoName
-							+ " is incompatible (require="
-							+ objectType.getName()
-							+ ", object of managed object type="
-							+ moObjectType.getName()
-							+ ", ManagedObjectSource="
-							+ scopeMoInstance.getRawManagedObjectMetaData()
-									.getManagedObjectName() + ")");
+					issues.addIssue(
+							AssetType.TASK,
+							taskName,
+							"Managed object "
+									+ scopeMoName
+									+ " is incompatible (require="
+									+ objectType.getName()
+									+ ", object of managed object type="
+									+ moObjectType.getName()
+									+ ", ManagedObjectSource="
+									+ scopeMoInstance
+											.getRawManagedObjectMetaData()
+											.getManagedObjectName() + ")");
 				}
 			}
 			if (isCompatibleIssue) {
@@ -374,7 +378,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @return {@link TaskDutyAssociation} instances.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private TaskDutyAssociation<?>[] createTaskDutyAssociations(
 			TaskDutyConfiguration<?>[] configurations,
 			RawWorkMetaData<?> rawWorkMetaData,
@@ -580,8 +584,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 										// Same scope, so arbitrary order
 										value = a
 												.getIndexOfManagedObjectWithinScope()
-												- b
-														.getIndexOfManagedObjectWithinScope();
+												- b.getIndexOfManagedObjectWithinScope();
 									}
 								}
 								return value;

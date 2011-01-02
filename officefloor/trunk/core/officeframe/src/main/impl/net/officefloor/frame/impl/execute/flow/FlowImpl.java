@@ -90,7 +90,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter) {
 
@@ -174,7 +174,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void loadDutyJobs(AbstractJobContainer<?, ?>[] firstLastJobs,
 			TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,

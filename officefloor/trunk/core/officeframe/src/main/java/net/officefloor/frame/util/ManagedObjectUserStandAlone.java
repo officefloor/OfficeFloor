@@ -37,7 +37,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  *
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 		AsynchronousListener, ObjectRegistry {
 

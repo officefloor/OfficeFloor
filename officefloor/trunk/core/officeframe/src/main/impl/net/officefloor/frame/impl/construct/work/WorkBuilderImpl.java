@@ -119,7 +119,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public DependencyMappingBuilder addWorkManagedObject(
 			String workManagedObjectName, String officeManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
@@ -143,7 +143,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
 			String taskName, TaskFactory<? super W, D, F> taskFactory) {
 		TaskBuilderImpl builder = new TaskBuilderImpl(taskName, taskFactory);

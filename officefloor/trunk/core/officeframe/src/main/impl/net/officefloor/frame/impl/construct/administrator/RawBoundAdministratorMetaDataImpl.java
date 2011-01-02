@@ -84,7 +84,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 *
 	 * @return {@link RawBoundAdministratorMetaDataFactory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawBoundAdministratorMetaDataFactory getFactory() {
 		return new RawBoundAdministratorMetaDataImpl(null, null, null, null,
 				null, null, null);
@@ -171,7 +171,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
 			AdministratorSourceConfiguration<?, ?>[] configuration,
 			OfficeFloorIssues issues, AdministratorScope administratorScope,
