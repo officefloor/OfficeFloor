@@ -37,7 +37,7 @@ import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWor
 
 /**
  * Tests the {@link HttpParametersLoaderWorkSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
@@ -77,22 +77,22 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Validates can source {@link Work} and do the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testDoTask() throws Throwable {
 
 		// Record executing task (loading object)
 		TaskContext taskContext = this.createMock(TaskContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
-		this
-				.recordReturn(
-						taskContext,
-						taskContext
-								.getObject(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION),
-						connection);
+		this.recordReturn(
+				taskContext,
+				taskContext
+						.getObject(HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION),
+				connection);
 		MockType object = this.createMock(MockType.class);
-		this.recordReturn(taskContext, taskContext
-				.getObject(HttpParametersLoaderDependencies.OBJECT), object);
+		this.recordReturn(taskContext,
+				taskContext.getObject(HttpParametersLoaderDependencies.OBJECT),
+				object);
 		HttpRequest request = new HttpRequestImpl("GET", "/path?VALUE=value",
 				"HTTP/1.1", null, null);
 		this.recordReturn(connection, connection.getHttpRequest(), request);

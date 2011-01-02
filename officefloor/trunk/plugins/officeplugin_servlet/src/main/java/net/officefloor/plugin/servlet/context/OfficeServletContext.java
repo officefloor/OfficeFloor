@@ -125,7 +125,7 @@ public interface OfficeServletContext {
 	 *            Path.
 	 * @return Resource paths.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	Set getResourcePaths(Office office, String path);
 
 	/**
@@ -234,7 +234,7 @@ public interface OfficeServletContext {
 	 *            {@link Office}.
 	 * @return Initialisation parameter names.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	Enumeration getInitParameterNames(Office office);
 
 	/**
@@ -255,7 +255,7 @@ public interface OfficeServletContext {
 	 *            {@link Office}.
 	 * @return Attribute names.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	Enumeration getAttributeNames(Office office);
 
 	/**

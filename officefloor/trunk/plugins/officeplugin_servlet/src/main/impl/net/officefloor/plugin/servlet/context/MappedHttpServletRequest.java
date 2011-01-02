@@ -97,7 +97,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Enumeration getParameterNames() {
 
 		// Create the set of names
@@ -127,7 +127,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Map getParameterMap() {
 
 		// Create the map to be loaded
@@ -148,8 +148,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 
 		// Determine path (absolute or relative)
 		String dispatcherPath = (path.startsWith("/") ? path : this.mapping
-				.getServletPath()
-				+ "/" + path);
+				.getServletPath() + "/" + path);
 
 		// Obtain and return the request dispatcher
 		return this.delegate.getRequestDispatcher(dispatcherPath);
@@ -233,13 +232,13 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getHeaderNames() {
 		return this.delegate.getHeaderNames();
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getHeaders(String name) {
 		return this.delegate.getHeaders(name);
 	}
@@ -303,7 +302,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getAttributeNames() {
 		return this.delegate.getAttributeNames();
 	}
@@ -344,7 +343,7 @@ public class MappedHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getLocales() {
 		return this.delegate.getLocales();
 	}

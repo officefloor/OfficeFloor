@@ -66,7 +66,7 @@ public class HttpParametersLoaderWorkSource
 	/**
 	 * {@link HttpParametersLoader}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private final HttpParametersLoader loader = new HttpParametersLoaderImpl<Object>();
 
 	/*

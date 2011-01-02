@@ -204,7 +204,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @return {@link Task} to execute.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private final Task<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask() {
 
 		// Load the work type

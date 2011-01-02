@@ -98,7 +98,7 @@ public class HttpSecurityServiceManagedObjectSource extends
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(final MetaDataContext<Indexed, None> context)
 			throws Exception {
 		final ManagedObjectSourceContext<None> mosContext = context
@@ -190,7 +190,7 @@ public class HttpSecurityServiceManagedObjectSource extends
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Create and return the managed object
 		return new HttpSecurityServiceManagedObject(this.source,

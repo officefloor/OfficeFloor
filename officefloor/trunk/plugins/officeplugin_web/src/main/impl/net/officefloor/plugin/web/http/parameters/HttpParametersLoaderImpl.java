@@ -71,7 +71,7 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 	 * @throws HttpParametersException
 	 *             If fails to obtain the {@link ValueLoaderFactory}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private <C> ValueLoaderFactory<C> getValueLoaderFactory(Class<C> clazz)
 			throws HttpParametersException {
 
@@ -124,7 +124,7 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends T> void loadParameters(HttpRequest httpRequest,
 			final O object) throws HttpParametersException {
 

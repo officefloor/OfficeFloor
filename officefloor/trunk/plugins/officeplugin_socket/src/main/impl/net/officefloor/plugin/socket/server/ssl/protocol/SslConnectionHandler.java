@@ -98,9 +98,9 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 		// Creates the SSL connection
 		this.connection = new SslConnectionImpl(connection.getLock(),
 				connection.getLocalAddress(), connection.getRemoteAddress(),
-				connection.getInputBufferStream(), connection
-						.getOutputBufferStream(), engine, bufferSquirtFactory,
-				this, taskExecutor);
+				connection.getInputBufferStream(),
+				connection.getOutputBufferStream(), engine,
+				bufferSquirtFactory, this, taskExecutor);
 
 		// Create the connection handler to wrap
 		this.wrappedConnectionHandler = wrappedServerSocketHandler
@@ -121,6 +121,7 @@ public class SslConnectionHandler<CH extends ConnectionHandler> implements
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void handleRead(ReadContext context) throws IOException {
 
 		// Ensure have SSL context object

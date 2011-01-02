@@ -119,7 +119,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		// Obtain the on message task to link it to task processing result
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public void enhanceOffice(OfficeEnhancerContext context) {
 				// Link JMS on message flow to process message task
 				FlowNodeBuilder flowNodeBuilder = context.getFlowNodeBuilder(

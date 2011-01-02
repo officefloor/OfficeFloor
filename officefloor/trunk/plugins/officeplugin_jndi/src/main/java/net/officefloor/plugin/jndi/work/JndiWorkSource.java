@@ -130,7 +130,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 				this.registerMethodAsPotentialTask(workTypeBuilder, method,
 						workType, new TaskFactoryManufacturer() {
 							@Override
-							@SuppressWarnings("unchecked")
+							@SuppressWarnings("rawtypes")
 							public TaskFactory createTaskFactory(
 									String taskName, Method method,
 									boolean isStatic,
@@ -158,7 +158,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 			this.registerMethodAsPotentialTask(workTypeBuilder, method, null,
 					new TaskFactoryManufacturer() {
 						@Override
-						@SuppressWarnings("unchecked")
+						@SuppressWarnings("rawtypes")
 						public TaskFactory createTaskFactory(String taskName,
 								Method method, boolean isStatic,
 								ParameterFactory[] parameters) {
@@ -194,7 +194,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		 *            {@link ParameterFactory} instances for the {@link Task}.
 		 * @return {@link TaskFactory}.
 		 */
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("rawtypes")
 		TaskFactory createTaskFactory(String taskName, Method method,
 				boolean isStatic, ParameterFactory[] parameters);
 	}
@@ -213,7 +213,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	 * @param manufacturer
 	 *            {@link TaskFactoryManufacturer}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void registerMethodAsPotentialTask(WorkTypeBuilder workTypeBuilder,
 			Method method, Class<?> workType,
 			TaskFactoryManufacturer manufacturer) {

@@ -72,8 +72,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Create the properties
 		this.properties = new String[8];
 		this.properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
-		this.properties[1] = this.getClass().getPackage().getName().replace(
-				'.', '/')
+		this.properties[1] = this.getClass().getPackage().getName()
+				.replace('.', '/')
 				+ "/Template.ofp";
 		this.properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
 				+ "template";
@@ -207,8 +207,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				assertEquals("Incorrect asset", expected[3], actual[3]);
 				assertEquals("Incorrect description", expected[4], actual[4]);
 				Exception cause = (Exception) actual[5];
-				assertEquals("Incorrect cause message", message, cause
-						.getMessage());
+				assertEquals("Incorrect cause message", message,
+						cause.getMessage());
 				return true;
 			}
 		});
@@ -235,7 +235,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Tests running the template to generate response.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTemplate() throws Throwable {
 
 		// Create the mock objects
@@ -303,8 +303,8 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 				.getBodyContent());
 
 		// Expected output (removing last end of line appended)
-		String expectedOutput = this.getFileContents(this.findFile(this
-				.getClass(), "Template.expected"));
+		String expectedOutput = this.getFileContents(this.findFile(
+				this.getClass(), "Template.expected"));
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
@@ -324,7 +324,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 * @throws Throwable
 	 *             If fails.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void doTask(String taskName, HttpTemplateWork work,
 			WorkType<HttpTemplateWork> workType,
 			TaskContext<HttpTemplateWork, ?, ?> taskContext) throws Throwable {

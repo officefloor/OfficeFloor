@@ -80,7 +80,7 @@ public class FilterConfigImpl implements FilterConfig {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration getInitParameterNames() {
 		return new IteratorEnumeration<String>(this.initParameters.keySet()
 				.iterator());
