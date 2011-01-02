@@ -46,8 +46,8 @@ import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
  * {@link Task} for a {@link HttpServlet} to service a {@link HttpRequest}.

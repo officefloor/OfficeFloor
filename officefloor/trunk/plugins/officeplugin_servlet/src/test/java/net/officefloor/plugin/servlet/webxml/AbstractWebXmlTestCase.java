@@ -62,9 +62,9 @@ import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.security.HttpSecurity;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.socket.server.http.session.HttpSession;
+import net.officefloor.plugin.web.http.security.HttpSecurity;
+import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;

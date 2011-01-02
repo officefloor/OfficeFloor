@@ -39,9 +39,9 @@ import net.officefloor.plugin.servlet.time.Clock;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.cookie.HttpCookie;
-import net.officefloor.plugin.socket.server.http.cookie.HttpCookieUtil;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.web.http.cookie.HttpCookie;
+import net.officefloor.plugin.web.http.cookie.HttpCookieUtil;
 
 /**
  * {@link HttpServletResponse} implementation.
