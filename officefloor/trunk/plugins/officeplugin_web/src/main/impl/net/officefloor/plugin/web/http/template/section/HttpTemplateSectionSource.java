@@ -41,9 +41,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement AbstractSectionSource.loadSpecification
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractSectionSource.loadSpecification");
+		context.addProperty(PROPERTY_CLASS_NAME, "Class");
 	}
 
 	@Override

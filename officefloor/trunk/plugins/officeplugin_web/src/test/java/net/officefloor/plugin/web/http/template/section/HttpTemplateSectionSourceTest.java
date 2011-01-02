@@ -41,7 +41,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct type.
 	 */
-	public void testType() {
+	public void _testType() {
 
 		// Create the expected type
 		SectionDesigner expected = SectionLoaderUtil

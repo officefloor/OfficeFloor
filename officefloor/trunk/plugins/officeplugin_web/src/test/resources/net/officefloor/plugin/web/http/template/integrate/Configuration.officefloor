@@ -43,7 +43,7 @@
     </team>
   </teams>
   <offices>
-    <office name="Application" source="net.officefloor.model.impl.office.OfficeModelOfficeSource" location="net/officefloor/plugin/socket/server/http/template/integrate/Configuration.office" x="353" y="158">
+    <office name="Application" source="net.officefloor.model.impl.office.OfficeModelOfficeSource" location="net/officefloor/plugin/web/http/template/integrate/Configuration.office" x="353" y="158">
       <properties>
       </properties>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">

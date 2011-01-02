@@ -53,8 +53,9 @@ public class PasswordFileCredentialStoreTest extends OfficeFrameTestCase {
 	 */
 	public void testShowCredentials() {
 		assertEquals("Incorrect credentials", "Y3JlZGVudGlhbHM=", Base64
-				.encodeBase64String("credentials"
-						.getBytes(HttpRequestParserImpl.US_ASCII)));
+				.encodeBase64String(
+						"credentials".getBytes(HttpRequestParserImpl.US_ASCII))
+				.trim());
 	}
 
 	/**
