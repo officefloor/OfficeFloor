@@ -10,7 +10,7 @@
 	</external-flows>
 
 	<works>
-		<work name="sender" source="net.officefloor.plugin.socket.server.http.resource.source.ClasspathHttpFileSenderWorkSource">
+		<work name="sender" source="net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource">
 			<properties>
 				<property name="classpath.prefix" value="WEB-PUBLIC" />
 				<property name="default.file.name" value="index.html" />
@@ -26,11 +26,11 @@
 
 	<tasks>
 		<task name="unhandled" public="true" work="sender" task="SendFile"
-			return-type="net.officefloor.plugin.socket.server.http.resource.HttpResource">
+			return-type="net.officefloor.plugin.web.http.resource.HttpResource">
 			<task-escalation escalation-type="java.io.IOException">
 				<external-flow name="escalation" />
 			</task-escalation>
-			<task-escalation escalation-type="net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException">
+			<task-escalation escalation-type="net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException">
 				<external-flow name="escalation" />
 			</task-escalation>
 		</task>

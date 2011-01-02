@@ -10,10 +10,10 @@
 			object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection"
 			object-scope="PROCESS" />
 		<external-managed-object name="HTTP_SESSION"
-			object-type="net.officefloor.plugin.socket.server.http.session.HttpSession"
+			object-type="net.officefloor.plugin.web.http.session.HttpSession"
 			object-scope="PROCESS" />
 		<external-managed-object name="HTTP_SECURITY"
-			object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity"
+			object-type="net.officefloor.plugin.web.http.security.HttpSecurity"
 			object-scope="PROCESS" />
 	</external-managed-objects>
 	<managed-object-sources>
@@ -43,11 +43,11 @@
 				<external-managed-object name="HTTP_CONNECTION" />
 			</object>
 			<object name="HTTP_SESSION"
-				object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
+				object-type="net.officefloor.plugin.web.http.session.HttpSession">
 				<external-managed-object name="HTTP_SESSION" />
 			</object>
 			<object name="HTTP_SECURITY"
-				object-type="net.officefloor.plugin.socket.server.http.security.HttpSecurity">
+				object-type="net.officefloor.plugin.web.http.security.HttpSecurity">
 				<external-managed-object name="HTTP_SECURITY" />
 			</object>
 			<object name="REQUEST_ATTRIBUTES" object-type="java.util.Map">
