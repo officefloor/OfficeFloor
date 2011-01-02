@@ -15,7 +15,7 @@
   <administrators>
   </administrators>
   <sections>
-    <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/socket/server/http/template/integrate/Route.desk" x="52" y="371">
+    <section name="Route" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/Route.desk" x="52" y="371">
       <properties>
       </properties>
       <input name="route" parameter-type=""/>
@@ -31,7 +31,7 @@
         <team name="Team"/>
       </responsibility>
     </section>
-    <section name="PageOne" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/socket/server/http/template/integrate/PageOne.desk" x="278" y="167">
+    <section name="PageOne" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/PageOne.desk" x="278" y="167">
       <properties>
       </properties>
       <input name="template" parameter-type=""/>
@@ -50,7 +50,7 @@
         <team name="Team"/>
       </responsibility>
     </section>
-    <section name="PageTwo" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/socket/server/http/template/integrate/PageTwo.desk" x="518" y="134">
+    <section name="PageTwo" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/PageTwo.desk" x="518" y="134">
       <properties>
       </properties>
       <input name="template" parameter-type=""/>
@@ -69,7 +69,7 @@
         <team name="Team"/>
       </responsibility>
     </section>
-    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/socket/server/http/template/integrate/Send.desk" x="786" y="231">
+    <section name="Send" source="net.officefloor.model.impl.desk.DeskModelSectionSource" location="net/officefloor/plugin/web/http/template/integrate/Send.desk" x="786" y="231">
       <properties>
       </properties>
       <input name="SEND" parameter-type=""/>

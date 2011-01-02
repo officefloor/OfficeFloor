@@ -11,9 +11,9 @@
     <external-flow name="TemplateComplete" argument-type="java.lang.Void" x="674" y="173"/>
   </external-flows>
   <works>
-    <work name="Http Template PageUnknown.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="339" y="287">
+    <work name="Http Template PageUnknown.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="339" y="287">
       <properties>
-        <property name="template.path" value="net/officefloor/plugin/socket/server/http/template/integrate/PageUnknown.ofp"/>
+        <property name="template.path" value="net/officefloor/plugin/web/http/template/integrate/PageUnknown.ofp"/>
       </properties>
       <work-task name="template">
         <task-object name="SERVER_HTTP_CONNECTION" key="" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" parameter="false">
@@ -21,7 +21,7 @@
         </task-object>
       </work-task>
     </work>
-    <work name="Http Template Route" source="net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource" x="61" y="299">
+    <work name="Http Template Route" source="net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource" x="61" y="299">
       <properties>
       </properties>
       <work-task name="route">
@@ -36,7 +36,7 @@
       <task-flow name="NON_MATCHED_REQUEST" key="NON_MATCHED_REQUEST" argument-type="">
         <task name="template" link="SEQUENTIAL"/>
       </task-flow>
-      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException">
+      <task-escalation escalation-type="net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException">
         <external-flow name="Exception"/>
       </task-escalation>
       <task-escalation escalation-type="net.officefloor.frame.api.manage.UnknownWorkException">

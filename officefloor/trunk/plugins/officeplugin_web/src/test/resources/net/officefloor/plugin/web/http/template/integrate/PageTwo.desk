@@ -12,12 +12,12 @@
     <external-flow name="TemplateComplete" argument-type="java.lang.Void" x="694" y="31"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-PageTwo.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="263" y="274">
+    <work name="HttpTemplate-PageTwo.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="263" y="274">
       <properties>
-        <property name="template.path" value="net/officefloor/plugin/socket/server/http/template/integrate/PageTwo.ofp"/>
+        <property name="template.path" value="net/officefloor/plugin/web/http/template/integrate/PageTwo.ofp"/>
       </properties>
       <work-task name="link">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="template">
