@@ -23,10 +23,10 @@ import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.resource.HttpFile;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriter;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWork;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseWriterWorkSource;
+import net.officefloor.plugin.web.http.resource.HttpFile;
+import net.officefloor.plugin.web.http.response.source.HttpResponseWriterWorkSource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;

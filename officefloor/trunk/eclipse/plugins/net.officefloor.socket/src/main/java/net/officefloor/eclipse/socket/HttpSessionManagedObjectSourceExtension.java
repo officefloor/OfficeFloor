@@ -18,16 +18,16 @@
 
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource;
+import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link ManagedObjectSourceExtension} for the

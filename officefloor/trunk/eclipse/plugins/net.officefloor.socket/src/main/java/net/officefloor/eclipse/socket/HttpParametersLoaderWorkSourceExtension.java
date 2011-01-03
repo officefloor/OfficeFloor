@@ -24,8 +24,8 @@ import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource;
-import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource.HttpParametersLoaderTask;
 
 import org.eclipse.swt.widgets.Composite;
 

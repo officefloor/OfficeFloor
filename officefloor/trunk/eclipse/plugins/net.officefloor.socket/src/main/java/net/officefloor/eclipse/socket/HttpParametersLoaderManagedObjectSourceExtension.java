@@ -18,16 +18,16 @@
 
 package net.officefloor.eclipse.socket;
 
-import org.eclipse.swt.widgets.Composite;
-
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderDependencies;
-import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderWorkSource;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderDependencies;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWorkSource;
+
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link ManagedObjectSourceExtension} for the

@@ -26,8 +26,8 @@ import net.officefloor.eclipse.extension.open.ExtensionOpenerContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource;
-import net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
+import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource;
+import net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource.HttpSessionObjectRetrieverDependencies;
 
 import org.eclipse.swt.widgets.Composite;
 

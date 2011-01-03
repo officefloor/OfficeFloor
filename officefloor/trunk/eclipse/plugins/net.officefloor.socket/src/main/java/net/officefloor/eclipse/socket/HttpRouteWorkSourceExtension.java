@@ -30,8 +30,8 @@ import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.route.source.HttpRouteTask;
-import net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.route.source.HttpRouteTask;
+import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
 
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;

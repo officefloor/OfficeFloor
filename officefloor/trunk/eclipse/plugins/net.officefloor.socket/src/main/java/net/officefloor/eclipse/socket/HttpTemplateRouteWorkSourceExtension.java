@@ -22,8 +22,8 @@ import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.extension.worksource.TaskDocumentationContext;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
-import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteTask;
-import net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource;
+import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask;
+import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
 
 import org.eclipse.swt.widgets.Composite;
 
