@@ -38,10 +38,10 @@ import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.socket.HttpRouteWorkSourceExtension.RoutingEntry;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
-import net.officefloor.plugin.socket.server.http.template.HttpTemplateWork;
-import net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.socket.server.http.template.parse.HttpTemplateSection;
+import net.officefloor.plugin.web.http.template.HttpTemplateWork;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
