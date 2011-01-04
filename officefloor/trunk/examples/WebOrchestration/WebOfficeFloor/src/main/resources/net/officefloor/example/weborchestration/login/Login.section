@@ -1,7 +1,7 @@
 <section>
   <external-managed-objects>
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="725" y="232"/>
-    <external-managed-object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" x="710" y="281"/>
+    <external-managed-object name="HttpSessionCustomer" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" x="710" y="281"/>
   </external-managed-objects>
   <managed-object-sources>
   </managed-object-sources>
@@ -29,7 +29,7 @@
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
       </object>
-      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <external-managed-object name="HttpSessionCustomer"/>
       </object>
     </sub-section>
@@ -52,7 +52,7 @@
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
       </object>
-      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <external-managed-object name="HttpSessionCustomer"/>
       </object>
     </sub-section>

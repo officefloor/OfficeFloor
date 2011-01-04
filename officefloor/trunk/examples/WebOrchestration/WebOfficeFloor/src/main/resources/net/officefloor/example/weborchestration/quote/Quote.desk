@@ -1,10 +1,10 @@
 <desk>
   <external-managed-objects>
-    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" x="721" y="407"/>
+    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" x="721" y="407"/>
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="743" y="512"/>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="HttpSessionObjectRetriever-Customer" source="net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource" object-type="net.officefloor.example.weborchestration.Customer" timeout="0" x="515" y="421">
+    <managed-object-source name="HttpSessionObjectRetriever-Customer" source="net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource" object-type="net.officefloor.example.weborchestration.Customer" timeout="0" x="515" y="421">
       <properties>
         <property name="type.name" value="net.officefloor.example.weborchestration.Customer"/>
       </properties>
@@ -13,7 +13,7 @@
   <managed-objects>
     <managed-object name="HttpSessionObjectRetriever-Customer" scope="PROCESS" x="480" y="348">
       <managed-object-source name="HttpSessionObjectRetriever-Customer"/>
-      <dependency name="HTTP_SESSION_OBJECT" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <dependency name="HTTP_SESSION_OBJECT" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <external-managed-object name="CustomerSessionObject"/>
       </dependency>
     </managed-object>
@@ -24,7 +24,7 @@
     <external-flow name="PurchaseQuote" argument-type="java.lang.Void" x="703" y="289"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-quote.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="193" y="398">
+    <work name="HttpTemplate-quote.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="193" y="398">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/quote/quote.ofp"/>
         <property name="bean.template" value="net.officefloor.example.weborchestration.Quote"/>
@@ -32,7 +32,7 @@
         <property name="bean.Tail" value="net.officefloor.example.weborchestration.Quote"/>
       </properties>
       <work-task name="PurchaseQuote">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="QuoteItem">

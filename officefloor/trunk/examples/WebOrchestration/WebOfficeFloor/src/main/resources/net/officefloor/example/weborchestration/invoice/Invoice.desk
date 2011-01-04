@@ -1,10 +1,10 @@
 <desk>
   <external-managed-objects>
-    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" x="666" y="517"/>
+    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" x="666" y="517"/>
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="707" y="279"/>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="Http load InvoiceInput" source="net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.invoice.InvoiceInput" timeout="0" x="456" y="350">
+    <managed-object-source name="Http load InvoiceInput" source="net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.invoice.InvoiceInput" timeout="0" x="456" y="350">
       <properties>
         <property name="type.name" value="net.officefloor.example.weborchestration.invoice.InvoiceInput"/>
       </properties>
@@ -35,7 +35,7 @@
     <external-flow name="Index" argument-type="java.lang.Void" x="776" y="201"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-invoice.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="170" y="421">
+    <work name="HttpTemplate-invoice.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="170" y="421">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/invoice/invoice.ofp"/>
         <property name="bean.template" value="net.officefloor.example.weborchestration.Invoice"/>
@@ -54,7 +54,7 @@
         </task-object>
       </work-task>
       <work-task name="index">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="template">
@@ -79,7 +79,7 @@
         </task-object>
       </work-task>
       <work-task name="purchaseShoppingCart">
-        <task-object name="HttpSessionObject" key="" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" parameter="false">
+        <task-object name="HttpSessionObject" key="" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" parameter="false">
           <external-managed-object name="CustomerSessionObject"/>
         </task-object>
       </work-task>

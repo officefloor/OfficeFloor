@@ -23,7 +23,7 @@
         </task-object>
       </work-task>
     </work>
-    <work name="Http Route" source="net.officefloor.plugin.socket.server.http.route.source.HttpRouteWorkSource" x="487" y="421">
+    <work name="Http Route" source="net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource" x="487" y="421">
       <properties>
         <property name="route.initialState" value="initialState.task"/>
         <property name="route.testReset" value="testReset.task"/>
@@ -35,7 +35,7 @@
         </task-object>
       </work-task>
     </work>
-    <work name="Http Template Route" source="net.officefloor.plugin.socket.server.http.template.route.HttpTemplateRouteWorkSource" x="223" y="495">
+    <work name="Http Template Route" source="net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource" x="223" y="495">
       <properties>
       </properties>
       <work-task name="route">
@@ -71,7 +71,7 @@
       <task-flow name="NON_MATCHED_REQUEST" key="NON_MATCHED_REQUEST" argument-type="">
         <task name="routeUrl" link="SEQUENTIAL"/>
       </task-flow>
-      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException">
+      <task-escalation escalation-type="net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException">
         <external-flow name="Exception"/>
       </task-escalation>
       <task-escalation escalation-type="net.officefloor.frame.api.manage.UnknownWorkException">
@@ -97,7 +97,7 @@
       <task-flow name="default" key="" argument-type="">
         <external-flow name="initialState" link="SEQUENTIAL"/>
       </task-flow>
-      <task-escalation escalation-type="net.officefloor.plugin.socket.server.http.resource.InvalidHttpRequestUriException">
+      <task-escalation escalation-type="net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException">
         <external-flow name="Exception"/>
       </task-escalation>
     </task>
