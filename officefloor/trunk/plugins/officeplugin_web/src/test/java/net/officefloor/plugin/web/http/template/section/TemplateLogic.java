@@ -17,6 +17,15 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.section.clazz.ManagedObject;
+import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.work.clazz.FlowInterface;
@@ -27,6 +36,18 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * @author Daniel Sagenschneider
  */
 public class TemplateLogic {
+
+	/**
+	 * Dependency injected object.
+	 */
+	@Dependency
+	Connection connection;
+
+	/**
+	 * {@link ManagedObject} injection.
+	 */
+	@ManagedObject(source = ClassManagedObjectSource.class, properties = @Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = RowBean.class))
+	RowBean managedObject;
 
 	/**
 	 * Obtains the bean for starting template.
@@ -64,9 +85,12 @@ public class TemplateLogic {
 	 *            {@link ServerHttpConnection}.
 	 * @param flow
 	 *            {@link SubmitFlow}.
+	 * @throws SQLException
+	 *             Escalation.
 	 */
-	public void submit(ServerHttpConnection connection, SubmitFlow flow) {
-		// TODO something
+	public void submit(ServerHttpConnection connection, SubmitFlow flow)
+			throws SQLException {
+		// Logic to handle the submit
 	}
 
 	/**
@@ -76,12 +100,35 @@ public class TemplateLogic {
 	public static interface SubmitFlow {
 
 		/**
-		 * Does the flow.
+		 * Does the internal flow.
 		 * 
 		 * @param parameter
 		 *            Parameter.
 		 */
-		void doFlow(Integer parameter);
+		void doInternalFlow(Integer parameter);
+
+		/**
+		 * Does the external flow.
+		 * 
+		 * @param parameter
+		 *            Parameter.
+		 */
+		void doExternalFlow(String parameter);
+	}
+
+	/**
+	 * Handles internal flow from {@link SubmitFlow}.
+	 * 
+	 * @param parameter
+	 *            Parameter.
+	 * @param connection
+	 *            {@link Connection}.
+	 * @return Parameter for external flow.
+	 */
+	@NextTask("doExternalFlow")
+	public String doInternalFlow(@Parameter Integer parameter,
+			Connection connection) {
+		return "Parameter for External Flow";
 	}
 
 	/**
@@ -98,6 +145,13 @@ public class TemplateLogic {
 		 * Description.
 		 */
 		private final String description;
+
+		/**
+		 * Initiate.
+		 */
+		public RowBean() {
+			this("name", "description");
+		}
 
 		/**
 		 * Initiate.

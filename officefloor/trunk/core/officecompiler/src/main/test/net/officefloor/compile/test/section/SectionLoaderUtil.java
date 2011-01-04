@@ -206,8 +206,7 @@ public class SectionLoaderUtil {
 
 		// Cast to obtain expected section type
 		if (!(designer instanceof SectionType)) {
-			TestCase
-					.fail("designer must be created from createSectionDesigner");
+			TestCase.fail("designer must be created from createSectionDesigner");
 		}
 		SectionType expectedSection = (SectionType) designer;
 
@@ -223,8 +222,8 @@ public class SectionLoaderUtil {
 		for (int i = 0; i < eInputs.length; i++) {
 			SectionInputType eInput = eInputs[i];
 			SectionInputType aInput = aInputs[i];
-			TestCase.assertEquals("Incorrect name for input " + i, eInput
-					.getSectionInputName(), aInput.getSectionInputName());
+			TestCase.assertEquals("Incorrect name for input " + i,
+					eInput.getSectionInputName(), aInput.getSectionInputName());
 			TestCase.assertEquals("Incorrect parameter type for input " + i,
 					eInput.getParameterType(), aInput.getParameterType());
 		}
@@ -237,8 +236,9 @@ public class SectionLoaderUtil {
 		for (int i = 0; i < eOutputs.length; i++) {
 			SectionOutputType eOutput = eOutputs[i];
 			SectionOutputType aOutput = aOutputs[i];
-			TestCase.assertEquals("Incorrect name for output " + i, eOutput
-					.getSectionOutputName(), aOutput.getSectionOutputName());
+			TestCase.assertEquals("Incorrect name for output " + i,
+					eOutput.getSectionOutputName(),
+					aOutput.getSectionOutputName());
 			TestCase.assertEquals("Incorrect argument type for output " + i,
 					eOutput.getArgumentType(), aOutput.getArgumentType());
 			TestCase.assertEquals("Incorrect escalation only for output " + i,
@@ -253,8 +253,9 @@ public class SectionLoaderUtil {
 		for (int i = 0; i < eObjects.length; i++) {
 			SectionObjectType eObject = eObjects[i];
 			SectionObjectType aObject = aObjects[i];
-			TestCase.assertEquals("Incorrect name for object " + i, eObject
-					.getSectionObjectName(), aObject.getSectionObjectName());
+			TestCase.assertEquals("Incorrect name for object " + i,
+					eObject.getSectionObjectName(),
+					aObject.getSectionObjectName());
 			TestCase.assertEquals("Incorrect object type for input " + i,
 					eObject.getObjectType(), aObject.getObjectType());
 		}
@@ -280,8 +281,7 @@ public class SectionLoaderUtil {
 
 		// Cast to obtain expected section type
 		if (!(designer instanceof OfficeSection)) {
-			TestCase
-					.fail("designer must be created from createSectionDesigner");
+			TestCase.fail("designer must be created from createSectionDesigner");
 		}
 		OfficeSection eSection = (OfficeSection) designer;
 
@@ -290,8 +290,9 @@ public class SectionLoaderUtil {
 				sectionSourceClass, sectionLocation, propertyNameValuePairs);
 
 		// Validate the office section
-		TestCase.assertEquals("Incorrect section name", eSection
-				.getOfficeSectionName(), aSection.getOfficeSectionName());
+		TestCase.assertEquals("Incorrect section name",
+				eSection.getOfficeSectionName(),
+				aSection.getOfficeSectionName());
 
 		// Validate the office section inputs
 		OfficeSectionInput[] eInputs = eSection.getOfficeSectionInputs();
@@ -302,8 +303,8 @@ public class SectionLoaderUtil {
 			OfficeSectionInput eInput = eInputs[i];
 			OfficeSectionInput aInput = aInputs[i];
 			TestCase.assertEquals("Incorrect name for section input " + i,
-					eInput.getOfficeSectionInputName(), aInput
-							.getOfficeSectionInputName());
+					eInput.getOfficeSectionInputName(),
+					aInput.getOfficeSectionInputName());
 			TestCase.assertEquals("Incorrect parameter type for section input "
 					+ i, eInput.getParameterType(), aInput.getParameterType());
 		}
@@ -317,8 +318,8 @@ public class SectionLoaderUtil {
 			OfficeSectionOutput eOutput = eOutputs[i];
 			OfficeSectionOutput aOutput = aOutputs[i];
 			TestCase.assertEquals("Incorrect name for section output " + i,
-					eOutput.getOfficeSectionOutputName(), aOutput
-							.getOfficeSectionOutputName());
+					eOutput.getOfficeSectionOutputName(),
+					aOutput.getOfficeSectionOutputName());
 			TestCase.assertEquals("Incorrect argument type for section output "
 					+ i, eOutput.getArgumentType(), aOutput.getArgumentType());
 			TestCase.assertEquals(
@@ -335,8 +336,8 @@ public class SectionLoaderUtil {
 			OfficeSectionObject eObject = eObjects[i];
 			OfficeSectionObject aObject = aObjects[i];
 			TestCase.assertEquals("Incorrect name for section object " + i,
-					eObject.getOfficeSectionObjectName(), aObject
-							.getOfficeSectionObjectName());
+					eObject.getOfficeSectionObjectName(),
+					aObject.getOfficeSectionObjectName());
 			TestCase.assertEquals("Incorrect object type for section object "
 					+ i, eObject.getObjectType(), aObject.getObjectType());
 		}
@@ -376,25 +377,29 @@ public class SectionLoaderUtil {
 			OfficeTask eTask = eTasks[i];
 			OfficeTask aTask = aTasks[i];
 			TestCase.assertEquals("Incorrect name for task " + i
-					+ " (sub section=" + subSectionName + ")", eTask
-					.getOfficeTaskName(), aTask.getOfficeTaskName());
+					+ " (sub section=" + subSectionName + ")",
+					eTask.getOfficeTaskName(), aTask.getOfficeTaskName());
 			TestCase.assertNotNull("Must have team responsible for task " + i
-					+ " (sub section=" + subSectionName + ")", aTask
-					.getTeamResponsible());
+					+ " (sub section=" + subSectionName + ")",
+					aTask.getTeamResponsible());
 
 			// Validate the dependencies
 			ObjectDependency[] eDependencies = eTask.getObjectDependencies();
 			ObjectDependency[] aDependencies = aTask.getObjectDependencies();
-			TestCase.assertEquals("Incorrect number of dependencies for task "
-					+ i + " (sub section=" + subSectionName + ")",
+			TestCase.assertEquals(
+					"Incorrect number of dependencies for task " + i
+							+ " (sub section=" + subSectionName + ", task="
+							+ eTask.getOfficeTaskName() + ")",
 					eDependencies.length, aDependencies.length);
 			for (int j = 0; j < eDependencies.length; j++) {
 				ObjectDependency eDependency = eDependencies[j];
 				ObjectDependency aDependency = aDependencies[j];
-				TestCase.assertEquals("Incorrect name for dependency " + j
-						+ " (sub section=" + subSectionName + ")", eDependency
-						.getObjectDependencyName(), aDependency
-						.getObjectDependencyName());
+				TestCase.assertEquals(
+						"Incorrect name for dependency " + j + " (sub section="
+								+ subSectionName + ", task="
+								+ eTask.getOfficeTaskName() + ")",
+						eDependency.getObjectDependencyName(),
+						aDependency.getObjectDependencyName());
 				// Do not check dependent as requires linking
 			}
 		}
@@ -412,9 +417,9 @@ public class SectionLoaderUtil {
 			OfficeSectionManagedObjectSource eMoSource = eMoSources[i];
 			OfficeSectionManagedObjectSource aMoSource = aMoSources[i];
 			TestCase.assertEquals("Incorrect name for managed obect source "
-					+ i + " (sub section=" + subSectionName + ")", eMoSource
-					.getOfficeSectionManagedObjectSourceName(), aMoSource
-					.getOfficeSectionManagedObjectSourceName());
+					+ i + " (sub section=" + subSectionName + ")",
+					eMoSource.getOfficeSectionManagedObjectSourceName(),
+					aMoSource.getOfficeSectionManagedObjectSourceName());
 			String managedObjectSourceName = eMoSource
 					.getOfficeSectionManagedObjectSourceName();
 
@@ -438,9 +443,9 @@ public class SectionLoaderUtil {
 				ManagedObjectTeam aTeam = aTeams[j];
 				TestCase.assertEquals("Incorrect name for team " + j
 						+ " (managed object source=" + managedObjectSourceName
-						+ ", sub section=" + subSectionName + ")", eTeam
-						.getManagedObjectTeamName(), aTeam
-						.getManagedObjectTeamName());
+						+ ", sub section=" + subSectionName + ")",
+						eTeam.getManagedObjectTeamName(),
+						aTeam.getManagedObjectTeamName());
 			}
 
 			// Validate the managed objects
@@ -458,23 +463,23 @@ public class SectionLoaderUtil {
 				OfficeSectionManagedObject aMo = aMos[j];
 				TestCase.assertEquals("Incorrect name for managed object " + j
 						+ " (managed object source=" + managedObjectSourceName
-						+ ", sub section=" + subSectionName + ")", eMo
-						.getOfficeSectionManagedObjectName(), aMo
-						.getOfficeSectionManagedObjectName());
+						+ ", sub section=" + subSectionName + ")",
+						eMo.getOfficeSectionManagedObjectName(),
+						aMo.getOfficeSectionManagedObjectName());
 				TestCase.assertEquals(
 						"Incorrect dependent name for managed object " + j
 								+ " (managed object source="
 								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")", eMo
-								.getDependentManagedObjectName(), aMo
-								.getDependentManagedObjectName());
+								+ subSectionName + ")",
+						eMo.getDependentManagedObjectName(),
+						aMo.getDependentManagedObjectName());
 				TestCase.assertEquals(
 						"Incorrect administerable name for managed object " + i
 								+ " (managed object source="
 								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")", eMo
-								.getAdministerableManagedObjectName(), aMo
-								.getAdministerableManagedObjectName());
+								+ subSectionName + ")",
+						eMo.getAdministerableManagedObjectName(),
+						aMo.getAdministerableManagedObjectName());
 				String managedObjectName = eMo
 						.getOfficeSectionManagedObjectName();
 
@@ -508,11 +513,10 @@ public class SectionLoaderUtil {
 		for (int i = 0; i < eSubSections.length; i++) {
 			OfficeSubSection eSubSection = eSubSections[i];
 			OfficeSubSection aSubSection = aSubSections[i];
-			TestCase
-					.assertEquals("Incorrect name for sub section " + i
-							+ " (sub section=" + subSectionName + ")",
-							eSubSection.getOfficeSectionName(), aSubSection
-									.getOfficeSectionName());
+			TestCase.assertEquals("Incorrect name for sub section " + i
+					+ " (sub section=" + subSectionName + ")",
+					eSubSection.getOfficeSectionName(),
+					aSubSection.getOfficeSectionName());
 		}
 	}
 
