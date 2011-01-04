@@ -54,6 +54,7 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
@@ -64,11 +65,447 @@ import net.officefloor.plugin.work.clazz.FlowParameterFactory;
 import net.officefloor.plugin.work.clazz.ParameterFactory;
 
 /**
+ * <p>
  * Class {@link SectionSource}.
+ * <p>
+ * The implementation has been segregated into smaller methods to allow
+ * overriding to re-use {@link ClassSectionSource} for other uses.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassSectionSource extends AbstractSectionSource {
+
+	/**
+	 * {@link SectionDesigner}.
+	 */
+	private SectionDesigner _designer;
+
+	/**
+	 * Obtains the {@link SectionDesigner}.
+	 * 
+	 * @return {@link SectionDesigner};
+	 */
+	protected final SectionDesigner getDesigner() {
+		return this._designer;
+	}
+
+	/**
+	 * {@link SectionSourceContext}.
+	 */
+	private SectionSourceContext _context;
+
+	/**
+	 * Obtains the {@link SectionSourceContext}.
+	 * 
+	 * @return {@link SectionSourceContext}.
+	 */
+	protected final SectionSourceContext getContext() {
+		return this._context;
+	}
+
+	/**
+	 * {@link SectionTask} instances by name.
+	 */
+	private final Map<String, SectionTask> _tasksByName = new HashMap<String, SectionTask>();
+
+	/**
+	 * Obtains the {@link SectionTask}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link SectionTask}.
+	 * @return {@link SectionTask} or <code>null</code> if no
+	 *         {@link SectionTask} by the name.
+	 */
+	public SectionTask getTask(String taskName) {
+		return this._tasksByName.get(taskName);
+	}
+
+	/**
+	 * {@link SectionObject} instances by fully qualified type name.
+	 */
+	private final Map<String, SectionObject> _objectsByTypeName = new HashMap<String, SectionObject>();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SectionObject}.
+	 * <p>
+	 * Should the {@link SectionObject} not yet be added, it is added.
+	 * 
+	 * @param typeName
+	 *            Fully qualified type name of the {@link SectionObject}.
+	 * @return {@link SectionObject}.
+	 */
+	public SectionObject getOrCreateObject(String typeName) {
+		SectionObject sectionObject = this._objectsByTypeName.get(typeName);
+		if (sectionObject == null) {
+			// No yet added, so add section object
+			sectionObject = this.getDesigner().addSectionObject(typeName,
+					typeName);
+			this._objectsByTypeName.put(typeName, sectionObject);
+		}
+		return sectionObject;
+	}
+
+	/**
+	 * {@link SectionManagedObject} instances by fully qualified type name.
+	 */
+	private final Map<String, SectionManagedObject> _managedObjectsByTypeName = new HashMap<String, SectionManagedObject>();
+
+	/**
+	 * Obtains the {@link SectionManagedObject} for the type.
+	 * 
+	 * @param typeName
+	 *            Fully qualified type name of the object for the
+	 *            {@link SectionManagedObject}.
+	 * @return {@link SectionManagedObject} or <code>null</code> if no
+	 *         {@link SectionManagedObject} for the type.
+	 */
+	public SectionManagedObject getManagedObject(String typeName) {
+		return this._managedObjectsByTypeName.get(typeName);
+	}
+
+	/**
+	 * {@link SectionOutput} instances by name.
+	 */
+	private final Map<String, SectionOutput> _outputsByName = new HashMap<String, SectionOutput>();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SectionOutput}.
+	 * <p>
+	 * Should the {@link SectionOutput} not yet be added, it is added.
+	 * 
+	 * @param name
+	 *            Name of the {@link SectionOutput}.
+	 * @param argumentType
+	 *            Type of the argument. May be <code>null</code> if no argument.
+	 * @param isEscalationOnly
+	 *            <code>true</code> if escalation only.
+	 * @return {@link SectionObject}.
+	 */
+	public SectionOutput getOrCreateOutput(String name, String argumentType,
+			boolean isEscalationOnly) {
+		SectionOutput sectionOutput = this._outputsByName.get(name);
+		if (sectionOutput == null) {
+			// Not yet added, so add section output
+			sectionOutput = this.getDesigner().addSectionOutput(name,
+					argumentType, isEscalationOnly);
+			this._outputsByName.put(name, sectionOutput);
+		}
+		return sectionOutput;
+	}
+
+	/**
+	 * {@link SubSection} instances by the {@link SectionInterface} annotated
+	 * type.
+	 */
+	private final Map<Class<?>, SubSection> _subSectionsByType = new HashMap<Class<?>, SubSection>();
+
+	/**
+	 * <p>
+	 * Obtains the {@link SubSection}.
+	 * <p>
+	 * Should the {@link SubSection} not already be created, it is created.
+	 * 
+	 * @param sectionInterfaceType
+	 *            Type that is annotated with {@link SectionInterface}.
+	 * @param sectionAnnotation
+	 *            {@link SectionInterface} annotation.
+	 * @return {@link SubSection}.
+	 */
+	public SubSection getOrCreateSubSection(Class<?> sectionInterfaceType,
+			SectionInterface sectionAnnotation) {
+
+		// Determine if sub section already created for type
+		SubSection subSection = this._subSectionsByType
+				.get(sectionInterfaceType);
+		if (subSection != null) {
+			return subSection;
+		}
+
+		// Sub section not registered, so create and register
+		String subSectionSourceClassName = sectionAnnotation.source().getName();
+		String subSectionLocation = ("".equals(sectionAnnotation.location())) ? sectionAnnotation
+				.locationClass().getName() : sectionAnnotation.location();
+		subSection = this.getDesigner().addSubSection(
+				sectionInterfaceType.getSimpleName(),
+				subSectionSourceClassName, subSectionLocation);
+		PropertyList subSectionProperties = this.getContext()
+				.createPropertyList();
+		for (Property property : sectionAnnotation.properties()) {
+			String name = property.name();
+			String value = ("".equals(property.value())) ? property
+					.valueClass().getName() : property.value();
+			subSection.addProperty(name, value);
+			subSectionProperties.addProperty(name).setValue(value);
+		}
+
+		// Register the sub section
+		this._subSectionsByType.put(sectionInterfaceType, subSection);
+
+		// Link outputs of sub section
+		for (FlowLink flowLink : sectionAnnotation.outputs()) {
+
+			// Obtain the sub section output
+			String subSectionOuputName = flowLink.name();
+			SubSectionOutput subSectionOuput = subSection
+					.getSubSectionOutput(subSectionOuputName);
+
+			// Obtain the section task for output
+			String linkTaskName = flowLink.method();
+			SectionTask linkTask = this.getTask(linkTaskName);
+			if (linkTask != null) {
+				// Link flow internally
+				this.getDesigner().link(subSectionOuput, linkTask);
+			}
+		}
+
+		// Load the section type
+		SectionType subSectionType = this.getContext().loadSectionType(
+				subSectionSourceClassName, subSectionLocation,
+				subSectionProperties);
+
+		// Link objects of sub section
+		for (SectionObjectType subSectionObjectType : subSectionType
+				.getSectionObjectTypes()) {
+
+			// Obtain the sub section output
+			String objectName = subSectionObjectType.getSectionObjectName();
+			SubSectionObject subSectionObject = subSection
+					.getSubSectionObject(objectName);
+
+			// Link to managed object or external object
+			String objectTypeName = subSectionObjectType.getObjectType();
+			SectionManagedObject sectionManagedObject = this
+					.getManagedObject(objectTypeName);
+			if (sectionManagedObject != null) {
+				// Link to section managed object
+				this.getDesigner().link(subSectionObject, sectionManagedObject);
+
+			} else {
+				// Link to external object
+				SectionObject sectionObject = this
+						.getOrCreateObject(objectTypeName);
+				this.getDesigner().link(subSectionObject, sectionObject);
+			}
+		}
+
+		// Return the sub section
+		return subSection;
+	}
+
+	/**
+	 * Obtains the name of the class for the section.
+	 * 
+	 * @return Class name for the backing class of the section.
+	 */
+	protected String getSectionClassName() {
+		String sectionClassName = this.getContext().getSectionLocation();
+		return sectionClassName;
+	}
+
+	/**
+	 * Enriches the {@link Task}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param taskType
+	 *            {@link TaskType} for the {@link SectionTask}.
+	 * @param taskMethod
+	 *            {@link Method} for the {@link SectionTask}.
+	 * @param parameterType
+	 *            Parameter type for the {@link SectionTask}. May be
+	 *            <code>null</code> if no parameter.
+	 */
+	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
+			Method taskMethod, Class<?> parameterType) {
+
+		// Obtain the task name
+		String taskName = taskType.getTaskName();
+
+		// Obtain the parameter type name
+		String parameterTypeName = (parameterType == null ? null
+				: parameterType.getName());
+
+		// Add input for task
+		SectionInput sectionInput = this.getDesigner().addSectionInput(
+				taskName, parameterTypeName);
+		this.getDesigner().link(sectionInput, task);
+	}
+
+	/**
+	 * Links the next {@link Task}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @param taskMethod
+	 *            {@link Method} for the {@link SectionTask}.
+	 * @param argumentType
+	 *            Argument type. May be <code>null</code> if no argument type.
+	 * @param nextTaskAnnotation
+	 *            {@link NextTask} annotation on the {@link Method}.
+	 */
+	protected void linkNextTask(SectionTask task, TaskType<?, ?, ?> taskType,
+			Method taskMethod, Class<?> argumentType,
+			NextTask nextTaskAnnotation) {
+
+		// Obtain the next task name
+		String nextTaskName = nextTaskAnnotation.value();
+
+		// Obtain the argument type name for the task
+		String argumentTypeName = (argumentType == null ? null : argumentType
+				.getName());
+
+		// Attempt to obtain next task internally
+		SectionTask nextTask = this.getTask(nextTaskName);
+		if (nextTask != null) {
+			// Link task internally
+			this.getDesigner().link(task, nextTask);
+
+		} else {
+			// Not internal task, so link externally
+			SectionOutput sectionOutput = this.getOrCreateOutput(nextTaskName,
+					argumentTypeName, false);
+			this.getDesigner().link(task, sectionOutput);
+		}
+	}
+
+	/**
+	 * Links the {@link TaskFlow}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @param flowInterfaceType
+	 *            Interface type specifying the flows.
+	 * @param flowMethod
+	 *            Method on the interface for the flow to be linked.
+	 * @param flowArgumentType
+	 *            {@link TaskFlow} argument type. May be <code>null</code> if no
+	 *            argument.
+	 */
+	protected void linkTaskFlow(SectionTask task, TaskType<?, ?, ?> taskType,
+			Class<?> flowInterfaceType, Method flowMethod,
+			Class<?> flowArgumentType) {
+
+		// Obtain the flow name
+		String flowName = flowMethod.getName();
+
+		// Obtain the task flow
+		TaskFlow taskFlow = task.getTaskFlow(flowName);
+
+		// Obtain the flow argument name
+		String flowArgumentTypeName = (flowArgumentType == null ? null
+				: flowArgumentType.getName());
+
+		// Determine if section interface (or flow interface)
+		SectionInterface sectionAnnotation = flowInterfaceType
+				.getAnnotation(SectionInterface.class);
+		if (sectionAnnotation != null) {
+			// Section interface so obtain the sub section
+			SubSection subSection = this.getOrCreateSubSection(
+					flowInterfaceType, sectionAnnotation);
+
+			// Link flow to sub section input
+			SubSectionInput subSectionInput = subSection
+					.getSubSectionInput(flowName);
+			this.getDesigner().link(taskFlow, subSectionInput,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		} else {
+			// Flow interface so attempt to obtain the task internally
+			SectionTask linkTask = this.getTask(flowName);
+			if (linkTask != null) {
+				// Link flow internally
+				this.getDesigner().link(taskFlow, linkTask,
+						FlowInstigationStrategyEnum.SEQUENTIAL);
+
+			} else {
+				// Not internal task, so link externally
+				SectionOutput sectionOutput = this.getOrCreateOutput(flowName,
+						flowArgumentTypeName, false);
+				this.getDesigner().link(taskFlow, sectionOutput,
+						FlowInstigationStrategyEnum.SEQUENTIAL);
+			}
+		}
+	}
+
+	/**
+	 * Links the {@link Task} escalation.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @param escalationType
+	 *            {@link TaskEscalationType}.
+	 * @param escalationHandler
+	 *            Potential {@link SectionTask} that can handle escalation based
+	 *            on its parameter. May be <code>null</code> if no
+	 *            {@link SectionTask} can handle the escalation.
+	 */
+	protected void linkTaskEscalation(SectionTask task,
+			TaskType<?, ?, ?> taskType, TaskEscalationType escalationType,
+			SectionTask escalationHandler) {
+
+		// Obtain the escalation type name
+		String escalationTypeName = escalationType.getEscalationType()
+				.getName();
+
+		// Obtain the task escalation
+		TaskFlow taskEscalation = task.getTaskEscalation(escalationTypeName);
+
+		// Link to escalation handler (if available)
+		if (escalationHandler != null) {
+			// Handle escalation internally
+			this.getDesigner().link(taskEscalation, escalationHandler,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		} else {
+			// Not internally handled, so link externally
+			SectionOutput sectionOutput = this.getOrCreateOutput(
+					escalationTypeName, escalationTypeName, true);
+			this.getDesigner().link(taskEscalation, sectionOutput,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
+		}
+	}
+
+	/**
+	 * Links the {@link TaskObject}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @param objectType
+	 *            {@link TaskObjectType}.
+	 */
+	protected void linkTaskObject(SectionTask task, TaskType<?, ?, ?> taskType,
+			TaskObjectType<?> objectType) {
+
+		// Obtain the object name and its type
+		String objectName = objectType.getObjectName();
+		String objectTypeName = objectType.getObjectType().getName();
+
+		// Obtain the task object
+		TaskObject taskObject = task.getTaskObject(objectName);
+
+		// Attempt to link to managed object
+		SectionManagedObject mo = this.getManagedObject(objectTypeName);
+		if (mo != null) {
+			// Link to managed object
+			this.getDesigner().link(taskObject, mo);
+
+		} else {
+			// Link to external object (by type)
+			SectionObject sectionObject = this
+					.getOrCreateObject(objectTypeName);
+			this.getDesigner().link(taskObject, sectionObject);
+		}
+	}
 
 	/*
 	 * =================== SectionSource ===========================
@@ -83,8 +520,18 @@ public class ClassSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
+		// Ensure only use once
+		if (this._designer != null) {
+			throw new IllegalStateException("May only use "
+					+ this.getClass().getName() + " once per instance");
+		}
+
+		// Initiate state
+		this._designer = designer;
+		this._context = context;
+
 		// Obtain the class
-		String sectionClassName = context.getSectionLocation();
+		String sectionClassName = this.getSectionClassName();
 		if ((sectionClassName == null)
 				|| (sectionClassName.trim().length() == 0)) {
 			designer.addIssue(
@@ -110,8 +557,6 @@ public class ClassSectionSource extends AbstractSectionSource {
 				.extractDependencyMetaData(sectionClass);
 
 		// Load the managed objects
-		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
-		Map<String, SectionManagedObject> sectionManagedObjects = new HashMap<String, SectionManagedObject>();
 		for (DependencyMetaData dependency : dependencyMetaData) {
 
 			// Obtain dependency name and type
@@ -137,21 +582,17 @@ public class ClassSectionSource extends AbstractSectionSource {
 				}
 				SectionManagedObject mo = mos.addSectionManagedObject(
 						dependencyTypeName, ManagedObjectScope.PROCESS);
-				sectionManagedObjects.put(dependencyTypeName, mo);
+
+				// Register the managed object
+				this._managedObjectsByTypeName.put(dependencyTypeName, mo);
 
 				// Link dependency to managed object
 				designer.link(moDependency, mo);
 
 			} else {
 				// Link to external object (by type)
-				SectionObject sectionObject = sectionObjects
-						.get(dependencyTypeName);
-				if (sectionObject == null) {
-					// No yet added, so add section object
-					sectionObject = designer.addSectionObject(
-							dependencyTypeName, dependencyTypeName);
-					sectionObjects.put(dependencyTypeName, sectionObject);
-				}
+				SectionObject sectionObject = this
+						.getOrCreateObject(dependencyTypeName);
 				designer.link(moDependency, sectionObject);
 			}
 		}
@@ -170,7 +611,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 			}
 
 			// Obtain the managed object
-			SectionManagedObject mo = sectionManagedObjects.get(moName);
+			SectionManagedObject mo = this.getManagedObject(moName);
 
 			// Load the managed object type
 			PropertyList moProperties = context.createPropertyList();
@@ -196,22 +637,16 @@ public class ClassSectionSource extends AbstractSectionSource {
 								.getDependencyName());
 
 				// First attempt to link internally
-				SectionManagedObject dependencyMo = sectionManagedObjects
-						.get(dependencyTypeName);
+				SectionManagedObject dependencyMo = this
+						.getManagedObject(dependencyTypeName);
 				if (dependencyMo != null) {
 					// Link to managed object
 					designer.link(moDependency, dependencyMo);
 
 				} else {
 					// Link to external object (by type)
-					SectionObject sectionObject = sectionObjects
-							.get(dependencyTypeName);
-					if (sectionObject == null) {
-						// No yet added, so add section object
-						sectionObject = designer.addSectionObject(
-								dependencyTypeName, dependencyTypeName);
-						sectionObjects.put(dependencyTypeName, sectionObject);
-					}
+					SectionObject sectionObject = this
+							.getOrCreateObject(dependencyTypeName);
 					designer.link(moDependency, sectionObject);
 				}
 			}
@@ -232,7 +667,6 @@ public class ClassSectionSource extends AbstractSectionSource {
 				sectionClassName);
 
 		// Load tasks
-		Map<String, SectionTask> tasksByName = new HashMap<String, SectionTask>();
 		Map<String, SectionTask> tasksByParameterType = new HashMap<String, SectionTask>();
 		Map<String, Integer> parameterIndexes = new HashMap<String, Integer>();
 		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
@@ -247,11 +681,11 @@ public class ClassSectionSource extends AbstractSectionSource {
 
 			// Add the task
 			SectionTask task = work.addSectionTask(taskName, taskName);
-			tasksByName.put(taskName, task);
+			this._tasksByName.put(taskName, task);
 
 			// Obtain the parameter for the task
 			int objectIndex = 1; // 1 as Section Object first
-			String parameterType = null;
+			Class<?> parameterType = null;
 			Class<?>[] parameters = method.getParameterTypes();
 			Annotation[][] parametersAnnotations = method
 					.getParameterAnnotations();
@@ -286,10 +720,10 @@ public class ClassSectionSource extends AbstractSectionSource {
 					}
 
 					// Specify the parameter type
-					parameterType = parameter.getName();
+					parameterType = parameter;
 
 					// Register the task by its parameter type
-					tasksByParameterType.put(parameterType, task);
+					tasksByParameterType.put(parameterType.getName(), task);
 
 					// Register the parameter index for the task
 					parameterIndexes.put(taskName, new Integer(objectIndex));
@@ -299,58 +733,37 @@ public class ClassSectionSource extends AbstractSectionSource {
 				objectIndex++;
 			}
 
-			// Add input for task
-			SectionInput sectionInput = designer.addSectionInput(taskName,
-					parameterType);
-			designer.link(sectionInput, task);
+			// Enrich the task
+			this.enrichTask(task, taskType, method, parameterType);
 		}
 
 		// Link tasks
-		Map<Class<?>, SubSection> subSections = new HashMap<Class<?>, SubSection>();
-		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
 		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
 
 			// Obtain the task name
 			String taskName = taskType.getTaskName();
 
 			// Obtain the task
-			SectionTask task = tasksByName.get(taskName);
+			SectionTask task = this.getTask(taskName);
 
 			// Obtain the task method
 			SectionTaskFactory taskFactory = (SectionTaskFactory) taskType
 					.getTaskFactory();
 			Method method = taskFactory.getMethod();
 
-			// Obtain the argument type for the task
-			Class<?> returnType = method.getReturnType();
-			String argumentType = ((returnType == null) || (returnType == void.class)) ? null
-					: returnType.getName();
-
-			// Link potential next task
+			// Link the next task
 			NextTask nextTaskAnnotation = method.getAnnotation(NextTask.class);
 			if (nextTaskAnnotation != null) {
 
-				// Obtain the next task name
-				String nextTaskName = nextTaskAnnotation.value();
+				// Obtain the argument type for the task
+				Class<?> returnType = method.getReturnType();
+				Class<?> argumentType = ((returnType == null)
+						|| (void.class.equals(returnType)) || (Void.TYPE
+						.equals(returnType))) ? null : returnType;
 
-				// Attempt to obtain next task internally
-				SectionTask nextTask = tasksByName.get(nextTaskName);
-				if (nextTask != null) {
-					// Link task internally
-					designer.link(task, nextTask);
-
-				} else {
-					// Not internal task, so link externally
-					SectionOutput sectionOutput = sectionOutputs
-							.get(nextTaskName);
-					if (sectionOutput == null) {
-						// Not yet added, so add section output
-						sectionOutput = designer.addSectionOutput(nextTaskName,
-								argumentType, false);
-						sectionOutputs.put(nextTaskName, sectionOutput);
-					}
-					designer.link(task, sectionOutput);
-				}
+				// Link next task
+				this.linkNextTask(task, taskType, method, argumentType,
+						nextTaskAnnotation);
 			}
 
 			// Obtain the flow meta-data for the task
@@ -383,168 +796,38 @@ public class ClassSectionSource extends AbstractSectionSource {
 			// Link flows for the task
 			for (FlowMethodMetaData flowMetaData : flowMetaDatas) {
 
-				// Obtain the flow name
+				// Obtain the flow interface type
+				Class<?> flowInterfaceType = flowMetaData.getFlowType();
+
+				// Obtain the flow method
 				Method flowMethod = flowMetaData.getMethod();
-				String flowName = flowMethod.getName();
 
-				// Obtain the task flow
-				TaskFlow taskFlow = task.getTaskFlow(flowName);
-
-				// Determine if section interface (or flow interface)
-				Class<?> parameter = flowMetaData.getFlowType();
-				SectionInterface sectionAnnotation = parameter
-						.getAnnotation(SectionInterface.class);
-				if (sectionAnnotation != null) {
-					// Section interface so link to sub section
-					SubSection subSection = subSections.get(parameter);
-					if (subSection == null) {
-						// Sub section not registered, so create and register
-						String subSectionSourceClassName = sectionAnnotation
-								.source().getName();
-						String subSectionLocation = (""
-								.equals(sectionAnnotation.location())) ? sectionAnnotation
-								.locationClass().getName()
-								: sectionAnnotation.location();
-						subSection = designer.addSubSection(parameter
-								.getSimpleName(), subSectionSourceClassName,
-								subSectionLocation);
-						PropertyList subSectionProperties = context
-								.createPropertyList();
-						for (Property property : sectionAnnotation.properties()) {
-							String name = property.name();
-							String value = ("".equals(property.value())) ? property
-									.valueClass().getName()
-									: property.value();
-							subSection.addProperty(name, value);
-							subSectionProperties.addProperty(name).setValue(
-									value);
-						}
-
-						// Register the sub section
-						subSections.put(parameter, subSection);
-
-						// Link outputs of sub section
-						for (FlowLink flowLink : sectionAnnotation.outputs()) {
-
-							// Obtain the sub section output
-							String subSectionOuputName = flowLink.name();
-							SubSectionOutput subSectionOuput = subSection
-									.getSubSectionOutput(subSectionOuputName);
-
-							// Obtain the section task for output
-							String linkTaskName = flowLink.method();
-							SectionTask linkTask = tasksByName
-									.get(linkTaskName);
-							if (linkTask != null) {
-								// Link flow internally
-								designer.link(subSectionOuput, linkTask);
-							}
-						}
-
-						// Load the section type
-						SectionType subSectionType = context.loadSectionType(
-								subSectionSourceClassName, subSectionLocation,
-								subSectionProperties);
-
-						// Link objects of sub section
-						for (SectionObjectType subSectionObjectType : subSectionType
-								.getSectionObjectTypes()) {
-
-							// Obtain the sub section output
-							String objectName = subSectionObjectType
-									.getSectionObjectName();
-							SubSectionObject subSectionObject = subSection
-									.getSubSectionObject(objectName);
-
-							// Link to managed object or external object
-							String objectTypeName = subSectionObjectType
-									.getObjectType();
-							SectionManagedObject sectionManagedObject = sectionManagedObjects
-									.get(objectTypeName);
-							if (sectionManagedObject != null) {
-								// Link to section managed object
-								designer.link(subSectionObject,
-										sectionManagedObject);
-
-							} else {
-								// Link to external object
-								SectionObject sectionObject = sectionObjects
-										.get(objectTypeName);
-								if (sectionObject == null) {
-									// Not yet added, so add section object
-									sectionObject = designer.addSectionObject(
-											objectTypeName, objectTypeName);
-									sectionObjects.put(objectTypeName,
-											sectionObject);
-								}
-								designer.link(subSectionObject, sectionObject);
-							}
-						}
-					}
-
-					// Link flow to sub section input
-					SubSectionInput subSectionInput = subSection
-							.getSubSectionInput(flowName);
-					designer.link(taskFlow, subSectionInput,
-							FlowInstigationStrategyEnum.SEQUENTIAL);
-
-				} else {
-					// Flow interface so attempt to obtain the task internally
-					SectionTask linkTask = tasksByName.get(flowName);
-					if (linkTask != null) {
-						// Link flow internally
-						designer.link(taskFlow, linkTask,
-								FlowInstigationStrategyEnum.SEQUENTIAL);
-
-					} else {
-						// Not internal task, so link externally
-						SectionOutput sectionOutput = sectionOutputs
-								.get(flowName);
-						if (sectionOutput == null) {
-							// Not yet added, so add section output
-							sectionOutput = designer.addSectionOutput(flowName,
-									argumentType, false);
-							sectionOutputs.put(flowName, sectionOutput);
-						}
-						designer.link(taskFlow, sectionOutput,
-								FlowInstigationStrategyEnum.SEQUENTIAL);
-					}
+				// Obtain the argument type for the flow
+				Class<?> flowArgumentType = null;
+				Class<?>[] flowParameters = flowMethod.getParameterTypes();
+				if (flowParameters.length > 0) {
+					// Argument is always the first (and only) parameter
+					flowArgumentType = flowParameters[0];
 				}
+
+				// Link the task flow
+				this.linkTaskFlow(task, taskType, flowInterfaceType,
+						flowMethod, flowArgumentType);
 			}
 
 			// Link escalations for the task
 			for (TaskEscalationType escalationType : taskType
 					.getEscalationTypes()) {
 
-				// Obtain the escalation class
+				// Obtain task handling escalation (if available)
 				String escalationTypeName = escalationType.getEscalationType()
 						.getName();
-
-				// Obtain the task escalation
-				TaskFlow taskEscalation = task
-						.getTaskEscalation(escalationTypeName);
-
-				// Obtain task handling escalation
 				SectionTask escalationHandler = tasksByParameterType
 						.get(escalationTypeName);
-				if (escalationHandler != null) {
-					// Handle escalation internally
-					designer.link(taskEscalation, escalationHandler,
-							FlowInstigationStrategyEnum.SEQUENTIAL);
 
-				} else {
-					// Not internally handled, so link externally
-					SectionOutput sectionOutput = sectionOutputs
-							.get(escalationTypeName);
-					if (sectionOutput == null) {
-						// Not yet added, so add section output
-						sectionOutput = designer.addSectionOutput(
-								escalationTypeName, escalationTypeName, true);
-						sectionOutputs.put(escalationTypeName, sectionOutput);
-					}
-					designer.link(taskEscalation, sectionOutput,
-							FlowInstigationStrategyEnum.SEQUENTIAL);
-				}
+				// Link escalation
+				this.linkTaskEscalation(task, taskType, escalationType,
+						escalationHandler);
 			}
 
 			// Obtain the object index for the parameter
@@ -563,32 +846,20 @@ public class ClassSectionSource extends AbstractSectionSource {
 			for (int i = 1; i < objectTypes.length; i++) {
 				TaskObjectType<?> objectType = objectTypes[i];
 
-				// Obtain the object name and its type
-				String objectName = objectType.getObjectName();
-				String objectTypeName = objectType.getObjectType().getName();
-
-				// Obtain the task object
-				TaskObject taskObject = task.getTaskObject(objectName);
-
 				// Determine if object is a parameter
 				if ((parameterIndex != null)
 						&& (parameterIndex.intValue() == i)) {
-					// Object is the parameter
+					// Parameter so flag as parameter
+					String objectName = objectType.getObjectName();
+					TaskObject taskObject = task.getTaskObject(objectName);
 					taskObject.flagAsParameter();
-
-				} else {
-					// Link to external object (by type)
-					SectionObject sectionObject = sectionObjects
-							.get(objectTypeName);
-					if (sectionObject == null) {
-						// No yet added, so add section object
-						sectionObject = designer.addSectionObject(
-								objectTypeName, objectTypeName);
-						sectionObjects.put(objectTypeName, sectionObject);
-					}
-					designer.link(taskObject, sectionObject);
+					continue; // next object
 				}
+
+				// Link the task object
+				this.linkTaskObject(task, taskType, objectType);
 			}
 		}
 	}
+
 }

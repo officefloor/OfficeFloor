@@ -17,10 +17,22 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.HttpTemplateClassSectionSource;
+import net.officefloor.plugin.web.http.template.section.TemplateLogic.RowBean;
 
 /**
  * Tests the {@link HttpTemplateSectionSource}.
@@ -41,11 +53,65 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct type.
 	 */
-	public void _testType() {
+	public void testType() {
 
 		// Create the expected type
 		SectionDesigner expected = SectionLoaderUtil
 				.createSectionDesigner(HttpTemplateSectionSource.class);
+
+		// Inputs
+		expected.addSectionInput("renderTemplate", null);
+
+		// Outputs
+		expected.addSectionOutput("doExternalFlow", String.class.getName(),
+				false);
+		expected.addSectionOutput("java.sql.SQLException",
+				SQLException.class.getName(), true);
+		expected.addSectionOutput("output", null, false);
+
+		// Objects
+		expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
+		expected.addSectionObject(HttpSession.class.getName(),
+				HttpSession.class.getName());
+		expected.addSectionObject(ServerHttpConnection.class.getName(),
+				ServerHttpConnection.class.getName());
+
+		// Tasks
+		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
+				HttpTemplateWorkSource.class.getName());
+		templateWork.addSectionTask("template", "template");
+		templateWork.addSectionTask("List", "List");
+		templateWork.addSectionTask("Tail", "Tail");
+		SectionWork classWork = expected.addSectionWork("WORK",
+				HttpTemplateClassSectionSource.class.getName());
+		SectionTask template = classWork.addSectionTask("getTemplate",
+				"getTemplate");
+		template.getTaskObject("OBJECT");
+		SectionTask templateName = classWork.addSectionTask("getTemplateName",
+				"getTemplateName");
+		templateName.getTaskObject("OBJECT");
+		SectionTask getList = classWork.addSectionTask("getList", "getList");
+		getList.getTaskObject("OBJECT");
+		getList.getTaskObject("HttpSession");
+		SectionTask submit = classWork.addSectionTask("submit", "submit");
+		submit.getTaskObject("OBJECT");
+		submit.getTaskObject("ServerHttpConnection");
+		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",
+				"doInternalFlow");
+		doInternalFlow.getTaskObject("OBJECT");
+		doInternalFlow.getTaskObject("Integer");
+		doInternalFlow.getTaskObject("Connection");
+
+		// Managed Object Sources
+		expected.addSectionManagedObjectSource("OBJECT",
+				SectionClassManagedObjectSource.class.getName()).addProperty(
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				TemplateLogic.class.getName());
+		expected.addSectionManagedObjectSource(RowBean.class.getName(),
+				ClassManagedObjectSource.class.getName()).addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				RowBean.class.getName());
 
 		// Validate type
 		SectionLoaderUtil.validateSection(expected,
@@ -53,4 +119,5 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"Template.ofp", HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName());
 	}
+
 }

@@ -18,6 +18,8 @@
 
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -529,7 +531,16 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public ObjectDependency[] getObjectDependencies() {
-		return this.taskObjects.values().toArray(new ObjectDependency[0]);
+		ObjectDependency[] dependencies = this.taskObjects.values().toArray(
+				new ObjectDependency[0]);
+		Arrays.sort(dependencies, new Comparator<ObjectDependency>() {
+			@Override
+			public int compare(ObjectDependency a, ObjectDependency b) {
+				return a.getObjectDependencyName().compareTo(
+						b.getObjectDependencyName());
+			}
+		});
+		return dependencies;
 	}
 
 	@Override
