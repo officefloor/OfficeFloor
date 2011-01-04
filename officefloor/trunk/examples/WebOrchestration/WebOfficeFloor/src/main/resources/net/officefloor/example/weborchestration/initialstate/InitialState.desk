@@ -11,7 +11,7 @@
     <external-flow name="Exception" argument-type="java.lang.Exception" x="783" y="73"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-initialState.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="465" y="378">
+    <work name="HttpTemplate-initialState.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="465" y="378">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/initialstate/initialState.ofp"/>
         <property name="bean.template" value="net.officefloor.example.weborchestration.Customer"/>

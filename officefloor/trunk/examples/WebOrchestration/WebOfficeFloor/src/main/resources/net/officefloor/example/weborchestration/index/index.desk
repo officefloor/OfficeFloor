@@ -1,10 +1,10 @@
 <desk>
   <external-managed-objects>
-    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" x="700" y="514"/>
+    <external-managed-object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" x="700" y="514"/>
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="755" y="368"/>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="HttpSessionObjectRetriever-Customer" source="net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource" object-type="net.officefloor.example.weborchestration.Customer" timeout="0" x="429" y="539">
+    <managed-object-source name="HttpSessionObjectRetriever-Customer" source="net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectRetrieverManagedObjectSource" object-type="net.officefloor.example.weborchestration.Customer" timeout="0" x="429" y="539">
       <properties>
         <property name="type.name" value="net.officefloor.example.weborchestration.Customer"/>
       </properties>
@@ -13,7 +13,7 @@
   <managed-objects>
     <managed-object name="HttpSessionObjectRetriever-Customer" scope="PROCESS" x="402" y="481">
       <managed-object-source name="HttpSessionObjectRetriever-Customer"/>
-      <dependency name="HTTP_SESSION_OBJECT" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <dependency name="HTTP_SESSION_OBJECT" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <external-managed-object name="CustomerSessionObject"/>
       </dependency>
     </managed-object>
@@ -26,25 +26,25 @@
     <external-flow name="SelectProducts" argument-type="java.lang.Void" x="601" y="195"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-index.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="49" y="319">
+    <work name="HttpTemplate-index.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="49" y="319">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/index/index.ofp"/>
         <property name="bean.template" value="net.officefloor.example.weborchestration.Customer"/>
       </properties>
       <work-task name="deliverProducts">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="login">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="selectProducts">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="shoppingCart">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="template">

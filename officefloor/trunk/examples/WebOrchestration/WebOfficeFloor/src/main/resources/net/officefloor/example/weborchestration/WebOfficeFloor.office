@@ -4,11 +4,11 @@
     </external-managed-object>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="CustomerSessionObject" source="net.officefloor.plugin.socket.server.http.session.object.source.HttpSessionObjectManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" timeout="0" x="477" y="546">
+    <managed-object-source name="CustomerSessionObject" source="net.officefloor.plugin.web.http.session.object.source.HttpSessionObjectManagedObjectSource" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" timeout="0" x="477" y="546">
       <properties>
       </properties>
     </managed-object-source>
-    <managed-object-source name="HttpSession" source="net.officefloor.plugin.socket.server.http.session.source.HttpSessionManagedObjectSource" object-type="net.officefloor.plugin.socket.server.http.session.HttpSession" timeout="1000" x="685" y="561">
+    <managed-object-source name="HttpSession" source="net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource" object-type="net.officefloor.plugin.web.http.session.HttpSession" timeout="1000" x="685" y="561">
       <properties>
       </properties>
     </managed-object-source>
@@ -16,7 +16,7 @@
   <managed-objects>
     <managed-object name="CustomerSessionObject" scope="PROCESS" x="430" y="486">
       <managed-object-source name="CustomerSessionObject"/>
-      <dependency name="HTTP_SESSION" object-type="net.officefloor.plugin.socket.server.http.session.HttpSession">
+      <dependency name="HTTP_SESSION" object-type="net.officefloor.plugin.web.http.session.HttpSession">
         <managed-object name="HttpSession"/>
       </dependency>
     </managed-object>
@@ -104,7 +104,7 @@
       <output name="SelectProducts" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="SelectProducts" input="obtainProductQuantities"/>
       </output>
-      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
@@ -129,7 +129,7 @@
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
         <external-managed-object name="HTTP"/>
       </object>
-      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="HttpSessionCustomer" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
       <responsibility name="Responsibility">
@@ -176,7 +176,7 @@
       <output name="Quote" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Quote" input="quote"/>
       </output>
-      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
@@ -198,7 +198,7 @@
       <output name="PurchaseQuote" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="Invoice" input="PurchaseQuote"/>
       </output>
-      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">
@@ -221,7 +221,7 @@
       <output name="Index" argument-type="java.lang.Void" escalation-only="false">
         <section-input section="index" input="display"/>
       </output>
-      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject">
+      <object name="CustomerSessionObject" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject">
         <managed-object name="CustomerSessionObject"/>
       </object>
       <object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection">

@@ -4,7 +4,7 @@
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="669" y="549"/>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="HttpLoadProductsSelected" source="net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.products.ProductsSelected" timeout="0" x="502" y="301">
+    <managed-object-source name="HttpLoadProductsSelected" source="net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.products.ProductsSelected" timeout="0" x="502" y="301">
       <properties>
         <property name="type.name" value="net.officefloor.example.weborchestration.products.ProductsSelected"/>
       </properties>
@@ -35,13 +35,13 @@
     <external-flow name="Selected" argument-type="java.lang.Void" x="736" y="184"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-selectProducts.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="308" y="408">
+    <work name="HttpTemplate-selectProducts.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="308" y="408">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/products/selectProducts.ofp"/>
         <property name="bean.Product" value="net.officefloor.example.weborchestration.products.ProductQuantity"/>
       </properties>
       <work-task name="Cancel">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="Product">
@@ -52,7 +52,7 @@
         </task-object>
       </work-task>
       <work-task name="ProductsSelected">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="Tail">
@@ -85,7 +85,7 @@
         <task-object name="ProductsSelected" key="" object-type="net.officefloor.example.weborchestration.products.ProductsSelected" parameter="false">
           <managed-object name="HttpLoadProductsSelected"/>
         </task-object>
-        <task-object name="HttpSessionObject" key="" object-type="net.officefloor.plugin.socket.server.http.session.object.HttpSessionObject" parameter="false">
+        <task-object name="HttpSessionObject" key="" object-type="net.officefloor.plugin.web.http.session.object.HttpSessionObject" parameter="false">
           <external-managed-object name="CustomerSessionObject"/>
         </task-object>
       </work-task>

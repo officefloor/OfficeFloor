@@ -3,7 +3,7 @@
     <external-managed-object name="HTTP" object-type="net.officefloor.plugin.socket.server.http.ServerHttpConnection" x="668" y="357"/>
   </external-managed-objects>
   <managed-object-sources>
-    <managed-object-source name="Http load DeliveredProducts" source="net.officefloor.plugin.socket.server.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.deliver.DeliveredProducts" timeout="0" x="398" y="551">
+    <managed-object-source name="Http load DeliveredProducts" source="net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderManagedObjectSource" object-type="net.officefloor.example.weborchestration.deliver.DeliveredProducts" timeout="0" x="398" y="551">
       <properties>
         <property name="type.name" value="net.officefloor.example.weborchestration.deliver.DeliveredProducts"/>
       </properties>
@@ -35,7 +35,7 @@
     <external-flow name="Exception" argument-type="java.lang.Exception" x="735" y="126"/>
   </external-flows>
   <works>
-    <work name="HttpTemplate-deliverProducts.ofp" source="net.officefloor.plugin.socket.server.http.template.HttpTemplateWorkSource" x="233" y="293">
+    <work name="HttpTemplate-deliverProducts.ofp" source="net.officefloor.plugin.web.http.template.HttpTemplateWorkSource" x="233" y="293">
       <properties>
         <property name="template.path" value="net/officefloor/example/weborchestration/deliver/deliverProducts.ofp"/>
         <property name="bean.Product" value="net.officefloor.example.weborchestration.deliver.ProductDelivery"/>
@@ -48,7 +48,7 @@
         </task-object>
       </work-task>
       <work-task name="ProductsDelivered">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="Tail">
@@ -57,7 +57,7 @@
         </task-object>
       </work-task>
       <work-task name="index">
-        <task-object name="0" key="" object-type="net.officefloor.plugin.socket.server.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
+        <task-object name="0" key="" object-type="net.officefloor.plugin.web.http.template.RequestHandlerTask$RequestHandlerIdentifier" parameter="true">
         </task-object>
       </work-task>
       <work-task name="template">
