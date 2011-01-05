@@ -659,6 +659,11 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		for (int i = 0; i < flowMetaDatas.length; i++) {
 			TaskFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
 
+			// Ensure have flow configuration
+			if (flowConfiguration == null) {
+				continue;
+			}
+
 			// Obtain the task reference
 			TaskNodeReference taskNodeReference = flowConfiguration
 					.getInitialTask();
