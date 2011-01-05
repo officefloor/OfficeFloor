@@ -249,6 +249,20 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load recursive value.
+	 */
+	public void testRecursiveLoad() {
+		MockRecursive one = this.record_instantiate(MockRecursive.class);
+		this.object.setRecursive(one);
+		MockRecursive two = this.record_instantiate(MockRecursive.class);
+		one.setRecursive(two);
+		MockRecursive three = this.record_instantiate(MockRecursive.class);
+		two.setRecursive(three);
+		three.setValue("VALUE");
+		this.doTest("Recursive.Recursive.Recursive.Value", "VALUE");
+	}
+
+	/**
 	 * Maps an alias for a name.
 	 * 
 	 * @param alias
@@ -273,8 +287,8 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 			T mock = this.createMock(clazz);
 
 			// Record instantiating the object
-			this.recordReturn(this.instantiator, this.instantiator
-					.instantiate(clazz), mock);
+			this.recordReturn(this.instantiator,
+					this.instantiator.instantiate(clazz), mock);
 
 			// Return the instantiated object
 			return mock;
@@ -294,7 +308,7 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		try {
 			// Create the source
 			ValueLoaderSource source = new ValueLoaderSourceImpl();
-			source.init(MockType.class, this.isCaseSensitive,
+			source.init(MockType.class, !this.isCaseSensitive,
 					this.aliasMappings, this.instantiator);
 
 			// Create and return the value loader
@@ -336,6 +350,8 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 
 		void setMapTwo(String key, MockObjectTwo objectTwo);
 
+		void setRecursive(MockRecursive recursive);
+
 		void setIgnore(int value);
 	}
 
@@ -357,6 +373,16 @@ public class ValueLoaderTest extends OfficeFrameTestCase {
 		void setProperty1(String property1);
 
 		void setObjectOne(MockObjectOne objectOne);
+	}
+
+	/**
+	 * Mock recursive object for loading.
+	 */
+	public static interface MockRecursive {
+
+		void setRecursive(MockRecursive recursive);
+
+		void setValue(String value);
 	}
 
 }

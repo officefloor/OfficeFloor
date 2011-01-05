@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.value.loader;
 
+import java.util.Map;
+
 /**
  * Loads a value onto the Object graph.
  * 
@@ -30,7 +32,10 @@ public interface StatelessValueLoader {
 	 * @param object
 	 *            Root object of the graph to have the value loaded.
 	 * @param name
-	 *            Property name.
+	 *            Full property name.
+	 * @param nameIndex
+	 *            Index into property name to identify particular property name
+	 *            for next stringed property to load.
 	 * @param value
 	 *            Property value.
 	 * @param state
@@ -38,7 +43,7 @@ public interface StatelessValueLoader {
 	 * @throws Exception
 	 *             If fails to load the value.
 	 */
-	void loadValue(Object object, String name, String value, Object[] state)
-			throws Exception;
+	void loadValue(Object object, String name, int nameIndex, String value,
+			Map<PropertyKey, Object> state) throws Exception;
 
 }

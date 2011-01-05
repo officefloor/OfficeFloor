@@ -18,8 +18,7 @@
 package net.officefloor.plugin.value.retriever;
 
 import java.lang.reflect.Method;
-
-import net.officefloor.plugin.value.loader.NameTranslator;
+import java.util.Map;
 
 /**
  * {@link ValueRetriever} implementation.
@@ -43,14 +42,24 @@ public class PropertyValueRetrieverImpl<T> implements ValueRetriever<T> {
 	 * 
 	 * @param metaData
 	 *            {@link PropertyMetaData}.
-	 * @param translator
-	 *            {@link NameTranslator}.
+	 * @param isCaseInsensitive
+	 *            Indicates if case insensitive.
+	 * @param valueRetrieverByMetaData
+	 *            {@link ValueRetriever} by its {@link PropertyMetaData}.
 	 */
-	public PropertyValueRetrieverImpl(PropertyMetaData metaData,
-			NameTranslator translator) {
+	PropertyValueRetrieverImpl(PropertyMetaData metaData,
+			boolean isCaseInsensitive,
+			Map<PropertyMetaData, ValueRetriever<?>> valueRetrieverByMetaData) {
 		this.metaData = metaData;
-		this.delegate = new RootValueRetrieverImpl<Object>(this.metaData
-				.getProperties(), translator);
+
+		// Register this property before continuing further.
+		// Must be registered before recursively creating further retrievers.
+		valueRetrieverByMetaData.put(metaData, this);
+
+		// Create further retrievers in the property meta-data tree
+		this.delegate = new RootValueRetrieverImpl<Object>(
+				this.metaData.getProperties(), isCaseInsensitive,
+				valueRetrieverByMetaData);
 	}
 
 	/*

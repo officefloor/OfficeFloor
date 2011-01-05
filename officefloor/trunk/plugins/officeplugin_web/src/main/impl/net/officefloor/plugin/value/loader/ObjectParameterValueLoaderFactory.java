@@ -18,6 +18,7 @@
 package net.officefloor.plugin.value.loader;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * {@link StatelessValueLoaderFactory} to load an object parameter.
@@ -48,15 +49,14 @@ public class ObjectParameterValueLoaderFactory implements
 	private final ObjectInstantiator objectInstantiator;
 
 	/**
-	 * Delegate {@link StatelessValueLoader}.
+	 * {@link PropertyKeyFactory}.
 	 */
-	private final StatelessValueLoader valueLoader;
+	private final PropertyKeyFactory propertyKeyFactory;
 
 	/**
-	 * Index within the state to obtain state for {@link ValueLoader} instances
-	 * created from this factory.
+	 * Delegate {@link StatelessValueLoader}.
 	 */
-	private final int stateIndex;
+	private StatelessValueLoader valueLoader;
 
 	/**
 	 * Initiate.
@@ -69,21 +69,28 @@ public class ObjectParameterValueLoaderFactory implements
 	 *            Object type.
 	 * @param objectInstantiator
 	 *            {@link ObjectInstantiator}.
-	 * @param delegateValueLoader
-	 *            Delegate {@link StatelessValueLoader}.
-	 * @param indexing
-	 *            {@link StateIndexing}.
+	 * @param propertyKeyFactory
+	 *            {@link PropertyKeyFactory}.
 	 */
 	public ObjectParameterValueLoaderFactory(String propertyName,
 			String methodName, Class<?> objectType,
 			ObjectInstantiator objectInstantiator,
-			StatelessValueLoader delegateValueLoader, StateIndexing indexing) {
+			PropertyKeyFactory propertyKeyFactory) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 		this.objectType = objectType;
 		this.objectInstantiator = objectInstantiator;
-		this.valueLoader = delegateValueLoader;
-		this.stateIndex = indexing.nextIndex();
+		this.propertyKeyFactory = propertyKeyFactory;
+	}
+
+	/**
+	 * Specifies the {@link StatelessValueLoader}.
+	 * 
+	 * @param valueLoader
+	 *            {@link StatelessValueLoader}.
+	 */
+	public void setValueLoader(StatelessValueLoader valueLoader) {
+		this.valueLoader = valueLoader;
 	}
 
 	/*
@@ -106,18 +113,24 @@ public class ObjectParameterValueLoaderFactory implements
 		// Return the value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, String value,
-					Object[] state) throws Exception {
+			public void loadValue(Object object, String name, int nameIndex,
+					String value, Map<PropertyKey, Object> state)
+					throws Exception {
+
+				// Determine parameter key (-1 to ignore separator '.')
+				String propertyName = name.substring(0, nameIndex - 1);
+				PropertyKey key = ObjectParameterValueLoaderFactory.this.propertyKeyFactory
+						.createPropertyKey(propertyName);
 
 				// Load the parameter only once
-				Object parameter = state[ObjectParameterValueLoaderFactory.this.stateIndex];
+				Object parameter = state.get(key);
 				if (parameter == null) {
 					// Instantiate the parameter object
 					parameter = ObjectParameterValueLoaderFactory.this.objectInstantiator
 							.instantiate(ObjectParameterValueLoaderFactory.this.objectType);
 
 					// Record on state for possible further loading
-					state[ObjectParameterValueLoaderFactory.this.stateIndex] = parameter;
+					state.put(key, parameter);
 
 					// Load the parameter
 					ValueLoaderSourceImpl.loadValue(object, loaderMethod,
@@ -126,7 +139,7 @@ public class ObjectParameterValueLoaderFactory implements
 
 				// Load the remaining object
 				ObjectParameterValueLoaderFactory.this.valueLoader.loadValue(
-						parameter, name, value, state);
+						parameter, name, nameIndex, value, state);
 			}
 		};
 	}

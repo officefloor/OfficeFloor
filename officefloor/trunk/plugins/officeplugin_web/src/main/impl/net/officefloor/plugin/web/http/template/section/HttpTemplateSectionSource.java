@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -50,7 +51,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	 * Property name for the {@link Class} providing the backing logic to the
 	 * template.
 	 */
-	public static final String PROPERTY_CLASS_NAME = "class.name";
+	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
 	 * {@link TemplateBeanTask} instances by the template bean

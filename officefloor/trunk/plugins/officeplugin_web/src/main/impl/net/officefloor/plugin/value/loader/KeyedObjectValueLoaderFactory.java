@@ -18,7 +18,6 @@
 package net.officefloor.plugin.value.loader;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -50,15 +49,14 @@ public class KeyedObjectValueLoaderFactory implements
 	private final ObjectInstantiator objectInstantiator;
 
 	/**
-	 * Delegate {@link StatelessValueLoader}.
+	 * {@link PropertyKeyFactory}.
 	 */
-	private final StatelessValueLoader valueLoader;
+	private final PropertyKeyFactory propertyKeyFactory;
 
 	/**
-	 * Index within the state to obtain state for {@link ValueLoader} instances
-	 * created from this factory.
+	 * Delegate {@link StatelessValueLoader}.
 	 */
-	private final int stateIndex;
+	private StatelessValueLoader valueLoader;
 
 	/**
 	 * Initiate.
@@ -71,21 +69,28 @@ public class KeyedObjectValueLoaderFactory implements
 	 *            Object type.
 	 * @param objectInstantiator
 	 *            {@link ObjectInstantiator}.
-	 * @param delegateValueLoader
-	 *            Delegate {@link StatelessValueLoader}.
-	 * @param indexing
-	 *            {@link StateIndexing}.
+	 * @param propertyKeyFactory
+	 *            {@link PropertyKeyFactory}.
 	 */
 	public KeyedObjectValueLoaderFactory(String propertyName,
 			String methodName, Class<?> objectType,
 			ObjectInstantiator objectInstantiator,
-			StatelessValueLoader delegateValueLoader, StateIndexing indexing) {
+			PropertyKeyFactory propertyKeyFactory) {
 		this.propertyName = propertyName;
 		this.methodName = methodName;
 		this.objectType = objectType;
 		this.objectInstantiator = objectInstantiator;
-		this.valueLoader = delegateValueLoader;
-		this.stateIndex = indexing.nextIndex();
+		this.propertyKeyFactory = propertyKeyFactory;
+	}
+
+	/**
+	 * Specifies the {@link StatelessValueLoader}.
+	 * 
+	 * @param valueLoader
+	 *            {@link StatelessValueLoader}.
+	 */
+	public void setValueLoader(StatelessValueLoader valueLoader) {
+		this.valueLoader = valueLoader;
 	}
 
 	/*
@@ -108,43 +113,37 @@ public class KeyedObjectValueLoaderFactory implements
 		// Return the value loader
 		return new StatelessValueLoader() {
 			@Override
-			@SuppressWarnings("unchecked")
-			public void loadValue(Object object, String name, String value,
-					Object[] state) throws Exception {
+			public void loadValue(Object object, String name, int nameIndex,
+					String value, Map<PropertyKey, Object> state)
+					throws Exception {
 
 				// Obtain the keyed value
-				int keyEnd = name.indexOf('}');
+				int keyEnd = name.indexOf('}', nameIndex);
 				if (keyEnd < 0) {
 					return; // No key so do not load
 				}
-				String key = name.substring(0, keyEnd);
+				String key = name.substring(nameIndex, keyEnd);
 
-				// Obtain the remaining name
-				int remainingStart = keyEnd + 1; // ignore '{'
-				if (name.charAt(remainingStart) == '.') {
-					remainingStart++; // ignore '.'
-				}
-				String remainingName = name.substring(remainingStart);
+				// Obtain the full property name for the key
+				String fullKeyName = name.substring(0, keyEnd);
+				PropertyKey propertyKey = KeyedObjectValueLoaderFactory.this.propertyKeyFactory
+						.createPropertyKey(fullKeyName);
 
-				// Obtain the map for keyed objects
-				Map<String, Object> map = (Map<String, Object>) state[KeyedObjectValueLoaderFactory.this.stateIndex];
-				if (map == null) {
-					// Create the map
-					map = new HashMap<String, Object>();
-
-					// Record on state for possible further loading
-					state[KeyedObjectValueLoaderFactory.this.stateIndex] = map;
+				// Obtain the index for remaining name
+				nameIndex = keyEnd + 1; // ignore '}'
+				if (name.charAt(nameIndex) == '.') {
+					nameIndex++; // ignore following '.'
 				}
 
-				// Load the keyed object only once
-				Object parameter = map.get(key);
+				// Load the parameter only once
+				Object parameter = state.get(propertyKey);
 				if (parameter == null) {
 					// Instantiate the parameter object
 					parameter = KeyedObjectValueLoaderFactory.this.objectInstantiator
 							.instantiate(KeyedObjectValueLoaderFactory.this.objectType);
 
 					// Register the keyed object
-					map.put(key, parameter);
+					state.put(propertyKey, parameter);
 
 					// Load the parameter
 					ValueLoaderSourceImpl.loadValue(object, loaderMethod, key,
@@ -153,7 +152,7 @@ public class KeyedObjectValueLoaderFactory implements
 
 				// Load the property onto the object
 				KeyedObjectValueLoaderFactory.this.valueLoader.loadValue(
-						parameter, remainingName, value, state);
+						parameter, name, nameIndex, value, state);
 			}
 		};
 	}

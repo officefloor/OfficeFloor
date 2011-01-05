@@ -124,7 +124,7 @@ public class HttpTemplateTask extends
 
 					// Obtain the value retriever
 					ValueRetrieverSource source = new ValueRetrieverSourceImpl();
-					source.init(false);
+					source.init(true);
 					valueRetriever = source.sourceValueRetriever(beanClass);
 				}
 

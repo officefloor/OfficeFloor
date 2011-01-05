@@ -20,11 +20,10 @@ package net.officefloor.plugin.value.retriever;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import net.officefloor.plugin.value.loader.NameTranslator;
-import net.officefloor.plugin.value.loader.NameTranslatorImpl;
+import java.util.Map;
 
 /**
  * {@link ValueRetrieverSource} implementation.
@@ -70,21 +69,34 @@ public class ValueRetrieverSourceImpl implements ValueRetrieverSource {
 	 * 
 	 * @param type
 	 *            Type to create the {@link PropertyMetaData} instances.
-	 * @param translator
-	 *            {@link NameTranslator}.
+	 * @param isCaseInsensitive
+	 *            Indicates if case insensitve property names.
+	 * @param metaDataByType
+	 *            {@link PropertyMetaData} for the type to allow tracking
+	 *            recursive properties (bean or its downstream property
+	 *            returning same type as the bean).
 	 * @return {@link PropertyMetaData} instances for the type.
 	 * @throws Exception
 	 *             If fails to obtain the {@link PropertyMetaData} instances.
 	 */
 	private static PropertyMetaData[] createPropertyMetaData(Class<?> type,
-			NameTranslator translator) throws Exception {
+			boolean isCaseInsensitive,
+			Map<Class<?>, PropertyMetaData[]> metaDataByType) throws Exception {
+
+		final String GETTER_PREFIX = "get";
+
+		// Determine if have meta-data already for type
+		PropertyMetaData[] recursiveMetaData = metaDataByType.get(type);
+		if (recursiveMetaData != null) {
+			return recursiveMetaData;
+		}
 
 		// Iterate over the methods to obtain the properties
-		List<PropertyMetaData> metaDatas = new LinkedList<PropertyMetaData>();
+		List<Method> propertyMethods = new ArrayList<Method>();
 		NEXT_METHOD: for (Method method : type.getMethods()) {
 
 			// Ignore Object methods
-			if (method.getDeclaringClass() == Object.class) {
+			if (Object.class.equals(method.getDeclaringClass())) {
 				continue NEXT_METHOD;
 			}
 
@@ -98,7 +110,6 @@ public class ValueRetrieverSourceImpl implements ValueRetrieverSource {
 
 			// Ensure the method begins with 'get'
 			String methodName = method.getName();
-			final String GETTER_PREFIX = "get";
 			if (!methodName.startsWith(GETTER_PREFIX)) {
 				continue NEXT_METHOD;
 			}
@@ -109,55 +120,74 @@ public class ValueRetrieverSourceImpl implements ValueRetrieverSource {
 				continue NEXT_METHOD;
 			}
 
-			// Translate the property name
-			propertyName = translator.translate(propertyName);
-
 			// Ensure returns a value
 			Class<?> returnType = method.getReturnType();
 			if ((returnType == null) || (returnType == Void.class)) {
 				continue NEXT_METHOD;
 			}
 
+			// Add the property method
+			propertyMethods.add(method);
+		}
+
+		// Create the property meta-data array for the type
+		PropertyMetaData[] metaData = new PropertyMetaData[propertyMethods
+				.size()];
+		metaDataByType.put(type, metaData);
+
+		// Load property meta-data (after adding meta-data for recursion)
+		for (int i = 0; i < metaData.length; i++) {
+
+			// Obtain the method and its details
+			Method method = propertyMethods.get(i);
+			String methodName = method.getName();
+			Class<?> returnType = method.getReturnType();
+
+			// Obtain the property name
+			String propertyName = methodName.substring(GETTER_PREFIX.length());
+			if (isCaseInsensitive) {
+				propertyName = propertyName.toLowerCase();
+			}
+
 			// Obtain the property meta data for the return type
 			PropertyMetaData[] returnTypeMetaData = createPropertyMetaData(
-					returnType, translator);
+					returnType, isCaseInsensitive, metaDataByType);
 
 			// Create and register the meta data for the property
 			PropertyMetaData propertyMetaData = new PropertyMetaData(
 					propertyName, methodName, returnTypeMetaData);
-			metaDatas.add(propertyMetaData);
+			metaData[i] = propertyMetaData;
 		}
 
 		// Return the meta data
-		return metaDatas.toArray(new PropertyMetaData[0]);
+		return metaData;
 	}
 
 	/**
-	 * Case sensitive.
+	 * Flag indicating if case insensitive.
 	 */
-	private boolean isCaseSensitive;
+	private boolean isCaseInsensitive;
 
 	/*
 	 * ================ ValueRetrieverSource ========================
 	 */
 
 	@Override
-	public void init(boolean isCaseSensitive) throws Exception {
-		this.isCaseSensitive = isCaseSensitive;
+	public void init(boolean isCaseInsensitive) throws Exception {
+		this.isCaseInsensitive = isCaseInsensitive;
 	}
 
 	@Override
 	public <T> ValueRetriever<T> sourceValueRetriever(Class<T> type)
 			throws Exception {
 
-		// Create the translator
-		NameTranslator translator = new NameTranslatorImpl(this.isCaseSensitive);
-
 		// Obtain the property meta data
-		PropertyMetaData[] metaData = createPropertyMetaData(type, translator);
+		PropertyMetaData[] metaData = createPropertyMetaData(type,
+				this.isCaseInsensitive,
+				new HashMap<Class<?>, PropertyMetaData[]>());
 
 		// Return the value retriever
-		return new RootValueRetrieverImpl<T>(metaData, translator);
+		return new RootValueRetrieverImpl<T>(metaData, this.isCaseInsensitive);
 	}
 
 }

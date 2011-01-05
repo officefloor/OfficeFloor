@@ -96,7 +96,7 @@ public class ValueRetrievableTest extends OfficeFrameTestCase {
 		try {
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSourceImpl();
-			source.init(this.isCaseSensitive);
+			source.init(!this.isCaseSensitive);
 			ValueRetriever<RootObject> retriever = source
 					.sourceValueRetriever(RootObject.class);
 

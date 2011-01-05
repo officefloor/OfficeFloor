@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2010 Daniel Sagenschneider
+ * Copyright (C) 2005-2009 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,36 @@
 package net.officefloor.plugin.value.loader;
 
 /**
- * Translates the name for comparison.
+ * Factory for a {@link PropertyKey}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface NameTranslator {
+public class PropertyKeyFactory {
 
 	/**
-	 * Translates the name for comparison.
-	 * 
-	 * @param name
-	 *            Name to be translated.
-	 * @return Translated name for comparison.
-	 * @throws Exception
-	 *             If fails to translate the name.
+	 * Indicates if case insensitive match.
 	 */
-	String translate(String name) throws Exception;
+	private final boolean isCaseInsensitive;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isisCaseInsensitive
+	 *            Indicates if case insensitive match.
+	 */
+	public PropertyKeyFactory(boolean isCaseInsensitive) {
+		this.isCaseInsensitive = isCaseInsensitive;
+	}
+
+	/**
+	 * Creates the {@link PropertyKey}.
+	 * 
+	 * @param propertyName
+	 *            Property name.
+	 * @return {@link PropertyKey}.
+	 */
+	public PropertyKey createPropertyKey(String propertyName) {
+		return new PropertyKey(propertyName, this.isCaseInsensitive);
+	}
 
 }

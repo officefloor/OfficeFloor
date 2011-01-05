@@ -18,6 +18,7 @@
 package net.officefloor.plugin.value.loader;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * {@link StatelessValueLoaderFactory} to load a string parameter.
@@ -71,8 +72,9 @@ public class SingleParameterValueLoaderFactory implements
 		// Return the new value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String name, String value,
-					Object[] state) throws Exception {
+			public void loadValue(Object object, String name, int nameIndex,
+					String value, Map<PropertyKey, Object> state)
+					throws Exception {
 				ValueLoaderSourceImpl.loadValue(object, loaderMethod, value);
 			}
 		};

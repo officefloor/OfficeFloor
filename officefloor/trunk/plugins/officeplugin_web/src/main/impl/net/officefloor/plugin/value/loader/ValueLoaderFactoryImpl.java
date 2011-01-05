@@ -25,11 +25,6 @@ package net.officefloor.plugin.value.loader;
 public class ValueLoaderFactoryImpl<T> implements ValueLoaderFactory<T> {
 
 	/**
-	 * Indicates the number of objects required within the state.
-	 */
-	private int numberOfObjectsInState;
-
-	/**
 	 * Delegate {@link StatelessValueLoader} to load values.
 	 */
 	private final StatelessValueLoader delegate;
@@ -37,14 +32,10 @@ public class ValueLoaderFactoryImpl<T> implements ValueLoaderFactory<T> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param numberOfObjectsInState
-	 *            Indicates the number of objects required within the state.
 	 * @param delegate
 	 *            Delegate {@link StatelessValueLoader} to load values.
 	 */
-	public ValueLoaderFactoryImpl(int numberOfObjectsInState,
-			StatelessValueLoader delegate) {
-		this.numberOfObjectsInState = numberOfObjectsInState;
+	public ValueLoaderFactoryImpl(StatelessValueLoader delegate) {
 		this.delegate = delegate;
 	}
 
@@ -55,8 +46,7 @@ public class ValueLoaderFactoryImpl<T> implements ValueLoaderFactory<T> {
 	@Override
 	public ValueLoader createValueLoader(T object) throws Exception {
 		// Create and return the new value loader
-		return new ValueLoaderImpl(object,
-				new Object[this.numberOfObjectsInState], this.delegate);
+		return new ValueLoaderImpl(object, this.delegate);
 	}
 
 }

@@ -429,7 +429,7 @@ public class HttpParametersLoaderTest extends OfficeFrameTestCase {
 		}
 
 		// Initialise the loader
-		loader.init(MockInterface.class, aliasMappings, isCaseSensitive, null);
+		loader.init(MockInterface.class, aliasMappings, !isCaseSensitive, null);
 
 		// Return the loader
 		return loader;
