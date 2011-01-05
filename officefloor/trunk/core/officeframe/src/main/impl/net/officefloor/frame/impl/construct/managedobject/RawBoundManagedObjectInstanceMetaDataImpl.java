@@ -36,7 +36,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMet
 
 /**
  * {@link RawBoundManagedObjectInstanceMetaData} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
@@ -82,7 +82,7 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param rawBoundMetaData
@@ -111,7 +111,7 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 	/**
 	 * Loads the dependencies.
-	 *
+	 * 
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param boundMo
@@ -145,6 +145,11 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 		Map<Integer, ManagedObjectDependencyConfiguration<D>> dependencyMappings = new HashMap<Integer, ManagedObjectDependencyConfiguration<D>>();
 		for (int i = 0; i < this.dependenciesConfiguration.length; i++) {
 			ManagedObjectDependencyConfiguration<D> dependencyConfiguration = this.dependenciesConfiguration[i];
+
+			// Ensure have dependency configuration
+			if (dependencyConfiguration == null) {
+				continue;
+			}
 
 			// Obtain the index to identify the dependency
 			D dependencyKey = dependencyConfiguration.getDependencyKey();
@@ -219,7 +224,8 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 				if (!requiredType.isAssignableFrom(dependencyType)) {
 					// incompatible dependency
 					isDependencyIssue = true;
-					issues.addIssue(AssetType.MANAGED_OBJECT,
+					issues.addIssue(
+							AssetType.MANAGED_OBJECT,
 							this.boundManagedObjectName,
 							"Incompatible dependency for "
 									+ dependencyLabel
@@ -242,10 +248,9 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 		// Ensure there are no additional dependencies configured
 		if (dependencyMappings.size() > 0) {
-			issues
-					.addIssue(AssetType.MANAGED_OBJECT,
-							this.boundManagedObjectName,
-							"Extra dependencies configured than required by ManagedObjectSourceMetaData");
+			issues.addIssue(AssetType.MANAGED_OBJECT,
+					this.boundManagedObjectName,
+					"Extra dependencies configured than required by ManagedObjectSourceMetaData");
 			return; // additional dependencies configured
 		}
 
