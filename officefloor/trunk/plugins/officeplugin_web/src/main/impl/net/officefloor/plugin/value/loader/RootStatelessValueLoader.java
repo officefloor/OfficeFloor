@@ -25,53 +25,79 @@ import java.util.Map;
  * 
  * @author Daniel Sagenschneider
  */
-public class RootStatelessValueLoader extends AbstractStatelessValueLoader {
+public class RootStatelessValueLoader implements StatelessValueLoader {
 
 	/**
-	 * {@link StatelessValueLoader} instances by property names.
+	 * {@link StatelessValueLoader} instances by {@link PropertyKey}.
 	 */
-	private Map<String, StatelessValueLoader> valueLoaders = new HashMap<String, StatelessValueLoader>();
+	private Map<PropertyKey, StatelessValueLoader> valueLoaders = new HashMap<PropertyKey, StatelessValueLoader>();
 
 	/**
-	 * {@link NameTranslator}.
+	 * {@link PropertyKeyFactory}.
 	 */
-	private final NameTranslator translator;
+	private final PropertyKeyFactory propertyKeyFactory;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param valueLoaders
-	 *            {@link StatelessValueLoader} instances by property names.
-	 * @param translator
-	 *            {@link NameTranslator}.
+	 *            {@link StatelessValueLoader} instances by {@link PropertyKey}.
+	 * @param propertyKeyFactory
+	 *            {@link PropertyKeyFactory}.
 	 */
 	public RootStatelessValueLoader(
-			Map<String, StatelessValueLoader> valueLoaders,
-			NameTranslator translator) {
+			Map<PropertyKey, StatelessValueLoader> valueLoaders,
+			PropertyKeyFactory propertyKeyFactory) {
 		this.valueLoaders = valueLoaders;
-		this.translator = translator;
+		this.propertyKeyFactory = propertyKeyFactory;
 	}
 
 	/*
-	 * ==================== ValueLoader ==========================
+	 * ================== StatelessValueLoader ==========================
 	 */
 
 	@Override
-	protected void loadValue(Object object, String propertyName,
-			String remainingName, String value, Object[] state)
-			throws Exception {
+	public void loadValue(Object object, String name, int nameIndex,
+			String value, Map<PropertyKey, Object> state) throws Exception {
 
-		// Transform the property name for comparison
-		propertyName = this.translator.translate(propertyName);
+		// Parse out the property name (start at name index)
+		int index = -1;
+		SEPARATOR_FOUND: for (int i = nameIndex; i < name.length(); i++) {
+			char character = name.charAt(i);
+			switch (character) {
+			case '.':
+			case '{':
+				index = i;
+				break SEPARATOR_FOUND;
+			default:
+				// not separator so continue to next character
+			}
+		}
+
+		// Split out the property name from the name
+		String propertyName;
+		if (index < 0) {
+			// Entire name
+			propertyName = name.substring(nameIndex);
+			nameIndex = name.length(); // end of name
+		} else {
+			// Not entire name
+			propertyName = name.substring(nameIndex, index);
+			nameIndex = index + 1; // ignore separator ('.' character)
+		}
+
+		// Create the property key
+		PropertyKey propertyKey = this.propertyKeyFactory
+				.createPropertyKey(propertyName);
 
 		// Obtain the value loader for the property name
-		StatelessValueLoader valueLoader = this.valueLoaders.get(propertyName);
+		StatelessValueLoader valueLoader = this.valueLoaders.get(propertyKey);
 		if (valueLoader == null) {
 			return; // no value loader for property
 		}
 
 		// Load the value
-		valueLoader.loadValue(object, remainingName, value, state);
+		valueLoader.loadValue(object, name, nameIndex, value, state);
 	}
 
 }

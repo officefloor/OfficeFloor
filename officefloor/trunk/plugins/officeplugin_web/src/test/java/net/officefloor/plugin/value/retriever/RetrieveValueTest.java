@@ -104,6 +104,20 @@ public class RetrieveValueTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to obtain recursive property.
+	 */
+	public void testRecursiveProperty() {
+		final PropertyObject one = this.createMock(PropertyObject.class);
+		final PropertyObject two = this.createMock(PropertyObject.class);
+		final PropertyObject three = this.createMock(PropertyObject.class);
+		this.recordReturn(this.object, this.object.getProperty(), one);
+		this.recordReturn(one, one.getRecursive(), two);
+		this.recordReturn(two, two.getRecursive(), three);
+		this.recordReturn(three, three.getText(), "TEST");
+		this.doTest("Property.Recursive.Recursive.Text", "TEST");
+	}
+
+	/**
 	 * Does the test.
 	 * 
 	 * @param nameValuePairs
@@ -113,7 +127,7 @@ public class RetrieveValueTest extends OfficeFrameTestCase {
 		try {
 			// Create the value retriever
 			ValueRetrieverSource source = new ValueRetrieverSourceImpl();
-			source.init(this.isCaseSensitive);
+			source.init(!this.isCaseSensitive);
 			ValueRetriever<RootObject> retriever = source
 					.sourceValueRetriever(RootObject.class);
 

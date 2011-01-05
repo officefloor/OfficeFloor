@@ -18,6 +18,7 @@
 package net.officefloor.plugin.value.loader;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * {@link StatelessValueLoaderFactory} to load keyed string parameter.
@@ -71,15 +72,16 @@ public class KeyedParameterValueLoaderFactory implements
 		// Return the new value loader
 		return new StatelessValueLoader() {
 			@Override
-			public void loadValue(Object object, String propertyName,
-					String value, Object[] state) throws Exception {
+			public void loadValue(Object object, String name, int nameIndex,
+					String value, Map<PropertyKey, Object> state)
+					throws Exception {
 
 				// Obtain the keyed value
-				int keyEnd = propertyName.indexOf('}');
+				int keyEnd = name.indexOf('}', nameIndex);
 				if (keyEnd < 0) {
 					return; // No key so do not load
 				}
-				String key = propertyName.substring(0, keyEnd);
+				String key = name.substring(nameIndex, keyEnd);
 
 				// Load the value
 				ValueLoaderSourceImpl.loadValue(object, loaderMethod, key,
@@ -87,5 +89,4 @@ public class KeyedParameterValueLoaderFactory implements
 			}
 		};
 	}
-
 }

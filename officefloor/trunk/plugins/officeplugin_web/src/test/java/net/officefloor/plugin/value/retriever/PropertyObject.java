@@ -34,4 +34,11 @@ public interface PropertyObject {
 	 */
 	String getText();
 
+	/**
+	 * Allows for <code>property.recursive.recursive.(etc)</code> property name.
+	 * 
+	 * @return String value as per testing.
+	 */
+	PropertyObject getRecursive();
+
 }

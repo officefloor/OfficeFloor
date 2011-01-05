@@ -99,7 +99,7 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 
 	@Override
 	public void init(Class<T> type, Map<String, String> aliasMappings,
-			boolean isCaseSensitive, ObjectInstantiator objectInstantiator)
+			boolean isCaseInsensitive, ObjectInstantiator objectInstantiator)
 			throws Exception {
 
 		// Provide empty alias mappings if null
@@ -119,7 +119,7 @@ public class HttpParametersLoaderImpl<T> implements HttpParametersLoader<T> {
 
 		// Load the source
 		this.source = new ValueLoaderSourceImpl();
-		this.source.init(type, isCaseSensitive, aliasMappings,
+		this.source.init(type, isCaseInsensitive, aliasMappings,
 				objectInstantiator);
 	}
 

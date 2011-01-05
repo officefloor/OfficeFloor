@@ -20,8 +20,6 @@ package net.officefloor.plugin.value.retriever;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.value.loader.NameTranslator;
-
 /**
  * {@link ValueRetriever} implementation.
  * 
@@ -35,27 +33,57 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 	private final Map<String, ValueRetriever<Object>> propertyToRetriever = new HashMap<String, ValueRetriever<Object>>();
 
 	/**
-	 * {@link NameTranslator}.
+	 * Indicates if case insensitive.
 	 */
-	private final NameTranslator translator;
+	private final boolean isCaseInsensitive;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param properties
 	 *            {@link PropertyMetaData} instances.
-	 * @param translator
-	 *            {@link NameTranslator}.
+	 * @param isCaseInsensitive
+	 *            Indicates if case insensitive.
 	 */
 	public RootValueRetrieverImpl(PropertyMetaData[] properties,
-			NameTranslator translator) {
-		this.translator = translator;
+			boolean isCaseInsensitive) {
+		this(properties, isCaseInsensitive,
+				new HashMap<PropertyMetaData, ValueRetriever<?>>());
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param properties
+	 *            {@link PropertyMetaData} instances.
+	 * @param isCaseInsensitive
+	 *            Indicates if case insensitive.
+	 * @param valueRetrieverByMetaData
+	 *            {@link ValueRetriever} by its {@link PropertyMetaData}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	RootValueRetrieverImpl(PropertyMetaData[] properties,
+			boolean isCaseInsensitive,
+			Map<PropertyMetaData, ValueRetriever<?>> valueRetrieverByMetaData) {
+		this.isCaseInsensitive = isCaseInsensitive;
 
 		// Load the property retriever
 		for (PropertyMetaData property : properties) {
+
+			// Obtain the property name
 			String propertyName = property.getPropertyName();
-			ValueRetriever<Object> propertyRetriever = new PropertyValueRetrieverImpl<Object>(
-					property, translator);
+
+			// Determine if already registered value retriever
+			ValueRetriever propertyRetriever = valueRetrieverByMetaData
+					.get(property);
+			if (propertyRetriever == null) {
+				// Create the property retriever (registers itself)
+				propertyRetriever = new PropertyValueRetrieverImpl<Object>(
+						property, this.isCaseInsensitive,
+						valueRetrieverByMetaData);
+			}
+
+			// Register the property retriever
 			this.propertyToRetriever.put(propertyName, propertyRetriever);
 		}
 	}
@@ -146,7 +174,9 @@ public class RootValueRetrieverImpl<T> implements ValueRetriever<T> {
 		}
 
 		// Translate the property name
-		propertyName = this.translator.translate(propertyName);
+		if (this.isCaseInsensitive) {
+			propertyName = propertyName.toLowerCase();
+		}
 
 		// Obtain the property value retriever
 		ValueRetriever<Object> propertyRetriever = this.propertyToRetriever

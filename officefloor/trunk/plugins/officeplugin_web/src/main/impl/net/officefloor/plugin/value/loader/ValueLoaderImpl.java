@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.value.loader;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link ValueLoader} implementation.
  * 
@@ -32,7 +35,7 @@ public class ValueLoaderImpl implements ValueLoader {
 	/**
 	 * State for loading values.
 	 */
-	private final Object[] state;
+	private final Map<PropertyKey, Object> state = new HashMap<PropertyKey, Object>();
 
 	/**
 	 * {@link StatelessValueLoader} to undertake loading the values.
@@ -44,15 +47,11 @@ public class ValueLoaderImpl implements ValueLoader {
 	 * 
 	 * @param object
 	 *            Object to load values on.
-	 * @param state
-	 *            State for loading values.
 	 * @param delegate
 	 *            {@link StatelessValueLoader} to undertake loading the values.
 	 */
-	public ValueLoaderImpl(Object object, Object[] state,
-			StatelessValueLoader delegate) {
+	public ValueLoaderImpl(Object object, StatelessValueLoader delegate) {
 		this.object = object;
-		this.state = state;
 		this.delegate = delegate;
 	}
 
@@ -63,7 +62,7 @@ public class ValueLoaderImpl implements ValueLoader {
 	@Override
 	public void loadValue(String name, String value) throws Exception {
 		// Load the value
-		this.delegate.loadValue(this.object, name, value, this.state);
+		this.delegate.loadValue(this.object, name, 0, value, this.state);
 	}
 
 }
