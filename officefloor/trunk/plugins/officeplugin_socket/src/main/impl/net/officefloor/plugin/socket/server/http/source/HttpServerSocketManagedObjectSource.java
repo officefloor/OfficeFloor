@@ -19,10 +19,18 @@
 package net.officefloor.plugin.socket.server.http.source;
 
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
+import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
+import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpCommunicationProtocol;
 import net.officefloor.plugin.socket.server.http.protocol.HttpConnectionHandler;
@@ -37,6 +45,62 @@ public class HttpServerSocketManagedObjectSource extends
 		AbstractServerSocketManagedObjectSource<HttpConnectionHandler>
 		implements
 		ManagedObjectSourceService<None, Indexed, HttpServerSocketManagedObjectSource> {
+
+	/**
+	 * Convenience method to create the {@link ManagedObjectSourceWirer} for
+	 * wiring in the {@link HttpServerSocketManagedObjectSource}.
+	 * 
+	 * @param sectionName
+	 *            Name of the section handling the {@link HttpRequest}.
+	 * @param sectionInputName
+	 *            Name of the {@link SectionInput} handling the
+	 *            {@link HttpRequest}.
+	 * @return {@link ManagedObjectSourceWirer} for wiring in the
+	 *         {@link HttpServerSocketManagedObjectSource}.
+	 */
+	public static ManagedObjectSourceWirer createManagedObjectSourceWirer(
+			final String sectionName, final String sectionInputName) {
+		return new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+
+				// Is input
+				context.setInput(true);
+
+				// Provide teams
+				context.mapTeam("accepter", OnePersonTeamSource.class);
+				context.mapTeam("listener", WorkerPerTaskTeamSource.class);
+				context.mapTeam("cleanup", OnePersonTeamSource.class);
+
+				// Map request handler
+				context.mapFlow("HANDLE_HTTP_REQUEST", sectionName,
+						sectionInputName);
+			}
+		};
+	}
+
+	/**
+	 * Convenience method to auto-wire in a
+	 * {@link HttpServerSocketManagedObjectSource} into an
+	 * {@link AutoWireOfficeFloorSource}.
+	 * 
+	 * @param source
+	 *            {@link AutoWireOfficeFloorSource}.
+	 * @param port
+	 *            Port to listen for HTTP requests.
+	 */
+	public static void autoWire(AutoWireOfficeFloorSource source, int port,
+			String sectionName, String sectionInputName) {
+
+		// Create the wirer
+		ManagedObjectSourceWirer wirer = createManagedObjectSourceWirer(
+				sectionName, sectionInputName);
+
+		// Add this managed object source
+		PropertyList properties = source.addObject(ServerHttpConnection.class,
+				HttpServerSocketManagedObjectSource.class, wirer);
+		properties.addProperty(PROPERTY_PORT).setValue(String.valueOf(port));
+	}
 
 	/*
 	 * ==================== ManagedObjectSourceService ====================
