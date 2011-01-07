@@ -452,6 +452,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = this.getManagedObjectType();
+		if (managedObjectType == null) {
+			return; // must have managed object type
+		}
 
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = this.context
@@ -581,8 +584,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
 					TaskNode.class, "Managed object flow " + flowName,
 					this.locationType, this.location, AssetType.MANAGED_OBJECT,
-					this.managedObjectSourceName, this.context
-							.getCompilerIssues());
+					this.managedObjectSourceName,
+					this.context.getCompilerIssues());
 			if (taskNode == null) {
 				continue; // must have task node
 			}
@@ -667,16 +670,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam,
 					TeamNode.class, "Managed object team " + teamName,
 					this.locationType, this.location, AssetType.MANAGED_OBJECT,
-					this.managedObjectSourceName, this.context
-							.getCompilerIssues());
+					this.managedObjectSourceName,
+					this.context.getCompilerIssues());
 			if (team == null) {
 				continue; // must have the team
 			}
 
 			// Register the team to the office
 			String officeTeamName = managedObjectSourceName + "." + teamName;
-			officeBuilder.registerTeam(officeTeamName, team
-					.getOfficeFloorTeamName());
+			officeBuilder.registerTeam(officeTeamName,
+					team.getOfficeFloorTeamName());
 		}
 
 		// Build the managed objects from this (in deterministic order)

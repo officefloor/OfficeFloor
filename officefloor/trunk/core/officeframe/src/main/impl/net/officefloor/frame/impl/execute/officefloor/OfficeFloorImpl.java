@@ -130,9 +130,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
 			for (OfficeStartupTask officeStartupTask : officeMetaData
 					.getStartupTasks()) {
+
+				// Ensure have startup task
+				if (officeStartupTask == null) {
+					continue; // failure in configuring startup task
+				}
+
+				// Create and active the startup task
 				JobNode startupTask = officeMetaData.createProcess(
-						officeStartupTask.getFlowMetaData(), officeStartupTask
-								.getParameter());
+						officeStartupTask.getFlowMetaData(),
+						officeStartupTask.getParameter());
 				startupTask.activateJob();
 			}
 		}
