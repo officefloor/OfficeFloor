@@ -227,14 +227,28 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		// Flag to stop executing
 		this.isContinueExecution = false;
 
-		// Wait until all process contexts are completed
-		synchronized (this.processContextThreads) {
-			while (this.processContextThreads.size() > 0) {
-				try {
-					this.processContextThreads.wait(100);
-				} catch (InterruptedException ex) {
-					// Keep waiting until all contexts complete
-				}
+		// Ensure all assigned jobs are completed
+		synchronized (threadToExecutor) {
+			try {
+				boolean isAssignedJob;
+				do {
+
+					// Determine if assigned a job
+					isAssignedJob = false;
+					for (JobQueueExecutor executor : threadToExecutor.values()) {
+						if (!(executor.jobQueue.isEmpty())) {
+							isAssignedJob = true;
+						}
+					}
+
+					// Wait some time if still assigned jobs
+					if (isAssignedJob) {
+						threadToExecutor.wait(100);
+					}
+
+				} while (isAssignedJob);
+			} catch (InterruptedException ex) {
+				// Interrupted so exit
 			}
 		}
 	}

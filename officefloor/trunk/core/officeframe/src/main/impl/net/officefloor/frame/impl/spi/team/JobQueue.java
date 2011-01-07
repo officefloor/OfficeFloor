@@ -60,6 +60,17 @@ public class JobQueue {
 	}
 
 	/**
+	 * Indicates if no {@link Job} instances within the queue.
+	 * 
+	 * @return No {@link Job} instances within the queue.
+	 */
+	public boolean isEmpty() {
+		synchronized (this.lock) {
+			return (this.head == null);
+		}
+	}
+
+	/**
 	 * Thread-safe enqueues a {@link Job} to the queue.
 	 * 
 	 * @param job
