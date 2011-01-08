@@ -63,7 +63,7 @@ public class HttpParametersLoaderWorkSourceExtension
 				HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME, page,
 				context, null);
 		SourceExtensionUtil.createPropertyCheckbox("Case sensitive names",
-				HttpParametersLoaderWorkSource.PROPERTY_CASE_SENSITIVE, false,
+				HttpParametersLoaderWorkSource.PROPERTY_CASE_INSENSITIVE, true,
 				Boolean.TRUE.toString(), Boolean.FALSE.toString(), page,
 				context, null);
 	}
