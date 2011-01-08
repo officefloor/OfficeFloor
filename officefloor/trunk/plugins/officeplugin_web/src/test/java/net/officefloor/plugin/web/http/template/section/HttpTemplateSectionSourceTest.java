@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -65,9 +66,11 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(),
 				false);
+		expected.addSectionOutput("output", null, false);
 		expected.addSectionOutput("java.sql.SQLException",
 				SQLException.class.getName(), true);
-		expected.addSectionOutput("output", null, false);
+		expected.addSectionOutput("java.io.IOException",
+				IOException.class.getName(), true);
 
 		// Objects
 		expected.addSectionObject(Connection.class.getName(),
@@ -77,26 +80,47 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionObject(ServerHttpConnection.class.getName(),
 				ServerHttpConnection.class.getName());
 
-		// Tasks
+		// Template and Class work
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
 				HttpTemplateWorkSource.class.getName());
-		templateWork.addSectionTask("template", "template");
-		templateWork.addSectionTask("List", "List");
-		templateWork.addSectionTask("Tail", "Tail");
 		SectionWork classWork = expected.addSectionWork("WORK",
 				HttpTemplateClassSectionSource.class.getName());
-		SectionTask template = classWork.addSectionTask("getTemplate",
+
+		// Template
+		SectionTask getTemplate = classWork.addSectionTask("getTemplate",
 				"getTemplate");
+		getTemplate.getTaskObject("OBJECT");
+		SectionTask template = templateWork.addSectionTask("template",
+				"template");
+		template.getTaskObject("SERVER_HTTP_CONNECTION");
 		template.getTaskObject("OBJECT");
-		SectionTask templateName = classWork.addSectionTask("getTemplateName",
-				"getTemplateName");
-		templateName.getTaskObject("OBJECT");
+
+		// List
 		SectionTask getList = classWork.addSectionTask("getList", "getList");
 		getList.getTaskObject("OBJECT");
 		getList.getTaskObject("HttpSession");
+		SectionTask listArrayIterator = classWork.addSectionTask(
+				"ListArrayIterator", "ListArrayIterator");
+		listArrayIterator.getTaskObject("ARRAY");
+		SectionTask list = templateWork.addSectionTask("List", "List");
+		list.getTaskObject("SERVER_HTTP_CONNECTION");
+		list.getTaskObject("OBJECT");
+
+		// Tail
+		SectionTask tail = templateWork.addSectionTask("Tail", "Tail");
+		tail.getTaskObject("SERVER_HTTP_CONNECTION");
+
+		// Additional bean method being task
+		SectionTask templateName = classWork.addSectionTask("getTemplateName",
+				"getTemplateName");
+		templateName.getTaskObject("OBJECT");
+
+		// Handle submit task
 		SectionTask submit = classWork.addSectionTask("submit", "submit");
 		submit.getTaskObject("OBJECT");
 		submit.getTaskObject("ServerHttpConnection");
+
+		// Extra task
 		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",
 				"doInternalFlow");
 		doInternalFlow.getTaskObject("OBJECT");

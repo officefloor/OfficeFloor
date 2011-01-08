@@ -57,8 +57,8 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 			fail("Should not be able to invoke task after closing OfficeFloor");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
-					"Must open the Office Floor before obtaining Offices", ex
-							.getMessage());
+					"Must open the Office Floor before obtaining Offices",
+					ex.getMessage());
 		}
 	}
 
@@ -90,10 +90,11 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		// Configure the office floor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		source.addObject(Value.class, value);
-		source.addSection("one", ClassSectionSource.class, MockSectionOne.class
-				.getName());
-		source.addSection("two", ClassSectionSource.class, MockSectionTwo.class
-				.getName());
+		AutoWireSection one = source.addSection("one",
+				ClassSectionSource.class, MockSectionOne.class.getName());
+		AutoWireSection two = source.addSection("two",
+				ClassSectionSource.class, MockSectionTwo.class.getName());
+		source.link(one, "output", two, "doInput");
 
 		// Return the office floor source
 		return source;

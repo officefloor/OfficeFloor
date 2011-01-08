@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
@@ -32,10 +34,12 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -150,10 +154,31 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			SectionTask templateTask = templateWork.addSectionTask(
 					templateTaskName, templateTaskName);
 
-			// Obtain the template bean method (if require bean)
-			SectionTask beanTask = null;
+			// Determine if template section requires a bean
 			boolean isRequireBean = HttpTemplateWorkSource
 					.isHttpTemplateSectionRequireBean(templateSection);
+
+			// Link the Server HTTP Connection dependency
+			SectionObject connectionObject = classSource
+					.getOrCreateObject(ServerHttpConnection.class.getName());
+			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
+					connectionObject);
+
+			// Flag bean as parameter if requires a bean
+			if (isRequireBean) {
+				templateTask.getTaskObject("OBJECT").flagAsParameter();
+			}
+
+			// Link the I/O escalation
+			SectionOutput ioEscalation = classSource.getOrCreateOutput(
+					IOException.class.getName(), IOException.class.getName(),
+					true);
+			designer.link(
+					templateTask.getTaskEscalation(IOException.class.getName()),
+					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
+
+			// Obtain the template bean method (if require bean)
+			SectionTask beanTask = null;
 			if (isRequireBean) {
 				// Obtain the bean task method
 				String beanTaskName = "get" + templateTaskName;
@@ -192,7 +217,37 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 								HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
 										+ templateTaskName, beanType.getName());
 
-						// TODO handle arrays
+						// Handle iterating over array of beans
+						if (isArray) {
+							// Provide iterator task if array
+							SectionWork arrayIteratorWork = designer
+									.addSectionWork(
+											templateTaskName + "ArrayIterator",
+											HttpTemplateArrayIteratorWorkSource.class
+													.getName());
+							arrayIteratorWork
+									.addProperty(
+											HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
+											beanType.getName());
+							SectionTask arrayIteratorTask = arrayIteratorWork
+									.addSectionTask(
+											templateTaskName + "ArrayIterator",
+											HttpTemplateArrayIteratorWorkSource.TASK_NAME);
+							arrayIteratorTask
+									.getTaskObject(
+											HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
+									.flagAsParameter();
+
+							// Link iteration of array to rendering
+							designer.link(
+									arrayIteratorTask
+											.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
+									templateTask,
+									FlowInstigationStrategyEnum.PARALLEL);
+
+							// Iterator is now controller for template
+							templateTask = arrayIteratorTask;
+						}
 					}
 				}
 			}
@@ -226,7 +281,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		}
 
 		// TODO register the #{link} tasks
-
+		
 		// Link last template task to output
 		SectionOutput output = classSource.getOrCreateOutput("output", null,
 				false);

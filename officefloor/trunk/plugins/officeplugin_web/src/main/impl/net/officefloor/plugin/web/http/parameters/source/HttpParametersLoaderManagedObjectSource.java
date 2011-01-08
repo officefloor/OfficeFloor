@@ -50,9 +50,9 @@ public class HttpParametersLoaderManagedObjectSource extends
 
 	/**
 	 * Property to obtain whether the {@link HttpParametersLoader} is case
-	 * sensitive in matching parameter names.
+	 * insensitive in matching parameter names.
 	 */
-	public static final String PROPERTY_CASE_SENSITIVE = "case.sensitive";
+	public static final String PROPERTY_CASE_INSENSITIVE = "case.insensitive";
 
 	/**
 	 * Property prefix for an alias.
@@ -86,9 +86,10 @@ public class HttpParametersLoaderManagedObjectSource extends
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
 		Class<?> type = mosContext.getClassLoader().loadClass(typeName);
 
-		// Obtain whether case sensitive (true by default)
-		boolean isCaseSensitive = Boolean.parseBoolean(mosContext.getProperty(
-				PROPERTY_CASE_SENSITIVE, Boolean.toString(false)));
+		// Obtain whether case insensitive (true by default)
+		boolean isCaseInsensitive = Boolean
+				.parseBoolean(mosContext.getProperty(PROPERTY_CASE_INSENSITIVE,
+						Boolean.toString(true)));
 
 		// Create the alias mappings
 		Map<String, String> aliasMappings = new HashMap<String, String>();
@@ -108,7 +109,7 @@ public class HttpParametersLoaderManagedObjectSource extends
 		}
 
 		// Initialise the HTTP parameters loader
-		this.loader.init(type, aliasMappings, isCaseSensitive, null);
+		this.loader.init(type, aliasMappings, isCaseInsensitive, null);
 
 		// Load the meta-data
 		context.setManagedObjectClass(HttpParametersLoaderManagedObject.class);

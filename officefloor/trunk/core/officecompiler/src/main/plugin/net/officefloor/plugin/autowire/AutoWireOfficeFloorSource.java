@@ -44,6 +44,8 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
@@ -146,14 +148,31 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	 *            {@link SectionSource} class.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
-	 * @return {@link PropertyList} to configure properties for the
-	 *         {@link OfficeSection}.
+	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
-	public <S extends SectionSource> PropertyList addSection(
+	public <S extends SectionSource> AutoWireSection addSection(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation) {
 		return this.officeSource.addSection(sectionName, sectionSourceClass,
 				sectionLocation);
+	}
+
+	/**
+	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
+	 * 
+	 * @param sourceSection
+	 *            Source section.
+	 * @param sourceOutputName
+	 *            Name of the source {@link SectionOutput}.
+	 * @param targetSection
+	 *            Target section.
+	 * @param targetInputName
+	 *            Name of the target {@link SectionInput}.
+	 */
+	public void link(AutoWireSection sourceSection, String sourceOutputName,
+			AutoWireSection targetSection, String targetInputName) {
+		this.officeSource.link(sourceSection, sourceOutputName, targetSection,
+				targetInputName);
 	}
 
 	/**
@@ -281,6 +300,26 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 		// Invoke the task
 		ProcessContextTeam.doTask(taskManager, parameter);
+	}
+
+	/**
+	 * Closes the {@link OfficeFloor}.
+	 */
+	public void closeOfficeFloor() {
+
+		// Ensure open
+		if (this.officeFloor == null) {
+			return;
+		}
+
+		try {
+			// Close
+			this.officeFloor.closeOfficeFloor();
+
+		} finally {
+			// Ensure release OfficeFloor
+			this.officeFloor = null;
+		}
 	}
 
 	/*
@@ -460,8 +499,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			} else {
 				// Bind the managed object source
 				this.managedObjectSource = deployer.addManagedObjectSource(
-						this.type.getName(), this.managedObjectSourceClass
-								.getName());
+						this.type.getName(),
+						this.managedObjectSourceClass.getName());
 				for (Property property : this.properties) {
 					this.managedObjectSource.addProperty(property.getName(),
 							property.getValue());
@@ -488,8 +527,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 				// Link source to input
 				deployer.link(this.managedObjectSource, inputMo);
-				inputMo
-						.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
+				inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
 
 				// Link input to office object
 				deployer.link(officeObject, inputMo);
@@ -582,13 +620,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 						.getManagedObjectTeam(team.managedObjectSourceTeamName);
 
 				// Add the team
-				OfficeFloorTeam officeFloorTeam = deployer.addTeam(this.type
-						.getName()
-						+ "-" + team.managedObjectSourceTeamName,
+				OfficeFloorTeam officeFloorTeam = deployer.addTeam(
+						this.type.getName() + "-"
+								+ team.managedObjectSourceTeamName,
 						team.teamSourceClass.getName());
 				for (Property property : team.properties) {
-					officeFloorTeam.addProperty(property.getName(), property
-							.getValue());
+					officeFloorTeam.addProperty(property.getName(),
+							property.getValue());
 				}
 
 				// Link managed object team to office floor team
