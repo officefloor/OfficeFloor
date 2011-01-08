@@ -455,6 +455,65 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Asserts the input XML's match with white spacing removed.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param expected
+	 *            Raw expected text.
+	 * @param actual
+	 *            Raw actual text.
+	 */
+	public static void assertXmlEquals(String message, String expected,
+			String actual) {
+		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
+		String actualXml = removeXmlWhiteSpacing(createPlatformIndependentText(actual));
+		assertEquals(message, expectedXml, actualXml);
+	}
+
+	/**
+	 * Removes the white spacing from the XML.
+	 * 
+	 * @param xml
+	 *            XML.
+	 * @return XML with white spacing removed.
+	 */
+	public static String removeXmlWhiteSpacing(String xml) {
+
+		final char[] whiteSpacing = new char[] { ' ', '\t', '\n', '\r' };
+
+		// Iterate until all white spacing is removed
+		boolean isComplete;
+		do {
+
+			// Remove white spacing
+			for (char character : whiteSpacing) {
+				xml = xml.replace(">" + character, ">");
+				xml = xml.replace(character + "<", "<");
+				xml = xml.replace(character + "/>", "/>");
+			}
+
+			// Determine if no further white spacing
+			isComplete = true;
+			for (char character : whiteSpacing) {
+				if (xml.contains(">" + character)) {
+					isComplete = false;
+				}
+				if (xml.contains(character + "<")) {
+					isComplete = false;
+				}
+				if (xml.contains(character + "/>")) {
+					isComplete = false;
+				}
+			}
+
+		} while (!isComplete);
+
+		// Return the XML minus the white spacing
+		return xml;
+	}
+
+	/**
 	 * Assets that the input graph is as expected.
 	 * 
 	 * @param O
