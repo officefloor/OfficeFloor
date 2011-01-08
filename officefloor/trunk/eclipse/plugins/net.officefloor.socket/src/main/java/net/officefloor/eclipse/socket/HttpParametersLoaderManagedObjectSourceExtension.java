@@ -65,9 +65,9 @@ public class HttpParametersLoaderManagedObjectSourceExtension
 		SourceExtensionUtil
 				.createPropertyCheckbox(
 						"Case sensitive names",
-						HttpParametersLoaderManagedObjectSource.PROPERTY_CASE_SENSITIVE,
-						false, Boolean.TRUE.toString(), Boolean.FALSE
-								.toString(), page, context, null);
+						HttpParametersLoaderManagedObjectSource.PROPERTY_CASE_INSENSITIVE,
+						true, Boolean.TRUE.toString(),
+						Boolean.FALSE.toString(), page, context, null);
 	}
 
 	@Override
