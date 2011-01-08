@@ -36,7 +36,10 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
  * {@link OfficeSource} implementation that auto-wires the configuration based
@@ -52,9 +55,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	private final OfficeFloorCompiler compiler;
 
 	/**
-	 * {@link Section} instances.
+	 * {@link AutoWireSection} instances.
 	 */
-	private final List<Section> sections = new LinkedList<Section>();
+	private final List<AutoWireSection> sections = new LinkedList<AutoWireSection>();
+
+	/**
+	 * {@link Link} instances.
+	 */
+	private final List<Link> links = new LinkedList<Link>();
 
 	/**
 	 * Initiate.
@@ -82,10 +90,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link SectionSource} class.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
-	 * @return {@link PropertyList} to configure properties for the
-	 *         {@link OfficeSection}.
+	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
-	public <S extends SectionSource> PropertyList addSection(
+	public <S extends SectionSource> AutoWireSection addSection(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation) {
 
@@ -93,12 +100,30 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the section
-		Section section = new Section(sectionName, sectionSourceClass,
-				sectionLocation, properties);
+		AutoWireSection section = new AutoWireSection(sectionName,
+				sectionSourceClass, sectionLocation, properties);
 		this.sections.add(section);
 
-		// Return the properties for the section
-		return properties;
+		// Return the section
+		return section;
+	}
+
+	/**
+	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
+	 * 
+	 * @param sourceSection
+	 *            Source section.
+	 * @param sourceOutputName
+	 *            Name of the source {@link SectionOutput}.
+	 * @param targetSection
+	 *            Target section.
+	 * @param targetInputName
+	 *            Name of the target {@link SectionInput}.
+	 */
+	public void link(AutoWireSection sourceSection, String sourceOutputName,
+			AutoWireSection targetSection, String targetInputName) {
+		this.links.add(new Link(sourceSection, sourceOutputName, targetSection,
+				targetInputName));
 	}
 
 	/*
@@ -121,15 +146,18 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		OfficeTeam team = architect.addOfficeTeam("team");
 
 		// Load the sections
-		Map<Class<?>, List<OfficeSectionInput>> inputs = new HashMap<Class<?>, List<OfficeSectionInput>>();
-		Map<Class<?>, List<OfficeSectionOutput>> outputs = new HashMap<Class<?>, List<OfficeSectionOutput>>();
+		Map<String, Map<String, OfficeSectionInput>> inputs = new HashMap<String, Map<String, OfficeSectionInput>>();
+		Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
 		Map<Class<?>, OfficeObject> objects = new HashMap<Class<?>, OfficeObject>();
-		for (Section section : this.sections) {
+		for (AutoWireSection section : this.sections) {
+
+			// Obtain the section name
+			String sectionName = section.getName();
 
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
-					section.name, section.sourceClass.getName(),
-					section.location, section.properties);
+					sectionName, section.getSourceClass().getName(),
+					section.getLocation(), section.getProperties());
 
 			// Link section tasks to team
 			for (OfficeTask task : officeSection.getOfficeTasks()) {
@@ -157,64 +185,65 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			}
 
 			// Register the inputs
+			Map<String, OfficeSectionInput> sectionInputs = new HashMap<String, OfficeSectionInput>();
+			inputs.put(sectionName, sectionInputs);
 			for (OfficeSectionInput input : officeSection
 					.getOfficeSectionInputs()) {
-				String parameterType = input.getParameterType();
-				if ((parameterType != null) && (parameterType.length() > 0)) {
-					Class<?> parameterClass = classLoader
-							.loadClass(parameterType);
-					List<OfficeSectionInput> list = inputs.get(parameterClass);
-					if (list == null) {
-						list = new LinkedList<OfficeSectionInput>();
-						inputs.put(parameterClass, list);
-					}
-					list.add(input);
-				}
+				String inputName = input.getOfficeSectionInputName();
+				sectionInputs.put(inputName, input);
 			}
 
 			// Register the outputs
+			Map<String, OfficeSectionOutput> sectionOutputs = new HashMap<String, OfficeSectionOutput>();
+			outputs.put(sectionName, sectionOutputs);
 			for (OfficeSectionOutput output : officeSection
 					.getOfficeSectionOutputs()) {
-				String argumentType = output.getArgumentType();
-				if ((argumentType != null) && (argumentType.length() > 0)) {
-					Class<?> argumentClass = classLoader
-							.loadClass(argumentType);
-					List<OfficeSectionOutput> list = outputs.get(argumentClass);
-					if (list == null) {
-						list = new LinkedList<OfficeSectionOutput>();
-						outputs.put(argumentClass, list);
-					}
-					list.add(output);
-				}
+				String outputName = output.getOfficeSectionOutputName();
+				sectionOutputs.put(outputName, output);
 			}
 		}
 
 		// Link outputs to inputs
-		for (Class<?> outputType : outputs.keySet()) {
-			List<OfficeSectionOutput> outputList = outputs.get(outputType);
-			for (OfficeSectionOutput output : outputList) {
+		for (Link link : this.links) {
 
-				// Ignore escalations
-				if (output.isEscalationOnly()) {
-					continue;
-				}
+			// Obtain the link details
+			String sourceSectionName = link.sourceSection.getName();
+			String sourceOutputName = link.sourceOutputName;
+			String outputName = sourceSectionName + ":" + sourceOutputName;
+			String targetSectionName = link.targetSection.getName();
+			String targetInputName = link.targetInputName;
+			String inputName = targetSectionName + ":" + targetInputName;
 
-				// Obtain the input to handle the output
-				List<OfficeSectionInput> inputList = inputs.get(outputType);
-				if (inputList != null) {
-
-					// Ensure not ambiguous link on type
-					if (inputList.size() > 1) {
-						throw new AmbiguousException(
-								"More than one input for output type "
-										+ outputType.getName());
-					}
-
-					// Link output to input
-					OfficeSectionInput input = inputList.get(0);
-					architect.link(output, input);
-				}
+			// Obtain the output
+			OfficeSectionOutput sectionOutput = null;
+			Map<String, OfficeSectionOutput> sectionOutputs = outputs
+					.get(sourceSectionName);
+			if (sectionOutputs != null) {
+				sectionOutput = sectionOutputs.get(sourceOutputName);
 			}
+			if (sectionOutput == null) {
+				architect.addIssue("Unknown section output '" + outputName
+						+ "' to link to section input '" + inputName + "'",
+						AssetType.TASK, outputName);
+				continue; // no output so can not link
+			}
+
+			// Obtain the input
+			OfficeSectionInput sectionInput = null;
+			Map<String, OfficeSectionInput> sectionInputs = inputs
+					.get(targetSectionName);
+			if (sectionInputs != null) {
+				sectionInput = sectionInputs.get(targetInputName);
+			}
+			if (sectionInput == null) {
+				architect.addIssue("Unknown section input '" + inputName
+						+ "' for linking section output '" + outputName + "'",
+						AssetType.TASK, inputName);
+				continue; // no input so can not link
+			}
+
+			// Link the output to the input
+			architect.link(sectionOutput, sectionInput);
 		}
 	}
 
@@ -244,48 +273,48 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Section.
+	 * Link of {@link SectionOutput} to {@link SectionInput}.
 	 */
-	private static class Section {
+	private static class Link {
 
 		/**
-		 * Name of section.
+		 * Source {@link AutoWireSection}.
 		 */
-		private final String name;
+		private final AutoWireSection sourceSection;
 
 		/**
-		 * {@link SectionSource} class.
+		 * Source {@link SectionOutput} name.
 		 */
-		private final Class<?> sourceClass;
+		private final String sourceOutputName;
 
 		/**
-		 * Location of section.
+		 * Target {@link AutoWireSection}.
 		 */
-		private final String location;
+		private final AutoWireSection targetSection;
 
 		/**
-		 * Properties for the section.
+		 * Target {@link SectionInput} name.
 		 */
-		private final PropertyList properties;
+		private final String targetInputName;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param name
-		 *            Name of section.
-		 * @param sourceClass
-		 *            {@link SectionSource} class.
-		 * @param location
-		 *            Location of section.
-		 * @param properties
-		 *            Properties for the section.
+		 * @param sourceSection
+		 *            Source {@link AutoWireSection}.
+		 * @param sourceOutputName
+		 *            Source {@link SectionOutput} name.
+		 * @param targetSection
+		 *            Target {@link AutoWireSection}.
+		 * @param targetInputName
+		 *            Target {@link SectionInput} name.
 		 */
-		public Section(String name, Class<?> sourceClass, String location,
-				PropertyList properties) {
-			this.name = name;
-			this.sourceClass = sourceClass;
-			this.location = location;
-			this.properties = properties;
+		public Link(AutoWireSection sourceSection, String sourceOutputName,
+				AutoWireSection targetSection, String targetInputName) {
+			this.sourceSection = sourceSection;
+			this.sourceOutputName = sourceOutputName;
+			this.targetSection = targetSection;
+			this.targetInputName = targetInputName;
 		}
 	}
 

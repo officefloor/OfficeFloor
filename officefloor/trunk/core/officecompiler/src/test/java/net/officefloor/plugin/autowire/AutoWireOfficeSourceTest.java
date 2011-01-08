@@ -37,9 +37,8 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.autowire.AmbiguousException;
-import net.officefloor.plugin.autowire.AutoWireOfficeSource;
 
 /**
  * Tests the {@link AutoWireOfficeSource}.
@@ -113,30 +112,33 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure link sections - output to input.
+	 * Ensure link flow between sections.
 	 */
-	public void testLinkSections() throws Exception {
+	public void testLinkFlow() throws Exception {
 
 		final String ONE = "One";
+		final String ONE_OUTPUT = "output";
 		final String TWO = "Two";
+		final String TWO_INPUT = "input";
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
-		this.addSection(source, ONE);
-		this.addSection(source, TWO);
+		AutoWireSection one = this.addSection(source, ONE);
+		AutoWireSection two = this.addSection(source, TWO);
+		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
 
 		// Record creating the section
 		this.recordTeam();
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
-		this.recordSectionOutputs(ONE, String.class);
+		this.recordSectionOutputs(ONE, ONE_OUTPUT);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
-		this.recordSectionInputs(TWO, String.class);
+		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
-		OfficeSectionOutput output = this.outputs.get(ONE).get(String.class);
-		OfficeSectionInput input = this.inputs.get(TWO).get(String.class);
+		OfficeSectionOutput output = this.outputs.get(ONE).get(ONE_OUTPUT);
+		OfficeSectionInput input = this.inputs.get(TWO).get(TWO_INPUT);
 		this.architect.link(output, input);
 
 		// Test
@@ -146,45 +148,76 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if ambiguous {@link OfficeSectionOutput} link.
+	 * Ensure issue if unknown output.
 	 */
-	public void testAmbiguousOutputLink() throws Exception {
+	public void testUnknownOutput() throws Exception {
 
-		final String OUTPUT = "Output";
 		final String ONE = "One";
+		final String ONE_OUTPUT = "output";
 		final String TWO = "Two";
+		final String TWO_INPUT = "input";
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
-		this.addSection(source, OUTPUT);
-		this.addSection(source, ONE);
-		this.addSection(source, TWO);
+		AutoWireSection one = this.addSection(source, ONE);
+		AutoWireSection two = this.addSection(source, TWO);
+		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
 
 		// Record creating the section
 		this.recordTeam();
-		this.recordOfficeSection(OUTPUT);
-		this.recordSectionObjects(OUTPUT);
-		this.recordSectionInputs(OUTPUT);
-		this.recordSectionOutputs(OUTPUT, String.class);
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
-		this.recordSectionInputs(ONE, String.class);
+		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
-		this.recordSectionInputs(TWO, String.class);
+		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
+		this.architect
+				.addIssue(
+						"Unknown section output 'One:output' to link to section input 'Two:input'",
+						AssetType.TASK, "One:output");
 
 		// Test
 		this.replayMockObjects();
-		try {
-			source.sourceOffice(this.architect, context);
-			fail("Should not be successful");
-		} catch (AmbiguousException ex) {
-			assertEquals("Incorrect failure",
-					"More than one input for output type java.lang.String", ex
-							.getMessage());
-		}
+		source.sourceOffice(this.architect, context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if unknown input.
+	 */
+	public void testUnknownInput() throws Exception {
+
+		final String ONE = "One";
+		final String ONE_OUTPUT = "output";
+		final String TWO = "Two";
+		final String TWO_INPUT = "input";
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection one = this.addSection(source, ONE);
+		AutoWireSection two = this.addSection(source, TWO);
+		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
+
+		// Record creating the section
+		this.recordTeam();
+		this.recordOfficeSection(ONE);
+		this.recordSectionObjects(ONE);
+		this.recordSectionInputs(ONE);
+		this.recordSectionOutputs(ONE, ONE_OUTPUT);
+		this.recordOfficeSection(TWO);
+		this.recordSectionObjects(TWO);
+		this.recordSectionInputs(TWO);
+		this.recordSectionOutputs(TWO);
+		this.architect
+				.addIssue(
+						"Unknown section input 'Two:input' for linking section output 'One:output'",
+						AssetType.TASK, "Two:input");
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, context);
 		this.verifyMockObjects();
 	}
 
@@ -231,19 +264,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * {@link OfficeSectionInput} instances by {@link OfficeSection} name and
 	 * input type.
 	 */
-	private final Map<String, Map<Class<?>, OfficeSectionInput>> inputs = new HashMap<String, Map<Class<?>, OfficeSectionInput>>();
+	private final Map<String, Map<String, OfficeSectionInput>> inputs = new HashMap<String, Map<String, OfficeSectionInput>>();
 
 	/**
 	 * {@link OfficeSectionOutput} instances by {@link OfficeSection} name and
 	 * output type.
 	 */
-	private final Map<String, Map<Class<?>, OfficeSectionOutput>> outputs = new HashMap<String, Map<Class<?>, OfficeSectionOutput>>();
+	private final Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
 
 	/**
 	 * {@link OfficeSectionObject} instances by {@link OfficeSection} name and
 	 * object type.
 	 */
-	private final Map<String, Map<Class<?>, OfficeSectionObject>> objects = new HashMap<String, Map<Class<?>, OfficeSectionObject>>();
+	private final Map<String, Map<String, OfficeSectionObject>> objects = new HashMap<String, Map<String, OfficeSectionObject>>();
 
 	/**
 	 * {@link OfficeObject} instances by type.
@@ -274,17 +307,26 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 *            Name of the {@link OfficeSection}.
 	 * @param propertyNameValues
 	 *            Property name value pairs.
+	 * @return {@link AutoWireSection}.
 	 */
-	private void addSection(AutoWireOfficeSource source, String sectionName,
-			String... propertyNameValues) {
-		PropertyList properties = source.addSection(sectionName,
+	private AutoWireSection addSection(AutoWireOfficeSource source,
+			String sectionName, String... propertyNameValues) {
+
+		// Add the section
+		AutoWireSection section = source.addSection(sectionName,
 				SectionSource.class, sectionName + "Location");
+
+		// Load the properties
+		PropertyList properties = section.getProperties();
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
 			properties.addProperty(name).setValue(value);
 		}
 		this.sectionProperties.put(sectionName, properties);
+
+		// Return the section
+		return section;
 	}
 
 	/**
@@ -298,8 +340,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 */
 	private void recordOfficeSection(String sectionName,
 			String... subSectionNames) {
-		assertNull("Already section by name " + sectionName, this.sections
-				.get(sectionName));
+		assertNull("Already section by name " + sectionName,
+				this.sections.get(sectionName));
 
 		// Obtain the properties
 		PropertyList properties = this.sectionProperties.get(sectionName);
@@ -342,18 +384,18 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
-	 * @param inputTypes
-	 *            Types of the inputs.
+	 * @param inputNames
+	 *            Names of the inputs.
 	 */
-	private void recordSectionInputs(String sectionName, Class<?>... inputTypes) {
+	private void recordSectionInputs(String sectionName, String... inputNames) {
 		OfficeSectionInput[] inputs = this.createSectionItems(sectionName,
-				OfficeSectionInput.class, this.inputs, inputTypes);
+				OfficeSectionInput.class, this.inputs, inputNames);
 		OfficeSection section = this.getOfficeSection(sectionName);
 		this.recordReturn(section, section.getOfficeSectionInputs(), inputs);
-		for (int i = 0; i < inputTypes.length; i++) {
+		for (int i = 0; i < inputNames.length; i++) {
 			OfficeSectionInput input = inputs[i];
-			this.recordReturn(input, input.getParameterType(), inputTypes[i]
-					.getName());
+			this.recordReturn(input, input.getOfficeSectionInputName(),
+					inputNames[i]);
 		}
 	}
 
@@ -362,20 +404,18 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
-	 * @param outputTypes
-	 *            Types of the outputs.
+	 * @param outputNames
+	 *            Names of the outputs.
 	 */
-	private void recordSectionOutputs(String sectionName,
-			Class<?>... outputTypes) {
+	private void recordSectionOutputs(String sectionName, String... outputNames) {
 		OfficeSectionOutput[] outputs = this.createSectionItems(sectionName,
-				OfficeSectionOutput.class, this.outputs, outputTypes);
+				OfficeSectionOutput.class, this.outputs, outputNames);
 		OfficeSection section = this.getOfficeSection(sectionName);
 		this.recordReturn(section, section.getOfficeSectionOutputs(), outputs);
-		for (int i = 0; i < outputTypes.length; i++) {
+		for (int i = 0; i < outputNames.length; i++) {
 			OfficeSectionOutput output = outputs[i];
-			this.recordReturn(output, output.getArgumentType(), outputTypes[i]
-					.getName());
-			this.recordReturn(output, output.isEscalationOnly(), false);
+			this.recordReturn(output, output.getOfficeSectionOutputName(),
+					outputNames[i]);
 		}
 	}
 
@@ -390,9 +430,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	private void recordSectionObjects(String sectionName,
 			Class<?>... objectTypes) {
 
+		// Create names of the objects
+		String[] objectNames = new String[objectTypes.length];
+		for (int i = 0; i < objectTypes.length; i++) {
+			objectNames[i] = objectTypes[i].getName();
+		}
+
 		// Record obtaining the objects
 		OfficeSectionObject[] objects = this.createSectionItems(sectionName,
-				OfficeSectionObject.class, this.objects, objectTypes);
+				OfficeSectionObject.class, this.objects, objectNames);
 		OfficeSection section = this.getOfficeSection(sectionName);
 		this.recordReturn(section, section.getOfficeSectionObjects(), objects);
 
@@ -402,8 +448,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			OfficeSectionObject object = objects[i];
 
 			// Obtain object type
-			this.recordReturn(object, object.getObjectType(), objectType
-					.getName());
+			this.recordReturn(object, object.getObjectType(),
+					objectType.getName());
 
 			// Lazy add the dependency
 			OfficeObject dependency = this.dependencies.get(objectType);
@@ -411,8 +457,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				dependency = this.createMock(OfficeObject.class);
 				this.dependencies.put(objectType, dependency);
 				this.recordReturn(this.architect, this.architect
-						.addOfficeObject(objectType.getName(), objectType
-								.getName()), dependency);
+						.addOfficeObject(objectType.getName(),
+								objectType.getName()), dependency);
 			}
 
 			// Link the object to dependency
@@ -479,22 +525,26 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
-	 * @param inputTypes
-	 *            Types of the inputs.
+	 * @param itemType
+	 *            Item type.
+	 * @param items
+	 *            Existing items.
+	 * @param itemNames
+	 *            Names of the items.
 	 */
 	@SuppressWarnings("unchecked")
 	private <T> T[] createSectionItems(String sectionName, Class<T> itemType,
-			Map<String, Map<Class<?>, T>> items, Class<?>... types) {
+			Map<String, Map<String, T>> items, String... itemNames) {
 		assertNull("Already obtained  " + itemType.getSimpleName()
 				+ " for section " + sectionName, items.get(sectionName));
 
 		// Create and register the items
-		Map<Class<?>, T> entries = new HashMap<Class<?>, T>();
+		Map<String, T> entries = new HashMap<String, T>();
 		items.put(sectionName, entries);
 		List<T> list = new LinkedList<T>();
-		for (Class<?> type : types) {
+		for (String itemName : itemNames) {
 			T item = this.createMock(itemType);
-			entries.put(type, item);
+			entries.put(itemName, item);
 			list.add(item);
 		}
 
