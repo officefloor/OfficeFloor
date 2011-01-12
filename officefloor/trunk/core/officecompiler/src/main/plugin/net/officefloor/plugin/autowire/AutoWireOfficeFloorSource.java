@@ -210,9 +210,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> PropertyList addObject(
 			Class<?> type, Class<S> sourceClass, ManagedObjectSourceWirer wirer) {
 
-		// Ensure not already added
-		this.ensureObjectTypeNotAdded(type);
-
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
@@ -322,6 +319,22 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		}
 	}
 
+	/**
+	 * Allows overriding for initialising the {@link OfficeFloor} before
+	 * auto-wiring.
+	 * 
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param context
+	 *            {@link OfficeFloorSourceContext}.
+	 * @throws Exception
+	 *             If fails to initialise.
+	 */
+	protected void initOfficeFloor(OfficeFloorDeployer deployer,
+			OfficeFloorSourceContext context) throws Exception {
+		// By default do nothing
+	}
+
 	/*
 	 * =================== OfficeFloorSource =========================
 	 */
@@ -342,6 +355,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
+		// Allow initialising the OfficeFloor
+		this.initOfficeFloor(deployer, context);
+
 		/*
 		 * Create the Team to always use invoking thread. This is to allow use
 		 * within an application server as typically would use OfficeFloor
@@ -361,9 +377,10 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		// Load then link the managed object sources
 		Map<Class<?>, OfficeFloorManagedObject> managedObjects = new HashMap<Class<?>, OfficeFloorManagedObject>();
 		Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects = new HashMap<Class<?>, OfficeFloorInputManagedObject>();
+		Map<Class<?>, Integer> typeIndexes = new HashMap<Class<?>, Integer>();
 		for (AutoWireContext objectContext : this.objectContexts) {
 			objectContext.loadManagedObject(office, deployer, managedObjects,
-					inputManagedObjects);
+					inputManagedObjects, typeIndexes);
 		}
 		for (AutoWireContext objectContext : this.objectContexts) {
 			objectContext.linkManagedObject(office, deployer, managedObjects,
@@ -482,11 +499,29 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		 * @param inputManagedObjects
 		 *            {@link OfficeFloorInputManagedObject} instances by type to
 		 *            be loaded.
+		 * @param typeIndex
+		 *            Indexes for the type to ensure unique naming.
 		 */
-		public void loadManagedObject(DeployedOffice office,
+		public void loadManagedObject(
+				DeployedOffice office,
 				OfficeFloorDeployer deployer,
 				Map<Class<?>, OfficeFloorManagedObject> managedObjects,
-				Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects) {
+				Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects,
+				Map<Class<?>, Integer> typeIndex) {
+
+			// Determine the managed object name
+			String managedObjectName = this.type.getName();
+			Integer index = typeIndex.get(this.type);
+			if (index == null) {
+				// First, so do not index name (as most cases only one)
+				index = new Integer(1);
+			} else {
+				// Provide index on name and increment for next
+				int indexValue = index.intValue();
+				managedObjectName += String.valueOf(indexValue);
+				index = new Integer(indexValue + 1);
+			}
+			typeIndex.put(this.type, index);
 
 			// Determine if raw object
 			if (this.rawObject != null) {
@@ -494,12 +529,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 				SingletonManagedObjectSource singleton = new SingletonManagedObjectSource(
 						this.rawObject);
 				this.managedObjectSource = ThreadLocalDelegateManagedObjectSource
-						.bindDelegate(this.type.getName(), singleton, deployer);
+						.bindDelegate(managedObjectName, singleton, deployer);
 
 			} else {
 				// Bind the managed object source
 				this.managedObjectSource = deployer.addManagedObjectSource(
-						this.type.getName(),
+						managedObjectName,
 						this.managedObjectSourceClass.getName());
 				for (Property property : this.properties) {
 					this.managedObjectSource.addProperty(property.getName(),
@@ -521,24 +556,29 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 			// Handle managed object
 			if (this.isInput) {
-				// Input managed object
-				OfficeFloorInputManagedObject inputMo = deployer
-						.addInputManagedObject(this.type.getName());
+				// Obtain the Input managed object
+				OfficeFloorInputManagedObject inputMo = inputManagedObjects
+						.get(this.type);
+				if (inputMo == null) {
+					// Create and register the input managed object
+					inputMo = deployer.addInputManagedObject(this.type
+							.getName());
+					inputManagedObjects.put(this.type, inputMo);
+
+					// Only first is specified as bound
+					inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
+				}
 
 				// Link source to input
 				deployer.link(this.managedObjectSource, inputMo);
-				inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
 
 				// Link input to office object
 				deployer.link(officeObject, inputMo);
 
-				// Register the input managed object
-				inputManagedObjects.put(this.type, inputMo);
-
 			} else {
 				// Managed object
 				this.managedObject = this.managedObjectSource
-						.addOfficeFloorManagedObject(this.type.getName(),
+						.addOfficeFloorManagedObject(managedObjectName,
 								ManagedObjectScope.PROCESS);
 
 				// Link managed object to office object
