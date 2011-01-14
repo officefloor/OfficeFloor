@@ -29,6 +29,7 @@ import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
@@ -51,17 +52,25 @@ public class WorkManagerImpl implements WorkManager {
 	private final OfficeMetaData officeMetaData;
 
 	/**
+	 * {@link ProcessTicker}.
+	 */
+	private final ProcessTicker processTicker;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param processTicker
+	 *            {@link ProcessTicker}.
 	 */
 	public WorkManagerImpl(WorkMetaData<?> workMetaData,
-			OfficeMetaData officeMetaData) {
+			OfficeMetaData officeMetaData, ProcessTicker processTicker) {
 		this.workMetaData = workMetaData;
 		this.officeMetaData = officeMetaData;
+		this.processTicker = processTicker;
 	}
 
 	/*
@@ -87,7 +96,8 @@ public class WorkManagerImpl implements WorkManager {
 
 		// Invoke the process for the work
 		ProcessFuture future = OfficeMetaDataImpl.invokeProcess(
-				this.officeMetaData, flowMetaData, parameter);
+				this.officeMetaData, flowMetaData, parameter,
+				this.processTicker);
 
 		// Indicate when process of work complete
 		return future;
@@ -117,7 +127,8 @@ public class WorkManagerImpl implements WorkManager {
 				.getTaskMetaData()) {
 			if (taskMetaData.getTaskName().equals(taskName)) {
 				// Have the task meta-data, so return a task manager for it
-				return new TaskManagerImpl(taskMetaData, this.officeMetaData);
+				return new TaskManagerImpl(taskMetaData, this.officeMetaData,
+						this.processTicker);
 			}
 		}
 

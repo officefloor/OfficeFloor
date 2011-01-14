@@ -19,7 +19,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -37,13 +36,13 @@ public interface ManagedObjectSourceInstance<F extends Enum<F>> {
 	ManagedObjectSource<?, F> getManagedObjectSource();
 
 	/**
-	 * Obtains the {@link ManagedObjectExecuteContext} for the
+	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectExecuteContext} for the
+	 * @return {@link ManagedObjectExecuteContextFactory} for the
 	 *         {@link ManagedObjectSource}.
 	 */
-	ManagedObjectExecuteContext<F> getManagedObjectExecuteContext();
+	ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool}.

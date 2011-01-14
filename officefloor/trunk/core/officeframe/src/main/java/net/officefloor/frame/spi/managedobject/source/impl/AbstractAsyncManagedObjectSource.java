@@ -40,7 +40,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 /**
  * Abstract {@link ManagedObjectSource} allowing to asynchronously source the
  * {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F extends Enum<F>>
@@ -62,7 +62,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 	/**
 	 * Overridden to load specifications.
-	 *
+	 * 
 	 * @param context
 	 *            Specifications.
 	 */
@@ -76,7 +76,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param name
 		 *            Name of property that is also used as the label.
 		 */
@@ -84,7 +84,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param name
 		 *            Name of property.
 		 * @param label
@@ -94,7 +94,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param property
 		 *            {@link ManagedObjectSourceProperty}.
 		 */
@@ -160,7 +160,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 	/**
 	 * Overridden to load meta-data.
-	 *
+	 * 
 	 * @param context
 	 *            Meta-data.
 	 * @throws Exception
@@ -176,7 +176,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Obtains the {@link ManagedObjectSourceContext}.
-		 *
+		 * 
 		 * @return {@link ManagedObjectSourceContext}.
 		 */
 		ManagedObjectSourceContext<F> getManagedObjectSourceContext();
@@ -184,7 +184,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * Specifies the type of the object returned from the
 		 * {@link ManagedObject}.
-		 *
+		 * 
 		 * @param objectClass
 		 *            Object type.
 		 */
@@ -192,7 +192,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Specifies the type of the {@link ManagedObject}.
-		 *
+		 * 
 		 * @param managedObjectClass
 		 *            {@link ManagedObject} type.
 		 */
@@ -201,7 +201,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a required dependency identified by the key.
-		 *
+		 * 
 		 * @param key
 		 *            {@link Enum} to identify the dependency.
 		 * @param dependencyType
@@ -213,7 +213,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * Adds a required dependency identified by an index into the order the
 		 * dependency was added.
-		 *
+		 * 
 		 * @param dependencyType
 		 *            Type the dependency is required to extend/implement.
 		 * @return {@link Labeller} to possibly label the required dependency.
@@ -222,7 +222,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a required {@link Flow} identified by the key.
-		 *
+		 * 
 		 * @param key
 		 *            {@link Enum} to identify the {@link Flow}.
 		 * @param argumentType
@@ -234,7 +234,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * Adds a required {@link Flow} identified by an index into the order
 		 * the {@link Flow} was added.
-		 *
+		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
@@ -243,7 +243,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
-		 *
+		 * 
 		 * @param interfaceType
 		 *            Type of the extension interface supported by the
 		 *            {@link ManagedObject} instances.
@@ -261,7 +261,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Specifies the label.
-		 *
+		 * 
 		 * @param label
 		 *            Label.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
@@ -270,7 +270,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Obtains the index of the dependency of {@link Flow}.
-		 *
+		 * 
 		 * @return Index of the dependency of {@link Flow}.
 		 */
 		int getIndex();
@@ -315,7 +315,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param context
 		 *            {@link ManagedObjectSourceContext}.
 		 */
@@ -358,7 +358,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a dependency.
-		 *
+		 * 
 		 * @param index
 		 *            Index to add the dependency under.
 		 * @param key
@@ -406,7 +406,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		/**
 		 * Adds a {@link Flow}.
-		 *
+		 * 
 		 * @param index
 		 *            Index to add the {@link Flow} under.
 		 * @param key
@@ -491,8 +491,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		// Override to provide start functionality
 	}
 
-	/**
-	 * {@link #sourceManagedObject(ManagedObjectUser)} to be implemented.
-	 */
+	@Override
+	public void stop() {
+		// Override to provide stop functionality
+	}
 
 }

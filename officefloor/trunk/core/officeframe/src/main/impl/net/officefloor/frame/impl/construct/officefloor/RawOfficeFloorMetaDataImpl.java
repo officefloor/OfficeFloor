@@ -217,19 +217,17 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			RawManagingOfficeMetaData managingOfficeMetaData = mosMetaData
 					.getRawManagingOfficeMetaData();
 			if (managingOfficeMetaData == null) {
-				issues
-						.addIssue(AssetType.MANAGED_OBJECT,
-								managedObjectSourceName,
-								"Managing Object Source did not specify managing office meta-data");
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						"Managing Object Source did not specify managing office meta-data");
 				continue; // must have a managing office
 			}
 			String managingOfficeName = managingOfficeMetaData
 					.getManagingOfficeName();
 			if (ConstructUtil.isBlank(managingOfficeName)) {
-				issues
-						.addIssue(AssetType.MANAGED_OBJECT,
-								managedObjectSourceName,
-								"Managed Object Source did not specify a managing Office");
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						"Managed Object Source did not specify a managing Office");
 				continue; // must have a managing office
 			}
 
@@ -260,9 +258,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(
-				teamRegistry, processContextListeners
-						.toArray(new ProcessContextListener[0]), mosRegistry,
-				officeFloorEscalation);
+				teamRegistry,
+				processContextListeners.toArray(new ProcessContextListener[0]),
+				mosRegistry, officeFloorEscalation);
 
 		// Construct the offices
 		List<OfficeMetaData> officeMetaDatas = new LinkedList<OfficeMetaData>();
@@ -311,11 +309,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 					String managedObjectSourceName = managingOfficeMetaData
 							.getRawManagedObjectMetaData()
 							.getManagedObjectName();
-					issues
-							.addIssue(AssetType.MANAGED_OBJECT,
-									managedObjectSourceName,
-									"Can not find managing office '"
-											+ officeName + "'");
+					issues.addIssue(AssetType.MANAGED_OBJECT,
+							managedObjectSourceName,
+							"Can not find managing office '" + officeName + "'");
 				}
 			}
 		}
@@ -326,15 +322,15 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			ManagedObjectSourceInstance mosInstance = new ManagedObjectSourceInstanceImpl(
 					rawMoMetaData.getManagedObjectSource(), rawMoMetaData
 							.getRawManagingOfficeMetaData()
-							.getManagedObjectExecuteContext(), rawMoMetaData
-							.getManagedObjectPool());
+							.getManagedObjectExecuteContextFactory(),
+					rawMoMetaData.getManagedObjectPool());
 			mosInstances.add(mosInstance);
 		}
 
 		// Create the office floor meta-data
 		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(
-				teamListing.toArray(new Team[0]), mosInstances
-						.toArray(new ManagedObjectSourceInstance[0]),
+				teamListing.toArray(new Team[0]),
+				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
 				officeMetaDatas.toArray(new OfficeMetaData[0]));
 
 		// Return the raw meta-data
