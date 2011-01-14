@@ -46,10 +46,10 @@ import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -873,8 +873,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 			final RawManagingOfficeMetaData<?> managingOffice = this
 					.createMock(RawManagingOfficeMetaData.class);
-			final ManagedObjectExecuteContext<?> executeContext = this
-					.createMock(ManagedObjectExecuteContext.class);
+			final ManagedObjectExecuteContextFactory<?> executeContextFactory = this
+					.createMock(ManagedObjectExecuteContextFactory.class);
 
 			// Record construction of the managed object instance
 			this.recordReturn(rawMoMetaData,
@@ -883,8 +883,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 					rawMoMetaData.getRawManagingOfficeMetaData(),
 					managingOffice);
 			this.recordReturn(managingOffice,
-					managingOffice.getManagedObjectExecuteContext(),
-					executeContext);
+					managingOffice.getManagedObjectExecuteContextFactory(),
+					executeContextFactory);
 			this.recordReturn(rawMoMetaData,
 					rawMoMetaData.getManagedObjectPool(), null);
 		}

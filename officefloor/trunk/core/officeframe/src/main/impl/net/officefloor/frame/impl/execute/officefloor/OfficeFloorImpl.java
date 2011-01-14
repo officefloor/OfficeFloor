@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
@@ -33,8 +34,10 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
@@ -54,6 +57,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
+
+	/**
+	 * {@link ProcessTicker}.
+	 */
+	private ProcessTicker processTicker = null;
 
 	/**
 	 * Initiate.
@@ -77,6 +85,28 @@ public class OfficeFloorImpl implements OfficeFloor {
 			throw new IllegalStateException("OfficeFloor is already open");
 		}
 
+		// Create the process ticker
+		final AtomicInteger ticker = new AtomicInteger(0);
+		this.processTicker = new ProcessTicker() {
+
+			@Override
+			public int activeProcessCount() {
+				return ticker.get();
+			}
+
+			@Override
+			public void processStarted() {
+				// Increment the number of active processes
+				ticker.incrementAndGet();
+			}
+
+			@Override
+			public void processComplete() {
+				// Decrement the number of active processes
+				ticker.decrementAndGet();
+			}
+		};
+
 		// Create the offices to open floor for work
 		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData
 				.getOfficeMetaData();
@@ -85,7 +115,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Create the office
 			String officeName = officeMetaData.getOfficeName();
-			Office office = new OfficeImpl(officeMetaData);
+			Office office = new OfficeImpl(officeMetaData, this.processTicker);
 
 			// Iterate over Office meta-data providing additional functionality
 			for (WorkMetaData<?> workMetaData : officeMetaData
@@ -156,9 +186,14 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private <F extends Enum<F>> void startManagedObjectSourceInstance(
 			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
 
-		// Start the managed object source
+		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
-		mos.start(mosInstance.getManagedObjectExecuteContext());
+
+		// Start the managed object source
+		ManagedObjectExecuteContext<F> executeContext = mosInstance
+				.getManagedObjectExecuteContextFactory()
+				.createManagedObjectExecuteContext(this.processTicker);
+		mos.start(executeContext);
 
 		// Determine if pooled
 		ManagedObjectPool pool = mosInstance.getManagedObjectPool();
@@ -177,45 +212,48 @@ public class OfficeFloorImpl implements OfficeFloor {
 			return;
 		}
 
-		/*
-		 * TODO provide notification to managed objects to stop working.
-		 * 
-		 * DETAILS: Likely candidate for this is to add a stop() method to the
-		 * ManagedObjectSource interface. The requirements of this method would
-		 * be to stop ManagedObjectSource instances invoking further
-		 * ProcessStates. An example being ServerSockets no longer accepting new
-		 * connections (but would allow existing connections to be completed).
-		 * Once this is added then no further ProcessStates should be created
-		 * and when Job counts with Teams reach zero the OfficeFloor is ready to
-		 * be closed.
-		 */
+		try {
+			// Stop the managed object sources
+			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+					.getManagedObjectSourceInstances()) {
+				mosInstance.getManagedObjectSource().stop();
+			}
 
-		// Stop the teams working as closing
-		/*
-		 * FIXME stopping teams must tie in with stopping ManagedObjectSources.
-		 * 
-		 * DETAILS: Stopping a team when has no further Jobs does not lead to
-		 * closing as another Team may require handing it another Job for
-		 * completion. As the Team is no longer processing the Job does not get
-		 * completed leaving OfficeFloor hanging waiting for the Job to
-		 * complete. This is not so much of an issues as OfficeFloor is closing
-		 * but would be nice to have graceful close.
-		 * 
-		 * MITIGATION: Will still close OfficeFloor (just some ProcessStates may
-		 * end up half processed giving a not so graceful close).
-		 */
-		for (Team team : this.officeFloorMetaData.getTeams()) {
-			team.stopWorking();
+			// Wait until processes complete (or reasonable amount of time)
+			long startTime = System.currentTimeMillis();
+			try {
+				while ((this.processTicker.activeProcessCount() > 0)
+						&& ((System.currentTimeMillis() - startTime) < 10000)) {
+					Thread.sleep(100);
+				}
+			} catch (InterruptedException ex) {
+				// Carry on to close the OfficeFloor
+			}
+
+			// Provide warning that timed out waiting for completion
+			if (this.processTicker.activeProcessCount() > 0) {
+				System.err
+						.println("Timed out waiting for processes to complete ("
+								+ this.processTicker.activeProcessCount()
+								+ " remaining).  Forcing close of OfficeFloor.");
+			}
+
+			// Stop the teams working as closing
+			for (Team team : this.officeFloorMetaData.getTeams()) {
+				team.stopWorking();
+			}
+
+			// Stop the office managers
+			for (OfficeMetaData officeMetaData : this.officeFloorMetaData
+					.getOfficeMetaData()) {
+				officeMetaData.getOfficeManager().stopManaging();
+			}
+
+		} finally {
+			// Flag that no longer open
+			this.offices = null;
+			this.processTicker = null;
 		}
-
-		// Stop the office managers
-		for (OfficeMetaData officeMetaData : this.officeFloorMetaData
-				.getOfficeMetaData()) {
-			officeMetaData.getOfficeManager().stopManaging();
-		}
-
-		// Flag that no longer open
-		this.offices = null;
 	}
 
 	@Override

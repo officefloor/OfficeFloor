@@ -1133,6 +1133,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public void sourceManagedObject(ManagedObjectUser user) {
 			fail("Should not call sourceManagedObject");
 		}
+
+		@Override
+		public void stop() {
+			fail("Should not call stop");
+		}
 	}
 
 	/**

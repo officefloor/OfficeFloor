@@ -30,7 +30,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
-import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextImpl;
+import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -51,14 +52,13 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 
 /**
  * {@link RawManagingOfficeMetaData} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
@@ -67,7 +67,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	/**
 	 * Determines if the {@link ManagedObjectSource} instigates {@link Flow}
 	 * instances.
-	 *
+	 * 
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} instances of the
 	 *            {@link ManagedObjectSource}.
@@ -128,13 +128,13 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	private FlowMetaData<?> recycleFlowMetaData = null;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
+	 * {@link ManagedObjectExecuteContextFactory}.
 	 */
-	private ManagedObjectExecuteContext<F> managedObjectExecuteContext = null;
+	private ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory = null;
 
 	/**
 	 * Initialise.
-	 *
+	 * 
 	 * @param managingOfficeName
 	 *            Name of the managing {@link Office}.
 	 * @param recycleWorkName
@@ -162,7 +162,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 	/**
 	 * Specifies the {@link RawManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param rawManagedObjectMetaData
 	 *            {@link RawManagedObjectMetaData}.
 	 */
@@ -174,7 +174,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	/**
 	 * Adds a {@link ManagedObjectMetaData} to be managed by the managing
 	 * {@link Office}.
-	 *
+	 * 
 	 * @param moMetaData
 	 *            {@link ManagedObjectMetaData} to be managed by the managing
 	 *            {@link Office}.
@@ -265,7 +265,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 			if (parameterType != null) {
 				if (!parameterType
 						.isAssignableFrom(RecycleManagedObjectParameter.class)) {
-					issues.addIssue(AssetType.MANAGED_OBJECT,
+					issues.addIssue(
+							AssetType.MANAGED_OBJECT,
 							managedObjectSourceName,
 							"Incompatible parameter type for recycle task (parameter="
 									+ parameterType.getName()
@@ -302,18 +303,16 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// No flows but issue if flows or input configuration
 			if ((flowConfigurations != null) && (flowConfigurations.length > 0)) {
-				issues
-						.addIssue(
-								AssetType.MANAGED_OBJECT,
-								managedObjectSourceName,
-								ManagedObjectSourceMetaData.class
-										.getSimpleName()
-										+ " specifies no flows but flows configured for it");
+				issues.addIssue(
+						AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						ManagedObjectSourceMetaData.class.getSimpleName()
+								+ " specifies no flows but flows configured for it");
 				return; // configuration does not align to meta-data
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContext = new ManagedObjectExecuteContextImpl<F>(
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
 					null, -1, null, officeMetaData);
 			return;
 		}
@@ -322,12 +321,11 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		String processBoundName = this.inputConfiguration
 				.getBoundManagedObjectName();
 		if (ConstructUtil.isBlank(processBoundName)) {
-			issues
-					.addIssue(
-							AssetType.MANAGED_OBJECT,
-							managedObjectSourceName,
-							ManagedObjectSource.class.getSimpleName()
-									+ " invokes flows but does not provide input Managed Object binding name");
+			issues.addIssue(
+					AssetType.MANAGED_OBJECT,
+					managedObjectSourceName,
+					ManagedObjectSource.class.getSimpleName()
+							+ " invokes flows but does not provide input Managed Object binding name");
 			return;
 		}
 
@@ -359,7 +357,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		}
 		if ((processBoundIndex < 0) || (managedObjectMetaData == null)) {
 			// Managed Object Source not in Office
-			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+			issues.addIssue(
+					AssetType.MANAGED_OBJECT,
+					managedObjectSourceName,
 					ManagedObjectSource.class.getSimpleName()
 							+ " by input name '" + processBoundName
 							+ "' not managed by Office "
@@ -439,23 +439,20 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Ensure no extra flow configurations
 		if (flowMappings.size() > 0) {
-			issues
-					.addIssue(AssetType.MANAGED_OBJECT,
-							managedObjectSourceName,
-							"Extra flows configured than specified by "
-									+ ManagedObjectSourceMetaData.class
-											.getSimpleName());
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"Extra flows configured than specified by "
+							+ ManagedObjectSourceMetaData.class.getSimpleName());
 			return; // should only have configurations for meta-data required
 		}
 
 		// Specify the managed object execute context
-		this.managedObjectExecuteContext = new ManagedObjectExecuteContextImpl<F>(
+		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
 				managedObjectMetaData, processBoundIndex, flows, officeMetaData);
 	}
 
 	@Override
-	public synchronized ManagedObjectExecuteContext<F> getManagedObjectExecuteContext() {
-		return this.managedObjectExecuteContext;
+	public synchronized ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
+		return this.managedObjectExecuteContextFactory;
 	}
 
 }

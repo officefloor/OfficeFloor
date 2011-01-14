@@ -18,9 +18,9 @@
 
 package net.officefloor.frame.impl.execute.officefloor;
 
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -37,9 +37,10 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	private final ManagedObjectSource<?, F> managedObjectSource;
 
 	/**
-	 * {@link ManagedObjectExecuteContext} for the {@link ManagedObjectSource}.
+	 * {@link ManagedObjectExecuteContextFactory} for the
+	 * {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectExecuteContext<F> managedObjectExecuteContext;
+	private final ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory;
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -51,18 +52,18 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	 * 
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
-	 * @param managedObjectExecuteContext
-	 *            {@link ManagedObjectExecuteContext} for the
+	 * @param managedObjectExecuteContextFactory
+	 *            {@link ManagedObjectExecuteContextFactory} for the
 	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 */
 	public ManagedObjectSourceInstanceImpl(
 			ManagedObjectSource<?, F> managedObjectSource,
-			ManagedObjectExecuteContext<F> managedObjectExecuteContext,
+			ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory,
 			ManagedObjectPool managedObjectPool) {
 		this.managedObjectSource = managedObjectSource;
-		this.managedObjectExecuteContext = managedObjectExecuteContext;
+		this.managedObjectExecuteContextFactory = managedObjectExecuteContextFactory;
 		this.managedObjectPool = managedObjectPool;
 	}
 
@@ -76,8 +77,8 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public ManagedObjectExecuteContext<F> getManagedObjectExecuteContext() {
-		return this.managedObjectExecuteContext;
+	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
+		return this.managedObjectExecuteContextFactory;
 	}
 
 	@Override

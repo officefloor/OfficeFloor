@@ -145,10 +145,13 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		user.setManagedObject(this.managedObjectSourceState.managedObject);
 	}
 
+	@Override
+	public void stop() {
+		// Nothing to stop
+	}
+
 	/**
-	 * State of the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
-	 * .
+	 * State of the {@link ManagedObjectSource}.
 	 */
 	private static class ManagedObjectSourceState {
 

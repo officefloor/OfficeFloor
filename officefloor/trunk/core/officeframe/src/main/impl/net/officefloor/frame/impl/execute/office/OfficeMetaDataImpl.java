@@ -37,6 +37,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -62,13 +63,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            {@link FlowMetaData}.
 	 * @param parameter
 	 *            Parameter.
+	 * @param processTicker
+	 *            {@link ProcessTicker}.
 	 * @return {@link ProcessFuture} for the invoked {@link ProcessState}.
 	 * @throws InvalidParameterTypeException
 	 *             Should the parameter type be incorrect the {@link Task}.
 	 */
 	public static ProcessFuture invokeProcess(OfficeMetaData officeMetaData,
-			FlowMetaData<?> flowMetaData, Object parameter)
-			throws InvalidParameterTypeException {
+			FlowMetaData<?> flowMetaData, Object parameter,
+			ProcessTicker processTicker) throws InvalidParameterTypeException {
 
 		// Ensure correct parameter type
 		if (parameter != null) {
@@ -89,12 +92,19 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		// Create the job node within a new process
 		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter);
 
-		// Assign the job node to the Team
-		jobNode.activateJob();
-
 		// Obtain the ProcessState
 		ProcessState processState = jobNode.getFlow().getThreadState()
 				.getProcessState();
+
+		// Indicate process started and register to be notified of completion.
+		// Must register before activating job to have trigger on completion.
+		if (processTicker != null) {
+			processTicker.processStarted();
+			processState.registerProcessCompletionListener(processTicker);
+		}
+
+		// Assign the job node to the Team
+		jobNode.activateJob();
 
 		// Indicate when process of work complete
 		return processState.getProcessFuture();

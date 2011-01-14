@@ -24,13 +24,14 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectExecuteContext} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
@@ -57,8 +58,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	private final OfficeMetaData officeMetaData;
 
 	/**
+	 * {@link ProcessTicker}.
+	 */
+	private final ProcessTicker processTicker;
+
+	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
 	 * @param processMoIndex
@@ -70,14 +76,18 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} to create {@link ProcessState}
 	 *            instances.
+	 * @param processTicker
+	 *            {@link ProcessTicker}.
 	 */
 	public ManagedObjectExecuteContextImpl(
 			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData) {
+			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData,
+			ProcessTicker processTicker) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
+		this.processTicker = processTicker;
 	}
 
 	/*
@@ -122,7 +132,15 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 				parameter, managedObject, this.managedObjectMetaData,
 				this.processMoIndex, escalationHandler);
 
+		// Indicate process started and register to be notified of completion
+		if (this.processTicker != null) {
+			this.processTicker.processStarted();
+			jobNode.getFlow().getThreadState().getProcessState()
+					.registerProcessCompletionListener(this.processTicker);
+		}
+
 		// Activate the Job
+		// Must register before activating job to have trigger on completion.
 		jobNode.activateJob();
 	}
 

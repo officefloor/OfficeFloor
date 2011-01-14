@@ -25,6 +25,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
@@ -50,17 +51,25 @@ public class TaskManagerImpl implements TaskManager {
 	private final FlowMetaData<?> flowMetaData = new TaskManagerFlowMetaData();
 
 	/**
+	 * {@link ProcessTicker}.
+	 */
+	private final ProcessTicker processTicker;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param taskMetaData
 	 *            {@link TaskMetaData}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param processTicker
+	 *            {@link ProcessTicker}.
 	 */
 	public TaskManagerImpl(TaskMetaData<?, ?, ?> taskMetaData,
-			OfficeMetaData officeMetaData) {
+			OfficeMetaData officeMetaData, ProcessTicker processTicker) {
 		this.taskMetaData = taskMetaData;
 		this.officeMetaData = officeMetaData;
+		this.processTicker = processTicker;
 	}
 
 	/*
@@ -83,7 +92,8 @@ public class TaskManagerImpl implements TaskManager {
 
 		// Invoke the process for the task
 		ProcessFuture future = OfficeMetaDataImpl.invokeProcess(
-				this.officeMetaData, this.flowMetaData, parameter);
+				this.officeMetaData, this.flowMetaData, parameter,
+				this.processTicker);
 
 		// Indicate when process of task complete
 		return future;

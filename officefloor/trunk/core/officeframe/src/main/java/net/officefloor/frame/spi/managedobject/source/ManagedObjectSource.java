@@ -21,6 +21,8 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -72,8 +74,12 @@ public interface ManagedObjectSource<D extends Enum<D>, F extends Enum<F>> {
 	ManagedObjectSourceMetaData<D, F> getMetaData();
 
 	/**
+	 * <p>
 	 * Called once after {@link #init(ManagedObjectSourceContext)} to indicate
 	 * this {@link ManagedObjectSource} should start execution.
+	 * <p>
+	 * On invocation of this method, {@link ProcessState} instances may be
+	 * invoked via the {@link ManagedObjectExecuteContext}.
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectExecuteContext} to use in starting this
@@ -92,5 +98,14 @@ public interface ManagedObjectSource<D extends Enum<D>, F extends Enum<F>> {
 	 *            {@link ManagedObject}.
 	 */
 	void sourceManagedObject(ManagedObjectUser user);
+
+	/**
+	 * <p>
+	 * Called to notify that the {@link OfficeFloor} is being closed.
+	 * <p>
+	 * On return from this method, no further {@link ProcessState} instances may
+	 * be invoked.
+	 */
+	void stop();
 
 }

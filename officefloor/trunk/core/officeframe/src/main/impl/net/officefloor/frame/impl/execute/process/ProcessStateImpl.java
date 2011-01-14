@@ -282,8 +282,8 @@ public class ProcessStateImpl implements ProcessState {
 	public <W extends Work> Flow createThread(FlowMetaData<W> flowMetaData) {
 
 		// Create the thread
-		ThreadState threadState = new ThreadStateImpl(this.processMetaData
-				.getThreadMetaData(), this, flowMetaData);
+		ThreadState threadState = new ThreadStateImpl(
+				this.processMetaData.getThreadMetaData(), this, flowMetaData);
 
 		// Register as active thread
 		synchronized (this.getProcessLock()) {
@@ -383,7 +383,9 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public void registerProcessCompletionListener(
 			ProcessCompletionListener listener) {
-		this.completionListeners.add(listener);
+		synchronized (this.getProcessLock()) {
+			this.completionListeners.add(listener);
+		}
 	}
 
 }
