@@ -19,6 +19,7 @@
 package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -137,8 +138,18 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		assertEquals("Connection should be closed", -1, this.socket
 				.getInputStream().read());
 
-		// Close the Office
+		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
+
+		// Ensure not accepting connections after OfficeFloor close
+		try {
+			new Socket().connect(
+					new InetSocketAddress(InetAddress.getLocalHost(), 12345),
+					100);
+		} catch (ConnectException ex) {
+			assertEquals("Incorrect cause", "Connection refused",
+					ex.getMessage());
+		}
 	}
 
 	/*

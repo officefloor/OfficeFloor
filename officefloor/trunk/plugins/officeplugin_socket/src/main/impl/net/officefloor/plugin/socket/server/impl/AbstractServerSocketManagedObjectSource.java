@@ -40,7 +40,7 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for a {@link ServerSocketChannel}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractServerSocketManagedObjectSource<CH extends ConnectionHandler>
@@ -90,7 +90,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * Allow for hooking in for testing.
-	 *
+	 * 
 	 * @param selectorFactory
 	 *            {@link SelectorFactory}.
 	 */
@@ -108,7 +108,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * Obtains the {@link SelectorFactory}.
-	 *
+	 * 
 	 * @return {@link SelectorFactory}.
 	 */
 	SelectorFactory getSelectorFactory() {
@@ -117,7 +117,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 
 	/**
 	 * Creates the {@link CommunicationProtocol}.
-	 *
+	 * 
 	 * @return {@link CommunicationProtocol}.
 	 */
 	protected abstract CommunicationProtocol<CH> createCommunicationProtocol();
@@ -131,7 +131,7 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 	 * <p>
 	 * This default implementation returns the input
 	 * {@link CommunicationProtocol} as is.
-	 *
+	 * 
 	 * @param communicationProtocol
 	 *            {@link CommunicationProtocol} to possibly wrap.
 	 * @return This default implementation returns the input
@@ -168,8 +168,8 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		final int bufferSize = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_BUFFER_SIZE, "1024"));
 		int maxConn = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER, String
-						.valueOf(SocketListener.UNBOUNDED_MAX_CONNECTIONS)));
+				PROPERTY_MAXIMUM_CONNECTIONS_PER_LISTENER,
+				String.valueOf(SocketListener.UNBOUNDED_MAX_CONNECTIONS)));
 
 		// Create the buffer squirt factory
 		BufferSquirtFactory bufferSquirtFactory = new HeapByteBufferSquirtFactory(
@@ -224,6 +224,12 @@ public abstract class AbstractServerSocketManagedObjectSource<CH extends Connect
 		// Should never be directly used by a task
 		throw new IllegalStateException("Can not source managed object from a "
 				+ this.getClass().getSimpleName());
+	}
+
+	@Override
+	public void stop() {
+		// Unbind acceptor socket to listen for new connections
+		this.serverSocketAccepter.unbindFromSocket();
 	}
 
 }
