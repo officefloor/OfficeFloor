@@ -152,12 +152,13 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		for (AutoWireSection section : this.sections) {
 
 			// Obtain the section name
-			String sectionName = section.getName();
+			String sectionName = section.getSectionName();
 
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
-					sectionName, section.getSourceClass().getName(),
-					section.getLocation(), section.getProperties());
+					sectionName, section.getSectionSourceClass().getName(),
+					section.getSectionLocation(),
+					section.getSectionProperties());
 
 			// Link section tasks to team
 			for (OfficeTask task : officeSection.getOfficeTasks()) {
@@ -207,10 +208,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		for (Link link : this.links) {
 
 			// Obtain the link details
-			String sourceSectionName = link.sourceSection.getName();
+			String sourceSectionName = link.sourceSection.getSectionName();
 			String sourceOutputName = link.sourceOutputName;
 			String outputName = sourceSectionName + ":" + sourceOutputName;
-			String targetSectionName = link.targetSection.getName();
+			String targetSectionName = link.targetSection.getSectionName();
 			String targetInputName = link.targetInputName;
 			String inputName = targetSectionName + ":" + targetInputName;
 

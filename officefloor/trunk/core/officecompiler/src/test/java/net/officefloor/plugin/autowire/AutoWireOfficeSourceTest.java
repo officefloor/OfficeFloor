@@ -317,7 +317,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				SectionSource.class, sectionName + "Location");
 
 		// Load the properties
-		PropertyList properties = section.getProperties();
+		PropertyList properties = section.getSectionProperties();
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];

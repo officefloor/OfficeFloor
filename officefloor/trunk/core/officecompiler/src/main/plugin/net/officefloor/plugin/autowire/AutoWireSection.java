@@ -69,11 +69,23 @@ public class AutoWireSection {
 	}
 
 	/**
+	 * Allow for extending this to provide additional functionality for an
+	 * section.
+	 * 
+	 * @param section
+	 *            Section to copy in state.
+	 */
+	protected AutoWireSection(AutoWireSection section) {
+		this(section.getSectionName(), section.getSectionSourceClass(), section
+				.getSectionLocation(), section.getSectionProperties());
+	}
+
+	/**
 	 * Obtains the section name.
 	 * 
 	 * @return Section name.
 	 */
-	public String getName() {
+	public String getSectionName() {
 		return this.name;
 	}
 
@@ -82,7 +94,7 @@ public class AutoWireSection {
 	 * 
 	 * @return {@link SectionSource} class.
 	 */
-	public Class<?> getSourceClass() {
+	public Class<?> getSectionSourceClass() {
 		return this.sourceClass;
 	}
 
@@ -91,7 +103,7 @@ public class AutoWireSection {
 	 * 
 	 * @return Section location.
 	 */
-	public String getLocation() {
+	public String getSectionLocation() {
 		return this.location;
 	}
 
@@ -100,7 +112,7 @@ public class AutoWireSection {
 	 * 
 	 * @return {@link PropertyList}.
 	 */
-	public PropertyList getProperties() {
+	public PropertyList getSectionProperties() {
 		return this.properties;
 	}
 
@@ -112,7 +124,7 @@ public class AutoWireSection {
 	 * @param value
 	 *            Value of the {@link Property}.
 	 */
-	public void addProperty(String name, String value) {
+	public void addSectionProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
 

@@ -593,11 +593,10 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Register the team
 		final OfficeFloorTeam team = this.createMock(OfficeFloorTeam.class);
-		this.recordReturn(
-				this.deployer,
-				this.deployer.addTeam(type.getName() + "-"
-						+ managedObjectTeamName, teamSourceClass.getName()),
-				team);
+		this.recordReturn(source,
+				source.getOfficeFloorManagedObjectSourceName(), "TestName");
+		this.recordReturn(this.deployer, this.deployer.addTeam("TestName-"
+				+ managedObjectTeamName, teamSourceClass.getName()), team);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
