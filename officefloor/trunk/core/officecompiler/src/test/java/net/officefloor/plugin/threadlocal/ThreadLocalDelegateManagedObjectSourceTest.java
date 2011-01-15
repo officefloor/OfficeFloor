@@ -80,6 +80,7 @@ public class ThreadLocalDelegateManagedObjectSourceTest extends
 		this.recordReturn(this.delegate, this.delegate.getMetaData(), metaData);
 		this.delegate.start(executeContext);
 		this.delegate.sourceManagedObject(user);
+		this.delegate.stop();
 
 		// Test
 		this.replayMockObjects();
@@ -98,6 +99,7 @@ public class ThreadLocalDelegateManagedObjectSourceTest extends
 		assertSame("Incorrect meta-data", metaData, returnedMetaData);
 		source.start(executeContext);
 		source.sourceManagedObject(user);
+		source.stop();
 		this.verifyMockObjects();
 	}
 

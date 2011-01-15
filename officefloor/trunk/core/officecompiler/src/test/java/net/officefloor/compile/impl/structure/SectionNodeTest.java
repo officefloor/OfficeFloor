@@ -124,13 +124,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionInput() {
 		// Add two different inputs verifying details
 		this.replayMockObjects();
-		SectionInput input = this.node.addSectionInput("INPUT", String.class
-				.getName());
+		SectionInput input = this.node.addSectionInput("INPUT",
+				String.class.getName());
 		assertNotNull("Must have input", input);
-		assertEquals("Incorrect input name", "INPUT", input
-				.getSectionInputName());
-		assertNotSame("Should obtain another input", input, this.node
-				.addSectionInput("ANOTHER", Integer.class.getName()));
+		assertEquals("Incorrect input name", "INPUT",
+				input.getSectionInputName());
+		assertNotSame("Should obtain another input", input,
+				this.node.addSectionInput("ANOTHER", Integer.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -164,10 +164,11 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionOutput output = this.node.addSectionOutput("OUTPUT",
 				Double.class.getName(), false);
 		assertNotNull("Must have output", output);
-		assertEquals("Incorrect output name", "OUTPUT", output
-				.getSectionOutputName());
-		assertNotSame("Should obtain another output", output, this.node
-				.addSectionOutput("ANOTHER", Exception.class.getName(), true));
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getSectionOutputName());
+		assertNotSame("Should obtain another output", output,
+				this.node.addSectionOutput("ANOTHER",
+						Exception.class.getName(), true));
 		this.verifyMockObjects();
 	}
 
@@ -201,10 +202,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionObject object = this.node.addSectionObject("OBJECT",
 				Connection.class.getName());
 		assertNotNull("Must have object", object);
-		assertEquals("Incorrect object name", "OBJECT", object
-				.getSectionObjectName());
-		assertNotSame("Should obtain another object", object, this.node
-				.addSectionObject("ANOTHER", Object.class.getName()));
+		assertEquals("Incorrect object name", "OBJECT",
+				object.getSectionObjectName());
+		assertNotSame("Should obtain another object", object,
+				this.node.addSectionObject("ANOTHER", Object.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -285,8 +286,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionManagedObject mo = moSource.addSectionManagedObject("MO",
 				ManagedObjectScope.WORK);
 		assertNotNull("Must have section managed object", mo);
-		assertEquals("Incorrect section managed object name", "MO", mo
-				.getSectionManagedObjectName());
+		assertEquals("Incorrect section managed object name", "MO",
+				mo.getSectionManagedObjectName());
 		assertNotSame("Should obtain another section managed object", mo,
 				moSource.addSectionManagedObject("ANOTHER",
 						ManagedObjectScope.WORK));
@@ -371,8 +372,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");
 		assertNotNull("Must have dependency", dependency);
-		assertEquals("Incorrect dependency name", "DEPENDENCY", dependency
-				.getManagedObjectDependencyName());
+		assertEquals("Incorrect dependency name", "DEPENDENCY",
+				dependency.getManagedObjectDependencyName());
 		assertEquals("Should get same managed object dependency again",
 				dependency, mo.getManagedObjectDependency("DEPENDENCY"));
 		assertNotSame("Should not be same dependency for different name",
@@ -381,10 +382,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Ensure can get flow
 		ManagedObjectFlow flow = moSource.getManagedObjectFlow("FLOW");
 		assertNotNull("Must have flow", flow);
-		assertEquals("Incorrect flow name", "FLOW", flow
-				.getManagedObjectFlowName());
-		assertEquals("Should get same task flow again", flow, moSource
-				.getManagedObjectFlow("FLOW"));
+		assertEquals("Incorrect flow name", "FLOW",
+				flow.getManagedObjectFlowName());
+		assertEquals("Should get same task flow again", flow,
+				moSource.getManagedObjectFlow("FLOW"));
 		assertNotSame("Should not be same flow for different name", flow,
 				moSource.getManagedObjectFlow("ANOTHER"));
 
@@ -400,10 +401,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionWork work = this.node.addSectionWork("WORK",
 				NotUseWorkSource.class.getName());
 		assertNotNull("Must have section work", work);
-		assertEquals("Incorrect section work name", "WORK", work
-				.getSectionWorkName());
-		assertNotSame("Should obtain another section work", work, this.node
-				.addSectionWork("ANOTHER", NotUseWorkSource.class.getName()));
+		assertEquals("Incorrect section work name", "WORK",
+				work.getSectionWorkName());
+		assertNotSame(
+				"Should obtain another section work",
+				work,
+				this.node.addSectionWork("ANOTHER",
+						NotUseWorkSource.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -438,10 +442,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		assertNotNull("Must have section task", task);
-		assertEquals("Incorrect section task name", "TASK", task
-				.getSectionTaskName());
-		assertNotSame("Should obtain another section task", task, work
-				.addSectionTask("ANOTHER", "TYPE"));
+		assertEquals("Incorrect section task name", "TASK",
+				task.getSectionTaskName());
+		assertNotSame("Should obtain another section task", task,
+				work.addSectionTask("ANOTHER", "TYPE"));
 		this.verifyMockObjects();
 	}
 
@@ -509,28 +513,28 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		TaskFlow flow = task.getTaskFlow("FLOW");
 		assertNotNull("Must have flow", flow);
 		assertEquals("Incorrect flow name", "FLOW", flow.getTaskFlowName());
-		assertEquals("Should get same task flow again", flow, task
-				.getTaskFlow("FLOW"));
-		assertNotSame("Should not be same flow for different name", flow, task
-				.getTaskFlow("ANOTHER"));
+		assertEquals("Should get same task flow again", flow,
+				task.getTaskFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow,
+				task.getTaskFlow("ANOTHER"));
 
 		// Ensure can get object
 		TaskObject object = task.getTaskObject("OBJECT");
 		assertNotNull("Must have object", object);
-		assertEquals("Incorrect object name", "OBJECT", object
-				.getTaskObjectName());
-		assertEquals("Should get same task object again", object, task
-				.getTaskObject("OBJECT"));
+		assertEquals("Incorrect object name", "OBJECT",
+				object.getTaskObjectName());
+		assertEquals("Should get same task object again", object,
+				task.getTaskObject("OBJECT"));
 		assertNotSame("Should not be same object for different name", object,
 				task.getTaskObject("ANOTHER"));
 
 		// Ensure can get escalation
 		TaskFlow escalation = task.getTaskEscalation("ESCALATION");
 		assertNotNull("Must have escalation", escalation);
-		assertEquals("Incorrect escalation name", "ESCALATION", escalation
-				.getTaskFlowName());
-		assertEquals("Should get same task flow again", escalation, task
-				.getTaskEscalation("ESCALATION"));
+		assertEquals("Incorrect escalation name", "ESCALATION",
+				escalation.getTaskFlowName());
+		assertEquals("Should get same task flow again", escalation,
+				task.getTaskEscalation("ESCALATION"));
 		assertNotSame("Should not be same escalation for different name",
 				escalation, task.getTaskEscalation("ANOTHER"));
 
@@ -546,8 +550,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				NotUseSectionSource.class.getName(), "SUB_SECTION_LOCATION");
 		assertNotNull("Must have sub section", subSection);
-		assertEquals("Incorrect sub section name", "SUB_SECTION", subSection
-				.getSubSectionName());
+		assertEquals("Incorrect sub section name", "SUB_SECTION",
+				subSection.getSubSectionName());
 		assertNotSame("Should obtain another sub section", subSection,
 				this.node.addSubSection("ANOTHER", "not used", "not used"));
 		this.verifyMockObjects();
@@ -589,30 +593,30 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Ensure can get input
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
 		assertNotNull("Must have input", input);
-		assertEquals("Incorrect input name", "INPUT", input
-				.getSubSectionInputName());
-		assertEquals("Should get same input again", input, subSection
-				.getSubSectionInput("INPUT"));
+		assertEquals("Incorrect input name", "INPUT",
+				input.getSubSectionInputName());
+		assertEquals("Should get same input again", input,
+				subSection.getSubSectionInput("INPUT"));
 		assertNotSame("Should not be same input for different name", input,
 				subSection.getSubSectionInput("ANOTHER"));
 
 		// Ensure can get output
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
 		assertNotNull("Must have output", output);
-		assertEquals("Incorrect output name", "OUTPUT", output
-				.getSubSectionOutputName());
-		assertEquals("Should get same output again", output, subSection
-				.getSubSectionOutput("OUTPUT"));
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getSubSectionOutputName());
+		assertEquals("Should get same output again", output,
+				subSection.getSubSectionOutput("OUTPUT"));
 		assertNotSame("Should not be same output for different name", output,
 				subSection.getSubSectionOutput("ANOTHER"));
 
 		// Ensure can get object
 		SubSectionObject object = subSection.getSubSectionObject("OBJECT");
 		assertNotNull("Must have output", object);
-		assertEquals("Incorrect output name", "OBJECT", object
-				.getSubSectionObjectName());
-		assertEquals("Should get same object again", object, subSection
-				.getSubSectionObject("OBJECT"));
+		assertEquals("Incorrect output name", "OBJECT",
+				object.getSubSectionObjectName());
+		assertEquals("Should get same object again", object,
+				subSection.getSubSectionObject("OBJECT"));
 		assertNotSame("Should not be same object for different name", object,
 				subSection.getSubSectionObject("ANOTHER"));
 
@@ -682,8 +686,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT", Object.class
-				.getName());
+		SectionInput input = this.node.addSectionInput("INPUT",
+				Object.class.getName());
 		SectionWork work = this.node.addSectionWork("WORK",
 				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
@@ -708,8 +712,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT", Object.class
-				.getName());
+		SectionInput input = this.node.addSectionInput("INPUT",
+				Object.class.getName());
 		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				NotUseSectionSource.class.getName(), "LOCATION");
 		SubSectionInput subSectionInput = subSection
@@ -735,8 +739,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionInput input = this.node.addSectionInput("INPUT", Object.class
-				.getName());
+		SectionInput input = this.node.addSectionInput("INPUT",
+				Object.class.getName());
 		SectionOutput output = this.node.addSectionOutput("OUTPUT",
 				Object.class.getName(), false);
 		this.node.link(input, output);
@@ -840,8 +844,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Ensure only can link once
-		this.node.link(flow, this.node.addSectionOutput("ANOTHER", Object.class
-				.getName(), false), FlowInstigationStrategyEnum.PARALLEL);
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER",
+				Object.class.getName(), false),
+				FlowInstigationStrategyEnum.PARALLEL);
 		assertFlowLink("Can only link once", flow, output);
 		assertFlowInstigationStrategy(flow,
 				FlowInstigationStrategyEnum.SEQUENTIAL);
@@ -921,8 +926,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("task -> next output", task, output);
 
 		// Ensure only can link once
-		this.node.link(task, this.node.addSectionOutput("ANOTHER", String.class
-				.getName(), false));
+		this.node.link(task, this.node.addSectionOutput("ANOTHER",
+				String.class.getName(), false));
 		assertFlowLink("Can only link once", task, output);
 
 		this.verifyMockObjects();
@@ -1014,8 +1019,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToSectionTask() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object source flow FLOW linked more than once");
+		this.record_issue("Managed object source flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -1043,8 +1047,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToSubSectionInput() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object source flow FLOW linked more than once");
+		this.record_issue("Managed object source flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -1072,8 +1075,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToSectionOutput() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object source flow FLOW linked more than once");
+		this.record_issue("Managed object source flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -1088,8 +1090,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("managed object flow -> section output", flow, output);
 
 		// Ensure only can link once
-		this.node.link(flow, this.node.addSectionOutput("ANOTHER", String.class
-				.getName(), false));
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER",
+				String.class.getName(), false));
 		assertFlowLink("Can only link once", flow, output);
 
 		this.verifyMockObjects();
@@ -1106,8 +1108,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
+		TaskObject object = this.node
+				.addSectionWork("WORK", NotUseWorkSource.class.getName())
 				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
 		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
 				Connection.class.getName());
@@ -1115,8 +1117,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		assertObjectLink("task object -> section object", object, sectionObject);
 
 		// Ensure only can link once
-		this.node.link(object, this.node.addSectionObject("ANOTHER",
-				String.class.getName()));
+		this.node.link(object,
+				this.node.addSectionObject("ANOTHER", String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
 
 		this.verifyMockObjects();
@@ -1133,8 +1135,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName())
+		TaskObject object = this.node
+				.addSectionWork("WORK", NotUseWorkSource.class.getName())
 				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
 		SectionManagedObjectSource moSource = this.node
 				.addSectionManagedObjectSource("MO_SOURCE",
@@ -1173,8 +1175,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				sectionObject);
 
 		// Ensure only can link once
-		this.node.link(object, this.node.addSectionObject("ANOTHER",
-				String.class.getName()));
+		this.node.link(object,
+				this.node.addSectionObject("ANOTHER", String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
 
 		this.verifyMockObjects();
@@ -1218,8 +1220,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToSectionObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1238,8 +1239,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				dependency, sectionObject);
 
 		// Ensure only can link once
-		this.node.link(dependency, this.node.addSectionObject("ANOTHER",
-				Object.class.getName()));
+		this.node.link(dependency,
+				this.node.addSectionObject("ANOTHER", Object.class.getName()));
 		assertObjectLink("Can only link once", dependency, sectionObject);
 
 		this.verifyMockObjects();
@@ -1252,8 +1253,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToSectionManagedObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1289,8 +1289,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToSectionObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1307,8 +1306,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(dependency, this.node.addSectionObject("ANOTHER",
-				Connection.class.getName()));
+		this.node.link(
+				dependency,
+				this.node.addSectionObject("ANOTHER",
+						Connection.class.getName()));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
@@ -1321,8 +1322,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToSectionManagedObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1412,6 +1412,11 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		@Override
 		public void sourceManagedObject(ManagedObjectUser user) {
+			fail("Should not use ManagedObjectSource");
+		}
+
+		@Override
+		public void stop() {
 			fail("Should not use ManagedObjectSource");
 		}
 	}

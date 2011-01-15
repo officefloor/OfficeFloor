@@ -150,6 +150,11 @@ public class ThreadLocalDelegateManagedObjectSource implements
 		this.delegate.sourceManagedObject(user);
 	}
 
+	@Override
+	public void stop() {
+		this.delegate.stop();
+	}
+
 	/**
 	 * Delegates for the {@link Thread}.
 	 */

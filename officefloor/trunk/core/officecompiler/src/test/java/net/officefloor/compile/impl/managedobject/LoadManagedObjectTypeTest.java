@@ -1728,13 +1728,16 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		@Override
 		public void start(ManagedObjectExecuteContext context) throws Exception {
 			fail("Should not start the ManagedObjectSource");
-			return;
 		}
 
 		@Override
 		public void sourceManagedObject(ManagedObjectUser user) {
 			fail("Should not source ManagedObject");
-			return;
+		}
+
+		@Override
+		public void stop() {
+			fail("Should not stop the ManagedObjectSource");
 		}
 	}
 
