@@ -108,6 +108,16 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 	private Selector selector;
 
 	/**
+	 * Flag indicating if should stop accepting further connections.
+	 */
+	private volatile boolean isComplete = false;
+
+	/**
+	 * Flag indicating if unbound the {@link ServerSocketChannel}.
+	 */
+	private volatile boolean isUnbound = false;
+
+	/**
 	 * Opens and binds the {@link ServerSocketChannel}.
 	 * 
 	 * @throws IOException
@@ -125,6 +135,33 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		this.channel.register(this.selector, SelectionKey.OP_ACCEPT);
 	}
 
+	/**
+	 * Unbinds from the {@link ServerSocketChannel}.
+	 */
+	public void unbindFromSocket() {
+
+		// Flag to complete processing
+		this.isComplete = true;
+
+		// Wait until unbound server socket (or timed out waiting)
+		try {
+			long startTime = System.currentTimeMillis();
+			while ((!this.isUnbound)
+					&& ((System.currentTimeMillis() - startTime) < 10000)) {
+
+				// Process accepting connections
+				if (this.selector != null) {
+					this.selector.wakeup();
+				}
+
+				// Wait some time for accepting connections
+				Thread.sleep(100);
+			}
+		} catch (InterruptedException ex) {
+			// Assume to be unbound and carry on
+		}
+	}
+
 	/*
 	 * ======================= Task ============================================
 	 */
@@ -140,8 +177,28 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 			// Wait some time for a connection
 			if (this.selector.select(1000) == 0) {
 
-				// Flag task never complete (but allow for closing office)
-				context.setComplete(false);
+				// Determine if complete
+				boolean isComplete = this.isComplete;
+
+				// Flag whether task complete (but allow for closing office)
+				context.setComplete(isComplete);
+
+				// Unbind socket if complete
+				if (isComplete) {
+					try {
+						// Close the selector
+						this.selector.close();
+
+						// Unbind the socket
+						this.channel.socket().close();
+
+					} finally {
+						// Ensure flagged unbound
+						this.isUnbound = true;
+					}
+				}
+
+				// Iteration of this task finished
 				return null;
 
 			} else {
@@ -212,15 +269,15 @@ public class ServerSocketAccepter<CH extends ConnectionHandler>
 		@Override
 		public InetSocketAddress getLocalAddress() {
 			Socket socket = this.socketChannel.socket();
-			return new InetSocketAddress(socket.getLocalAddress(), socket
-					.getLocalPort());
+			return new InetSocketAddress(socket.getLocalAddress(),
+					socket.getLocalPort());
 		}
 
 		@Override
 		public InetSocketAddress getRemoteAddress() {
 			Socket socket = this.socketChannel.socket();
-			return new InetSocketAddress(socket.getInetAddress(), socket
-					.getPort());
+			return new InetSocketAddress(socket.getInetAddress(),
+					socket.getPort());
 		}
 
 		@Override
