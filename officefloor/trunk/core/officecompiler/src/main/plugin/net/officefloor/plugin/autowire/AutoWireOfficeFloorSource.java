@@ -661,7 +661,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 				// Add the team
 				OfficeFloorTeam officeFloorTeam = deployer.addTeam(
-						this.type.getName() + "-"
+						this.managedObjectSource
+								.getOfficeFloorManagedObjectSourceName()
+								+ "-"
 								+ team.managedObjectSourceTeamName,
 						team.teamSourceClass.getName());
 				for (Property property : team.properties) {
