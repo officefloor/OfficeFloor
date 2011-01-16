@@ -19,8 +19,11 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -34,6 +37,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -69,6 +73,12 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
 
 	/**
+	 * Prefix on the {@link Task} name of the class {@link Method} handling the
+	 * link.
+	 */
+	private static final String LINK_METHOD_TASK_NAME_PREFIX = "ServiceLink_";
+
+	/**
 	 * {@link TemplateBeanTask} instances by the template bean
 	 * {@link SectionTask} name.
 	 */
@@ -79,6 +89,11 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	 * requires bean.
 	 */
 	private final Map<String, Boolean> isRequireBeanTemplates = new HashMap<String, Boolean>();
+
+	/**
+	 * {@link Task} link names.
+	 */
+	private final Set<String> taskLinkNames = new HashSet<String>();
 
 	/**
 	 * Indicates if the {@link SectionTask} by the name is to provide a template
@@ -128,13 +143,20 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		SectionInput sectionInput = designer.addSectionInput(
 				RENDER_TEMPLATE_INPUT_NAME, null);
 
-		// Register the HTTP template sections requiring a bean
+		// Obtain the HTTP template
 		PropertyList templateProperties = context.createPropertyList();
 		templateProperties.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).setValue(
 				templateLocation);
 		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(
 				templateProperties.getProperties(), context.getClassLoader());
+
+		// Obtain the listing of task link names
+		String[] linkNames = HttpTemplateWorkSource
+				.getHttpTemplateLinkNames(template);
+		this.taskLinkNames.addAll(Arrays.asList(linkNames));
+
+		// Register the HTTP template sections requiring a bean
 		for (HttpTemplateSection templateSection : template.getSections()) {
 			String templateSectionName = templateSection.getSectionName();
 			boolean isRequireBean = HttpTemplateWorkSource
@@ -294,7 +316,27 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			previousTemplateTask = templateTask;
 		}
 
-		// TODO register the #{link} tasks
+		// Register the #{link} tasks
+		for (String linkTaskName : linkNames) {
+
+			// Add the task for handling the link
+			SectionTask linkTask = templateWork.addSectionTask(linkTaskName,
+					linkTaskName);
+
+			// Obtain the link method task
+			String linkMethodTaskName = LINK_METHOD_TASK_NAME_PREFIX
+					+ linkTaskName;
+			SectionTask methodTask = classSource
+					.getTaskByName(linkMethodTaskName);
+			if (methodTask == null) {
+				designer.addIssue("No backing method for link '" + linkTaskName
+						+ "'", AssetType.TASK, linkTaskName);
+				continue; // must have link method
+			}
+
+			// Link handling of request to method
+			designer.link(linkTask, methodTask);
+		}
 
 		// Link last template task to output
 		SectionOutput output = classSource.getOrCreateOutput(
@@ -340,6 +382,21 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		protected String getSectionClassName() {
 			// Obtain class name from property as location is for template
 			return this.getContext().getProperty(PROPERTY_CLASS_NAME);
+		}
+
+		@Override
+		protected String getTaskName(TaskType<?, ?, ?> taskType) {
+
+			// Obtain the task type name
+			String taskTypeName = taskType.getTaskName();
+
+			// Determine if backing method to link task
+			boolean isLinkMethod = HttpTemplateSectionSource.this.taskLinkNames
+					.contains(taskTypeName);
+
+			// Return prefix on link method task
+			return (isLinkMethod ? LINK_METHOD_TASK_NAME_PREFIX + taskTypeName
+					: taskTypeName);
 		}
 
 		@Override

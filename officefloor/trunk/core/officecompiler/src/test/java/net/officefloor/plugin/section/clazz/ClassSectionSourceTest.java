@@ -32,10 +32,12 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
+import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
@@ -55,6 +57,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * This is loaded via creation of the {@link SectionDesigner}.
 	 */
 	private final Map<String, SectionTask> expectedTasks = new HashMap<String, SectionTask>();
+
+	/**
+	 * {@link ClassSectionSource} used for testing. Allows for overriding with
+	 * child implementation.
+	 */
+	private Class<? extends ClassSectionSource> classSectionSource = ClassSectionSource.class;
 
 	/**
 	 * Ensure correct specification.
@@ -200,8 +208,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				MockObjectSection.class, "doInput");
 		this.expectedTasks.get("doInput").getTaskObject("Connection");
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(Connection.class.getName(), Connection.class
-				.getName());
+		expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
@@ -224,8 +232,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = this.createSectionDesigner(
 				MockDependencySection.class, "doInput");
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(Connection.class.getName(), Connection.class
-				.getName());
+		expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
@@ -240,6 +248,161 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		Connection connection;
 
 		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure able to handle changing the {@link Task} name.
+	 */
+	public void testChangeTaskName() {
+
+		// Override to change class name
+		this.classSectionSource = MockChangeTaskNameClassSectionSource.class;
+
+		// Create the expected type
+		SectionDesigner expected = this.createSectionDesigner(
+				MockInputSection.class, "newName");
+		expected.addSectionInput("newName", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected,
+				MockChangeTaskNameClassSectionSource.class,
+				MockChangeTaskNameSection.class.getName());
+	}
+
+	/**
+	 * Section with only task.
+	 */
+	public static class MockChangeTaskNameSection {
+		public void oldName() {
+		}
+	}
+
+	/**
+	 * {@link ClassSectionSource} to change {@link Task} name.
+	 */
+	public static class MockChangeTaskNameClassSectionSource extends
+			ClassSectionSource {
+		@Override
+		protected String getTaskName(TaskType<?, ?, ?> taskType) {
+			String taskTypeName = taskType.getTaskName();
+			return ("oldName".equals(taskTypeName) ? "newName" : taskTypeName);
+		}
+	}
+
+	/**
+	 * Ensure able to handle changing the {@link Task} name along with keeping
+	 * links working.
+	 */
+	public void testChangeTaskNameAndEnsureCorrectLinkedType() {
+
+		// Override to change class name
+		this.classSectionSource = MockChangeTaskNameClassSectionSource.class;
+
+		// Create the expected type
+		SectionDesigner expected = this.createSectionDesigner(
+				MockInputSection.class, "doInput", "newName", "finished");
+		SectionTask doInput = this.expectedTasks.get("doInput");
+		doInput.getTaskObject("ReturnValue");
+		doInput.getTaskObject("Boolean");
+		SectionTask newName = this.expectedTasks.get("newName");
+		newName.getTaskObject("ReturnValue");
+		newName.getTaskObject("String");
+		newName.getTaskObject("Connection");
+		SectionTask finished = this.expectedTasks.get("finished");
+		finished.getTaskObject("ReturnValue");
+
+		// Inputs
+		expected.addSectionInput("doInput", Boolean.class.getName());
+		expected.addSectionInput("newName", String.class.getName());
+		expected.addSectionInput("finished", null);
+
+		// Outputs
+		expected.addSectionOutput("externalFlow", null, false);
+		expected.addSectionOutput("java.sql.SQLException",
+				SQLException.class.getName(), true);
+
+		// Objects
+		expected.addSectionObject(ReturnValue.class.getName(),
+				ReturnValue.class.getName());
+		expected.addSectionObject(Connection.class.getName(),
+				Connection.class.getName());
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected,
+				MockChangeTaskNameClassSectionSource.class,
+				MockChangeTaskNameWithLinksSection.class.getName());
+	}
+
+	/**
+	 * Ensure able to handle changing the {@link Task} name and continue to
+	 * execute.
+	 */
+	public void testChangeTaskNameAndEnsureCorrectLinkedExecution()
+			throws Exception {
+
+		final Connection connection = this.createMock(Connection.class);
+		final ReturnValue returnValue = new ReturnValue();
+
+		// Managed object internal, so must run to test
+		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
+		AutoWireSection section = officeFloor.addSection("test",
+				MockChangeTaskNameClassSectionSource.class,
+				MockChangeTaskNameWithLinksSection.class.getName());
+		officeFloor.addObject(ReturnValue.class, returnValue);
+		officeFloor.addObject(Connection.class, connection);
+		officeFloor.link(section, "externalFlow", section, "finished");
+
+		// Run invoking flow
+		officeFloor.invokeTask("test.WORK", "doInput", new Boolean(true));
+		assertEquals("Incorrect value on invoking flow",
+				"doInput -> oldName(Flow) -> finished", returnValue.value);
+
+		// Run using next task
+		officeFloor.invokeTask("test.WORK", "doInput", null);
+		assertEquals("Incorrect value on next task",
+				"doInput -> oldName(null) -> finished", returnValue.value);
+	}
+
+	/**
+	 * Mock {@link FlowInterface} for linking to old method name even after
+	 * {@link Task} name change.
+	 */
+	@FlowInterface
+	public static interface MockChangeNameFlows {
+		void oldName(String parameter);
+	}
+
+	/**
+	 * Section with only task.
+	 */
+	public static class MockChangeTaskNameWithLinksSection {
+
+		// even with name change, should still link by method name
+		@NextTask("oldName")
+		public void doInput(MockChangeNameFlows flow, ReturnValue returnValue,
+				@Parameter Boolean isInvokeFlow) {
+
+			// Flag invoked
+			returnValue.value = "doInput";
+
+			// Determine if invoke flow
+			if (isInvokeFlow == null ? false : isInvokeFlow.booleanValue()) {
+				// Invoke the flow
+				flow.oldName("Flow");
+			}
+		}
+
+		@NextTask("externalFlow")
+		public void oldName(ReturnValue returnValue,
+				@Parameter String parameter, Connection connection)
+				throws SQLException {
+			// Indicate invoked
+			returnValue.value += " -> oldName(" + parameter + ")";
+		}
+
+		public void finished(ReturnValue returnValue) {
+			returnValue.value += " -> finished";
 		}
 	}
 
@@ -264,7 +427,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Allows returning a value from the {@link OfficeFloor}.
 	 */
 	public static class ReturnValue {
-		public Object value = null;
+		public String value = null;
 	}
 
 	/**
@@ -373,12 +536,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		public void doSecond(@Parameter ReturnValue returnValue,
 				MockInternalFlows flows) {
-			returnValue.value = returnValue.value.toString() + "-two";
+			returnValue.value = returnValue.value + "-two";
 			flows.doThird(returnValue);
 		}
 
 		public void doThird(@Parameter ReturnValue returnValue) {
-			returnValue.value = returnValue.value.toString() + "-three";
+			returnValue.value = returnValue.value + "-three";
 		}
 	}
 
@@ -460,7 +623,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		}
 
 		public void doLast(ReturnValue returnValue) {
-			returnValue.value = returnValue.value.toString() + " section";
+			returnValue.value = returnValue.value + " section";
 		}
 	}
 
@@ -478,13 +641,13 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the section designer
 		SectionDesigner designer = SectionLoaderUtil
-				.createSectionDesigner(ClassSectionSource.class);
+				.createSectionDesigner(this.classSectionSource);
 		SectionManagedObjectSource managedObjectSource = designer
 				.addSectionManagedObjectSource("OBJECT",
 						ClassManagedObjectSource.class.getName());
 		managedObjectSource.addProperty(
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, sectionClass
-						.getName());
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				sectionClass.getName());
 		SectionWork work = designer.addSectionWork("WORK",
 				ClassWorkSource.class.getName());
 		for (String taskName : taskNames) {

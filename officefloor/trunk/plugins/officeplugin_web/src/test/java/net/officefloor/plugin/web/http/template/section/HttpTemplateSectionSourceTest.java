@@ -115,10 +115,14 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				"getTemplateName");
 		templateName.getTaskObject("OBJECT");
 
+		// Route submit link
+		templateWork.addSectionTask("submit", "submit");
+
 		// Handle submit task
-		SectionTask submit = classWork.addSectionTask("submit", "submit");
-		submit.getTaskObject("OBJECT");
-		submit.getTaskObject("ServerHttpConnection");
+		SectionTask submitMethod = classWork.addSectionTask(
+				"ServiceLink_submit", "submit");
+		submitMethod.getTaskObject("OBJECT");
+		submitMethod.getTaskObject("ServerHttpConnection");
 
 		// Extra task
 		SectionTask doInternalFlow = classWork.addSectionTask("doInternalFlow",

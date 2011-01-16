@@ -33,10 +33,12 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.work.WorkSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -50,6 +52,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private final Connection connection = this
 			.createSynchronizedMock(Connection.class);
+
+	/**
+	 * Mock {@link HttpSession}.
+	 */
+	private final HttpSession httpSession = this.createMock(HttpSession.class);
 
 	/**
 	 * Port for running on.
@@ -70,16 +77,16 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Add the HTTP server socket listener
 		this.port = MockHttpServer.getAvailablePort();
 		HttpServerSocketManagedObjectSource.autoWire(source, this.port,
-				"SECTION", "renderTemplate");
+				"ROUTE", "route");
 
-		// Add connection
+		// Add dependencies
 		source.addObject(Connection.class, this.connection);
+		source.addObject(HttpSession.class, this.httpSession);
 
-		// Mock the HTTP Session
-		HttpSession httpSession = this.createMock(HttpSession.class);
-		source.addObject(HttpSession.class, httpSession);
-
-		// TODO provide HTTP template router for testing
+		// Provide HTTP template router for testing
+		AutoWireSection routeSection = source.addSection("ROUTE",
+				WorkSectionSource.class,
+				HttpTemplateRouteWorkSource.class.getName());
 
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
@@ -96,6 +103,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				ClassSectionSource.class, MockSection.class.getName());
 
 		// Link flow outputs
+		source.link(routeSection, "NON_MATCHED_REQUEST", templateSection,
+				"renderTemplate");
 		source.link(templateSection, "output", handleOutputSection, "finished");
 		source.link(templateSection, "doExternalFlow", handleOutputSection,
 				"finished");
@@ -140,13 +149,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure can handle submit to a link.
 	 */
 	public void testSubmit() throws Exception {
-
-		// TODO remove
-		if (true) {
-			System.err.println("TODO uncomment to run "
-					+ this.getClass().getSimpleName() + ".testSubmit");
-			return;
-		}
 
 		final String RESPONSE = "submit - doInternalFlow[1] - finished(Parameter for External Flow)";
 

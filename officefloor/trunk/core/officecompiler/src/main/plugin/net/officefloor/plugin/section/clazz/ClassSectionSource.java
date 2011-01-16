@@ -109,15 +109,32 @@ public class ClassSectionSource extends AbstractSectionSource {
 	private final Map<String, SectionTask> _tasksByName = new HashMap<String, SectionTask>();
 
 	/**
-	 * Obtains the {@link SectionTask}.
+	 * Obtains the {@link SectionTask} by its name.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link SectionTask}.
 	 * @return {@link SectionTask} or <code>null</code> if no
 	 *         {@link SectionTask} by the name.
 	 */
-	public SectionTask getTask(String taskName) {
+	public SectionTask getTaskByName(String taskName) {
 		return this._tasksByName.get(taskName);
+	}
+
+	/**
+	 * {@link SectionTask} instances by {@link TaskType} name.
+	 */
+	private final Map<String, SectionTask> _tasksByTypeName = new HashMap<String, SectionTask>();
+
+	/**
+	 * Obtains the {@link SectionTask} by its {@link TaskType} name.
+	 * 
+	 * @param taskTypeName
+	 *            {@link TaskType} name.
+	 * @return {@link SectionTask} or <code>null</code> if no
+	 *         {@link SectionTask} by the {@link TaskType} name.
+	 */
+	public SectionTask getTaskByTypeName(String taskTypeName) {
+		return this._tasksByTypeName.get(taskTypeName);
 	}
 
 	/**
@@ -253,7 +270,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 
 			// Obtain the section task for output
 			String linkTaskName = flowLink.method();
-			SectionTask linkTask = this.getTask(linkTaskName);
+			SectionTask linkTask = this.getTaskByTypeName(linkTaskName);
 			if (linkTask != null) {
 				// Link flow internally
 				this.getDesigner().link(subSectionOuput, linkTask);
@@ -305,6 +322,17 @@ public class ClassSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Obtains the {@link Task} name from the {@link TaskType}.
+	 * 
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @return {@link Task} name.
+	 */
+	protected String getTaskName(TaskType<?, ?, ?> taskType) {
+		return taskType.getTaskName();
+	}
+
+	/**
 	 * Enriches the {@link Task}.
 	 * 
 	 * @param task
@@ -321,7 +349,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 			Method taskMethod, Class<?> parameterType) {
 
 		// Obtain the task name
-		String taskName = taskType.getTaskName();
+		String taskName = task.getSectionTaskName();
 
 		// Obtain the parameter type name
 		String parameterTypeName = (parameterType == null ? null
@@ -359,7 +387,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 				.getName());
 
 		// Attempt to obtain next task internally
-		SectionTask nextTask = this.getTask(nextTaskName);
+		SectionTask nextTask = this.getTaskByTypeName(nextTaskName);
 		if (nextTask != null) {
 			// Link task internally
 			this.getDesigner().link(task, nextTask);
@@ -417,7 +445,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 
 		} else {
 			// Flow interface so attempt to obtain the task internally
-			SectionTask linkTask = this.getTask(flowName);
+			SectionTask linkTask = this.getTaskByTypeName(flowName);
 			if (linkTask != null) {
 				// Link flow internally
 				this.getDesigner().link(taskFlow, linkTask,
@@ -672,16 +700,18 @@ public class ClassSectionSource extends AbstractSectionSource {
 		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
 
 			// Obtain the task name
-			String taskName = taskType.getTaskName();
+			String taskTypeName = taskType.getTaskName();
+			String taskName = this.getTaskName(taskType);
 
 			// Obtain the method for the task
 			SectionTaskFactory taskFactory = (SectionTaskFactory) taskType
 					.getTaskFactory();
 			Method method = taskFactory.getMethod();
 
-			// Add the task
-			SectionTask task = work.addSectionTask(taskName, taskName);
+			// Add the task (both by name and type name for internal linking)
+			SectionTask task = work.addSectionTask(taskName, taskTypeName);
 			this._tasksByName.put(taskName, task);
+			this._tasksByTypeName.put(taskTypeName, task);
 
 			// Obtain the parameter for the task
 			int objectIndex = 1; // 1 as Section Object first
@@ -726,7 +756,8 @@ public class ClassSectionSource extends AbstractSectionSource {
 					tasksByParameterType.put(parameterType.getName(), task);
 
 					// Register the parameter index for the task
-					parameterIndexes.put(taskName, new Integer(objectIndex));
+					parameterIndexes
+							.put(taskTypeName, new Integer(objectIndex));
 				}
 
 				// Increment object index for parameter
@@ -744,7 +775,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 			String taskName = taskType.getTaskName();
 
 			// Obtain the task
-			SectionTask task = this.getTask(taskName);
+			SectionTask task = this.getTaskByTypeName(taskName);
 
 			// Obtain the task method
 			SectionTaskFactory taskFactory = (SectionTaskFactory) taskType
