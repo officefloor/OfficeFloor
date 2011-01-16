@@ -128,7 +128,7 @@ public class FilingCabinetGenerator {
 				unorderedPrimaryKey.put(new Integer(keySeq), columnName);
 			}
 			primaryKeyResultSet.close();
-			List<String> primaryKey = this.getSortedList(unorderedPrimaryKey);
+			List<String> primaryKey = this.sort(unorderedPrimaryKey);
 
 			// Obtain the indexes
 			Map<String, Map<Integer, String>> unorderedIndexColumns = new HashMap<String, Map<Integer, String>>();
@@ -170,9 +170,9 @@ public class FilingCabinetGenerator {
 
 			// Create the table
 			TableMetaData tableMetaData = new TableMetaData(this.packagePrefix,
-					catalogName, schemaName, tableName, columns
-							.toArray(new ColumnMetaData[0]), primaryKey
-							.toArray(new String[0]), indexColumns,
+					catalogName, schemaName, tableName,
+					columns.toArray(new ColumnMetaData[0]),
+					primaryKey.toArray(new String[0]), indexColumns,
 					indexUniqueness);
 
 			// Register the table
@@ -195,8 +195,8 @@ public class FilingCabinetGenerator {
 
 				// Load for current table
 				ResultSet crossReferenceResultSet = databaseMetaData
-						.getImportedKeys(table.getCatalogName(), table
-								.getSchemaName(), table.getTableName());
+						.getImportedKeys(table.getCatalogName(),
+								table.getSchemaName(), table.getTableName());
 				while (crossReferenceResultSet.next()) {
 
 					// Obtain details of cross reference
@@ -264,8 +264,8 @@ public class FilingCabinetGenerator {
 
 			// Create the cross reference
 			CrossReferenceMetaData crossReference = new CrossReferenceMetaData(
-					foreignKeyName, primaryTable, primaryColumnList
-							.toArray(new String[0]), foreignTable,
+					foreignKeyName, primaryTable,
+					primaryColumnList.toArray(new String[0]), foreignTable,
 					foreignColumnList.toArray(new String[0]));
 
 			// Add the cross reference
@@ -307,7 +307,7 @@ public class FilingCabinetGenerator {
 		Map<K, List<T>> sortedMap = new HashMap<K, List<T>>();
 		for (K key : unorderedMap.keySet()) {
 			Map<Integer, T> unorderedList = unorderedMap.get(key);
-			List<T> sortedList = this.getSortedList(unorderedList);
+			List<T> sortedList = this.sort(unorderedList);
 			sortedMap.put(key, sortedList);
 		}
 		return sortedMap;
@@ -320,7 +320,7 @@ public class FilingCabinetGenerator {
 	 *            Unordered items.
 	 * @return Items sorted.
 	 */
-	private <T> List<T> getSortedList(Map<Integer, T> unorderedItems) {
+	private <T> List<T> sort(Map<Integer, T> unorderedItems) {
 		List<T> sortedItems = new LinkedList<T>();
 		int index = 1;
 		for (;;) {
