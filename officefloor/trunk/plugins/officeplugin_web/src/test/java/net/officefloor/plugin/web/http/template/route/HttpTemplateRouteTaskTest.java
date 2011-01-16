@@ -27,8 +27,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.template.RequestHandlerTask.RequestHandlerIdentifier;
-import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask;
+import net.officefloor.plugin.web.http.template.HttpTemplateRequestHandlerDifferentiator;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
 
@@ -73,7 +72,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	public void testRoute() throws Throwable {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
-				RequestHandlerIdentifier.class);
+				new HttpTemplateRequestHandlerDifferentiator());
 		this.record_requestURI("/WORK/TASK.task");
 		this.taskContext.doFlow("WORK", "TASK", null);
 
@@ -87,7 +86,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	public void testNoWorkName() throws Throwable {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
-				RequestHandlerIdentifier.class);
+				new HttpTemplateRequestHandlerDifferentiator());
 		this.record_requestURI("/TASK.task");
 		this.record_doNonMatchedRequestFlow();
 
@@ -101,7 +100,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	public void testNonMatchingWork() throws Throwable {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
-				RequestHandlerIdentifier.class);
+				new HttpTemplateRequestHandlerDifferentiator());
 		this.record_requestURI("/NON_MATCHING/TASK.task");
 		this.record_doNonMatchedRequestFlow();
 
@@ -115,7 +114,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	public void testNonMatchingTask() throws Throwable {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
-				RequestHandlerIdentifier.class);
+				new HttpTemplateRequestHandlerDifferentiator());
 		this.record_requestURI("/WORK/NON_MATCHING.task");
 		this.record_doNonMatchedRequestFlow();
 
@@ -125,11 +124,12 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures handle not using handler {@link Task} as it has incorrect
-	 * parameter type.
+	 * differentiator type.
 	 */
-	public void testNonMatchingParameterType() throws Throwable {
+	public void testNonMatchingDifferentiator() throws Throwable {
 		// Record
-		this.record_cacheOfficeMetaData("WORK", "TASK", Integer.class);
+		this.record_cacheOfficeMetaData("WORK", "TASK",
+				"Wrong differentiator type");
 		this.record_requestURI("/WORK/TASK.task");
 		this.record_doNonMatchedRequestFlow();
 
@@ -159,11 +159,11 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	 * 
 	 * @param workName
 	 *            {@link Work} name.
-	 * @param taskParamPairs
-	 *            Listing of {@link Task} name and parameter type pairs.
+	 * @param taskNameAndDifferentiatorPairs
+	 *            Listing of {@link Task} name and its differentiator.
 	 */
 	private void record_cacheOfficeMetaData(String workName,
-			Object... taskParamPairs) throws Exception {
+			Object... taskNameAndDifferentiatorPairs) throws Exception {
 
 		// Record returning list of work names
 		this.recordReturn(this.office, this.office.getWorkNames(),
@@ -175,11 +175,11 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 				workManager);
 
 		// Create the listing of task names and parameter types
-		String[] taskNames = new String[taskParamPairs.length / 2];
-		Class<?>[] parameterTypes = new Class[taskParamPairs.length / 2];
-		for (int i = 0; i < taskParamPairs.length; i += 2) {
-			taskNames[i / 2] = (String) taskParamPairs[i];
-			parameterTypes[i / 2] = (Class<?>) taskParamPairs[i + 1];
+		String[] taskNames = new String[taskNameAndDifferentiatorPairs.length / 2];
+		Object[] differentiators = new Object[taskNameAndDifferentiatorPairs.length / 2];
+		for (int i = 0; i < taskNameAndDifferentiatorPairs.length; i += 2) {
+			taskNames[i / 2] = (String) taskNameAndDifferentiatorPairs[i];
+			differentiators[i / 2] = taskNameAndDifferentiatorPairs[i + 1];
 		}
 
 		// Record returning the listing of task names
@@ -194,10 +194,10 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 			this.recordReturn(workManager,
 					workManager.getTaskManager(taskName), taskManager);
 
-			// Record returning the parameter type
-			Class<?> parameterType = parameterTypes[i];
-			this.recordReturn(taskManager, taskManager.getParameterType(),
-					parameterType);
+			// Record returning the differentiator
+			Object differentiator = differentiators[i];
+			this.recordReturn(taskManager, taskManager.getDifferentiator(),
+					differentiator);
 		}
 	}
 
@@ -208,12 +208,11 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	 *            Request URI.
 	 */
 	private void record_requestURI(String requestUri) {
-		this
-				.recordReturn(
-						this.taskContext,
-						this.taskContext
-								.getObject(HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION),
-						this.connection);
+		this.recordReturn(
+				this.taskContext,
+				this.taskContext
+						.getObject(HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION),
+				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.request);
 		this.recordReturn(this.request, this.request.getRequestURI(),

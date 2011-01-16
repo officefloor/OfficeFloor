@@ -58,6 +58,17 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
+	 * Name of the {@link SectionInput} for rendering this {@link HttpTemplate}.
+	 */
+	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
+
+	/**
+	 * Name of the {@link SectionOutput} for flow after completion of rending
+	 * the {@link HttpTemplate}.
+	 */
+	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
+
+	/**
 	 * {@link TemplateBeanTask} instances by the template bean
 	 * {@link SectionTask} name.
 	 */
@@ -114,8 +125,8 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
 
 		// Create the input to the section
-		SectionInput sectionInput = designer.addSectionInput("renderTemplate",
-				null);
+		SectionInput sectionInput = designer.addSectionInput(
+				RENDER_TEMPLATE_INPUT_NAME, null);
 
 		// Register the HTTP template sections requiring a bean
 		PropertyList templateProperties = context.createPropertyList();
@@ -136,8 +147,11 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource();
 		classSource.sourceSection(designer, context);
 
+		// Name of work is exposed on URL for links.
+		// Result is: /<section>.links/<link>.task
+		final String TEMPLATE_WORK_NANE = "links";
+
 		// Load the HTTP template
-		final String TEMPLATE_WORK_NANE = "TEMPLATE";
 		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE,
 				HttpTemplateWorkSource.class.getName());
 		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
@@ -281,10 +295,10 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		}
 
 		// TODO register the #{link} tasks
-		
+
 		// Link last template task to output
-		SectionOutput output = classSource.getOrCreateOutput("output", null,
-				false);
+		SectionOutput output = classSource.getOrCreateOutput(
+				ON_COMPLETION_OUTPUT_NAME, null, false);
 		designer.link(previousTemplateTask, output);
 	}
 

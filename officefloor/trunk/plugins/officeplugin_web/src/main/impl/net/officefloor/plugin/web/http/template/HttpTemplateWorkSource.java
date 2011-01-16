@@ -38,7 +38,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
-import net.officefloor.plugin.web.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -189,8 +188,8 @@ public class HttpTemplateWorkSource extends
 
 		// Obtain the template
 		Properties properties = context.getProperties();
-		HttpTemplate template = getHttpTemplate(properties, context
-				.getClassLoader());
+		HttpTemplate template = getHttpTemplate(properties,
+				context.getClassLoader());
 
 		// Obtain the details of the template
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE,
@@ -226,9 +225,8 @@ public class HttpTemplateWorkSource extends
 					requestHandlerTaskName, new RequestHandlerTask(),
 					Indexed.class, None.class);
 
-			// Add marker object to allow it to be found for routing.
-			// (Should be configured as parameter and may be passed null)
-			task.addObject(RequestHandlerIdentifier.class);
+			// Specify differentiator to enable finding this task
+			task.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
 		}
 	}
 

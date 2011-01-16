@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -87,10 +90,20 @@ public class TemplateLogic {
 	 *            {@link SubmitFlow}.
 	 * @throws SQLException
 	 *             Escalation.
+	 * @throws IOException
+	 *             Escalation.
 	 */
 	public void submit(ServerHttpConnection connection, SubmitFlow flow)
-			throws SQLException {
-		// Logic to handle the submit
+			throws SQLException, IOException {
+
+		// Indicate submit
+		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
+				.getBody().getOutputStream());
+		writer.write("submit");
+		writer.flush();
+
+		// Trigger flow
+		flow.doInternalFlow(new Integer(1));
 	}
 
 	/**
@@ -121,13 +134,28 @@ public class TemplateLogic {
 	 * 
 	 * @param parameter
 	 *            Parameter.
-	 * @param connection
+	 * @param sqlConnection
 	 *            {@link Connection}.
+	 * @param httpConnection
+	 *            {@link ServerHttpConnection}.
 	 * @return Parameter for external flow.
+	 * @throws IOException
+	 *             Escalation.
 	 */
 	@NextTask("doExternalFlow")
 	public String doInternalFlow(@Parameter Integer parameter,
-			Connection connection) {
+			Connection sqlConnection, ServerHttpConnection httpConnection)
+			throws IOException {
+
+		// Indicate internal flow with its parameter
+		Writer writer = new OutputStreamWriter(httpConnection.getHttpResponse()
+				.getBody().getOutputStream());
+		writer.write(" - doInternalFlow[");
+		writer.write(parameter.intValue());
+		writer.write("]");
+		writer.flush();
+
+		// Return parameter for next flow
 		return "Parameter for External Flow";
 	}
 
