@@ -292,21 +292,14 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				MockRawType.class, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		OfficeFloorInputManagedObject inputMo = this.recordInputManagedObject(
-				mosOne, MockRawType.class);
+		this.recordInputManagedObject(mosOne, MockRawType.class);
 
 		// Record the second input managed object
 		OfficeFloorManagedObjectSource mosTwo = this.recordManagedObjectSource(
 				MockRawType.class, ClassManagedObjectSource.class, 1,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
-		this.deployer.link(mosTwo, inputMo);
-		final OfficeObject officeObjectTwo = this
-				.createMock(OfficeObject.class);
-		this.recordReturn(this.office, this.office
-				.getDeployedOfficeObject(MockRawType.class.getName()),
-				officeObjectTwo);
-		this.deployer.link(officeObjectTwo, inputMo);
+		this.recordInputManagedObject(mosTwo, MockRawType.class);
 
 		// Providing wiring indicating input managed object
 		ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
@@ -468,23 +461,31 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private OfficeFloorInputManagedObject recordInputManagedObject(
 			OfficeFloorManagedObjectSource source, Class<?> type) {
 
-		// Input Managed Object
-		final OfficeFloorInputManagedObject input = this
-				.createMock(OfficeFloorInputManagedObject.class);
-		this.recordReturn(this.deployer,
-				this.deployer.addInputManagedObject(type.getName()), input);
-
-		// Link the source to input
-		this.deployer.link(source, input);
-		input.setBoundOfficeFloorManagedObjectSource(source);
-		this.inputManagedObjects.put(type, input);
-
 		// Record the managed object into the office
 		final OfficeObject object = this.createMock(OfficeObject.class);
 		this.recordReturn(this.office,
 				this.office.getDeployedOfficeObject(type.getName()), object);
-		this.deployer.link(object, input);
 		this.objects.put(type, object);
+
+		// Obtain the Input Managed Object
+		OfficeFloorInputManagedObject input = this.inputManagedObjects
+				.get(type);
+		if (input == null) {
+			// Create and register the input managed object
+			input = this.createMock(OfficeFloorInputManagedObject.class);
+			this.inputManagedObjects.put(type, input);
+			this.recordReturn(this.deployer,
+					this.deployer.addInputManagedObject(type.getName()), input);
+
+			// First managed object source is bound
+			input.setBoundOfficeFloorManagedObjectSource(source);
+
+			// Link input office object to input managed object
+			this.deployer.link(object, input);
+		}
+
+		// Link the source to input
+		this.deployer.link(source, input);
 
 		// Return the input managed object
 		return input;
