@@ -201,6 +201,9 @@ public class WorkNodeImpl implements WorkNode {
 				this.sectionLocation, this.workName);
 		WorkType workType = workLoader.loadWorkType(workSourceClass,
 				this.propertyList);
+		if (workType == null) {
+			return; // must have WorkType to build work
+		}
 
 		// Obtain the fully qualified work name
 		String fullyQualifiedWorkName = this.section

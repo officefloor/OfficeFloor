@@ -126,6 +126,37 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				targetInputName));
 	}
 
+	/**
+	 * <p>
+	 * Determines if the {@link AutoWireSection} output is configured for
+	 * linking.
+	 * <p>
+	 * This aids configuration by allowing to know if {@link SectionOutput}
+	 * flows have been configured (linked).
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param sectionOutputName
+	 *            {@link SectionOutput} name.
+	 * @return <code>true</code> if configured for linking, otherwise
+	 *         <code>false</code>.
+	 */
+	public boolean isLinked(AutoWireSection section, String sectionOutputName) {
+
+		// Determine if linked
+		for (Link link : this.links) {
+			if ((link.sourceSection.getSectionName().equals(section
+					.getSectionName()))
+					&& (link.sourceOutputName.equals(sectionOutputName))) {
+				// Matching section output so configured for linking
+				return true;
+			}
+		}
+
+		// As here, not linked
+		return false;
+	}
+
 	/*
 	 * ===================== OfficeSource =========================
 	 */

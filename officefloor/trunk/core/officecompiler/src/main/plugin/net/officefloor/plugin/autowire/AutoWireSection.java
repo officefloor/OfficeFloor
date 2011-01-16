@@ -76,8 +76,8 @@ public class AutoWireSection {
 	 *            Section to copy in state.
 	 */
 	protected AutoWireSection(AutoWireSection section) {
-		this(section.getSectionName(), section.getSectionSourceClass(), section
-				.getSectionLocation(), section.getSectionProperties());
+		this(section.name, section.sourceClass, section.location,
+				section.properties);
 	}
 
 	/**
