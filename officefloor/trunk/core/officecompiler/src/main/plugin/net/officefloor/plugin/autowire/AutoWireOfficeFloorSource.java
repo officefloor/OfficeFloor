@@ -586,13 +586,13 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 					// Only first is specified as bound
 					inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
+
+					// Link office object to input managed object
+					deployer.link(officeObject, inputMo);
 				}
 
 				// Link source to input
 				deployer.link(this.managedObjectSource, inputMo);
-
-				// Link input to office object
-				deployer.link(officeObject, inputMo);
 
 			} else {
 				// Managed object
