@@ -70,7 +70,7 @@ import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
  * {@link OfficeFloorSource} implementation that auto-wires the configuration
  * based on type.
  * <p>
- * To allow auto-wiring this implementation provides facades over the the
+ * To allow auto-wiring this implementation provides facades over the
  * complexities of more advanced {@link OfficeFloor} configuration to allow
  * simpler configuration. It is anticipated in majority of cases that this will
  * be adequate for most applications. Should however more flexibility be
