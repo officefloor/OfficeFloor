@@ -148,6 +148,31 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to indicate if a flow is linked.
+	 */
+	public void testIsFlowLinked() throws Exception {
+
+		final String ONE = "One";
+		final String ONE_OUTPUT = "output";
+		final String TWO = "Two";
+		final String TWO_INPUT = "input";
+
+		// Create source with linked flow
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection one = this.addSection(source, ONE);
+		AutoWireSection two = this.addSection(source, TWO);
+		source.link(one, ONE_OUTPUT, two, TWO_INPUT);
+
+		// Ensure indicate if linked
+		assertTrue("Should indicate linked", source.isLinked(one, ONE_OUTPUT));
+
+		// Provide indications that not linked
+		assertFalse("Output not linked", source.isLinked(one, "NotLinked"));
+		assertFalse("Section without output not linked",
+				source.isLinked(two, "output"));
+	}
+
+	/**
 	 * Ensure issue if unknown output.
 	 */
 	public void testUnknownOutput() throws Exception {

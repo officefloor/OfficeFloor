@@ -176,6 +176,25 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	}
 
 	/**
+	 * <p>
+	 * Determines if the {@link AutoWireSection} output is configured for
+	 * linking.
+	 * <p>
+	 * This aids configuration by allowing to know if {@link SectionOutput}
+	 * flows have been configured (linked).
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param sectionOutputName
+	 *            {@link SectionOutput} name.
+	 * @return <code>true</code> if configured for linking, otherwise
+	 *         <code>false</code>.
+	 */
+	public boolean isLinked(AutoWireSection section, String sectionOutputName) {
+		return this.officeSource.isLinked(section, sectionOutputName);
+	}
+
+	/**
 	 * Adds a raw object for dependency injection for the particular type.
 	 * 
 	 * @param type
