@@ -35,7 +35,7 @@ import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskD
 
 /**
  * Tests the {@link HttpRouteTask}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRouteTaskTest extends OfficeFrameTestCase {
@@ -114,8 +114,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			this.doRouteTest("", -1);
 			fail("Should not be successful");
 		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST, ex
-					.getHttpStatus());
+			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST,
+					ex.getHttpStatus());
 		}
 	}
 
@@ -127,8 +127,8 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			this.doRouteTest(null, -1);
 			fail("Should not be successful");
 		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST, ex
-					.getHttpStatus());
+			assertEquals("Incorrect status", HttpStatus.SC_BAD_REQUEST,
+					ex.getHttpStatus());
 		}
 	}
 
@@ -163,7 +163,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does the routing test.
-	 *
+	 * 
 	 * @param path
 	 *            Path on the {@link HttpRequest}.
 	 * @param flowIndex
@@ -181,19 +181,20 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		}
 
 		// Create the route task
-		HttpRouteTask routeTask = new HttpRouteTask(patterns
-				.toArray(new Pattern[0]));
+		HttpRouteTask routeTask = new HttpRouteTask(
+				patterns.toArray(new Pattern[0]));
 
 		// Record actions on mocks
-		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION),
 				this.serverHttpConnection);
-		this.recordReturn(this.serverHttpConnection, this.serverHttpConnection
-				.getHttpRequest(), this.httpRequest);
+		this.recordReturn(this.serverHttpConnection,
+				this.serverHttpConnection.getHttpRequest(), this.httpRequest);
 		this.recordReturn(this.httpRequest, this.httpRequest.getRequestURI(),
 				path);
 		if (flowIndex >= 0) {
-			this.recordReturn(this.taskContext, this.taskContext.doFlow(
-					flowIndex, null), this.flowFuture);
+			this.recordReturn(this.taskContext,
+					this.taskContext.doFlow(flowIndex, null), this.flowFuture);
 		}
 
 		// Replay mocks

@@ -38,8 +38,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpResourceUtil;
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
+import net.officefloor.plugin.web.http.template.HttpTemplateRequestHandlerDifferentiator;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 
@@ -89,11 +89,10 @@ public class HttpTemplateRouteTask
 			for (String taskName : workManager.getTaskNames()) {
 				TaskManager taskManager = workManager.getTaskManager(taskName);
 
-				// Determine if handler task based on parameter type
-				Class<?> parameterType = taskManager.getParameterType();
-				if ((parameterType != null)
-						&& (RequestHandlerIdentifier.class
-								.isAssignableFrom(parameterType))) {
+				// Determine if handler task
+				Object differentiator = taskManager.getDifferentiator();
+				if ((differentiator != null)
+						&& (differentiator instanceof HttpTemplateRequestHandlerDifferentiator)) {
 					// Handler task so include for work
 					handlerTaskNames.add(taskName);
 				}
@@ -101,8 +100,8 @@ public class HttpTemplateRouteTask
 
 			// Include handler tasks (if any for the work)
 			if (handlerTaskNames.size() > 0) {
-				this.templateHandlerTasks.put(workName, handlerTaskNames
-						.toArray(new String[0]));
+				this.templateHandlerTasks.put(workName,
+						handlerTaskNames.toArray(new String[0]));
 			}
 		}
 	}

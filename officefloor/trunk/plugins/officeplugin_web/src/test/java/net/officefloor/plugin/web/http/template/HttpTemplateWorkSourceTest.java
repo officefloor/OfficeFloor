@@ -20,8 +20,6 @@ package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
 
-import org.easymock.AbstractMatcher;
-
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -39,12 +37,9 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.web.http.template.HttpTemplateTask;
-import net.officefloor.plugin.web.http.template.HttpTemplateWork;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.RequestHandlerTask;
-import net.officefloor.plugin.web.http.template.RequestHandlerTask.RequestHandlerIdentifier;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link HttpTemplateWorkSource}.
@@ -143,12 +138,12 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		// Handle link 'beans' task
 		TaskTypeBuilder<Indexed, None> beans = work.addTaskType("beans",
 				requestHandlerTaskFactory, Indexed.class, None.class);
-		beans.addObject(RequestHandlerIdentifier.class);
+		beans.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
 
 		// Handle link 'submit' task
 		TaskTypeBuilder<Indexed, None> submit = work.addTaskType("submit",
 				requestHandlerTaskFactory, Indexed.class, None.class);
-		submit.addObject(RequestHandlerIdentifier.class);
+		submit.setDifferentiator(new HttpTemplateRequestHandlerDifferentiator());
 
 		// Verify the work type
 		WorkLoaderUtil.validateWorkType(work, HttpTemplateWorkSource.class,

@@ -31,7 +31,7 @@ import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 
 /**
  * {@link Task} for routing a {@link HttpRequest}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRouteTask
@@ -52,7 +52,7 @@ public class HttpRouteTask
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param routings
 	 *            {@link Pattern} match against paths to route the
 	 *            {@link HttpRequest}.
@@ -72,7 +72,7 @@ public class HttpRouteTask
 
 		// Obtain the request to route it
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(0);
+				.getObject(HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
 		// Obtain the canonical path from request

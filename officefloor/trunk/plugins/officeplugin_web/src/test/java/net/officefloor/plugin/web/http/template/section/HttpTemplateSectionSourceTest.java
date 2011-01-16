@@ -126,6 +126,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		doInternalFlow.getTaskObject("OBJECT");
 		doInternalFlow.getTaskObject("Integer");
 		doInternalFlow.getTaskObject("Connection");
+		doInternalFlow.getTaskObject("ServerHttpConnection");
 
 		// Managed Object Sources
 		expected.addSectionManagedObjectSource("OBJECT",

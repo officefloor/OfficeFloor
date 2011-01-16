@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -75,6 +76,11 @@ public class ClasspathHttpFileSenderWorkSource extends
 	 * found&quot; response.
 	 */
 	public static final String PROPERTY_FILE_NOT_FOUND_CONTENT_PATH = "file.not.found.content.path";
+
+	/**
+	 * Name of the {@link Task} to send the {@link HttpFile}.
+	 */
+	public static final String TASK_NAME = "SendFile";
 
 	/*
 	 * ============================ WorkSource ================================
@@ -172,7 +178,7 @@ public class ClasspathHttpFileSenderWorkSource extends
 
 		// Load the task to send the HTTP file
 		TaskTypeBuilder<DependencyKeys, None> taskTypeBuilder = workTypeBuilder
-				.addTaskType("SendFile", task, DependencyKeys.class, None.class);
+				.addTaskType(TASK_NAME, task, DependencyKeys.class, None.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
 		taskTypeBuilder.addEscalation(IOException.class);

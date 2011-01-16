@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.web.http.template.section;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 
 import org.apache.http.HttpResponse;
@@ -30,6 +33,7 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -71,9 +75,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Add connection
 		source.addObject(Connection.class, this.connection);
 
-		// TODO provide HTTP Session
+		// Mock the HTTP Session
 		HttpSession httpSession = this.createMock(HttpSession.class);
 		source.addObject(HttpSession.class, httpSession);
+
+		// TODO provide HTTP template router for testing
 
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
@@ -81,7 +87,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				+ "/Template.ofp";
 		AutoWireSection templateSection = source.addSection("SECTION",
 				HttpTemplateSectionSource.class, templateLocation);
-		templateSection.addProperty(
+		templateSection.addSectionProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName());
 
@@ -113,7 +119,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String XML = "<html><body>Template Test:<table>"
 				+ "<tr><td>Name</td><td>Description</td></tr>"
 				+ "<tr><td>row</td><td>test row</td></tr></table>"
-				+ "<form action=\"/SECTION.TEMPLATE/submit.task\">"
+				+ "<form action=\"/SECTION.links/submit.task\">"
 				+ "<input type=\"submit\"/></form></body></html>";
 
 		// Send the request to obtain results of rending template
@@ -131,10 +137,48 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can handle submit to a link.
+	 */
+	public void testSubmit() throws Exception {
+
+		// TODO remove
+		if (true) {
+			System.err.println("TODO uncomment to run "
+					+ this.getClass().getSimpleName() + ".testSubmit");
+			return;
+		}
+
+		final String RESPONSE = "submit - doInternalFlow[1] - finished(Parameter for External Flow)";
+
+		// Send the request to obtain results of rending template
+		HttpClient client = new DefaultHttpClient();
+		HttpGet request = new HttpGet("http://localhost:" + this.port
+				+ "/SECTION.links/submit.task");
+		HttpResponse response = client.execute(request);
+
+		// Ensure successful
+		assertEquals("Ensure successful", 200, response.getStatusLine()
+				.getStatusCode());
+
+		// Ensure correct rendering of template
+		String rendering = MockHttpServer.getEntityBody(response);
+		assertEquals("Incorrect rendering", RESPONSE, rendering);
+	}
+
+	/**
 	 * Mock section for output tasks of the template.
 	 */
 	public static class MockSection {
-		public void finished(@Parameter String parameter) {
+		public void finished(@Parameter String parameter,
+				ServerHttpConnection connection) throws IOException {
+			if ((parameter != null) && (parameter.length() > 0)) {
+				Writer writer = new OutputStreamWriter(connection
+						.getHttpResponse().getBody().getOutputStream());
+				writer.write(" - finished(");
+				writer.write(parameter);
+				writer.write(")");
+				writer.flush();
+			}
 		}
 	}
 
