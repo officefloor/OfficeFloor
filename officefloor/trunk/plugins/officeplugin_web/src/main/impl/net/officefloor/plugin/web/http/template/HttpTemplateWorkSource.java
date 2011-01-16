@@ -25,6 +25,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -42,6 +44,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateParserImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSectionContent;
+import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionContent;
 import net.officefloor.plugin.web.http.template.parse.ReferenceHttpTemplateSectionContent;
 
 /**
@@ -136,6 +139,37 @@ public class HttpTemplateWorkSource extends
 
 		// No reference content, so does not require bean
 		return false;
+	}
+
+	/**
+	 * Obtains the link names for the {@link HttpTemplate}.
+	 * 
+	 * @param template
+	 *            {@link HttpTemplate}.
+	 * @return Link names.
+	 */
+	public static String[] getHttpTemplateLinkNames(HttpTemplate template) {
+
+		// Obtain the listing of link names
+		List<String> linkNames = new LinkedList<String>();
+		for (HttpTemplateSection section : template.getSections()) {
+			for (HttpTemplateSectionContent content : section.getContent()) {
+				if (content instanceof LinkHttpTemplateSectionContent) {
+					LinkHttpTemplateSectionContent link = (LinkHttpTemplateSectionContent) content;
+
+					// Obtain the link name
+					String linkName = link.getName();
+
+					// Add the link name
+					if (!linkNames.contains(linkName)) {
+						linkNames.add(linkName);
+					}
+				}
+			}
+		}
+
+		// Return the link names
+		return linkNames.toArray(new String[linkNames.size()]);
 	}
 
 	/**

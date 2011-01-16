@@ -140,7 +140,7 @@ public class HttpServerOfficeFloorSource extends AutoWireOfficeFloorSource {
 
 		} else {
 			// Private template so provide private section name
-			sectionName = "PrivateTemplate" + this.httpTemplates.size();
+			sectionName = "resource" + this.httpTemplates.size();
 		}
 
 		// Add the HTTP template section

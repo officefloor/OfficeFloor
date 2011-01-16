@@ -200,7 +200,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.source.openOfficeFloor();
 
 		// Ensure correct section details
-		assertEquals("Incorrect section name", "PrivateTemplate0",
+		assertEquals("Incorrect section name", "resource0",
 				section.getSectionName());
 		assertEquals("Incorrect section source",
 				HttpTemplateSectionSource.class,
@@ -217,18 +217,28 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to request the template link.
+	 * Ensure able to request the template link on public template.
 	 */
-	public void testTemplateLink() throws Exception {
+	public void testTemplateLinkWithUri() throws Exception {
 
-		// TODO remove
-		if (true) {
-			System.err.println("TODO uncomment to run "
-					+ this.getClass().getSimpleName() + ".testTemplateLink");
-			return;
-		}
+		final String SUBMIT_URI = "/uri.ofp.links/submit.task";
 
-		final String SUBMIT_URI = "/PrivateTemplate0.links/submit.task";
+		// Add HTTP template
+		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class,
+				"uri.ofp");
+		this.source.openOfficeFloor();
+
+		// Ensure submit on task for template is correct
+		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
+				"submit");
+	}
+
+	/**
+	 * Ensure able to request the template link on private template.
+	 */
+	public void testTemplateLinkWithoutUri() throws Exception {
+
+		final String SUBMIT_URI = "/resource0.links/submit.task";
 
 		// Add HTTP template
 		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class);

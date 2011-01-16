@@ -151,7 +151,7 @@ public class TemplateLogic {
 		Writer writer = new OutputStreamWriter(httpConnection.getHttpResponse()
 				.getBody().getOutputStream());
 		writer.write(" - doInternalFlow[");
-		writer.write(parameter.intValue());
+		writer.write(String.valueOf(parameter.intValue()));
 		writer.write("]");
 		writer.flush();
 
