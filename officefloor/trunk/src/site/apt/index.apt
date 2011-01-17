@@ -13,39 +13,32 @@ So why another framework?
   Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
   
   Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enbles {{{./promote-good-design.html}promoting good designs}}.
+  
+Simple Example
 
-  The following is an example of the graphical configuration of OfficeFloor within Eclipse:
+  This is a quick introduction to the capabilities of OfficeFloor.  As much of the value of inversion of control frameworks is in wiring together existing services, the following is a simple example with the web plug-in for OfficeFloor.
+  
++----------------------------------
+        HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource();
+        server.addHttpTemplate("example.ofp", Example.class, "example");
+        server.openOfficeFloor();
++----------------------------------
+
+
+
+* Graphical Configuration
+
+  The above example was limited to code configuration of OfficeFloor.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}.  An example of the graphical configuration is below:
 
 [./images/screenshot.png] Example graphical configuration of OfficeFloor
-  
-Get going with OfficeFloor
 
-* OfficeFloor quick install
-
-  The simplest means of installing OfficeFloor is via Maven as follows:
-  
-+----------------------------
-      wget http://www.officefloor.net/pom.xml
-      mvn install
-+----------------------------
-
-  If <<<wget>>> is not available download this {{{/pom.xml}pom.xml}} (right click and save as) and run <<<mvn install>>> in same directory.
-
-  Once run, OfficeFloor will be installed in the current directory.
-
-* Run example OfficeFloor application
-  
-  OfficeFloor (much like other frameworks) has initial learning curves to adopt.  Even though the graphical configuration of OfficeFloor is aimed at making development with OfficeFloor intuitive, the initial concepts still need to be understood.  Current work at the moment by the development team is to provide simple example uses of OfficeFloor to allow you easier understanding of both OfficeFloor's capabilities and how to start using OfficeFloor to build your applications.
-
-  The following active tasks are providing this detail and this page will be updated shortly with their outcomes:
-
-   * {{{http://sourceforge.net/tracker/index.php?func=detail&aid=3109862&group_id=156349&atid=799429}HTTP template links implementated as object methods}}
-
-  Once the above tasks are available, the examples will also be available within Eclipse (see {{{./eclipse.html}installing OfficeFloor within Eclipse}}) for making graphical configuration changes to the examples.
+  See the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}} for further configuration.
 
 Find out more
 
   To find out more about OfficeFloor:
+  
+   * Review the {{{./examples/index.html}Examples}}
 
    * Watch the {{{./demo.html}Demo}}
 
@@ -53,5 +46,5 @@ Find out more
 
    * Understand the {{{./principles.html}Principles}}
 
-   * Start using in {{{./eclipse.html}Eclipse}}
+   * Develop within {{{./eclipse.html}Eclipse}}
 
