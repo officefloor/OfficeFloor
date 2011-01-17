@@ -211,7 +211,8 @@ public class WorkSectionSource extends AbstractSectionSource {
 					.getEscalationTypes()) {
 
 				// Obtain the escalation type
-				Class<?> escalation = escalationType.getEscalationType();
+				Class<? extends Throwable> escalation = escalationType
+						.getEscalationType();
 
 				// Obtain the escalation
 				TaskFlow flow = task.getTaskEscalation(escalation.getName());
