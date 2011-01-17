@@ -59,14 +59,14 @@
 		</head>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
-			<item name="Demo" href="./demo.html" />
 			<item name="Principles" href="./principles.html" />
 			<item name="Job Based Architecture" href="./core/officeframe/job-based-architecture.html" />
 			<item name="Graphical Configuration" href="./eclipse/graphical-configuration.html" />
 		</menu>
 		<menu name="Start using">
-			<item name="Eclipse" href="./eclipse.html" />
+			<item name="Eclipse" href="./eclipse/index.html" />
 			<item name="Download" href="./download.html" />
+			<item name="Examples" href="./examples/index.html" />
 		</menu>
 		<menu name="Technical">
 			<item name="Architecture" href="./architecture.html" />
