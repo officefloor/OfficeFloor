@@ -1,4 +1,4 @@
-                                       ------------------
+				       ------------------
 				             Welcome
 				       ------------------
 				      Daniel Sagenschneider
@@ -16,14 +16,9 @@ So why another framework?
   
 Simple Example
 
-  This is a quick introduction to the capabilities of OfficeFloor.  As much of the value of inversion of control frameworks is in wiring together existing services, the following is a simple example with the web plug-in for OfficeFloor.
-  
-+----------------------------------
-        HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource();
-        server.addHttpTemplate("example.ofp", Example.class, "example");
-        server.openOfficeFloor();
-+----------------------------------
+  This is a quick introduction to the capabilities of OfficeFloor.  As much of the value with inversion of control frameworks is in wiring together existing services, the following is a simple example with the web plug-in for OfficeFloor.
 
+%{code-snippet|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 
 
 * Graphical Configuration

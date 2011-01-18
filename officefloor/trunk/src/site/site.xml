@@ -28,9 +28,19 @@
 			<link rel="shortcut icon" href="./favicon.ico" />
 			<!-- Search Engine details -->
 			<meta name="keywords"
-				content="job,based,architecture,graphical,configuration,framework,server,inversion,control,dependency,injection,java,XML,SEDA" />
+				content="job,based,architecture,visual,graphical,configuration,framework,server,inversion,of,control,2.0,dependency,injection,java,XML,SEDA" />
 			<meta name="description"
-				content="OfficeFloor simplifies the development of high performance applications" />
+				content="OfficeFloor is an inversion of control 2.0 implementation" />
+			<!-- Syntax Highlighter -->
+			<link type="text/css" rel="stylesheet" href="./css/shCore.css" />
+			<link type="text/css" rel="stylesheet" href="./css/shThemeDefault.css" />
+			<script type="text/javascript" src="./scripts/shCore.js"></script>
+			<script type="text/javascript" src="./scripts/shAutoloader.js"></script>
+			<script type="text/javascript" src="./scripts/shBrushJava.js"></script>
+			<script type="text/javascript">
+				SyntaxHighlighter.defaults['toolbar'] = false;
+				SyntaxHighlighter.all();
+            </script>
 			<!-- Piwik -->
 			<script type="text/javascript">
 				var pkBaseURL = (("https:" ==
