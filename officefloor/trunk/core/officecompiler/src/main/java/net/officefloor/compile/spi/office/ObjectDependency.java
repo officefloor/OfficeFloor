@@ -18,23 +18,38 @@
 
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Dependency of an {@link OfficeTask} on a {@link ManagedObject}.
+ * Dependency of an {@link OfficeTask} or {@link ManagedObject} on a
+ * {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ObjectDependency {
 
 	/**
-	 * Obtains the name of this {@link ObjectDependency}. This is typically the
-	 * {@link TaskObjectType} name.
+	 * <p>
+	 * Obtains the name of this {@link ObjectDependency}.
+	 * <p>
+	 * This would correspond to either the {@link TaskObjectType} or the
+	 * {@link ManagedObjectDependencyType} name.
 	 * 
 	 * @return Name of this {@link ObjectDependency}.
 	 */
 	String getObjectDependencyName();
+
+	/**
+	 * Obtains the type required of this {@link ObjectDependency}.
+	 * 
+	 * @return Type required of this {@link ObjectDependency}.
+	 *         {@link UnknownType} is to be returned if the type can not be
+	 *         determined which avoids clients having to do <code>null</code>
+	 *         checks.
+	 */
+	Class<?> getObjectDependencyType();
 
 	/**
 	 * <p>
@@ -52,4 +67,5 @@ public interface ObjectDependency {
 	 *         linked (or issue in linking).
 	 */
 	DependentManagedObject getDependentManagedObject();
+
 }

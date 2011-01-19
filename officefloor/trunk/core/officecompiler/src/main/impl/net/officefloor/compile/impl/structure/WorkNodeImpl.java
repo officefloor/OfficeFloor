@@ -38,6 +38,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link WorkNode} implementation.
@@ -91,6 +92,22 @@ public class WorkNodeImpl implements WorkNode {
 	 * Initial {@link SectionTask} for this {@link SectionWork}.
 	 */
 	private SectionTask initialTask = null;
+
+	/**
+	 * Flag indicating if within the {@link Office} context.
+	 */
+	private boolean isWithinOfficeContext = false;
+
+	/**
+	 * {@link WorkType} for this {@link WorkNode}.
+	 */
+	private WorkType<?> workType = null;
+
+	/**
+	 * Flag indicating if the {@link WorkType} is loaded (or at least attempted
+	 * to be loaded).
+	 */
+	private boolean isWorkTypeLoaded = false;
 
 	/**
 	 * Initiate.
@@ -175,6 +192,12 @@ public class WorkNodeImpl implements WorkNode {
 	 */
 
 	@Override
+	public void addOfficeContext(String officeLocation) {
+		// Do not need office location, only that to know within Office context
+		this.isWithinOfficeContext = true;
+	}
+
+	@Override
 	public SectionNode getSectionNode() {
 		return this.section;
 	}
@@ -186,21 +209,45 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildWork(OfficeBuilder builder) {
+	public WorkType<?> getWorkType() {
+
+		// Ensure within office context
+		if (!this.isWithinOfficeContext) {
+			throw new IllegalStateException("Office context has not been added");
+		}
+
+		// Determine if work type already loaded
+		if (this.isWorkTypeLoaded) {
+			return this.workType;
+		}
+
+		// Flag work type loaded (as now attempting to load it)
+		this.isWorkTypeLoaded = true;
 
 		// Obtain the work source class
 		Class<? extends WorkSource> workSourceClass = this.context
 				.getWorkSourceClass(this.workSourceClassName,
 						this.sectionLocation, this.workName);
 		if (workSourceClass == null) {
-			return; // must obtain work source class
+			return null; // must obtain work source class
 		}
 
 		// Load the work type
 		WorkLoader workLoader = this.context.getWorkLoader(
 				this.sectionLocation, this.workName);
-		WorkType workType = workLoader.loadWorkType(workSourceClass,
+		this.workType = workLoader.loadWorkType(workSourceClass,
 				this.propertyList);
+
+		// Return the work type
+		return this.workType;
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	public void buildWork(OfficeBuilder builder) {
+
+		// Obtain the work type
+		WorkType<?> workType = this.getWorkType();
 		if (workType == null) {
 			return; // must have WorkType to build work
 		}
@@ -215,7 +262,7 @@ public class WorkNodeImpl implements WorkNode {
 
 		// Build the tasks
 		for (TaskNode task : this.workTaskNodes) {
-			task.buildTask(workType, workBuilder);
+			task.buildTask(workBuilder);
 		}
 
 		// Determine if initial task for work

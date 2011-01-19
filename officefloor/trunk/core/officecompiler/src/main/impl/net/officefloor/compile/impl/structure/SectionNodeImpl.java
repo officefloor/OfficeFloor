@@ -372,8 +372,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Instantiate an instance of the section source
 			this.sectionSource = CompileUtil.newInstance(sectionSourceClass,
 					SectionSource.class, LocationType.SECTION,
-					this.sectionLocation, null, null, this.context
-							.getCompilerIssues());
+					this.sectionLocation, null, null,
+					this.context.getCompilerIssues());
 			if (this.sectionSource == null) {
 				return; // must instantiate section source
 			}
@@ -389,8 +389,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		} catch (Throwable ex) {
 			// Indicate failure to source section
-			this.addIssue("Faild to source "
-					+ OfficeSection.class.getSimpleName(), ex);
+			this.addIssue(
+					"Faild to source " + OfficeSection.class.getSimpleName(),
+					ex);
 			return; // can not load sub section as section load failure
 		}
 
@@ -404,6 +405,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.values()) {
 			managedObjectSource.addOfficeContext(officeLocation);
 			managedObjectSource.loadManagedObjectType();
+		}
+
+		// Add the office context for the work
+		for (WorkNode work : this.workNodes.values()) {
+			work.addOfficeContext(officeLocation);
 		}
 
 		// Add the office context for the tasks
@@ -472,8 +478,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		}
 
 		// Build the sub sections (in deterministic order)
-		SectionNode[] subSections = CompileUtil.toSortedArray(this.subSections
-				.values(), new SectionNode[0],
+		SectionNode[] subSections = CompileUtil.toSortedArray(
+				this.subSections.values(), new SectionNode[0],
 				new StringExtractor<SectionNode>() {
 					@Override
 					public String toString(SectionNode subSection) {
@@ -1015,11 +1021,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					@Override
 					public int compare(OfficeSectionManagedObjectSource a,
 							OfficeSectionManagedObjectSource b) {
-						return a
-								.getOfficeSectionManagedObjectSourceName()
+						return a.getOfficeSectionManagedObjectSourceName()
 								.compareTo(
-										b
-												.getOfficeSectionManagedObjectSourceName());
+										b.getOfficeSectionManagedObjectSourceName());
 					}
 				});
 		return sectionMos;

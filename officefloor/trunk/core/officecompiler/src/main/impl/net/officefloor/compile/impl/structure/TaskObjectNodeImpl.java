@@ -21,12 +21,16 @@ package net.officefloor.compile.impl.structure;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
+import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 
@@ -36,6 +40,11 @@ import net.officefloor.frame.api.manage.Office;
  * @author Daniel Sagenschneider
  */
 public class TaskObjectNodeImpl implements TaskObjectNode {
+
+	/**
+	 * {@link TaskNode} containing this {@link TaskObjectNode}.
+	 */
+	private final TaskNode taskNode;
 
 	/**
 	 * Name of this {@link TaskObject}.
@@ -72,6 +81,8 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	/**
 	 * Initiate.
 	 * 
+	 * @param taskNode
+	 *            {@link TaskNode} containing this {@link TaskObjectNode}.
 	 * @param objectName
 	 *            Name of this {@link TaskObject}.
 	 * @param sectionLocation
@@ -80,8 +91,9 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public TaskObjectNodeImpl(String objectName, String sectionLocation,
-			NodeContext context) {
+	public TaskObjectNodeImpl(TaskNode taskNode, String objectName,
+			String sectionLocation, NodeContext context) {
+		this.taskNode = taskNode;
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
 		this.context = context;
@@ -127,6 +139,32 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	}
 
 	@Override
+	public Class<?> getObjectDependencyType() {
+
+		// Ensure in office context
+		if (!this.isInOfficeContext) {
+			throw new IllegalStateException("Must be in office context");
+		}
+
+		// Obtain the task type for this task node
+		TaskType<?, ?, ?> taskType = this.taskNode.getTaskType();
+		if (taskType == null) {
+			return UnknownType.class; // must have task type
+		}
+
+		// Find the corresponding object type for this task object
+		for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
+			if (this.objectName.equals(objectType.getObjectName())) {
+				// Found the object type, so return the type
+				return objectType.getObjectType();
+			}
+		}
+
+		// As here, did not find the object type
+		return UnknownType.class;
+	}
+
+	@Override
 	public DependentManagedObject getDependentManagedObject() {
 
 		// Ensure in office context
@@ -137,8 +175,8 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		// Return the retrieved dependent managed object
 		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
 				"TaskObject " + this.objectName, LocationType.OFFICE,
-				this.officeLocation, null, null, this.context
-						.getCompilerIssues());
+				this.officeLocation, null, null,
+				this.context.getCompilerIssues());
 	}
 
 	/*

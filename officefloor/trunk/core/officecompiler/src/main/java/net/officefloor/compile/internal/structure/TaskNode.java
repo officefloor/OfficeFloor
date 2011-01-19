@@ -20,7 +20,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -34,7 +34,11 @@ import net.officefloor.frame.api.manage.Office;
 public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
 
 	/**
+	 * <p>
 	 * Adds context of the {@link Office} containing this {@link OfficeTask}.
+	 * <p>
+	 * The {@link TaskType} can not be added until the {@link Office} context is
+	 * provided.
 	 * 
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
@@ -49,13 +53,19 @@ public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
 	WorkNode getWorkNode();
 
 	/**
+	 * Obtains the {@link TaskType} for this {@link TaskNode}.
+	 * 
+	 * @return {@link TaskType} for this {@link TaskNode}. May be
+	 *         <code>null</code> if can not determine {@link TaskType}.
+	 */
+	TaskType<?, ?, ?> getTaskType();
+
+	/**
 	 * Builds the {@link Task} for this {@link TaskNode}.
 	 * 
-	 * @param workType
-	 *            {@link WorkType} for the {@link Work} of this {@link Task}.
 	 * @param workBuilder
 	 *            {@link WorkBuilder} for the {@link Work} of this {@link Task}.
 	 */
-	<W extends Work> void buildTask(WorkType<W> workType,
-			WorkBuilder<W> workBuilder);
+	void buildTask(WorkBuilder<?> workBuilder);
+
 }
