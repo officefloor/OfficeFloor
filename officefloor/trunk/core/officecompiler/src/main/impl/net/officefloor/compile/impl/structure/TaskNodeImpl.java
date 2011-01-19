@@ -53,11 +53,10 @@ import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
@@ -197,18 +196,32 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <W extends Work> void buildTask(WorkType<W> workType,
-			WorkBuilder<W> workBuilder) {
+	public TaskType<?, ?, ?> getTaskType() {
 
-		// Obtain the task factory for this task
-		TaskType<W, ?, ?> taskType = null;
-		for (TaskType<W, ?, ?> type : workType.getTaskTypes()) {
+		// Obtain the work type
+		WorkType<?> workType = this.workNode.getWorkType();
+		if (workType == null) {
+			return null; // must have work type for task
+		}
+
+		// Find the task type for this task node
+		for (TaskType<?, ?, ?> type : workType.getTaskTypes()) {
 			if (this.taskTypeName.equals(type.getTaskName())) {
 				// Found the type for this task
-				taskType = type;
+				return type;
 			}
 		}
+
+		// As here, did not find corresponding task type
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void buildTask(WorkBuilder<?> workBuilder) {
+
+		// Obtain the task factory for this task
+		TaskType<?, ?, ?> taskType = this.getTaskType();
 		if (taskType == null) {
 			this.addIssue("Can not find task type '" + this.taskTypeName + "'");
 			return; // must have task type
@@ -224,7 +237,7 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the task
-		TaskFactory<W, ?, ?> taskFactory = taskType.getTaskFactory();
+		TaskFactory taskFactory = taskType.getTaskFactory();
 		TaskBuilder taskBuilder = workBuilder.addTask(this.taskName,
 				taskFactory);
 		taskBuilder.setTeam(officeTeam.getOfficeTeamName());
@@ -464,7 +477,7 @@ public class TaskNodeImpl implements TaskNode {
 		TaskObjectNode object = this.taskObjects.get(taskObjectName);
 		if (object == null) {
 			// Create the task object
-			object = new TaskObjectNodeImpl(taskObjectName,
+			object = new TaskObjectNodeImpl(this, taskObjectName,
 					this.sectionLocation, this.context);
 			if (this.isOfficeContextLoaded) {
 				// Add the office context to the task

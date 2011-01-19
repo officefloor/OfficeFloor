@@ -20,8 +20,10 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionWork} node.
@@ -29,6 +31,18 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel Sagenschneider
  */
 public interface WorkNode extends SectionWork {
+
+	/**
+	 * <p>
+	 * Adds context of the {@link Office}.
+	 * <p>
+	 * The {@link WorkType} can not be retrieved until the {@link Office}
+	 * context is provided.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
 
 	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.
@@ -44,6 +58,14 @@ public interface WorkNode extends SectionWork {
 	 * @return Qualified name of this {@link Work}.
 	 */
 	String getQualifiedWorkName();
+
+	/**
+	 * Obtains the {@link WorkType} for this {@link WorkNode}.
+	 * 
+	 * @return {@link WorkType} for this {@link WorkNode}. May be
+	 *         <code>null</code> if can not load the {@link WorkType}.
+	 */
+	WorkType<?> getWorkType();
 
 	/**
 	 * Builds the {@link Work} for this {@link SectionWork}.
