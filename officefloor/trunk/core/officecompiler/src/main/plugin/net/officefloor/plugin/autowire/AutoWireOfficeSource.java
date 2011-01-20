@@ -18,13 +18,18 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.DependentManagedObject;
+import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -41,6 +46,8 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link OfficeSource} implementation that auto-wires the configuration based
@@ -64,6 +71,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * {@link Link} instances.
 	 */
 	private final List<Link> links = new LinkedList<Link>();
+
+	/**
+	 * {@link AutoWireResponsibility} instances.
+	 */
+	private final List<AutoWireResponsibility> responsibilities = new LinkedList<AutoWireResponsibility>();
 
 	/**
 	 * Initiate.
@@ -158,6 +170,21 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		return false;
 	}
 
+	/**
+	 * Adds an {@link OfficeTeam} responsible for executing {@link Task}
+	 * instances that has an object dependency of the input type.
+	 * 
+	 * @param dependencyType
+	 *            Object dependency type for the {@link Task}.
+	 * @return {@link AutoWireResponsibility} for the {@link OfficeTeam}.
+	 */
+	public AutoWireResponsibility addResponsibility(Class<?> dependencyType) {
+		AutoWireResponsibility responsibility = new AutoWireResponsibility(
+				dependencyType, "team-" + dependencyType.getName());
+		this.responsibilities.add(responsibility);
+		return responsibility;
+	}
+
 	/*
 	 * ===================== OfficeSource =========================
 	 */
@@ -171,16 +198,31 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	public void sourceOffice(OfficeArchitect architect,
 			OfficeSourceContext context) throws Exception {
 
-		// Obtain the class loader
-		ClassLoader classLoader = context.getClassLoader();
+		// Add the default team
+		OfficeTeam defaultTeam = architect.addOfficeTeam("team");
 
-		// Add the team
-		OfficeTeam team = architect.addOfficeTeam("team");
+		// Add the responsibility teams
+		List<ResponsibleTeam> responsibleTeams = new ArrayList<ResponsibleTeam>(
+				this.responsibilities.size());
+		for (AutoWireResponsibility responsibility : this.responsibilities) {
+
+			// Add the Office Team
+			OfficeTeam officeTeam = architect.addOfficeTeam(responsibility
+					.getOfficeTeamName());
+
+			// Register the responsible team
+			Class<?> dependencyType = responsibility.getDependencyType();
+			ResponsibleTeam responsibleTeam = new ResponsibleTeam(
+					dependencyType, officeTeam);
+
+			// Add the responsible team
+			responsibleTeams.add(responsibleTeam);
+		}
 
 		// Load the sections
 		Map<String, Map<String, OfficeSectionInput>> inputs = new HashMap<String, Map<String, OfficeSectionInput>>();
 		Map<String, Map<String, OfficeSectionOutput>> outputs = new HashMap<String, Map<String, OfficeSectionOutput>>();
-		Map<Class<?>, OfficeObject> objects = new HashMap<Class<?>, OfficeObject>();
+		Map<String, OfficeObject> objects = new HashMap<String, OfficeObject>();
 		for (AutoWireSection section : this.sections) {
 
 			// Obtain the section name
@@ -192,27 +234,15 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					section.getSectionLocation(),
 					section.getSectionProperties());
 
-			// Link section tasks to team
-			for (OfficeTask task : officeSection.getOfficeTasks()) {
-				architect.link(task.getTeamResponsible(), team);
-			}
-
-			// Link sub section tasks to team
-			for (OfficeSubSection subSection : officeSection
-					.getOfficeSubSections()) {
-				this.linkTasksToTeams(subSection, team, architect);
-			}
-
 			// Link the objects
 			for (OfficeSectionObject object : officeSection
 					.getOfficeSectionObjects()) {
 				String objectType = object.getObjectType();
-				Class<?> objectClass = classLoader.loadClass(objectType);
-				OfficeObject officeObject = objects.get(objectClass);
+				OfficeObject officeObject = objects.get(objectType);
 				if (officeObject == null) {
 					officeObject = architect.addOfficeObject(objectType,
 							objectType);
-					objects.put(objectClass, officeObject);
+					objects.put(objectType, officeObject);
 				}
 				architect.link(object, officeObject);
 			}
@@ -233,6 +263,19 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					.getOfficeSectionOutputs()) {
 				String outputName = output.getOfficeSectionOutputName();
 				sectionOutputs.put(outputName, output);
+			}
+
+			// Link section tasks to team.
+			// Must be after objects to ensure linked.
+			for (OfficeTask task : officeSection.getOfficeTasks()) {
+				this.assignTeam(task, responsibleTeams, defaultTeam, architect);
+			}
+
+			// Link sub section tasks to team
+			for (OfficeSubSection subSection : officeSection
+					.getOfficeSubSections()) {
+				this.linkTasksToTeams(subSection, responsibleTeams,
+						defaultTeam, architect);
 			}
 		}
 
@@ -286,23 +329,59 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSection}.
-	 * @param team
+	 * @param responsibleTeams
+	 *            {@link ResponsibleTeam} instances.
+	 * @param defaultTeam
 	 *            {@link OfficeTeam}.
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void linkTasksToTeams(OfficeSubSection subSection, OfficeTeam team,
+	private void linkTasksToTeams(OfficeSubSection subSection,
+			List<ResponsibleTeam> responsibleTeams, OfficeTeam defaultTeam,
 			OfficeArchitect architect) {
 
 		// Link section tasks to team
 		for (OfficeTask task : subSection.getOfficeTasks()) {
-			architect.link(task.getTeamResponsible(), team);
+			this.assignTeam(task, responsibleTeams, defaultTeam, architect);
 		}
 
 		// Recursively link the sub sections
 		for (OfficeSubSection subSubSection : subSection.getOfficeSubSections()) {
-			this.linkTasksToTeams(subSubSection, team, architect);
+			this.linkTasksToTeams(subSubSection, responsibleTeams, defaultTeam,
+					architect);
 		}
+	}
+
+	/**
+	 * Assigns the {@link OfficeTeam} for the {@link OfficeTask}.
+	 * 
+	 * @param task
+	 *            {@link OfficeTask}.
+	 * @param responsibleTeams
+	 *            {@link ResponsibleTeam} instances.
+	 * @param defaultTeam
+	 *            Default {@link OfficeTeam}.
+	 * @param architect
+	 *            {@link OfficeArchitect}.
+	 */
+	private void assignTeam(OfficeTask task,
+			List<ResponsibleTeam> responsibleTeams, OfficeTeam defaultTeam,
+			OfficeArchitect architect) {
+
+		// Determine if team to be responsible
+		for (ResponsibleTeam responsibleTeam : responsibleTeams) {
+			if (responsibleTeam.isResponsible(task)) {
+				// Team responsible for the task, so link
+				architect.link(task.getTeamResponsible(),
+						responsibleTeam.officeTeam);
+
+				// Team assigned
+				return;
+			}
+		}
+
+		// As here, default team is responsible
+		architect.link(task.getTeamResponsible(), defaultTeam);
 	}
 
 	/**
@@ -313,22 +392,22 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		/**
 		 * Source {@link AutoWireSection}.
 		 */
-		private final AutoWireSection sourceSection;
+		public final AutoWireSection sourceSection;
 
 		/**
 		 * Source {@link SectionOutput} name.
 		 */
-		private final String sourceOutputName;
+		public final String sourceOutputName;
 
 		/**
 		 * Target {@link AutoWireSection}.
 		 */
-		private final AutoWireSection targetSection;
+		public final AutoWireSection targetSection;
 
 		/**
 		 * Target {@link SectionInput} name.
 		 */
-		private final String targetInputName;
+		public final String targetInputName;
 
 		/**
 		 * Initiate.
@@ -348,6 +427,94 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			this.sourceOutputName = sourceOutputName;
 			this.targetSection = targetSection;
 			this.targetInputName = targetInputName;
+		}
+	}
+
+	/**
+	 * Responsible {@link Team}.
+	 */
+	private static class ResponsibleTeam {
+
+		/**
+		 * Dependency type.
+		 */
+		private final Class<?> dependencyType;
+
+		/**
+		 * {@link OfficeTeam}.
+		 */
+		public final OfficeTeam officeTeam;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param dependencyType
+		 *            Dependency type.
+		 * @param officeTeam
+		 *            {@link OfficeTeam}.
+		 */
+		public ResponsibleTeam(Class<?> dependencyType, OfficeTeam officeTeam) {
+			this.dependencyType = dependencyType;
+			this.officeTeam = officeTeam;
+		}
+
+		/**
+		 * Determines if the {@link OfficeTeam} is responsible for the
+		 * {@link OfficeTask}.
+		 * 
+		 * @param task
+		 *            {@link OfficeTeam}.
+		 * @return <code>true</code> if the {@link OfficeTeam} is potentially
+		 *         responsible for the {@link OfficeTask}.
+		 */
+		public boolean isResponsible(OfficeTask task) {
+			return this.isResponsible(task.getObjectDependencies(),
+					new HashSet<DependentManagedObject>());
+		}
+
+		/**
+		 * Determines if {@link OfficeTeam} is responsible for the
+		 * {@link ObjectDependency} instances.
+		 * 
+		 * @param dependencies
+		 *            {@link ObjectDependency} instances.
+		 * @param objects
+		 *            Set of {@link DependentManagedObject} instances.
+		 * @return <code>true</code> if the {@link OfficeTeam} is potentially
+		 *         responsible for the {@link ObjectDependency} instances.
+		 */
+		private boolean isResponsible(ObjectDependency[] dependencies,
+				Set<DependentManagedObject> objects) {
+
+			// Determine if any objects are of dependency type
+			for (ObjectDependency dependency : dependencies) {
+				if (this.dependencyType.equals(dependency
+						.getObjectDependencyType())) {
+					// Matching dependency type, so is responsible
+					return true;
+				}
+			}
+
+			// Determine if responsible for dependent objects
+			for (ObjectDependency dependency : dependencies) {
+
+				// Obtain the dependent object
+				DependentManagedObject object = dependency
+						.getDependentManagedObject();
+				if (object == null) {
+					continue; // ignore if dependency not linked
+				}
+
+				// Determine if already processed dependent object
+				if (objects.contains(object)) {
+					continue; // ignore as already processed object
+				}
+				objects.add(object);
+
+			}
+
+			// As here, not responsible
+			return false;
 		}
 	}
 
