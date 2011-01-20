@@ -25,7 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -38,8 +41,11 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Tests the {@link AutoWireOfficeSource}.
@@ -77,6 +83,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
+		this.recordAssignTeams(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -97,14 +104,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Record creating the section
 		this.recordTeam();
-		this.recordOfficeSection(SECTION, "SubSection");
+		this.recordOfficeSection(SECTION);
+		this.recordSectionObjects(SECTION);
+		this.recordSectionInputs(SECTION);
+		this.recordSectionOutputs(SECTION);
+		this.recordAssignTeams(SECTION, "SubSection");
 		this.recordSubSections("SubSection", "SubSubSectionOne",
 				"SubSubSectionTwo");
 		this.recordSubSections("SubSubSectionOne");
 		this.recordSubSections("SubSubSectionTwo");
-		this.recordSectionObjects(SECTION);
-		this.recordSectionInputs(SECTION);
-		this.recordSectionOutputs(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -134,10 +142,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
+		this.recordAssignTeams(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
+		this.recordAssignTeams(TWO);
 		OfficeSectionOutput output = this.outputs.get(ONE).get(ONE_OUTPUT);
 		OfficeSectionInput input = this.inputs.get(TWO).get(TWO_INPUT);
 		this.architect.link(output, input);
@@ -195,10 +205,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE);
+		this.recordAssignTeams(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
 		this.recordSectionOutputs(TWO);
+		this.recordAssignTeams(TWO);
 		this.architect
 				.addIssue(
 						"Unknown section output 'One:output' to link to section input 'Two:input'",
@@ -232,10 +244,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
+		this.recordAssignTeams(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
 		this.recordSectionOutputs(TWO);
+		this.recordAssignTeams(TWO);
 		this.architect
 				.addIssue(
 						"Unknown section input 'Two:input' for linking section output 'One:output'",
@@ -264,11 +278,66 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, Connection.class);
 		this.recordSectionInputs(SECTION);
 		this.recordSectionOutputs(SECTION);
+		this.recordAssignTeams(SECTION);
 
 		// Test
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, context);
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can assign a {@link Team} role.
+	 */
+	public void testAssignTeamRole() throws Exception {
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, MockTeamSection.class);
+		AutoWireResponsibility responsibility = source
+				.addResponsibility(Connection.class);
+		assertEquals("Incorrect team name",
+				"team-" + Connection.class.getName(),
+				responsibility.getOfficeTeamName());
+
+		// Record creating the section
+		final OfficeTeam defaultTeam = this.recordTeam();
+		final OfficeTeam connectionTeam = this.recordTeam(Connection.class);
+		this.recordOfficeSection(MockTeamSection.class, new TeamAssigner() {
+			@Override
+			public void recordAssignTeam(OfficeTask task) {
+				// Determine if has connection
+				boolean isConnectionTask = false;
+				for (ObjectDependency dependency : task.getObjectDependencies()) {
+					if (Connection.class.equals(dependency
+							.getObjectDependencyType())) {
+						isConnectionTask = true;
+					}
+				}
+
+				// Assign the team
+				AutoWireOfficeSourceTest.this.architect.link(task
+						.getTeamResponsible(),
+						(isConnectionTask ? connectionTeam : defaultTeam));
+			}
+		});
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Mock {@link Team} section class.
+	 */
+	public static class MockTeamSection {
+
+		public void taskOne(String value) {
+		}
+
+		public void taskTwo(Connection connection) {
+		}
 	}
 
 	/**
@@ -316,12 +385,125 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records the {@link OfficeTeam}.
+	 * 
+	 * @return {@link OfficeTeam}.
 	 */
-	private void recordTeam() {
-		this.recordReturn(this.context, this.context.getClassLoader(), Thread
-				.currentThread().getContextClassLoader());
+	private OfficeTeam recordTeam() {
 		this.recordReturn(this.architect, this.architect.addOfficeTeam("team"),
 				this.team);
+		return this.team;
+	}
+
+	/**
+	 * Records the {@link OfficeTeam} for a object.
+	 * 
+	 * @return {@link OfficeTeam}.
+	 */
+	private OfficeTeam recordTeam(Class<?> objectType) {
+		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
+		this.recordReturn(this.architect,
+				this.architect.addOfficeTeam("team-" + objectType.getName()),
+				officeTeam);
+		return officeTeam;
+	}
+
+	/**
+	 * Adds an {@link OfficeSection}.
+	 * 
+	 * @param source
+	 *            {@link AutoWireOfficeSource}.
+	 * @param sectionClass
+	 *            {@link ClassSectionSource} class.
+	 * @return {@link AutoWireSection}.
+	 */
+	private AutoWireSection addSection(AutoWireOfficeSource source,
+			Class<?> sectionClass) {
+
+		final String SECTION_NAME = sectionClass.getSimpleName();
+
+		// Add the section
+		AutoWireSection section = source.addSection(SECTION_NAME,
+				ClassSectionSource.class, sectionClass.getName());
+
+		// Register the properties
+		PropertyList properties = section.getSectionProperties();
+		this.sectionProperties.put(SECTION_NAME, properties);
+
+		// Return the section
+		return section;
+	}
+
+	/**
+	 * Records the {@link OfficeSection} for the {@link ClassSectionSource}
+	 * class.
+	 * 
+	 * @param sectionClass
+	 *            {@link ClassSectionSource} class.
+	 * @param assigner
+	 *            {@link TeamAssigner}.
+	 * @return {@link OfficeSection}.
+	 */
+	private OfficeSection recordOfficeSection(Class<?> sectionClass,
+			TeamAssigner assigner) {
+
+		final String SECTION_NAME = sectionClass.getSimpleName();
+
+		// Obtain the properties
+		PropertyList properties = this.sectionProperties.get(SECTION_NAME);
+		assertNotNull("Section " + SECTION_NAME + " should be added",
+				properties);
+
+		// Load the office section
+		OfficeSection officeSection = SectionLoaderUtil.loadOfficeSection(
+				SECTION_NAME, ClassSectionSource.class, sectionClass.getName());
+		this.sections.put(SECTION_NAME, officeSection);
+
+		// Record adding the office section
+		this.recordReturn(this.architect, this.architect.addOfficeSection(
+				SECTION_NAME, ClassSectionSource.class.getName(),
+				sectionClass.getName(), properties), officeSection);
+
+		// Record the office section objects
+		for (OfficeSectionObject sectionObject : officeSection
+				.getOfficeSectionObjects()) {
+			String objectType = sectionObject.getObjectType();
+			OfficeObjectNode officeObject = this
+					.createMock(OfficeObjectNode.class);
+			this.recordReturn(this.architect,
+					this.architect.addOfficeObject(objectType, objectType),
+					officeObject);
+
+			// Record the link
+			this.architect.link(sectionObject, officeObject);
+
+			// Ensure linked
+			((SectionObjectNode) sectionObject).linkObjectNode(officeObject);
+		}
+
+		// Should not require linking inputs and outputs
+
+		// Record assigning teams
+		for (OfficeTask task : officeSection.getOfficeTasks()) {
+			assigner.recordAssignTeam(task);
+		}
+		// Should not require sub sections for team assignment
+
+		// Return the office section
+		return officeSection;
+	}
+
+	/**
+	 * Records assigning the {@link Team} for the {@link OfficeTask}.
+	 */
+	private static interface TeamAssigner {
+
+		/**
+		 * Records assigning the {@link Team} for the {@link OfficeTask}.
+		 * 
+		 * @param task
+		 *            {@link OfficeTask}.
+		 */
+		void recordAssignTeam(OfficeTask task);
 	}
 
 	/**
@@ -364,8 +546,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 *            Sub section names.
 	 * @return {@link OfficeSection}.
 	 */
-	private void recordOfficeSection(String sectionName,
-			String... subSectionNames) {
+	private void recordOfficeSection(String sectionName) {
 		assertNull("Already section by name " + sectionName,
 				this.sections.get(sectionName));
 
@@ -379,17 +560,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				sectionName, SectionSource.class.getName(), sectionName
 						+ "Location", properties), section);
 		this.sections.put(sectionName, section);
-
-		// Record task on section
-		OfficeTask task = this.createMock(OfficeTask.class);
-		this.recordReturn(section, section.getOfficeTasks(),
-				new OfficeTask[] { task });
-		TaskTeam taskTeam = this.createMock(TaskTeam.class);
-		this.recordReturn(task, task.getTeamResponsible(), taskTeam);
-		this.architect.link(taskTeam, this.team);
-
-		// Record the sub sections
-		this.recordSubSections(sectionName, subSectionNames);
 	}
 
 	/**
@@ -490,6 +660,32 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			// Link the object to dependency
 			this.architect.link(object, dependency);
 		}
+	}
+
+	/**
+	 * Records the assigning the {@link Team} instances.
+	 * 
+	 * @param sectionName
+	 *            Section name.
+	 * @param subSectionNames
+	 *            Name of the {@link OfficeSubSection} instances.
+	 */
+	private void recordAssignTeams(String sectionName,
+			String... subSectionNames) {
+
+		// Obtain the section
+		OfficeSection section = this.getOfficeSection(sectionName);
+
+		// Record task on section
+		OfficeTask task = this.createMock(OfficeTask.class);
+		this.recordReturn(section, section.getOfficeTasks(),
+				new OfficeTask[] { task });
+		TaskTeam taskTeam = this.createMock(TaskTeam.class);
+		this.recordReturn(task, task.getTeamResponsible(), taskTeam);
+		this.architect.link(taskTeam, this.team);
+
+		// Record the sub sections
+		this.recordSubSections(sectionName, subSectionNames);
 	}
 
 	/**
