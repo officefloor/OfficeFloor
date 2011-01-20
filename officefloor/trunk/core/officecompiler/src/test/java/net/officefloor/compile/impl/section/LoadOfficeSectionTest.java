@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.section;
 
 import java.sql.Connection;
 
+import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
@@ -34,6 +35,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -45,6 +47,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Tests loading the {@link OfficeSection}.
@@ -170,6 +173,51 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure no {@link DependentManagedObject} if {@link TaskObject} not
+	 * linked.
+	 */
+	public void testTaskObjectDependencyNotLinked() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		// Record not linked on first attempt to retrieve dependent
+		this.issues.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+				"TaskObject OBJECT is not linked to a DependentManagedObject");
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Load the task object dependency not linked
+		OfficeSection section = this.loadOfficeSection(false, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addTaskObject("WORK", workFactory, "TASK",
+								taskFactory, "OBJECT", Connection.class);
+					}
+				});
+
+		// Ensure task object is correct
+		OfficeTask task = section.getOfficeTasks()[0];
+		assertEquals("Incorrect number of dependencies", 1,
+				task.getObjectDependencies().length);
+		ObjectDependency dependency = task.getObjectDependencies()[0];
+		assertEquals("Incorrect object dependency name", "OBJECT",
+				dependency.getObjectDependencyName());
+		assertEquals("Incorrect object dependency type", Connection.class,
+				dependency.getObjectDependencyType());
+
+		// Validate not linked to dependent managed object
+		assertNull("Should not be linked to dependent managed object",
+				dependency.getDependentManagedObject());
+
+		// Verify the mocks
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can load a {@link OfficeSectionInput}.
 	 */
 	public void testLoadOfficeSectionInput() {
@@ -291,6 +339,73 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.getOfficeSectionManagedObjects()[0];
 		assertEquals("Incorrect managed object name", "MO",
 				mo.getOfficeSectionManagedObjectName());
+		assertEquals("Should not have dependencies", 0,
+				mo.getObjectDependencies().length);
+	}
+
+	/**
+	 * Ensure no {@link DependentManagedObject} if
+	 * {@link ManagedObjectDependency} not linked.
+	 */
+	public void testSectionManagedObjectDependencyNotLinked() {
+
+		// Record not linked on first attempt to retrieve dependent
+		this.issues
+				.addIssue(LocationType.SECTION, SECTION_LOCATION, null, null,
+						"ManagedObjectDependency DEPENDENCY is not linked to a DependentManagedObject");
+
+		// Load the section managed object with a dependency
+		this.replayMockObjects();
+		OfficeSection section = this.loadOfficeSection(false, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						SectionManagedObjectSource source = context
+								.addManagedObjectSource("MO_SOURCE",
+										new ManagedObjectMaker() {
+											@Override
+											public void make(
+													ManagedObjectMakerContext context) {
+												context.getContext()
+														.addDependency(
+																Connection.class)
+														.setLabel("DEPENDENCY");
+											}
+										});
+						SectionManagedObject mo = source
+								.addSectionManagedObject("MO",
+										ManagedObjectScope.PROCESS);
+						mo.getManagedObjectDependency("DEPENDENCY");
+					}
+				});
+
+		// Validate the managed object
+		assertEquals("Should have a section managed object source", 1,
+				section.getOfficeSectionManagedObjectSources().length);
+		OfficeSectionManagedObjectSource moSource = section
+				.getOfficeSectionManagedObjectSources()[0];
+		assertEquals("Incorrect managed object source name", "MO_SOURCE",
+				moSource.getOfficeSectionManagedObjectSourceName());
+		assertEquals("Should have a section managed object", 1,
+				moSource.getOfficeSectionManagedObjects().length);
+		OfficeSectionManagedObject mo = moSource
+				.getOfficeSectionManagedObjects()[0];
+		assertEquals("Incorrect managed object name", "MO",
+				mo.getOfficeSectionManagedObjectName());
+		assertEquals("Should have a dependency", 1,
+				mo.getObjectDependencies().length);
+		ObjectDependency dependency = mo.getObjectDependencies()[0];
+		assertEquals("Incorrect dependency name", "DEPENDENCY",
+				dependency.getObjectDependencyName());
+		assertEquals("Incorrect dependency type", Connection.class,
+				dependency.getObjectDependencyType());
+
+		// Dependency should not be linked and report the issue
+		assertNull("Dependency should not be linked",
+				dependency.getDependentManagedObject());
+
+		// Verify
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -337,52 +452,10 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure no {@link DependentManagedObject} if not linked.
-	 */
-	public void testObjectDependencyNotLinked() {
-
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
-		// Record not linked on first attempt to retrieve dependent
-		this.issues.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
-				"TaskObject OBJECT is not linked to a DependentManagedObject");
-
-		// Replay mocks
-		this.replayMockObjects();
-
-		// Load the task object dependency not linked
-		OfficeSection section = this.loadOfficeSection(false, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addTaskObject("WORK", workFactory, "TASK",
-								taskFactory, "OBJECT", Connection.class);
-					}
-				});
-
-		// Validate not linked to dependent managed object
-		OfficeTask task = section.getOfficeTasks()[0];
-		assertEquals("Incorrect number of dependencies", 1,
-				task.getObjectDependencies().length);
-		ObjectDependency dependency = task.getObjectDependencies()[0];
-		assertEquals("Incorrect object dependency name", "OBJECT",
-				dependency.getObjectDependencyName());
-		assertEquals("Incorrect object dependency type", Connection.class,
-				dependency.getObjectDependencyType());
-		assertNull("Should not be linked to dependent managed object",
-				dependency.getDependentManagedObject());
-
-		// Verify the mocks
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensure can get {@link DependentManagedObject} linked to
 	 * {@link SectionManagedObject} of same {@link OfficeSubSection}.
 	 */
-	public void testDependentOnManagedObjectOfSameSection() {
+	public void testTaskDependentOnManagedObjectOfSameSection() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
 		final TaskFactory<Work, ?, ?> taskFactory = this
@@ -427,7 +500,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	 * Ensure can get {@link DependentManagedObject} linked to
 	 * {@link SectionManagedObject} of another {@link OfficeSubSection}.
 	 */
-	public void testDependentOnManagedObjectOfAnotherSection() {
+	public void testTaskDependentOnManagedObjectOfAnotherSection() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
 		final TaskFactory<Work, ?, ?> taskFactory = this
@@ -489,6 +562,185 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				mo.getDependentManagedObjectName());
 		assertTrue("Incorrect managed object type",
 				mo instanceof OfficeSectionManagedObject);
+	}
+
+	/**
+	 * Ensure can get {@link DependentManagedObject} for a
+	 * {@link ManagedObjectDependency}.
+	 */
+	public void testManagedObjectDependentOnAnotherManagedObject() {
+
+		// Load the section managed object with a dependency
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+
+						// Add the first managed object (with dependency)
+						SectionManagedObjectSource sourceOne = context
+								.addManagedObjectSource("MO_SOURCE_ONE",
+										new ManagedObjectMaker() {
+											@Override
+											public void make(
+													ManagedObjectMakerContext context) {
+												context.getContext()
+														.addDependency(
+																Connection.class)
+														.setLabel("DEPENDENCY");
+											}
+										});
+						SectionManagedObject moOne = sourceOne
+								.addSectionManagedObject("MO_ONE",
+										ManagedObjectScope.PROCESS);
+						ManagedObjectDependency dependency = moOne
+								.getManagedObjectDependency("DEPENDENCY");
+
+						// Add the second managed object (no dependency)
+						SectionManagedObjectSource sourceTwo = context
+								.addManagedObjectSource("MO_SOURCE_TWO", null);
+						SectionManagedObject moTwo = sourceTwo
+								.addSectionManagedObject("MO_TWO",
+										ManagedObjectScope.PROCESS);
+
+						// Link dependency to second managed object
+						context.getBuilder().link(dependency, moTwo);
+					}
+				});
+
+		// Ensure correct number of managed object sources
+		assertEquals("Should have a two managed object sources", 2,
+				section.getOfficeSectionManagedObjectSources().length);
+
+		// Obtain appropriate sources
+		OfficeSectionManagedObjectSource moSourceOne = section
+				.getOfficeSectionManagedObjectSources()[0];
+		OfficeSectionManagedObjectSource moSourceTwo = section
+				.getOfficeSectionManagedObjectSources()[1];
+		if (!("MO_SOURCE_ONE".equals(moSourceOne
+				.getOfficeSectionManagedObjectSourceName()))) {
+			// Wrong way round, so swap
+			OfficeSectionManagedObjectSource tmp = moSourceOne;
+			moSourceOne = moSourceTwo;
+			moSourceTwo = tmp;
+		}
+
+		// Validate managed object one
+		assertEquals("Incorrect managed object source name", "MO_SOURCE_ONE",
+				moSourceOne.getOfficeSectionManagedObjectSourceName());
+		assertEquals("MO_SOURCE_ONE should have a section managed object", 1,
+				moSourceOne.getOfficeSectionManagedObjects().length);
+		OfficeSectionManagedObject moOne = moSourceOne
+				.getOfficeSectionManagedObjects()[0];
+		assertEquals("Incorrect managed object name", "MO_ONE",
+				moOne.getOfficeSectionManagedObjectName());
+		assertEquals("MO_ONE should have a dependency", 1,
+				moOne.getObjectDependencies().length);
+		ObjectDependency dependency = moOne.getObjectDependencies()[0];
+		assertEquals("Incorrect dependency name", "DEPENDENCY",
+				dependency.getObjectDependencyName());
+		assertEquals("Incorrect dependency type", Connection.class,
+				dependency.getObjectDependencyType());
+		assertNotNull("Dependency should be linked",
+				dependency.getDependentManagedObject());
+
+		// Validate managed object two
+		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
+				moSourceTwo.getOfficeSectionManagedObjectSourceName());
+		assertEquals("MO_SOURCE_TWO should have a section managed object", 1,
+				moSourceTwo.getOfficeSectionManagedObjects().length);
+		OfficeSectionManagedObject moTwo = moSourceTwo
+				.getOfficeSectionManagedObjects()[0];
+		assertEquals("Incorrect managed object name", "MO_TWO",
+				moTwo.getOfficeSectionManagedObjectName());
+		assertEquals("MO_TWO should not have a dependency", 0,
+				moTwo.getObjectDependencies().length);
+
+		// Ensure dependency is linked to correct managed object
+		assertEquals("Incorrect dependent managed object",
+				dependency.getDependentManagedObject(), moTwo);
+	}
+
+	/**
+	 * Ensure can get {@link TaskObject} linked to {@link ManagedObject} which
+	 * has a {@link ManagedObjectDependency} linked to another
+	 * {@link ManagedObject}.
+	 */
+	public void testTaskDependentOnManagedObjectDependentOnAnotherManagedObject() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		// Load the task object dependent on managed object of same section
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+
+						// Add the task object
+						TaskObject taskObject = context.addTaskObject("WORK",
+								workFactory, "TASK", taskFactory, "OBJECT",
+								Connection.class);
+
+						// Add the first managed object with a dependency
+						SectionManagedObjectSource moSourceOne = context
+								.addManagedObjectSource("MO_SOURCE_ONE",
+										new ManagedObjectMaker() {
+											@Override
+											public void make(
+													ManagedObjectMakerContext context) {
+												context.getContext()
+														.addDependency(
+																DataSource.class)
+														.setLabel("DEPENDENCY");
+											}
+										});
+						SectionManagedObject moOne = moSourceOne
+								.addSectionManagedObject("MO_ONE",
+										ManagedObjectScope.THREAD);
+						ManagedObjectDependency dependency = moOne
+								.getManagedObjectDependency("DEPENDENCY");
+
+						// Add the second managed object (no dependency)
+						SectionManagedObjectSource sourceTwo = context
+								.addManagedObjectSource("MO_SOURCE_TWO", null);
+						SectionManagedObject moTwo = sourceTwo
+								.addSectionManagedObject("MO_TWO",
+										ManagedObjectScope.PROCESS);
+
+						// Link task object to first managed object
+						context.getBuilder().link(taskObject, moOne);
+
+						// Link managed object dependency to managed object
+						context.getBuilder().link(dependency, moTwo);
+					}
+				});
+
+		// Validate link to dependent managed object
+		OfficeTask task = section.getOfficeTasks()[0];
+		assertEquals("Incorrect number of task object dependencies", 1,
+				task.getObjectDependencies().length);
+		ObjectDependency taskDependency = task.getObjectDependencies()[0];
+		assertEquals("Incorrect task object dependency", "OBJECT",
+				taskDependency.getObjectDependencyName());
+		assertEquals("Incorrect task object dependency type", Connection.class,
+				taskDependency.getObjectDependencyType());
+		DependentManagedObject mo = taskDependency.getDependentManagedObject();
+		assertEquals("Incorrect task dependent managed object", "MO_ONE",
+				mo.getDependentManagedObjectName());
+		assertEquals("Incorrect number of managed object dependencies", 1,
+				mo.getObjectDependencies().length);
+		ObjectDependency moDependency = mo.getObjectDependencies()[0];
+		assertEquals("Incorrect managed object dependency", "DEPENDENCY",
+				moDependency.getObjectDependencyName());
+		assertEquals("Incorrect managed object dependency type",
+				DataSource.class, moDependency.getObjectDependencyType());
+		DependentManagedObject dependentMo = moDependency
+				.getDependentManagedObject();
+		assertEquals("Incorrect managed object dependent managed object",
+				"MO_TWO", dependentMo.getDependentManagedObjectName());
+		assertEquals("Incorrect number of dependencies for managed object", 0,
+				dependentMo.getObjectDependencies().length);
 	}
 
 }
