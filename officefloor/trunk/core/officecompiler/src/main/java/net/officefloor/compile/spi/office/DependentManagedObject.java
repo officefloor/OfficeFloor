@@ -21,7 +21,8 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link ManagedObject} that a {@link OfficeTask} depends upon.
+ * {@link ManagedObject} that a {@link OfficeTask} or {@link ManagedObject}
+ * depends upon.
  * 
  * @author Daniel Sagenschneider
  */
@@ -33,5 +34,14 @@ public interface DependentManagedObject {
 	 * @return Name of this {@link DependentManagedObject}.
 	 */
 	String getDependentManagedObjectName();
+
+	/**
+	 * Obtains the {@link ObjectDependency} instances for this
+	 * {@link DependentManagedObject}.
+	 * 
+	 * @return {@link ObjectDependency} instances for this
+	 *         {@link DependentManagedObject}.
+	 */
+	ObjectDependency[] getObjectDependencies();
 
 }

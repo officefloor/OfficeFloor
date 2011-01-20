@@ -18,6 +18,8 @@
 
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,6 +37,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -66,7 +69,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * {@link ManagedObjectDependencyNode} instances by their
 	 * {@link ManagedObjectDependency} names.
 	 */
-	private final Map<String, ManagedObjectDependencyNode> depedencies = new HashMap<String, ManagedObjectDependencyNode>();
+	private final Map<String, ManagedObjectDependencyNode> dependencies = new HashMap<String, ManagedObjectDependencyNode>();
 
 	/**
 	 * {@link LocationType} of the location containing this
@@ -231,7 +234,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			int dependencyIndex = dependencyType.getIndex();
 
 			// Obtain the dependency
-			ManagedObjectDependencyNode dependencyNode = this.depedencies
+			ManagedObjectDependencyNode dependencyNode = this.dependencies
 					.get(dependencyName);
 			BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(
 					dependencyNode, BoundManagedObjectNode.class, "Dependency "
@@ -265,16 +268,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName) {
 		// Obtain and return the dependency for the name
-		ManagedObjectDependencyNode dependency = this.depedencies
+		ManagedObjectDependencyNode dependency = this.dependencies
 				.get(managedObjectDependencyName);
 		if (dependency == null) {
 			// Create the managed object dependency
 			dependency = new ManagedObjectDependencyNodeImpl(
-					managedObjectDependencyName, this.locationType,
-					this.location, this.context);
+					this.managedObjectSourceNode, managedObjectDependencyName,
+					this.locationType, this.location, this.context);
 
 			// Add the managed object dependency
-			this.depedencies.put(managedObjectDependencyName, dependency);
+			this.dependencies.put(managedObjectDependencyName, dependency);
 		}
 		return dependency;
 	}
@@ -339,6 +342,20 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getDependentManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	@Override
+	public ObjectDependency[] getObjectDependencies() {
+		ObjectDependency[] dependencies = this.dependencies.values().toArray(
+				new ObjectDependency[0]);
+		Arrays.sort(dependencies, new Comparator<ObjectDependency>() {
+			@Override
+			public int compare(ObjectDependency a, ObjectDependency b) {
+				return a.getObjectDependencyName().compareTo(
+						b.getObjectDependencyName());
+			}
+		});
+		return dependencies;
 	}
 
 	/*

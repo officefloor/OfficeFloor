@@ -18,10 +18,17 @@
 
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.spi.office.DependentManagedObject;
+import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 
 /**
@@ -31,6 +38,12 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
  */
 public class ManagedObjectDependencyNodeImpl implements
 		ManagedObjectDependencyNode {
+
+	/**
+	 * {@link ManagedObjectSourceNode} for the {@link ManagedObjectNode}
+	 * containing this {@link ManagedObjectDependency}.
+	 */
+	private final ManagedObjectSourceNode managedObjectSourceNode;
 
 	/**
 	 * Name of this {@link ManagedObjectDependency}.
@@ -56,6 +69,10 @@ public class ManagedObjectDependencyNodeImpl implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param managedObjectSourceNode
+	 *            {@link ManagedObjectSourceNode} for the
+	 *            {@link ManagedObjectNode} containing this
+	 *            {@link ManagedObjectDependency}.
 	 * @param dependencyName
 	 *            Name of this {@link ManagedObjectDependency}.
 	 * @param locationType
@@ -66,8 +83,11 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectDependencyNodeImpl(String dependencyName,
-			LocationType locationType, String location, NodeContext context) {
+	public ManagedObjectDependencyNodeImpl(
+			ManagedObjectSourceNode managedObjectSourceNode,
+			String dependencyName, LocationType locationType, String location,
+			NodeContext context) {
+		this.managedObjectSourceNode = managedObjectSourceNode;
 		this.dependencyName = dependencyName;
 		this.locationType = locationType;
 		this.location = location;
@@ -81,6 +101,49 @@ public class ManagedObjectDependencyNodeImpl implements
 	@Override
 	public String getManagedObjectDependencyName() {
 		return this.dependencyName;
+	}
+
+	/*
+	 * ========================= ObjectDependency =============================
+	 */
+
+	@Override
+	public String getObjectDependencyName() {
+		return this.dependencyName;
+	}
+
+	@Override
+	public Class<?> getObjectDependencyType() {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
+				.getManagedObjectType();
+		if (managedObjectType == null) {
+			// Failed to obtain managed object type, so type unknown
+			return UnknownType.class;
+		}
+
+		// Find the corresponding dependency type
+		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType
+				.getDependencyTypes()) {
+			if (this.dependencyName.equals(dependencyType.getDependencyName())) {
+				// Return the dependency type
+				return dependencyType.getDependencyType();
+			}
+		}
+
+		// As here, no dependency type so is unknown
+		return UnknownType.class;
+	}
+
+	@Override
+	public DependentManagedObject getDependentManagedObject() {
+
+		// Return the retrieved dependent managed object
+		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
+				"ManagedObjectDependency " + this.dependencyName,
+				this.locationType, this.location, null, null,
+				this.context.getCompilerIssues());
 	}
 
 	/*

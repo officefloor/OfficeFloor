@@ -762,7 +762,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.get(managedObjectDependencyName);
 		if (dependency == null) {
 			// Create the managed object dependency
-			dependency = new ManagedObjectDependencyNodeImpl(
+			dependency = new ManagedObjectDependencyNodeImpl(this,
 					managedObjectDependencyName, this.locationType,
 					this.location, this.context);
 

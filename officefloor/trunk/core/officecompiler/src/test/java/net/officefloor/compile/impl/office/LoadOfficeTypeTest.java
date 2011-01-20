@@ -84,9 +84,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockOfficeSource.class.getName() + " by default constructor",
-				failure);
+		this.record_issue(
+				"Failed to instantiate " + MockOfficeSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockOfficeSource.instantiateFailure = failure;
@@ -120,9 +120,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		this.control(this.configurationContext).expectAndThrow(
 				this.configurationContext.getConfigurationItem(location),
 				failure);
-		this
-				.record_issue("Failure obtaining configuration 'LOCATION'",
-						failure);
+		this.record_issue("Failure obtaining configuration 'LOCATION'", failure);
 
 		// Attempt to obtain the configuration item
 		this.loadOfficeType(false, new Loader() {
@@ -143,16 +141,16 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		final ConfigurationItem item = this.createMock(ConfigurationItem.class);
 
 		// Record obtaining the configuration item
-		this.recordReturn(this.configurationContext, this.configurationContext
-				.getConfigurationItem(location), item);
+		this.recordReturn(this.configurationContext,
+				this.configurationContext.getConfigurationItem(location), item);
 
 		// Obtain the configuration item
 		this.loadOfficeType(true, new Loader() {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				assertEquals("Incorrect configuation item", item, context
-						.getConfiguration(location));
+				assertEquals("Incorrect configuation item", item,
+						context.getConfiguration(location));
 			}
 		});
 	}
@@ -188,22 +186,22 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 					OfficeSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context
-						.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context
-						.getProperty("TWO"));
+				assertEquals("Ensure get property ONE", "1",
+						context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2",
+						context.getProperty("TWO"));
 				String[] names = context.getPropertyNames();
 				assertEquals("Incorrect number of property names", 2,
 						names.length);
 				assertEquals("Incorrect property name 0", "ONE", names[0]);
 				assertEquals("Incorrect property name 1", "TWO", names[1]);
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
-						.size());
-				assertEquals("Incorrect property ONE", "1", properties
-						.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties
-						.get("TWO"));
+				assertEquals("Incorrect number of properties", 2,
+						properties.size());
+				assertEquals("Incorrect property ONE", "1",
+						properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2",
+						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -218,8 +216,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				assertEquals("Incorrect class loader", LoadOfficeTypeTest.class
-						.getClassLoader(), context.getClassLoader());
+				assertEquals("Incorrect class loader",
+						LoadOfficeTypeTest.class.getClassLoader(),
+						context.getClassLoader());
 			}
 		});
 	}
@@ -294,21 +293,38 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.addOfficeObject("MO", Connection.class.getName());
+
+				final String MANAGED_OBJECT_NAME = "MO";
+
+				// Add the office object
+				OfficeObject officeObject = office.addOfficeObject(
+						MANAGED_OBJECT_NAME, Connection.class.getName());
+
+				// Ensure the office object is correct
+				assertEquals("Incorrect office object name",
+						MANAGED_OBJECT_NAME, officeObject.getOfficeObjectName());
+				assertEquals("Incorrect dependent name", MANAGED_OBJECT_NAME,
+						officeObject.getDependentManagedObjectName());
+				assertEquals(
+						"Always no dependencies for Office object in sourcing Office",
+						0, officeObject.getObjectDependencies().length);
+				assertEquals("Incorrect administerable name",
+						MANAGED_OBJECT_NAME,
+						officeObject.getAdministerableManagedObjectName());
 			}
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of managed object types", 1, officeType
-				.getOfficeManagedObjectTypes().length);
+		assertEquals("Incorrect number of managed object types", 1,
+				officeType.getOfficeManagedObjectTypes().length);
 		OfficeManagedObjectType moType = officeType
 				.getOfficeManagedObjectTypes()[0];
-		assertEquals("Incorrect name", "MO", moType
-				.getOfficeManagedObjectName());
-		assertEquals("Incorrect type", Connection.class.getName(), moType
-				.getObjectType());
-		assertEquals("Should be no required extension interfaces", 0, moType
-				.getExtensionInterfaces().length);
+		assertEquals("Incorrect name", "MO",
+				moType.getOfficeManagedObjectName());
+		assertEquals("Incorrect type", Connection.class.getName(),
+				moType.getObjectType());
+		assertEquals("Should be no required extension interfaces", 0,
+				moType.getExtensionInterfaces().length);
 	}
 
 	/**
@@ -321,8 +337,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeObject mo = office.addOfficeObject("MO", Connection.class
-						.getName());
+				OfficeObject mo = office.addOfficeObject("MO",
+						Connection.class.getName());
 				OfficeAdministrator admin = LoadOfficeTypeTest.this
 						.addAdministrator(office, "ADMIN", XAResource.class,
 								SimpleDutyKey.DUTY);
@@ -331,19 +347,19 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of managed object types", 1, officeType
-				.getOfficeManagedObjectTypes().length);
+		assertEquals("Incorrect number of managed object types", 1,
+				officeType.getOfficeManagedObjectTypes().length);
 		OfficeManagedObjectType moType = officeType
 				.getOfficeManagedObjectTypes()[0];
-		assertEquals("Incorrect name", "MO", moType
-				.getOfficeManagedObjectName());
-		assertEquals("Incorrect type", Connection.class.getName(), moType
-				.getObjectType());
-		assertEquals("Incorrect number of extension interfaces", 1, moType
-				.getExtensionInterfaces().length);
+		assertEquals("Incorrect name", "MO",
+				moType.getOfficeManagedObjectName());
+		assertEquals("Incorrect type", Connection.class.getName(),
+				moType.getObjectType());
+		assertEquals("Incorrect number of extension interfaces", 1,
+				moType.getExtensionInterfaces().length);
 		String extensionInterface = moType.getExtensionInterfaces()[0];
-		assertEquals("Incorrect extension interface", XAResource.class
-				.getName(), extensionInterface);
+		assertEquals("Incorrect extension interface",
+				XAResource.class.getName(), extensionInterface);
 	}
 
 	/**
@@ -379,8 +395,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of teams", 1, officeType
-				.getOfficeTeamTypes().length);
+		assertEquals("Incorrect number of teams", 1,
+				officeType.getOfficeTeamTypes().length);
 		OfficeTeamType team = officeType.getOfficeTeamTypes()[0];
 		assertEquals("Incorrect team name", "TEAM", team.getOfficeTeamName());
 	}
@@ -408,15 +424,15 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of inputs", 1, officeType
-				.getOfficeInputTypes().length);
+		assertEquals("Incorrect number of inputs", 1,
+				officeType.getOfficeInputTypes().length);
 		OfficeInputType input = officeType.getOfficeInputTypes()[0];
-		assertEquals("Incorrect section name", "SECTION", input
-				.getOfficeSectionName());
-		assertEquals("Incorrect input name", "INPUT", input
-				.getOfficeSectionInputName());
-		assertEquals("Incorrect parameter type", String.class.getName(), input
-				.getParameterType());
+		assertEquals("Incorrect section name", "SECTION",
+				input.getOfficeSectionName());
+		assertEquals("Incorrect input name", "INPUT",
+				input.getOfficeSectionInputName());
+		assertEquals("Incorrect parameter type", String.class.getName(),
+				input.getParameterType());
 	}
 
 	/**
@@ -434,8 +450,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadManagedObject.class.getName());
 				ManagedObjectType<?> managedObjectType = context
-						.loadManagedObjectType(ClassManagedObjectSource.class
-								.getName(), properties);
+						.loadManagedObjectType(
+								ClassManagedObjectSource.class.getName(),
+								properties);
 
 				// Ensure correct managed object type
 				MockLoadManagedObject
@@ -464,8 +481,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadManagedObjectType(ClassManagedObjectSource.class
-						.getName(), properties);
+				context.loadManagedObjectType(
+						ClassManagedObjectSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load managed object type");
@@ -488,8 +505,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadAdministrator.class.getName());
 				AdministratorType<?, ?> administratorType = context
-						.loadAdministratorType(ClassAdministratorSource.class
-								.getName(), properties);
+						.loadAdministratorType(
+								ClassAdministratorSource.class.getName(),
+								properties);
 
 				// Ensure correct administrator type
 				MockLoadAdministrator
@@ -518,8 +536,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = context.createPropertyList();
-				context.loadAdministratorType(ClassAdministratorSource.class
-						.getName(), properties);
+				context.loadAdministratorType(
+						ClassAdministratorSource.class.getName(), properties);
 
 				// Should not reach this point
 				fail("Should not successfully load administrator type");
