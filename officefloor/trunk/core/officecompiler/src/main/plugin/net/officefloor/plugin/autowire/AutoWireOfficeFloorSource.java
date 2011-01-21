@@ -59,6 +59,7 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -98,7 +99,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	private final AutoWireOfficeSource officeSource;
 
 	/**
-	 * {@link AutoWireContext} instances.
+	 * {@link AutoWireContext} instances for the {@link AutoWireObject}
+	 * instances.
 	 */
 	private final List<AutoWireContext> objectContexts = new LinkedList<AutoWireContext>();
 
@@ -207,49 +209,63 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	}
 
 	/**
-	 * Adds a raw object for dependency injection for the particular type.
+	 * Adds a raw object for dependency injection.
 	 * 
-	 * @param type
-	 *            Type that the Object is to provide dependency injection via
-	 *            auto-wiring.
 	 * @param object
 	 *            Object implementing the type to be dependency injected.
+	 * @param objectTypes
+	 *            Types that the object is to provide dependency injection via
+	 *            auto-wiring. Should no types be provided the type is defaulted
+	 *            from the object.
 	 */
-	public <T, O extends T> void addObject(Class<T> type, O object) {
+	public void addObject(Object object, Class<?>... objectTypes) {
 
-		// Ensure not already added
-		this.ensureObjectTypeNotAdded(type);
+		// Default the object type if not provided
+		if ((objectTypes == null) || (objectTypes.length == 0)) {
+			objectTypes = new Class<?>[] { object.getClass() };
+		}
 
 		// Add the raw object
-		this.objectContexts.add(new AutoWireContext(type, object));
+		this.objectContexts.add(new AutoWireContext(new AutoWireObject(null,
+				null, null, objectTypes), object));
 	}
 
 	/**
 	 * Adds a {@link ManagedObjectSource} for dependency injection.
 	 * 
-	 * @param type
-	 *            Type that the {@link ManagedObjectSource} is to provide
-	 *            dependency injection via auto-wiring.
-	 * @param sourceClass
+	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param wirer
 	 *            {@link ManagedObjectSourceWirer} to assist in configuring the
 	 *            {@link ManagedObjectSource}. May be <code>null</code> if no
 	 *            assistance is required.
-	 * @return {@link PropertyList} for the {@link ManagedObjectSource}.
+	 * @param objectTypes
+	 *            Types that the {@link ManagedObjectSource} is to provide
+	 *            dependency injection via auto-wiring.
+	 * @return {@link AutoWireObject} for the {@link ManagedObjectSource}.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> PropertyList addObject(
-			Class<?> type, Class<S> sourceClass, ManagedObjectSourceWirer wirer) {
+	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> AutoWireObject addManagedObject(
+			Class<S> managedObjectSourceClass, ManagedObjectSourceWirer wirer,
+			Class<?>... objectTypes) {
+
+		// Ensure have object types
+		if ((objectTypes == null) || (objectTypes.length == 0)) {
+			throw new IllegalArgumentException(
+					"Must provide at least one object type");
+		}
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
-		// Add the object context
-		this.objectContexts.add(new AutoWireContext(type, sourceClass,
-				properties, wirer));
+		// Create the auto wire object
+		AutoWireObject object = new AutoWireObject(managedObjectSourceClass,
+				properties, wirer, objectTypes);
 
-		// Return the properties for the managed object source
-		return properties;
+		// Add the object context
+		this.objectContexts.add(new AutoWireContext(object, null));
+
+		// Return the auto wire object
+		return object;
 	}
 
 	/**
@@ -312,22 +328,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 		// Return the default team
 		return this.defaultTeam;
-	}
-
-	/**
-	 * Ensures the object type is not already added.
-	 * 
-	 * @param type
-	 *            Type of the object for the {@link ManagedObjectSource}.
-	 */
-	private void ensureObjectTypeNotAdded(Class<?> type) {
-		for (AutoWireContext objectContext : this.objectContexts) {
-			if (objectContext.type.equals(type)) {
-				// Obtain already added
-				throw new IllegalStateException("Object of type "
-						+ type.getName() + " already added");
-			}
-		}
 	}
 
 	/**
@@ -522,29 +522,19 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	private class AutoWireContext implements ManagedObjectSourceWirerContext {
 
 		/**
-		 * Type of the object.
+		 * {@link AutoWireObject}.
 		 */
-		public final Class<?> type;
+		private final AutoWireObject autoWireObject;
 
 		/**
 		 * Raw object.
 		 */
-		public final Object rawObject;
+		private final Object rawObject;
 
 		/**
-		 * {@link ManagedObjectSource} class.
+		 * Name of the {@link ManagedObject}.
 		 */
-		public final Class<?> managedObjectSourceClass;
-
-		/**
-		 * {@link PropertyList} for the {@link ManagedObjectSource}.
-		 */
-		public final PropertyList properties;
-
-		/**
-		 * {@link ManagedObjectSourceWirer}.
-		 */
-		public final ManagedObjectSourceWirer wirer;
+		private String managedObjectName;
 
 		/**
 		 * Flag indicating is if {@link OfficeFloorInputManagedObject}.
@@ -579,39 +569,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param type
-		 *            Type of the object.
-		 * @param managedObjectSourceClass
-		 *            {@link ManagedObjectSource} class.
-		 * @param properties
-		 *            {@link PropertyList} for the {@link ManagedObjectSource}.
-		 * @param wirer
-		 *            {@link ManagedObjectSourceWirer}.
-		 */
-		public AutoWireContext(Class<?> type,
-				Class<?> managedObjectSourceClass, PropertyList properties,
-				ManagedObjectSourceWirer wirer) {
-			this.type = type;
-			this.rawObject = null;
-			this.managedObjectSourceClass = managedObjectSourceClass;
-			this.properties = properties;
-			this.wirer = wirer;
-		}
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param type
-		 *            Type of the object.
+		 * @param autoWireObject
+		 *            {@link AutoWireObject}.
 		 * @param rawObject
 		 *            Raw object.
 		 */
-		public AutoWireContext(Class<?> type, Object rawObject) {
-			this.type = type;
+		public AutoWireContext(AutoWireObject autoWireObject, Object rawObject) {
+			this.autoWireObject = autoWireObject;
 			this.rawObject = rawObject;
-			this.managedObjectSourceClass = null;
-			this.properties = null;
-			this.wirer = null;
 		}
 
 		/**
@@ -637,19 +602,31 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 				Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects,
 				Map<Class<?>, Integer> typeIndex) {
 
+			// Determine the details
+			Class<?> managedObjectSourceClass = this.autoWireObject
+					.getManagedObjectSourceClass();
+			PropertyList properties = this.autoWireObject.getProperties();
+			ManagedObjectSourceWirer wirer = this.autoWireObject
+					.getManagedObjectSourceWirer();
+			Class<?>[] objectTypes = this.autoWireObject.getObjectTypes();
+
+			// Use first object type for naming
+			Class<?> firstObjectType = objectTypes[0];
+			String rawName = firstObjectType.getName();
+
 			// Determine the managed object name
-			String managedObjectName = this.type.getName();
-			Integer index = typeIndex.get(this.type);
+			Integer index = typeIndex.get(firstObjectType);
 			if (index == null) {
 				// First, so do not index name (as most cases only one)
+				this.managedObjectName = rawName;
 				index = new Integer(1);
 			} else {
 				// Provide index on name and increment for next
 				int indexValue = index.intValue();
-				managedObjectName += String.valueOf(indexValue);
+				this.managedObjectName = rawName + String.valueOf(indexValue);
 				index = new Integer(indexValue + 1);
 			}
-			typeIndex.put(this.type, index);
+			typeIndex.put(firstObjectType, index);
 
 			// Determine if raw object
 			if (this.rawObject != null) {
@@ -662,9 +639,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			} else {
 				// Bind the managed object source
 				this.managedObjectSource = deployer.addManagedObjectSource(
-						managedObjectName,
-						this.managedObjectSourceClass.getName());
-				for (Property property : this.properties) {
+						this.managedObjectName,
+						managedObjectSourceClass.getName());
+				for (Property property : properties) {
 					this.managedObjectSource.addProperty(property.getName(),
 							property.getValue());
 				}
@@ -674,46 +651,53 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			deployer.link(this.managedObjectSource.getManagingOffice(), office);
 
 			// Wire the managed object source
-			if (this.wirer != null) {
-				this.wirer.wire(this);
+			if (wirer != null) {
+				wirer.wire(this);
 			}
 
-			// Obtain the office object
-			OfficeObject officeObject = office
-					.getDeployedOfficeObject(this.type.getName());
+			// Link in the objects
+			for (Class<?> objectType : objectTypes) {
 
-			// Handle managed object
-			if (this.isInput) {
-				// Obtain the Input managed object
-				OfficeFloorInputManagedObject inputMo = inputManagedObjects
-						.get(this.type);
-				if (inputMo == null) {
-					// Create and register the input managed object
-					inputMo = deployer.addInputManagedObject(this.type
-							.getName());
-					inputManagedObjects.put(this.type, inputMo);
+				// Obtain the office object
+				OfficeObject officeObject = office
+						.getDeployedOfficeObject(objectType.getName());
 
-					// Only first is specified as bound
-					inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
+				// Handle managed object
+				if (this.isInput) {
+					// Obtain the Input managed object
+					OfficeFloorInputManagedObject inputMo = inputManagedObjects
+							.get(objectType);
+					if (inputMo == null) {
+						// Create and register the input managed object
+						inputMo = deployer.addInputManagedObject(objectType
+								.getName());
+						inputManagedObjects.put(objectType, inputMo);
 
-					// Link office object to input managed object
-					deployer.link(officeObject, inputMo);
+						// Only first is specified as bound
+						inputMo.setBoundOfficeFloorManagedObjectSource(this.managedObjectSource);
+
+						// Link office object to input managed object
+						deployer.link(officeObject, inputMo);
+					}
+
+					// Link source to input
+					deployer.link(this.managedObjectSource, inputMo);
+
+				} else {
+					// Ensure only create the one managed object
+					if (this.managedObject == null) {
+						this.managedObject = this.managedObjectSource
+								.addOfficeFloorManagedObject(
+										this.managedObjectName,
+										ManagedObjectScope.PROCESS);
+					}
+
+					// Link managed object to office object
+					deployer.link(officeObject, this.managedObject);
+
+					// Register the managed object for each type
+					managedObjects.put(objectType, this.managedObject);
 				}
-
-				// Link source to input
-				deployer.link(this.managedObjectSource, inputMo);
-
-			} else {
-				// Managed object
-				this.managedObject = this.managedObjectSource
-						.addOfficeFloorManagedObject(managedObjectName,
-								ManagedObjectScope.PROCESS);
-
-				// Link managed object to office object
-				deployer.link(officeObject, this.managedObject);
-
-				// Register the managed object
-				managedObjects.put(this.type, this.managedObject);
 			}
 		}
 
@@ -841,7 +825,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			// No managed object for dependency
 			deployer.addIssue("No dependency managed object for type "
 					+ dependencyType.getName(), AssetType.MANAGED_OBJECT,
-					this.type.getName());
+					this.managedObjectName);
 		}
 
 		/*
