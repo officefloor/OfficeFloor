@@ -231,8 +231,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
 					sectionName, section.getSectionSourceClass().getName(),
-					section.getSectionLocation(),
-					section.getSectionProperties());
+					section.getSectionLocation(), section.getProperties());
 
 			// Link the objects
 			for (OfficeSectionObject object : officeSection

@@ -477,7 +477,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				ClassSectionSource.class, sectionClass.getName());
 
 		// Register the properties
-		PropertyList properties = section.getSectionProperties();
+		PropertyList properties = section.getProperties();
 		this.sectionProperties.put(SECTION_NAME, properties);
 
 		// Return the section
@@ -576,7 +576,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				SectionSource.class, sectionName + "Location");
 
 		// Load the properties
-		PropertyList properties = section.getSectionProperties();
+		PropertyList properties = section.getProperties();
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];

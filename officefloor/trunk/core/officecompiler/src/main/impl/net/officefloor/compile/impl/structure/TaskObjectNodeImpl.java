@@ -172,6 +172,11 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 			throw new IllegalStateException("Must be in office context");
 		}
 
+		// No dependent if a parameter
+		if (this.isParameter) {
+			return null;
+		}
+
 		// Return the retrieved dependent managed object
 		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
 				"TaskObject " + this.objectName, LocationType.OFFICE,

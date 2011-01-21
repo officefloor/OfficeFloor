@@ -743,4 +743,42 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				dependentMo.getObjectDependencies().length);
 	}
 
+	/**
+	 * Ensure {@link TaskObject} flagged as parameter does not provide a
+	 * {@link DependentManagedObject}.
+	 */
+	public void testTaskObjectAsParameter() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		// Load the task object dependent on managed object of same section
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						// Add the task object as parameter
+						TaskObject taskObject = context.addTaskObject("WORK",
+								workFactory, "TASK", taskFactory, "OBJECT",
+								Connection.class);
+						taskObject.flagAsParameter();
+					}
+				});
+
+		// Validate no dependent managed object
+		OfficeTask task = section.getOfficeTasks()[0];
+		assertEquals("Incorrect number of task object dependencies", 1,
+				task.getObjectDependencies().length);
+		ObjectDependency taskDependency = task.getObjectDependencies()[0];
+		assertEquals("Incorrect task object dependency", "OBJECT",
+				taskDependency.getObjectDependencyName());
+		assertEquals("Incorrect task object dependency type", Connection.class,
+				taskDependency.getObjectDependencyType());
+
+		// Ensure no dependent managed object for parameter
+		assertNull("Should be no dependent for task parameter",
+				taskDependency.getDependentManagedObject());
+	}
+
 }

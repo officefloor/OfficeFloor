@@ -55,6 +55,9 @@ public interface ObjectDependency {
 	 * <p>
 	 * Obtains the {@link ManagedObject} that full fills the dependency.
 	 * <p>
+	 * Should the {@link ObjectDependency} represent a parameter then no
+	 * {@link DependentManagedObject} will be provided.
+	 * <p>
 	 * Expected return types are:
 	 * <ol>
 	 * <li>{@link OfficeSectionManagedObject}</li>
@@ -63,8 +66,8 @@ public interface ObjectDependency {
 	 * <li><code>null</code> if not yet linked (or issue in linking)</li>
 	 * </ol>
 	 * 
-	 * @return {@link DependentManagedObject} or <code>null</code> if not yet
-	 *         linked (or issue in linking).
+	 * @return {@link DependentManagedObject} or <code>null</code> if a
+	 *         parameter or not yet linked (or issue in linking).
 	 */
 	DependentManagedObject getDependentManagedObject();
 

@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.autowire;
 
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -50,9 +49,9 @@ public interface ManagedObjectSourceWirerContext {
 	 *            Name of the {@link ManagedObjectTeam}.
 	 * @param teamSourceClass
 	 *            {@link TeamSource} class.
-	 * @return {@link PropertyList} for the {@link TeamSource}.
+	 * @return {@link AutoWireTeam}.
 	 */
-	<S extends TeamSource> PropertyList mapTeam(
+	<S extends TeamSource> AutoWireTeam mapTeam(
 			String managedObjectSourceTeamName, Class<S> teamSourceClass);
 
 	/**

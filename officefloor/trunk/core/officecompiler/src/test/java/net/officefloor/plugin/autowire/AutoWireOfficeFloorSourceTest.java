@@ -22,6 +22,8 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -39,10 +41,12 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
@@ -203,8 +207,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				context.mapFlow("flow", "section", "sectionInput");
 
 				// Map team
-				context.mapTeam("team", OnePersonTeamSource.class)
-						.addProperty("name").setValue("value");
+				context.mapTeam("team", OnePersonTeamSource.class).addProperty(
+						"name", "value");
 			}
 		};
 
@@ -258,8 +262,8 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				context.mapFlow("flow", "section", "sectionInput");
 
 				// Map team
-				context.mapTeam("team", OnePersonTeamSource.class)
-						.addProperty("name").setValue("value");
+				context.mapTeam("team", OnePersonTeamSource.class).addProperty(
+						"name", "value");
 			}
 		};
 
@@ -331,6 +335,69 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to assign a {@link Team}.
+	 */
+	public void testAssignTeam() throws Exception {
+
+		// Assign the team
+		AutoWireTeam team = this.source.assignTeam(OnePersonTeamSource.class,
+				Connection.class);
+		team.addProperty("name", "value");
+
+		// Record
+		this.recordTeamAndOffice();
+		this.recordTeam(new String[] { "name", "value" }, Connection.class);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to assign a {@link Team} multiple responsibilities.
+	 */
+	public void testAssignTeamMultipleResponsibilities() throws Exception {
+
+		// Assign the team with multiple responsibilities
+		this.source.assignTeam(OnePersonTeamSource.class, Connection.class,
+				DataSource.class);
+
+		// Record
+		this.recordTeamAndOffice();
+		this.recordTeam(null, Connection.class, DataSource.class);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to override the default {@link Team}.
+	 */
+	public void testOverrideDefaultTeam() throws Exception {
+
+		// Assign the default team
+		AutoWireTeam defaultTeam = this.source
+				.assignDefaultTeam(PassiveTeamSource.class);
+		defaultTeam.addProperty("name", "value");
+
+		// Record
+		OfficeFloorTeam officeFloorTeam = this
+				.createMock(OfficeFloorTeam.class);
+		this.recordReturn(this.deployer, this.deployer.addTeam("team",
+				PassiveTeamSource.class.getName()), officeFloorTeam);
+		officeFloorTeam.addProperty("name", "value");
+		this.recordOffice(officeFloorTeam);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * {@link OfficeFloorTeam}.
 	 */
 	private final OfficeFloorTeam team = this.createMock(OfficeFloorTeam.class);
@@ -372,6 +439,18 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 						ProcessContextTeamSource.class.getName()), this.team);
 
 		// Record the office
+		this.recordOffice(this.team);
+	}
+
+	/**
+	 * Records the office.
+	 * 
+	 * @param defaultTeam
+	 *            Default {@link Team}.
+	 */
+	private void recordOffice(OfficeFloorTeam defaultTeam) {
+
+		// Record the office
 		this.recordReturn(this.deployer, this.deployer.addDeployedOffice(
 				"OFFICE", ThreadLocalDelegateOfficeSource.class.getName(), ""),
 				this.office);
@@ -384,7 +463,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
 		this.recordReturn(this.office,
 				this.office.getDeployedOfficeTeam("team"), officeTeam);
-		this.deployer.link(officeTeam, this.team);
+		this.deployer.link(officeTeam, defaultTeam);
 	}
 
 	/**
@@ -607,6 +686,46 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Link team
 		this.deployer.link(moTeam, team);
+	}
+
+	/**
+	 * Records the {@link Team}.
+	 * 
+	 * @param propertyNameValuePairs
+	 *            Name value pairs. May be <code>null</code> to indicate no
+	 *            properties.
+	 * @param objectTypes
+	 *            Object types.
+	 */
+	private void recordTeam(String[] propertyNameValuePairs,
+			Class<?>... objectTypes) {
+
+		// Base name of first object type
+		Class<?> nameObjectType = objectTypes[0];
+
+		// Create the Office Floor team
+		OfficeFloorTeam officeFloorTeam = this
+				.createMock(OfficeFloorTeam.class);
+		this.recordReturn(this.deployer,
+				this.deployer.addTeam("team-" + nameObjectType.getName(),
+						OnePersonTeamSource.class.getName()), officeFloorTeam);
+		if (propertyNameValuePairs != null) {
+			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+				String name = propertyNameValuePairs[i];
+				String value = propertyNameValuePairs[i + 1];
+				officeFloorTeam.addProperty(name, value);
+			}
+		}
+
+		// Create and link the responsibilities
+		for (Class<?> objectType : objectTypes) {
+			OfficeTeam officeTeam = this.createMock(OfficeTeam.class);
+			this.recordReturn(
+					this.office,
+					this.office.getDeployedOfficeTeam("team-"
+							+ objectType.getName()), officeTeam);
+			this.deployer.link(officeTeam, officeFloorTeam);
+		}
 	}
 
 	/**
