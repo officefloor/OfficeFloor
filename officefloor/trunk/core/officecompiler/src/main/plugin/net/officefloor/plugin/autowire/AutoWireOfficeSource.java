@@ -511,6 +511,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				}
 				objects.add(object);
 
+				// Recursively determine if responsible
+				if (this.isResponsible(object.getObjectDependencies(), objects)) {
+					return true; // responsible
+				}
 			}
 
 			// As here, not responsible

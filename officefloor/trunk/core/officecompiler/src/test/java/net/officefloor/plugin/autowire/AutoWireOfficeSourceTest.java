@@ -25,10 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -43,9 +43,14 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.ManagedObject;
+import net.officefloor.plugin.section.clazz.Property;
 
 /**
  * Tests the {@link AutoWireOfficeSource}.
@@ -287,38 +292,96 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} role.
+	 * Ensure can assign a {@link Team} responsibility.
 	 */
-	public void testAssignTeamRole() throws Exception {
+	public void testAssignTeam() throws Exception {
+		this.doAssignTeamTest(MockTeamSection.class);
+	}
+
+	/**
+	 * Mock {@link Team} section class with direct dependency.
+	 */
+	public static class MockTeamSection {
+
+		public void taskNotAssign(String value) {
+		}
+
+		public void taskAssign(Connection connection) {
+		}
+	}
+
+	/**
+	 * Ensure can assign a {@link Team} responsibility based on {@link Task}
+	 * having dependency on a {@link ManagedObject} that depends on the object
+	 * type..
+	 */
+	public void testAssignTeamBasedOnManagedObjectDependency() throws Exception {
+		this.doAssignTeamTest(MockTeamDependencySection.class);
+	}
+
+	/**
+	 * Mock {@link Team} {@link ManagedObject} that has dependency.
+	 */
+	public static class MockTeamDependencyManagedObject {
+
+		@Dependency
+		Connection connection;
+	}
+
+	/**
+	 * Mock {@link Team} section class with dependency via {@link ManagedObject}
+	 * dependency.
+	 */
+	public static class MockTeamDependencySection {
+
+		@ManagedObject(source = ClassManagedObjectSource.class, properties = { @Property(name = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, valueClass = MockTeamDependencyManagedObject.class) })
+		MockTeamDependencyManagedObject managedObject;
+
+		/**
+		 * {@link Task} depends on {@link #managedObject} which depends on
+		 * {@link Connection}.
+		 */
+		public void taskAssign() {
+		}
+	}
+
+	/**
+	 * Does the assign {@link Team} test.
+	 * 
+	 * @param sectionClass
+	 *            Section class.
+	 */
+	private void doAssignTeamTest(Class<?> sectionClass) throws Exception {
 
 		// Create and configure the source
 		AutoWireOfficeSource source = new AutoWireOfficeSource();
-		this.addSection(source, MockTeamSection.class);
+		this.addSection(source, sectionClass);
 		AutoWireResponsibility responsibility = source
 				.addResponsibility(Connection.class);
 		assertEquals("Incorrect team name",
 				"team-" + Connection.class.getName(),
 				responsibility.getOfficeTeamName());
 
-		// Record creating the section
+		// Record creating the teams (responsibilities)
 		final OfficeTeam defaultTeam = this.recordTeam();
 		final OfficeTeam connectionTeam = this.recordTeam(Connection.class);
-		this.recordOfficeSection(MockTeamSection.class, new TeamAssigner() {
+
+		// Record creating the section
+		this.recordOfficeSection(sectionClass, new TeamAssigner() {
 			@Override
 			public void recordAssignTeam(OfficeTask task) {
-				// Determine if has connection
-				boolean isConnectionTask = false;
-				for (ObjectDependency dependency : task.getObjectDependencies()) {
-					if (Connection.class.equals(dependency
-							.getObjectDependencyType())) {
-						isConnectionTask = true;
-					}
+
+				// Determine team responsible
+				OfficeTeam assignedTeam;
+				if ("taskAssign".equals(task.getOfficeTaskName())) {
+					assignedTeam = connectionTeam;
+				} else {
+					assignedTeam = defaultTeam;
 				}
 
 				// Assign the team
-				AutoWireOfficeSourceTest.this.architect.link(task
-						.getTeamResponsible(),
-						(isConnectionTask ? connectionTeam : defaultTeam));
+				AutoWireOfficeSourceTest.this.architect.link(
+						task.getTeamResponsible(), assignedTeam);
 			}
 		});
 
@@ -326,18 +389,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		source.sourceOffice(this.architect, context);
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Mock {@link Team} section class.
-	 */
-	public static class MockTeamSection {
-
-		public void taskOne(String value) {
-		}
-
-		public void taskTwo(Connection connection) {
-		}
 	}
 
 	/**
@@ -467,8 +518,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		for (OfficeSectionObject sectionObject : officeSection
 				.getOfficeSectionObjects()) {
 			String objectType = sectionObject.getObjectType();
-			OfficeObjectNode officeObject = this
-					.createMock(OfficeObjectNode.class);
+			OfficeObjectNode officeObject = new OfficeObjectNodeImpl("TEST",
+					"TEST", null);
 			this.recordReturn(this.architect,
 					this.architect.addOfficeObject(objectType, objectType),
 					officeObject);
