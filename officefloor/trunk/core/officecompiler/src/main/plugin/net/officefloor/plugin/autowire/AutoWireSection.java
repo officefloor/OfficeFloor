@@ -18,7 +18,6 @@
 
 package net.officefloor.plugin.autowire;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.source.SectionSource;
 
@@ -27,7 +26,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireSection {
+public class AutoWireSection extends AutoWireProperties {
 
 	/**
 	 * Name of section.
@@ -45,11 +44,6 @@ public class AutoWireSection {
 	private final String location;
 
 	/**
-	 * Properties for the section.
-	 */
-	private final PropertyList properties;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param name
@@ -63,10 +57,10 @@ public class AutoWireSection {
 	 */
 	public AutoWireSection(String name, Class<?> sourceClass, String location,
 			PropertyList properties) {
+		super(properties);
 		this.name = name;
 		this.sourceClass = sourceClass;
 		this.location = location;
-		this.properties = properties;
 	}
 
 	/**
@@ -77,8 +71,8 @@ public class AutoWireSection {
 	 *            Section to copy in state.
 	 */
 	protected AutoWireSection(AutoWireSection section) {
-		this(section.name, section.sourceClass, section.location,
-				section.properties);
+		this(section.name, section.sourceClass, section.location, section
+				.getProperties());
 	}
 
 	/**
@@ -106,27 +100,6 @@ public class AutoWireSection {
 	 */
 	public String getSectionLocation() {
 		return this.location;
-	}
-
-	/**
-	 * Obtains the {@link PropertyList}
-	 * 
-	 * @return {@link PropertyList}.
-	 */
-	public PropertyList getSectionProperties() {
-		return this.properties;
-	}
-
-	/**
-	 * Convenience method to add a {@link Property}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	public void addSectionProperty(String name, String value) {
-		this.properties.addProperty(name).setValue(value);
 	}
 
 }

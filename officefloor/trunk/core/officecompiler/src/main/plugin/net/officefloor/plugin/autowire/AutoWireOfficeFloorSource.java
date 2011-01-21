@@ -60,6 +60,7 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
@@ -100,6 +101,16 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	 * {@link AutoWireContext} instances.
 	 */
 	private final List<AutoWireContext> objectContexts = new LinkedList<AutoWireContext>();
+
+	/**
+	 * Default {@link AutoWireTeam}.
+	 */
+	private AutoWireTeam defaultTeam = null;
+
+	/**
+	 * {@link AutoWireTeam} instances.
+	 */
+	private final List<AutoWireTeam> teams = new LinkedList<AutoWireTeam>();
 
 	/**
 	 * Opened {@link OfficeFloor}.
@@ -242,6 +253,68 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	}
 
 	/**
+	 * Assigns a {@link Team} responsible for {@link Task} dependent on the
+	 * specified object types.
+	 * 
+	 * @param teamSourceClass
+	 *            {@link TeamSource} class.
+	 * @param objectTypes
+	 *            Dependent {@link Task} object types the {@link Team} is
+	 *            responsible for. Must have at least one object type provided.
+	 * @return {@link AutoWireTeam}.
+	 */
+	public <T extends TeamSource> AutoWireTeam assignTeam(
+			Class<T> teamSourceClass, Class<?>... objectTypes) {
+
+		// Must have object types
+		if ((objectTypes == null) || (objectTypes.length == 0)) {
+			throw new IllegalArgumentException(
+					"Must provide at least one object type for team to be responsible");
+		}
+
+		// Determine name of team
+		String teamName = "team-" + objectTypes[0].getName();
+
+		// Create the responsibilities
+		AutoWireResponsibility[] responsibilities = new AutoWireResponsibility[objectTypes.length];
+		for (int i = 0; i < objectTypes.length; i++) {
+			responsibilities[i] = this.officeSource
+					.addResponsibility(objectTypes[i]);
+		}
+
+		// Create the properties
+		PropertyList properties = this.compiler.createPropertyList();
+
+		// Create and add the team
+		AutoWireTeam team = new AutoWireTeam(teamName, teamSourceClass,
+				properties, responsibilities);
+		this.teams.add(team);
+
+		// Return the team
+		return team;
+	}
+
+	/**
+	 * Assigns a {@link Team} responsible for unassigned {@link Task} instances.
+	 * 
+	 * @param teamSourceClass
+	 *            {@link TeamSource} class.
+	 * @return {@link AutoWireTeam}.
+	 */
+	public <T extends TeamSource> AutoWireTeam assignDefaultTeam(
+			Class<T> teamSourceClass) {
+
+		// Create the properties
+		PropertyList properties = this.compiler.createPropertyList();
+
+		// Create the default team
+		this.defaultTeam = new AutoWireTeam("team", teamSourceClass, properties);
+
+		// Return the default team
+		return this.defaultTeam;
+	}
+
+	/**
 	 * Ensures the object type is not already added.
 	 * 
 	 * @param type
@@ -378,21 +451,56 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		// Allow initialising the OfficeFloor
 		this.initOfficeFloor(deployer, context);
 
-		/*
-		 * Create the Team to always use invoking thread. This is to allow use
-		 * within an application server as typically would use OfficeFloor
-		 * configuration (not auto-wire) for OfficeFloor hosted application.
-		 */
-		OfficeFloorTeam team = deployer.addTeam("team",
-				ProcessContextTeamSource.class.getName());
+		// Add the default team
+		OfficeFloorTeam team;
+		if (this.defaultTeam != null) {
+			// Configure the default team
+			team = deployer.addTeam("team", this.defaultTeam
+					.getTeamSourceClass().getName());
+			for (Property property : this.defaultTeam.getProperties()) {
+				team.addProperty(property.getName(), property.getValue());
+			}
+
+		} else {
+			/*
+			 * Create the default Team by default to always use invoking thread.
+			 * This is to allow use within an application server as typically
+			 * would use OfficeFloor configuration (not auto-wire) for
+			 * OfficeFloor hosted application.
+			 */
+			team = deployer.addTeam("team",
+					ProcessContextTeamSource.class.getName());
+		}
 
 		// Add the auto-wiring office
 		DeployedOffice office = ThreadLocalDelegateOfficeSource.bindDelegate(
 				OFFICE_NAME, this.officeSource, deployer);
 
-		// Link team for office
+		// Link default team for office
 		OfficeTeam officeTeam = office.getDeployedOfficeTeam("team");
 		deployer.link(officeTeam, team);
+
+		// Link team via object dependency responsibility
+		for (AutoWireTeam autoWireTeam : this.teams) {
+
+			// Add the responsible team
+			OfficeFloorTeam responsibleTeam = deployer
+					.addTeam(autoWireTeam.getTeamName(), autoWireTeam
+							.getTeamSourceClass().getName());
+			for (Property property : autoWireTeam.getProperties()) {
+				responsibleTeam.addProperty(property.getName(),
+						property.getValue());
+			}
+
+			// Link responsible team to its responsibilities
+			for (AutoWireResponsibility autoWireResponsibility : autoWireTeam
+					.getResponsibilities()) {
+				OfficeTeam responsibility = office
+						.getDeployedOfficeTeam(autoWireResponsibility
+								.getOfficeTeamName());
+				deployer.link(responsibility, responsibleTeam);
+			}
+		}
 
 		// Load then link the managed object sources
 		Map<Class<?>, OfficeFloorManagedObject> managedObjects = new HashMap<Class<?>, OfficeFloorManagedObject>();
@@ -677,16 +785,16 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 
 				// Obtain the managed object team
 				ManagedObjectTeam moTeam = this.managedObjectSource
-						.getManagedObjectTeam(team.managedObjectSourceTeamName);
+						.getManagedObjectTeam(team.getTeamName());
 
 				// Add the team
 				OfficeFloorTeam officeFloorTeam = deployer.addTeam(
 						this.managedObjectSource
 								.getOfficeFloorManagedObjectSourceName()
 								+ "-"
-								+ team.managedObjectSourceTeamName,
-						team.teamSourceClass.getName());
-				for (Property property : team.properties) {
+								+ team.getTeamName(), team.getTeamSourceClass()
+								.getName());
+				for (Property property : team.getProperties()) {
 					officeFloorTeam.addProperty(property.getName(),
 							property.getValue());
 				}
@@ -758,7 +866,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		}
 
 		@Override
-		public <S extends TeamSource> PropertyList mapTeam(
+		public <S extends TeamSource> AutoWireTeam mapTeam(
 				String managedObjectSourceTeamName, Class<S> teamSourceClass) {
 
 			// Create the properties for the team
@@ -766,11 +874,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 					.createPropertyList();
 
 			// Register the team mapping
-			this.teams.add(new AutoWireTeam(managedObjectSourceTeamName,
-					teamSourceClass, properties));
+			AutoWireTeam team = new AutoWireTeam(managedObjectSourceTeamName,
+					teamSourceClass, properties);
+			this.teams.add(team);
 
-			// Return the team properties
-			return properties;
+			// Return the team
+			return team;
 		}
 	}
 
@@ -838,44 +947,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			this.managedObjectSourceFlowName = managedObjectSourceFlowName;
 			this.sectionName = sectionName;
 			this.sectionInputName = sectionInputName;
-		}
-	}
-
-	/**
-	 * Auto-wire {@link ManagedObjectTeam}.
-	 */
-	private class AutoWireTeam {
-
-		/**
-		 * Name of the {@link ManagedObjectTeam}.
-		 */
-		public final String managedObjectSourceTeamName;
-
-		/**
-		 * {@link TeamSource} class.
-		 */
-		public final Class<?> teamSourceClass;
-
-		/**
-		 * {@link PropertyList}.
-		 */
-		public final PropertyList properties;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param managedObjectSourceTeamName
-		 *            Name of the {@link ManagedObjectTeam}.
-		 * @param teamSourceClass
-		 *            {@link TeamSource} class.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 */
-		public AutoWireTeam(String managedObjectSourceTeamName,
-				Class<?> teamSourceClass, PropertyList properties) {
-			this.managedObjectSourceTeamName = managedObjectSourceTeamName;
-			this.teamSourceClass = teamSourceClass;
-			this.properties = properties;
 		}
 	}
 

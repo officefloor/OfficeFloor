@@ -115,17 +115,17 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		// Create Work section
 		AutoWireSection section = autoWire.addSection("SECTION",
 				WorkSectionSource.class, ClassWorkSource.class.getName());
-		section.addSectionProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX
+		section.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX
 				+ "taskTwo", "2");
-		section.addSectionProperty(
-				WorkSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS, "taskTwo");
-		section.addSectionProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		section.addProperty(WorkSectionSource.PROPERTY_TASKS_NEXT_TO_OUTPUTS,
+				"taskTwo");
+		section.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				MockWork.class.getName());
 
 		// Create handle section
 		AutoWireSection handle = autoWire.addSection("HANDLE",
 				WorkSectionSource.class, ClassWorkSource.class.getName());
-		handle.addSectionProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+		handle.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				MockFinishTask.class.getName());
 
 		// Link flows

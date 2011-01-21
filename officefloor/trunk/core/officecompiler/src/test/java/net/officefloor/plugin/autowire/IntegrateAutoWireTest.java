@@ -18,8 +18,14 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.officefloor.compile.test.issues.FailCompilerIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -34,25 +40,44 @@ import net.officefloor.plugin.section.clazz.Parameter;
 public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 
 	/**
+	 * Dependency object.
+	 */
+	private static volatile Connection dependencyObject = null;
+
+	/**
+	 * {@link Thread} instances that executed the {@link Task} instances.
+	 */
+	private static List<Thread> threadForTask = new ArrayList<Thread>(2);
+
+	/**
+	 * Registers the {@link Thread} for the {@link Task}.
+	 */
+	private static void registerTaskThread() {
+		synchronized (threadForTask) {
+			threadForTask.add(Thread.currentThread());
+		}
+	}
+
+	/**
 	 * Ensure can open the {@link OfficeFloor}.
 	 */
 	public void testOpen() throws Exception {
 
 		// Create the office floor
-		Value value = new Value();
-		AutoWireOfficeFloorSource source = this.createSource(value);
+		final Connection connection = this.createMock(Connection.class);
+		final Value value = new Value();
+		AutoWireOfficeFloorSource source = this.createSource(value, connection);
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Run the task
 		source.invokeTask("one.WORK", "doInput", value);
-		assertEquals("Incorrect value", "doInput-1", value.value);
 
 		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
-		// Should now not be able to open OfficeFloor
+		// Should now not be able to invoke task
 		try {
 			source.invokeTask("one.WORK", "doInput", value);
 			fail("Should not be able to invoke task after closing OfficeFloor");
@@ -68,15 +93,34 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 */
 	public void testIntegrationByTask() throws Exception {
 
+		// Ensure in valid state for running test
+		synchronized (threadForTask) {
+			dependencyObject = null;
+			threadForTask.clear();
+		}
+
 		// Create the office floor
-		Value value = new Value();
-		AutoWireOfficeFloorSource source = this.createSource(value);
+		final Connection connection = this.createMock(Connection.class);
+		final Value value = new Value();
+		AutoWireOfficeFloorSource source = this.createSource(value, connection);
 
 		// Invoke the task (which also triggers open the OfficeFloor)
 		source.invokeTask("one.WORK", "doInput", value);
 
 		// Ensure correct value created
 		assertEquals("Incorrect value", "doInput-1", value.value);
+
+		// Validate object and teams
+		synchronized (threadForTask) {
+
+			// Ensure appropriate object
+			assertEquals("Incorrect dependency", connection, dependencyObject);
+
+			// Ensure appropriate threads executing teams
+			assertEquals("Incorrect number of teams", 2, threadForTask.size());
+			assertTrue("Should be different threads executing the tasks",
+					threadForTask.get(0) != threadForTask.get(1));
+		}
 	}
 
 	/**
@@ -84,18 +128,36 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	 * 
 	 * @param value
 	 *            {@link Value}.
+	 * @param connection
+	 *            {@link Connection}.
 	 * @return {@link AutoWireOfficeFloorSource} for testing.
 	 */
-	private AutoWireOfficeFloorSource createSource(Value value) {
+	private AutoWireOfficeFloorSource createSource(Value value,
+			Connection connection) {
 
-		// Configure the office floor
+		// Create the office floor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
-		source.addObject(Value.class, value);
+
+		// Indicate fail immediately
+		source.getOfficeFloorCompiler().setCompilerIssues(
+				new FailCompilerIssues());
+
+		// Add sections
 		AutoWireSection one = source.addSection("one",
 				ClassSectionSource.class, MockSectionOne.class.getName());
 		AutoWireSection two = source.addSection("two",
 				ClassSectionSource.class, MockSectionTwo.class.getName());
 		source.link(one, "output", two, "doInput");
+
+		// Add the Value
+		source.addObject(Value.class, value);
+
+		// Add the Connection
+		source.addObject(Connection.class, connection);
+
+		// Provide teams for separate tasks
+		source.assignDefaultTeam(OnePersonTeamSource.class);
+		source.assignTeam(OnePersonTeamSource.class, Connection.class);
 
 		// Return the office floor source
 		return source;
@@ -114,6 +176,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	public static class MockSectionOne {
 		@NextTask("output")
 		public Integer doInput(@Parameter Value value) {
+			registerTaskThread();
 			value.value = "doInput";
 			return new Integer(1);
 		}
@@ -127,7 +190,11 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		@Dependency
 		private Value value;
 
-		public void doInput(@Parameter Integer parameter) {
+		public void doInput(@Parameter Integer parameter, Connection connection) {
+			synchronized (threadForTask) {
+				dependencyObject = connection;
+			}
+			registerTaskThread();
 			this.value.value += "-" + String.valueOf(parameter.intValue());
 		}
 	}
