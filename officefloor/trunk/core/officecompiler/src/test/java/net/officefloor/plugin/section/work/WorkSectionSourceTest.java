@@ -108,9 +108,9 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		final List<String> list = new LinkedList<String>();
 
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
-		autoWire.addObject(Connection.class, connection);
-		autoWire.addObject(List.class, list);
-		autoWire.addObject(Integer.class, new Integer(1));
+		autoWire.addObject(connection, Connection.class);
+		autoWire.addObject(list, List.class);
+		autoWire.addObject(new Integer(1), Integer.class);
 
 		// Create Work section
 		AutoWireSection section = autoWire.addSection("SECTION",

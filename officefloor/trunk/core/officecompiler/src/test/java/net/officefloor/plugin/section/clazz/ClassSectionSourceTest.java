@@ -350,8 +350,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireSection section = officeFloor.addSection("test",
 				MockChangeTaskNameClassSectionSource.class,
 				MockChangeTaskNameWithLinksSection.class.getName());
-		officeFloor.addObject(ReturnValue.class, returnValue);
-		officeFloor.addObject(Connection.class, connection);
+		officeFloor.addObject(returnValue, ReturnValue.class);
+		officeFloor.addObject(connection, Connection.class);
 		officeFloor.link(section, "externalFlow", section, "finished");
 
 		// Run invoking flow
@@ -554,7 +554,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		// Triggering flows, so must run to test
 		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
 		ReturnValue returnValue = new ReturnValue();
-		officeFloor.addObject(ReturnValue.class, returnValue);
+		officeFloor.addObject(returnValue, ReturnValue.class);
 		officeFloor.addSection("test", ClassSectionSource.class,
 				MockEscalationHandlingSection.class.getName());
 
@@ -589,7 +589,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		officeFloor.addSection("test", ClassSectionSource.class,
 				MockInvokeSubSection.class.getName());
 		ReturnValue returnValue = new ReturnValue();
-		officeFloor.addObject(ReturnValue.class, returnValue);
+		officeFloor.addObject(returnValue, ReturnValue.class);
 
 		// Run to ensure obtained message
 		officeFloor.invokeTask("test.WORK", "doFirst", null);

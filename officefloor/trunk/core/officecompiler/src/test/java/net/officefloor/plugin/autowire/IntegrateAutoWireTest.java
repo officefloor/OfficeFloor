@@ -150,10 +150,10 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		source.link(one, "output", two, "doInput");
 
 		// Add the Value
-		source.addObject(Value.class, value);
+		source.addObject(value, Value.class);
 
 		// Add the Connection
-		source.addObject(Connection.class, connection);
+		source.addObject(connection, Connection.class);
 
 		// Provide teams for separate tasks
 		source.assignDefaultTeam(OnePersonTeamSource.class);
