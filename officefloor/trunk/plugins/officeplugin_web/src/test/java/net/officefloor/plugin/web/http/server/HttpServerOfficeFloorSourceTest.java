@@ -38,7 +38,7 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
- * Tests the {@link HttpServerOfficeFloorSource}.
+ * Tests the {@link HttpServerAutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -50,9 +50,9 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private static final int CONNECTION_REFUSED_STATUS = -1;
 
 	/**
-	 * {@link HttpServerOfficeFloorSource} to test.
+	 * {@link HttpServerAutoWireOfficeFloorSource} to test.
 	 */
-	private final HttpServerOfficeFloorSource source = new HttpServerOfficeFloorSource();
+	private final HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 
 	/**
 	 * {@link HttpClient}.
@@ -277,8 +277,8 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 						HttpServerSocketManagedObjectSource.class,
 						HttpServerSocketManagedObjectSource
 								.createManagedObjectSourceWirer(
-										HttpServerOfficeFloorSource.HANDLER_SECTION_NAME,
-										HttpServerOfficeFloorSource.HANDLER_INPUT_NAME))
+										HttpServerAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
+										HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME))
 				.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT)
 				.setValue(String.valueOf(port));
 	}

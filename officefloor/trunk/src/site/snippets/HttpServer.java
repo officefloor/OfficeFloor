@@ -1,12 +1,13 @@
 // OfficeFloor source implementation to simplify creating a HTTP Server
-HttpServerOfficeFloorSource server = new HttpServerOfficeFloorSource();
+HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource();
         
 // Add dynamic web page
 server.addHttpTemplate("example.ofp", Example.class, "example");
         
-// Add Object for dependency injection
-PropertyList properties = server.addObject(DataSource.class, DataSourceManagedObjectSource.class, null);
-// Configure DataSource, e.g. properties.addProperty("jdbcDriver").setValue("jdbcDriver");
+// Add configured DataSource for dependency injection
+AutoWireObject object = server.addManagedObject(DataSourceManagedObjectSource.class, null, DataSource.class);
+object.addProperty("data.source.class.name", "org.hsqldb.jdbc.jdbcDataSource");
+object.addProperty("Database", "jdbc:hsqldb:mem:exampledb");
         
 // Assign Team (specific thread pool) responsible for executing tasks with a DataSource dependency
 server.assignTeam(LeaderFollowerTeam.class, DataSource.class);
