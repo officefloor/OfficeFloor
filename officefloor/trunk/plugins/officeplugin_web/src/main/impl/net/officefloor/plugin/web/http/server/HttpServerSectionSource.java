@@ -89,11 +89,11 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            {@link AutoWireSection} for this
 	 *            {@link HttpServerSectionSource}.
 	 * @param source
-	 *            {@link HttpServerOfficeFloorSource}.
+	 *            {@link HttpServerAutoWireOfficeFloorSource}.
 	 */
 	public static void linkRouteToSection(String uri, AutoWireSection section,
 			String inputName, AutoWireSection httpSection,
-			HttpServerOfficeFloorSource source) {
+			HttpServerAutoWireOfficeFloorSource source) {
 
 		// Link route
 		String sectionOutputName = linkRoute(httpSection, uri);
@@ -111,11 +111,12 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            {@link AutoWireSection} for this
 	 *            {@link HttpServerSectionSource}.
 	 * @param source
-	 *            {@link HttpServerOfficeFloorSource}.
+	 *            {@link HttpServerAutoWireOfficeFloorSource}.
 	 */
 	public static void linkRouteToHttpTemplate(
 			HttpTemplateAutoWireSection httpTemplate,
-			AutoWireSection httpSection, HttpServerOfficeFloorSource source) {
+			AutoWireSection httpSection,
+			HttpServerAutoWireOfficeFloorSource source) {
 
 		// Must have URI for routing
 		String templateUri = httpTemplate.getTemplateUri();
@@ -151,7 +152,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 				+ uri;
 
 		// Register HTTP template for routing
-		httpSection.addSectionProperty(
+		httpSection.addProperty(
 				HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX + uri, uri);
 
 		// Return the section output name
@@ -170,7 +171,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 		final String TRUE = String.valueOf(true);
 
 		// Ensure is require routing property is true
-		for (Property property : httpSection.getSectionProperties()) {
+		for (Property property : httpSection.getProperties()) {
 			if (PROPERTY_IS_REQUIRE_ROUTING.equals(property.getName())) {
 				// Flag property to true as requires routing
 				property.setValue(TRUE);
@@ -179,7 +180,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 		}
 
 		// As here property not added, so add
-		httpSection.addSectionProperty(PROPERTY_IS_REQUIRE_ROUTING, TRUE);
+		httpSection.addProperty(PROPERTY_IS_REQUIRE_ROUTING, TRUE);
 	}
 
 	/*
@@ -217,7 +218,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 
 		// Link handling input to route link task
 		SectionInput input = designer.addSectionInput(
-				HttpServerOfficeFloorSource.HANDLER_INPUT_NAME, null);
+				HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
 		designer.link(input, routeLinkTask);
 
 		// Add file sender

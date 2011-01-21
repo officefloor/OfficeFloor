@@ -19,13 +19,13 @@
 package net.officefloor.plugin.socket.server.http.source;
 
 import net.officefloor.compile.ManagedObjectSourceService;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
@@ -97,9 +97,10 @@ public class HttpServerSocketManagedObjectSource extends
 				sectionName, sectionInputName);
 
 		// Add this managed object source
-		PropertyList properties = source.addObject(ServerHttpConnection.class,
-				HttpServerSocketManagedObjectSource.class, wirer);
-		properties.addProperty(PROPERTY_PORT).setValue(String.valueOf(port));
+		AutoWireObject object = source.addManagedObject(
+				HttpServerSocketManagedObjectSource.class, wirer,
+				ServerHttpConnection.class);
+		object.addProperty(PROPERTY_PORT, String.valueOf(port));
 	}
 
 	/*

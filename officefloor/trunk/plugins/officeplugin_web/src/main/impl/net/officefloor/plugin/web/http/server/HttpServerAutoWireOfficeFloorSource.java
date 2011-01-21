@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
@@ -45,7 +46,8 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerOfficeFloorSource extends AutoWireOfficeFloorSource {
+public class HttpServerAutoWireOfficeFloorSource extends
+		AutoWireOfficeFloorSource {
 
 	/**
 	 * Name of the {@link OfficeSection} that handles the {@link HttpRequest}
@@ -147,8 +149,7 @@ public class HttpServerOfficeFloorSource extends AutoWireOfficeFloorSource {
 		// Add the HTTP template section
 		AutoWireSection section = this.addSection(sectionName,
 				HttpTemplateSectionSource.class, templatePath);
-		section.addSectionProperty(
-				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+		section.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				templateLogicClass.getName());
 
 		// Create and register the HTTP template
@@ -225,12 +226,11 @@ public class HttpServerOfficeFloorSource extends AutoWireOfficeFloorSource {
 		} else {
 			// Override the HTTP Socket
 			for (HttpSocket socket : this.httpSockets) {
-				PropertyList properties = this.addObject(
-						ServerHttpConnection.class, socket.managedObjectSource,
-						socket.wirer);
+				AutoWireObject object = this.addManagedObject(
+						socket.managedObjectSource, socket.wirer,
+						ServerHttpConnection.class);
 				for (Property property : socket.properties) {
-					properties.addProperty(property.getName()).setValue(
-							property.getValue());
+					object.addProperty(property.getName(), property.getValue());
 				}
 			}
 		}
@@ -276,7 +276,7 @@ public class HttpServerOfficeFloorSource extends AutoWireOfficeFloorSource {
 	private void addProperty(AutoWireSection section,
 			OfficeFloorSourceContext context, String propertyName,
 			String defaultValue) {
-		section.addSectionProperty(propertyName,
+		section.addProperty(propertyName,
 				context.getProperty(propertyName, defaultValue));
 	}
 

@@ -81,8 +81,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"ROUTE", "route");
 
 		// Add dependencies
-		source.addObject(Connection.class, this.connection);
-		source.addObject(HttpSession.class, this.httpSession);
+		source.addObject(this.connection, Connection.class);
+		source.addObject(this.httpSession, HttpSession.class);
 
 		// Provide HTTP template router for testing
 		AutoWireSection routeSection = source.addSection("ROUTE",
@@ -95,7 +95,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				+ "/Template.ofp";
 		AutoWireSection templateSection = source.addSection("SECTION",
 				HttpTemplateSectionSource.class, templateLocation);
-		templateSection.addSectionProperty(
+		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				TemplateLogic.class.getName());
 
