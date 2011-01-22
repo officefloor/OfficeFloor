@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -512,8 +514,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 					inputManagedObjects, typeIndexes);
 		}
 		for (AutoWireContext objectContext : this.objectContexts) {
-			objectContext.linkManagedObject(office, deployer, managedObjects,
-					inputManagedObjects);
+			objectContext.linkManagedObject(office, deployer, context,
+					managedObjects, inputManagedObjects);
 		}
 	}
 
@@ -709,44 +711,78 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		 *            {@link DeployedOffice}.
 		 * @param deployer
 		 *            {@link OfficeFloorDeployer}.
+		 * @param context
+		 *            {@link OfficeFloorSourceContext}.
 		 * @param managedObjects
 		 *            {@link OfficeFloorManagedObject} instances by type.
 		 * @param inputManagedObjects
 		 *            {@link OfficeFloorInputManagedObject} instances by type.
 		 */
 		public void linkManagedObject(DeployedOffice office,
-				OfficeFloorDeployer deployer,
+				OfficeFloorDeployer deployer, OfficeFloorSourceContext context,
 				Map<Class<?>, OfficeFloorManagedObject> managedObjects,
 				Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects) {
 
-			// Link dependencies
-			if (this.isInput) {
-				// Link the dependencies for the input managed object
-				for (AutoWireDependency dependency : this.dependencies) {
+			// Obtain the managed object dependencies from type
+			Map<String, Class<?>> typeDependencies = new HashMap<String, Class<?>>();
+			if (this.rawObject == null) {
+				// Load the managed object type
+				ManagedObjectType<?> moType = context
+						.loadManagedObjectType(this.autoWireObject
+								.getManagedObjectSourceClass().getName(),
+								this.autoWireObject.getProperties());
+				if (moType != null) {
+					// Have type so register its dependencies
+					for (ManagedObjectDependencyType<?> typeDependency : moType
+							.getDependencyTypes()) {
+						typeDependencies.put(
+								typeDependency.getDependencyName(),
+								typeDependency.getDependencyType());
+					}
+				}
+			}
 
-					// Obtain the dependency
-					ManagedObjectDependency inputDependency = this.managedObjectSource
-							.getInputManagedObjectDependency(dependency.dependencyName);
+			// Link the dependencies (from mapping)
+			for (AutoWireDependency autoWireDependency : this.dependencies) {
 
-					// Link the dependency
-					this.linkDependency(inputDependency,
-							dependency.dependencyType, deployer,
-							managedObjects, inputManagedObjects);
+				// Obtain the dependency
+				ManagedObjectDependency dependency;
+				if (this.isInput) {
+					dependency = this.managedObjectSource
+							.getInputManagedObjectDependency(autoWireDependency.dependencyName);
+				} else {
+					dependency = this.managedObject
+							.getManagedObjectDependency(autoWireDependency.dependencyName);
 				}
 
-			} else {
-				// Link the dependencies for the managed object
-				for (AutoWireDependency dependency : this.dependencies) {
+				// Link the dependency
+				this.linkDependency(dependency,
+						autoWireDependency.dependencyType, deployer,
+						managedObjects, inputManagedObjects);
 
-					// Obtain the dependency
-					ManagedObjectDependency moDependency = this.managedObject
-							.getManagedObjectDependency(dependency.dependencyName);
+				// Remove the dependency from type (so not added later)
+				typeDependencies.remove(autoWireDependency.dependencyName);
+			}
 
-					// Link the dependency
-					this.linkDependency(moDependency,
-							dependency.dependencyType, deployer,
-							managedObjects, inputManagedObjects);
+			// Link the dependencies (from type)
+			for (String dependencyName : typeDependencies.keySet()) {
+
+				// Obtain the type of dependency
+				Class<?> dependencyType = typeDependencies.get(dependencyName);
+
+				// Obtain the dependency
+				ManagedObjectDependency dependency;
+				if (this.isInput) {
+					dependency = this.managedObjectSource
+							.getInputManagedObjectDependency(dependencyName);
+				} else {
+					dependency = this.managedObject
+							.getManagedObjectDependency(dependencyName);
 				}
+
+				// Link the dependency
+				this.linkDependency(dependency, dependencyType, deployer,
+						managedObjects, inputManagedObjects);
 			}
 
 			// Link flows
