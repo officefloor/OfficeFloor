@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.web.http.server;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -42,17 +43,20 @@ public class HttpTemplateAutoWireSection extends AutoWireSection {
 	/**
 	 * Initiate.
 	 * 
-	 * @param sectionName
-	 *            Section name for the {@link HttpTemplate}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 * @param section
+	 *            {@link AutoWireSection}.
 	 * @param templateLogicClass
 	 *            Logic class for the template.
 	 * @param templateUri
 	 *            URI to the template. May be <code>null</code> if not publicly
 	 *            exposed template.
 	 */
-	public HttpTemplateAutoWireSection(AutoWireSection section,
-			Class<?> templateLogicClass, String templateUri) {
-		super(section);
+	public HttpTemplateAutoWireSection(OfficeFloorCompiler compiler,
+			AutoWireSection section, Class<?> templateLogicClass,
+			String templateUri) {
+		super(compiler, section);
 		this.templateLogicClass = templateLogicClass;
 		this.templateUri = templateUri;
 	}
