@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.autowire;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -45,6 +46,8 @@ public class AutoWireObject extends AutoWireProperties {
 	/**
 	 * Initiate.
 	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param properties
@@ -55,10 +58,10 @@ public class AutoWireObject extends AutoWireProperties {
 	 *            Object types that the {@link ManagedObjectSource} is to
 	 *            provide auto-wiring.
 	 */
-	public AutoWireObject(Class<?> managedObjectSourceClass,
-			PropertyList properties, ManagedObjectSourceWirer wirer,
-			Class<?>... objectTypes) {
-		super(properties);
+	public AutoWireObject(OfficeFloorCompiler compiler,
+			Class<?> managedObjectSourceClass, PropertyList properties,
+			ManagedObjectSourceWirer wirer, Class<?>... objectTypes) {
+		super(compiler, properties);
 		this.managedObjectSourceClass = managedObjectSourceClass;
 		this.wirer = wirer;
 		this.objectTypes = objectTypes;

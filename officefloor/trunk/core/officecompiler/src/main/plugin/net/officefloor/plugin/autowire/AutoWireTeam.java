@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.autowire;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -46,6 +47,8 @@ public class AutoWireTeam extends AutoWireProperties {
 	/**
 	 * Initiate.
 	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param teamName
 	 *            Name of the {@link OfficeFloorTeam}.
 	 * @param teamSourceClass
@@ -55,10 +58,10 @@ public class AutoWireTeam extends AutoWireProperties {
 	 * @param responsibilities
 	 *            {@link AutoWireResponsibility} instances.
 	 */
-	public AutoWireTeam(String teamName,
+	public AutoWireTeam(OfficeFloorCompiler compiler, String teamName,
 			Class<? extends TeamSource> teamSourceClass,
 			PropertyList properties, AutoWireResponsibility... responsibilities) {
-		super(properties);
+		super(compiler, properties);
 		this.teamName = teamName;
 		this.teamSourceClass = teamSourceClass;
 		this.responsibilities = responsibilities;

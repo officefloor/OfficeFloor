@@ -113,8 +113,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the section
-		AutoWireSection section = new AutoWireSection(sectionName,
-				sectionSourceClass, sectionLocation, properties);
+		AutoWireSection section = new AutoWireSection(this.compiler,
+				sectionName, sectionSourceClass, sectionLocation, properties);
 		this.sections.add(section);
 
 		// Return the section
