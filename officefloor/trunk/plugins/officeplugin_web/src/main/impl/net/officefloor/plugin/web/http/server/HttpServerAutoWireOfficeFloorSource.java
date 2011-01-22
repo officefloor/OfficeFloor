@@ -154,7 +154,8 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 		// Create and register the HTTP template
 		HttpTemplateAutoWireSection wirer = new HttpTemplateAutoWireSection(
-				section, templateLogicClass, templateUri);
+				this.getOfficeFloorCompiler(), section, templateLogicClass,
+				templateUri);
 		this.httpTemplates.add(wirer);
 
 		// Return the wirer
