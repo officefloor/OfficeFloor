@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.autowire;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.source.SectionSource;
 
@@ -46,6 +47,8 @@ public class AutoWireSection extends AutoWireProperties {
 	/**
 	 * Initiate.
 	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param name
 	 *            Name of section.
 	 * @param sourceClass
@@ -55,9 +58,9 @@ public class AutoWireSection extends AutoWireProperties {
 	 * @param properties
 	 *            Properties for the section.
 	 */
-	public AutoWireSection(String name, Class<?> sourceClass, String location,
-			PropertyList properties) {
-		super(properties);
+	public AutoWireSection(OfficeFloorCompiler compiler, String name,
+			Class<?> sourceClass, String location, PropertyList properties) {
+		super(compiler, properties);
 		this.name = name;
 		this.sourceClass = sourceClass;
 		this.location = location;
@@ -67,12 +70,15 @@ public class AutoWireSection extends AutoWireProperties {
 	 * Allow for extending this to provide additional functionality for an
 	 * section.
 	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param section
 	 *            Section to copy in state.
 	 */
-	protected AutoWireSection(AutoWireSection section) {
-		this(section.name, section.sourceClass, section.location, section
-				.getProperties());
+	protected AutoWireSection(OfficeFloorCompiler compiler,
+			AutoWireSection section) {
+		this(compiler, section.name, section.sourceClass, section.location,
+				section.getProperties());
 	}
 
 	/**

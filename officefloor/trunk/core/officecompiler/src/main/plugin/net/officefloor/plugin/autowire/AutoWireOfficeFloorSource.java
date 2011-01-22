@@ -226,8 +226,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		}
 
 		// Add the raw object
-		this.objectContexts.add(new AutoWireContext(new AutoWireObject(null,
-				null, null, objectTypes), object));
+		this.objectContexts.add(new AutoWireContext(new AutoWireObject(
+				this.compiler, null, null, null, objectTypes), object));
 	}
 
 	/**
@@ -258,8 +258,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the auto wire object
-		AutoWireObject object = new AutoWireObject(managedObjectSourceClass,
-				properties, wirer, objectTypes);
+		AutoWireObject object = new AutoWireObject(this.compiler,
+				managedObjectSourceClass, properties, wirer, objectTypes);
 
 		// Add the object context
 		this.objectContexts.add(new AutoWireContext(object, null));
@@ -302,8 +302,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the team
-		AutoWireTeam team = new AutoWireTeam(teamName, teamSourceClass,
-				properties, responsibilities);
+		AutoWireTeam team = new AutoWireTeam(this.compiler, teamName,
+				teamSourceClass, properties, responsibilities);
 		this.teams.add(team);
 
 		// Return the team
@@ -324,7 +324,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the default team
-		this.defaultTeam = new AutoWireTeam("team", teamSourceClass, properties);
+		this.defaultTeam = new AutoWireTeam(this.compiler, "team",
+				teamSourceClass, properties);
 
 		// Return the default team
 		return this.defaultTeam;
@@ -858,8 +859,9 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 					.createPropertyList();
 
 			// Register the team mapping
-			AutoWireTeam team = new AutoWireTeam(managedObjectSourceTeamName,
-					teamSourceClass, properties);
+			AutoWireTeam team = new AutoWireTeam(
+					AutoWireOfficeFloorSource.this.compiler,
+					managedObjectSourceTeamName, teamSourceClass, properties);
 			this.teams.add(team);
 
 			// Return the team

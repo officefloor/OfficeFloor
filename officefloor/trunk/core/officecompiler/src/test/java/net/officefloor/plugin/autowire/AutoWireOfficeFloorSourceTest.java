@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.autowire;
 
+import java.io.File;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
@@ -181,6 +182,65 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				MockRawType.class, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
+		this.recordManagedObject(source, MockRawType.class);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load properties from class path.
+	 */
+	public void testProperties() throws Exception {
+
+		// Ensure no environment override so load from class path
+		System.clearProperty(AutoWireProperties.ENVIRONMENT_PROPERTIES_DIRECTORY);
+
+		// Add the managed object loading properties from class path
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class, null, MockRawType.class);
+		object.loadProperties(this.getClass().getPackage().getName()
+				.replace('.', '/')
+				+ "/object.properties");
+
+		// Record
+		this.recordTeamAndOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				MockRawType.class, ClassManagedObjectSource.class, 0,
+				"class.path.property", "available");
+		this.recordManagedObject(source, MockRawType.class);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load environment properties from class path.
+	 */
+	public void testEnvironmentProperties() throws Exception {
+
+		// Obtain location of the environment properties file
+		File environmentPropertiesFile = this.findFile(this.getClass(),
+				"object.properties");
+
+		// Specify the environment override
+		System.setProperty(AutoWireProperties.ENVIRONMENT_PROPERTIES_DIRECTORY,
+				environmentPropertiesFile.getParentFile().getAbsolutePath());
+
+		// Add the managed object loading properties from class path
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class, null, MockRawType.class);
+		object.loadProperties("object.properties");
+
+		// Record
+		this.recordTeamAndOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				MockRawType.class, ClassManagedObjectSource.class, 0,
+				"class.path.property", "available");
 		this.recordManagedObject(source, MockRawType.class);
 
 		// Test
