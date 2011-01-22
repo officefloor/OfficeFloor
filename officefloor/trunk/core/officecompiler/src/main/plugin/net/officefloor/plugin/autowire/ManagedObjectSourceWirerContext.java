@@ -22,7 +22,6 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -68,14 +67,13 @@ public interface ManagedObjectSourceWirerContext {
 			String sectionInputName);
 
 	/**
-	 * Maps the {@link OfficeFloorManagedObject} or
-	 * {@link OfficeFloorInputManagedObject} for the particular dependency type.
+	 * Overrides the type for the dependency to allow more specific auto-wiring
+	 * by type.
 	 * 
 	 * @param dependencyName
 	 *            Name of the {@link ManagedObjectDependency}.
 	 * @param type
-	 *            Type the dependency must implement/extend.
-	 * @return {@link OfficeFloorManagedObject} for the dependency.
+	 *            Specific type the dependency must implement/extend.
 	 */
 	void mapDependency(String dependencyName, Class<?> type);
 
