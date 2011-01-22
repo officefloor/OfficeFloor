@@ -16,7 +16,7 @@ So why another framework?
   
 Simple Example
 
-  This is a quick introduction to the capabilities of OfficeFloor.  As much of the value with inversion of control frameworks is in wiring together existing services, the following is a simple example with the web plug-in for OfficeFloor.
+  The following provides a simple example of OfficeFloor capabilities via the web plug-in: 
 
 %{code-snippet|sh-params=highlight:[11]|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 

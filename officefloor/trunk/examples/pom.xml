@@ -9,11 +9,12 @@
 	</parent>
 	<groupId>net.officefloor.example</groupId>
 	<artifactId>examples</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>pom</packaging>
 	<name>Examples</name>
 	<description>Example uses of OfficeFloor</description>
 	<modules>
+		<module>StaticHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
 </project>
