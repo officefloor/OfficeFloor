@@ -24,6 +24,7 @@ import java.io.Writer;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -68,7 +69,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure close
-		this.source.closeOfficeFloor();
+		AutoWireOfficeFloor.closeAllOfficeFloors();
 
 		// Stop the client
 		this.client.getConnectionManager().shutdown();

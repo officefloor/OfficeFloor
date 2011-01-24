@@ -17,5 +17,10 @@
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
