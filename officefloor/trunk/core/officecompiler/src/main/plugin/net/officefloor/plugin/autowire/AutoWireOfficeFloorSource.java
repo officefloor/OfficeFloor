@@ -52,12 +52,8 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.TaskManager;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -115,11 +111,6 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	 * {@link AutoWireTeam} instances.
 	 */
 	private final List<AutoWireTeam> teams = new LinkedList<AutoWireTeam>();
-
-	/**
-	 * Opened {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor = null;
 
 	/**
 	 * Initiate.
@@ -334,85 +325,21 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	}
 
 	/**
-	 * Opens the {@link OfficeFloor}.
+	 * Opens the {@link AutoWireOfficeFloor}.
 	 * 
-	 * @return {@link OfficeFloor}.
+	 * @return {@link AutoWireOfficeFloor}.
 	 * @throws Exception
-	 *             If fails to open the {@link OfficeFloor}.
+	 *             If fails to open the {@link AutoWireOfficeFloor}.
 	 */
-	public OfficeFloor openOfficeFloor() throws Exception {
+	public AutoWireOfficeFloor openOfficeFloor() throws Exception {
 
-		// Lazy open the OfficeFloor
-		if (this.officeFloor == null) {
-			this.officeFloor = this.compiler.compile("auto-wire");
-		}
+		// Open the OfficeFloor
+		OfficeFloor officeFloor = this.compiler.compile("auto-wire");
+		officeFloor.openOfficeFloor();
 
-		// Ensure the OfficeFloor is open
-		if (this.officeFloor != null) {
-			this.officeFloor.openOfficeFloor();
-		}
-
-		// Return the OfficeFloor
-		return this.officeFloor;
-	}
-
-	/**
-	 * <p>
-	 * Invokes a {@link Task} on the {@link OfficeFloor}.
-	 * <p>
-	 * Should the {@link OfficeFloor} not be open, it is opened before invoking
-	 * the {@link Task}. Please note however the {@link OfficeFloor} will not be
-	 * re-opened after being closed.
-	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @param parameter
-	 *            Parameter for the {@link Task}. May be <code>null</code>.
-	 * @throws Exception
-	 *             If fails invoking the {@link Task}.
-	 */
-	public void invokeTask(String workName, String taskName, Object parameter)
-			throws Exception {
-
-		// Ensure OfficeFloor is open
-		if (this.officeFloor == null) {
-			this.openOfficeFloor();
-
-			// Ensure opened
-			if (this.officeFloor == null) {
-				throw new IllegalStateException("Failed opening OfficeFloor");
-			}
-		}
-
-		// Obtain the Task
-		Office office = this.officeFloor.getOffice(OFFICE_NAME);
-		WorkManager workManager = office.getWorkManager(workName);
-		TaskManager taskManager = workManager.getTaskManager(taskName);
-
-		// Invoke the task
-		ProcessContextTeam.doTask(taskManager, parameter);
-	}
-
-	/**
-	 * Closes the {@link OfficeFloor}.
-	 */
-	public void closeOfficeFloor() {
-
-		// Ensure open
-		if (this.officeFloor == null) {
-			return;
-		}
-
-		try {
-			// Close
-			this.officeFloor.closeOfficeFloor();
-
-		} finally {
-			// Ensure release OfficeFloor
-			this.officeFloor = null;
-		}
+		// Create and return the auto-wire OfficeFloor
+		return AutoWireOfficeFloor.createAutoWireOfficeFloor(officeFloor,
+				OFFICE_NAME);
 	}
 
 	/**

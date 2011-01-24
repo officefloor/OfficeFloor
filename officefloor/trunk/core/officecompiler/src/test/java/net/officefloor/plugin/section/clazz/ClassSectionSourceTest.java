@@ -37,6 +37,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -346,23 +347,32 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		final ReturnValue returnValue = new ReturnValue();
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
-		AutoWireSection section = officeFloor.addSection("test",
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		AutoWireSection section = source.addSection("test",
 				MockChangeTaskNameClassSectionSource.class,
 				MockChangeTaskNameWithLinksSection.class.getName());
-		officeFloor.addObject(returnValue, ReturnValue.class);
-		officeFloor.addObject(connection, Connection.class);
-		officeFloor.link(section, "externalFlow", section, "finished");
+		source.addObject(returnValue, ReturnValue.class);
+		source.addObject(connection, Connection.class);
+		source.link(section, "externalFlow", section, "finished");
 
-		// Run invoking flow
-		officeFloor.invokeTask("test.WORK", "doInput", new Boolean(true));
-		assertEquals("Incorrect value on invoking flow",
-				"doInput -> oldName(Flow) -> finished", returnValue.value);
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
 
-		// Run using next task
-		officeFloor.invokeTask("test.WORK", "doInput", null);
-		assertEquals("Incorrect value on next task",
-				"doInput -> oldName(null) -> finished", returnValue.value);
+			// Run invoking flow
+			officeFloor.invokeTask("test.WORK", "doInput", new Boolean(true));
+			assertEquals("Incorrect value on invoking flow",
+					"doInput -> oldName(Flow) -> finished", returnValue.value);
+
+			// Run using next task
+			officeFloor.invokeTask("test.WORK", "doInput", null);
+			assertEquals("Incorrect value on next task",
+					"doInput -> oldName(null) -> finished", returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
@@ -413,15 +423,24 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testManagedObject() throws Exception {
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
-		officeFloor.addSection("test", ClassSectionSource.class,
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		source.addSection("test", ClassSectionSource.class,
 				MockManagedObjectSection.class.getName());
 
-		// Run to ensure obtained message
-		ReturnValue returnValue = new ReturnValue();
-		officeFloor.invokeTask("test.WORK", "doInput", returnValue);
-		assertEquals("Incorrect value from managed object", "test",
-				returnValue.value);
+		// Open the OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run to ensure obtained message
+			ReturnValue returnValue = new ReturnValue();
+			officeFloor.invokeTask("test.WORK", "doInput", returnValue);
+			assertEquals("Incorrect value from managed object", "test",
+					returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
@@ -459,15 +478,24 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testManagedObjectWithDependency() throws Exception {
 
 		// Managed object internal, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
-		officeFloor.addSection("test", ClassSectionSource.class,
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		source.addSection("test", ClassSectionSource.class,
 				MockManagedObjectWithDependencySection.class.getName());
 
-		// Run to ensure obtained message
-		ReturnValue returnValue = new ReturnValue();
-		officeFloor.invokeTask("test.WORK", "doInput", returnValue);
-		assertEquals("Incorrect value from managed object", "test",
-				returnValue.value);
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run to ensure obtained message
+			ReturnValue returnValue = new ReturnValue();
+			officeFloor.invokeTask("test.WORK", "doInput", returnValue);
+			assertEquals("Incorrect value from managed object", "test",
+					returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
@@ -505,15 +533,24 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testInternalFlow() throws Exception {
 
 		// Triggering flows, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
-		officeFloor.addSection("test", ClassSectionSource.class,
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		source.addSection("test", ClassSectionSource.class,
 				MockInternalFlowSection.class.getName());
 
-		// Run to ensure obtained message
-		ReturnValue returnValue = new ReturnValue();
-		officeFloor.invokeTask("test.WORK", "doFirst", returnValue);
-		assertEquals("Incorrect value from flow", "one-two-three",
-				returnValue.value);
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run to ensure obtained message
+			ReturnValue returnValue = new ReturnValue();
+			officeFloor.invokeTask("test.WORK", "doFirst", returnValue);
+			assertEquals("Incorrect value from flow", "one-two-three",
+					returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
@@ -552,16 +589,25 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testEscalationHandling() throws Exception {
 
 		// Triggering flows, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
 		ReturnValue returnValue = new ReturnValue();
-		officeFloor.addObject(returnValue, ReturnValue.class);
-		officeFloor.addSection("test", ClassSectionSource.class,
+		source.addObject(returnValue, ReturnValue.class);
+		source.addSection("test", ClassSectionSource.class,
 				MockEscalationHandlingSection.class.getName());
 
-		// Run to ensure obtained message
-		officeFloor.invokeTask("test.WORK", "triggerEscalation", null);
-		assertEquals("Incorrect value from handling escalation", "test",
-				returnValue.value);
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run to ensure obtained message
+			officeFloor.invokeTask("test.WORK", "triggerEscalation", null);
+			assertEquals("Incorrect value from handling escalation", "test",
+					returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
@@ -585,16 +631,25 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testSubSection() throws Exception {
 
 		// Triggering sub section, so must run to test
-		AutoWireOfficeFloorSource officeFloor = new AutoWireOfficeFloorSource();
-		officeFloor.addSection("test", ClassSectionSource.class,
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		source.addSection("test", ClassSectionSource.class,
 				MockInvokeSubSection.class.getName());
 		ReturnValue returnValue = new ReturnValue();
-		officeFloor.addObject(returnValue, ReturnValue.class);
+		source.addObject(returnValue, ReturnValue.class);
 
-		// Run to ensure obtained message
-		officeFloor.invokeTask("test.WORK", "doFirst", null);
-		assertEquals("Incorrect value from sub section", "sub section",
-				returnValue.value);
+		// Open OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+		try {
+
+			// Run to ensure obtained message
+			officeFloor.invokeTask("test.WORK", "doFirst", null);
+			assertEquals("Incorrect value from sub section", "sub section",
+					returnValue.value);
+
+		} finally {
+			// Ensure closed
+			officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**

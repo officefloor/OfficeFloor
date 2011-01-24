@@ -59,6 +59,18 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link AutoWireOfficeFloor}.
+	 */
+	private AutoWireOfficeFloor officeFloor;
+
+	@Override
+	protected void tearDown() throws Exception {
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
 	 * Ensure can open the {@link OfficeFloor}.
 	 */
 	public void testOpen() throws Exception {
@@ -69,17 +81,17 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloorSource source = this.createSource(value, connection);
 
 		// Open the OfficeFloor
-		OfficeFloor officeFloor = source.openOfficeFloor();
+		this.officeFloor = source.openOfficeFloor();
 
 		// Run the task
-		source.invokeTask("one.WORK", "doInput", value);
+		this.officeFloor.invokeTask("one.WORK", "doInput", value);
 
 		// Close the OfficeFloor
-		officeFloor.closeOfficeFloor();
+		this.officeFloor.closeOfficeFloor();
 
 		// Should now not be able to invoke task
 		try {
-			source.invokeTask("one.WORK", "doInput", value);
+			this.officeFloor.invokeTask("one.WORK", "doInput", value);
 			fail("Should not be able to invoke task after closing OfficeFloor");
 		} catch (IllegalStateException ex) {
 			assertEquals("Incorrect cause",
@@ -103,9 +115,10 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		final Connection connection = this.createMock(Connection.class);
 		final Value value = new Value();
 		AutoWireOfficeFloorSource source = this.createSource(value, connection);
+		this.officeFloor = source.openOfficeFloor();
 
-		// Invoke the task (which also triggers open the OfficeFloor)
-		source.invokeTask("one.WORK", "doInput", value);
+		// Invoke the task
+		this.officeFloor.invokeTask("one.WORK", "doInput", value);
 
 		// Ensure correct value created
 		assertEquals("Incorrect value", "doInput-1", value.value);
@@ -121,6 +134,37 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 			assertTrue("Should be different threads executing the tasks",
 					threadForTask.get(0) != threadForTask.get(1));
 		}
+	}
+
+	/**
+	 * Ensure register/unregister MBean for operational control.
+	 */
+	public void testMBean() throws Exception {
+
+		// Ensure all auto-wire OfficeFloors are closed
+		AutoWireOfficeFloor.closeAllOfficeFloors();
+
+		// Create the OfficeFloor
+		final Connection connection = this.createMock(Connection.class);
+		final Value value = new Value();
+		AutoWireOfficeFloorSource source = this.createSource(value, connection);
+
+		// Open the OfficeFloor
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+
+		// Obtain the MBean
+		AutoWireOfficeFloorMBean[] mbeans = AutoWireOfficeFloor
+				.getOfficeFloors();
+		assertEquals("Incorrect number of OfficeFloor MBeans", 1, mbeans.length);
+
+		// Close the OfficeFloor
+		officeFloor.closeOfficeFloor();
+
+		// Ensure MBean unregistered
+		AutoWireOfficeFloorMBean[] remainingMBeans = AutoWireOfficeFloor
+				.getOfficeFloors();
+		assertEquals("Should unregister OfficeFloor MBean", 0,
+				remainingMBeans.length);
 	}
 
 	/**

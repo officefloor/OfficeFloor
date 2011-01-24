@@ -23,13 +23,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -40,6 +35,11 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -65,9 +65,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private int port;
 
 	/**
-	 * {@link OfficeFloor}.
+	 * {@link AutoWireOfficeFloor}.
 	 */
-	private OfficeFloor officeFloor;
+	private AutoWireOfficeFloor officeFloor;
 
 	@Override
 	protected void setUp() throws Exception {

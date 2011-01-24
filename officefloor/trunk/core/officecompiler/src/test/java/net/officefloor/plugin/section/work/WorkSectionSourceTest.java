@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
@@ -133,7 +134,7 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 		autoWire.link(section, "taskTwo", handle, "task");
 
 		// Open the section
-		autoWire.openOfficeFloor();
+		AutoWireOfficeFloor officeFloor = autoWire.openOfficeFloor();
 		try {
 
 			// Ensure appropriate state for running
@@ -144,7 +145,7 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 
 			// Invoke the task
 			final String PARAMETER = "test";
-			autoWire.invokeTask("SECTION.WORK", "taskTwo", PARAMETER);
+			officeFloor.invokeTask("SECTION.WORK", "taskTwo", PARAMETER);
 
 			// Ensure invoked as parameter should be in list
 			synchronized (list) {
@@ -157,7 +158,7 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 
 		} finally {
 			// Ensure close
-			autoWire.closeOfficeFloor();
+			officeFloor.closeOfficeFloor();
 		}
 	}
 
