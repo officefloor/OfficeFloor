@@ -29,6 +29,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
@@ -59,6 +60,11 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private final HttpClient client = new DefaultHttpClient();
 
+	/**
+	 * Default not found file path.
+	 */
+	private final String DEFAULT_NOT_FOUND_PATH = ClasspathHttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
+
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure close
@@ -78,7 +84,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Obtain the expected content
 		String expected = this.getFileContents("PUBLIC/index.html");
-		String fileNotFound = this.getFileContents("PUBLIC/FileNotFound.html");
+		String fileNotFound = this.getFileContents(DEFAULT_NOT_FOUND_PATH);
 
 		// Ensure services request for direct file
 		this.assertHttpRequest("http://localhost:7878/index.html", 200,
@@ -195,6 +201,8 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testTemplateWithoutUri() throws Exception {
 
+		String fileNotFound = this.getFileContents(DEFAULT_NOT_FOUND_PATH);
+
 		// Add HTTP template (without URL)
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
 				"template.ofp", MockTemplateLogic.class);
@@ -214,7 +222,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Ensure template NOT available
 		this.assertHttpRequest("http://localhost:7878/template.ofp", 404,
-				"<html><body>File not found</body></html>");
+				fileNotFound);
 	}
 
 	/**

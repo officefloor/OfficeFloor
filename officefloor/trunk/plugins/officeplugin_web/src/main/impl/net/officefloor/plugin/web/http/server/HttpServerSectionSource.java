@@ -226,8 +226,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 				ClasspathHttpFileSenderWorkSource.class.getName());
 		final String[] SEND_FILE_PROPERTIES = new String[] {
 				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH };
+				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME };
 		for (String propertyName : SEND_FILE_PROPERTIES) {
 			sendFileWork.addProperty(propertyName,
 					context.getProperty(propertyName));

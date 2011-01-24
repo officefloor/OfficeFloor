@@ -21,6 +21,8 @@ package net.officefloor.plugin.web.http.resource.source;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -38,8 +40,6 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
 
 import org.easymock.AbstractMatcher;
@@ -81,18 +81,25 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 			.createMock(OutputBufferStream.class);
 
 	/**
+	 * Expected file sent content.
+	 */
+	private String expectedFileSentContent = "";
+
+	/**
+	 * Actual file sent content.
+	 */
+	private String actualFileSentContent = "";
+
+	/**
 	 * Validates the specification.
 	 */
 	public void testSpecification() {
-		WorkLoaderUtil
-				.validateSpecification(
-						ClasspathHttpFileSenderWorkSource.class,
-						ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-						"classpath.prefix",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-						"default.file.name",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH,
-						"file.not.found.content.path");
+		WorkLoaderUtil.validateSpecification(
+				ClasspathHttpFileSenderWorkSource.class,
+				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				"classpath.prefix",
+				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
+				"default.file.name");
 	}
 
 	/**
@@ -115,16 +122,12 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		taskBuilder.addEscalation(InvalidHttpRequestUriException.class);
 
 		// Validate
-		WorkLoaderUtil
-				.validateWorkType(
-						workBuilder,
-						ClasspathHttpFileSenderWorkSource.class,
-						ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-						this.getClass().getPackage().getName(),
-						ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-						"index.html",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH,
-						"FileNotFoundContent.html");
+		WorkLoaderUtil.validateWorkType(workBuilder,
+				ClasspathHttpFileSenderWorkSource.class,
+				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
+				this.getClass().getPackage().getName(),
+				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
+				"index.html");
 	}
 
 	/**
@@ -133,19 +136,7 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	public void testSendHttpFile() throws Throwable {
 
 		// Record
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				"/index.html");
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
-		this.recordReturn(this.response, this.response.getBody(), this.body);
-		this.recordFileSentContent("index.html");
-		this.response.setStatus(200);
-		this.response.send();
+		this.recordSendFile("/index.html", "index.html", 200);
 
 		// Test
 		this.replayMockObjects();
@@ -160,29 +151,20 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		HttpFile httpFile = (HttpFile) result;
 		assertTrue("HTTP file should exist", httpFile.isExist());
 
-		this.verifyMockObjects();
+		// Verify
+		this.verifyFileSent();
 	}
 
 	/**
-	 * Validate sending file not found content for not finding the
+	 * Validate sending default file not found content for not finding the
 	 * {@link HttpFile}.
 	 */
-	public void testSendFileNotFoundContent() throws Throwable {
+	public void testSendDefaultFileNotFoundContent() throws Throwable {
+
+		final String URI = "/missing-file.html";
 
 		// Record
-		this.recordReturn(this.taskContext, this.taskContext
-				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
-				this.connection);
-		this.recordReturn(this.connection, this.connection.getHttpRequest(),
-				this.request);
-		this.recordReturn(this.request, this.request.getRequestURI(),
-				"/missing-file.html");
-		this.recordReturn(this.connection, this.connection.getHttpResponse(),
-				this.response);
-		this.recordReturn(this.response, this.response.getBody(), this.body);
-		this.recordFileSentContent("FileNotFoundContent.html");
-		this.response.setStatus(404);
-		this.response.send();
+		this.recordSendFile(URI, "DefaultFileNotFound.html", 404);
 
 		// Test
 		this.replayMockObjects();
@@ -197,27 +179,68 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
 
-		this.verifyMockObjects();
+		// Verify
+		this.verifyFileSent();
+	}
+
+	/**
+	 * Validate overriding file not found content for not finding the
+	 * {@link HttpFile}.
+	 */
+	public void testSendFileNotFoundOverrideContent() throws Throwable {
+
+		final String URI = "/missing-file.html";
+
+		// Record
+		this.recordSendFile(URI, "OverrideFileNotFound.html", 404);
+
+		// Test
+		this.replayMockObjects();
+
+		// Load work and obtain the task
+		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+				.loadWorkAndObtainTask(
+						ClasspathHttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
+						"OverrideFileNotFound.html");
+
+		// Execute the task to send the HTTP file
+		Object result = task.doTask(this.taskContext);
+		assertNotNull("Ensure have HTTP resource returned", result);
+		HttpResource httpResource = (HttpResource) result;
+		assertFalse("HTTP resource should be missing", httpResource.isExist());
+
+		// Verify
+		this.verifyFileSent();
 	}
 
 	/**
 	 * Loads the {@link WorkSource} and returns a created {@link Task}.
 	 * 
+	 * @param additionalParameterNameValues
+	 *            Addition parmaeter name/value pairs.
 	 * @return {@link Task} to execute.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private final Task<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask() {
+	private final Task<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask(
+			String... additionalParameterNameValues) {
+
+		// Create the listing of parameters
+		List<String> parameters = new ArrayList<String>(
+				4 + (additionalParameterNameValues.length / 2));
+		parameters
+				.add(ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX);
+		parameters.add(this.getClass().getPackage().getName());
+		parameters
+				.add(ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME);
+		parameters.add("index.html");
+		for (String parameterNameValue : additionalParameterNameValues) {
+			parameters.add(parameterNameValue);
+		}
 
 		// Load the work type
 		WorkType<HttpFileFactoryTask<None>> workType = WorkLoaderUtil
-				.loadWorkType(
-						(Class) ClasspathHttpFileSenderWorkSource.class,
-						ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-						this.getClass().getPackage().getName(),
-						ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-						"index.html",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH,
-						"FileNotFoundContent.html");
+				.loadWorkType((Class) ClasspathHttpFileSenderWorkSource.class,
+						parameters.toArray(new String[parameters.size()]));
 
 		// Create the task
 		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(
@@ -228,28 +251,73 @@ public class ClasspathHttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records sending the {@link HttpFile}.
+	 * 
+	 * @param uri
+	 *            URI.
+	 * @param fileName
+	 *            File name.
+	 * @param status
+	 *            Status.
+	 */
+	private void recordSendFile(String uri, String fileName, int status)
+			throws IOException {
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(DependencyKeys.SERVER_HTTP_CONNECTION),
+				this.connection);
+		this.recordReturn(this.connection, this.connection.getHttpRequest(),
+				this.request);
+		this.recordReturn(this.request, this.request.getRequestURI(), uri);
+		this.recordReturn(this.connection, this.connection.getHttpResponse(),
+				this.response);
+		this.recordReturn(this.response, this.response.getBody(), this.body);
+		this.recordFileSentContent(fileName);
+		this.response.setStatus(status);
+		this.response.send();
+	}
+
+	/**
 	 * Records sending the {@link HttpFile} content.
+	 * 
+	 * @param fileName
+	 *            Name of file containing content.
 	 */
 	private void recordFileSentContent(String fileName) throws IOException {
 
 		// Read in the file content
 		File file = this.findFile(this.getClass(), fileName);
-		final String fileContents = this.getFileContents(file).trim();
+		String fileContents = this.getFileContents(file);
+
+		// Indicate expected file sent content
+		ClasspathHttpFileSenderWorkSourceTest.this.expectedFileSentContent += fileContents;
 
 		// Record obtaining the file content
 		this.body.append((ByteBuffer) null);
 		this.control(this.body).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
+				// Obtain the actual contents
 				ByteBuffer buffer = (ByteBuffer) actual[0];
 				byte[] data = new byte[buffer.limit()];
 				buffer.get(data);
-				String actualContents = new String(data).trim();
-				assertTextEquals("Incorrect file contents sent", fileContents,
-						actualContents);
+				String actualContents = new String(data);
+
+				// Append the file content
+				ClasspathHttpFileSenderWorkSourceTest.this.actualFileSentContent += actualContents;
+
+				// Always match
 				return true;
 			}
 		});
+	}
+
+	/**
+	 * Verifies the file sent content is valid.
+	 */
+	private void verifyFileSent() {
+		this.verifyMockObjects();
+		assertEquals("Incorrect file send content",
+				this.expectedFileSentContent, this.actualFileSentContent);
 	}
 
 }

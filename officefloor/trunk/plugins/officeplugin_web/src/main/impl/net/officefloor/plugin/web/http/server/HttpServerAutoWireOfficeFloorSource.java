@@ -213,11 +213,6 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		this.addProperty(httpSection, context,
 				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
 				"index.html");
-		this.addProperty(
-				httpSection,
-				context,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH,
-				"FileNotFound.html");
 
 		// Add the HTTP Socket
 		if (this.httpSockets.size() == 0) {
