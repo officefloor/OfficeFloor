@@ -73,15 +73,32 @@ public class ClasspathHttpFileSenderWorkSource extends
 	public static final String PROPERTY_DEFAULT_FILE_NAME = "default.file.name";
 
 	/**
-	 * Property to obtain the path to the file containing the &quot;file not
+	 * Property to obtain the path to the file containing the &quot;not
 	 * found&quot; response.
 	 */
-	public static final String PROPERTY_FILE_NOT_FOUND_CONTENT_PATH = "file.not.found.content.path";
+	public static final String PROPERTY_NOT_FOUND_FILE_PATH = "not.found.file.path";
 
 	/**
 	 * Name of the {@link Task} to send the {@link HttpFile}.
 	 */
 	public static final String TASK_NAME = "SendFile";
+
+	/**
+	 * Name of the default not found file.
+	 */
+	private static final String DEFAULT_NOT_FOUND_FILE_NAME = "DefaultFileNotFound.html";
+
+	/**
+	 * Prefix for the default not found file.
+	 */
+	private static final String DEFAULT_NOT_FOUND_PREFIX = ClasspathHttpFileSenderWorkSource.class
+			.getPackage().getName().replace('.', '/');
+
+	/**
+	 * Path on the class path to the default not found file.
+	 */
+	public static final String DEFAULT_NOT_FOUND_FILE_PATH = DEFAULT_NOT_FOUND_PREFIX
+			+ "/" + DEFAULT_NOT_FOUND_FILE_NAME;
 
 	/*
 	 * ============================ WorkSource ================================
@@ -91,7 +108,6 @@ public class ClasspathHttpFileSenderWorkSource extends
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_CLASSPATH_PREFIX);
 		context.addProperty(PROPERTY_DEFAULT_FILE_NAME);
-		context.addProperty(PROPERTY_FILE_NOT_FOUND_CONTENT_PATH);
 	}
 
 	@Override
@@ -103,8 +119,8 @@ public class ClasspathHttpFileSenderWorkSource extends
 		String classpathPrefix = context.getProperty(PROPERTY_CLASSPATH_PREFIX);
 		String defaultFileName = context
 				.getProperty(PROPERTY_DEFAULT_FILE_NAME);
-		String fileNotFoundContentPath = context
-				.getProperty(PROPERTY_FILE_NOT_FOUND_CONTENT_PATH);
+		String notFoundContentPath = context.getProperty(
+				PROPERTY_NOT_FOUND_FILE_PATH, null);
 
 		// TODO allow configuring multiple default file names
 
@@ -118,22 +134,37 @@ public class ClasspathHttpFileSenderWorkSource extends
 		describer.loadDescriptions(context.getProperties());
 		httpResourceFactory.addHttpFileDescriber(describer);
 
+		// Initiate to obtain the not found content
+		HttpResourceFactory notFoundResourceFactory;
+		if (notFoundContentPath == null) {
+			// Use default file not found content
+			notFoundContentPath = DEFAULT_NOT_FOUND_FILE_NAME;
+			notFoundResourceFactory = ClasspathHttpResourceFactory
+					.getHttpResourceFactory(DEFAULT_NOT_FOUND_PREFIX,
+							notFoundContentPath);
+			notFoundResourceFactory.addHttpFileDescriber(describer);
+
+		} else {
+			// Use specified not found from resource path
+			notFoundResourceFactory = httpResourceFactory;
+		}
+
 		// Ensure file not found content path is request URI
-		if (!fileNotFoundContentPath.startsWith("/")) {
-			fileNotFoundContentPath = "/" + fileNotFoundContentPath;
+		if (!notFoundContentPath.startsWith("/")) {
+			notFoundContentPath = "/" + notFoundContentPath;
 		}
 
 		// Obtain the file not found content
-		HttpResource fileNotFoundResource = httpResourceFactory
-				.createHttpResource(fileNotFoundContentPath);
-		if ((!fileNotFoundResource.isExist())
-				|| (!(fileNotFoundResource instanceof HttpFile))) {
+		HttpResource notFoundResource = notFoundResourceFactory
+				.createHttpResource(notFoundContentPath);
+		if ((!notFoundResource.isExist())
+				|| (!(notFoundResource instanceof HttpFile))) {
 			// Must have file not found content
 			throw new FileNotFoundException(
 					"Can not obtain file not found content: "
-							+ fileNotFoundContentPath);
+							+ notFoundContentPath);
 		}
-		final HttpFile fileNotFoundContent = (HttpFile) fileNotFoundResource;
+		final HttpFile fileNotFoundContent = (HttpFile) notFoundResource;
 
 		// Create the HTTP file creation listener
 		HttpResourceCreationListener<None> httpFileCreationListener = new HttpResourceCreationListener<None>() {
