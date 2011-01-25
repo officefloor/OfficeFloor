@@ -65,7 +65,7 @@ public class ClasspathHttpFileSenderWorkSourceExtension
 		SourceExtensionUtil
 				.createPropertyText(
 						"Resource not found content path",
-						ClasspathHttpFileSenderWorkSource.PROPERTY_FILE_NOT_FOUND_CONTENT_PATH,
+						ClasspathHttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"FileNotFound.html", page, context, null);
 	}
 
