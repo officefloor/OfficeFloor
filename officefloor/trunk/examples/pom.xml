@@ -15,6 +15,7 @@
 	<description>Example uses of OfficeFloor</description>
 	<modules>
 		<module>StaticHttpServer</module>
+		<module>DynamicHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
 </project>
