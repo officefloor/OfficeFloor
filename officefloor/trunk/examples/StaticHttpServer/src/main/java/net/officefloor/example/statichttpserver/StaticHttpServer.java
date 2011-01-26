@@ -25,17 +25,10 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class StaticHttpServer {
 
-	/**
-	 * Runs the HTTP Server.
-	 * 
-	 * @param args
-	 *            Command line arguments.
-	 * @throws Exception
-	 *             Fail to start the HTTP Server.
-	 */
-	public static void main(String... args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
 		// Default configuration runs HTTP Server from class path
 		new HttpServerAutoWireOfficeFloorSource().openOfficeFloor();
@@ -43,3 +36,4 @@ public class StaticHttpServer {
 	}
 
 }
+// END SNIPPET: example

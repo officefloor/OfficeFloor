@@ -17,11 +17,10 @@
  */
 package net.officefloor.example.statichttpserver;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -30,30 +29,28 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
-public class StaticHttpServerTest extends OfficeFrameTestCase {
+// START SNIPPET: example
+public class StaticHttpServerTest extends TestCase {
 
-	/**
-	 * Ensure can obtain static file.
-	 */
 	public void testStaticFile() throws Exception {
 
 		// Start the server
-		StaticHttpServer.main();
+		StaticHttpServer.main(new String[0]);
 
-		// Send request
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet("http://localhost:7878/index.html");
-		HttpResponse response = client.execute(request);
+		// Send request for 'index.html'
+		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
+				"http://localhost:7878/index.html"));
 
 		// Ensure request is successful
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
 
-		// Indicate response
+		// Indicate content of 'index.html'
 		response.getEntity().writeTo(System.out);
 
-		// Stop the Server
+		// Use JMX to stop the server
 		AutoWireOfficeFloor.closeAllOfficeFloors();
 	}
 
 }
+// END SNIPPET: example
