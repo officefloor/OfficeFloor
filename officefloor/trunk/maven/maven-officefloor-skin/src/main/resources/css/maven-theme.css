@@ -102,14 +102,15 @@ table.bodyTable th {
 
 table.bodyTable th, table.bodyTable td {
   font-size: 1em;
+  padding: 15px 10px 15px 10px;
 }
 
 table.bodyTable tr.a {
-  background-color: #e5e5e5;
+  background-color: #fafafa;
 }
 
 table.bodyTable tr.b {
-  background-color: #e5e5e5;
+  background-color: #f3f3f3;
 }
 
 .source {

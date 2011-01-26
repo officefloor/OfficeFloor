@@ -1,4 +1,4 @@
-                                       ------------------
+				       ------------------
 				            Examples
 				       ------------------
 				      Daniel Sagenschneider
@@ -6,4 +6,12 @@
   
   <<Examples>>
   
-  This module contains examples of using the various features and capabilities of OfficeFloor.
+  The examples illustrate various features and capabilities of OfficeFloor.
+  
+  All examples have respective sources that can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the examples within an IDE, use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within Eclipse).
+
+*----------------------------------------------------------+-----------------------------------------------------------+
+|| Example                                                 || Description                                             
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./StaticHttpServer/index.html}Static HTTP Server}}    | HTTP Server for static web pages.
+*----------------------------------------------------------+-----------------------------------------------------------+

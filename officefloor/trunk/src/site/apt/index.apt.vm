@@ -21,6 +21,13 @@ Simple Example
 %{code-snippet|sh-params=highlight:[11]|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 
 
+
+
+  TODO continue with the simple example explanation.
+
+
+
+
 * Graphical Configuration
 
   The above example was limited to code configuration of OfficeFloor.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}.  An example of the graphical configuration is below:
