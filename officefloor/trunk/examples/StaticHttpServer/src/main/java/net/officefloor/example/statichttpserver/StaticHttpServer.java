@@ -29,10 +29,7 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 public class StaticHttpServer {
 
 	public static void main(String[] args) throws Exception {
-
-		// Default configuration runs HTTP Server from class path
 		new HttpServerAutoWireOfficeFloorSource().openOfficeFloor();
-
 	}
 
 }

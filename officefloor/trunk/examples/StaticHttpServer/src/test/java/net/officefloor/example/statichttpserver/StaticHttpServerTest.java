@@ -29,13 +29,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
 public class StaticHttpServerTest extends TestCase {
 
-	public void testStaticFile() throws Exception {
-
-		// Start the server
+	@Override
+	// START SNIPPET: setup
+	protected void setUp() throws Exception {
 		StaticHttpServer.main(new String[0]);
+	}
+	// END SNIPPET: setup
+
+	// START SNIPPET: test
+	public void testStaticFile() throws Exception {
 
 		// Send request for 'index.html'
 		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
@@ -47,10 +51,14 @@ public class StaticHttpServerTest extends TestCase {
 
 		// Indicate content of 'index.html'
 		response.getEntity().writeTo(System.out);
+	}
+	// END SNIPPET: test
 
-		// Use JMX to stop the server
+	@Override
+	// START SNIPPET: teardown
+	protected void tearDown() throws Exception {
 		AutoWireOfficeFloor.closeAllOfficeFloors();
 	}
+	// END SNIPPET: teardown
 
 }
-// END SNIPPET: example
