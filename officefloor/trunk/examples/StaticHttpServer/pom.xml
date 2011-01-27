@@ -12,6 +12,9 @@
 	<version>0.0.2</version>
 	<name>Static HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a Static HTTP Server</description>
+	<properties>
+		<basedir>${basedir}</basedir>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
