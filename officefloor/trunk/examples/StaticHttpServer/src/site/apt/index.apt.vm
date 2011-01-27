@@ -10,7 +10,7 @@
   
 Code
 
-%{code-snippet|sh-params=highlight:[4]|brush-autodetect=1|id=example|file=src/main/java/net/officefloor/example/statichttpserver/StaticHttpServer.java}
+%{code-snippet|sh-params=highlight:[4]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/statichttpserver/StaticHttpServer.java}
 
   The above code will start a HTTP Server on the default port 7878 servicing files from the class path under the <<<PUBLIC>>> directory.  In other words the <<<index.html>>> file would be located on the class path as <<<PUBLIC/index.html>>>.  The following is an example jar structure:
 
@@ -36,18 +36,18 @@ Unit Test
 
 * Setup
 
-%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=setup|file=src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=setup|file=${basedir}/src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
 
   Starts the example HTTP Server.
 
 * Test by requesting index.html
 
-%{code-snippet|sh-params=highlight:[4,5]|brush-autodetect=1|id=test|file=src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|sh-params=highlight:[4,5]|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
 
   Requests <<<index.html>>> from the HTTP Server.
 
 * TearDown
 
-%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=teardown|file=src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=teardown|file=${basedir}/src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
 
   As the code to run the HTTP Server is contained within the <<<main>>> method, the {{{/apidocs/net/officefloor/plugin/autowire/AutoWireOfficeFloor.html}AutoWireOfficeFloor}} provides means to stop the HTTP Server via JMX.  This means that code need not expose the {{{/apidocs/net/officefloor/frame/api/manage/OfficeFloor.html}OfficeFloor}} for closing between tests.
