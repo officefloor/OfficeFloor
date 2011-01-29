@@ -323,6 +323,48 @@ public class ClassSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Creates the {@link SectionManagedObject} for providing the section
+	 * object.
+	 * 
+	 * @param objectNameWithinSection
+	 *            Name of the object within the section.
+	 * @param sectionClass
+	 *            Section object class.
+	 * @return {@link SectionManagedObject}.
+	 */
+	protected SectionManagedObject createClassManagedObject(
+			String objectNameWithinSection, Class<?> sectionClass) {
+
+		// Create the managed object source
+		SectionManagedObjectSource managedObjectSource = this.getDesigner()
+				.addSectionManagedObjectSource(objectNameWithinSection,
+						SectionClassManagedObjectSource.class.getName());
+		managedObjectSource.addProperty(
+				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				sectionClass.getName());
+
+		// Create the managed object
+		SectionManagedObject managedObject = managedObjectSource
+				.addSectionManagedObject(objectNameWithinSection,
+						ManagedObjectScope.THREAD);
+		return managedObject;
+	}
+
+	/**
+	 * Extracts the {@link DependencyMetaData} instances for the section object.
+	 * 
+	 * @param sectionClass
+	 *            Section object class.
+	 * @return Extracted {@link DependencyMetaData} instances for the section
+	 *         object.
+	 */
+	protected DependencyMetaData[] extractClassManagedObjectDependencies(
+			Class<?> sectionClass) {
+		return new SectionClassManagedObjectSource()
+				.extractDependencyMetaData(sectionClass);
+	}
+
+	/**
 	 * Obtains the {@link Task} name from the {@link TaskType}.
 	 * 
 	 * @param taskType
@@ -572,18 +614,12 @@ public class ClassSectionSource extends AbstractSectionSource {
 				sectionClassName);
 
 		// Add the managed object for the section class
-		SectionManagedObjectSource managedObjectSource = designer
-				.addSectionManagedObjectSource("OBJECT",
-						SectionClassManagedObjectSource.class.getName());
-		managedObjectSource.addProperty(
-				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				sectionClassName);
-		SectionManagedObject managedObject = managedObjectSource
-				.addSectionManagedObject("OBJECT", ManagedObjectScope.THREAD);
+		SectionManagedObject managedObject = this.createClassManagedObject(
+				"OBJECT", sectionClass);
 
 		// Obtain the dependency meta-data
-		DependencyMetaData[] dependencyMetaData = new SectionClassManagedObjectSource()
-				.extractDependencyMetaData(sectionClass);
+		DependencyMetaData[] dependencyMetaData = this
+				.extractClassManagedObjectDependencies(sectionClass);
 
 		// Load the managed objects
 		for (DependencyMetaData dependency : dependencyMetaData) {
