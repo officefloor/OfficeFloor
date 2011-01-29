@@ -535,6 +535,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 			// Determine the details
 			Class<?> managedObjectSourceClass = this.autoWireObject
 					.getManagedObjectSourceClass();
+			long timeout = this.autoWireObject.getTimeout();
 			PropertyList properties = this.autoWireObject.getProperties();
 			ManagedObjectSourceWirer wirer = this.autoWireObject
 					.getManagedObjectSourceWirer();
@@ -571,6 +572,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 				this.managedObjectSource = deployer.addManagedObjectSource(
 						this.managedObjectName,
 						managedObjectSourceClass.getName());
+
+				// Specify time out to source the managed object
+				this.managedObjectSource.setTimeout(timeout);
+
+				// Configure properties for managed object source
 				for (Property property : properties) {
 					this.managedObjectSource.addProperty(property.getName(),
 							property.getValue());

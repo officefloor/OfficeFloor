@@ -181,9 +181,34 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Record
 		this.recordTeamAndOffice();
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
+		this.recordManagedObject(source, MockRawType.class);
+		this.recordManagedObjectType(object);
+
+		// Test
+		this.replayMockObjects();
+		this.source.sourceOfficeFloor(this.deployer, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can specify the timeout to source the {@link ManagedObject}.
+	 */
+	public void testManagedObjectSourceTimeout() throws Exception {
+
+		final long TIMEOUT = 100;
+
+		// Add the managed object source
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class, null, MockRawType.class);
+		object.setTimeout(TIMEOUT);
+
+		// Record
+		this.recordTeamAndOffice();
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				MockRawType.class, ClassManagedObjectSource.class, 0, TIMEOUT);
 		this.recordManagedObject(source, MockRawType.class);
 		this.recordManagedObjectType(object);
 
@@ -211,7 +236,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Record
 		this.recordTeamAndOffice();
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				"class.path.property", "available");
 		this.recordManagedObject(source, MockRawType.class);
 		this.recordManagedObjectType(object);
@@ -243,7 +268,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Record
 		this.recordTeamAndOffice();
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				"class.path.property", "available");
 		this.recordManagedObject(source, MockRawType.class);
 		this.recordManagedObjectType(object);
@@ -310,7 +335,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordTeamAndOffice();
 		this.recordRawObjectDependency(Connection.class);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordManagedObject(source, MockRawType.class);
@@ -358,7 +383,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordRawObjectDependency(Connection.class);
 		this.recordRawObjectDependency(DataSource.class);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordManagedObject(source, MockRawType.class);
@@ -412,7 +437,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordTeamAndOffice();
 		this.recordRawObjectDependency(Connection.class);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordInputManagedObject(source, MockRawType.class);
@@ -460,7 +485,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record the first input managed object
 		OfficeFloorManagedObjectSource mosOne = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordInputManagedObject(mosOne, MockRawType.class);
@@ -468,7 +493,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record the second input managed object
 		OfficeFloorManagedObjectSource mosTwo = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 1,
+				MockRawType.class, ClassManagedObjectSource.class, 1, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordInputManagedObject(mosTwo, MockRawType.class);
@@ -500,7 +525,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.recordTeamAndOffice();
 		this.recordRawObjectDependency(Connection.class);
 		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
-				MockRawType.class, ClassManagedObjectSource.class, 0,
+				MockRawType.class, ClassManagedObjectSource.class, 0, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockRawObject.class.getName());
 		this.recordManagedObject(source, MockRawType.class);
@@ -656,6 +681,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 						types[0],
 						ThreadLocalDelegateManagedObjectSource.class,
 						0,
+						-1,
 						ThreadLocalDelegateManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
 						String.valueOf(this.mosInstanceIndex++));
 
@@ -668,7 +694,7 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	private OfficeFloorManagedObjectSource recordManagedObjectSource(
 			Class<?> type, Class<?> managedObjectSourceClass, int typeIndex,
-			String... propertyNameValues) {
+			long timeout, String... propertyNameValues) {
 
 		final OfficeFloorManagedObjectSource source = this
 				.createMock(OfficeFloorManagedObjectSource.class);
@@ -678,6 +704,13 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 				type.getName()
 						+ (typeIndex <= 0 ? "" : String.valueOf(typeIndex)),
 				managedObjectSourceClass.getName()), source);
+
+		// Record time out (-1 for no timeout on raw object)
+		if (timeout != -1) {
+			source.setTimeout(timeout);
+		}
+
+		// Record properties
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
