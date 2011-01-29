@@ -129,6 +129,9 @@ public class HttpTemplateArrayIteratorWorkSource
 
 			// Obtain the array
 			Object[] array = (Object[]) context.getObject(DependencyKeys.ARRAY);
+			if (array == null) {
+				return null; // no array, no rendering
+			}
 
 			// Iterate over the array rendering the elements
 			for (Object element : array) {
