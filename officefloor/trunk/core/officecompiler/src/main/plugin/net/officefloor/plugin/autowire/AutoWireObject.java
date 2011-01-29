@@ -19,6 +19,7 @@ package net.officefloor.plugin.autowire;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -42,6 +43,12 @@ public class AutoWireObject extends AutoWireProperties {
 	 * Object types for linking this a dependency.
 	 */
 	private final Class<?>[] objectTypes;
+
+	/**
+	 * Time-out for sourcing the {@link ManagedObject} from the
+	 * {@link ManagedObjectSource}.
+	 */
+	private long timeout = 0;
 
 	/**
 	 * Initiate.
@@ -94,6 +101,29 @@ public class AutoWireObject extends AutoWireProperties {
 	 */
 	public Class<?>[] getObjectTypes() {
 		return this.objectTypes;
+	}
+
+	/**
+	 * Obtains the time-out for sourcing the {@link ManagedObject} from the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return Time-out for sourcing the {@link ManagedObject} from the
+	 *         {@link ManagedObjectSource}.
+	 */
+	public long getTimeout() {
+		return this.timeout;
+	}
+
+	/**
+	 * Specifies the time-out for sourcing the {@link ManagedObject} from the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param timeout
+	 *            Time-out for sourcing the {@link ManagedObject} from the
+	 *            {@link ManagedObjectSource}.
+	 */
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
 	}
 
 }
