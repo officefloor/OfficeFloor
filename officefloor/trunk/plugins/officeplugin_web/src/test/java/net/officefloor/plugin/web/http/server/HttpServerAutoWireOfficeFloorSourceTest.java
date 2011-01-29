@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.server;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.Writer;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -31,6 +32,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
@@ -44,7 +46,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
+public class HttpServerAutoWireOfficeFloorSourceTest extends
+		OfficeFrameTestCase {
 
 	/**
 	 * Value indicating that connection was expected to be refused.
@@ -240,7 +243,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submit");
+				"submitted");
 	}
 
 	/**
@@ -256,7 +259,7 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submit");
+				"submitted");
 	}
 
 	/**
@@ -271,7 +274,32 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 		this.source.openOfficeFloor();
 
 		// Ensure can send to URI
-		this.assertHttpRequest("http://localhost:7878/test", 200, "submit");
+		this.assertHttpRequest("http://localhost:7878/test", 200, "submitted");
+	}
+
+	/**
+	 * Ensure able to utilise the {@link HttpSession}.
+	 */
+	public void testHttpSession() throws Exception {
+
+		// Add section that uses the HTTP Session
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class, MockTemplateLogic.class.getName());
+		this.source.linkUri("increment", section, "incrementCounter");
+
+		// Ensure have the auto-wire object for HTTP Session
+		assertNotNull("Must have HTTP Session auto-wire object",
+				this.source.getHttpSessionAutoWireObject());
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// First requests sets up state
+		this.assertHttpRequest("http://localhost:7878/increment", 200, "1");
+
+		// State should be maintained across requests to get incremented count
+		this.assertHttpRequest("http://localhost:7878/increment", 200, "2");
+		this.assertHttpRequest("http://localhost:7878/increment", 200, "3");
 	}
 
 	/**
@@ -359,12 +387,71 @@ public class HttpServerOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * Mock logic for the template.
 	 */
 	public static class MockTemplateLogic {
+
+		/**
+		 * Submit handler.
+		 * 
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
 		public void submit(ServerHttpConnection connection) throws IOException {
+			this.writeResponse("submitted", connection);
+		}
+
+		/**
+		 * Increment counter handler.
+		 * 
+		 * @param session
+		 *            {@link HttpSession}.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		public void incrementCounter(HttpSession session,
+				ServerHttpConnection connection) throws IOException {
+
+			final String COUNTER_NAME = "counter";
+
+			// Obtain the counter
+			RequestCounter counter = (RequestCounter) session
+					.getAttribute(COUNTER_NAME);
+			if (counter == null) {
+				counter = new RequestCounter();
+				session.setAttribute(COUNTER_NAME, counter);
+			}
+
+			// Increment the counter for this request
+			counter.count++;
+
+			// Indicate the number of requests
+			this.writeResponse(String.valueOf(counter.count), connection);
+		}
+
+		/**
+		 * Writes the response.
+		 * 
+		 * @param response
+		 *            Response.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		private void writeResponse(String response,
+				ServerHttpConnection connection) throws IOException {
 			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
 					.getBody().getOutputStream());
-			writer.append("submit");
+			writer.append(response);
 			writer.flush();
 		}
+	}
+
+	/**
+	 * Request counter to be stored within the {@link HttpSession}.
+	 */
+	public static class RequestCounter implements Serializable {
+
+		/**
+		 * Count.
+		 */
+		public int count = 0;
 	}
 
 }
