@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
@@ -38,6 +39,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
@@ -77,6 +80,24 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	private final List<UriLink> uriLinks = new LinkedList<UriLink>();
 
 	/**
+	 * {@link AutoWireObject} for the {@link HttpSession}.
+	 */
+	private final AutoWireObject httpSession;
+
+	/**
+	 * Initiate.
+	 */
+	public HttpServerAutoWireOfficeFloorSource() {
+		// Use active team by default - done early so allow further overriding
+		this.assignDefaultTeam(OnePersonTeamSource.class);
+
+		// Configure HTTP Session (allowing 10 seconds to retrieve session)
+		this.httpSession = this.addManagedObject(
+				HttpSessionManagedObjectSource.class, null, HttpSession.class);
+		this.httpSession.setTimeout(10 * 1000);
+	}
+
+	/**
 	 * <p>
 	 * Allows overriding the {@link ManagedObjectSource} providing the
 	 * {@link ServerHttpConnection}.
@@ -108,6 +129,19 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 		// Return the properties
 		return properties;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link AutoWireObject} for the {@link HttpSession}.
+	 * <p>
+	 * This allows overriding the default configuration for the
+	 * {@link HttpSessionManagedObjectSource}.
+	 * 
+	 * @return {@link AutoWireObject} for the {@link HttpSession}.
+	 */
+	public AutoWireObject getHttpSessionAutoWireObject() {
+		return this.httpSession;
 	}
 
 	/**
