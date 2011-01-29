@@ -326,18 +326,18 @@ public class ClassSectionSource extends AbstractSectionSource {
 	 * Creates the {@link SectionManagedObject} for providing the section
 	 * object.
 	 * 
-	 * @param objectNameWithinSection
+	 * @param objectName
 	 *            Name of the object within the section.
 	 * @param sectionClass
 	 *            Section object class.
 	 * @return {@link SectionManagedObject}.
 	 */
-	protected SectionManagedObject createClassManagedObject(
-			String objectNameWithinSection, Class<?> sectionClass) {
+	protected SectionManagedObject createClassManagedObject(String objectName,
+			Class<?> sectionClass) {
 
 		// Create the managed object source
 		SectionManagedObjectSource managedObjectSource = this.getDesigner()
-				.addSectionManagedObjectSource(objectNameWithinSection,
+				.addSectionManagedObjectSource(objectName,
 						SectionClassManagedObjectSource.class.getName());
 		managedObjectSource.addProperty(
 				SectionClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
@@ -345,21 +345,24 @@ public class ClassSectionSource extends AbstractSectionSource {
 
 		// Create the managed object
 		SectionManagedObject managedObject = managedObjectSource
-				.addSectionManagedObject(objectNameWithinSection,
-						ManagedObjectScope.THREAD);
+				.addSectionManagedObject(objectName, ManagedObjectScope.THREAD);
 		return managedObject;
 	}
 
 	/**
 	 * Extracts the {@link DependencyMetaData} instances for the section object.
 	 * 
+	 * @param objectName
+	 *            Name of the object within the section.
 	 * @param sectionClass
 	 *            Section object class.
 	 * @return Extracted {@link DependencyMetaData} instances for the section
 	 *         object.
+	 * @throws Exception
+	 *             If fails to extract the {@link DependencyMetaData} instances.
 	 */
 	protected DependencyMetaData[] extractClassManagedObjectDependencies(
-			Class<?> sectionClass) {
+			String objectName, Class<?> sectionClass) throws Exception {
 		return new SectionClassManagedObjectSource()
 				.extractDependencyMetaData(sectionClass);
 	}
@@ -613,13 +616,16 @@ public class ClassSectionSource extends AbstractSectionSource {
 		Class<?> sectionClass = context.getClassLoader().loadClass(
 				sectionClassName);
 
+		final String CLASS_OBJECT_NAME = "OBJECT";
+
 		// Add the managed object for the section class
 		SectionManagedObject managedObject = this.createClassManagedObject(
-				"OBJECT", sectionClass);
+				CLASS_OBJECT_NAME, sectionClass);
 
 		// Obtain the dependency meta-data
 		DependencyMetaData[] dependencyMetaData = this
-				.extractClassManagedObjectDependencies(sectionClass);
+				.extractClassManagedObjectDependencies(CLASS_OBJECT_NAME,
+						sectionClass);
 
 		// Load the managed objects
 		for (DependencyMetaData dependency : dependencyMetaData) {

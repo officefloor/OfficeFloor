@@ -30,10 +30,12 @@ import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
 
 import org.apache.http.HttpResponse;
@@ -55,11 +57,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			.createSynchronizedMock(Connection.class);
 
 	/**
-	 * Mock {@link HttpSession}.
-	 */
-	private final HttpSession httpSession = this.createMock(HttpSession.class);
-
-	/**
 	 * Port for running on.
 	 */
 	private int port;
@@ -69,8 +66,128 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 */
 	private AutoWireOfficeFloor officeFloor;
 
+	/**
+	 * {@link HttpClient}.
+	 */
+	private final HttpClient client = new DefaultHttpClient();
+
 	@Override
-	protected void setUp() throws Exception {
+	protected void tearDown() throws Exception {
+
+		// Disconnect client
+		this.client.getConnectionManager().shutdown();
+
+		// Close the OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Ensure can render the template.
+	 */
+	public void testRenderTemplate() throws Exception {
+
+		// Start the server
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		final String XML = "<html><body>Template Test:<table>"
+				+ "<tr><td>Name</td><td>Description</td></tr>"
+				+ "<tr><td>row</td><td>test row</td></tr></table>"
+				+ "<form action=\"/SECTION.links/submit.task\">"
+				+ "<input type=\"submit\"/></form></body></html>";
+
+		// Ensure correct rendering of template
+		String rendering = this.doHttpRequest("");
+		assertXmlEquals("Incorrect rendering", XML, rendering);
+	}
+
+	/**
+	 * Ensure can handle submit to a link.
+	 */
+	public void testSubmit() throws Exception {
+
+		// Start the server
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		final String RESPONSE = "submit - doInternalFlow[1] - finished(Parameter for External Flow)";
+
+		// Ensure correctly renders template on submit
+		this.assertHttpRequest("/SECTION.links/submit.task", RESPONSE);
+	}
+
+	/**
+	 * Ensure stateful across {@link HttpRequest}.
+	 */
+	public void testStatefulTemplate() throws Exception {
+
+		// Start the server
+		this.startHttpServer("StatefulTemplate.ofp",
+				StatefulTemplateLogic.class);
+
+		// Ensure retains state across HTTP requests (by incrementing counter)
+		this.assertHttpRequest("",
+				"<a href='/SECTION.links/increment.task'>1</a>");
+		this.assertHttpRequest("/SECTION.links/increment.task",
+				"increment - finished(2)");
+		this.assertHttpRequest("",
+				"<a href='/SECTION.links/increment.task'>2</a>");
+		this.assertHttpRequest("/SECTION.links/increment.task",
+				"increment - finished(3)");
+		this.assertHttpRequest("",
+				"<a href='/SECTION.links/increment.task'>3</a>");
+	}
+
+	/**
+	 * Sends the {@link HttpRequest}.
+	 * 
+	 * @param uri
+	 *            URI.
+	 * @return Content of the {@link HttpResponse}.
+	 */
+	private String doHttpRequest(String uri) throws Exception {
+
+		// Send the request to obtain results of rending template
+		HttpGet request = new HttpGet("http://localhost:" + this.port + uri);
+		HttpResponse response = this.client.execute(request);
+
+		// Ensure successful
+		assertEquals("Ensure successful", 200, response.getStatusLine()
+				.getStatusCode());
+
+		// Obtain and return the response content
+		String content = MockHttpServer.getEntityBody(response);
+		return content;
+	}
+
+	/**
+	 * Asserts the {@link HttpRequest}.
+	 * 
+	 * @param uri
+	 *            URI for the {@link HttpRequest}.
+	 * @param expectedResponse
+	 *            Expected content of the {@link HttpResponse}.
+	 */
+	private void assertHttpRequest(String uri, String expectedResponse)
+			throws Exception {
+
+		// Obtain the rendering
+		String rendering = this.doHttpRequest(uri);
+
+		// Ensure correct rendering of template
+		assertEquals("Incorrect rendering", expectedResponse, rendering);
+	}
+
+	/**
+	 * Starts the HTTP server for testing.
+	 * 
+	 * @param templateName
+	 *            Name of the template file.
+	 * @param logicClass
+	 *            Template logic class.
+	 */
+	protected void startHttpServer(String templateName, Class<?> logicClass)
+			throws Exception {
 
 		// Auto-wire for testing
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
@@ -82,7 +199,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Add dependencies
 		source.addObject(this.connection, Connection.class);
-		source.addObject(this.httpSession, HttpSession.class);
+		source.addManagedObject(HttpSessionManagedObjectSource.class, null,
+				HttpSession.class).setTimeout(10 * 1000);
 
 		// Provide HTTP template router for testing
 		AutoWireSection routeSection = source.addSection("ROUTE",
@@ -92,12 +210,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
 				.replace('.', '/')
-				+ "/Template.ofp";
+				+ "/" + templateName;
 		AutoWireSection templateSection = source.addSection("SECTION",
 				HttpTemplateSectionSource.class, templateLocation);
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-				TemplateLogic.class.getName());
+				logicClass.getName());
 
 		// Load mock section for handling outputs
 		AutoWireSection handleOutputSection = source.addSection("OUTPUT",
@@ -112,60 +230,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Open the OfficeFloor
 		this.officeFloor = source.openOfficeFloor();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
-
-	/**
-	 * Ensure can render the template.
-	 */
-	public void testRenderTemplate() throws Exception {
-
-		final String XML = "<html><body>Template Test:<table>"
-				+ "<tr><td>Name</td><td>Description</td></tr>"
-				+ "<tr><td>row</td><td>test row</td></tr></table>"
-				+ "<form action=\"/SECTION.links/submit.task\">"
-				+ "<input type=\"submit\"/></form></body></html>";
-
-		// Send the request to obtain results of rending template
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet("http://localhost:" + this.port);
-		HttpResponse response = client.execute(request);
-
-		// Ensure successful
-		assertEquals("Ensure successful", 200, response.getStatusLine()
-				.getStatusCode());
-
-		// Ensure correct rendering of template
-		String rendering = MockHttpServer.getEntityBody(response);
-		assertXmlEquals("Incorrect rendering", XML, rendering);
-	}
-
-	/**
-	 * Ensure can handle submit to a link.
-	 */
-	public void testSubmit() throws Exception {
-
-		final String RESPONSE = "submit - doInternalFlow[1] - finished(Parameter for External Flow)";
-
-		// Send the request to obtain results of rending template
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet("http://localhost:" + this.port
-				+ "/SECTION.links/submit.task");
-		HttpResponse response = client.execute(request);
-
-		// Ensure successful
-		assertEquals("Ensure successful", 200, response.getStatusLine()
-				.getStatusCode());
-
-		// Ensure correct rendering of template
-		String rendering = MockHttpServer.getEntityBody(response);
-		assertEquals("Incorrect rendering", RESPONSE, rendering);
 	}
 
 	/**

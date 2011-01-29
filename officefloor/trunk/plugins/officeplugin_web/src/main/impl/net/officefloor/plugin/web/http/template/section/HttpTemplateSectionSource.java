@@ -19,6 +19,7 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +30,8 @@ import java.util.Set;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -40,11 +43,15 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
+import net.officefloor.plugin.web.http.template.HttpSessionStateful;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -379,10 +386,105 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	 */
 	public class HttpTemplateClassSectionSource extends ClassSectionSource {
 
+		/**
+		 * Determine if the section class is stateful - annotated with
+		 * {@link HttpSessionStateful}.
+		 * 
+		 * @param sectionClass
+		 *            Section class.
+		 * @return <code>true</code> if stateful.
+		 */
+		private boolean isHttpSessionStateful(Class<?> sectionClass) {
+
+			// Determine if stateful
+			boolean isStateful = sectionClass
+					.isAnnotationPresent(HttpSessionStateful.class);
+
+			// Return indicating if stateful
+			return isStateful;
+		}
+
+		/*
+		 * =================== ClassSectionSource ==========================
+		 */
+
 		@Override
 		protected String getSectionClassName() {
 			// Obtain class name from property as location is for template
 			return this.getContext().getProperty(PROPERTY_CLASS_NAME);
+		}
+
+		@Override
+		protected SectionManagedObject createClassManagedObject(
+				String objectName, Class<?> sectionClass) {
+
+			// Determine if stateful
+			boolean isStateful = this.isHttpSessionStateful(sectionClass);
+
+			// Default behaviour if not stateful
+			if (!isStateful) {
+				return super.createClassManagedObject(objectName, sectionClass);
+			}
+
+			// If stateful, the class must be serialisable
+			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
+				this.getDesigner().addIssue(
+						"Template logic class " + sectionClass.getName()
+								+ " is annotated with "
+								+ HttpSessionStateful.class.getSimpleName()
+								+ " but is not "
+								+ Serializable.class.getSimpleName(),
+						AssetType.MANAGED_OBJECT, objectName);
+			}
+
+			// Create the managed object for the stateful template logic
+			SectionManagedObjectSource managedObjectSource = this
+					.getDesigner()
+					.addSectionManagedObjectSource(objectName,
+							HttpSessionClassManagedObjectSource.class.getName());
+			managedObjectSource.addProperty(
+					HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+					sectionClass.getName());
+
+			// Create the managed object
+			SectionManagedObject managedObject = managedObjectSource
+					.addSectionManagedObject(objectName,
+							ManagedObjectScope.PROCESS);
+			return managedObject;
+		}
+
+		@Override
+		protected DependencyMetaData[] extractClassManagedObjectDependencies(
+				String objectName, Class<?> sectionClass) throws Exception {
+
+			// Extract the dependency meta-data for default behaviour
+			DependencyMetaData[] metaData = super
+					.extractClassManagedObjectDependencies(objectName,
+							sectionClass);
+
+			// Determine if stateful
+			boolean isStateful = this.isHttpSessionStateful(sectionClass);
+
+			// If not stateful, return meta-data for default behaviour
+			if (!isStateful) {
+				return metaData;
+			}
+
+			// As stateful, must not have any dependencies into object
+			if (metaData.length > 0) {
+				this.getDesigner()
+						.addIssue(
+								"Template logic class "
+										+ sectionClass.getName()
+										+ " is annotated with "
+										+ HttpSessionStateful.class
+												.getSimpleName()
+										+ " and therefore can not have dependencies injected into the object (only its methods)",
+								AssetType.MANAGED_OBJECT, objectName);
+			}
+
+			// Return the dependency meta-data for stateful template logic
+			return new DependencyMetaData[] { new StatefulDependencyMetaData() };
 		}
 
 		@Override
