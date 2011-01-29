@@ -79,7 +79,7 @@ public class ClassManagedObject implements CoordinatingManagedObject<Indexed> {
 			Object dependency = registry.getObject(metaData.index);
 
 			// Inject the dependency
-			metaData.field.set(this.object, dependency);
+			metaData.injectDependency(this.object, dependency);
 		}
 
 		// Inject the process interfaces

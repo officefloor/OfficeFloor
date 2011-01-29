@@ -60,4 +60,19 @@ public class DependencyMetaData {
 		this.field = field;
 	}
 
+	/**
+	 * Injects the dependency into the object.
+	 * 
+	 * @param object
+	 *            Object to receive the dependency.
+	 * @param dependency
+	 *            Dependency to inject.
+	 * @throws Exception
+	 *             If fails to inject the dependency.
+	 */
+	public void injectDependency(Object object, Object dependency)
+			throws Exception {
+		this.field.set(object, dependency);
+	}
+
 }
