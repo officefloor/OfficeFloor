@@ -1,0 +1,20 @@
+<html>
+	<body>
+		<!-- [Customer] -->
+		<p>Welcome ${name}, your currently selected shopping cart items:</p>
+		<table>
+			<tr>
+				<td>Item Name</td>
+				<td>Item Price</td>
+				<td>Quantity of item</td>
+			</tr>
+			<!-- [ShoppingCartItems] -->
+			<tr>
+				<td>${name}</td>
+				<td>${price}</td>
+				<td>${quantity}</td>
+			</tr>
+			<!-- [EndItems] -->
+		</table>
+	</body>
+</html>

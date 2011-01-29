@@ -8,10 +8,10 @@
 		<version>0.0.2</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
-	<artifactId>DynamicHttpServer</artifactId>
+	<artifactId>PageFlowHttpServer</artifactId>
 	<version>0.0.2</version>
-	<name>Dynamic HTTP Server Example</name>
-	<description>Example of using OfficeFloor for dynamic content from a HTTP Server</description>
+	<name>Page Flow HTTP Server Example</name>
+	<description>Example of using OfficeFloor for page flow within a HTTP Server</description>
 	<properties>
 		<basedir>${basedir}</basedir>
 	</properties>

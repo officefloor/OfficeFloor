@@ -1,0 +1,27 @@
+<html>
+	<body>
+		<form action="#{purchase}">
+			<!-- [Customer] -->
+			<p>Welcome ${name}.</p>
+			<!-- [ListItems] -->
+			<table>
+				<tr>
+					<td>Item Name</td>
+					<td>Item Price</td>
+					<td>Quantity of item</td>
+				</tr>
+				<!-- [ShoppingCartItems] -->
+				<tr>
+					<td>${name}</td>
+					<td>${price}</td>
+					<td>${quantity}</td>
+				</tr>
+				<!-- [EndShoppingCartItems] -->
+			</table>
+			<!-- [NoItems] -->
+			<p>You currently have no shopping cart items.</p>
+			<!-- [EndItems] -->
+			<input type="submit" value="Purchase" />
+		</form>
+	</body>
+</html>

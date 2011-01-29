@@ -13,7 +13,18 @@
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Example                                                 || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./StaticHttpServer/index.html}Static HTTP Server}}    | HTTP Server for static web pages.
+| {{{./StaticHttpServer/index.html}Static HTTP Server}}    | HTTP Server for static web pages illustrating the opening and closing of an OfficeFloor.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic HTTP Server}}  | HTTP Server for dynamic web pages.
+| {{{./DynamicHttpServer/index.html}Dynamic HTTP Server}}  | HTTP Server for dynamic web pages which introduces tasks.
 *----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./PageFlowHttpServer/index.html}Page flow for HTTP Server}}  | HTTP Server demonstrating ease of wiring tasks together.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./DependencyInjectionHttpServer/index.html}Dependency injection for HTTP Server}}  | HTTP Server with dependency injection.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./TeamAllocationHttpServer/index.html}Team allocation for HTTP Server}}  | HTTP Server with assignment of team to execute tasks.  A Team within OfficeFloor is in effect a thread pool and is the means to assign specific threads (thread pools) to execute specific tasks.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| Running within a Servlet container  | Current focus of OfficeFloor development is producing a Servlet Filter that can integrate OfficeFloor HTTP Server functionality into your existing java web applications. This will mean you can start taking advantage of OfficeFloor capabilities without having to significantly change your existing web application.
+*----------------------------------------------------------+-----------------------------------------------------------+
+
+  Current focus of features being developed (or documented as examples) can be found at {{{http://sourceforge.net/tracker/?func=browse&group_id=156349&atid=799429&status=1}OfficeFloor features}}.
+
