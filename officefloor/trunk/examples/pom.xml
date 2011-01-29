@@ -16,6 +16,7 @@
 	<modules>
 		<module>StaticHttpServer</module>
 		<module>DynamicHttpServer</module>
+		<module>PageFlowHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
 </project>

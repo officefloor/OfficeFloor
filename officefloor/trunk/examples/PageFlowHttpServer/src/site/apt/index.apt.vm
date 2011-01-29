@@ -1,0 +1,24 @@
+                                               -----------------------
+                                            Page Flow HTTP Server Example 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Page Flow Http Server Example>>
+
+  This example demonstrates the wiring together of {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances into a {{{/apidocs/net/officefloor/frame/internal/structure/Flow.html}Flow}}. 
+  
+Code
+
+%{code-snippet|sh-params=highlight:[5]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServer.java}
+
+
+  %{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+
+
+Unit Test
+
+  The unit test requests the dynamic web page from the HTTP Server and validates the page against expected content.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServerTest.java}
+

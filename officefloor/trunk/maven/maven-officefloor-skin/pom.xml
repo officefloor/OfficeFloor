@@ -45,6 +45,7 @@
 									<url url="${script.url}/shCore.js" />
 									<url url="${script.url}/shAutoloader.js" />
 									<url url="${script.url}/shBrushJava.js" />
+									<url url="${script.url}/shBrushXml.js" />
 								</get>
 								<get dest="${css.dir}" verbose="true" skipexisting="true">
 									<url url="${css.url}/shCore.css" />
