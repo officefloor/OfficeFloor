@@ -28,6 +28,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
@@ -394,8 +395,15 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		 * @param connection
 		 *            {@link ServerHttpConnection}.
 		 */
+		@NextTask("doNothing")
 		public void submit(ServerHttpConnection connection) throws IOException {
 			this.writeResponse("submitted", connection);
+		}
+
+		/**
+		 * Do nothing after submit.
+		 */
+		public void doNothing() {
 		}
 
 		/**

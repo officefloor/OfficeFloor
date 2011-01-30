@@ -18,6 +18,8 @@
 
 package net.officefloor.plugin.web.http.parameters;
 
+import java.io.IOException;
+
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 /**
@@ -25,7 +27,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpParametersException extends Exception {
+public class HttpParametersException extends IOException {
 
 	/**
 	 * Initiate.

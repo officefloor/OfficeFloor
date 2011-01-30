@@ -173,10 +173,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 					new Boolean(isRequireBean));
 		}
 
-		// Load the section class
-		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource();
-		classSource.sourceSection(designer, context);
-
 		// Name of work is exposed on URL for links.
 		// Result is: /<section>.links/<link>.task
 		final String TEMPLATE_WORK_NANE = "links";
@@ -187,8 +183,9 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
 				templateLocation);
 
-		// Load the HTTP template tasks
-		SectionTask previousTemplateTask = null;
+		// Create the template tasks and ensure registered for logic flows
+		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource();
+		Map<String, SectionTask> templateTasks = new HashMap<String, SectionTask>();
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
 			// Obtain the template task name
@@ -197,6 +194,25 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Add the template task
 			SectionTask templateTask = templateWork.addSectionTask(
 					templateTaskName, templateTaskName);
+
+			// Register the template task
+			templateTasks.put(templateTaskName, templateTask);
+
+			// Make template task available to logic flow
+			classSource.registerTaskByTypeName(templateTaskName, templateTask);
+		}
+
+		// Load the section class (with ability to link in template tasks)
+		classSource.sourceSection(designer, context);
+
+		// Load the HTTP template tasks
+		SectionTask firstTemplateTask = null;
+		SectionTask previousTemplateTask = null;
+		for (HttpTemplateSection templateSection : template.getSections()) {
+
+			// Obtain the template task
+			String templateTaskName = templateSection.getSectionName();
+			SectionTask templateTask = templateTasks.get(templateTaskName);
 
 			// Determine if template section requires a bean
 			boolean isRequireBean = HttpTemplateWorkSource
@@ -221,15 +237,16 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 					templateTask.getTaskEscalation(IOException.class.getName()),
 					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
 
-			// Obtain the template bean method (if require bean)
-			SectionTask beanTask = null;
+			// Obtain the bean task method
+			String beanTaskName = "get" + templateTaskName;
+			TemplateBeanTask beanTask = this.templateBeanTasksByName
+					.get(beanTaskName.toUpperCase());
+
+			// Ensure correct configuration, if template section requires bean
 			if (isRequireBean) {
-				// Obtain the bean task method
-				String beanTaskName = "get" + templateTaskName;
-				TemplateBeanTask templateBeanTask = this.templateBeanTasksByName
-						.get(beanTaskName.toUpperCase());
-				if (templateBeanTask == null) {
-					// Must have template bean task
+
+				// Must have template bean task
+				if (beanTask == null) {
 					designer.addIssue("Missing method '" + beanTaskName
 							+ "' on class " + sectionClassName
 							+ " to provide bean for template "
@@ -237,17 +254,23 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 							TEMPLATE_WORK_NANE);
 
 				} else {
-					// Load the template bean task
-					beanTask = templateBeanTask.task;
+					// Ensure bean task does not have a parameter
+					if (beanTask.parameter != null) {
+						designer.addIssue("Template bean method '"
+								+ beanTaskName + "' must not have a "
+								+ Parameter.class.getSimpleName()
+								+ " annotation", AssetType.TASK, beanTaskName);
+					}
 
 					// Obtain the argument type for the template
-					Class<?> argumentType = templateBeanTask.type
-							.getReturnType();
-					if (argumentType == null) {
+					Class<?> argumentType = beanTask.type.getReturnType();
+					if ((argumentType == null)
+							|| (Void.class.equals(argumentType))) {
 						// Must provide argument from bean task
 						designer.addIssue("Bean method '" + beanTaskName
 								+ "' must have return value", AssetType.TASK,
 								beanTaskName);
+
 					} else {
 						// Determine bean type and whether an array
 						Class<?> beanType = argumentType;
@@ -297,25 +320,31 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			}
 
 			// Determine if first template task
-			if (previousTemplateTask == null) {
+			if (firstTemplateTask == null) {
 				// First template task so link to input
 				if (beanTask != null) {
-					// Link with bean task
-					designer.link(sectionInput, beanTask);
-					designer.link(beanTask, templateTask);
+					// First template task is bean task
+					firstTemplateTask = beanTask.task;
+
+					// Link input to bean then template
+					designer.link(sectionInput, beanTask.task);
+					designer.link(beanTask.task, templateTask);
 				} else {
-					// No bean task required
+					// First template task is section rendering
+					firstTemplateTask = templateTask;
+
+					// Link input to just template
 					designer.link(sectionInput, templateTask);
 				}
 
 			} else {
 				// Subsequent template tasks so link to previous task
 				if (beanTask != null) {
-					// Link with bean task
-					designer.link(previousTemplateTask, beanTask);
-					designer.link(beanTask, templateTask);
+					// Link with bean task then template
+					designer.link(previousTemplateTask, beanTask.task);
+					designer.link(beanTask.task, templateTask);
 				} else {
-					// No bean task required
+					// No bean task so link to template
 					designer.link(previousTemplateTask, templateTask);
 				}
 			}
@@ -334,8 +363,8 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Obtain the link method task
 			String linkMethodTaskName = LINK_METHOD_TASK_NAME_PREFIX
 					+ linkTaskName;
-			SectionTask methodTask = classSource
-					.getTaskByName(linkMethodTaskName);
+			TemplateBeanTask methodTask = this.templateBeanTasksByName
+					.get(linkMethodTaskName.toUpperCase());
 			if (methodTask == null) {
 				designer.addIssue("No backing method for link '" + linkTaskName
 						+ "'", AssetType.TASK, linkTaskName);
@@ -343,7 +372,13 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			}
 
 			// Link handling of request to method
-			designer.link(linkTask, methodTask);
+			designer.link(linkTask, methodTask.task);
+
+			// Determine if method already indicating next task
+			if (!(methodTask.method.isAnnotationPresent(NextTask.class))) {
+				// Next task not linked, so link to render template
+				designer.link(methodTask.task, firstTemplateTask);
+			}
 		}
 
 		// Link last template task to output
@@ -360,12 +395,23 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		/**
 		 * {@link SectionTask}.
 		 */
-		public SectionTask task;
+		public final SectionTask task;
 
 		/**
 		 * {@link TaskType}.
 		 */
-		public TaskType<?, ?, ?> type;
+		public final TaskType<?, ?, ?> type;
+
+		/**
+		 * {@link Method} for the {@link SectionTask}.
+		 */
+		public final Method method;
+
+		/**
+		 * Type of parameter for {@link SectionTask}. <code>null</code>
+		 * indicates no parameter.
+		 */
+		public final Class<?> parameter;
 
 		/**
 		 * Initiate.
@@ -374,10 +420,18 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		 *            {@link SectionTask}.
 		 * @param type
 		 *            {@link TaskType}.
+		 * @param method
+		 *            {@link Method} for the {@link SectionTask}.
+		 * @param parameter
+		 *            Type of parameter for {@link SectionTask}.
+		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateBeanTask(SectionTask task, TaskType<?, ?, ?> type) {
+		public TemplateBeanTask(SectionTask task, TaskType<?, ?, ?> type,
+				Method method, Class<?> parameter) {
 			this.task = task;
 			this.type = type;
+			this.method = method;
+			this.parameter = parameter;
 		}
 	}
 
@@ -506,24 +560,13 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
 				Method method, Class<?> parameterType) {
 
-			// Determine if template bean task
-			String taskName = taskType.getTaskName();
-			if (HttpTemplateSectionSource.this.isTemplateBeanTask(taskName)) {
+			// Determine name of task
+			String taskName = task.getSectionTaskName();
 
-				// Ensure bean task does not have a parameter
-				if (parameterType != null) {
-					this.getDesigner().addIssue(
-							"Template bean method '" + taskName
-									+ "' must not have a "
-									+ Parameter.class.getSimpleName()
-									+ " annotation", AssetType.TASK, taskName);
-				}
-
-				// Register the template bean task
-				HttpTemplateSectionSource.this.templateBeanTasksByName.put(
-						taskName.toUpperCase(), new TemplateBeanTask(task,
-								taskType));
-			}
+			// Register the template bean task (case insensitive)
+			HttpTemplateSectionSource.this.templateBeanTasksByName.put(taskName
+					.toUpperCase(), new TemplateBeanTask(task, taskType,
+					method, parameterType));
 		}
 
 		@Override
@@ -546,28 +589,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Not template bean task, so link next task
 			super.linkNextTask(task, taskType, taskMethod, argumentType,
 					nextTaskAnnotation);
-		}
-
-		@Override
-		protected void linkTaskFlow(SectionTask task,
-				TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
-				Method flowMethod, Class<?> flowArgumentType) {
-
-			// Determine if template bean task
-			String taskName = taskType.getTaskName();
-			if (HttpTemplateSectionSource.this.isTemplateBeanTask(taskName)) {
-				// Can not have flows for template bean task
-				this.getDesigner().addIssue(
-						"Template bean method '" + taskName
-								+ "' must not have a flow parameter ("
-								+ flowInterfaceType.getName() + ")",
-						AssetType.TASK, taskName);
-				return; // do not link flow
-			}
-
-			// Not template bean task, so link flow
-			super.linkTaskFlow(task, taskType, flowInterfaceType, flowMethod,
-					flowArgumentType);
 		}
 	}
 
