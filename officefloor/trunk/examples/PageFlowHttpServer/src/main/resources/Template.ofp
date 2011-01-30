@@ -1,27 +1,26 @@
 <html>
 	<body>
-		<form action="#{purchase}">
-			<!-- [Customer] -->
-			<p>Welcome ${name}.</p>
-			<!-- [ListItems] -->
-			<table>
-				<tr>
-					<td>Item Name</td>
-					<td>Item Price</td>
-					<td>Quantity of item</td>
-				</tr>
-				<!-- [ShoppingCartItems] -->
-				<tr>
-					<td>${name}</td>
-					<td>${price}</td>
-					<td>${quantity}</td>
-				</tr>
-				<!-- [EndShoppingCartItems] -->
-			</table>
-			<!-- [NoItems] -->
-			<p>You currently have no shopping cart items.</p>
-			<!-- [EndItems] -->
-			<input type="submit" value="Purchase" />
+		<!-- [listItems] -->
+		<table>
+			<tr>
+				<td>Name</td>
+				<td>Description</td>
+			</tr>
+			<!-- [items] -->
+			<tr>
+				<td>${name}</td>
+				<td>${description}</td>
+			</tr>
+			<!-- [endItems] -->
+		</table>
+		<p><a href="#{clear}">Clear</a></p>
+		<!-- [noItems] -->
+		<p>Currently no items in list.</p>
+		<!-- [endListItems] -->
+		<form action="#{addItem}">
+			Name: <input name="name" type="text" /> 
+			Description: <input name="description" type="text" />
+			<input type="submit" value="Add" />
 		</form>
 	</body>
 </html>

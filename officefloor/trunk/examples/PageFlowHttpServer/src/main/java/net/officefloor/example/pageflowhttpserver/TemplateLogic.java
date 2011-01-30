@@ -17,6 +17,11 @@
  */
 package net.officefloor.example.pageflowhttpserver;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.plugin.web.http.template.HttpSessionStateful;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
@@ -24,31 +29,52 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
-public class TemplateLogic {
-	
+// START SNIPPET: class
+@HttpSessionStateful
+public class TemplateLogic implements Serializable {
+
+	private List<Item> items = new LinkedList<Item>();
+	// END SNIPPET: class
+
+	// START SNIPPET: flows
 	@FlowInterface
 	public static interface PageFlows {
-				
-		void NoItems();
-		
-		void EndItems();
+
+		void getNoItems();
+
+		void endListItems();
+	}
+	// END SNIPPET: flows
+
+
+	// START SNIPPET: items
+	public Item[] getItems() {
+		return this.items.toArray(new Item[this.items.size()]);
+	}
+	// END SNIPPET: items
+
+	// START SNIPPET: control
+	public void getListItems(PageFlows flows) {
+		if (this.items.size() == 0) {
+			flows.getNoItems(); // skip to getNoItems task
+		}
 	}
 
-	private ShoppingCartItem[] shoppingCartItems = new ShoppingCartItem[] {
-			new ShoppingCartItem("Book", 10.53, 3),
-			new ShoppingCartItem("Magazine", 5.51, 1) };
+	public void getNoItems(PageFlows flows) {
+		if (this.items.size() > 0) {
+			flows.endListItems(); // skip to endListItems task
+		}
+	}
+	// END SNIPPET: control
 
-	public Customer getCustomer() {
-		return new Customer("Daniel");
+	// START SNIPPET: submit
+	public void addItem(Item item) {
+		this.items.add(item);
 	}
 
-	public ShoppingCartItem[] getShoppingCartItems() {
-		return this.shoppingCartItems;
+	public void clear() {
+		this.items.clear();
 	}
-
-	public void purchase() {
-		// Mock shopping cart items being bought
-		this.shoppingCartItems = null;
-	}
+	// END SNIPPET: submit
 
 }

@@ -10,10 +10,31 @@
   
 Code
 
-%{code-snippet|sh-params=highlight:[5]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServer.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServer.java}
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
 
 
-  %{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+
+%{code-snippet|brush-autodetect=1|id=class|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+
+%{code-snippet|brush-autodetect=1|id=items|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+
+%{code-snippet|brush-autodetect=1|id=flows|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+
+%{code-snippet|brush-autodetect=1|id=control|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+
+%{code-snippet|brush-autodetect=1|id=submit|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+
+
+* Remaining Classes
+
+** Item Class
+
+  As the Item is stored within the TemplateLogic object which is bound to the {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}}, it must be serialisable. 
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/Item.java}
+
 
 
 Unit Test
