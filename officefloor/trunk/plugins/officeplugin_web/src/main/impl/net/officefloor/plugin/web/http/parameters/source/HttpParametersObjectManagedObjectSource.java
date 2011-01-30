@@ -28,6 +28,8 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireObject;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
@@ -42,6 +44,27 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
 public class HttpParametersObjectManagedObjectSource
 		extends
 		AbstractManagedObjectSource<HttpParametersObjectManagedObjectSource.Dependencies, None> {
+
+	/**
+	 * Convenience method to auto-wire the
+	 * {@link HttpParametersObjectManagedObjectSource}.
+	 * 
+	 * @param source
+	 *            {@link AutoWireOfficeFloorSource}.
+	 * @param objectClass
+	 *            Object class.
+	 * @return {@link AutoWireObject}.
+	 */
+	public static AutoWireObject autoWire(AutoWireOfficeFloorSource source,
+			Class<?> objectClass) {
+		AutoWireObject object = source.addManagedObject(
+				HttpParametersObjectManagedObjectSource.class, null,
+				objectClass);
+		object.addProperty(
+				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				objectClass.getName());
+		return object;
+	}
 
 	/**
 	 * Dependencies for the {@link HttpParametersObjectManagedObjectSource}.

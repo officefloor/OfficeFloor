@@ -17,23 +17,34 @@
  */
 package net.officefloor.example.pageflowhttpserver;
 
+import java.io.Serializable;
+
 /**
- * Customer bean.
+ * Shopping cart bean.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-public class Customer {
+public class Item implements Serializable {
 
 	private String name;
 
-	public Customer(String name) {
-		this.name = name;
-	}
+	private String description;
 
 	public String getName() {
 		return this.name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }
 // END SNIPPET: example

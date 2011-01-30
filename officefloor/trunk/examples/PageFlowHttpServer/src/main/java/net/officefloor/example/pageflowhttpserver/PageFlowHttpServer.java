@@ -17,6 +17,7 @@
  */
 package net.officefloor.example.pageflowhttpserver;
 
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 /**
@@ -30,6 +31,7 @@ public class PageFlowHttpServer {
 	public static void main(String[] args) throws Exception {
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 		source.addHttpTemplate("Template.ofp", TemplateLogic.class, "example");
+		HttpParametersObjectManagedObjectSource.autoWire(source, Item.class);
 		source.openOfficeFloor();
 	}
 
