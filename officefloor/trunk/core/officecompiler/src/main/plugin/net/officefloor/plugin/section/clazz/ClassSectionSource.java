@@ -139,6 +139,24 @@ public class ClassSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * <p>
+	 * Allows being made aware of further {@link SectionTask} instances within
+	 * the section to be considered for linking flows.
+	 * <p>
+	 * This allows {@link ClassSectionSource} to be used in conjunction with
+	 * other functionality - such as template rendering for dynamic HTTP web
+	 * pages.
+	 * 
+	 * @param taskTypeName
+	 *            Name to register the {@link SectionTask}.
+	 * @param task
+	 *            {@link SectionTask}.
+	 */
+	public void registerTaskByTypeName(String taskTypeName, SectionTask task) {
+		this._tasksByTypeName.put(taskTypeName, task);
+	}
+
+	/**
 	 * {@link SectionObject} instances by fully qualified type name.
 	 */
 	private final Map<String, SectionObject> _objectsByTypeName = new HashMap<String, SectionObject>();
@@ -754,7 +772,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 			// Add the task (both by name and type name for internal linking)
 			SectionTask task = work.addSectionTask(taskName, taskTypeName);
 			this._tasksByName.put(taskName, task);
-			this._tasksByTypeName.put(taskTypeName, task);
+			this.registerTaskByTypeName(taskTypeName, task);
 
 			// Obtain the parameter for the task
 			int objectIndex = 1; // 1 as Section Object first

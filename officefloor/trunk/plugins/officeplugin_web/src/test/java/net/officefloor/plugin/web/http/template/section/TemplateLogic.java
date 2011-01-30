@@ -32,6 +32,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
@@ -83,7 +84,29 @@ public class TemplateLogic {
 	}
 
 	/**
-	 * Handles the submit.
+	 * Handles the nextTask link.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @return Parameter for the next task.
+	 * @throws IOException
+	 *             Escalation.
+	 */
+	@NextTask("doExternalFlow")
+	public String nextTask(ServerHttpConnection connection) throws IOException {
+
+		// Indicate next task
+		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
+				.getBody().getOutputStream());
+		writer.write("nextTask");
+		writer.flush();
+
+		// Return parameter
+		return "NextTask";
+	}
+
+	/**
+	 * Handles the submit link.
 	 * 
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
@@ -100,11 +123,16 @@ public class TemplateLogic {
 		// Indicate submit
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
 				.getBody().getOutputStream());
-		writer.write("submit");
+		writer.write("<submit />");
 		writer.flush();
 
-		// Trigger flow
-		flow.doInternalFlow(new Integer(1));
+		// Obtain whether to invoke flow
+		String doFlowValue = HttpRequestTokeniserImpl.extractParameters(
+				connection.getHttpRequest()).get("doFlow");
+		if ("true".equals(doFlowValue)) {
+			// Trigger flow
+			flow.doInternalFlow(new Integer(1));
+		}
 	}
 
 	/**

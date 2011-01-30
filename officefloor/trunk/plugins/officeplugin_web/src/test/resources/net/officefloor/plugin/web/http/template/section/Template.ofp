@@ -13,6 +13,9 @@ Template ${TemplateName}:
     </tr>
     <!-- [Tail] -->
 </table>
+<form action="#{nextTask}">
+	<input type="submit" />
+</form>
 <form action="#{submit}">
     <input type="submit" />
 </form>

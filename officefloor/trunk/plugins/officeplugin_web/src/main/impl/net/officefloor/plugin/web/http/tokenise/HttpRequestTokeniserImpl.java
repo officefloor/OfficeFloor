@@ -21,6 +21,8 @@ package net.officefloor.plugin.web.http.tokenise;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.stream.BufferStream;
@@ -35,6 +37,59 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
  * @author Daniel Sagenschneider
  */
 public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
+
+	/**
+	 * <p>
+	 * Convenience method for extracting the parameters from the
+	 * {@link HttpRequest}.
+	 * <p>
+	 * Only the first value for the parameter will be returned.
+	 * 
+	 * @param request
+	 *            {@link HttpRequest}.
+	 * @return Parameter name values.
+	 * @throws HttpRequestTokeniseException
+	 *             If fails to extract the parameters.
+	 */
+	public static Map<String, String> extractParameters(HttpRequest request)
+			throws HttpRequestTokeniseException {
+
+		// Extract the parameters
+		final Map<String, String> parameters = new HashMap<String, String>();
+		new HttpRequestTokeniserImpl().tokeniseHttpRequest(request,
+				new HttpRequestTokenHandler() {
+
+					@Override
+					public void handlePath(String path)
+							throws HttpRequestTokeniseException {
+						// Ignore
+					}
+
+					@Override
+					public void handleHttpParameter(String name, String value)
+							throws HttpRequestTokeniseException {
+						// Only add the first value for parameter
+						if (!parameters.containsKey(name)) {
+							parameters.put(name, value);
+						}
+					}
+
+					@Override
+					public void handleQueryString(String queryString)
+							throws HttpRequestTokeniseException {
+						// Ignore
+					}
+
+					@Override
+					public void handleFragment(String fragment)
+							throws HttpRequestTokeniseException {
+						// Ignore
+					}
+				});
+
+		// Return the parameters
+		return parameters;
+	}
 
 	/*
 	 * ====================== HttpRequestTokeniser ============================

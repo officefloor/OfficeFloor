@@ -23,11 +23,13 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.work.WorkSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -49,6 +51,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
+
+	/**
+	 * Rendered template XML.
+	 */
+	private static final String RENDERED_TEMPLATE_XML = "<html><body>Template Test:<table>"
+			+ "<tr><td>Name</td><td>Description</td></tr>"
+			+ "<tr><td>row</td><td>test row</td></tr></table>"
+			+ "<form action=\"/SECTION.links/nextTask.task\"><input type=\"submit\"/></form>"
+			+ "<form action=\"/SECTION.links/submit.task\"><input type=\"submit\"/></form>"
+			+ "</body></html>";
 
 	/**
 	 * Mock {@link Connection}.
@@ -91,29 +103,79 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Start the server
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
-		final String XML = "<html><body>Template Test:<table>"
-				+ "<tr><td>Name</td><td>Description</td></tr>"
-				+ "<tr><td>row</td><td>test row</td></tr></table>"
-				+ "<form action=\"/SECTION.links/submit.task\">"
-				+ "<input type=\"submit\"/></form></body></html>";
-
 		// Ensure correct rendering of template
 		String rendering = this.doHttpRequest("");
-		assertXmlEquals("Incorrect rendering", XML, rendering);
+		assertXmlEquals("Incorrect rendering", RENDERED_TEMPLATE_XML, rendering);
 	}
 
 	/**
-	 * Ensure can handle submit to a link.
+	 * Ensure can handle submit to a link that has {@link NextTask} annotation
+	 * for handling.
 	 */
-	public void testSubmit() throws Exception {
+	public void testSubmitWithNextTask() throws Exception {
 
 		// Start the server
 		this.startHttpServer("Template.ofp", TemplateLogic.class);
 
-		final String RESPONSE = "submit - doInternalFlow[1] - finished(Parameter for External Flow)";
+		final String RESPONSE = "nextTask - finished(NextTask)";
 
 		// Ensure correctly renders template on submit
-		this.assertHttpRequest("/SECTION.links/submit.task", RESPONSE);
+		this.assertHttpRequest("/SECTION.links/nextTask.task", RESPONSE);
+	}
+
+	/**
+	 * Ensure default behaviour of #{link} method without a {@link NextTask}
+	 * annotation is to render the template.
+	 */
+	public void testSubmitWithoutNextTask() throws Exception {
+
+		// Start the server
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		final String RESPONSE = "<submit />" + RENDERED_TEMPLATE_XML;
+
+		// Ensure correctly renders template on submit not invoking flow
+		String response = this.doHttpRequest("/SECTION.links/submit.task");
+		assertXmlEquals("Incorrect rendering", RESPONSE, response);
+	}
+
+	/**
+	 * Ensure with {@link NextTask} annotation that invoking a {@link Flow}
+	 * takes precedence.
+	 */
+	public void testSubmitInvokingFlow() throws Exception {
+
+		// Start the server
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		final String RESPONSE = "<submit /> - doInternalFlow[1] - finished(Parameter for External Flow)";
+
+		// Ensure correctly renders template on submit when invoking flow
+		this.assertHttpRequest("/SECTION.links/submit.task?doFlow=true",
+				RESPONSE);
+	}
+
+	/**
+	 * Ensure able to invoke flows by template logic to alter template
+	 * rendering.
+	 */
+	public void testFlowControl() throws Exception {
+
+		// Start the server
+		this.startHttpServer("FlowTemplate.ofp", FlowTemplateLogic.class);
+
+		// Ensure get full template
+		this.assertHttpRequest("", "TemplateOne1TwoEnd");
+
+		// Ensure skip template one rendering
+		this.assertHttpRequest("?getOne=getTwo", "TemplateTwoEnd");
+
+		// Ensure can skip to end
+		this.assertHttpRequest("?getTemplate=end", "End");
+
+		// Ensure can loop back
+		this.assertHttpRequest("?getEnd=getTemplate",
+				"TemplateOne1TwoTemplateOne1TwoEnd");
 	}
 
 	/**
