@@ -17,6 +17,9 @@
  */
 package net.officefloor.example.dynamichttpserver;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Example logic for the template.
  * 
@@ -25,14 +28,17 @@ package net.officefloor.example.dynamichttpserver;
 // START SNIPPET: example
 public class TemplateLogic {
 
-	public Customer getCustomer() {
-		return new Customer("Daniel");
+	public Time getTime() {
+		return new Time();
 	}
 
-	public ShoppingCartItem[] getShoppingCartItems() {
-		return new ShoppingCartItem[] {
-				new ShoppingCartItem("Book", 10.53, 3),
-				new ShoppingCartItem("Magazine", 5.51, 1) };
+	public Property[] getSystemProperties() {
+		List<Property> properties = new LinkedList<Property>();
+		for (String name : System.getProperties().stringPropertyNames()) {
+			String value = System.getProperty(name);
+			properties.add(new Property(name, value));
+		}
+		return properties.toArray(new Property[properties.size()]);
 	}
 
 }

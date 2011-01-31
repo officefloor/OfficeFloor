@@ -18,35 +18,29 @@
 package net.officefloor.example.dynamichttpserver;
 
 /**
- * Shopping cart bean.
+ * Property bean.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-public class ShoppingCartItem {
+public class Property {
 
 	private String name;
 
-	private double price;
+	private String value;
 
-	private int quantity;
 
-	public ShoppingCartItem(String name, double price, int quantity) {
+	public Property(String name, String value) {
 		this.name = name;
-		this.price = price;
-		this.quantity = quantity;
+		this.value = value;
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public double getPrice() {
-		return this.price;
-	}
-
-	public int getQuantity() {
-		return this.quantity;
+	public String getValue() {
+		return this.value;
 	}
 
 }

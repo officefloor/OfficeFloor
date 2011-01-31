@@ -1,20 +1,18 @@
 <html>
 	<body>
-		<!-- [Customer] -->
-		<p>Welcome ${name}, your currently selected shopping cart items:</p>
+		<!-- [time] -->
+		<p>Milliseconds since epoc is ${time}</p>
 		<table>
 			<tr>
-				<td>Item Name</td>
-				<td>Item Price</td>
-				<td>Quantity of item</td>
+				<td>Name</td>
+				<td>Value</td>
 			</tr>
-			<!-- [ShoppingCartItems] -->
+			<!-- [systemProperties] -->
 			<tr>
 				<td>${name}</td>
-				<td>${price}</td>
-				<td>${quantity}</td>
+				<td>${value}</td>
 			</tr>
-			<!-- [EndItems] -->
+			<!-- [endSystemProperties] -->
 		</table>
 	</body>
 </html>
