@@ -21,6 +21,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import net.officefloor.plugin.web.http.template.HttpSessionStateful;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
@@ -46,7 +48,6 @@ public class TemplateLogic implements Serializable {
 	}
 	// END SNIPPET: flows
 
-
 	// START SNIPPET: items
 	public Item[] getItems() {
 		return this.items.toArray(new Item[this.items.size()]);
@@ -67,14 +68,29 @@ public class TemplateLogic implements Serializable {
 	}
 	// END SNIPPET: control
 
-	// START SNIPPET: submit
+	// START SNIPPET: addItem
 	public void addItem(Item item) {
 		this.items.add(item);
 	}
 
+	// END SNIPPET: addItem
+
+	// START SNIPPET: clear
 	public void clear() {
 		this.items.clear();
 	}
-	// END SNIPPET: submit
+	// END SNIPPET: clear
+
+	/**
+	 * Inner class for extra dependency example. 
+	 */
+	public static class ExtraDependencyExample {
+
+		// START SNIPPET: extraDependency
+		public void getNoItems(PageFlows flows, DataSource dataSource) {
+			// code requiring DataSource
+		}
+		// END SNIPPET: extraDependency
+	}
 
 }

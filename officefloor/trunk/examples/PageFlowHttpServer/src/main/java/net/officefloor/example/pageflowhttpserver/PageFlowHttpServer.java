@@ -29,9 +29,13 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 public class PageFlowHttpServer {
 
 	public static void main(String[] args) throws Exception {
+		
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+		
 		source.addHttpTemplate("Template.ofp", TemplateLogic.class, "example");
+		
 		HttpParametersObjectManagedObjectSource.autoWire(source, Item.class);
+		
 		source.openOfficeFloor();
 	}
 

@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -32,26 +33,34 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class PageFlowHttpServerTest extends TestCase {
 
 	// START SNIPPET: test
+	private final HttpClient client = new DefaultHttpClient();
+
 	public void testDynamicPage() throws Exception {
 
 		// Start server
 		PageFlowHttpServer.main(new String[0]);
 
-		// Send request for dynamic page
-		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
-				"http://localhost:7878/example"));
+		// Request the template
+		this.doRequest("http://localhost:7878/example");
 
-		// Ensure request is successful
+		// Add an item
+		this.doRequest("http://localhost:7878/example.links/addItem.task?name=Daniel&description=founder");
+
+		// Clear the items
+		this.doRequest("http://localhost:7878/example.links/clear.task");
+	}
+
+	private void doRequest(String url) throws Exception {
+		HttpResponse response = this.client.execute(new HttpGet(url));
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
-		
-		// Indicate response
 		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test
 
 	@Override
 	protected void tearDown() throws Exception {
+		this.client.getConnectionManager().shutdown();
 		AutoWireOfficeFloor.closeAllOfficeFloors();
 	}
 
