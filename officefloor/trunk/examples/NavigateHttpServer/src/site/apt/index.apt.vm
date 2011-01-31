@@ -1,0 +1,39 @@
+                                               -----------------------
+                                             Navigate HTTP Server Example 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Navigate Http Server Example>>
+
+  This example demonstrates ...
+  
+Code
+
+  The following is the <<<main>>> method to run the application.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/NavigateHttpServer.java}
+
+  The above ...
+
+  
+* TemplateOne
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateOne.ofp}
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateOne.java}
+
+
+* TemplateTwo
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateTwo.ofp}
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateTwo.java}
+
+
+Unit Test
+
+  The unit test toggles between the templates.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/navigatehttpserver/NavigateHttpServerTest.java}
+
