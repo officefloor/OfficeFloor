@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.example.pageflowhttpserver;
+package net.officefloor.example.navigatehttpserver;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
@@ -26,28 +26,28 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
- * Tests the {@link PageFlowHttpServer}.
+ * Tests the {@link NavigateHttpServer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class PageFlowHttpServerTest extends TestCase {
+public class NavigateHttpServerTest extends TestCase {
 
 	// START SNIPPET: test
 	private final HttpClient client = new DefaultHttpClient();
 
-	public void testPageInteraction() throws Exception {
+	public void testNavigate() throws Exception {
 
 		// Start server
-		PageFlowHttpServer.main(new String[0]);
+		NavigateHttpServer.main(new String[0]);
 
-		// Request the template
-		this.doRequest("http://localhost:7878/example");
+		// Request template one
+		this.doRequest("http://localhost:7878/one");
 
-		// Add an item
-		this.doRequest("http://localhost:7878/example.links/addItem.task?name=Daniel&description=founder");
+		// Click on link on template one
+		this.doRequest("http://localhost:7878/one.links/navigate.task");
 
-		// Clear the items
-		this.doRequest("http://localhost:7878/example.links/clear.task");
+		// Submit on template two
+		this.doRequest("http://localhost:7878/two.links/process.task");
 	}
 
 	private void doRequest(String url) throws Exception {
