@@ -18,21 +18,15 @@
 package net.officefloor.example.dynamichttpserver;
 
 /**
- * Customer bean.
+ * Time bean.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-public class Customer {
+public class Time {
 
-	private String name;
-
-	public Customer(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return this.name;
+	public long getTime() {
+		return System.currentTimeMillis();
 	}
 
 }

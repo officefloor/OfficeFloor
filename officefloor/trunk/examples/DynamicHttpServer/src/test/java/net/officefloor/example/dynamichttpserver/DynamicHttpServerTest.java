@@ -17,8 +17,6 @@
  */
 package net.officefloor.example.dynamichttpserver;
 
-import java.io.InputStream;
-
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 
@@ -47,13 +45,8 @@ public class DynamicHttpServerTest extends TestCase {
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
 
-		// Ensure correct content
-		InputStream expected = Thread.currentThread().getContextClassLoader().getResourceAsStream("Expected.html");
-		InputStream actual = response.getEntity().getContent();
-		for (int expectedChar = expected.read(); expectedChar != -1; expectedChar = expected.read()) {
-			int actualChar = actual.read();
-			assertEquals("Incorrect response", expectedChar, actualChar);
-		}
+		// Indicate response
+		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test
 
