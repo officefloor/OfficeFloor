@@ -17,6 +17,8 @@
 		<module>StaticHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>PageFlowHttpServer</module>
+		<module>NavigateHttpServer</module>
+		<module>DatabaseHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
 </project>
