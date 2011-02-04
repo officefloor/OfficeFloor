@@ -19,6 +19,7 @@
 		<module>PageFlowHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>DatabaseHttpServer</module>
+		<module>TeamHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
 </project>
