@@ -8,7 +8,7 @@ server.addHttpTemplate("example.ofp", Example.class, "example");
 server.addManagedObject(DataSourceManagedObjectSource.class, null, DataSource.class).loadProperties("datasource.properties");
         
 // Assign Team (specific thread pool) responsible for executing tasks with a DataSource dependency
-server.assignTeam(LeaderFollowerTeam.class, DataSource.class);
+server.assignTeam(LeaderFollowerTeamSource.class, DataSource.class).addProperty("size", "10");
         
 // Start the HTTP Server
 server.openOfficeFloor();
