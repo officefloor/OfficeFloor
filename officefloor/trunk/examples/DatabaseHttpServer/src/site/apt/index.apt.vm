@@ -1,0 +1,45 @@
+                                               -----------------------
+                                             Database HTTP Server Example 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Database Http Server Example>>
+
+  This example demonstrates ...
+  
+Code
+
+  The following is the <<<main>>> method to run the application.
+
+%{code-snippet|sh-params=highlight:[22,23,24,25]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/DatabaseHttpServer.java}
+
+  The above ...
+
+%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+  
+* Template.ofp
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+
+* Template class
+
+%{code-snippet|brush-autodetect=1|id=getRows|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=addRow|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=deleteRow|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/Template.java}
+
+* Remaining classes
+
+** Row class
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/Row.java}
+
+
+Unit Test
+
+  The unit test toggles between the templates.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/databasehttpserver/DatabaseHttpServerTest.java}
+

@@ -97,6 +97,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	/**
 	 * Requests page from HTTP Server.
 	 */
+	// START SNIPPET: test
 	public void testRequestPage() throws Exception {
 
 		// Request page
@@ -110,5 +111,6 @@ public class DatabaseHttpServerTest extends TestCase {
 		// Indicate response
 		response.getEntity().writeTo(System.out);
 	}
+	// END SNIPPET: test
 
 }

@@ -31,20 +31,14 @@ import javax.sql.DataSource;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: getRows
 public class Template {
 
-	/**
-	 * Obtains the {@link Row} instances.
-	 * 
-	 * @return {@link Row} instances.
-	 * @throws SQLException
-	 *             If fails to source {@link Row} instances from the database.
-	 */
 	public Row[] getRows(DataSource dataSource) throws SQLException {
 
 		Connection connection = dataSource.getConnection();
 		try {
-
+			
 			// Obtain the row instances
 			ResultSet resultSet = connection.createStatement().executeQuery(
 					"SELECT * FROM EXAMPLE ORDER BY ID");
@@ -57,24 +51,16 @@ public class Template {
 
 			// Return the row instances
 			return rows.toArray(new Row[rows.size()]);
-
+			
 		} finally {
 			connection.close();
 		}
 	}
+	// END SNIPPET: getRows
 
-	/**
-	 * Adds a {@link Row}.
-	 * 
-	 * @param row
-	 *            {@link Row} with attributes to add.
-	 * @param dataSource
-	 *            {@link DataSource}.
-	 * @throws SQLException
-	 *             If fails to add the {@link Row}.
-	 */
+	// START SNIPPET: addRow
 	public void addRow(Row row, DataSource dataSource) throws SQLException {
-
+		
 		Connection connection = dataSource.getConnection();
 		try {
 
@@ -89,16 +75,9 @@ public class Template {
 			connection.close();
 		}
 	}
+	// END SNIPPET: addRow
 
-	/**
-	 * Deletes the {@link Row}.
-	 * 
-	 * @param row
-	 *            {@link Row} containing Id to delete.
-	 * @param dataSource
-	 *            {@link DataSource}.
-	 * @throws SQLException
-	 */
+	// START SNIPPET: deleteRow
 	public void deleteRow(Row row, DataSource dataSource) throws SQLException {
 
 		Connection connection = dataSource.getConnection();
@@ -114,5 +93,6 @@ public class Template {
 			connection.close();
 		}
 	}
+	// END SNIPPET: deleteRow
 
 }
