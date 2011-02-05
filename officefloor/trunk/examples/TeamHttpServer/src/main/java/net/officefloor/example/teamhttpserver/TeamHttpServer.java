@@ -51,7 +51,7 @@ public class TeamHttpServer {
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 		source.addHttpTemplate("Template.ofp", Template.class, "example");
 		HttpParametersObjectManagedObjectSource.autoWire(source,
-				EncodeLetter.class);
+				EncryptLetter.class);
 		source.addManagedObject(DataSourceManagedObjectSource.class, null,
 				DataSource.class).loadProperties("datasource.properties");
 
@@ -63,6 +63,7 @@ public class TeamHttpServer {
 		// Start the HTTP server
 		source.openOfficeFloor();
 	}
+
 	// END SNIPPET: example
 
 	// START SNIPPET: createDatabase

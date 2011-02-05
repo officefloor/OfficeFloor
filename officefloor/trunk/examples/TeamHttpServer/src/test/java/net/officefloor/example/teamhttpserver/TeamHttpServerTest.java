@@ -99,16 +99,16 @@ public class TeamHttpServerTest extends TestCase {
 	 * Requests page from HTTP Server.
 	 */
 	// START SNIPPET: test
-	public void testRequestPage() throws Exception {
+	public void testRetrieveEncryptions() throws Exception {
 
 		// Request page
 		this.doRequest("http://localhost:7878/example");
 
-		// Encode looking up in database
-		this.doRequest("http://localhost:7878/example.links/encode.task?letter=A");
+		// Retrieving from database
+		this.doRequest("http://localhost:7878/example.links/encrypt.task?letter=A");
 
-		// Encode retrieving from cache
-		this.doRequest("http://localhost:7878/example.links/encode.task?letter=A");
+		// Looking up within cache
+		this.doRequest("http://localhost:7878/example.links/encrypt.task?letter=A");
 	}
 
 	private void doRequest(String url) throws Exception {

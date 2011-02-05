@@ -1,13 +1,13 @@
 <html>
 	<body>
-		<form action="#{encode}">
+		<form action="#{encrypt}">
 			Letter: <input name="letter" value="${letter}" type="text" maxlength="1" />
 			<input type="submit" value="Code" />
 		</form>
 		<p>Code: ${code}</p>
 		<br />
 		<!-- [ThreadNames] -->
-		<p>Encode thread: ${encodeThreadName}</p>
+		<p>Encrypt thread: ${encryptThreadName}</p>
 		<p>Retrieve from database thread: ${retrieveFromDatabaseThreadName}</p>
 	</body>
 </html>
