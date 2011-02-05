@@ -7,5 +7,3 @@
   <<Eclipse Update Site>>
   
   This module creates the Eclipse update site content for OfficeFloor.
-  
-  See {{{/eclipse.html}installing OfficeFloor within Eclipse}} for installation of OfficeFloor within Eclipse.

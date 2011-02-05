@@ -21,9 +21,9 @@
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./NavigateHttpServer/index.html}Navigate between pages}}  | Provides navigation between pages which shows how to link sections.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./DependencyInjectionHttpServer/index.html}Dependency injection for functionality}}  | HTTP Server with dependency injection.
+| {{{./DatabaseHttpServer/index.html}Dependency injection for functionality}}  | HTTP Server with dependency injection.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./TeamAllocationHttpServer/index.html}Team allocation within HTTP server}}  | HTTP Server with assignment of team to execute tasks.  A Team within OfficeFloor is in effect a thread pool and is the means to assign specific threads (thread pools) to execute specific tasks.
+| {{{./TeamHttpServer/index.html}Team allocation within HTTP server}}  | HTTP Server with assignment of team to execute tasks.  A Team within OfficeFloor is in effect a thread pool and is the means to assign specific threads (thread pools) to execute specific tasks.
 *----------------------------------------------------------+-----------------------------------------------------------+
 | Running within a Servlet container  | Current focus of OfficeFloor development is producing a Servlet Filter that can integrate OfficeFloor HTTP Server functionality into your existing java web applications. This will mean you can start taking advantage of OfficeFloor capabilities without having to significantly change your existing web application.
 *----------------------------------------------------------+-----------------------------------------------------------+
