@@ -49,11 +49,6 @@ public class DatabaseHttpServerTest extends TestCase {
 	 */
 	private static final String DATABASE_USER = "sa";
 
-	/**
-	 * {@link HttpClient}.
-	 */
-	private final HttpClient client = new DefaultHttpClient();
-
 	@Override
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
@@ -98,17 +93,24 @@ public class DatabaseHttpServerTest extends TestCase {
 	 * Requests page from HTTP Server.
 	 */
 	// START SNIPPET: test
-	public void testRequestPage() throws Exception {
+	private final HttpClient client = new DefaultHttpClient();
+
+	public void testInteraction() throws Exception {
 
 		// Request page
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:7878/example"));
+		this.doRequest("http://localhost:7878/example");
 
-		// Ensure successful
+		// Add row (will pick up parameter values from URL)
+		this.doRequest("http://localhost:7878/example.links/addRow.task?name=Daniel&description=Founder");
+
+		// Delete row
+		this.doRequest("http://localhost:7878/example.links/deleteRow.task?id=1");
+	}
+
+	private void doRequest(String url) throws Exception {
+		HttpResponse response = this.client.execute(new HttpGet(url));
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
-
-		// Indicate response
 		response.getEntity().writeTo(System.out);
 	}
 	// END SNIPPET: test

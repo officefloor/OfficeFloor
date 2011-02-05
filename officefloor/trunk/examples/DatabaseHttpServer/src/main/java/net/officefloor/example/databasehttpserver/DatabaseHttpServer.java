@@ -40,23 +40,14 @@ public class DatabaseHttpServer {
 	public static void main(String[] args) throws Exception {
 
 		// Create the database
-		jdbcDriver.class.newInstance();
-		Connection connection = DriverManager.getConnection(
-				"jdbc:hsqldb:mem:exampleDb", "sa", "");
-		connection.createStatement().execute(
-				"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY"
-						+ ", NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
-		connection
-				.createStatement()
-				.execute(
-						"INSERT INTO EXAMPLE (NAME, DESCRIPTION) VALUES ('TEST', 'TEST')");
+		createDatabase();
 
 		// Configure the HTTP server
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 		HttpParametersObjectManagedObjectSource.autoWire(source, Row.class);
 		source.addHttpTemplate("Template.ofp", Template.class, "example");
 
-		// Provide DataSource to database
+		// Provide DataSource to database for dependency injection
 		AutoWireObject object = source.addManagedObject(
 				DataSourceManagedObjectSource.class, null, DataSource.class);
 		object.loadProperties("datasource.properties");
@@ -65,5 +56,22 @@ public class DatabaseHttpServer {
 		source.openOfficeFloor();
 	}
 
+	// END SNIPPET: example
+
+	// START SNIPPET: createDatabase
+	private static void createDatabase() throws Exception {
+		Class.forName(jdbcDriver.class.getName());
+		Connection connection = DriverManager.getConnection(
+				"jdbc:hsqldb:mem:exampleDb", "sa", "");
+		connection
+				.createStatement()
+				.execute(
+						"CREATE TABLE EXAMPLE ( ID IDENTITY PRIMARY KEY, NAME VARCHAR(20), DESCRIPTION VARCHAR(256) )");
+		connection
+				.createStatement()
+				.execute(
+						"INSERT INTO EXAMPLE ( NAME, DESCRIPTION ) VALUES ( 'TEST', 'TEST' )");
+	}
+	// END SNIPPET: createDatabase
+
 }
-// END SNIPPET: example
