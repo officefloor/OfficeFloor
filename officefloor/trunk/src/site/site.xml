@@ -38,6 +38,7 @@
 			<script type="text/javascript" src="./scripts/shAutoloader.js"></script>
 			<script type="text/javascript" src="./scripts/shBrushJava.js"></script>
 			<script type="text/javascript" src="./scripts/shBrushXml.js"></script>
+			<script type="text/javascript" src="./scripts/shBrushPlain.js"></script>
 			<script type="text/javascript">
 				SyntaxHighlighter.defaults['toolbar'] = false;
 				SyntaxHighlighter.all();

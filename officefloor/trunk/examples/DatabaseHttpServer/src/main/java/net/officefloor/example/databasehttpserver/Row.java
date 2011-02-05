@@ -17,12 +17,12 @@
  */
 package net.officefloor.example.databasehttpserver;
 
-
 /**
  * Represents a row from the table in the database.
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class Row {
 
 	private int id;
@@ -31,22 +31,9 @@ public class Row {
 
 	private String description;
 
-	/**
-	 * Default constructor for loading HTTP parameters.
-	 */
 	public Row() {
 	}
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param id
-	 *            Primary key.
-	 * @param name
-	 *            Name.
-	 * @param description
-	 *            Description.
-	 */
 	public Row(int id, String name, String description) {
 		this.id = id;
 		this.name = name;
@@ -78,3 +65,4 @@ public class Row {
 	}
 
 }
+// END SNIPPET: example

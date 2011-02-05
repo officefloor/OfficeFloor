@@ -22,6 +22,7 @@ import java.sql.DriverManager;
 
 import javax.sql.DataSource;
 
+import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.jdbc.datasource.DataSourceManagedObjectSource;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -38,7 +39,7 @@ public class DatabaseHttpServer {
 
 	public static void main(String[] args) throws Exception {
 
-		// Create the IMDB
+		// Create the database
 		jdbcDriver.class.newInstance();
 		Connection connection = DriverManager.getConnection(
 				"jdbc:hsqldb:mem:exampleDb", "sa", "");
@@ -50,16 +51,17 @@ public class DatabaseHttpServer {
 				.execute(
 						"INSERT INTO EXAMPLE (NAME, DESCRIPTION) VALUES ('TEST', 'TEST')");
 
+		// Configure the HTTP server
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 		HttpParametersObjectManagedObjectSource.autoWire(source, Row.class);
-
-		// Provide template using DataSource
 		source.addHttpTemplate("Template.ofp", Template.class, "example");
 
-		// Provide DataSource to IMDB
-		source.addManagedObject(DataSourceManagedObjectSource.class, null,
-				DataSource.class).loadProperties("datasource.properties");
+		// Provide DataSource to database
+		AutoWireObject object = source.addManagedObject(
+				DataSourceManagedObjectSource.class, null, DataSource.class);
+		object.loadProperties("datasource.properties");
 
+		// Start the HTTP server
 		source.openOfficeFloor();
 	}
 
