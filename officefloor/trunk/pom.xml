@@ -861,6 +861,8 @@
 								<excludedPages>
 									<!-- Ignore checking javadoc -->
 									<excludedPage>apidocs/**</excludedPage>
+									<!-- Ignore source repositories -->
+									<excludedPage>**/source-repository.html</excludedPage>
 								</excludedPages>
 							</configuration>
 						</plugin>
