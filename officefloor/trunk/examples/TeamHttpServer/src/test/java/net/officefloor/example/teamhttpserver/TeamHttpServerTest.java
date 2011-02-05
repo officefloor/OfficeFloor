@@ -98,6 +98,7 @@ public class TeamHttpServerTest extends TestCase {
 	/**
 	 * Requests page from HTTP Server.
 	 */
+	// START SNIPPET: test
 	public void testRequestPage() throws Exception {
 
 		// Request page
@@ -110,17 +111,12 @@ public class TeamHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/example.links/encode.task?letter=A");
 	}
 
-	/**
-	 * Undertakes the request.
-	 * 
-	 * @param url
-	 *            URL of the request.
-	 */
 	private void doRequest(String url) throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(url));
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
+	// END SNIPPET: test
 
 }

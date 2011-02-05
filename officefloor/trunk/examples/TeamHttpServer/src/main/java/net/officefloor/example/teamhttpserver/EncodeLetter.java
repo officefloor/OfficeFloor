@@ -22,6 +22,7 @@ package net.officefloor.example.teamhttpserver;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class EncodeLetter {
 
 	private char letter;
@@ -35,3 +36,4 @@ public class EncodeLetter {
 	}
 
 }
+// END SNIPPET: example

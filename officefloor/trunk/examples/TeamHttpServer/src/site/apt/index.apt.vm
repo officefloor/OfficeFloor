@@ -1,0 +1,54 @@
+                                               -----------------------
+                                              Team HTTP Server Example 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Team Http Server Example>>
+
+  This example demonstrates ...
+  
+Code
+
+  The following is the <<<main>>> method to run the application.
+
+%{code-snippet|sh-params=highlight:[16,17,18,19]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/TeamHttpServer.java}
+
+  The above ...
+
+%{code-snippet|sh-params=first-line:24|brush-autodetect=1|id=createDatabase|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/TeamHttpServer.java}
+
+%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+  
+* Template.ofp
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
+
+* Template class
+
+%{code-snippet|brush-autodetect=1|id=values|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=flows|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=encode|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=retrieveFromDatabase|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/Template.java}
+
+%{code-snippet|brush-autodetect=1|id=setDisplayCode|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/Template.java}
+
+* Remaining classes
+
+** EncodeLetter class
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/EncodeLetter.java}
+
+** LetterCode class
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/teamhttpserver/LetterCode.java}
+
+Unit Test
+
+  The unit test toggles between the templates.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/teamhttpserver/TeamHttpServerTest.java}
+
