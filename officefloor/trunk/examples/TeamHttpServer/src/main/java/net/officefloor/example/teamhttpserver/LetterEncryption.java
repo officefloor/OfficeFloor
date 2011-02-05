@@ -17,23 +17,31 @@
  */
 package net.officefloor.example.teamhttpserver;
 
+import java.io.Serializable;
+
 /**
- * Request to encode the letter.
+ * Encription of the letter.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-public class EncodeLetter {
+public class LetterEncryption implements Serializable {
 
 	private char letter;
 
-	public void setLetter(String letter) {
-		this.letter = (letter.length() == 0 ? ' ' : letter.charAt(0));
+	private char code;
+
+	public LetterEncryption(char letter, char code) {
+		this.letter = letter;
+		this.code = code;
 	}
 
 	public char getLetter() {
 		return this.letter;
 	}
 
+	public char getCode() {
+		return this.code;
+	}
 }
 // END SNIPPET: example
