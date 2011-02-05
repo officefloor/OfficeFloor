@@ -24,6 +24,7 @@ import java.io.Serializable;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class LetterCode implements Serializable {
 
 	private char letter;
@@ -43,3 +44,4 @@ public class LetterCode implements Serializable {
 		return this.code;
 	}
 }
+// END SNIPPET: example

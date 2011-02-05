@@ -45,29 +45,43 @@ public class TeamHttpServer {
 	public static void main(String[] args) throws Exception {
 
 		// Create the database
-		jdbcDriver.class.newInstance();
-		Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:exampleDb", "sa", "");
-		connection.createStatement().execute("CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
-		PreparedStatement statement = connection.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )");
+		createDatabase();
+
+		// Configure the HTTP server
+		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+		source.addHttpTemplate("Template.ofp", Template.class, "example");
+		HttpParametersObjectManagedObjectSource.autoWire(source,
+				EncodeLetter.class);
+		source.addManagedObject(DataSourceManagedObjectSource.class, null,
+				DataSource.class).loadProperties("datasource.properties");
+
+		// Configure team for all database tasks
+		AutoWireTeam team = source.assignTeam(LeaderFollowerTeamSource.class,
+				DataSource.class);
+		team.addProperty("size", "10");
+
+		// Start the HTTP server
+		source.openOfficeFloor();
+	}
+	// END SNIPPET: example
+
+	// START SNIPPET: createDatabase
+	private static void createDatabase() throws Exception {
+		Class.forName(jdbcDriver.class.getName());
+		Connection connection = DriverManager.getConnection(
+				"jdbc:hsqldb:mem:exampleDb", "sa", "");
+		connection
+				.createStatement()
+				.execute(
+						"CREATE TABLE LETTER_CODE ( LETTER CHAR(1) PRIMARY KEY, CODE CHAR(1) )");
+		PreparedStatement statement = connection
+				.prepareStatement("INSERT INTO LETTER_CODE ( LETTER, CODE ) VALUES ( ?, ? )");
 		for (char letter = ' '; letter <= 'z'; letter++) {
 			char code = (char) ('z' - letter + ' '); // simple reverse order
 			statement.setString(1, String.valueOf(letter));
 			statement.setString(2, String.valueOf(code));
 			statement.execute();
 		}
-
-		// Configure the HTTP server
-		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
-		source.addHttpTemplate("Template.ofp", Template.class, "example");
-		HttpParametersObjectManagedObjectSource.autoWire(source, EncodeLetter.class);
-		source.addManagedObject(DataSourceManagedObjectSource.class, null, DataSource.class).loadProperties("datasource.properties");
-
-		// Configure team for all database tasks
-		AutoWireTeam team = source.assignTeam(LeaderFollowerTeamSource.class, DataSource.class);
-		team.addProperty("size", "10");
-
-		// Start the HTTP server
-		source.openOfficeFloor();
 	}
+	// END SNIPPET: createDatabase
 }
-// END SNIPPET: example

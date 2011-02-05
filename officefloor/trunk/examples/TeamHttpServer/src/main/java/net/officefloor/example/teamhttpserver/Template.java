@@ -37,13 +37,9 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: values
 @HttpSessionStateful
 public class Template implements Serializable {
-
-	@FlowInterface
-	public static interface PageFlows {
-		void retrieveFromDatabase(char letter);
-	}
 
 	private Map<Character, LetterCode> cache = new HashMap<Character, LetterCode>();
 
@@ -54,7 +50,29 @@ public class Template implements Serializable {
 	public LetterCode getTemplate() {
 		return this.displayCode;
 	}
+	
+	public Template getThreadNames() {
+		return this;
+	}
 
+	public String getEncodeThreadName() {
+		return this.encodeThreadName;
+	}
+
+	public String getRetrieveFromDatabaseThreadName() {
+		return this.retrieveFromDatabaseThreadName;
+	}
+	// END SNIPPET: values
+
+
+	// START SNIPPET: flows
+	@FlowInterface
+	public static interface PageFlows {
+		void retrieveFromDatabase(char letter);
+	}
+	// END SNIPPET: flows
+
+	// START SNIPPET: encode
 	@NextTask("setDisplayCode")
 	public LetterCode encode(EncodeLetter request, PageFlows flows) {
 
@@ -73,7 +91,9 @@ public class Template implements Serializable {
 		flows.retrieveFromDatabase(letter);
 		return null; // for compiler
 	}
+	// END SNIPPET: encode
 
+	// START SNIPPET: retrieveFromDatabase
 	@NextTask("setDisplayCode")
 	public LetterCode retrieveFromDatabase(@Parameter char letter,
 			DataSource dataSource) throws SQLException {
@@ -81,6 +101,7 @@ public class Template implements Serializable {
 		// Specify thread name
 		this.retrieveFromDatabaseThreadName = Thread.currentThread().getName();
 
+		// Retrieve from database and cache
 		Connection connection = dataSource.getConnection();
 		try {
 			PreparedStatement statement = connection
@@ -91,6 +112,7 @@ public class Template implements Serializable {
 			String code = resultSet.getString("CODE");
 			LetterCode letterCode = new LetterCode(letter, code.charAt(0));
 
+			// Cache
 			this.cache.put(new Character(letter), letterCode);
 
 			return letterCode;
@@ -98,22 +120,13 @@ public class Template implements Serializable {
 			connection.close();
 		}
 	}
+	// END SNIPPET: retrieveFromDatabase
 
+	// START SNIPPET: setDisplayCode
 	@NextTask("getTemplate")
 	public void setDisplayCode(@Parameter LetterCode code) {
 		this.displayCode = code;
 	}
-
-	public Template getThreadNames() {
-		return this;
-	}
-
-	public String getEncodeThreadName() {
-		return this.encodeThreadName;
-	}
-
-	public String getRetrieveFromDatabaseThreadName() {
-		return this.retrieveFromDatabaseThreadName;
-	}
+	// END SNIPPET: setDisplayCode
 
 }
