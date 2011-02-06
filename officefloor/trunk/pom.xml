@@ -45,9 +45,7 @@
 		<site>
 			<id>site.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>
-				scp://sagenschneider@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs
-			</url>
+			<url>sftp://sagenschneider,officefloor@frs.sourceforge.net/home/groups/o/of/officefloor/htdocs</url>
 		</site>
 		<repository>
 			<id>repo.officefloor.sf.net</id>
@@ -418,6 +416,14 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
+		<extensions>
+			<extension>
+				<!-- Allow for scpexe distribution -->
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-7</version>
+			</extension>
+		</extensions>
 		<pluginManagement>
 			<plugins>
 				<plugin>
