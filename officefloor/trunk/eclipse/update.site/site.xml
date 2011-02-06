@@ -6,15 +6,14 @@
 	<description name="OfficeFloor" url="http://www.officefloor.net"><![CDATA[Eclipse update site for OfficeFloor]]></description>
 
 	<!-- OfficeFloor feature -->
-	<feature url="features/net.officefloor.feature_0.2.0.jar" id="net.officefloor.feature"
-		version="0.2.0">
+	<feature url="features/net.officefloor.feature_0.3.0.jar" id="net.officefloor.feature"
+		version="0.3.0">
 		<category name="OfficeFloor" />
 	</feature>
 
-
 	<!-- OfficeFloor plug-ins feature -->
-	<feature url="features/net.officefloor.plugins.feature_0.2.1.jar"
-		id="net.officefloor.plugins.feature" version="0.2.1">
+	<feature url="features/net.officefloor.plugins.feature_0.3.0.jar"
+		id="net.officefloor.plugins.feature" version="0.3.0">
 		<category name="OfficeFloor_Plugins" />
 	</feature>
 

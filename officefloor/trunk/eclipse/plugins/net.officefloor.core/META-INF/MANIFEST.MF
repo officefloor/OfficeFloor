@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Core
 Bundle-SymbolicName: net.officefloor.core;singleton:=true
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 0.2.0
+Bundle-Version: 0.3.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Export-Package: net.officefloor.building.console,
@@ -136,11 +136,10 @@ Export-Package: net.officefloor.building.console,
  net.officefloor.plugin.xml.unmarshall.translate,
  net.officefloor.plugin.xml.unmarshall.tree
 Bundle-ClassPath: .,
- officeframe-0.2.0.jar,
- officemodelgen-0.2.0.jar,
- officexml-0.2.0.jar,
- officecompiler-0.2.1.jar,
- officebuilding-0.2.1.jar,
+ officeframe-1.0.0.jar,
+ officexml-1.0.0.jar,
+ officecompiler-1.0.0.jar,
+ officebuilding-1.0.0.jar,
  aether-api-1.8.jar,
  aether-connector-asynchttpclient-1.8.jar,
  aether-connector-file-1.8.jar,

@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.example.weborchestration</groupId>
 		<artifactId>WebOrchestration</artifactId>
-		<version>0.0.1</version>
+		<version>0.3.0</version>
 	</parent>
 	<artifactId>WebTests</artifactId>
-	<version>0.0.1</version>
+	<version>0.3.0</version>
 	<packaging>jar</packaging>
 	<name>WebTests</name>
 	<description>Set of tests to validate the Web examples</description>
