@@ -8,12 +8,6 @@
 
   OfficeFloor is an Inversion of Control 2.0 implementation that focuses on dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - there by really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
 
-So why another framework?
-  
-  Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
-  
-  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enables {{{./promote-good-design.html}promoting good designs}}.
-  
 Simple Example
 
   The following provides a simple example of OfficeFloor capabilities via its web plug-in: 
@@ -21,7 +15,6 @@ Simple Example
 %{code-snippet|sh-params=highlight:[10,11]|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 
   Further examples can be found {{{./examples/index.html}here}}.
-
 
 * Graphical Configuration
 
@@ -31,6 +24,12 @@ Simple Example
 
   See the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}} for further configuration and watch the {{{./demo.html}demo}}.
 
+So why another framework?
+  
+  Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
+  
+  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enables {{{./promote-good-design.html}promoting good designs}}.
+  
 Find out more
 
   To find out more about OfficeFloor:
