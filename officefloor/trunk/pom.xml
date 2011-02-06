@@ -10,26 +10,32 @@
 	<description>Parent OfficeFloor</description>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
-	<issueManagement>
-		<system>Tracker</system>
-		<url>http://sourceforge.net/tracker/?atid=799427&amp;group_id=156349</url>
-	</issueManagement>
 	<developers>
 		<developer>
 			<id>sagenschneider</id>
 			<name>Daniel Sagenschneider</name>
 			<email>sagenschneider@users.sourceforge.net</email>
 			<roles>
+				<role>Founder</role>
 				<role>Administrator</role>
 				<role>Developer</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>melanies</id>
+	</developers>
+	<contributors>
+		<contributor>
 			<name>Melanie Sagenschneider</name>
 			<email>melanies@users.sourceforge.net</email>
-		</developer>
-	</developers>
+			<roles>
+				<role>Marketing</role>
+				<role>Graphics</role>
+			</roles>
+		</contributor>
+	</contributors>
+	<issueManagement>
+		<system>SourceForge</system>
+		<url>http://sourceforge.net/tracker/?group_id=156349</url>
+	</issueManagement>
 	<scm>
 		<connection>scm:svn:http://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
 		<developerConnection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</developerConnection>
@@ -603,7 +609,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Allow SVN tagging via command: mvn scm:tag -->
+				<!-- Allow SVN tagging via command: -->
+				<!-- -->
+				<!-- mvn scm:tag -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-scm-plugin</artifactId>
 				<configuration>
@@ -842,6 +850,25 @@
 										<report>mailing-list</report>
 										<report>issue-tracking</report>
 										<report>scm</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+						<plugin>
+							<!-- Changes -->
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-changes-plugin</artifactId>
+							<version>2.4</version>
+							<configuration>
+								<issueLinkTemplatePerSystem>
+									<!-- All to link to search for listing of all changes -->
+									<SourceForge>http://sourceforge.net/search/index.php?group_id=156349&amp;type_of_search=artifact&amp;status_id[]=2&amp;form_submit=Search&amp;%ISSUE%</SourceForge>
+								</issueLinkTemplatePerSystem>
+							</configuration>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>changes-report</report>
 									</reports>
 								</reportSet>
 							</reportSets>
