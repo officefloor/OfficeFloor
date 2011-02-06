@@ -74,6 +74,7 @@
 			<item name="Principles" href="./principles.html" />
 			<item name="Job Based Architecture" href="./core/officeframe/job-based-architecture.html" />
 			<item name="Graphical Configuration" href="./eclipse/graphical-configuration.html" />
+			<item name="Releases" href="./changes-report.html" />
 		</menu>
 		<menu name="Start using">
 			<item name="Eclipse" href="./eclipse/index.html" />
