@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse OfficeFloor Demo
 Bundle-SymbolicName: net.officefloor.demo;singleton:=true
-Bundle-Version: 0.2.0
+Bundle-Version: 0.3.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.ui;bundle-version="0.2.0",
- net.officefloor.core;bundle-version="0.2.0"
+Require-Bundle: net.officefloor.ui;bundle-version="0.3.0",
+ net.officefloor.core;bundle-version="0.3.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui
@@ -22,4 +22,4 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.widgets,
  org.eclipse.ui
 Bundle-ClassPath: .,
- officetool_demo-0.2.0.jar
+ officetool_demo-1.0.0.jar

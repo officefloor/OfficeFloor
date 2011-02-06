@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>0.2.2</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -65,7 +65,7 @@
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.skin.version>0.2.0</officefloor.skin.version>
+		<officefloor.skin.version>1.0.0</officefloor.skin.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
 	<repositories>
@@ -108,166 +108,166 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>core</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officeframe</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officexml</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officemodelgen</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officebuilding</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 			</dependency>
 			<!-- ==================== Plugins ==================== -->
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>plugins</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_ejb</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_hibernate</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jdbc</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jms</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jndi</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_servlet</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_socket</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_spring</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_web</artifactId>
-				<version>0.2.1</version>
+				<version>1.0.0</version>
 			</dependency>
 			<!-- ===================== Tools ==================== -->
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
 				<artifactId>tools</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
 				<artifactId>officetool_demo</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
 				<artifactId>officetool_filingcabinet</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<!-- =================== Eclipse ==================== -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>eclipse</artifactId>
-				<version>0.2.1</version>
+				<version>0.3.0</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.core</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.plugins.feature</artifactId>
-				<version>0.2.1</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.demo</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.filingcabinet</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.jdbc</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.jndi</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.socket</artifactId>
-				<version>0.2.1</version>
+				<version>0.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.ui</artifactId>
-				<version>0.2.0</version>
+				<version>0.3.0</version>
 			</dependency>
 			<!-- ======================= Maven ================== -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven</artifactId>
-				<version>0.2.0</version>
-				<type>version</type>
+				<version>1.0.0</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-officefloor-plugin</artifactId>
-				<version>0.2.0</version>
+				<version>1.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
@@ -560,7 +560,7 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>maven-officefloor-plugin</artifactId>
-					<version>0.2.0</version>
+					<version>1.0.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>0.2.2</version>
+		<version>1.0.0</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
 	<artifactId>examples</artifactId>
-	<version>0.0.2</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<name>Examples</name>
 	<description>Example uses of OfficeFloor</description>

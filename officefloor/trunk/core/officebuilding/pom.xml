@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.core</groupId>
 		<artifactId>core</artifactId>
-		<version>0.2.1</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>officebuilding</artifactId>
-	<version>0.2.1</version>
+	<version>1.0.0</version>
 	<name>OfficeBuilding</name>
 	<description>Building to contain the OfficeFloors</description>
 	<build>
