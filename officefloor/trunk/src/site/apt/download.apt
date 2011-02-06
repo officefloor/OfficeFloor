@@ -23,7 +23,7 @@ OfficeFloor quick install
 
 OfficeFloor Maven Repository
 
-  The OfficeFloor maven repository is located at:  {{{http://www.officefloor.net/maven2}http://www.officefloor.net/maven2}}
+  The OfficeFloor maven repository is located at:  {{{http://www.officefloor.net/maven2/}http://www.officefloor.net/maven2/}}
   
   This is configured in the pom.xml file as follows:
   
