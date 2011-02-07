@@ -41,7 +41,7 @@
 								<exec dir="${project.basedir}/target/site" executable="rsync"
 									failonerror="true">
 									<arg
-										line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net:/home/frs/project/o/of/officefloor/eclipse/update" />
+										line="-e ssh -r . sagenschneider,officefloor@frs.sourceforge.net/home/frs/project/o/of/officefloor/eclipse/update" />
 								</exec>
 							</target>
 						</configuration>
