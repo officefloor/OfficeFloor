@@ -12,6 +12,9 @@
 	<name>Eclipse Feature</name>
 	<description>Feature for the core plug-ins for Eclipse</description>
 	<packaging>eclipse-feature</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

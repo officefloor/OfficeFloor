@@ -12,6 +12,9 @@
 	<name>Eclipse Update Site</name>
 	<description>Generates update site content for OfficeFloor in Eclipse.</description>
 	<packaging>eclipse-update-site</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<distributionManagement>
 		<repository>
 			<!-- Deploy to temp to not release site.zip -->

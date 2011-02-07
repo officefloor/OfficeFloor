@@ -12,6 +12,9 @@
 	<name>Eclipse OfficeFloor Demo</name>
 	<description>OfficeFloor tool for generating demos</description>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

@@ -12,6 +12,9 @@
 	<packaging>jar</packaging>
 	<name>WebTests</name>
 	<description>Set of tests to validate the Web examples</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.seleniumhq.selenium.client-drivers</groupId>

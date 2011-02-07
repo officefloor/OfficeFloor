@@ -11,6 +11,9 @@
 	<version>1.0.0</version>
 	<name>Hibernate Plug-in</name>
 	<description>OfficeFloor plug-in for Hibernate</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.hibernate</groupId>

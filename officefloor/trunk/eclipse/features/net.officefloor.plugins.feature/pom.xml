@@ -12,6 +12,9 @@
 	<name>Plug-ins Eclipse Feature</name>
 	<description>Eclipse Feature for the additional OfficeFloor Plug-ins</description>
 	<packaging>eclipse-feature</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

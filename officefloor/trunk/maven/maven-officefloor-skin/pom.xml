@@ -10,6 +10,9 @@
 	<version>1.0.0</version>
 	<name>Site Skin</name>
 	<description>Skin for OfficeFloor web site</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

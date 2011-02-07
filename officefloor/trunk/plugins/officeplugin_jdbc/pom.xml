@@ -11,6 +11,9 @@
 	<version>1.0.0</version>
     <name>JDBC Plug-in</name>
     <description>OfficeFloor plug-in for JDBC</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
     <dependencies>
         <dependency>
             <groupId>commons-dbcp</groupId>

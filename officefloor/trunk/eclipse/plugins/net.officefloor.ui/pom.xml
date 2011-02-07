@@ -12,6 +12,9 @@
 	<name>Eclipse UI</name>
 	<description>OfficeFloor user interface Eclipse plug-in</description>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

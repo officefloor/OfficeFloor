@@ -11,6 +11,9 @@
 	<version>1.0.0</version>
 	<name>OfficeFrame</name>
 	<description>Frame that executes the applications</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

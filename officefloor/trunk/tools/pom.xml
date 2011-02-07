@@ -13,6 +13,9 @@
 	<packaging>pom</packaging>
 	<name>Tools</name>
 	<description>Tools for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<modules>
 		<module>officetool_demo</module>
 		<module>officetool_filingcabinet</module>

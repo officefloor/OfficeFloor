@@ -12,6 +12,9 @@
 	<packaging>war</packaging>
 	<name>WebStruts-war</name>
 	<description>Web components of the Web Struts Example</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

@@ -12,6 +12,7 @@
 	<name>Maven OfficeFloor Plugin</name>
 	<description>Maven plug-in to start/stop an OfficeFloor instance</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Properties for reporting -->
 		<projectGroupId>${project.groupId}</projectGroupId>
 		<projectArtifactId>${project.artifactId}</projectArtifactId>

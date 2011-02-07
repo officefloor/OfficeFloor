@@ -13,6 +13,7 @@
 	<name>Static HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a Static HTTP Server</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
 	</properties>
 	<dependencies>

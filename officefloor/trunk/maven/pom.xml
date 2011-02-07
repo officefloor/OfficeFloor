@@ -13,6 +13,9 @@
 	<packaging>pom</packaging>
 	<name>Maven</name>
 	<description>Maven components for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<modules>
 		<module>maven-officefloor-plugin</module>
 		<module>maven-officefloor-skin</module>

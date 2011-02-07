@@ -13,6 +13,7 @@
 	<name>Page Flow HTTP Server Example</name>
 	<description>Example of using OfficeFloor for page flow within a HTTP Server</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
 	</properties>
 	<dependencies>

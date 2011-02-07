@@ -12,6 +12,9 @@
 	<name>Eclipse Filing Cabinet</name>
 	<description>Eclipse plug-in for Filing Cabinet</description>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
