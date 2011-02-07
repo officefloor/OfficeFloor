@@ -45,7 +45,7 @@
 		<site>
 			<id>site.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>sftp://sagenschneider,officefloor@frs.sourceforge.net/home/groups/o/of/officefloor/htdocs</url>
+			<url>sftp://sagenschneider,officefloor@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</url>
 		</site>
 		<repository>
 			<id>repo.officefloor.sf.net</id>

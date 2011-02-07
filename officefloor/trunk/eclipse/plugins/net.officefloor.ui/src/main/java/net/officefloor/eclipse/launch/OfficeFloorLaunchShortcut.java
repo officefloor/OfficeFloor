@@ -124,7 +124,7 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			if (launchConfig == null) {
 				// Ensure unique configuration name for launch
 				String uniqueConfigName = launchManager
-						.generateLaunchConfigurationName(resourceName);
+						.generateUniqueLaunchConfigurationNameFrom(resourceName);
 
 				// Create launch configuration (include project for defaults)
 				ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType
