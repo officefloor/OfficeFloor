@@ -11,6 +11,9 @@
 	<version>1.0.0</version>
 	<name>Filing Cabinet Tool</name>
 	<description>OfficeFloor tool for filing cabinet</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>hsqldb</groupId>

@@ -13,6 +13,7 @@
 	<name>Team HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a HTTP Server with specific teams for tasks</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
 	</properties>
 	<dependencies>

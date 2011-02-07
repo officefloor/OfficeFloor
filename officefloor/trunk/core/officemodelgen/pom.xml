@@ -13,6 +13,9 @@
 	<description>
 		Generates the OfficeFloor model for configuring via an IDE.  This is a code generator internal to OfficeFloor to save effort in writing the model classes.
 	</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

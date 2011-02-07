@@ -12,6 +12,9 @@
 	<packaging>ear</packaging>
 	<name>WebStruts-ear</name>
 	<description>EAR generation of the Web Struts Example</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

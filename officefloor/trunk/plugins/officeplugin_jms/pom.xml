@@ -11,6 +11,9 @@
 	<version>1.0.0</version>
 	<name>JMS Plug-in</name>
 	<description>OfficeFloor plug-in for JMS</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>

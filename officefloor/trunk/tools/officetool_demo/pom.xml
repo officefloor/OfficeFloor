@@ -10,8 +10,10 @@
 	<artifactId>officetool_demo</artifactId>
 	<version>1.0.0</version>
 	<name>Demo Tool</name>
-	<description>OfficeFloor tool for creating demo
-	</description>
+	<description>OfficeFloor tool for creating demo</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

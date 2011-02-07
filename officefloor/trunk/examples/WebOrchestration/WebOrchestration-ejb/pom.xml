@@ -12,6 +12,9 @@
 	<packaging>ejb</packaging>
 	<name>WebOrchestration-ejb</name>
 	<description>EJB components of the Web Orchestration Examples</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

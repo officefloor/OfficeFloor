@@ -13,6 +13,7 @@
 	<name>Dynamic HTTP Server Example</name>
 	<description>Example of using OfficeFloor for dynamic content from a HTTP Server</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
 	</properties>
 	<dependencies>

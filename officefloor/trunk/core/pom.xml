@@ -13,6 +13,9 @@
 	<packaging>pom</packaging>
 	<name>Core</name>
 	<description>Core components for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<modules>
 		<module>officeframe</module>
 		<module>officexml</module>

@@ -13,6 +13,9 @@
 	<packaging>pom</packaging>
 	<name>Eclipse</name>
 	<description>Eclipse plugins and features for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<modules>
 		<!-- Core eclipse functionality -->
 		<module>plugins/net.officefloor.core</module>

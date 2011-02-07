@@ -13,6 +13,7 @@
 	<name>Database HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a HTTP Server connected to a database</description>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
 	</properties>
 	<dependencies>
