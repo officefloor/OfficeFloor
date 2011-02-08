@@ -268,9 +268,9 @@
 			</dependency>
 			<!-- ================ Additional dependencies ======= -->
 			<dependency>
-				<groupId>javax</groupId>
+				<groupId>javaee</groupId>
 				<artifactId>javaee-api</artifactId>
-				<version>6.0</version>
+				<version>5</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -320,7 +320,7 @@
 			<dependency>
 				<groupId>org.apache.openejb</groupId>
 				<artifactId>openejb-core</artifactId>
-				<version>3.1.3</version>
+				<version>3.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.struts</groupId>
