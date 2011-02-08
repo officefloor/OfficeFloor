@@ -790,8 +790,7 @@
 				<executions>
 					<execution>
 						<id>javadoc</id>
-						<!-- TODO provide javadoc on site generation -->
-						<!-- <phase>pre-site</phase> -->
+						<phase>pre-site</phase>
 						<goals>
 							<goal>aggregate</goal>
 						</goals>
