@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="office floor team name" />
+    <field type="OfficeFloorManagedObjectSourceTeamModel" name="office floor managed object source team"
+        end-field="office floor team" />
+    <field type="OfficeFloorTeamModel" name="office floor team"
+        end-list="office floor managed object source team" />
+</model>
