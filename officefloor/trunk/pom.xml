@@ -45,12 +45,12 @@
 		<site>
 			<id>site.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>sftp://sagenschneider,officefloor@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</url>
+			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/groups/o/of/officefloor/htdocs</url>
 		</site>
 		<repository>
 			<id>repo.officefloor.sf.net</id>
 			<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
-			<url>sftp://sagenschneider,officefloor@frs.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
+			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
 		</repository>
 	</distributionManagement>
 	<modules>
