@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
@@ -201,6 +202,44 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure on submit link that has next {@link Task} instances that if last
+	 * {@link Task} in {@link Flow} does not indicate {@link NextTask} that the
+	 * template is rendered.
+	 */
+	public void testRenderByDefault() throws Exception {
+
+		// Start the server
+		this.startHttpServer("SubmitTemplate.ofp",
+				RenderByDefaultTemplateLogic.class);
+
+		// Ensure render template again by default on link submit
+		this.assertHttpRequest("/SECTION.links/submit.task",
+				"Submit-RenderByDefault-/SECTION.links/submit.task");
+	}
+
+	/**
+	 * Template logic for testing.
+	 */
+	public static class RenderByDefaultTemplateLogic {
+
+		@NextTask("renderByDefault")
+		public void submit(ServerHttpConnection connection) throws IOException {
+			writeMessage(connection, "Submit");
+		}
+
+		// Next is to render the template
+		public void renderByDefault(ServerHttpConnection connection)
+				throws IOException {
+			writeMessage(connection, "-RenderByDefault-");
+		}
+
+		// Required for test configuration
+		@NextTask("doExternalFlow")
+		public void required() {
+		}
+	}
+
+	/**
 	 * Sends the {@link HttpRequest}.
 	 * 
 	 * @param uri
@@ -292,6 +331,24 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Open the OfficeFloor
 		this.officeFloor = source.openOfficeFloor();
+	}
+
+	/**
+	 * Writes the message.
+	 * 
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 * @param message
+	 *            Message.
+	 * @throws IOException
+	 *             If fails to write the message.
+	 */
+	private static void writeMessage(ServerHttpConnection connection,
+			String message) throws IOException {
+		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
+				.getBody().getOutputStream());
+		writer.write(message);
+		writer.flush();
 	}
 
 	/**

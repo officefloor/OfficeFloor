@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
 	<artifactId>examples</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>Examples</name>
 	<description>Example uses of OfficeFloor</description>
@@ -22,4 +22,16 @@
 		<module>TeamHttpServer</module>
 		<module>WebOrchestration</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Dependency Management for dependencies -->
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>plugins</artifactId>
+				<version>1.0.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

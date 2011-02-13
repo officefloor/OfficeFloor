@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.core</groupId>
 	<artifactId>core</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>Core</name>
 	<description>Core components for OfficeFloor</description>
@@ -23,6 +23,42 @@
 		<module>officecompiler</module>
 		<module>officebuilding</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Dependency Management for core -->
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>core</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officeframe</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officexml</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officemodelgen</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officecompiler</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>officebuilding</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
