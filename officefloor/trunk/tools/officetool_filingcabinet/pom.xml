@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.tool</groupId>
 		<artifactId>tools</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Filing Cabinet Tool</name>
 	<description>OfficeFloor tool for filing cabinet</description>
 	<properties>

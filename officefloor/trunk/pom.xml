@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -63,7 +63,7 @@
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.skin.version>1.0.0</officefloor.skin.version>
+		<officefloor.skin.version>1.0.1</officefloor.skin.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
 	<repositories>
@@ -96,177 +96,6 @@
 	</pluginRepositories>
 	<dependencyManagement>
 		<dependencies>
-			<!-- ===================== Core ===================== -->
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>core</artifactId>
-				<version>1.0.0</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officeframe</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officexml</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officemodelgen</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officecompiler</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officebuilding</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<!-- ==================== Plugins ==================== -->
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>plugins</artifactId>
-				<version>1.0.0</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_ejb</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_hibernate</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jdbc</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jms</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jndi</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_servlet</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_socket</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_spring</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_web</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<!-- ===================== Tools ==================== -->
-			<dependency>
-				<groupId>net.officefloor.tool</groupId>
-				<artifactId>tools</artifactId>
-				<version>1.0.0</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.tool</groupId>
-				<artifactId>officetool_demo</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.tool</groupId>
-				<artifactId>officetool_filingcabinet</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<!-- =================== Eclipse ==================== -->
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>eclipse</artifactId>
-				<version>0.3.0</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.core</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.feature</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.plugins.feature</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.demo</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.filingcabinet</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.jdbc</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.jndi</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.socket</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.ui</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-			<!-- ======================= Maven ================== -->
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven</artifactId>
-				<version>1.0.0</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-officefloor-plugin</artifactId>
-				<version>1.0.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-officefloor-skin</artifactId>
-				<version>${officefloor.skin.version}</version>
-			</dependency>
-			<!-- ================ Additional dependencies ======= -->
 			<dependency>
 				<groupId>javaee</groupId>
 				<artifactId>javaee-api</artifactId>
@@ -412,7 +241,7 @@
 	<build>
 		<extensions>
 			<extension>
-				<!-- Allow for scpexe distribution -->
+				<!-- Allow for scp distribution -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>1.0-beta-7</version>

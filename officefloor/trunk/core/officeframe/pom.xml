@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>net.officefloor.core</groupId>
 		<artifactId>core</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<artifactId>officeframe</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>OfficeFrame</name>
 	<description>Frame that executes the applications</description>
 	<properties>

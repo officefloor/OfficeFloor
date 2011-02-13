@@ -244,7 +244,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submitted");
+				"submitted" + SUBMIT_URI);
 	}
 
 	/**
@@ -260,7 +260,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submitted");
+				"submitted" + SUBMIT_URI);
 	}
 
 	/**

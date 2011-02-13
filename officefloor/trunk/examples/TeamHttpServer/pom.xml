@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor.example</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
 	<artifactId>TeamHttpServer</artifactId>
-	<version>0.0.2</version>
+	<version>1.0.1</version>
 	<name>Team HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a HTTP Server with specific teams for tasks</description>
 	<properties>

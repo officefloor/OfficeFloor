@@ -2,7 +2,11 @@
 	<files>
 		<!-- Ensure releasing latest version -->
 		<file>
-			<location>${basedir}/../pom.xml</location>
+			<location>${basedir}/../eclipse/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../examples/pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
 		

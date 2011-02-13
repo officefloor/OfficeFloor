@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.plugin</groupId>
 	<artifactId>plugins</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>Plugins</name>
 	<description>Plugin components for OfficeFloor</description>
@@ -24,10 +24,75 @@
 		<module>officeplugin_spring</module>
 		<module>officeplugin_web</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Dependency Management for dependencies -->
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>core</artifactId>
+				<version>1.0.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Dependency Management for plug-ins -->
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>plugins</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_ejb</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_hibernate</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_jdbc</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_jms</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_jndi</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_servlet</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_socket</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_spring</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_web</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Test the install pom.xml (as officebuilding should now be built)-->
+				<!-- Test the install pom.xml (as officebuilding should now be built) -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-invoker-plugin</artifactId>
 				<configuration>

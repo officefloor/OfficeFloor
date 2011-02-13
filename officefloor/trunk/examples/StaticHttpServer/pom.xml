@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor.example</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.example</groupId>
 	<artifactId>StaticHttpServer</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Static HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a Static HTTP Server</description>
 	<properties>

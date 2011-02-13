@@ -2,7 +2,15 @@
 	<files>
 		<!-- Ensure releasing latest version -->
 		<file>
-			<location>${basedir}/../pom.xml</location>
+			<location>${basedir}/../plugins/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../tools/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		<file>
+			<location>${basedir}/../maven/pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
 

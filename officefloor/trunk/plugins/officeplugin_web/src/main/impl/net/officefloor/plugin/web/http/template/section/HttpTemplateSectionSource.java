@@ -21,9 +21,12 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -205,6 +208,9 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		// Load the section class (with ability to link in template tasks)
 		classSource.sourceSection(designer, context);
 
+		// Keep track of template bean task keys
+		Set<String> templateBeanTaskKeys = new HashSet<String>();
+
 		// Load the HTTP template tasks
 		SectionTask firstTemplateTask = null;
 		SectionTask previousTemplateTask = null;
@@ -239,8 +245,12 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 			// Obtain the bean task method
 			String beanTaskName = "get" + templateTaskName;
+			String beanTaskKey = beanTaskName.toUpperCase();
 			TemplateBeanTask beanTask = this.templateBeanTasksByName
-					.get(beanTaskName.toUpperCase());
+					.get(beanTaskKey);
+
+			// Keep track of bean task keys
+			templateBeanTaskKeys.add(beanTaskKey);
 
 			// Ensure correct configuration, if template section requires bean
 			if (isRequireBean) {
@@ -363,8 +373,9 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Obtain the link method task
 			String linkMethodTaskName = LINK_METHOD_TASK_NAME_PREFIX
 					+ linkTaskName;
+			String linkMethodTaskKey = linkMethodTaskName.toUpperCase();
 			TemplateBeanTask methodTask = this.templateBeanTasksByName
-					.get(linkMethodTaskName.toUpperCase());
+					.get(linkMethodTaskKey);
 			if (methodTask == null) {
 				designer.addIssue("No backing method for link '" + linkTaskName
 						+ "'", AssetType.TASK, linkTaskName);
@@ -373,6 +384,22 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 			// Link handling of request to method
 			designer.link(linkTask, methodTask.task);
+		}
+
+		// Link bean tasks to re-render template by default
+		List<String> beanTaskNames = new ArrayList<String>(
+				this.templateBeanTasksByName.keySet());
+		Collections.sort(beanTaskNames);
+		for (String beanTaskKey : this.templateBeanTasksByName.keySet()) {
+
+			// Ignore template bean methods
+			if (templateBeanTaskKeys.contains(beanTaskKey)) {
+				continue;
+			}
+
+			// Obtain the bean method
+			TemplateBeanTask methodTask = this.templateBeanTasksByName
+					.get(beanTaskKey);
 
 			// Determine if method already indicating next task
 			if (!(methodTask.method.isAnnotationPresent(NextTask.class))) {

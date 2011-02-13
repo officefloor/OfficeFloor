@@ -5,10 +5,10 @@
     <parent>
 		<groupId>net.officefloor.plugin</groupId>
 		<artifactId>plugins</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <artifactId>officeplugin_jdbc</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
     <name>JDBC Plug-in</name>
     <description>OfficeFloor plug-in for JDBC</description>
 	<properties>

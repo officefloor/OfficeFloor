@@ -5,10 +5,10 @@
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>0.3.0</version>
+		<version>0.3.1</version>
 	</parent>
 	<artifactId>net.officefloor.ui</artifactId>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<name>Eclipse UI</name>
 	<description>OfficeFloor user interface Eclipse plug-in</description>
 	<packaging>eclipse-plugin</packaging>

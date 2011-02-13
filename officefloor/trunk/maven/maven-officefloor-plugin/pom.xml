@@ -4,10 +4,10 @@
 	<parent>
 		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<artifactId>maven-officefloor-plugin</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>maven-plugin</packaging>
 	<name>Maven OfficeFloor Plugin</name>
 	<description>Maven plug-in to start/stop an OfficeFloor instance</description>

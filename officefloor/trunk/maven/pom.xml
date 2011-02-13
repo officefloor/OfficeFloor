@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<groupId>net.officefloor.maven</groupId>
 	<artifactId>maven</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>Maven</name>
 	<description>Maven components for OfficeFloor</description>
@@ -20,4 +20,34 @@
 		<module>maven-officefloor-plugin</module>
 		<module>maven-officefloor-skin</module>
 	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Dependency Management for dependencies -->
+			<dependency>
+				<groupId>net.officefloor.core</groupId>
+				<artifactId>core</artifactId>
+				<version>1.0.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Dependency Management for maven -->
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-officefloor-plugin</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-officefloor-skin</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

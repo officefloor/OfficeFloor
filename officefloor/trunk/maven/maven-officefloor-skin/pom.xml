@@ -4,10 +4,10 @@
 	<parent>
 		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	<artifactId>maven-officefloor-skin</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>Site Skin</name>
 	<description>Skin for OfficeFloor web site</description>
 	<properties>
