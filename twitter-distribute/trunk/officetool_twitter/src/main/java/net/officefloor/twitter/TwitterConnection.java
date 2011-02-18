@@ -17,11 +17,10 @@
  */
 package net.officefloor.twitter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Set;
 
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -40,6 +39,11 @@ import twitter4j.http.AuthorizationFactory;
 public class TwitterConnection {
 
 	/**
+	 * Prefix text of distribution configuration tweet.
+	 */
+	private static final String DISTRIBUTE_PREFIX_TEXT = "distributed - ";
+
+	/**
 	 * {@link Twitter}.
 	 */
 	private final Twitter twitter;
@@ -47,20 +51,13 @@ public class TwitterConnection {
 	/**
 	 * Initiate.
 	 * 
+	 * @param properties
+	 *            {@link TwitterDistributeProperties}.
 	 * @throws Exception
 	 *             If fails to establish connection.
 	 */
-	public TwitterConnection() throws Exception {
-
-		// Load properties from user properties
-		File propertiesFile = new File(System.getProperty("user.home"),
-				"twitter-distribute.properties");
-		if (!propertiesFile.isFile()) {
-			throw new FileNotFoundException("Can not find properties file: "
-					+ propertiesFile.getPath());
-		}
-		Properties properties = new Properties();
-		properties.load(new FileReader(propertiesFile));
+	public TwitterConnection(TwitterDistributeProperties properties)
+			throws Exception {
 
 		// Obtain the authorization
 		Authorization authorisation = AuthorizationFactory
@@ -71,15 +68,64 @@ public class TwitterConnection {
 	}
 
 	/**
-	 * Obtains the tweets.
+	 * Obtains the tweets to distribute.
 	 * 
 	 * @return Listing of tweets.
 	 * @throws TwitterException
 	 *             If fails to obtain tweets.
 	 */
-	public List<Status> getTweets() throws TwitterException {
+	public List<Status> getTweetsToDistribute() throws TwitterException {
+
+		// Obtain all tweets
 		ResponseList<Status> tweets = this.twitter.getUserTimeline();
-		return tweets;
+
+		// Obtain the list of tweets to distribute
+		List<Status> potential = new LinkedList<Status>();
+		Set<String> tweetIds = new HashSet<String>();
+		for (Status tweet : tweets) {
+
+			// Determine if distribute confirmation tweet
+			String text = tweet.getText();
+			if (text.startsWith(DISTRIBUTE_PREFIX_TEXT)) {
+				// Add the distribution tweet id
+				String tweetId = text
+						.substring(DISTRIBUTE_PREFIX_TEXT.length());
+				tweetIds.add(tweetId.trim());
+				continue;
+			}
+
+			// Not distribution configuration tweet, so include for distribution
+			potential.add(tweet);
+		}
+
+		// Filter out any already distributed tweets
+		List<Status> tweetsToDistribute = new LinkedList<Status>();
+		for (Status tweet : potential) {
+
+			// Determine if already distributed tweet
+			String tweetId = String.valueOf(tweet.getId());
+			if (tweetIds.contains(tweetId)) {
+				continue; // ignore as already distributed
+			}
+
+			// Add tweet to distribute
+			tweetsToDistribute.add(tweet);
+		}
+
+		// Return the tweets to distribute
+		return tweetsToDistribute;
+	}
+
+	/**
+	 * Flags the tweet as distributed.
+	 * 
+	 * @param tweet
+	 *            Tweet to flag as distributed.
+	 * @throws TwitterException
+	 *             If fails to flag tweet distributed.
+	 */
+	public void flagTweetDistributed(Status tweet) throws TwitterException {
+		this.twitter.updateStatus(DISTRIBUTE_PREFIX_TEXT + tweet.getId());
 	}
 
 }
