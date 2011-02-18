@@ -19,6 +19,7 @@
 	<modules>
 		<module>officetool_demo</module>
 		<module>officetool_filingcabinet</module>
+		<module>officetool_twitter</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -46,6 +47,11 @@
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
 				<artifactId>officetool_filingcabinet</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.tool</groupId>
+				<artifactId>officetool_twitter</artifactId>
 				<version>1.0.1</version>
 			</dependency>
 		</dependencies>
