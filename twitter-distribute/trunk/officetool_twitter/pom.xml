@@ -54,6 +54,7 @@
 				<!-- Ensure integration tests included -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
 				<executions>
 					<execution>
 						<id>add-integration-test-source</id>
