@@ -23,6 +23,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import junit.framework.TestCase;
+
 /**
  * Twitter distribute properties.
  * 
@@ -53,13 +55,11 @@ public class TwitterDistributeProperties extends Properties {
 	 * @param name
 	 *            Name of the property.
 	 * @return Value for the property.
-	 * @throws IOException
-	 *             If property not configured.
 	 */
-	public String getEnsuredProperty(String name) throws IOException {
+	public String getEnsuredProperty(String name) {
 		String value = this.getProperty(name);
 		if (value == null) {
-			throw new IOException("Property '" + name + "' not configured");
+			TestCase.fail("Property '" + name + "' not configured");
 		}
 		return value;
 	}
