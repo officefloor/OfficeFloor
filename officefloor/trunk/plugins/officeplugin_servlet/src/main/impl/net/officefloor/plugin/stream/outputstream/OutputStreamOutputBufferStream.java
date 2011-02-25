@@ -57,45 +57,39 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	}
 
 	@Override
-	public void write(byte[] bytes) throws IOException {
-		// TODO implement OutputBufferStream.write
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.write");
+	public synchronized void write(byte[] bytes) throws IOException {
+		this.output.write(bytes);
 	}
 
 	@Override
-	public void write(byte[] data, int offset, int length) throws IOException {
-		// TODO implement OutputBufferStream.write
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.write");
+	public synchronized void write(byte[] data, int offset, int length)
+			throws IOException {
+		this.output.write(data, offset, length);
 	}
 
 	@Override
 	public void write(BufferPopulator populator) throws IOException {
-		// TODO implement OutputBufferStream.write
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.write");
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		populator.populate(buffer);
+		buffer.flip();
+		this.append(buffer);
 	}
 
 	@Override
-	public void append(ByteBuffer buffer) throws IOException {
-		// TODO implement OutputBufferStream.append
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.append");
+	public synchronized void append(ByteBuffer buffer) throws IOException {
+		while (buffer.remaining() > 0) {
+			this.output.write(buffer.get());
+		}
 	}
 
 	@Override
 	public void append(BufferSquirt squirt) throws IOException {
-		// TODO implement OutputBufferStream.append
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.append");
+		this.append(squirt.getBuffer());
 	}
 
 	@Override
-	public void close() throws IOException {
-		// TODO implement OutputBufferStream.close
-		throw new UnsupportedOperationException(
-				"TODO implement OutputBufferStream.close");
+	public synchronized void close() throws IOException {
+		this.output.close();
 	}
 
 }
