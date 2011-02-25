@@ -72,8 +72,8 @@ public class ServletConfirmerTest extends OfficeFrameTestCase {
 	 */
 	public void testServletConfirmer() throws Exception {
 		this.request.getRequestURI();
-		assertEquals("Fails to confirm", "/test", this.confirmer
-				.confirm("test"));
+		assertEquals("Fails to confirm", "/test",
+				this.confirmer.confirm("test"));
 	}
 
 	/**
@@ -180,8 +180,8 @@ public class ServletConfirmerTest extends OfficeFrameTestCase {
 	 */
 	public void test_getHeaders() throws Exception {
 		this.request.getHeaders("one");
-		this.output("getHeaders", this.confirmer.confirm("test", "one", "10",
-				"one", "11"));
+		this.output("getHeaders",
+				this.confirmer.confirm("test", "one", "10", "one", "11"));
 	}
 
 	/**
@@ -232,6 +232,21 @@ public class ServletConfirmerTest extends OfficeFrameTestCase {
 	 * Validates method.
 	 */
 	public void test_getLocalPort() throws Exception {
+		this.confirmer.setProxyReturn(new Integer(-1));
+		this.confirm();
+	}
+
+	/**
+	 * Validates method.
+	 */
+	public void test_getServerName() throws Exception {
+		this.confirm();
+	}
+
+	/**
+	 * Validates method.
+	 */
+	public void test_getServerPort() throws Exception {
 		this.confirmer.setProxyReturn(new Integer(-1));
 		this.confirm();
 	}
