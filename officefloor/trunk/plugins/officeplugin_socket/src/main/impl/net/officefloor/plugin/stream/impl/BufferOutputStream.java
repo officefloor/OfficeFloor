@@ -25,7 +25,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * {@link OutputBufferStream} {@link OutputStream}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BufferOutputStream extends OutputStream {
@@ -42,7 +42,7 @@ public class BufferOutputStream extends OutputStream {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param output
 	 *            {@link OutputBufferStream}.
 	 */
@@ -55,7 +55,7 @@ public class BufferOutputStream extends OutputStream {
 	 */
 
 	@Override
-	public void write(int b) throws IOException {
+	public synchronized void write(int b) throws IOException {
 		this.writeBuffer[0] = (byte) b;
 		this.output.write(this.writeBuffer);
 	}

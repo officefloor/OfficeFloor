@@ -354,10 +354,12 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain the {@link OutputStream}.
 	 */
 	public void test_getHttpResponse_getOutputStream() throws Exception {
+		final byte[] data = new byte[1];
+		data[0] = 0;
 		OutputStream expected = new ServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
-				fail("Should not be invoked");
+				data[0] = (byte) b;
 			}
 		};
 		this.recordReturn(this.response, this.response.getOutputStream(),
@@ -371,7 +373,8 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure correct output
-		assertEquals("Incorrect output stream", expected, actual);
+		actual.write(1);
+		assertEquals("Incorrect output stream", 1, data[0]);
 	}
 
 }

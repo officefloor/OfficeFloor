@@ -59,9 +59,9 @@ public class OutputStreamOutputBufferStreamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OutputStream}.
 	 */
-	public void testOutputStream() {
-		assertEquals("Incorrect output stream", this.content,
-				this.buffer.getOutputStream());
+	public void testOutputStream() throws Exception {
+		this.buffer.getOutputStream().write(CONTENT_BYTES);
+		this.assertContent(CONTENT);
 	}
 
 	/**
