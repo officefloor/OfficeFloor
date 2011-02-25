@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import net.officefloor.plugin.stream.BufferPopulator;
 import net.officefloor.plugin.stream.BufferSquirt;
 import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.synchronise.SynchronizedOutputStream;
 
 /**
  * {@link OutputBufferStream} wrapping an {@link OutputStream}.
@@ -36,6 +37,11 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	 * {@link OutputStream}.
 	 */
 	private final OutputStream output;
+
+	/**
+	 * {@link SynchronizedOutputStream} if using {@link OutputStream} directly.
+	 */
+	private SynchronizedOutputStream synchronizedOutput;
 
 	/**
 	 * Initiate.
@@ -52,8 +58,16 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	 */
 
 	@Override
-	public OutputStream getOutputStream() {
-		return this.output;
+	public synchronized OutputStream getOutputStream() {
+
+		// Lazy create the output stream
+		if (this.synchronizedOutput == null) {
+			this.synchronizedOutput = new SynchronizedOutputStream(this.output,
+					this);
+		}
+
+		// Return the output stream
+		return this.synchronizedOutput;
 	}
 
 	@Override
