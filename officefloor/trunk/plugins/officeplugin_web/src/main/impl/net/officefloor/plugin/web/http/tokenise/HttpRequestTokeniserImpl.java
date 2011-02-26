@@ -119,9 +119,13 @@ public class HttpRequestTokeniserImpl implements HttpRequestTokeniser {
 
 			// Obtain the body data
 			InputBufferStream body = request.getBody();
-			int bodySize = (int) body.available();
-			byte[] data = new byte[bodySize < 0 ? 0 : bodySize];
+			byte[] data;
 			try {
+				// Create buffer for data
+				int bodySize = (int) body.available();
+				data = new byte[bodySize < 0 ? 0 : bodySize];
+				
+				// Obtain the data
 				InputStream browseStream = body.getBrowseStream();
 				int index = 0;
 				for (int value = browseStream.read(); value != BufferStream.END_OF_STREAM; value = browseStream

@@ -209,8 +209,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		InputStream expected = new ServletInputStream() {
 			@Override
 			public int read() throws IOException {
-				fail("Should not be invoked");
-				return -1;
+				return 1;
 			}
 		};
 		this.recordReturn(this.request, this.request.getInputStream(), expected);
@@ -223,7 +222,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure correct input
-		assertEquals("Incorrect input stream", expected, actual);
+		assertEquals("Incorrect input stream", 1, actual.read());
 	}
 
 	/**

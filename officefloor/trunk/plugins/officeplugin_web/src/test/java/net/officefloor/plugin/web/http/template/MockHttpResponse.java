@@ -35,7 +35,7 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Mock {@link HttpResponse}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class MockHttpResponse implements HttpResponse {
@@ -73,7 +73,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP status.
-	 *
+	 * 
 	 * @return HTTP status.
 	 */
 	public int getStatus() {
@@ -82,7 +82,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP status message.
-	 *
+	 * 
 	 * @return HTTP status message.
 	 */
 	public String getStatusMessage() {
@@ -91,7 +91,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the HTTP version.
-	 *
+	 * 
 	 * @return HTTP version.
 	 */
 	public String getVersion() {
@@ -100,7 +100,7 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the header value.
-	 *
+	 * 
 	 * @param name
 	 *            Header name.
 	 * @return Corresponding header value.
@@ -111,27 +111,31 @@ public class MockHttpResponse implements HttpResponse {
 
 	/**
 	 * Obtains the body content.
-	 *
+	 * 
 	 * @return Body content.
 	 */
 	public byte[] getBodyContent() {
 		InputBufferStream input = this.body.getInputBufferStream();
-		int availableBytes = (int) input.available();
-		byte[] data = new byte[availableBytes];
+		byte[] data;
 		try {
+			// Create buffer for the data
+			int availableBytes = (int) input.available();
+			data = new byte[availableBytes];
+
 			// Ensure read all data
 			TestCase.assertEquals("Failed obtaining body content",
 					availableBytes, input.read(data));
 		} catch (IOException ex) {
 			TestCase.fail("Should not fail on reading body data: "
 					+ ex.getMessage());
+			return null; // should fail above
 		}
 		return data;
 	}
 
 	/**
 	 * Flags if this {@link HttpResponse} is sent.
-	 *
+	 * 
 	 * @return <code>true</code> if this {@link HttpResponse} is sent.
 	 */
 	public boolean isSent() {

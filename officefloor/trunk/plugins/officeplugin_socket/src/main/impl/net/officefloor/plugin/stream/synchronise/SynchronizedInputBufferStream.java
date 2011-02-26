@@ -28,7 +28,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * Synchronised {@link InputBufferStream}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SynchronizedInputBufferStream implements InputBufferStream {
@@ -45,7 +45,7 @@ public class SynchronizedInputBufferStream implements InputBufferStream {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param backingStream
 	 *            Backing {@link InputBufferStream}.
 	 * @param mutex
@@ -64,16 +64,16 @@ public class SynchronizedInputBufferStream implements InputBufferStream {
 	@Override
 	public InputStream getInputStream() {
 		synchronized (this.mutex) {
-			return new SynchronizedInputStream(this.backingStream
-					.getInputStream(), this.mutex);
+			return new SynchronizedInputStream(
+					this.backingStream.getInputStream(), this.mutex);
 		}
 	}
 
 	@Override
 	public InputStream getBrowseStream() {
 		synchronized (this.mutex) {
-			return new SynchronizedInputStream(this.backingStream
-					.getBrowseStream(), this.mutex);
+			return new SynchronizedInputStream(
+					this.backingStream.getBrowseStream(), this.mutex);
 		}
 	}
 
@@ -123,14 +123,14 @@ public class SynchronizedInputBufferStream implements InputBufferStream {
 	}
 
 	@Override
-	public long available() {
+	public long available() throws IOException {
 		synchronized (this.mutex) {
 			return this.backingStream.available();
 		}
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		synchronized (this.mutex) {
 			this.backingStream.close();
 		}

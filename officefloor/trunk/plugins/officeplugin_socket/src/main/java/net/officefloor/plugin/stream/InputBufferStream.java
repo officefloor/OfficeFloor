@@ -27,7 +27,7 @@ import javax.net.ssl.SSLEngine;
 
 /**
  * Retreives input from the {@link BufferStream}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface InputBufferStream {
@@ -41,7 +41,7 @@ public interface InputBufferStream {
 	 * none is available will result in an {@link IOException}.
 	 * {@link InputStream#available()} is implemented to provide an accurate
 	 * size of available bytes.
-	 *
+	 * 
 	 * @return {@link InputStream} to read from the {@link BufferStream}.
 	 */
 	InputStream getInputStream();
@@ -55,7 +55,7 @@ public interface InputBufferStream {
 	 * {@link BufferStream#END_OF_STREAM} indicating end of stream of available
 	 * data. It is therefore optional for {@link InputStream#available()} to
 	 * provide the available bytes (unlike {@link #getInputStream()}.
-	 *
+	 * 
 	 * @return {@link InputStream} to browse the {@link BufferStream}.
 	 */
 	InputStream getBrowseStream();
@@ -63,7 +63,7 @@ public interface InputBufferStream {
 	/**
 	 * Reads the content from the {@link BufferStream} into the input buffer
 	 * returning the number of bytes loaded.
-	 *
+	 * 
 	 * @param readBuffer
 	 *            Buffer to load {@link BufferStream} content.
 	 * @return Number of bytes loaded into the buffer from the
@@ -79,7 +79,7 @@ public interface InputBufferStream {
 	/**
 	 * Reads the content from the {@link BufferStream} into the input buffer
 	 * returning the number of bytes loaded.
-	 *
+	 * 
 	 * @param readBuffer
 	 *            Buffer to load {@link BufferStream} content.
 	 * @param offset
@@ -105,7 +105,7 @@ public interface InputBufferStream {
 	 * As {@link ByteBuffer} instances may be stored in varying sizes within the
 	 * {@link BufferStream} and data already consumed from them, the provided
 	 * {@link ByteBuffer} will have a variable number of bytes remaining.
-	 *
+	 * 
 	 * @param processor
 	 *            {@link BufferProcessor} to process the data of the
 	 *            {@link ByteBuffer}.
@@ -115,7 +115,7 @@ public interface InputBufferStream {
 	 * @throws IOException
 	 *             If fails to read input. Typically this will be because the
 	 *             input is closed.
-	 *
+	 * 
 	 * @see #read(int, GatheringBufferProcessor)
 	 */
 	int read(BufferProcessor processor) throws IOException;
@@ -128,12 +128,12 @@ public interface InputBufferStream {
 	 * <p>
 	 * Should the number of bytes be greater than the available, all
 	 * {@link ByteBuffer} instances are provided to the
-	 * {@link GatheringBufferProcessor}. In this case the provided data will be less
-	 * than the number of bytes specified.
+	 * {@link GatheringBufferProcessor}. In this case the provided data will be
+	 * less than the number of bytes specified.
 	 * <p>
 	 * Typically this will be used by gather operations such as with the
 	 * {@link GatheringByteChannel} and {@link SSLEngine}.
-	 *
+	 * 
 	 * @param numberOfBytes
 	 *            Number of bytes to be processed from this
 	 *            {@link InputBufferStream}.
@@ -155,7 +155,7 @@ public interface InputBufferStream {
 	 * Only available bytes are read to the {@link OutputBufferStream} and
 	 * therefore the requested number of bytes may not be read. The return
 	 * provides the number of bytes read.
-	 *
+	 * 
 	 * @param numberOfBytes
 	 *            Number of bytes to read into the {@link OutputBufferStream}.
 	 * @param outputBufferStream
@@ -175,7 +175,7 @@ public interface InputBufferStream {
 	 * not be the available bytes to skip in the {@link BufferStream}, this
 	 * method returns the actual number of bytes skipped from the available
 	 * bytes.
-	 *
+	 * 
 	 * @param numberOfBytes
 	 *            Maximum number of bytes to skip.
 	 * @return Number of available bytes skipped in the {@link BufferStream}.
@@ -190,15 +190,20 @@ public interface InputBufferStream {
 	/**
 	 * Provides an accurate number of bytes available in the
 	 * {@link BufferStream}.
-	 *
+	 * 
 	 * @return Number of bytes available in the {@link BufferStream}. Return of
 	 *         {@link BufferStream#END_OF_STREAM} indicates end of stream.
+	 * @throws IOException
+	 *             If fails to obtain available bytes.
 	 */
-	long available();
+	long available() throws IOException;
 
 	/**
 	 * Closes the stream releasing resources.
+	 * 
+	 * @throws IOException
+	 *             If fails to close.
 	 */
-	void close();
+	void close() throws IOException;
 
 }

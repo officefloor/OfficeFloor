@@ -18,6 +18,7 @@
 
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -26,7 +27,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * {@link HttpRequest} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRequestImpl implements HttpRequest {
@@ -58,7 +59,7 @@ public class HttpRequestImpl implements HttpRequest {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param method
 	 *            Method.
 	 * @param requestURI
@@ -81,8 +82,11 @@ public class HttpRequestImpl implements HttpRequest {
 
 	/**
 	 * Cleans up this {@link HttpRequest}.
+	 * 
+	 * @throws IOException
+	 *             If fails to clean up.
 	 */
-	void cleanup() {
+	void cleanup() throws IOException {
 		// Close the body to clean it up
 		this.body.close();
 	}

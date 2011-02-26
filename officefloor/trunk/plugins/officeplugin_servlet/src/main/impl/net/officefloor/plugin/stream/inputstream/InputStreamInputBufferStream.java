@@ -19,11 +19,14 @@ package net.officefloor.plugin.stream.inputstream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import net.officefloor.plugin.stream.BufferProcessor;
 import net.officefloor.plugin.stream.GatheringBufferProcessor;
 import net.officefloor.plugin.stream.InputBufferStream;
 import net.officefloor.plugin.stream.OutputBufferStream;
+import net.officefloor.plugin.stream.synchronise.SynchronizedInputStream;
 
 /**
  * {@link InputBufferStream} implementation that wraps an {@link InputStream}.
@@ -33,10 +36,14 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 public class InputStreamInputBufferStream implements InputBufferStream {
 
 	/**
-	 * {@link InputStream} being wrapped for {@link InputBufferStream}
-	 * functionality.
+	 * {@link BrowsableInputStream}.
 	 */
-	private final InputStream input;
+	private BrowsableInputStream browsableInput = null;
+
+	/**
+	 * {@link SynchronizedInputStream}.
+	 */
+	private SynchronizedInputStream synchronizedInput = null;
 
 	/**
 	 * Initiate.
@@ -46,7 +53,9 @@ public class InputStreamInputBufferStream implements InputBufferStream {
 	 *            {@link InputBufferStream} functionality.
 	 */
 	public InputStreamInputBufferStream(InputStream input) {
-		this.input = input;
+		this.browsableInput = new BrowsableInputStream(input, 1024, this);
+		this.synchronizedInput = new SynchronizedInputStream(
+				this.browsableInput, this);
 	}
 
 	/*
@@ -55,73 +64,89 @@ public class InputStreamInputBufferStream implements InputBufferStream {
 
 	@Override
 	public InputStream getInputStream() {
-		return this.input;
+		return this.synchronizedInput;
 	}
 
 	@Override
 	public InputStream getBrowseStream() {
-		// TODO implement InputBufferStream.getBrowseStream
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.getBrowseStream");
+		return new SynchronizedInputStream(this.browsableInput.createBrowser(),
+				this);
 	}
 
 	@Override
 	public int read(byte[] readBuffer) throws IOException {
-		// TODO implement InputBufferStream.read
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.read");
+		return this.synchronizedInput.read(readBuffer);
 	}
 
 	@Override
 	public int read(byte[] readBuffer, int offset, int length)
 			throws IOException {
-		// TODO implement InputBufferStream.read
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.read");
+		return this.synchronizedInput.read(readBuffer, offset, length);
 	}
 
 	@Override
 	public int read(BufferProcessor processor) throws IOException {
-		// TODO implement InputBufferStream.read
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.read");
+		int available = this.synchronizedInput.available();
+		byte[] data = new byte[available];
+		this.synchronizedInput.read(data);
+		ByteBuffer buffer = ByteBuffer.wrap(data);
+		processor.process(buffer);
+		return data.length;
 	}
 
 	@Override
 	public int read(int numberOfBytes, GatheringBufferProcessor processor)
 			throws IOException {
-		// TODO implement InputBufferStream.read
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.read");
+
+		// Read the bytes
+		byte[] data = new byte[numberOfBytes];
+		int bytesRead = this.synchronizedInput.read(data);
+
+		// Process the bytes
+		ByteBuffer buffer = ByteBuffer.wrap(data, 0, bytesRead);
+		processor.process(new ByteBuffer[] { buffer });
+
+		// Return the bytes read
+		return bytesRead;
 	}
 
 	@Override
 	public int read(int numberOfBytes, OutputBufferStream outputBufferStream)
 			throws IOException {
-		// TODO implement InputBufferStream.read
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.read");
+
+		// Read the bytes
+		int bytesRead = 0;
+		OutputStream output = outputBufferStream.getOutputStream();
+		while (bytesRead < numberOfBytes) {
+
+			// Read the value
+			int value = this.synchronizedInput.read();
+			if (value == -1) {
+				return bytesRead; // no further bytes to read
+			}
+
+			// Read the byte
+			output.write(value);
+			bytesRead++;
+		}
+
+		// Return the number of bytes read
+		return bytesRead;
 	}
 
 	@Override
 	public long skip(long numberOfBytes) throws IOException {
-		// TODO implement InputBufferStream.skip
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.skip");
+		return this.synchronizedInput.skip(numberOfBytes);
 	}
 
 	@Override
-	public long available() {
-		// TODO implement InputBufferStream.available
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.available");
+	public long available() throws IOException {
+		return this.synchronizedInput.available();
 	}
 
 	@Override
-	public void close() {
-		// TODO implement InputBufferStream.close
-		throw new UnsupportedOperationException(
-				"TODO implement InputBufferStream.close");
+	public void close() throws IOException {
+		this.synchronizedInput.close();
 	}
 
 }
