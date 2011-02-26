@@ -95,8 +95,7 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 	public void testNoContent() throws IOException {
 		HttpResponse response = this.createHttpResponse();
 		response.getBody().close();
-		this
-				.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
+		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0\n\n");
 	}
 
 	/**
@@ -147,8 +146,8 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 		response.addHeader("test", "three");
 		response.addHeader("test", "four");
 		response.removeHeaders("test");
-		assertNull("Should be no headers by name on removing", response
-				.getHeader("test"));
+		assertNull("Should be no headers by name on removing",
+				response.getHeader("test"));
 	}
 
 	/**
@@ -314,11 +313,13 @@ public class HttpResponseTest extends OfficeFrameTestCase {
 
 		// Obtain the response on the wire
 		InputBufferStream wireInput = this.wire.getInputBufferStream();
-		byte[] wireContent = new byte[(int) wireInput.available()];
+		byte[] wireContent;
 		try {
+			wireContent = new byte[(int) wireInput.available()];
 			wireInput.read(wireContent);
 		} catch (IOException ex) {
 			fail("Should not fail on wire read: " + ex.getMessage());
+			return; // fails above
 		}
 
 		// Validate the response on the wire

@@ -41,7 +41,7 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	/**
 	 * {@link SynchronizedOutputStream} if using {@link OutputStream} directly.
 	 */
-	private SynchronizedOutputStream synchronizedOutput;
+	private SynchronizedOutputStream synchronizedOutput = null;
 
 	/**
 	 * Initiate.

@@ -123,8 +123,9 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 		this.safeFromClientStream = new SynchronizedInputBufferStream(
 				this.fromClientStream.getInputBufferStream(), this.getLock());
 		this.safeToClientStream = new SynchronizedOutputBufferStream(
-				new ConnectionOutputBufferStream(this.toClientStream
-						.getOutputBufferStream()), this.getLock());
+				new ConnectionOutputBufferStream(
+						this.toClientStream.getOutputBufferStream()),
+				this.getLock());
 
 		// Create the handler for this connection
 		this.connectionHandler = serverSocketHandler
@@ -210,8 +211,10 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 	 * Indicates if there is data to be written to the client.
 	 * 
 	 * @return <code>true</code> if there is data to be written to the client.
+	 * @throws IOException
+	 *             If fails to check if data.
 	 */
-	boolean isDataForClient() {
+	boolean isDataForClient() throws IOException {
 		return (this.toClientStream.getInputBufferStream().available() > 0);
 	}
 
@@ -384,8 +387,8 @@ public class ConnectionImpl<CH extends ConnectionHandler> implements
 
 		@Override
 		public OutputStream getOutputStream() {
-			return new ConnectionOutputStream(this.backingStream
-					.getOutputStream());
+			return new ConnectionOutputStream(
+					this.backingStream.getOutputStream());
 		}
 
 		@Override
