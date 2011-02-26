@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.twitter.publish.Blogspot;
 import net.officefloor.twitter.publish.Digg;
 import net.officefloor.twitter.publish.Ohloh;
+import net.officefloor.twitter.publish.WordPress;
 import twitter4j.Status;
 
 /**
@@ -36,7 +37,7 @@ public class TwitterDistributor {
 	 * {@link Publisher} instances.
 	 */
 	private static final Publisher[] PUBLISHERS = new Publisher[] {
-			new Ohloh(), new Digg(), new Blogspot() };
+			new Ohloh(), new Digg(), new Blogspot(), new WordPress() };
 
 	/**
 	 * Undertakes the distribution of tweets.
