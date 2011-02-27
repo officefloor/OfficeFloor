@@ -53,7 +53,9 @@ public interface ServletBridge {
 	 * @param objectType
 	 *            Type of the {@link Object}.
 	 * @return {@link Object}.
+	 * @throws Exception
+	 *             If fails to obtain the object.
 	 */
-	<O> O getObject(Class<? extends O> objectType);
+	<O> O getObject(Class<? extends O> objectType) throws Exception;
 
 }
