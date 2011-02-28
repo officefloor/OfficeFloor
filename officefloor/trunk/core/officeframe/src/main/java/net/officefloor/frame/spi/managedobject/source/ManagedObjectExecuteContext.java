@@ -20,6 +20,7 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -59,10 +60,12 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @return {@link ProcessFuture}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject);
+	ProcessFuture invokeProcess(F key, Object parameter,
+			ManagedObject managedObject);
 
 	/**
 	 * Instigates a {@link Flow}.
@@ -74,10 +77,11 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @return {@link ProcessFuture}
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(int flowIndex, Object parameter,
+	ProcessFuture invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject);
 
 	/**
@@ -97,11 +101,12 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            {@link Flow}.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
+	 * @return {@link ProcessFuture}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject,
-			EscalationHandler escalationHandler);
+	ProcessFuture invokeProcess(F key, Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler);
 
 	/**
 	 * <p>
@@ -120,10 +125,11 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            {@link Flow}.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
+	 * @return {@link ProcessFuture}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(int flowIndex, Object parameter,
+	ProcessFuture invokeProcess(int flowIndex, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler);
 
 }

@@ -30,6 +30,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -219,7 +220,7 @@ public class ManagedObjectSourceStandAlone {
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private class LoadExecuteContext<F extends Enum<F>> implements
-			ManagedObjectExecuteContext<F> {
+			ManagedObjectExecuteContext<F>, ProcessFuture {
 
 		/**
 		 * Processes the {@link Task} for the invoked {@link ProcessState}.
@@ -230,7 +231,7 @@ public class ManagedObjectSourceStandAlone {
 		 *            {@link EscalationHandler}. May be <code>null</code>.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		private void process(int processIndex,
+		private ProcessFuture process(int processIndex,
 				EscalationHandler escalationHandler) {
 
 			// Obtain the details for invoking process
@@ -266,6 +267,9 @@ public class ManagedObjectSourceStandAlone {
 					throw new Error(ex);
 				}
 			}
+
+			// Return this as the process future
+			return this;
 		}
 
 		/*
@@ -273,27 +277,37 @@ public class ManagedObjectSourceStandAlone {
 		 */
 
 		@Override
-		public void invokeProcess(F key, Object parameter,
+		public ProcessFuture invokeProcess(F key, Object parameter,
 				ManagedObject managedObject) {
-			this.process(key.ordinal(), null);
+			return this.process(key.ordinal(), null);
 		}
 
 		@Override
-		public void invokeProcess(int flowIndex, Object parameter,
+		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject) {
-			this.process(flowIndex, null);
+			return this.process(flowIndex, null);
 		}
 
 		@Override
-		public void invokeProcess(F key, Object parameter,
+		public ProcessFuture invokeProcess(F key, Object parameter,
 				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			this.process(key.ordinal(), escalationHandler);
+			return this.process(key.ordinal(), escalationHandler);
 		}
 
 		@Override
-		public void invokeProcess(int flowIndex, Object parameter,
+		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
 				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			this.process(flowIndex, escalationHandler);
+			return this.process(flowIndex, escalationHandler);
+		}
+
+		/*
+		 * ==================== ProcessFuture =============================
+		 */
+
+		@Override
+		public boolean isComplete() {
+			// Always complete
+			return true;
 		}
 	}
 
