@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.spi.team;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -28,7 +29,10 @@ import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
@@ -152,6 +156,90 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 			// Invoke the task
 			ProcessFuture future = taskManager.invokeTask(parameter);
+
+			// Blocking call to execute the Jobs
+			executor.executeJobs(future);
+
+		} finally {
+			// Ensure unregister current Thread
+			synchronized (threadToExecutor) {
+				threadToExecutor.remove(currentThread);
+			}
+
+			// All Jobs should be completed with completion of Process
+		}
+	}
+
+	/**
+	 * <p>
+	 * Wrap invoking {@link ProcessState} on the
+	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
+	 * available to execute the {@link Task} instances of the
+	 * {@link ProcessState}.
+	 * <p>
+	 * This method blocks until the invoked {@link ProcessState} is complete.
+	 * 
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param flowKey
+	 *            {@link Flow} key.
+	 * @param parameter
+	 *            Parameter for the initial {@link Task}.
+	 * @param managedObject
+	 *            {@link ManagedObject}.
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}. May be <code>null</code>.
+	 * @throws InterruptedException
+	 *             Should this blocking call be interrupted.
+	 */
+	public static <F extends Enum<F>> void doProcess(
+			ManagedObjectExecuteContext<F> executeContext, F flowKey,
+			Object parameter, ManagedObject managedObject,
+			EscalationHandler escalationHandler) throws InterruptedException {
+		doProcess(executeContext, flowKey.ordinal(), parameter, managedObject,
+				escalationHandler);
+	}
+
+	/**
+	 * <p>
+	 * Wrap invoking {@link ProcessState} on the
+	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
+	 * available to execute the {@link Task} instances of the
+	 * {@link ProcessState}.
+	 * <p>
+	 * This method blocks until the invoked {@link ProcessState} is complete.
+	 * 
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 * @param flowIndex
+	 *            {@link Flow} index.
+	 * @param parameter
+	 *            Parameter for the initial {@link Task}.
+	 * @param managedObject
+	 *            {@link ManagedObject}.
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}. May be <code>null</code>.
+	 * @throws InterruptedException
+	 *             Should this blocking call be interrupted.
+	 */
+	public static void doProcess(ManagedObjectExecuteContext<?> executeContext,
+			int flowIndex, Object parameter, ManagedObject managedObject,
+			EscalationHandler escalationHandler) throws InterruptedException {
+
+		// Obtain the current Thread
+		Thread currentThread = Thread.currentThread();
+		try {
+
+			// Register the Job Queue Executor for the Thread.
+			// Must be done before invoking task to ensure available.
+			JobQueueExecutor executor = new JobQueueExecutor();
+			synchronized (threadToExecutor) {
+				threadToExecutor.put(currentThread, executor);
+			}
+
+			// Invoke the process
+			ProcessFuture future = executeContext.invokeProcess(flowIndex,
+					parameter, managedObject, escalationHandler);
 
 			// Blocking call to execute the Jobs
 			executor.executeJobs(future);

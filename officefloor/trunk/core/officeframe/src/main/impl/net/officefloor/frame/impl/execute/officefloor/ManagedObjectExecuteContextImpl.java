@@ -19,6 +19,7 @@
 package net.officefloor.frame.impl.execute.officefloor;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -95,26 +96,27 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void invokeProcess(F key, Object parameter,
+	public ProcessFuture invokeProcess(F key, Object parameter,
 			ManagedObject managedObject) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject, null);
+		return this
+				.invokeProcess(key.ordinal(), parameter, managedObject, null);
 	}
 
 	@Override
-	public void invokeProcess(int processIndex, Object parameter,
+	public ProcessFuture invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject) {
-		this.invokeProcess(processIndex, parameter, managedObject, null);
+		return this.invokeProcess(processIndex, parameter, managedObject, null);
 	}
 
 	@Override
-	public void invokeProcess(F key, Object parameter,
+	public ProcessFuture invokeProcess(F key, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject,
+		return this.invokeProcess(key.ordinal(), parameter, managedObject,
 				escalationHandler);
 	}
 
 	@Override
-	public void invokeProcess(int processIndex, Object parameter,
+	public ProcessFuture invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
 
 		// Obtain the flow meta-data
@@ -132,16 +134,22 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 				parameter, managedObject, this.managedObjectMetaData,
 				this.processMoIndex, escalationHandler);
 
+		// Obtain the process state
+		ProcessState processState = jobNode.getFlow().getThreadState()
+				.getProcessState();
+
 		// Indicate process started and register to be notified of completion
 		if (this.processTicker != null) {
 			this.processTicker.processStarted();
-			jobNode.getFlow().getThreadState().getProcessState()
-					.registerProcessCompletionListener(this.processTicker);
+			processState.registerProcessCompletionListener(this.processTicker);
 		}
 
 		// Activate the Job
 		// Must register before activating job to have trigger on completion.
 		jobNode.activateJob();
+
+		// Return the Process Future
+		return processState.getProcessFuture();
 	}
 
 }

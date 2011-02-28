@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -254,9 +255,15 @@ public class ServletBridgeManagedObjectSource
 			ServletBridgeManagedObject managedObject = new ServletBridgeManagedObject(
 					this, servlet, request, response);
 
-			// Service the request
-			instance.context.invokeProcess(FlowKeys.SERVICE, null,
-					managedObject, managedObject);
+			try {
+				// Service the request (blocking re-using this thread)
+				ProcessContextTeam.doProcess(instance.context,
+						FlowKeys.SERVICE, null, managedObject, managedObject);
+
+			} catch (InterruptedException ex) {
+				// Propagate failure
+				throw new ServletException(ex);
+			}
 
 			// Propagate any exception
 			managedObject.propagateException();

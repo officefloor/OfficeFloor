@@ -24,6 +24,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
@@ -666,6 +667,10 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
 		final JobNode jobNode = this.createMock(JobNode.class);
+		final Flow flow = this.createMock(Flow.class);
+		final ThreadState thread = this.createMock(ThreadState.class);
+		final ProcessState process = this.createMock(ProcessState.class);
+		final ProcessFuture future = this.createMock(ProcessFuture.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName();
@@ -725,17 +730,29 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			}
 		});
 
+		// Record obtaining the process state
+		this.recordReturn(jobNode, jobNode.getFlow(), flow);
+		this.recordReturn(flow, flow.getThreadState(), thread);
+		this.recordReturn(thread, thread.getProcessState(), process);
+
 		// Record activating job (without notifying process ticker)
 		jobNode.activateJob();
+
+		// Record providing the process future
+		this.recordReturn(process, process.getProcessFuture(), future);
 
 		// Manage by office
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true,
 				null, processBoundMetaData, flowMetaData);
-		rawOffice.getManagedObjectExecuteContextFactory()
+		ProcessFuture actualFuture = rawOffice
+				.getManagedObjectExecuteContextFactory()
 				.createManagedObjectExecuteContext(null)
 				.invokeProcess(0, parameter, managedObject);
 		this.verifyMockObjects();
+
+		// Ensure correct future
+		assertSame("Incorrect process future", future, actualFuture);
 	}
 
 	/**
@@ -765,6 +782,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final Flow flow = this.createMock(Flow.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
+		final ProcessFuture future = this.createMock(ProcessFuture.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName();
@@ -826,22 +844,31 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			}
 		});
 
-		// Record activating job (and subsequently process)
-		processTicker.processStarted();
+		// Record obtaining the process state
 		this.recordReturn(jobNode, jobNode.getFlow(), flow);
 		this.recordReturn(flow, flow.getThreadState(), thread);
 		this.recordReturn(thread, thread.getProcessState(), process);
+
+		// Record activating job (and subsequently process)
+		processTicker.processStarted();
 		process.registerProcessCompletionListener(processTicker);
 		jobNode.activateJob();
+
+		// Record providing the process future
+		this.recordReturn(process, process.getProcessFuture(), future);
 
 		// Manage by office
 		this.replayMockObjects();
 		RawManagingOfficeMetaData<?> rawOffice = this.run_manageByOffice(true,
 				null, processBoundMetaData, flowMetaData);
-		rawOffice.getManagedObjectExecuteContextFactory()
+		ProcessFuture actualFuture = rawOffice
+				.getManagedObjectExecuteContextFactory()
 				.createManagedObjectExecuteContext(processTicker)
 				.invokeProcess(0, parameter, managedObject);
 		this.verifyMockObjects();
+
+		// Ensure correct future
+		assertSame("Incorrect process future", future, actualFuture);
 	}
 
 	/**
