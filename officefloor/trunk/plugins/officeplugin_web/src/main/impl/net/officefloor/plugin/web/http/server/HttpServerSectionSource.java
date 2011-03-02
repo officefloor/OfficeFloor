@@ -89,11 +89,11 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            {@link AutoWireSection} for this
 	 *            {@link HttpServerSectionSource}.
 	 * @param source
-	 *            {@link HttpServerAutoWireOfficeFloorSource}.
+	 *            {@link WebApplicationAutoWireOfficeFloorSource}.
 	 */
 	public static void linkRouteToSection(String uri, AutoWireSection section,
 			String inputName, AutoWireSection httpSection,
-			HttpServerAutoWireOfficeFloorSource source) {
+			WebApplicationAutoWireOfficeFloorSource source) {
 
 		// Link route
 		String sectionOutputName = linkRoute(httpSection, uri);
@@ -111,12 +111,12 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            {@link AutoWireSection} for this
 	 *            {@link HttpServerSectionSource}.
 	 * @param source
-	 *            {@link HttpServerAutoWireOfficeFloorSource}.
+	 *            {@link WebApplicationAutoWireOfficeFloorSource}.
 	 */
 	public static void linkRouteToHttpTemplate(
 			HttpTemplateAutoWireSection httpTemplate,
 			AutoWireSection httpSection,
-			HttpServerAutoWireOfficeFloorSource source) {
+			WebApplicationAutoWireOfficeFloorSource source) {
 
 		// Must have URI for routing
 		String templateUri = httpTemplate.getTemplateUri();
