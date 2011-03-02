@@ -7,6 +7,24 @@
   <<Welcome to OfficeFloor>>
 
   OfficeFloor is an Inversion of Control 2.0 implementation that focuses on dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - thereby really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
+  
+  OfficeFloor is freely distributed under GPL and it's source is available {{{./source-repository.html}here}}.
+  
+Features
+
+  * Multi-threaded Java framework providing for thread safe execution of your methods (with ability to specify differing thread pools to execute particular methods)
+  
+  * Dependency injection of objects as parameters to the executed methods
+  
+  * Provides both auto-wiring of dependencies and manual graphical configuration
+  
+  * Abstraction of plug-ins to enable more course grained integration than individual classes (allows easier assembly and management of applications)
+  
+  * Existing plug-ins to build web based applications
+  
+  * JEE Servlet integration for web based components (currently under development)
+  
+  * Spring plug-in to enable re-use of your existing Spring beans
 
 Simple Example
 
