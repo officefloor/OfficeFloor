@@ -8,7 +8,7 @@
 
   OfficeFloor is an Inversion of Control 2.0 implementation that focuses on dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - thereby really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
   
-  OfficeFloor is freely distributed under GPL and it's source is available {{{./source-repository.html}here}}.
+  OfficeFloor is freely distributed under GPL and the source is available {{{./source-repository.html}here}}.
   
 Features
 
