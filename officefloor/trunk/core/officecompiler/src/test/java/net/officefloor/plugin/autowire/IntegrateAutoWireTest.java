@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -184,7 +184,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 
 		// Indicate fail immediately
 		source.getOfficeFloorCompiler().setCompilerIssues(
-				new FailCompilerIssues());
+				new FailTestCompilerIssues());
 
 		// Add sections
 		AutoWireSection one = source.addSection("one",

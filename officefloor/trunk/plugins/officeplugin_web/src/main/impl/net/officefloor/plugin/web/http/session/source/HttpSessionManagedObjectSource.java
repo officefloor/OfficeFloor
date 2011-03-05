@@ -34,7 +34,7 @@ import net.officefloor.plugin.web.http.session.store.MemoryHttpSessionStore;
 
 /**
  * {@link ManagedObjectSource} for a {@link HttpSession}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpSessionManagedObjectSource extends
@@ -67,10 +67,10 @@ public class HttpSessionManagedObjectSource extends
 	public static final String PROPERTY_MAX_IDLE_TIME = "max.idle.time";
 
 	/**
-	 * Keep default consistent with J2EE to aid in special processing of session
+	 * Keep default consistent with JEE to aid in special processing of session
 	 * identifiers by such things as search engines.
 	 */
-	private static final String DEFAULT_SESSION_ID_COOKIE_NAME = "jsessionid";
+	public static final String DEFAULT_SESSION_ID_COOKIE_NAME = "jsessionid";
 
 	/**
 	 * Default maximum idle time for a {@link HttpSession} in seconds.
@@ -132,19 +132,19 @@ public class HttpSessionManagedObjectSource extends
 						DEFAULT_SESSION_ID_COOKIE_NAME);
 
 		// Register dependency on HTTP connection
-		this.serverHttpConnectionIndex = context.addDependency(
-				ServerHttpConnection.class).setLabel("HTTP_CONNECTION")
-				.getIndex();
+		this.serverHttpConnectionIndex = context
+				.addDependency(ServerHttpConnection.class)
+				.setLabel("HTTP_CONNECTION").getIndex();
 
 		// Deterimine Session Id generator to use
 		String useDependencySessionIdGenerator = mosContext.getProperty(
-				PROPERTY_USE_DEPENDENCY_SESSION_ID_GENERATOR, String
-						.valueOf(false));
+				PROPERTY_USE_DEPENDENCY_SESSION_ID_GENERATOR,
+				String.valueOf(false));
 		if (Boolean.parseBoolean(useDependencySessionIdGenerator)) {
 			// Use dependency Session Id generator
-			this.httpSessionIdGeneratorIndex = context.addDependency(
-					HttpSessionIdGenerator.class).setLabel(
-					"SESSION_ID_GENERATOR").getIndex();
+			this.httpSessionIdGeneratorIndex = context
+					.addDependency(HttpSessionIdGenerator.class)
+					.setLabel("SESSION_ID_GENERATOR").getIndex();
 		} else {
 			// Use default Session Id generator
 			this.generator = new UuidHttpSessionIdGenerator();
@@ -155,14 +155,14 @@ public class HttpSessionManagedObjectSource extends
 				PROPERTY_USE_DEPENDENCY_SESSION_STORE, String.valueOf(false));
 		if (Boolean.parseBoolean(useDependencySessionStore)) {
 			// Use dependency Session Store
-			this.httpSessionStoreIndex = context.addDependency(
-					HttpSessionStore.class).setLabel("SESSION_STORE")
-					.getIndex();
+			this.httpSessionStoreIndex = context
+					.addDependency(HttpSessionStore.class)
+					.setLabel("SESSION_STORE").getIndex();
 		} else {
 			// Use default Session Store
 			int maxIdleTime = Integer.parseInt(mosContext.getProperty(
-					PROPERTY_MAX_IDLE_TIME, String
-							.valueOf(DEFAULT_MAX_IDLE_TIME)));
+					PROPERTY_MAX_IDLE_TIME,
+					String.valueOf(DEFAULT_MAX_IDLE_TIME)));
 			this.store = new MemoryHttpSessionStore(maxIdleTime);
 		}
 	}

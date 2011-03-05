@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
@@ -301,7 +301,7 @@ public class WorkLoaderUtil {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
 

@@ -32,7 +32,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.manage.Office;
@@ -288,7 +288,7 @@ public class OfficeLoaderUtil {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
 

@@ -31,7 +31,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.Indexed;
@@ -183,7 +183,7 @@ public class AdministratorLoaderUtil {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
 

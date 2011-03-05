@@ -35,6 +35,20 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public interface ServletServiceBridger<S> {
 
 	/**
+	 * Obtains the instance identifier for this {@link ServletServiceBridger}.
+	 * 
+	 * @return Instance identifier for this {@link ServletServiceBridger}.
+	 */
+	String getInstanceIdentifier();
+
+	/**
+	 * Obtains the object types for the {@link Servlet}.
+	 * 
+	 * @return Object types for the {@link Servlet}.
+	 */
+	Class<?>[] getObjectTypes();
+
+	/**
 	 * Services the {@link Servlet}.
 	 * 
 	 * @param servlet
@@ -50,12 +64,5 @@ public interface ServletServiceBridger<S> {
 	 */
 	void service(S servlet, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException;
-
-	/**
-	 * Obtains the instance identifier for this {@link ServletServiceBridger}.
-	 * 
-	 * @return Instance identifier for this {@link ServletServiceBridger}.
-	 */
-	String getInstanceIdentifier();
 
 }

@@ -46,7 +46,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -651,7 +651,7 @@ public class SectionLoaderUtil {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
 

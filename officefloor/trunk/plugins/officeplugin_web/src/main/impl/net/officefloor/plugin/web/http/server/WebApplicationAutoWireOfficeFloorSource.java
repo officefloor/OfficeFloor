@@ -17,8 +17,10 @@
  */
 package net.officefloor.plugin.web.http.server;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -145,6 +147,30 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 	public void linkUri(String uri, AutoWireSection section, String inputName) {
 		this.uriLinks.add(new UriLink(uri, section, inputName));
+	}
+
+	/**
+	 * Obtains the registered URIs.
+	 * 
+	 * @return Registered URIs.
+	 */
+	public String[] getURIs() {
+
+		// Create the set of URIs
+		Set<String> uris = new HashSet<String>();
+
+		// Add HTTP template URIs
+		for (HttpTemplateAutoWireSection httpTemplate : this.httpTemplates) {
+			uris.add(httpTemplate.getTemplateUri());
+		}
+
+		// Add link URIs
+		for (UriLink link : this.uriLinks) {
+			uris.add(link.uri);
+		}
+
+		// Return the URIs
+		return uris.toArray(new String[uris.size()]);
 	}
 
 	/*

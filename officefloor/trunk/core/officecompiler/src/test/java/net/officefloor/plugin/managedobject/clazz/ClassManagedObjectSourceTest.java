@@ -25,6 +25,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -182,6 +183,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testInjectProcessInterfaces() throws Throwable {
 
 		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final ProcessFuture future = this.createMock(ProcessFuture.class);
 		final Connection connection = this.createMock(Connection.class);
 		final ObjectRegistry<Indexed> objectRegistry = this
 				.createMock(ObjectRegistry.class);
@@ -196,28 +198,31 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				SQL_QUERY);
 
 		// Record invoking the processes
-		executeContext.invokeProcess(0, null, null);
-		this.control(executeContext).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				boolean isMatch = true;
-				// Ensure process indexes match
-				isMatch &= (expected[0].equals(actual[0]));
+		this.recordReturn(executeContext,
+				executeContext.invokeProcess(0, null, null), future,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						boolean isMatch = true;
+						// Ensure process indexes match
+						isMatch &= (expected[0].equals(actual[0]));
 
-				// Ensure parameters match
-				isMatch &= ((expected[1] == null ? "null" : expected[1])
-						.equals((actual[1] == null ? "null" : actual[1])));
+						// Ensure parameters match
+						isMatch &= ((expected[1] == null ? "null" : expected[1])
+								.equals((actual[1] == null ? "null" : actual[1])));
 
-				// Ensure have a managed object
-				assertNotNull("Must have managed object", actual[2]);
-				assertTrue("Incorrect managed object type",
-						actual[2] instanceof ClassManagedObject);
+						// Ensure have a managed object
+						assertNotNull("Must have managed object", actual[2]);
+						assertTrue("Incorrect managed object type",
+								actual[2] instanceof ClassManagedObject);
 
-				// Return whether matched
-				return isMatch;
-			}
-		});
-		executeContext.invokeProcess(1, PROCESS_PARAMETER, null);
+						// Return whether matched
+						return isMatch;
+					}
+				});
+		this.recordReturn(executeContext,
+				executeContext.invokeProcess(1, PROCESS_PARAMETER, null),
+				future);
 
 		// Replay mocks
 		this.replayMockObjects();

@@ -30,7 +30,7 @@ import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -50,7 +50,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		compiler.addSourceAliases();
 		compiler.addProperty("team.name", "TEAM");
 
