@@ -123,11 +123,14 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 */
 	public void test_getHttpRequest_getRequestURI() {
 		final String REQUEST_URI = "/test";
+		final String QUERY_STRING = "name=value";
 		this.recordReturn(this.request, this.request.getRequestURI(),
 				REQUEST_URI);
+		this.recordReturn(this.request, this.request.getQueryString(),
+				QUERY_STRING);
 		this.replayMockObjects();
 		HttpRequest request = this.connection.getHttpRequest();
-		assertEquals("Incorrect request URI", REQUEST_URI,
+		assertEquals("Incorrect request URI", REQUEST_URI + "?" + QUERY_STRING,
 				request.getRequestURI());
 		this.verifyMockObjects();
 	}

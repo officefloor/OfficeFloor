@@ -33,7 +33,7 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
@@ -255,7 +255,7 @@ public class ManagedObjectLoaderUtil {
 		} else {
 			// Create the office floor compiler that fails on first issue
 			compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
-			compiler.setCompilerIssues(new FailCompilerIssues());
+			compiler.setCompilerIssues(new FailTestCompilerIssues());
 		}
 
 		// Return the OfficeFloorCompiler

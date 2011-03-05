@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.servlet.bridge;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.servlet.Servlet;
@@ -89,6 +92,21 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Create the servicer for servicing
 		ServletServiceBridger<MockHttpServlet> servicer = ServletBridgeManagedObjectSource
 				.createServletServiceBridger(MockHttpServlet.class);
+
+		// Ensure appropriate object types
+		Class<?>[] objectTypes = servicer.getObjectTypes();
+		assertEquals("Expecting dependencies", 2, objectTypes.length);
+		Arrays.sort(objectTypes, new Comparator<Class<?>>() {
+			@Override
+			public int compare(Class<?> a, Class<?> b) {
+				return String.CASE_INSENSITIVE_ORDER.compare(a.getName(),
+						b.getName());
+			}
+		});
+		assertEquals("Incorrect resource dependency type",
+				ServletDependency.class, objectTypes[0]);
+		assertEquals("Incorrect ejb dependency type", ServletEjbLocal.class,
+				objectTypes[1]);
 
 		// Configure the OfficeFloor
 		AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();

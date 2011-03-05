@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
@@ -334,7 +335,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	public AutoWireOfficeFloor openOfficeFloor() throws Exception {
 
 		// Open the OfficeFloor
-		OfficeFloor officeFloor = this.compiler.compile("auto-wire");
+		OfficeFloor officeFloor = FailCompilerIssues.compile(this.compiler,
+				"auto-wire");
 		officeFloor.openOfficeFloor();
 
 		// Create and return the auto-wire OfficeFloor

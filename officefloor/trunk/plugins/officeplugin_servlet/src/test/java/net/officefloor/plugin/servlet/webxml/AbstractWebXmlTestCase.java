@@ -45,7 +45,7 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -137,7 +137,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			OfficeFloorCompiler compiler = OfficeFloorCompiler
 					.newOfficeFloorCompiler();
 			compiler.setConfigurationContext(context);
-			compiler.setCompilerIssues(new FailCompilerIssues());
+			compiler.setCompilerIssues(new FailTestCompilerIssues());
 
 			// Compiler the Office Floor
 			this.officeFloor = compiler.compile("office-floor");

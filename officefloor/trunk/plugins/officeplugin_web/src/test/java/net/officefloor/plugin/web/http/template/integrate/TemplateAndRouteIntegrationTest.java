@@ -22,7 +22,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -59,7 +59,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.addSourceAliases();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		this.officeFloor = compiler.compile(officeFloorConfiguration);
 
 		// Open the OfficeFloor

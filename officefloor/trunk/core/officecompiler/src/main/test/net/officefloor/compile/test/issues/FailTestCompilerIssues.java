@@ -31,7 +31,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
  * 
  * @author Daniel Sagenschneider
  */
-public class FailCompilerIssues implements CompilerIssues {
+public class FailTestCompilerIssues implements CompilerIssues {
 
 	/*
 	 * =================== CompilerIssues =================================

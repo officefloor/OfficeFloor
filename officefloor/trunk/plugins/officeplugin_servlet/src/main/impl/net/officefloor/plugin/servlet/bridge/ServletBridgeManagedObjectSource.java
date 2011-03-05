@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -39,6 +40,10 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireObject;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
+import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
+import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 
 /**
@@ -79,13 +84,54 @@ public class ServletBridgeManagedObjectSource
 	private ManagedObjectExecuteContext<FlowKeys> context;
 
 	/**
+	 * Convenience method to create a {@link ServletServiceBridger} and also
+	 * configure into the {@link AutoWireOfficeFloorSource}.
+	 * 
+	 * @param servletClass
+	 *            {@link Servlet} class.
+	 * @param source
+	 *            {@link AutoWireOfficeFloorSource}.
+	 * @param handlerSectionName
+	 *            Name of the section to handle the HTTP request.
+	 * @param handlerInputName
+	 *            Name of the input on the section to handle the HTTP request.
+	 * @return {@link ServletServiceBridger}.
+	 */
+	public static <S> ServletServiceBridger<S> createServletServiceBridger(
+			Class<S> servletClass, AutoWireOfficeFloorSource source,
+			final String handlerSectionName, final String handlerInputName) {
+
+		// Create the Servlet Bridger
+		ServletServiceBridger<S> bridger = ServletBridgeManagedObjectSource
+				.createServletServiceBridger(servletClass);
+
+		// Configure the Servlet Bridger
+		AutoWireObject bridge = source.addManagedObject(
+				ServletBridgeManagedObjectSource.class,
+				new ManagedObjectSourceWirer() {
+					@Override
+					public void wire(ManagedObjectSourceWirerContext context) {
+						context.setInput(true);
+						context.mapFlow(FlowKeys.SERVICE.name(),
+								handlerSectionName, handlerInputName);
+					}
+				}, ServletBridge.class);
+		bridge.addProperty(
+				ServletBridgeManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
+				bridger.getInstanceIdentifier());
+
+		// Return the Servlet Bridger
+		return bridger;
+	}
+
+	/**
 	 * Creates the {@link ServletServiceBridger} for the {@link Servlet}.
 	 * 
 	 * @param servletClass
 	 *            Class of the {@link Servlet}.
 	 * @return {@link ServletServiceBridger} for the {@link Servlet}.
 	 */
-	public synchronized static <S extends Servlet> ServletServiceBridger<S> createServletServiceBridger(
+	public synchronized static <S> ServletServiceBridger<S> createServletServiceBridger(
 			Class<S> servletClass) {
 
 		// Obtain the instance identifier (and increment for next)
@@ -178,8 +224,8 @@ public class ServletBridgeManagedObjectSource
 	 * 
 	 * @author Daniel Sagenschneider
 	 */
-	private static class ServletServiceBridgerImpl<S extends Servlet>
-			implements ServletServiceBridger<S> {
+	private static class ServletServiceBridgerImpl<S> implements
+			ServletServiceBridger<S> {
 
 		/**
 		 * Instance identifier.
@@ -220,7 +266,7 @@ public class ServletBridgeManagedObjectSource
 		 * @throws Exception
 		 *             If fails to obtain the object.
 		 */
-		private Object getObject(Servlet servlet, Class<?> objectType)
+		private Object getObject(Object servlet, Class<?> objectType)
 				throws Exception {
 
 			// Look up the field
@@ -236,6 +282,17 @@ public class ServletBridgeManagedObjectSource
 		/*
 		 * ==================== ServletServiceBridger ======================
 		 */
+
+		@Override
+		public String getInstanceIdentifier() {
+			return this.instanceIdentifier;
+		}
+
+		@Override
+		public Class<?>[] getObjectTypes() {
+			Set<Class<?>> types = this.injectedDependencies.keySet();
+			return types.toArray(new Class[types.size()]);
+		}
 
 		@Override
 		public void service(S servlet, HttpServletRequest request,
@@ -268,11 +325,6 @@ public class ServletBridgeManagedObjectSource
 			// Propagate any exception
 			managedObject.propagateException();
 		}
-
-		@Override
-		public String getInstanceIdentifier() {
-			return this.instanceIdentifier;
-		}
 	}
 
 	/**
@@ -289,7 +341,7 @@ public class ServletBridgeManagedObjectSource
 		/**
 		 * {@link Servlet}.
 		 */
-		private final Servlet servlet;
+		private final Object servlet;
 
 		/**
 		 * {@link HttpServletRequest}.
@@ -319,7 +371,7 @@ public class ServletBridgeManagedObjectSource
 		 *            {@link HttpServletResponse}.
 		 */
 		public ServletBridgeManagedObject(ServletServiceBridgerImpl<?> bridger,
-				Servlet servlet, HttpServletRequest request,
+				Object servlet, HttpServletRequest request,
 				HttpServletResponse response) {
 			this.bridger = bridger;
 			this.servlet = servlet;
