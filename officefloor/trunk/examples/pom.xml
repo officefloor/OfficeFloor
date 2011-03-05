@@ -20,6 +20,7 @@
 		<module>NavigateHttpServer</module>
 		<module>DatabaseHttpServer</module>
 		<module>TeamHttpServer</module>
+		<module>ServletFilterWebApplication</module>
 		<module>WebOrchestration</module>
 	</modules>
 	<dependencyManagement>
