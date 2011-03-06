@@ -21,7 +21,7 @@ package net.officefloor.example.weborchestration;
 import javax.naming.InitialContext;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -86,7 +86,7 @@ public class WebOfficeFloorTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.addSystemProperties();
-		compiler.setCompilerIssues(new FailCompilerIssues());
+		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		OfficeFloor officeFloor = compiler.compile(officeFloorConfiguration);
 		officeFloor.openOfficeFloor();
 		try {			
