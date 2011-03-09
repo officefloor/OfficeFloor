@@ -154,6 +154,14 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure pass onto {@link Servlet} for unhandled task.
+	 */
+	public void testNonHandledTask() throws Exception {
+		assertEquals("Should pass onto servlet", "SERVLET",
+				this.doGetBody("/unhandled.links/unhandled.task"));
+	}
+
+	/**
 	 * Ensure can service from public template.
 	 */
 	public void testPublicTemplate() throws Exception {

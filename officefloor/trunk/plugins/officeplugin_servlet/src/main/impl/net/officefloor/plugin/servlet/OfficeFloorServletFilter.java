@@ -34,6 +34,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
+import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.servlet.bridge.ServletBridge;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
@@ -49,6 +52,25 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  */
 public abstract class OfficeFloorServletFilter extends
 		WebApplicationAutoWireOfficeFloorSource implements Filter {
+
+	/**
+	 * {@link HttpServletRequest} attribute name to indicate if serviced.
+	 */
+	private static final String NOT_HANDLED_REQUEST_ATTRIBUTE_NAME = "not.handled.request";
+
+	/**
+	 * Indicates if the {@link HttpServletRequest} was serviced by this
+	 * {@link Filter}.
+	 * 
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @return <code>true</code> if serviced by this {@link Filter}.
+	 */
+	private static boolean isServiced(HttpServletRequest request) {
+		synchronized (request) {
+			return (request.getAttribute(NOT_HANDLED_REQUEST_ATTRIBUTE_NAME) == null);
+		}
+	}
 
 	/**
 	 * {@link FilterConfig}.
@@ -110,6 +132,12 @@ public abstract class OfficeFloorServletFilter extends
 		this.addManagedObject(ServletHttpSessionManagedObjectSource.class,
 				null, HttpSession.class);
 
+		// Configure to pass through on not handling
+		AutoWireSection nonHandledServicer = this.addSection(
+				"NON_HANDLED_SERVICER", ClassSectionSource.class,
+				ServletNotHandledServicer.class.getName());
+		this.setNonHandledServicer(nonHandledServicer, "service");
+
 		// Provide dependencies of Servlet
 		Class<?>[] dependencyTypes = this.bridger.getObjectTypes();
 		for (Class<?> dependencyType : dependencyTypes) {
@@ -124,7 +152,9 @@ public abstract class OfficeFloorServletFilter extends
 
 		// Process Context Team to ensure appropriate Thread for dependencies
 		// (EJB's typically rely on ThreadLocal functionality)
-		this.assignTeam(ProcessContextTeamSource.class, dependencyTypes);
+		if (dependencyTypes.length > 0) {
+			this.assignTeam(ProcessContextTeamSource.class, dependencyTypes);
+		}
 
 		// Configure the web application
 		this.configure();
@@ -160,8 +190,10 @@ public abstract class OfficeFloorServletFilter extends
 			// Handle by OfficeFloor
 			this.bridger.service(this, httpRequest, httpResponse);
 
-			// Handled
-			return;
+			// Determine if handled
+			if (isServiced(httpRequest)) {
+				return; // serviced
+			}
 		}
 
 		// Not handled so continue on for Servlet container to handle
@@ -173,6 +205,25 @@ public abstract class OfficeFloorServletFilter extends
 		// Ensure close OfficeFloor
 		if (this.officeFloor != null) {
 			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Not handled servicer.
+	 */
+	public static class ServletNotHandledServicer {
+
+		/**
+		 * Flag not handled by this {@link Filter}.
+		 * 
+		 * @param bridge
+		 *            {@link ServletBridge}.
+		 */
+		public void service(ServletBridge bridge) {
+			HttpServletRequest request = bridge.getRequest();
+			synchronized (request) {
+				request.setAttribute(NOT_HANDLED_REQUEST_ATTRIBUTE_NAME, this);
+			}
 		}
 	}
 
