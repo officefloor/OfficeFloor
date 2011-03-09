@@ -304,6 +304,26 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to override the non-routed servicing.
+	 */
+	public void testOverrideNonHandledServicing() throws Exception {
+
+		// Add section to override servicing
+		AutoWireSection section = this.source
+				.addSection("SECTION", ClassSectionSource.class,
+						MockNonRoutedServicer.class.getName());
+		this.source.setNonHandledServicer(section, "service");
+		this.source.linkToSendResponse(section, "send");
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure override non-routed servicing
+		this.assertHttpRequest("http://localhost:7878/unhandled", 200,
+				"NON_ROUTED - /unhandled");
+	}
+
+	/**
 	 * Convenience method to add a {@link HttpServerSocketManagedObjectSource}.
 	 * 
 	 * @param port
@@ -385,6 +405,22 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Writes the response.
+	 * 
+	 * @param response
+	 *            Response.
+	 * @param connection
+	 *            {@link ServerHttpConnection}.
+	 */
+	private static void writeResponse(String response,
+			ServerHttpConnection connection) throws IOException {
+		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
+				.getBody().getOutputStream());
+		writer.append(response);
+		writer.flush();
+	}
+
+	/**
 	 * Mock logic for the template.
 	 */
 	public static class MockTemplateLogic {
@@ -397,7 +433,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		 */
 		@NextTask("doNothing")
 		public void submit(ServerHttpConnection connection) throws IOException {
-			this.writeResponse("submitted", connection);
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("submitted",
+					connection);
 		}
 
 		/**
@@ -431,23 +468,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 			counter.count++;
 
 			// Indicate the number of requests
-			this.writeResponse(String.valueOf(counter.count), connection);
-		}
-
-		/**
-		 * Writes the response.
-		 * 
-		 * @param response
-		 *            Response.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 */
-		private void writeResponse(String response,
-				ServerHttpConnection connection) throws IOException {
-			Writer writer = new OutputStreamWriter(connection.getHttpResponse()
-					.getBody().getOutputStream());
-			writer.append(response);
-			writer.flush();
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
+					String.valueOf(counter.count), connection);
 		}
 	}
 
@@ -460,6 +482,18 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		 * Count.
 		 */
 		public int count = 0;
+	}
+
+	/**
+	 * Provides mock functionality of non-routed servicing.
+	 */
+	public static class MockNonRoutedServicer {
+		@NextTask("send")
+		public void service(ServerHttpConnection connection) throws IOException {
+			String uri = connection.getHttpRequest().getRequestURI();
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
+					"NON_ROUTED - " + uri, connection);
+		}
 	}
 
 }

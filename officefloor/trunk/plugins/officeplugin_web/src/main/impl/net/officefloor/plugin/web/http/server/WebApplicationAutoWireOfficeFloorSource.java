@@ -24,12 +24,15 @@ import java.util.Set;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
@@ -63,6 +66,17 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link UriLink} instances.
 	 */
 	private final List<UriLink> uriLinks = new LinkedList<UriLink>();
+
+	/**
+	 * {@link SendLink} instances.
+	 */
+	private final List<SendLink> sendLinks = new LinkedList<SendLink>();
+
+	/**
+	 * Allows for overriding the {@link NonHandledServicer}. <code>null</code>
+	 * indicates to use default.
+	 */
+	private NonHandledServicer nonHandledServicer = null;
 
 	/**
 	 * Adds a {@link HttpTemplate} available at the specified URI.
@@ -150,6 +164,31 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	/**
+	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param outputName
+	 *            Name of the {@link OfficeSectionOutput}.
+	 */
+	public void linkToSendResponse(AutoWireSection section, String outputName) {
+		this.sendLinks.add(new SendLink(section, outputName));
+	}
+
+	/**
+	 * Specifies the {@link OfficeSectionInput} to handle if unable to route
+	 * {@link HttpRequest}.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param inputName
+	 *            Name of the {@link OfficeSectionInput}.
+	 */
+	public void setNonHandledServicer(AutoWireSection section, String inputName) {
+		this.nonHandledServicer = new NonHandledServicer(section, inputName);
+	}
+
+	/**
 	 * Obtains the registered URIs.
 	 * 
 	 * @return Registered URIs.
@@ -185,23 +224,36 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
 				WebApplicationSectionSource.class, null);
 
-		// Add non-handled servicer
-		AutoWireSection nonHandledServicer = this
-				.addSection("NON_HANDLED_SERVICER",
-						HttpFileSenderSectionSource.class, null);
-		this.addProperty(nonHandledServicer, context,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				"PUBLIC");
-		this.addProperty(nonHandledServicer, context,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
-				"index.html");
-		this.link(httpSection,
-				WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
-				nonHandledServicer,
-				HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
-		this.link(nonHandledServicer,
-				HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME, httpSection,
-				WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
+		// Provide the non-handled servicer
+		if (this.nonHandledServicer != null) {
+			// Use overridden servicer
+			this.link(httpSection,
+					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
+					this.nonHandledServicer.section,
+					this.nonHandledServicer.inputName);
+
+		} else {
+			// Use default non-handled servicer (file sending)
+			AutoWireSection nonHandledServicer = this.addSection(
+					"NON_HANDLED_SERVICER", HttpFileSenderSectionSource.class,
+					null);
+			this.addProperty(
+					nonHandledServicer,
+					context,
+					ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
+					"PUBLIC");
+			this.addProperty(
+					nonHandledServicer,
+					context,
+					ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
+					"index.html");
+			this.link(httpSection,
+					WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
+					nonHandledServicer,
+					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
+			this.linkToSendResponse(nonHandledServicer,
+					HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
+		}
 
 		// Link URI's
 		for (UriLink link : this.uriLinks) {
@@ -221,11 +273,15 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			if (!this.isLinked(section,
 					HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME)) {
 				// Not linked, so link to sending HTTP response
-				this.link(section,
-						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
-						httpSection,
-						WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
+				this.linkToSendResponse(section,
+						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
 			}
+		}
+
+		// Link sending the response
+		for (SendLink link : this.sendLinks) {
+			this.link(link.section, link.outputName, httpSection,
+					WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
 		}
 	}
 
@@ -280,6 +336,64 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		 */
 		public UriLink(String uri, AutoWireSection section, String inputName) {
 			this.uri = uri;
+			this.section = section;
+			this.inputName = inputName;
+		}
+	}
+
+	/**
+	 * Send link.
+	 */
+	private static class SendLink {
+
+		/**
+		 * {@link AutoWireSection}.
+		 */
+		public final AutoWireSection section;
+
+		/**
+		 * Name of the {@link SectionOutput}.
+		 */
+		public final String outputName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param section
+		 *            {@link AutoWireSection}.
+		 * @param outputName
+		 *            Name of the {@link SectionOutput}.
+		 */
+		public SendLink(AutoWireSection section, String outputName) {
+			this.section = section;
+			this.outputName = outputName;
+		}
+	}
+
+	/**
+	 * Non-handled servicer.
+	 */
+	private static class NonHandledServicer {
+
+		/**
+		 * {@link AutoWireSection}.
+		 */
+		public final AutoWireSection section;
+
+		/**
+		 * Name of the {@link SectionInput}.
+		 */
+		public final String inputName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param section
+		 *            {@link AutoWireSection}.
+		 * @param inputName
+		 *            Name of the {@link SectionInput}.
+		 */
+		public NonHandledServicer(AutoWireSection section, String inputName) {
 			this.section = section;
 			this.inputName = inputName;
 		}
