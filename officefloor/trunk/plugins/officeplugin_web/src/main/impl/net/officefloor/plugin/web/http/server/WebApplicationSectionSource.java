@@ -41,13 +41,11 @@ import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
 import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSendTask.HttpResponseSendTaskDependencies;
+import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSenderWorkSource;
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
-import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
-import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
-import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
+import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
@@ -58,7 +56,13 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpServerSectionSource extends AbstractSectionSource {
+public class WebApplicationSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Name of the {@link SectionOutput} for servicing non-handled
+	 * {@link HttpRequest} instances.
+	 */
+	public static final String UNHANDLED_REQUEST_OUTPUT_NAME = "unhandled-request";
 
 	/**
 	 * Name of the {@link SectionInput} to send the {@link HttpResponse}.
@@ -87,7 +91,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            Name of the {@link SectionInput}.
 	 * @param httpSection
 	 *            {@link AutoWireSection} for this
-	 *            {@link HttpServerSectionSource}.
+	 *            {@link WebApplicationSectionSource}.
 	 * @param source
 	 *            {@link WebApplicationAutoWireOfficeFloorSource}.
 	 */
@@ -109,7 +113,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 *            {@link HttpTemplateAutoWireSection}
 	 * @param httpSection
 	 *            {@link AutoWireSection} for this
-	 *            {@link HttpServerSectionSource}.
+	 *            {@link WebApplicationSectionSource}.
 	 * @param source
 	 *            {@link WebApplicationAutoWireOfficeFloorSource}.
 	 */
@@ -133,11 +137,72 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Links the {@link TaskObject} to the {@link SectionObject}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param objectName
+	 *            Name of the object.
+	 * @param objectType
+	 *            Type of the object.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param objects
+	 *            Registry of the {@link SectionObject} by type of object.
+	 */
+	static void linkObject(SectionTask task, String objectName,
+			Class<?> objectType, SectionDesigner designer,
+			Map<Class<?>, SectionObject> objects) {
+
+		// Obtain the section object
+		SectionObject sectionObject = objects.get(objectType);
+		if (sectionObject == null) {
+			sectionObject = designer.addSectionObject(objectType.getName(),
+					objectType.getName());
+			objects.put(objectType, sectionObject);
+		}
+
+		// Link task object to section object
+		TaskObject taskObject = task.getTaskObject(objectName);
+		designer.link(taskObject, sectionObject);
+	}
+
+	/**
+	 * Links an escalation to an {@link SectionOutput}.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param exception
+	 *            Type of escalation.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param escalations
+	 *            Registry of the {@link SectionOutput} by type of escalation.
+	 */
+	static <E extends Throwable> void linkEscalation(SectionTask task,
+			Class<E> exception, SectionDesigner designer,
+			Map<Class<?>, SectionOutput> escalations) {
+
+		// Obtain the section output
+		SectionOutput output = escalations.get(exception);
+		if (output == null) {
+			output = designer.addSectionOutput(exception.getName(),
+					exception.getName(), true);
+			escalations.put(exception, output);
+		}
+
+		// Link task escalation to output
+		TaskFlow escalation = task.getTaskEscalation(exception.getName());
+		designer.link(escalation, output,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+	}
+
+	/**
 	 * Links the URI route to {@link SectionOutput}.
 	 * 
 	 * @param httpSection
 	 *            {@link AutoWireSection} for this
-	 *            {@link HttpServerSectionSource}.
+	 *            {@link WebApplicationSectionSource}.
 	 * @param uri
 	 *            URI.
 	 * @return {@link SectionOutput} name.
@@ -164,7 +229,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 	 * 
 	 * @param httpSection
 	 *            {@link AutoWireSection} for this
-	 *            {@link HttpServerSectionSource}.
+	 *            {@link WebApplicationSectionSource}.
 	 */
 	private static void flagToRoute(AutoWireSection httpSection) {
 
@@ -204,16 +269,16 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 				HttpTemplateRouteWorkSource.class.getName());
 		SectionTask routeLinkTask = routeLinkWork.addSectionTask("LINK_ROUTE",
 				"route");
-		this.linkObject(routeLinkTask,
+		linkObject(routeLinkTask,
 				HttpTemplateRouteDependencies.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
-		this.linkEscalation(routeLinkTask,
-				InvalidHttpRequestUriException.class, designer, escalations);
-		this.linkEscalation(routeLinkTask, UnknownWorkException.class,
+		linkEscalation(routeLinkTask, InvalidHttpRequestUriException.class,
 				designer, escalations);
-		this.linkEscalation(routeLinkTask, UnknownTaskException.class,
-				designer, escalations);
-		this.linkEscalation(routeLinkTask, InvalidParameterTypeException.class,
+		linkEscalation(routeLinkTask, UnknownWorkException.class, designer,
+				escalations);
+		linkEscalation(routeLinkTask, UnknownTaskException.class, designer,
+				escalations);
+		linkEscalation(routeLinkTask, InvalidParameterTypeException.class,
 				designer, escalations);
 
 		// Link handling input to route link task
@@ -221,39 +286,22 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 				HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME, null);
 		designer.link(input, routeLinkTask);
 
-		// Add file sender
-		SectionWork sendFileWork = designer.addSectionWork("FILE",
-				ClasspathHttpFileSenderWorkSource.class.getName());
-		final String[] SEND_FILE_PROPERTIES = new String[] {
-				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME };
-		for (String propertyName : SEND_FILE_PROPERTIES) {
-			sendFileWork.addProperty(propertyName,
-					context.getProperty(propertyName));
-		}
-		SectionTask sendFileTask = sendFileWork.addSectionTask(
-				ClasspathHttpFileSenderWorkSource.TASK_NAME,
-				ClasspathHttpFileSenderWorkSource.TASK_NAME);
-		this.linkObject(sendFileTask,
-				DependencyKeys.SERVER_HTTP_CONNECTION.name(),
-				ServerHttpConnection.class, designer, objects);
-		this.linkEscalation(sendFileTask, IOException.class, designer,
-				escalations);
-		this.linkEscalation(sendFileTask, InvalidHttpRequestUriException.class,
-				designer, escalations);
-
 		// Create the flow for not matching of link route task
 		TaskFlow notLinkRouteFlow = routeLinkTask
 				.getTaskFlow(HttpTemplateRouteTaskFlows.NON_MATCHED_REQUEST
 						.name());
+
+		// Create the non-handled section output
+		SectionOutput unhandledRequest = designer.addSectionOutput(
+				UNHANDLED_REQUEST_OUTPUT_NAME, null, false);
 
 		// Add router for URI's
 		SectionTask routeUriTask = null;
 		boolean isRequireRouting = Boolean.valueOf(context.getProperty(
 				PROPERTY_IS_REQUIRE_ROUTING, String.valueOf(false)));
 		if (!isRequireRouting) {
-			// Not require URI routing, so send file
-			designer.link(notLinkRouteFlow, sendFileTask,
+			// Not require URI routing, always not handled
+			designer.link(notLinkRouteFlow, unhandledRequest,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		} else {
@@ -261,11 +309,11 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 			SectionWork routeUriWork = designer.addSectionWork("URI_ROUTE",
 					HttpRouteWorkSource.class.getName());
 			routeUriTask = routeUriWork.addSectionTask("URI_ROUTE", "route");
-			this.linkObject(routeUriTask,
+			linkObject(routeUriTask,
 					HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION.name(),
 					ServerHttpConnection.class, designer, objects);
-			this.linkEscalation(routeUriTask,
-					InvalidHttpRequestUriException.class, designer, escalations);
+			linkEscalation(routeUriTask, InvalidHttpRequestUriException.class,
+					designer, escalations);
 			for (String propertyName : context.getPropertyNames()) {
 				if (propertyName
 						.startsWith(HttpRouteWorkSource.PROPERTY_ROUTE_PREFIX)) {
@@ -296,7 +344,7 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 
 			// Link non-routed URI request to look for file
 			TaskFlow defaultRouteFlow = routeUriTask.getTaskFlow("default");
-			designer.link(defaultRouteFlow, sendFileTask,
+			designer.link(defaultRouteFlow, unhandledRequest,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 
@@ -305,75 +353,14 @@ public class HttpServerSectionSource extends AbstractSectionSource {
 				HttpResponseSenderWorkSource.class.getName());
 		SectionTask sendResponseTask = sendResponseWork.addSectionTask("SEND",
 				"SEND");
-		this.linkObject(sendResponseTask,
+		linkObject(sendResponseTask,
 				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION.name(),
 				ServerHttpConnection.class, designer, objects);
-		this.linkEscalation(sendResponseTask, IOException.class, designer,
+		linkEscalation(sendResponseTask, IOException.class, designer,
 				escalations);
 		SectionInput sendResponseInput = designer.addSectionInput(
 				SEND_RESPONSE_INPUT_NAME, null);
 		designer.link(sendResponseInput, sendResponseTask);
-	}
-
-	/**
-	 * Links the {@link TaskObject} to the {@link SectionObject}.
-	 * 
-	 * @param task
-	 *            {@link SectionTask}.
-	 * @param objectName
-	 *            Name of the object.
-	 * @param objectType
-	 *            Type of the object.
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param objects
-	 *            Registry of the {@link SectionObject} by type of object.
-	 */
-	private void linkObject(SectionTask task, String objectName,
-			Class<?> objectType, SectionDesigner designer,
-			Map<Class<?>, SectionObject> objects) {
-
-		// Obtain the section object
-		SectionObject sectionObject = objects.get(objectType);
-		if (sectionObject == null) {
-			sectionObject = designer.addSectionObject(objectType.getName(),
-					objectType.getName());
-			objects.put(objectType, sectionObject);
-		}
-
-		// Link task object to section object
-		TaskObject taskObject = task.getTaskObject(objectName);
-		designer.link(taskObject, sectionObject);
-	}
-
-	/**
-	 * Links an escalation to an {@link SectionOutput}.
-	 * 
-	 * @param task
-	 *            {@link SectionTask}.
-	 * @param exception
-	 *            Type of escalation.
-	 * @param designer
-	 *            {@link SectionDesigner}.
-	 * @param escalations
-	 *            Registry of the {@link SectionOutput} by type of escalation.
-	 */
-	private <E extends Throwable> void linkEscalation(SectionTask task,
-			Class<E> exception, SectionDesigner designer,
-			Map<Class<?>, SectionOutput> escalations) {
-
-		// Obtain the section output
-		SectionOutput output = escalations.get(exception);
-		if (output == null) {
-			output = designer.addSectionOutput(exception.getName(),
-					exception.getName(), true);
-			escalations.put(exception, output);
-		}
-
-		// Link task escalation to output
-		TaskFlow escalation = task.getTaskEscalation(exception.getName());
-		designer.link(escalation, output,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
 	}
 
 }

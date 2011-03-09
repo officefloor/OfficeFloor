@@ -183,26 +183,38 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
-				HttpServerSectionSource.class, null);
-		this.addProperty(httpSection, context,
+				WebApplicationSectionSource.class, null);
+
+		// Add non-handled servicer
+		AutoWireSection nonHandledServicer = this
+				.addSection("NON_HANDLED_SERVICER",
+						HttpFileSenderSectionSource.class, null);
+		this.addProperty(nonHandledServicer, context,
 				ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
 				"PUBLIC");
-		this.addProperty(httpSection, context,
+		this.addProperty(nonHandledServicer, context,
 				ClasspathHttpFileSenderWorkSource.PROPERTY_DEFAULT_FILE_NAME,
 				"index.html");
+		this.link(httpSection,
+				WebApplicationSectionSource.UNHANDLED_REQUEST_OUTPUT_NAME,
+				nonHandledServicer,
+				HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
+		this.link(nonHandledServicer,
+				HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME, httpSection,
+				WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
 
 		// Link URI's
 		for (UriLink link : this.uriLinks) {
 			// Register the URI link
-			HttpServerSectionSource.linkRouteToSection(link.uri, link.section,
-					link.inputName, httpSection, this);
+			WebApplicationSectionSource.linkRouteToSection(link.uri,
+					link.section, link.inputName, httpSection, this);
 		}
 
 		// Link template rendering
 		for (HttpTemplateAutoWireSection section : this.httpTemplates) {
 
 			// Register the HTTP template for routing
-			HttpServerSectionSource.linkRouteToHttpTemplate(section,
+			WebApplicationSectionSource.linkRouteToHttpTemplate(section,
 					httpSection, this);
 
 			// Link completion of template rendering (if not already linked)
@@ -212,7 +224,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				this.link(section,
 						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
 						httpSection,
-						HttpServerSectionSource.SEND_RESPONSE_INPUT_NAME);
+						WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
 			}
 		}
 	}
