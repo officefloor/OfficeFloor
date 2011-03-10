@@ -19,24 +19,27 @@ package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.servlet.bridge.ServletBridge;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
@@ -52,25 +55,6 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  */
 public abstract class OfficeFloorServletFilter extends
 		WebApplicationAutoWireOfficeFloorSource implements Filter {
-
-	/**
-	 * {@link HttpServletRequest} attribute name to indicate if serviced.
-	 */
-	private static final String NOT_HANDLED_REQUEST_ATTRIBUTE_NAME = "not.handled.request";
-
-	/**
-	 * Indicates if the {@link HttpServletRequest} was serviced by this
-	 * {@link Filter}.
-	 * 
-	 * @param request
-	 *            {@link HttpServletRequest}.
-	 * @return <code>true</code> if serviced by this {@link Filter}.
-	 */
-	private static boolean isServiced(HttpServletRequest request) {
-		synchronized (request) {
-			return (request.getAttribute(NOT_HANDLED_REQUEST_ATTRIBUTE_NAME) == null);
-		}
-	}
 
 	/**
 	 * {@link FilterConfig}.
@@ -89,6 +73,11 @@ public abstract class OfficeFloorServletFilter extends
 	private AutoWireOfficeFloor officeFloor;
 
 	/**
+	 * {@link ServletResourceLink} instances.
+	 */
+	private final List<ServletResourceLink> servletResourceLinks = new LinkedList<ServletResourceLink>();
+
+	/**
 	 * Handled URIs.
 	 */
 	private final Set<String> handledURIs = new HashSet<String>();
@@ -100,6 +89,23 @@ public abstract class OfficeFloorServletFilter extends
 	 */
 	protected FilterConfig getFilterConfig() {
 		return this.filterConfig;
+	}
+
+	/**
+	 * Links {@link OfficeSectionOutput} to a {@link Servlet} container
+	 * resource.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param outputName
+	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param requestDispatcherPath
+	 *            Path for the {@link RequestDispatcher}.
+	 */
+	public void linkToServletResource(AutoWireSection section,
+			String outputName, String requestDispatcherPath) {
+		this.servletResourceLinks.add(new ServletResourceLink(section,
+				outputName, requestDispatcherPath));
 	}
 
 	/**
@@ -132,11 +138,11 @@ public abstract class OfficeFloorServletFilter extends
 		this.addManagedObject(ServletHttpSessionManagedObjectSource.class,
 				null, HttpSession.class);
 
-		// Configure to pass through on not handling
-		AutoWireSection nonHandledServicer = this.addSection(
-				"NON_HANDLED_SERVICER", ClassSectionSource.class,
-				ServletNotHandledServicer.class.getName());
-		this.setNonHandledServicer(nonHandledServicer, "service");
+		// Configure the Servlet container resource section
+		AutoWireSection servletContainerResource = this.addSection(
+				"SERVLET_CONTAINER_RESOURCE",
+				ServletContainerResourceSectionSource.class, "NOT_HANDLED");
+		this.setNonHandledServicer(servletContainerResource, "NOT_HANDLED");
 
 		// Provide dependencies of Servlet
 		Class<?>[] dependencyTypes = this.bridger.getObjectTypes();
@@ -165,6 +171,14 @@ public abstract class OfficeFloorServletFilter extends
 			this.handledURIs.add(uri);
 		}
 
+		// Link the Servlet Resources
+		for (ServletResourceLink link : this.servletResourceLinks) {
+			servletContainerResource.addProperty(link.requestDispatcherPath,
+					link.requestDispatcherPath);
+			this.link(link.section, link.outputName, servletContainerResource,
+					link.requestDispatcherPath);
+		}
+
 		// Open the OfficeFloor
 		try {
 			this.officeFloor = this.openOfficeFloor();
@@ -185,13 +199,15 @@ public abstract class OfficeFloorServletFilter extends
 		// Obtain the URI
 		String uri = httpRequest.getRequestURI();
 
-		// Determine if handles request
+		// Determine handling request (quick cache look-up to save invoking)
 		if (this.handledURIs.contains(uri) || (uri.endsWith(".task"))) {
+
 			// Handle by OfficeFloor
 			this.bridger.service(this, httpRequest, httpResponse);
 
 			// Determine if handled
-			if (isServiced(httpRequest)) {
+			if (ServletContainerResourceSectionSource.completeServletService(
+					httpRequest, httpResponse)) {
 				return; // serviced
 			}
 		}
@@ -209,21 +225,40 @@ public abstract class OfficeFloorServletFilter extends
 	}
 
 	/**
-	 * Not handled servicer.
+	 * {@link Servlet} resource link.
 	 */
-	public static class ServletNotHandledServicer {
+	private static class ServletResourceLink {
 
 		/**
-		 * Flag not handled by this {@link Filter}.
-		 * 
-		 * @param bridge
-		 *            {@link ServletBridge}.
+		 * {@link AutoWireSection}.
 		 */
-		public void service(ServletBridge bridge) {
-			HttpServletRequest request = bridge.getRequest();
-			synchronized (request) {
-				request.setAttribute(NOT_HANDLED_REQUEST_ATTRIBUTE_NAME, this);
-			}
+		public final AutoWireSection section;
+
+		/**
+		 * {@link OfficeSectionOutput} name.
+		 */
+		public final String outputName;
+
+		/**
+		 * {@link RequestDispatcher} path.
+		 */
+		public final String requestDispatcherPath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param section
+		 *            {@link AutoWireSection}.
+		 * @param outputName
+		 *            {@link OfficeSectionOutput} name.
+		 * @param requestDispatcherPath
+		 *            {@link RequestDispatcher} path.
+		 */
+		public ServletResourceLink(AutoWireSection section, String outputName,
+				String requestDispatcherPath) {
+			this.section = section;
+			this.outputName = outputName;
+			this.requestDispatcherPath = requestDispatcherPath;
 		}
 	}
 

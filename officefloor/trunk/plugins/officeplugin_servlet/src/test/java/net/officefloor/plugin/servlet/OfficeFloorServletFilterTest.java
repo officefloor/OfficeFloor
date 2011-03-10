@@ -39,6 +39,7 @@ import javax.servlet.http.HttpSession;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.template.HttpSessionStateful;
@@ -195,6 +196,14 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can link to {@link Servlet} resource.
+	 */
+	public void testLinkToServletResource() throws Exception {
+		assertEquals("Should provide servlet resource", "SERVLET_RESOURCE",
+				this.doGetBody("/servlet-resource"));
+	}
+
+	/**
 	 * Ensure can utilise the object (such as EJB).
 	 */
 	public void testObject() throws Exception {
@@ -280,8 +289,13 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		// Add the filter for handling requests
 		context.addFilter(new FilterHolder(filter), "/*", FilterMapping.REQUEST);
 
+		// Add the linked Servlet Resource
+		context.addServlet(new ServletHolder(new MockHttpServlet(
+				"SERVLET_RESOURCE")), "/Template.jsp");
+
 		// Add the servlet for testing
-		context.addServlet(new ServletHolder(new MockHttpServlet()), "/");
+		context.addServlet(new ServletHolder(new MockHttpServlet("SERVLET")),
+				"/");
 
 		// Start the server
 		this.server.start();
@@ -346,6 +360,10 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 					ClassSectionSource.class, MockSection.class.getName());
 			this.linkUri("section", section, "doSection");
 
+			// Link to Servlet resource
+			this.linkUri("servlet-resource", section, "doServletResource");
+			this.linkToServletResource(section, "resource", "Template.jsp");
+
 			// Enable access to EJB of filter
 			AutoWireSection ejb = this.addSection("EJB",
 					ClassSectionSource.class, MockEjbSection.class.getName());
@@ -409,6 +427,10 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 			writer.write("SECTION");
 			writer.flush();
 		}
+
+		@NextTask("resource")
+		public void doServletResource() {
+		}
 	}
 
 	/**
@@ -428,11 +450,31 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 * Mock {@link HttpServlet} for testing.
 	 */
 	private class MockHttpServlet extends HttpServlet {
+
+		/**
+		 * Response content.
+		 */
+		private final String response;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param response
+		 *            Response content.
+		 */
+		public MockHttpServlet(String response) {
+			this.response = response;
+		}
+
+		/*
+		 * ================ HttpServlet =====================
+		 */
+
 		@Override
 		protected void service(HttpServletRequest request,
 				HttpServletResponse response) throws ServletException,
 				IOException {
-			response.getWriter().write("SERVLET");
+			response.getWriter().write(this.response);
 		}
 	}
 
