@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.io.Writer;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -34,6 +35,7 @@ import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
@@ -279,6 +281,25 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to link {@link OfficeSectionOutput} to {@link HttpTemplate}.
+	 */
+	public void testLinkToHttpTemplate() throws Exception {
+
+		// Add linking to HTTP template
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class, MockLinkHttpTemplate.class.getName());
+		this.source.linkUri("test", section, "service");
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				"template.ofp", MockTemplateLogic.class);
+		this.source.linkToHttpTemplate(section, "http-template", template);
+		this.source.openOfficeFloor();
+
+		// Ensure link to the HTTP template
+		this.assertHttpRequest("http://localhost:7878/test", 200,
+				"LINK to /resource0.links/submit.task");
+	}
+
+	/**
 	 * Ensure able to utilise the {@link HttpSession}.
 	 */
 	public void testHttpSession() throws Exception {
@@ -493,6 +514,17 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 			String uri = connection.getHttpRequest().getRequestURI();
 			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
 					"NON_ROUTED - " + uri, connection);
+		}
+	}
+
+	/**
+	 * Provides mock functionality to link to a HTTP template.
+	 */
+	public static class MockLinkHttpTemplate {
+		@NextTask("http-template")
+		public void service(ServerHttpConnection connection) throws IOException {
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
+					connection);
 		}
 	}
 
