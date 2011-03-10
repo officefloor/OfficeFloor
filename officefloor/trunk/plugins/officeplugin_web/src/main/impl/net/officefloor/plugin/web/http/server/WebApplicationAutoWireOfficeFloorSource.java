@@ -164,6 +164,22 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	/**
+	 * Links the {@link OfficeSectionOutput} to render the {@link HttpTemplate}.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param outputName
+	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param template
+	 *            {@link HttpTemplateAutoWireSection}.
+	 */
+	public void linkToHttpTemplate(AutoWireSection section, String outputName,
+			HttpTemplateAutoWireSection template) {
+		this.link(section, outputName, template,
+				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+	}
+
+	/**
 	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
 	 * 
 	 * @param section
