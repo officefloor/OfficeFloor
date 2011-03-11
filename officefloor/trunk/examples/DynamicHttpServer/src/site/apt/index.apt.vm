@@ -8,6 +8,8 @@
 
   This example demonstrates the concept of the {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} within an OfficeFloor by rendering a dynamic web page. 
   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  
 Code
 
 %{code-snippet|sh-params=highlight:[5]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/dynamichttpserver/DynamicHttpServer.java}

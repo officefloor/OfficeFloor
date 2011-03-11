@@ -16,6 +16,8 @@
   
   This example shows how OfficeFloor makes it simple for all database tasks to be executed by a separate thread pool leaving the HTTP request servicing thread pool free to service these smaller requests.
   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  
 Code
 
   The following is the <<<main>>> method to run the application.

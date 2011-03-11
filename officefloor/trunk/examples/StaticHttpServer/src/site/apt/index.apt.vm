@@ -6,7 +6,9 @@
 
   <<Static Http Server Example>>
 
-  This example uses the {{{/apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}} implementation {{{/apidocs/net/officefloor/plugin/web/http/server/HttpServerAutoWireOfficeFloorSource.html}HttpServerAutoWireOfficeFloorSource}} to demonstrate the concept of opening and closing an OfficeFloor along with the ease of using OfficeFloor for a HTTP Server. 
+  This example uses the {{{/apidocs/net/officefloor/compile/spi/officefloor/source/OfficeFloorSource.html}OfficeFloorSource}} implementation {{{/apidocs/net/officefloor/plugin/web/http/server/HttpServerAutoWireOfficeFloorSource.html}HttpServerAutoWireOfficeFloorSource}} to demonstrate the concept of opening and closing an OfficeFloor along with the ease of using OfficeFloor for a HTTP Server.
+  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/StaticHttpServer/${projectVersion}/StaticHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
   
 Code
 

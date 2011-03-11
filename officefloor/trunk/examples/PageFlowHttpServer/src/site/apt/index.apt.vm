@@ -18,6 +18,8 @@
   
   The example will implement the ability to add items to a list along with clearing the list.  Different parts of the template will be shown based on whether there are items in the list.
   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/PageFlowHttpServer/${projectVersion}/PageFlowHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  
 Code
 
   The following is the <<<main>>> method to run the application.

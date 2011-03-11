@@ -7,6 +7,8 @@
   <<Navigate Http Server Example>>
 
   This example demonstrates that a HTTP template is a section (implementation of {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} which is a functional building block of OfficeFloor) by navigating between two templates. 
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
   
 Code
 
