@@ -28,13 +28,15 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleClass {
 
 	public void example(ServerHttpConnection connection) throws IOException {
 		Writer writer = new OutputStreamWriter(connection.getHttpResponse()
 				.getBody().getOutputStream());
-		writer.write("CLASS");
+		writer.write("<html><body>CLASS</body></html>");
 		writer.flush();
 	}
 
 }
+// END SNIPPET: example

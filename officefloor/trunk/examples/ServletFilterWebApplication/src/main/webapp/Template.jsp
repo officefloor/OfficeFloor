@@ -1,1 +1,1 @@
-LINKED
+<html><body>Linked to JSP</body></html>
