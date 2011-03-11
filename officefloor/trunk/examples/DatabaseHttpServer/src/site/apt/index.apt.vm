@@ -10,6 +10,8 @@
   
   The <<<DataSource>>> is provided for dependency injection via a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.
   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  
 Code
 
   The following is the <<<main>>> method to run the application.
