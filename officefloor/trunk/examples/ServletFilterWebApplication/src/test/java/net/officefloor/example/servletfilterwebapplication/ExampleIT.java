@@ -32,6 +32,7 @@ import junit.framework.TestCase;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleIT extends TestCase {
 
 	private final HttpClient client = new DefaultHttpClient();
@@ -46,11 +47,12 @@ public class ExampleIT extends TestCase {
 	}
 
 	public void testLinkToJsp() throws IOException {
-		this.assertRequest("/template.links/link.task", "LINKED");
+		this.assertRequest("/template.links/link.task",
+				"<html><body>Linked to JSP</body></html>");
 	}
 
 	public void testClass() throws IOException {
-		this.assertRequest("/class", "CLASS");
+		this.assertRequest("/class", "<html><body>CLASS</body></html>");
 	}
 
 	private void assertRequest(String uri, String expectedContent)
@@ -70,3 +72,4 @@ public class ExampleIT extends TestCase {
 	}
 
 }
+// END SNIPPET: example

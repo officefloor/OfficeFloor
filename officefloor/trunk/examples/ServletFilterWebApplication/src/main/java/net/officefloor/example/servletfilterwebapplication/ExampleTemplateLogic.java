@@ -24,6 +24,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleTemplateLogic {
 
 	@NextTask("LINK")
@@ -31,3 +32,4 @@ public class ExampleTemplateLogic {
 	}
 
 }
+// END SNIPPET: example

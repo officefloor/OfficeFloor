@@ -27,6 +27,7 @@ import net.officefloor.plugin.web.http.server.HttpTemplateAutoWireSection;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleFilter extends OfficeFloorServletFilter {
 
 	@Override
@@ -47,3 +48,4 @@ public class ExampleFilter extends OfficeFloorServletFilter {
 	}
 
 }
+// END SNIPPET: example
