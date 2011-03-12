@@ -14,9 +14,11 @@
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
 		<logo name="Eclipse" href="http://www.eclipse.org/"
 			img="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg" />
+		<!--  
 		<logo name="Ohloh"
 			href="http://www.ohloh.net/p/officefloor?ref=WidgetProjectThinBadge"
 			img="http://www.ohloh.net/p/officefloor/widgets/project_thin_badge.gif" />
+		-->
 	</poweredBy>
 	<publishDate position="right" />
 	<version position="right" />
