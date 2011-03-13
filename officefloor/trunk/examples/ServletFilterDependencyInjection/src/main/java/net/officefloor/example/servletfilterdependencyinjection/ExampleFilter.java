@@ -26,6 +26,7 @@ import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleFilter extends OfficeFloorServletFilter {
 
 	@EJB
@@ -38,3 +39,4 @@ public class ExampleFilter extends OfficeFloorServletFilter {
 	}
 
 }
+// END SNIPPET: example

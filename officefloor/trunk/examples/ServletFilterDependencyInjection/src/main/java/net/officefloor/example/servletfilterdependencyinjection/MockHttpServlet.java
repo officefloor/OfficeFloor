@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class MockHttpServlet extends HttpServlet {
 
 	@Override
@@ -38,3 +39,4 @@ public class MockHttpServlet extends HttpServlet {
 	}
 
 }
+// END SNIPPET: example
