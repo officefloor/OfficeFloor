@@ -22,7 +22,6 @@
 		<module>TeamHttpServer</module>
 		<module>ServletFilterWebApplication</module>
 		<module>ServletFilterDependencyInjection</module>
-		<module>WebOrchestration</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
