@@ -1,1 +1,1 @@
-<html><body>${message}</body></html>
+<html><body>${text}</body></html>

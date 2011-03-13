@@ -24,6 +24,7 @@ import javax.ejb.Stateless;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @Stateless
 public class ExampleDependency implements ExampleDependencyLocal {
 
@@ -33,3 +34,4 @@ public class ExampleDependency implements ExampleDependencyLocal {
 	}
 
 }
+// END SNIPPET: example

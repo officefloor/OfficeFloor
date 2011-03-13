@@ -22,16 +22,18 @@ package net.officefloor.example.servletfilterdependencyinjection;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class Message {
 
-	private String message;
+	private String text;
 
-	public Message(String message) {
-		this.message = message;
+	public Message(String text) {
+		this.text = text;
 	}
 
-	public String getMessage() {
-		return this.message;
+	public String getText() {
+		return this.text;
 	}
 
 }
+// END SNIPPET: example

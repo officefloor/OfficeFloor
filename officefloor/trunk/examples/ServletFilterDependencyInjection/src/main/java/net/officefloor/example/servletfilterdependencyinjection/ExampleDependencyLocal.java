@@ -24,9 +24,11 @@ import javax.ejb.Local;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @Local
 public interface ExampleDependencyLocal {
 
 	Message getMessage();
 
 }
+// END SNIPPET: example

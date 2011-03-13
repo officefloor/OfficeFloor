@@ -22,6 +22,7 @@ package net.officefloor.example.servletfilterdependencyinjection;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleTemplateLogic {
 
 	public Message getTemplate(ExampleDependencyLocal dependency) {
@@ -29,3 +30,4 @@ public class ExampleTemplateLogic {
 	}
 
 }
+// END SNIPPET: example

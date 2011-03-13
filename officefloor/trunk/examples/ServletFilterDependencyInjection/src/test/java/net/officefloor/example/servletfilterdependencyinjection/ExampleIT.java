@@ -32,6 +32,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ExampleIT extends TestCase {
 
 	private final HttpClient client = new DefaultHttpClient();
@@ -61,3 +62,4 @@ public class ExampleIT extends TestCase {
 	}
 
 }
+// END SNIPPET: example
