@@ -122,10 +122,13 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 	 * Ensure able to obtain request URI.
 	 */
 	public void test_getHttpRequest_getRequestURI() {
+		final String CONTEXT_PATH = "/path";
 		final String REQUEST_URI = "/test";
 		final String QUERY_STRING = "name=value";
 		this.recordReturn(this.request, this.request.getRequestURI(),
-				REQUEST_URI);
+				CONTEXT_PATH + REQUEST_URI);
+		this.recordReturn(this.request, this.request.getContextPath(),
+				CONTEXT_PATH);
 		this.recordReturn(this.request, this.request.getQueryString(),
 				QUERY_STRING);
 		this.replayMockObjects();

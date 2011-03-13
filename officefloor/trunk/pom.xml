@@ -74,6 +74,12 @@
 			<url>http://download.java.net/maven/2/</url>
 		</repository>
 		<repository>
+			<!-- Embedded Glassfish (for testing JEE integration) -->
+			<id>glassfish.dev.java.net</id>
+			<name>Java.net Repository for Maven</name>
+			<url>http://download.java.net/maven/glassfish/</url>
+		</repository>
+		<repository>
 			<!-- Doxia additional macros (code-snippet) -->
 			<id>com.anasoft.os.repository.releases</id>
 			<name>ANASOFT OpenSource releases</name>
@@ -88,6 +94,12 @@
 			<url>http://www.officefloor.net/maven2/</url>
 		</pluginRepository>
 		<pluginRepository>
+			<!-- Embedded Glassfish (for testing JEE integration) -->
+			<id>glassfish.dev.java.net</id>
+			<name>Java.net Repository for Maven</name>
+			<url>http://download.java.net/maven/glassfish/</url>
+		</pluginRepository>
+		<pluginRepository>
 			<!-- Doxia additional macros (code-snippet) -->
 			<id>com.anasoft.os.repository.releases</id>
 			<name>ANASOFT OpenSource releases</name>
@@ -97,9 +109,15 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<!-- TODO: remove and migrate to 6.0 -->
 				<groupId>javaee</groupId>
 				<artifactId>javaee-api</artifactId>
 				<version>5</version>
+			</dependency>
+			<dependency>
+				<groupId>javax</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -367,6 +385,7 @@
 					<version>1.8.0</version>
 				</plugin>
 				<plugin>
+					<!-- TODO migrate to v7 -->
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>maven-jetty-plugin</artifactId>
 					<version>6.1.26</version>
@@ -375,6 +394,11 @@
 					<groupId>org.mortbay.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>7.2.1.v20101111</version>
+				</plugin>
+				<plugin>
+					<groupId>org.glassfish</groupId>
+					<artifactId>maven-embedded-glassfish-plugin</artifactId>
+					<version>3.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonatype.tycho</groupId>

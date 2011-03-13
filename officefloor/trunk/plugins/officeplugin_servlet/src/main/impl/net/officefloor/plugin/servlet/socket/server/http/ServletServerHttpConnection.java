@@ -37,6 +37,46 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 public class ServletServerHttpConnection implements ServerHttpConnection {
 
 	/**
+	 * Obtains the request URI from the {@link HttpServletRequest}.
+	 * 
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @return Request URI.
+	 */
+	public static String getRequestUri(HttpServletRequest request) {
+
+		// Obtain the URI
+		String uri = request.getRequestURI();
+
+		// Strip off context path from URI
+		String contextPath = request.getContextPath();
+		if ((!("/".equals(contextPath))) && (uri.startsWith(contextPath))) {
+			uri = uri.substring(contextPath.length());
+		}
+
+		// Return the URI
+		return uri;
+	}
+
+	/**
+	 * Obtains the request path from the {@link HttpServletRequest} which
+	 * includes the query information.
+	 * 
+	 * @param request
+	 *            {@link HttpServletRequest}.
+	 * @return Request URI.
+	 */
+	public static String getRequestPath(HttpServletRequest request) {
+		String requestUri = ServletServerHttpConnection.getRequestUri(request);
+		String queryString = request.getQueryString();
+		if ((queryString == null) || (queryString.length() == 0)) {
+			return requestUri; // no query string
+		} else {
+			return requestUri + "?" + queryString;
+		}
+	}
+
+	/**
 	 * {@link HttpServletRequest}.
 	 */
 	private final HttpServletRequest servletRequest;
