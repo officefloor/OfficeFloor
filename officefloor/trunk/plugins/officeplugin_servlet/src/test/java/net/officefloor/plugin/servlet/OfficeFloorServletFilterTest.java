@@ -74,6 +74,11 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	private Server server;
 
 	/**
+	 * Context path.
+	 */
+	private String contextPath = "/";
+
+	/**
 	 * {@link HttpClient}.
 	 */
 	private HttpClient client;
@@ -212,6 +217,15 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures the context path is stripped off the request URI.
+	 */
+	public void testStripOffContextPath() throws Exception {
+		this.contextPath = "/path";
+		assertEquals("Should be handled by template", "TEMPLATE",
+				this.doGetBody("/path/test"));
+	}
+
+	/**
 	 * Executes the {@link HttpGet} for the URI returning the text content of
 	 * the body.
 	 * 
@@ -282,7 +296,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 		// Start servlet container with filter
 		this.server = new Server(this.port);
 		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/");
+		context.setContextPath(this.contextPath);
 		context.setSessionHandler(new SessionHandler());
 		this.server.setHandler(context);
 

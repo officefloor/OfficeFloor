@@ -42,6 +42,7 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
+import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnection;
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
 import net.officefloor.plugin.servlet.web.http.session.ServletHttpSessionManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -197,7 +198,7 @@ public abstract class OfficeFloorServletFilter extends
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		// Obtain the URI
-		String uri = httpRequest.getRequestURI();
+		String uri = ServletServerHttpConnection.getRequestUri(httpRequest);
 
 		// Determine handling request (quick cache look-up to save invoking)
 		if (this.handledURIs.contains(uri) || (uri.endsWith(".task"))) {
