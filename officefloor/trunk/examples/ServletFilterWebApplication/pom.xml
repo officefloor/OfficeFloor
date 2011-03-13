@@ -42,7 +42,7 @@
 					</connectors>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<stopKey>officefloor</stopKey>
-					<stopPort>9999</stopPort>
+					<stopPort>18081</stopPort>
 				</configuration>
 				<executions>
 					<execution>
