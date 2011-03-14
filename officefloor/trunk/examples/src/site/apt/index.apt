@@ -25,7 +25,13 @@
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./TeamHttpServer/index.html}Team allocation within HTTP server}}  | HTTP Server with assignment of team to execute tasks.  A Team within OfficeFloor is in effect a thread pool and is the means to assign specific threads (thread pools) to execute specific tasks.
 *----------------------------------------------------------+-----------------------------------------------------------+
-| Running within a Servlet container  | Current focus of OfficeFloor development is producing a Servlet Filter that can integrate OfficeFloor HTTP Server functionality into your existing java web applications. This will mean you can start taking advantage of OfficeFloor capabilities without having to significantly change your existing web application.
+| {{{./ServletFilterWebApplication/index.html}Running within Servlet Container}}  | Running the above web functionality within a JEE Servlet container.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./ServletFilterDependencyInjection/index.html}Utilising dependency injection of the Servlet Container}}  | Use of Servlet container dependency injection (e.g. making use of EJBs).
+*----------------------------------------------------------+-----------------------------------------------------------+
+| Graphical web navigation configuration  | Current focus of OfficeFloor development is providing graphical configuration to configure a web application.
+*----------------------------------------------------------+-----------------------------------------------------------+
+| Scripting languages  | Future focus is to look at incorporating scripting languages (such as JRuby, Jython, Groovy) as logic for templates.
 *----------------------------------------------------------+-----------------------------------------------------------+
 
   Current focus of features being developed (or documented as examples) can be found at {{{http://sourceforge.net/tracker/?func=browse&group_id=156349&atid=799429&status=1}OfficeFloor features}}.

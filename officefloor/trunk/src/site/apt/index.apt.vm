@@ -22,7 +22,7 @@ Features
   
   * Existing plug-ins to build web based applications
   
-  * JEE Servlet integration for web based components (currently under development)
+  * JEE Servlet integration for web based applications
   
   * Spring plug-in to enable re-use of your existing Spring beans
 

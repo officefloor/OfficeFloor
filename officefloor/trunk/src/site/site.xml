@@ -12,7 +12,7 @@
 			img="http://www.opensourcescripts.com/icons/twi.jpg" alt="open source scripts" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
-		<logo name="Eclipse" href="http://www.eclipse.org/"
+		<logo name="Eclipse" href="http://marketplace.eclipse.org/content/officefloor"
 			img="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg" />
 		<!--  
 		<logo name="Ohloh"
