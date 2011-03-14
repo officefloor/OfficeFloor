@@ -12,6 +12,14 @@
 	<version>1.0.1</version>
 	<name>Database HTTP Server Example</name>
 	<description>Example of using OfficeFloor for a HTTP Server connected to a database</description>
+	<repositories>
+		<repository>
+			<!-- OfficeFloor repository to obtain artifacts for running the example -->
+			<id>maven2-repository.officefloor.net</id>
+			<name>OfficeFloor Repository for Maven</name>
+			<url>http://www.officefloor.net/maven2/</url>
+		</repository>
+	</repositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
