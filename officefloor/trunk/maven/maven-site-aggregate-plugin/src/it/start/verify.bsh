@@ -3,20 +3,53 @@ import java.io.*;
 // Log verifying
 System.out.println("Verifying project run");
 
-// Method to ensure file created
-ensureExists( path ) {
+// Obtain the file
+File getFile( path ) {
 	File siteAggregateDir = new File(basedir, "target/site-aggregate");
 	File file = new File(siteAggregateDir, path);
+	return file;
+}
+
+// Method to ensure file created
+ensureExists( path ) {
+	File file = getFile(path);
 	if ( !file.isFile() ) {
-		throw new FileNotFoundException("OfficeFloor not run as file not existing: " + file);
+		throw new FileNotFoundException("Site aggregator did not aggregate file " + file);
 	}	
 }
 
+// Ensure content is correct
+ensureContent( path, content ) {
+	ensureExists(path);
+	StringWriter buffer = new StringWriter();
+	File file = getFile(path);
+	FileReader reader = new FileReader(file);
+	for (int character = reader.read(); character != -1; character = reader.read()) {
+		buffer.write(character);
+	}
+	reader.close();
+	String actual = buffer.toString();
+	content = content.replace('\r', '\n');
+	content = content.replace("\n\n", "\n");
+	actual = actual.replace('\r', '\n');
+	actual = actual.replace("\n\n", "\n");
+	if ( !(actual.equals(content)) ) {
+		throw new IOException( "Incorrect content\nEXPECTED : '" + content + "'\nACTUAL   : '" + actual + "'");
+	}
+}
+
 // Ensure top level site content
-ensureExists("apt/index.apt");
+ensureContent("apt/index.apt", "  PARENT");
+ensureContent("resources/raw.apt.vm", "${raw}");
 
 // Ensure child content aggregated
-ensureExists("apt/child-index.apt");
+ensureContent("apt/child-index.apt", "  CHILD");
 
-// Ensure pdf.xml available
-ensureExists("pdf.xml");
+// Ensure book.xml available
+File expectedBook = new File(basedir, "expected-book.xml");
+FileReader reader = new FileReader(expectedBook);
+StringWriter book = new StringWriter();
+for (int character = reader.read(); character != -1; character = reader.read()) {
+	book.write(character);
+}
+ensureContent("book.xml", book.toString());

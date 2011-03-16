@@ -4,6 +4,7 @@
 	<groupId>@project.groupId@.test</groupId>
 	<artifactId>@project.artifactId@-test</artifactId>
 	<version>@project.version@</version>
+	<packaging>pom</packaging>
 	<name>Test for the Site Aggregate maven plugin</name>
 	<description>Tests the Site Aggregate maven plugin</description>
 	<properties>
@@ -18,6 +19,9 @@
 				<groupId>@project.groupId@</groupId>
 				<artifactId>@project.artifactId@</artifactId>
 				<version>@project.version@</version>
+				<configuration>
+					<title>OfficeFloor</title>
+				</configuration>
 				<executions>
 					<execution>
 						<phase>test</phase>
