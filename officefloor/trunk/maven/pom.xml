@@ -49,6 +49,11 @@
 				<artifactId>maven-officefloor-skin</artifactId>
 				<version>1.0.1</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-site-aggregate-plugin</artifactId>
+				<version>1.0.1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>
