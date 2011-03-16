@@ -12,17 +12,21 @@
   
 Features
 
-  * Multi-threaded Java framework providing for thread safe execution of your methods (with ability to specify differing thread pools to execute particular methods)
-  
-  * Dependency injection of objects as parameters to the executed methods
+  * Combines the object oriented / procedural ease of programming with the multi-threaded performance of functional programming
   
   * Provides both auto-wiring of dependencies and manual graphical configuration
   
   * Abstraction of plug-ins to enable more course grained integration than individual classes (allows easier assembly and management of applications)
   
-  * Existing plug-ins to build web based applications
+  * Web Framework built on OfficeFloor that:
   
-  * JEE Servlet integration for web based applications
+    * focuses on simplicity in building web applications - complex code only for complex problems
+  
+    * provides web page instrumentation without intrusive tags that allows the raw page to be viewed in a browser
+    
+    * graphically wires together the web application's navigation giving easy overview of how the web application works  (currently under development)
+    
+    * JEE integration for running within a Servlet container and optionally making use of EJBs
   
   * Spring plug-in to enable re-use of your existing Spring beans
 
