@@ -1,0 +1,24 @@
+<book>
+	<id>book</id>
+	<title>OfficeFloor</title>
+	<chapters>
+		<chapter>
+			<id>introduction</id>
+			<title>introduction</title>
+			<sections>
+				<section>
+					<id>index</id>
+				</section>
+			</sections>
+		</chapter>
+		<chapter>
+			<id>child</id>
+			<title>child</title>
+			<sections>
+				<section>
+					<id>child-index</id>
+				</section>
+			</sections>
+		</chapter>
+	</chapters>
+</book>
