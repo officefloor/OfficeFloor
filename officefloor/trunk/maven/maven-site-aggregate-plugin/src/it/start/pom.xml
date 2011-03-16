@@ -21,6 +21,9 @@
 				<version>@project.version@</version>
 				<configuration>
 					<title>OfficeFloor</title>
+					<ignores>
+						<ignore>ignore</ignore>
+					</ignores>
 				</configuration>
 				<executions>
 					<execution>

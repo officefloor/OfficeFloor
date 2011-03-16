@@ -66,6 +66,13 @@ public class AggregateGoal extends AbstractMojo {
 	 */
 	private String title;
 
+	/**
+	 * Ignore file names.
+	 * 
+	 * @parameter
+	 */
+	private String[] ignores;
+
 	/*
 	 * ======================= Mojo ===========================
 	 */
@@ -100,13 +107,13 @@ public class AggregateGoal extends AbstractMojo {
 		List<Chapter> chapters = new LinkedList<Chapter>();
 
 		// Copy the top level module
-		copyModule("", this.basedir, aggregateDir, chapters);
+		copyModule("", this.basedir, aggregateDir, chapters, this.ignores, this);
 
 		// Write the book content for doxia
 		try {
 			PrintWriter book = new PrintWriter(new FileWriter(new File(
 					aggregateDir, "book.xml"), false));
-			book.println("<book>");
+			book.println("<book xmlns=\"http://maven.apache.org/BOOK/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/BOOK/1.0.0 http://maven.apache.org/xsd/book-1.0.0.xsd\">");
 			book.println("\t<id>book</id>");
 			book.println("\t<title>" + this.title + "</title>");
 			book.println("\t<chapters>");
@@ -181,11 +188,15 @@ public class AggregateGoal extends AbstractMojo {
 	 *            Target directory.
 	 * @param chapters
 	 *            {@link Chapter} instances.
+	 * @param ignore
+	 *            Files to ignore.
+	 * @param mojo
+	 *            {@link AggregateGoal}.
 	 * @throws MojoFailureException
 	 */
 	private static void copyModule(String modulePrefix, File projectBaseDir,
-			File targetDirectory, List<Chapter> chapters)
-			throws MojoFailureException {
+			File targetDirectory, List<Chapter> chapters, String[] ignore,
+			AggregateGoal mojo) throws MojoFailureException {
 
 		try {
 			// Load the pom.xml
@@ -198,6 +209,9 @@ public class AggregateGoal extends AbstractMojo {
 					: modulePrefix);
 			Chapter chapter = new Chapter(chapterId, chapterId);
 			chapters.add(chapter);
+
+			// Log progress
+			mojo.getLog().info("\t" + modulePrefix);
 
 			// Determine if site directory available
 			File siteDir = new File(projectBaseDir, "src/site");
@@ -218,7 +232,7 @@ public class AggregateGoal extends AbstractMojo {
 					// Copy the directory
 					copyDirectory(child,
 							new File(targetDirectory, child.getName()), pom,
-							isResourcesDir, modulePrefix, chapter);
+							isResourcesDir, modulePrefix, chapter, ignore);
 				}
 			}
 
@@ -227,11 +241,12 @@ public class AggregateGoal extends AbstractMojo {
 
 				// Obtain sub module details
 				String subModulePrefix = subModule.replace('/', '_');
+				subModulePrefix = subModulePrefix.replace('.', '_');
 				File subModuleBaseDir = new File(projectBaseDir, subModule);
 
 				// Copy the sub module
 				copyModule(subModulePrefix, subModuleBaseDir, targetDirectory,
-						chapters);
+						chapters, ignore, mojo);
 			}
 
 		} catch (Exception ex) {
@@ -253,12 +268,20 @@ public class AggregateGoal extends AbstractMojo {
 	 *            Prefix on files for the module if not raw copy.
 	 * @param chapter
 	 *            {@link Chapter}.
+	 * @param ignore
+	 *            Files to ignore.
 	 * @throws MojoFailureException
 	 *             If fails to copy the directory.
 	 */
 	private static void copyDirectory(File sourceDirectory,
 			File targetDirectory, Model pom, boolean isRawCopy,
-			String modulePrefix, Chapter chapter) throws MojoFailureException {
+			String modulePrefix, Chapter chapter, String[] ignore)
+			throws MojoFailureException {
+
+		// Determine if ignore directory
+		if (isIgnore(sourceDirectory, ignore)) {
+			return;
+		}
 
 		// Ignore non-existent directory
 		if (!(sourceDirectory.isDirectory())) {
@@ -270,12 +293,12 @@ public class AggregateGoal extends AbstractMojo {
 			if (child.isFile()) {
 				// Copy the file
 				copyFile(child, targetDirectory, pom, isRawCopy, modulePrefix,
-						chapter);
+						chapter, ignore);
 			} else {
 				// Directory, so recursively copy
 				copyDirectory(child,
 						new File(targetDirectory, child.getName()), pom,
-						isRawCopy, modulePrefix, chapter);
+						isRawCopy, modulePrefix, chapter, ignore);
 			}
 		}
 	}
@@ -295,12 +318,19 @@ public class AggregateGoal extends AbstractMojo {
 	 *            Prefix on files for the module if not raw copy.
 	 * @param chapter
 	 *            {@link Chapter}.
+	 * @param ignore
+	 *            Files to ignore.
 	 * @throws MojoFailureException
 	 *             If fails to copy the file.
 	 */
 	private static void copyFile(File sourceFile, File targetDirectory,
-			Model pom, boolean isRawCopy, String modulePrefix, Chapter chapter)
-			throws MojoFailureException {
+			Model pom, boolean isRawCopy, String modulePrefix, Chapter chapter,
+			String[] ignore) throws MojoFailureException {
+
+		// Determine if ignore
+		if (isIgnore(sourceFile, ignore)) {
+			return;
+		}
 
 		// Ensure the directory exists
 		ensureDirectoryExists(targetDirectory,
@@ -401,6 +431,38 @@ public class AggregateGoal extends AbstractMojo {
 						+ directory.getPath());
 			}
 		}
+	}
+
+	/**
+	 * Determines if ignore content.
+	 * 
+	 * @param file
+	 *            File to determine if ignore.
+	 * @param ignore
+	 *            Names to ignore.
+	 * @return <code>true</code> ignore file.
+	 */
+	private static boolean isIgnore(File file, String[] ignore) {
+
+		// Obtain the file name
+		String fileName = file.getName();
+
+		// Ignore known files
+		if (fileName.endsWith("~")) {
+			return true;
+		}
+
+		// Determine if ignore
+		if (ignore != null) {
+			for (String name : ignore) {
+				if (name.equals(file.getName())) {
+					return true; // ignore
+				}
+			}
+		}
+
+		// As here, do not ignore
+		return false;
 	}
 
 }

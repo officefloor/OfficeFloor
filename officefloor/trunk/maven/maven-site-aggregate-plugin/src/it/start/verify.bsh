@@ -18,6 +18,14 @@ ensureExists( path ) {
 	}	
 }
 
+// Method to ensure ignore file
+ensureIgnored( path ) {
+	File ignoredFile = getFile(path);
+	if (ignoredFile.exists()) {
+		throw new IOException("Should ignore file " + path);
+	}
+}
+
 // Ensure content is correct
 ensureContent( path, content ) {
 	ensureExists(path);
@@ -53,3 +61,7 @@ for (int character = reader.read(); character != -1; character = reader.read()) 
 	book.write(character);
 }
 ensureContent("book.xml", book.toString());
+
+// Ensure ignore
+ensureIgnored("resources/ignore/ignored.txt");
+ensureIgnored("resources/ignored.apt~");

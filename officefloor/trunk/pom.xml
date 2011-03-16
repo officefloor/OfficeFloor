@@ -245,6 +245,11 @@
 				<version>2.0.6</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity</artifactId>
+				<version>1.7</version>
+			</dependency>
+			<dependency>
 				<groupId>easymock</groupId>
 				<artifactId>easymock</artifactId>
 				<version>1.1</version>
@@ -633,6 +638,56 @@
 				</executions>
 			</plugin>
 			<!-- END: project validation -->
+
+			<!-- START: Generate PDF Book -->
+			<plugin>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-site-aggregate-plugin</artifactId>
+				<version>1.0.1</version>
+				<inherited>false</inherited>
+				<configuration>
+					<title>OfficeFloor</title>
+					<ignores>
+						<ignore>.svn</ignore>
+					</ignores>
+				</configuration>
+				<executions>
+					<execution>
+						<id>book</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.doxia</groupId>
+				<artifactId>doxia-maven-plugin</artifactId>
+				<version>1.1.4</version>
+				<executions>
+					<execution>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>render-books</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<books>
+						<book>
+							<directory>target/site-aggregate</directory>
+							<descriptor>target/site-aggregate/book.xml</descriptor>
+							<formats>
+								<format>
+									<id>pdf</id>
+								</format>
+							</formats>
+						</book>
+					</books>
+				</configuration>
+			</plugin>
+			<!-- END: Generate PDF Book -->
 
 			<plugin>
 				<!-- Generate Javadoc for referencing in site documentation -->

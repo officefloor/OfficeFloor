@@ -42,7 +42,7 @@ Simple Example
 
   The above example was limited to code configuration of OfficeFloor.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}.  An example of the graphical configuration is below:
 
-[./images/screenshot.png] Example graphical configuration of OfficeFloor
+[./images/graphical-configuration.png] Example graphical configuration of OfficeFloor
 
   See the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}} for further configuration and watch the {{{./demo.html}demo}}.
 
