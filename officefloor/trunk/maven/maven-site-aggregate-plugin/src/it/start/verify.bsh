@@ -1,0 +1,22 @@
+import java.io.*;
+
+// Log verifying
+System.out.println("Verifying project run");
+
+// Method to ensure file created
+ensureExists( path ) {
+	File siteAggregateDir = new File(basedir, "target/site-aggregate");
+	File file = new File(siteAggregateDir, path);
+	if ( !file.isFile() ) {
+		throw new FileNotFoundException("OfficeFloor not run as file not existing: " + file);
+	}	
+}
+
+// Ensure top level site content
+ensureExists("apt/index.apt");
+
+// Ensure child content aggregated
+ensureExists("apt/child-index.apt");
+
+// Ensure pdf.xml available
+ensureExists("pdf.xml");
