@@ -52,6 +52,7 @@ ensureContent("resources/raw.apt.vm", "${raw}");
 
 // Ensure child content aggregated
 ensureContent("apt/child-index.apt", "  CHILD");
+ensureContent("apt/child-link.apt", " {{{http://www.officefloor.net/child/link.html}Link}}");
 
 // Ensure book.xml available
 File expectedBook = new File(basedir, "expected-book.xml");
@@ -65,3 +66,6 @@ ensureContent("book.xml", book.toString());
 // Ensure ignore
 ensureIgnored("resources/ignore/ignored.txt");
 ensureIgnored("resources/ignored.apt~");
+
+// Ensure resources available for PDF
+ensureContent("../../target/generated-site/pdf/book/raw.apt.vm", "${raw}");

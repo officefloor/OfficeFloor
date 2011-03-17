@@ -21,9 +21,13 @@
 				<version>@project.version@</version>
 				<configuration>
 					<title>OfficeFloor</title>
+					<baseUrl>http://www.officefloor.net</baseUrl>
 					<ignores>
 						<ignore>ignore</ignore>
 					</ignores>
+					<order>
+						<order>index</order>
+					</order>
 				</configuration>
 				<executions>
 					<execution>

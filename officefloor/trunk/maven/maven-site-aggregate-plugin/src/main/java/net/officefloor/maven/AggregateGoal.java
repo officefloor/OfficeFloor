@@ -17,12 +17,17 @@
  */
 package net.officefloor.maven;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -67,11 +72,34 @@ public class AggregateGoal extends AbstractMojo {
 	private String title;
 
 	/**
+	 * Base URL for links.
+	 * 
+	 * @parameter
+	 * @required
+	 */
+	private String baseUrl;
+
+	/**
 	 * Ignore file names.
 	 * 
 	 * @parameter
 	 */
 	private String[] ignores;
+
+	/**
+	 * Order of the sections.
+	 * 
+	 * @parameter
+	 */
+	private String[] order;
+
+	/**
+	 * Directory to copy aggregated resources content for potential PDF
+	 * generation.
+	 * 
+	 * @parameter default-value="target/generated-site/pdf/book"
+	 */
+	private String pdfResourcesDirectory;
 
 	/*
 	 * ======================= Mojo ===========================
@@ -107,7 +135,38 @@ public class AggregateGoal extends AbstractMojo {
 		List<Chapter> chapters = new LinkedList<Chapter>();
 
 		// Copy the top level module
-		copyModule("", this.basedir, aggregateDir, chapters, this.ignores, this);
+		copyModule("", this.basedir, aggregateDir, this.baseUrl, "", chapters,
+				this.ignores, this);
+
+		// Copy resources for PDF generation
+		File resourcesDir = new File(aggregateDir, "resources");
+		File pdfDir = new File(this.basedir, this.pdfResourcesDirectory);
+		copyDirectory(resourcesDir, pdfDir, null, null, null, null, true, "",
+				new Chapter("resources", "resources"), new String[0]);
+
+		// Order the sections
+		for (Chapter chapter : chapters) {
+			Collections.sort(chapter.sections, new Comparator<Section>() {
+				@Override
+				public int compare(Section a, Section b) {
+					int indexA = this.getIndex(a);
+					int indexB = this.getIndex(b);
+					return indexA - indexB;
+				}
+
+				private int getIndex(Section section) {
+					String[] ordering = AggregateGoal.this.order;
+					if (ordering != null) {
+						for (int i = 0; i < ordering.length; i++) {
+							if (section.id.endsWith(ordering[i])) {
+								return i; // provide order
+							}
+						}
+					}
+					return Integer.MAX_VALUE; // default to last
+				}
+			});
+		}
 
 		// Write the book content for doxia
 		try {
@@ -189,6 +248,10 @@ public class AggregateGoal extends AbstractMojo {
 	 *            Project base directory.
 	 * @param targetDirectory
 	 *            Target directory.
+	 * @param baseUrl
+	 *            Base URL for content.
+	 * @param moduleRelativePath
+	 *            Relative path from base URL for the module.
 	 * @param chapters
 	 *            {@link Chapter} instances.
 	 * @param ignore
@@ -198,9 +261,10 @@ public class AggregateGoal extends AbstractMojo {
 	 * @throws MojoFailureException
 	 */
 	private static void copyModule(String modulePrefix, File projectBaseDir,
-			File targetDirectory, List<Chapter> chapters, String[] ignore,
-			AggregateGoal mojo) throws MojoFailureException {
-		
+			File targetDirectory, String baseUrl, String moduleRelativePath,
+			List<Chapter> chapters, String[] ignore, AggregateGoal mojo)
+			throws MojoFailureException {
+
 		try {
 			// Load the pom.xml
 			File pomFile = new File(projectBaseDir, "pom.xml");
@@ -210,7 +274,11 @@ public class AggregateGoal extends AbstractMojo {
 			// Create and add the chapter
 			String chapterId = ("".equals(modulePrefix) ? "introduction"
 					: modulePrefix);
-			Chapter chapter = new Chapter(chapterId, chapterId);
+			String chapterName = pom.getName();
+			if ((chapterName == null) || (chapterName.trim().length() == 0)) {
+				chapterName = chapterId; // default to chapter Id
+			}
+			Chapter chapter = new Chapter(chapterId, chapterName);
 			chapters.add(chapter);
 
 			// Log progress
@@ -234,7 +302,8 @@ public class AggregateGoal extends AbstractMojo {
 
 					// Copy the directory
 					copyDirectory(child,
-							new File(targetDirectory, child.getName()), pom,
+							new File(targetDirectory, child.getName()),
+							baseUrl, moduleRelativePath, pom, projectBaseDir,
 							isResourcesDir, modulePrefix, chapter, ignore);
 				}
 			}
@@ -243,10 +312,13 @@ public class AggregateGoal extends AbstractMojo {
 			for (String subModule : pom.getModules()) {
 
 				// Obtain sub module details
+				String subModuleRelativePath = ("".equals(moduleRelativePath) ? ""
+						: moduleRelativePath + "/")
+						+ subModule;
 				String subModulePrefix = subModule.replace('/', '_');
 				subModulePrefix = subModulePrefix.replace('.', '_');
 				File subModuleBaseDir = new File(projectBaseDir, subModule);
-				
+
 				// Determine if ignore
 				if (isIgnore(subModuleBaseDir, ignore)) {
 					continue;
@@ -254,7 +326,7 @@ public class AggregateGoal extends AbstractMojo {
 
 				// Copy the sub module
 				copyModule(subModulePrefix, subModuleBaseDir, targetDirectory,
-						chapters, ignore, mojo);
+						baseUrl, subModuleRelativePath, chapters, ignore, mojo);
 			}
 
 		} catch (Exception ex) {
@@ -270,6 +342,14 @@ public class AggregateGoal extends AbstractMojo {
 	 *            Directory to be copied.
 	 * @param targetDirectory
 	 *            Target location to copy directory.
+	 * @param baseUrl
+	 *            Base URL for content.
+	 * @param moduleRelativePath
+	 *            Relative path from base URL for the module.
+	 * @param pom
+	 *            {@link Model} POM.
+	 * @param moduleBaseDir
+	 *            Module base directory.
 	 * @param isRawCopy
 	 *            Indicates if raw copy (no manipulation of content).
 	 * @param modulePrefix
@@ -282,7 +362,8 @@ public class AggregateGoal extends AbstractMojo {
 	 *             If fails to copy the directory.
 	 */
 	private static void copyDirectory(File sourceDirectory,
-			File targetDirectory, Model pom, boolean isRawCopy,
+			File targetDirectory, String baseUrl, String moduleRelativePath,
+			Model pom, File moduleBaseDir, boolean isRawCopy,
 			String modulePrefix, Chapter chapter, String[] ignore)
 			throws MojoFailureException {
 
@@ -300,13 +381,15 @@ public class AggregateGoal extends AbstractMojo {
 		for (File child : sourceDirectory.listFiles()) {
 			if (child.isFile()) {
 				// Copy the file
-				copyFile(child, targetDirectory, pom, isRawCopy, modulePrefix,
-						chapter, ignore);
+				copyFile(child, targetDirectory, baseUrl, moduleRelativePath,
+						pom, moduleBaseDir, isRawCopy, modulePrefix, chapter,
+						ignore);
 			} else {
 				// Directory, so recursively copy
 				copyDirectory(child,
-						new File(targetDirectory, child.getName()), pom,
-						isRawCopy, modulePrefix, chapter, ignore);
+						new File(targetDirectory, child.getName()), baseUrl,
+						moduleRelativePath, pom, moduleBaseDir, isRawCopy,
+						modulePrefix, chapter, ignore);
 			}
 		}
 	}
@@ -318,8 +401,14 @@ public class AggregateGoal extends AbstractMojo {
 	 *            File to be copied.
 	 * @param targetDirectory
 	 *            Target location to copy the file.
+	 * @param baseUrl
+	 *            Base URL for content.
+	 * @param moduleRelativePath
+	 *            Relative path from base URL for the module.
 	 * @param pom
 	 *            POM for the project containing the site file.
+	 * @param moduleBaseDir
+	 *            Module base directory.
 	 * @param isRawCopy
 	 *            Indicates if raw copy (no manipulation of content).
 	 * @param modulePrefix
@@ -332,8 +421,9 @@ public class AggregateGoal extends AbstractMojo {
 	 *             If fails to copy the file.
 	 */
 	private static void copyFile(File sourceFile, File targetDirectory,
-			Model pom, boolean isRawCopy, String modulePrefix, Chapter chapter,
-			String[] ignore) throws MojoFailureException {
+			String baseUrl, String moduleRelativePath, Model pom,
+			File moduleBaseDir, boolean isRawCopy, String modulePrefix,
+			Chapter chapter, String[] ignore) throws MojoFailureException {
 
 		// Determine if ignore
 		if (isIgnore(sourceFile, ignore)) {
@@ -345,16 +435,15 @@ public class AggregateGoal extends AbstractMojo {
 				"Failed creating directory in site aggregation");
 
 		// Read in the contents of the file
-		String contents;
+		byte[] contents;
 		try {
-			StringWriter buffer = new StringWriter();
-			FileReader reader = new FileReader(sourceFile);
-			for (int character = reader.read(); character != -1; character = reader
-					.read()) {
-				buffer.write(character);
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			FileInputStream reader = new FileInputStream(sourceFile);
+			for (int datum = reader.read(); datum != -1; datum = reader.read()) {
+				buffer.write((byte) datum);
 			}
 			reader.close();
-			contents = buffer.toString();
+			contents = buffer.toByteArray();
 		} catch (IOException ex) {
 			throw new MojoFailureException(
 					"Failed copy file in site aggregation: "
@@ -375,14 +464,27 @@ public class AggregateGoal extends AbstractMojo {
 				if (properties != null) {
 					for (String name : properties.stringPropertyNames()) {
 						String value = properties.getProperty(name);
+
+						/*
+						 * TODO consider resolving POM, however for now just the
+						 * properties known to be used for OfficeFloor.
+						 */
+						if ("${basedir}".equals(value)) {
+							value = moduleBaseDir.getAbsolutePath();
+						} else if ("${project.version}".equals(value)) {
+							value = pom.getVersion();
+						}
+
+						// Register the property
 						context.put(name, value);
 					}
 				}
 
 				// Replace tags
 				StringWriter buffer = new StringWriter();
-				Velocity.evaluate(context, buffer, fileName, contents);
-				contents = buffer.toString();
+				Velocity.evaluate(context, buffer, fileName, new String(
+						contents));
+				contents = buffer.toString().getBytes();
 
 				// Remove velocity extension
 				fileName = fileName.substring(0,
@@ -399,6 +501,15 @@ public class AggregateGoal extends AbstractMojo {
 				String fileId = fileName.substring(0, extensionIndex);
 				chapter.sections.add(new Section(fileId));
 			}
+
+			// Transform APT links
+			if (fileName.endsWith(".apt")) {
+				String text = new String(contents);
+				text = text.replace("{{{/", "{{{" + baseUrl + "/");
+				text = text.replace("{{{.", "{{{" + baseUrl + "/"
+						+ moduleRelativePath);
+				contents = text.getBytes();
+			}
 		}
 
 		// Ensure the target file not already exists
@@ -410,7 +521,7 @@ public class AggregateGoal extends AbstractMojo {
 
 		try {
 			// Write the file content
-			FileWriter writer = new FileWriter(targetFile, false);
+			FileOutputStream writer = new FileOutputStream(targetFile, false);
 			writer.write(contents);
 			writer.close();
 		} catch (IOException ex) {
