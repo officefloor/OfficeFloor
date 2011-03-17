@@ -610,6 +610,24 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Copy Site PDF to Site</id>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="site.dir" value="${project.basedir}/target/site" />
+								<property name="book.pdf.dir"
+									value="${project.basedir}/target/generated-site/pdf/book" />
+								<mkdir dir="${site.dir}" />
+								<mkdir dir="${book.pdf.dir}" />
+								<touch file="${book.pdf.dir}/book.pdf" />
+								<copy file="${book.pdf.dir}/book.pdf" tofile="${site.dir}/officefloor.pdf" />
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 				<dependencies>
 					<dependency>
@@ -647,8 +665,32 @@
 				<inherited>false</inherited>
 				<configuration>
 					<title>OfficeFloor</title>
+					<baseUrl>http://www.officefloor.net</baseUrl>
+					<order>
+						<order>index</order>
+						<order>download</order>
+						<order>promote-good-design</order>
+						<order>principles</order>
+						<order>performance</order>
+						<order>architecture</order>
+						<order>work-source</order>
+						<order>managed-object-source</order>
+						<order>team-source</order>
+						<order>administrator-source</order>
+						<order>section-source</order>
+						<order>office-source</order>
+						<order>office-floor-source</order>
+						<order>desk-editor</order>
+						<order>section-editor</order>
+						<order>office-editor</order>
+						<order>office-floor-editor</order>
+					</order>
 					<ignores>
 						<ignore>.svn</ignore>
+						<ignore>snippets</ignore>
+						<ignore>update</ignore>
+						<ignore>css-test.apt</ignore>
+						<ignore>demo.xml</ignore>
 					</ignores>
 				</configuration>
 				<executions>
@@ -665,6 +707,7 @@
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-maven-plugin</artifactId>
 				<version>1.1.4</version>
+				<inherited>false</inherited>
 				<executions>
 					<execution>
 						<phase>pre-site</phase>
@@ -686,6 +729,13 @@
 						</book>
 					</books>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>com.anasoft.os</groupId>
+						<artifactId>m2st-doxia-macros</artifactId>
+						<version>2.0</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<!-- END: Generate PDF Book -->
 
