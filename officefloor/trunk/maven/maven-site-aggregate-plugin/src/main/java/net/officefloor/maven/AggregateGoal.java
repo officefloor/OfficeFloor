@@ -118,17 +118,20 @@ public class AggregateGoal extends AbstractMojo {
 			book.println("\t<title>" + this.title + "</title>");
 			book.println("\t<chapters>");
 			for (Chapter chapter : chapters) {
-				book.println("\t\t<chapter>");
-				book.println("\t\t\t<id>" + chapter.id + "</id>");
-				book.println("\t\t\t<title>" + chapter.title + "</title>");
-				book.println("\t\t\t<sections>");
-				for (Section section : chapter.sections) {
-					book.println("\t\t\t\t<section>");
-					book.println("\t\t\t\t\t<id>" + section.id + "</id>");
-					book.println("\t\t\t\t</section>");
+				if (chapter.sections.size() > 0) {
+					// Include chapter as has content
+					book.println("\t\t<chapter>");
+					book.println("\t\t\t<id>" + chapter.id + "</id>");
+					book.println("\t\t\t<title>" + chapter.title + "</title>");
+					book.println("\t\t\t<sections>");
+					for (Section section : chapter.sections) {
+						book.println("\t\t\t\t<section>");
+						book.println("\t\t\t\t\t<id>" + section.id + "</id>");
+						book.println("\t\t\t\t</section>");
+					}
+					book.println("\t\t\t</sections>");
+					book.println("\t\t</chapter>");
 				}
-				book.println("\t\t\t</sections>");
-				book.println("\t\t</chapter>");
 			}
 			book.println("\t</chapters>");
 			book.print("</book>");
@@ -197,7 +200,7 @@ public class AggregateGoal extends AbstractMojo {
 	private static void copyModule(String modulePrefix, File projectBaseDir,
 			File targetDirectory, List<Chapter> chapters, String[] ignore,
 			AggregateGoal mojo) throws MojoFailureException {
-
+		
 		try {
 			// Load the pom.xml
 			File pomFile = new File(projectBaseDir, "pom.xml");
@@ -243,6 +246,11 @@ public class AggregateGoal extends AbstractMojo {
 				String subModulePrefix = subModule.replace('/', '_');
 				subModulePrefix = subModulePrefix.replace('.', '_');
 				File subModuleBaseDir = new File(projectBaseDir, subModule);
+				
+				// Determine if ignore
+				if (isIgnore(subModuleBaseDir, ignore)) {
+					continue;
+				}
 
 				// Copy the sub module
 				copyModule(subModulePrefix, subModuleBaseDir, targetDirectory,
