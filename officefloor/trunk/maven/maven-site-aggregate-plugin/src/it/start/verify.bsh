@@ -41,13 +41,25 @@ ensureContent( path, content ) {
 	content = content.replace("\n\n", "\n");
 	actual = actual.replace('\r', '\n');
 	actual = actual.replace("\n\n", "\n");
-	if ( !(actual.equals(content)) ) {
+	if ( !(actual.trim().equals(content.trim())) ) {
 		throw new IOException( "Incorrect content\nEXPECTED : '" + content + "'\nACTUAL   : '" + actual + "'");
 	}
 }
 
+// Ensure content is as per file
+ensureFile( path, file ) {
+	File expectedFile = new File(basedir, file);
+	FileReader reader = new FileReader(expectedFile);
+	StringWriter content = new StringWriter();
+	for (int character = reader.read(); character != -1; character = reader.read()) {
+		content.write(character);
+	}
+	ensureContent(path, content.toString());
+}
+
 // Ensure top level site content
 ensureContent("apt/index.apt", "  PARENT");
+ensureFile("apt/code-snippet.apt", "expected-code-snippet.apt");
 ensureContent("resources/raw.apt.vm", "${raw}");
 
 // Ensure child content aggregated
@@ -55,13 +67,7 @@ ensureContent("apt/child-index.apt", "  CHILD");
 ensureContent("apt/child-link.apt", " {{{http://www.officefloor.net/child/link.html}Link}}");
 
 // Ensure pdf.xml available
-File expectedPdf = new File(basedir, "expected-pdf.xml");
-FileReader pdfReader = new FileReader(expectedPdf);
-StringWriter pdf = new StringWriter();
-for (int character = pdfReader.read(); character != -1; character = pdfReader.read()) {
-	pdf.write(character);
-}
-ensureContent("pdf.xml", pdf.toString());
+ensureFile("pdf.xml", "expected-pdf.xml");
 
 // Ensure ignore
 ensureIgnored("resources/ignore/ignored.txt");
