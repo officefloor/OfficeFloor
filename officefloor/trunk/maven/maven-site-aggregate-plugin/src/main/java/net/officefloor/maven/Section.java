@@ -30,13 +30,29 @@ public class Section {
 	public final String id;
 
 	/**
+	 * Name.
+	 */
+	public final String name;
+
+	/**
+	 * Reference.
+	 */
+	public final String reference;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param id
 	 *            Id.
+	 * @param name
+	 *            Name.
+	 * @param reference
+	 *            Reference.
 	 */
-	public Section(String id) {
+	public Section(String id, String name, String reference) {
 		this.id = id;
+		this.name = name;
+		this.reference = reference;
 	}
 
 }

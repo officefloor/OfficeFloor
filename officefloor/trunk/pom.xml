@@ -610,24 +610,6 @@
 							</target>
 						</configuration>
 					</execution>
-					<execution>
-						<id>Copy Site PDF to Site</id>
-						<phase>site</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<property name="site.dir" value="${project.basedir}/target/site" />
-								<property name="book.pdf.dir"
-									value="${project.basedir}/target/generated-site/pdf/book" />
-								<mkdir dir="${site.dir}" />
-								<mkdir dir="${book.pdf.dir}" />
-								<touch file="${book.pdf.dir}/book.pdf" />
-								<copy file="${book.pdf.dir}/book.pdf" tofile="${site.dir}/officefloor.pdf" />
-							</target>
-						</configuration>
-					</execution>
 				</executions>
 				<dependencies>
 					<dependency>
@@ -657,7 +639,7 @@
 			</plugin>
 			<!-- END: project validation -->
 
-			<!-- START: Generate PDF Book -->
+			<!-- START: Generate Site PDF -->
 			<plugin>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-site-aggregate-plugin</artifactId>
@@ -665,6 +647,9 @@
 				<inherited>false</inherited>
 				<configuration>
 					<title>OfficeFloor</title>
+					<author>Daniel Sagenschneider</author>
+					<version>${project.version}</version>
+					<projectLogo>${project.basedir}/maven/maven-officefloor-skin/src/main/resources/images/OfficeFloorBannerImage.png</projectLogo>
 					<baseUrl>http://www.officefloor.net</baseUrl>
 					<order>
 						<order>index</order>
@@ -704,40 +689,27 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.doxia</groupId>
-				<artifactId>doxia-maven-plugin</artifactId>
-				<version>1.1.4</version>
-				<inherited>false</inherited>
+				<!-- Generate PDF from aggregated Site -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pdf-plugin</artifactId>
+				<version>1.1</version>
 				<executions>
 					<execution>
+						<id>pdf</id>
 						<phase>pre-site</phase>
 						<goals>
-							<goal>render-books</goal>
+							<goal>pdf</goal>
 						</goals>
+						<configuration>
+							<docDescriptor>${project.basedir}/target/site-aggregate/pdf.xml</docDescriptor>
+							<siteDirectory>${project.basedir}/target/site-aggregate</siteDirectory>
+							<outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+							<includeReports>false</includeReports>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<books>
-						<book>
-							<directory>target/site-aggregate</directory>
-							<descriptor>target/site-aggregate/book.xml</descriptor>
-							<formats>
-								<format>
-									<id>pdf</id>
-								</format>
-							</formats>
-						</book>
-					</books>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>com.anasoft.os</groupId>
-						<artifactId>m2st-doxia-macros</artifactId>
-						<version>2.0</version>
-					</dependency>
-				</dependencies>
 			</plugin>
-			<!-- END: Generate PDF Book -->
+			<!-- END: Generate Site PDF -->
 
 			<plugin>
 				<!-- Generate Javadoc for referencing in site documentation -->

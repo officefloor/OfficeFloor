@@ -54,18 +54,15 @@ ensureContent("resources/raw.apt.vm", "${raw}");
 ensureContent("apt/child-index.apt", "  CHILD");
 ensureContent("apt/child-link.apt", " {{{http://www.officefloor.net/child/link.html}Link}}");
 
-// Ensure book.xml available
-File expectedBook = new File(basedir, "expected-book.xml");
-FileReader reader = new FileReader(expectedBook);
-StringWriter book = new StringWriter();
-for (int character = reader.read(); character != -1; character = reader.read()) {
-	book.write(character);
+// Ensure pdf.xml available
+File expectedPdf = new File(basedir, "expected-pdf.xml");
+FileReader pdfReader = new FileReader(expectedPdf);
+StringWriter pdf = new StringWriter();
+for (int character = pdfReader.read(); character != -1; character = pdfReader.read()) {
+	pdf.write(character);
 }
-ensureContent("book.xml", book.toString());
+ensureContent("pdf.xml", pdf.toString());
 
 // Ensure ignore
 ensureIgnored("resources/ignore/ignored.txt");
 ensureIgnored("resources/ignored.apt~");
-
-// Ensure resources available for PDF
-ensureContent("../../target/generated-site/pdf/book/raw.apt.vm", "${raw}");

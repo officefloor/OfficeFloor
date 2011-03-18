@@ -17,6 +17,7 @@
  */
 package net.officefloor.maven;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +26,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,12 +74,43 @@ public class AggregateGoal extends AbstractMojo {
 	private String title;
 
 	/**
+	 * Author of the book.
+	 * 
+	 * @parameter
+	 * @required
+	 */
+	private String author;
+
+	/**
+	 * Version of the book.
+	 * 
+	 * @parameter
+	 * @required
+	 */
+	private String version;
+
+	/**
+	 * Project logo.
+	 * 
+	 * @parameter
+	 * @required
+	 */
+	private String projectLogo;
+
+	/**
 	 * Base URL for links.
 	 * 
 	 * @parameter
 	 * @required
 	 */
 	private String baseUrl;
+
+	/**
+	 * Table of contents depth.
+	 * 
+	 * @parameter default-value="3"
+	 */
+	private int tocDepth;
 
 	/**
 	 * Ignore file names.
@@ -92,14 +125,6 @@ public class AggregateGoal extends AbstractMojo {
 	 * @parameter
 	 */
 	private String[] order;
-
-	/**
-	 * Directory to copy aggregated resources content for potential PDF
-	 * generation.
-	 * 
-	 * @parameter default-value="target/generated-site/pdf/book"
-	 */
-	private String pdfResourcesDirectory;
 
 	/*
 	 * ======================= Mojo ===========================
@@ -138,12 +163,6 @@ public class AggregateGoal extends AbstractMojo {
 		copyModule("", this.basedir, aggregateDir, this.baseUrl, "", chapters,
 				this.ignores, this);
 
-		// Copy resources for PDF generation
-		File resourcesDir = new File(aggregateDir, "resources");
-		File pdfDir = new File(this.basedir, this.pdfResourcesDirectory);
-		copyDirectory(resourcesDir, pdfDir, null, null, null, null, true, "",
-				new Chapter("resources", "resources"), new String[0]);
-
 		// Order the sections
 		for (Chapter chapter : chapters) {
 			Collections.sort(chapter.sections, new Comparator<Section>() {
@@ -168,35 +187,39 @@ public class AggregateGoal extends AbstractMojo {
 			});
 		}
 
-		// Write the book content for doxia
+		// Write the pdf.xml for PDF plug-in
 		try {
-			PrintWriter book = new PrintWriter(new FileWriter(new File(
-					aggregateDir, "book.xml"), false));
-			book.println("<book xmlns=\"http://maven.apache.org/BOOK/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/BOOK/1.0.0 http://maven.apache.org/xsd/book-1.0.0.xsd\">");
-			book.println("\t<id>book</id>");
-			book.println("\t<title>" + this.title + "</title>");
-			book.println("\t<chapters>");
+			PrintWriter pdf = new PrintWriter(new FileWriter(new File(
+					aggregateDir, "pdf.xml")));
+			pdf.println("<document xmlns=\"http://maven.apache.org/DOCUMENT/1.0.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/DOCUMENT/1.0.1  http://maven.apache.org/xsd/document-1.0.1.xsd\" outputName=\""
+					+ this.title + "\">");
+			pdf.println("\t<meta>");
+			pdf.println("\t\t<title>" + this.title + "</title>");
+			pdf.println("\t\t<author>" + this.author + "</author>");
+			pdf.println("\t</meta>");
+			pdf.println("\t<toc name=\"Table of Contents\" depth=\""
+					+ this.tocDepth + "\">");
 			for (Chapter chapter : chapters) {
-				if (chapter.sections.size() > 0) {
-					// Include chapter as has content
-					book.println("\t\t<chapter>");
-					book.println("\t\t\t<id>" + chapter.id + "</id>");
-					book.println("\t\t\t<title>" + chapter.title + "</title>");
-					book.println("\t\t\t<sections>");
-					for (Section section : chapter.sections) {
-						book.println("\t\t\t\t<section>");
-						book.println("\t\t\t\t\t<id>" + section.id + "</id>");
-						book.println("\t\t\t\t</section>");
-					}
-					book.println("\t\t\t</sections>");
-					book.println("\t\t</chapter>");
+				for (Section section : chapter.sections) {
+					pdf.println("\t\t<item name=\"" + section.name
+							+ "\" ref=\"" + section.reference + "\"/>");
 				}
 			}
-			book.println("\t</chapters>");
-			book.print("</book>");
-			book.close();
+			pdf.println("\t</toc>");
+			pdf.println("\t<cover>");
+			pdf.println("\t\t<coverTitle>" + this.title + "</coverTitle>");
+			pdf.println("\t\t<coverSubTitle>" + this.version
+					+ "</coverSubTitle>");
+			pdf.println("\t\t<author>" + this.author + "</author>");
+			pdf.println("\t\t<companyName>" + this.author + "</companyName>");
+			pdf.println("\t\t<projectLogo>" + this.projectLogo
+					+ "</projectLogo>");
+			pdf.println("\t</cover>");
+			pdf.println("</document>");
+			pdf.close();
 		} catch (IOException ex) {
-			throw new MojoFailureException("Failed writing doxia book file", ex);
+			throw new MojoFailureException(
+					"Failed writing PDF configuration file", ex);
 		}
 	}
 
@@ -454,61 +477,90 @@ public class AggregateGoal extends AbstractMojo {
 		String fileName = sourceFile.getName();
 
 		if (!isRawCopy) {
-			// Transform if velocity template
-			final String VELOCITY_EXTENSION = ".vm";
-			if (fileName.endsWith(VELOCITY_EXTENSION)) {
+			try {
+				// Transform if velocity template
+				final String VELOCITY_EXTENSION = ".vm";
+				if (fileName.endsWith(VELOCITY_EXTENSION)) {
 
-				// Create the context
-				VelocityContext context = new VelocityContext();
-				Properties properties = pom.getProperties();
-				if (properties != null) {
-					for (String name : properties.stringPropertyNames()) {
-						String value = properties.getProperty(name);
+					// Create the context
+					VelocityContext context = new VelocityContext();
+					Properties properties = pom.getProperties();
+					if (properties != null) {
+						for (String name : properties.stringPropertyNames()) {
+							String value = properties.getProperty(name);
 
-						/*
-						 * TODO consider resolving POM, however for now just the
-						 * properties known to be used for OfficeFloor.
-						 */
-						if ("${basedir}".equals(value)) {
-							value = moduleBaseDir.getAbsolutePath();
-						} else if ("${project.version}".equals(value)) {
-							value = pom.getVersion();
+							/*
+							 * TODO consider resolving POM, however for now just
+							 * the properties known to be used for OfficeFloor.
+							 */
+							if ("${basedir}".equals(value)) {
+								value = moduleBaseDir.getAbsolutePath();
+							} else if ("${project.version}".equals(value)) {
+								value = pom.getVersion();
+							}
+
+							// Register the property
+							context.put(name, value);
 						}
+					}
 
-						// Register the property
-						context.put(name, value);
+					// Replace tags
+					StringWriter buffer = new StringWriter();
+					Velocity.evaluate(context, buffer, fileName, new String(
+							contents));
+					contents = buffer.toString().getBytes();
+
+					// Remove velocity extension
+					fileName = fileName.substring(0,
+							(fileName.length() - VELOCITY_EXTENSION.length()));
+				}
+
+				// Look to source section name
+				String sectionName = null;
+
+				// Specifics for APT files
+				if (fileName.endsWith(".apt")) {
+
+					// Transform APT links
+					String text = new String(contents);
+					text = text.replace("{{{/", "{{{" + baseUrl + "/");
+					text = text.replace("{{{.", "{{{" + baseUrl + "/"
+							+ moduleRelativePath);
+					contents = text.getBytes();
+
+					// Parse out the section name
+					BufferedReader aptReader = new BufferedReader(
+							new StringReader(text));
+					aptReader.readLine(); // skip ------------
+					sectionName = aptReader.readLine(); // title
+					if (sectionName != null) {
+						sectionName = sectionName.trim(); // clean up title
 					}
 				}
 
-				// Replace tags
-				StringWriter buffer = new StringWriter();
-				Velocity.evaluate(context, buffer, fileName, new String(
-						contents));
-				contents = buffer.toString().getBytes();
+				// Prefix module to file name
+				fileName = ("".equals(modulePrefix) ? "" : modulePrefix + "-")
+						+ fileName;
 
-				// Remove velocity extension
-				fileName = fileName.substring(0,
-						(fileName.length() - VELOCITY_EXTENSION.length()));
-			}
+				// Include section for the file
+				int extensionIndex = fileName.indexOf('.');
+				if (extensionIndex > 0) {
 
-			// Prefix module
-			fileName = ("".equals(modulePrefix) ? "" : modulePrefix + "-")
-					+ fileName;
+					// Obtain the file Id
+					String fileId = fileName.substring(0, extensionIndex);
 
-			// Include section for the file
-			int extensionIndex = fileName.indexOf('.');
-			if (extensionIndex > 0) {
-				String fileId = fileName.substring(0, extensionIndex);
-				chapter.sections.add(new Section(fileId));
-			}
+					// Default section name to file Id
+					if (sectionName == null) {
+						sectionName = fileId;
+					}
 
-			// Transform APT links
-			if (fileName.endsWith(".apt")) {
-				String text = new String(contents);
-				text = text.replace("{{{/", "{{{" + baseUrl + "/");
-				text = text.replace("{{{.", "{{{" + baseUrl + "/"
-						+ moduleRelativePath);
-				contents = text.getBytes();
+					// Include the section
+					chapter.sections.add(new Section(fileId, sectionName,
+							fileName));
+				}
+			} catch (IOException ex) {
+				throw new MojoFailureException("Failed to transform APT file: "
+						+ sourceFile.getPath(), ex);
 			}
 		}
 
