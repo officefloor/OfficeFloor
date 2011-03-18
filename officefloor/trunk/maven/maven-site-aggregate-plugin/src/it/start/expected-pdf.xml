@@ -6,6 +6,7 @@
 	<toc name="Table of Contents" depth="3">
 		<item name="index" ref="index.apt"/>
 		<item name="SECTION" ref="section-name.apt"/>
+		<item name="code-snippet" ref="code-snippet.apt"/>
 		<item name="child-index" ref="child-index.apt"/>
 		<item name="child-link" ref="child-link.apt"/>
 	</toc>

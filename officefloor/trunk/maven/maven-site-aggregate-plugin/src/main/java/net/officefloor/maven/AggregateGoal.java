@@ -30,8 +30,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.model.Model;
@@ -521,21 +523,38 @@ public class AggregateGoal extends AbstractMojo {
 				// Specifics for APT files
 				if (fileName.endsWith(".apt")) {
 
-					// Transform APT links
+					// Obtain text content
 					String text = new String(contents);
-					text = text.replace("{{{/", "{{{" + baseUrl + "/");
-					text = text.replace("{{{.", "{{{" + baseUrl + "/"
-							+ moduleRelativePath);
-					contents = text.getBytes();
 
 					// Parse out the section name
 					BufferedReader aptReader = new BufferedReader(
 							new StringReader(text));
-					aptReader.readLine(); // skip ------------
-					sectionName = aptReader.readLine(); // title
-					if (sectionName != null) {
-						sectionName = sectionName.trim(); // clean up title
+					String titleIndicator = aptReader.readLine();
+					if (titleIndicator != null) {
+						// Skip -------------------
+						titleIndicator = titleIndicator.trim();
+						if (titleIndicator.length() > 0) {
+							titleIndicator = titleIndicator.replace("-", "");
+							if (titleIndicator.length() == 0) {
+								// First line title indicator, so obtain title
+								sectionName = aptReader.readLine();
+								if (sectionName != null) {
+									sectionName = sectionName.trim();
+								}
+							}
+						}
 					}
+
+					// Transform APT links
+					text = text.replace("{{{/", "{{{" + baseUrl + "/");
+					text = text.replace("{{{.", "{{{" + baseUrl + "/"
+							+ moduleRelativePath);
+
+					// Transform code-snippet macro
+					text = transformCodeSnippetMacro(text, moduleBaseDir);
+
+					// Use transformed APT content
+					contents = text.getBytes();
 				}
 
 				// Prefix module to file name
@@ -634,6 +653,137 @@ public class AggregateGoal extends AbstractMojo {
 
 		// As here, do not ignore
 		return false;
+	}
+
+	/**
+	 * Transforms the <code>code-snippet</code> macro.
+	 * 
+	 * @param text
+	 *            Text of the APT file.
+	 * @param baseDir
+	 *            Base directory.
+	 * @return Transformed APT file.
+	 * @throws MojoFailureException
+	 *             If fails to transform.
+	 */
+	private static String transformCodeSnippetMacro(String text, File baseDir)
+			throws MojoFailureException {
+		try {
+			// Parse APT file line by line
+			BufferedReader reader = new BufferedReader(new StringReader(text));
+
+			// Read through lines transforming
+			final String CODE_SNIPPET_MACRO = "%{code-snippet";
+			StringWriter transformedContent = new StringWriter();
+			PrintWriter writer = new PrintWriter(transformedContent);
+			String line;
+			while ((line = reader.readLine()) != null) {
+
+				// Determine if code-snippet macro line
+				if (!(line.startsWith(CODE_SNIPPET_MACRO))) {
+					// Normal line, so include
+					writer.println(line);
+					continue;
+				}
+
+				// code-snippet macro so parse out contents
+				line = line.trim();
+				line = line.substring(CODE_SNIPPET_MACRO.length());
+				if (line.endsWith("}")) {
+					line = line.substring(0, (line.length() - 1));
+				}
+				Map<String, String> parameters = new HashMap<String, String>();
+				for (String nameValue : line.split("\\|")) {
+					String[] tokens = nameValue.split("=");
+					String name = tokens[0].trim();
+					String value = (tokens.length >= 2 ? tokens[1].trim() : "");
+					parameters.put(name, value);
+				}
+
+				// Obtain the file
+				String filePath = parameters.get("file");
+				if (filePath == null) {
+					throw new IOException(
+							"No file specified in code-snippet macro for "
+									+ text);
+				}
+				File snippetFile;
+				if (filePath.startsWith("/")) {
+					// Absolute path
+					snippetFile = new File(filePath);
+				} else {
+					// Relative path to base directory
+					snippetFile = new File(baseDir, filePath);
+				}
+
+				// Obtain the appropriate snippet
+				String id = parameters.get("id");
+				BufferedReader snippetReader = new BufferedReader(
+						new FileReader(snippetFile));
+				StringWriter snippet = new StringWriter();
+				PrintWriter snippetWriter = new PrintWriter(snippet);
+				if (id == null) {
+					// Use full contents of file
+					String snippetLine;
+					while ((snippetLine = snippetReader.readLine()) != null) {
+						snippetWriter.println(snippetLine);
+					}
+				} else {
+					// Parse out the snippet
+					String snippetLine;
+					boolean isStarted = false;
+					while ((!isStarted)
+							&& ((snippetLine = snippetReader.readLine()) != null)) {
+						// Remove extra spacing from line
+						while (snippetLine.contains("  ")) {
+							snippetLine = snippetLine.replace("  ", " ");
+						}
+						if (snippetLine.contains("START SNIPPET: " + id)) {
+							isStarted = true; // found start of snippet
+						}
+					}
+					if (!isStarted) {
+						throw new IOException("Did not find snippet '" + id
+								+ "' in file " + snippetFile.getAbsolutePath());
+					}
+
+					// Found start of snippet so now include the snippet
+					boolean isFinished = false;
+					while ((!isFinished)
+							&& ((snippetLine = snippetReader.readLine()) != null)) {
+
+						// Determine if end of snippet
+						String checkLine = snippetLine;
+						while (checkLine.contains("  ")) {
+							checkLine = checkLine.replace("  ", " ");
+						}
+						if (checkLine.contains("END SNIPPET: " + id)) {
+							isFinished = true; // found end of snippet
+						}
+
+						// Include line if not finished
+						if (!isFinished) {
+							snippetWriter.println(snippetLine);
+						}
+					}
+
+				}
+				snippetWriter.flush();
+
+				// Write the code-snippet
+				writer.println("+-----+");
+				writer.print(snippet.toString());
+				writer.println("+-----+");
+			}
+			writer.flush();
+
+			// Return the transformed content
+			return transformedContent.toString();
+
+		} catch (IOException ex) {
+			throw new MojoFailureException(
+					"Failed parsing 'code-snippet' macro from " + text, ex);
+		}
 	}
 
 }

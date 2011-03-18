@@ -9,6 +9,7 @@
 	<description>Tests the Site Aggregate maven plugin</description>
 	<properties>
 		<testTag>PARENT</testTag>
+		<basedir>${basedir}</basedir>
 	</properties>
 	<modules>
 		<module>child</module>
