@@ -370,6 +370,21 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>maven-site-aggregate-plugin</artifactId>
+					<version>1.0.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pdf-plugin</artifactId>
+					<version>1.1</version>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>failsafe-maven-plugin</artifactId>
 					<version>2.4.3-alpha-1</version>
@@ -639,11 +654,10 @@
 			</plugin>
 			<!-- END: project validation -->
 
-			<!-- START: Generate Site PDF -->
+			<!-- START SNIPPET: pdf -->
 			<plugin>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-site-aggregate-plugin</artifactId>
-				<version>1.0.1</version>
 				<inherited>false</inherited>
 				<configuration>
 					<title>OfficeFloor</title>
@@ -680,7 +694,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>book</id>
+						<id>site-aggregate-for-pdf</id>
 						<phase>pre-site</phase>
 						<goals>
 							<goal>aggregate</goal>
@@ -689,14 +703,12 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Generate PDF from aggregated Site -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pdf-plugin</artifactId>
-				<version>1.1</version>
 				<inherited>false</inherited>
 				<executions>
 					<execution>
-						<id>pdf</id>
+						<id>generate-pdf</id>
 						<phase>pre-site</phase>
 						<goals>
 							<goal>pdf</goal>
@@ -710,13 +722,12 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- END: Generate Site PDF -->
+			<!-- END SNIPPET: pdf -->
 
 			<plugin>
 				<!-- Generate Javadoc for referencing in site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
 				<inherited>false</inherited>
 				<executions>
 					<execution>

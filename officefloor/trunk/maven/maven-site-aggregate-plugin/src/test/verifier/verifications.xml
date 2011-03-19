@@ -5,5 +5,11 @@
 			<location>${basedir}/../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
+		
+		<!-- Ensure generating PDF with latest version -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<plugin>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</plugin>]]></contains>
+		</file>
 	</files>
 </verifications>
