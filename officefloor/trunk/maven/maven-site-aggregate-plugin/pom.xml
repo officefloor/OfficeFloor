@@ -17,6 +17,7 @@
 		<projectGroupId>${project.groupId}</projectGroupId>
 		<projectArtifactId>${project.artifactId}</projectArtifactId>
 		<projectVersion>${project.version}</projectVersion>
+		<basedir>${basedir}</basedir>
 	</properties>
 	<build>
 		<plugins>
