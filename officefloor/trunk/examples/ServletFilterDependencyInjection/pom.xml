@@ -13,14 +13,6 @@
 	<packaging>war</packaging>
 	<name>Servlet Filter Dependency Injection Example</name>
 	<description>Example of using the OfficeFloorServletFilter with dependency injection</description>
-	<repositories>
-		<repository>
-			<!-- OfficeFloor repository to obtain artifacts for running the example -->
-			<id>maven2-repository.officefloor.net</id>
-			<name>OfficeFloor Repository for Maven</name>
-			<url>http://www.officefloor.net/maven2/</url>
-		</repository>
-	</repositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -80,4 +72,23 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- OfficeFloor repository to obtain artifacts for running the example -->
+					<id>maven2-repository.officefloor.net</id>
+					<name>OfficeFloor Repository for Maven</name>
+					<url>http://www.officefloor.net/maven2/</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 </project>
