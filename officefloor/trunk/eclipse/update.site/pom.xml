@@ -15,14 +15,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<repositories>
-		<repository>
-			<!-- OfficeFloor -->
-			<id>officefloor-eclipse</id>
-			<layout>p2</layout>
-			<url>http://www.officefloor.net/update</url>
-		</repository>
-	</repositories>
 	<distributionManagement>
 		<repository>
 			<!-- Deploy to temp to not release site.zip -->
@@ -73,4 +65,23 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- OfficeFloor -->
+					<id>officefloor-eclipse</id>
+					<layout>p2</layout>
+					<url>http://www.officefloor.net/update</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 </project>

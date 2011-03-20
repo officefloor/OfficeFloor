@@ -10,6 +10,23 @@
 	<description>Parent OfficeFloor</description>
 	<url>http://www.officefloor.net</url>
 	<inceptionYear>2005</inceptionYear>
+	<licenses>
+		<license>
+			<name>GPL</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+			<distribution>repo</distribution>
+			<comments>GNU Public License</comments>
+		</license>
+	</licenses>
+	<issueManagement>
+		<system>SourceForge</system>
+		<url>http://sourceforge.net/tracker/?group_id=156349</url>
+	</issueManagement>
+	<scm>
+		<connection>scm:svn:http://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
+		<developerConnection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</developerConnection>
+		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk</url>
+	</scm>
 	<developers>
 		<developer>
 			<id>sagenschneider</id>
@@ -32,26 +49,12 @@
 			</roles>
 		</contributor>
 	</contributors>
-	<issueManagement>
-		<system>SourceForge</system>
-		<url>http://sourceforge.net/tracker/?group_id=156349</url>
-	</issueManagement>
-	<scm>
-		<connection>scm:svn:http://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</connection>
-		<developerConnection>scm:svn:https://officefloor.svn.sourceforge.net/svnroot/officefloor/officefloor/trunk</developerConnection>
-		<url>http://officefloor.svn.sourceforge.net/viewvc/officefloor/officefloor/trunk</url>
-	</scm>
 	<distributionManagement>
 		<site>
 			<id>site.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
 			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/project-web/officefloor/htdocs</url>
 		</site>
-		<repository>
-			<id>repo.officefloor.sf.net</id>
-			<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
-			<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
-		</repository>
 	</distributionManagement>
 	<modules>
 		<module>core</module>
@@ -66,46 +69,6 @@
 		<officefloor.skin.version>1.0.1</officefloor.skin.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
-	<repositories>
-		<repository>
-			<!-- Access JEE APIs -->
-			<id>maven2-repository.dev.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
-		<repository>
-			<!-- Embedded Glassfish (for testing JEE integration) -->
-			<id>glassfish.dev.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/glassfish/</url>
-		</repository>
-		<repository>
-			<!-- Doxia additional macros (code-snippet) -->
-			<id>com.anasoft.os.repository.releases</id>
-			<name>ANASOFT OpenSource releases</name>
-			<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<!-- OfficeFloor -->
-			<id>maven2-plugin-repository.officefloor.net</id>
-			<name>OfficeFloor Plug-in Repository for Maven</name>
-			<url>http://www.officefloor.net/maven2/</url>
-		</pluginRepository>
-		<pluginRepository>
-			<!-- Embedded Glassfish (for testing JEE integration) -->
-			<id>glassfish.dev.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/glassfish/</url>
-		</pluginRepository>
-		<pluginRepository>
-			<!-- Doxia additional macros (code-snippet) -->
-			<id>com.anasoft.os.repository.releases</id>
-			<name>ANASOFT OpenSource releases</name>
-			<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
-		</pluginRepository>
-	</pluginRepositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -306,6 +269,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.7.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
 					<version>2.4.1</version>
 				</plugin>
@@ -385,6 +353,11 @@
 					<version>1.1</version>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.1</version>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>failsafe-maven-plugin</artifactId>
 					<version>2.4.3-alpha-1</version>
@@ -437,6 +410,7 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<!-- Standard JVM for compilation -->
@@ -448,31 +422,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Include source jars for release -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
-				<executions>
-					<execution>
-						<id>attach-sources-for-release</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-						<configuration>
-							<includePom>true</includePom>
-						</configuration>
-					</execution>
-					<execution>
-						<id>attach-test-sources-for-release</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>test-jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<!-- Always include sources and javadoc for Eclipse -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -481,6 +430,7 @@
 					<downloadJavadocs>true</downloadJavadocs>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<!-- Allow SVN tagging via command: -->
 				<!-- -->
@@ -495,6 +445,7 @@
 					<password>${developer.svn.password}</password>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<!-- Ensures correct licensing -->
 				<!-- -->
@@ -554,6 +505,7 @@
 					</headerDefinitions>
 				</configuration>
 			</plugin>
+
 			<!-- START: project validation -->
 			<plugin>
 				<!-- Copy verifications file for use -->
@@ -654,6 +606,47 @@
 			</plugin>
 			<!-- END: project validation -->
 
+			<plugin>
+				<!-- Include source jars for release -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources-for-release</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+							<goal>test-jar-no-fork</goal>
+						</goals>
+						<configuration>
+							<includePom>true</includePom>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Generate Javadoc for site documentation and release jar -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>site-javadoc</id>
+						<inherited>false</inherited>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>attach-javadoc-for-release</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- START SNIPPET: pdf -->
 			<plugin>
 				<groupId>net.officefloor.maven</groupId>
@@ -724,21 +717,6 @@
 			</plugin>
 			<!-- END SNIPPET: pdf -->
 
-			<plugin>
-				<!-- Generate Javadoc for referencing in site documentation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>javadoc</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<!-- Run HTTP server for staged site content for linkcheck report -->
 				<groupId>org.mortbay.jetty</groupId>
@@ -845,4 +823,126 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<!-- Profile on deploying to SourceForge -->
+			<!-- -->
+			<!-- ssh -t sagenschneider,officefloor@shell.sourceforge.net create -->
+			<!-- mvn -Dsourceforge=deploy -Dpgp.passphrase=[passphrase] deploy -->
+			<id>release-to-sourceforge</id>
+			<activation>
+				<property>
+					<name>sourceforge</name>
+					<value>deploy</value>
+				</property>
+			</activation>
+			<distributionManagement>
+				<repository>
+					<id>repo.officefloor.sf.net</id>
+					<name>Maven repository on SourceForge - http://www.officefloor.net/maven2</name>
+					<url>scp://sagenschneider,officefloor@shell.sourceforge.net/home/frs/project/o/of/officefloor/maven/maven2</url>
+				</repository>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Profile on deploying to SonaType -->
+			<id>release-to-sonatype</id>
+			<activation>
+				<property>
+					<name>sonatype</name>
+					<value>deploy</value>
+				</property>
+			</activation>
+			<distributionManagement>
+				<repository>
+					<id>sonatype-nexus-staging</id>
+					<name>Nexus Release Repository</name>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<!-- Profile for building OfficeFloor -->
+			<id>build-OfficeFloor</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- Access JEE APIs -->
+					<id>maven2-repository.dev.java.net</id>
+					<name>Java.net Repository for Maven</name>
+					<url>http://download.java.net/maven/2/</url>
+				</repository>
+				<repository>
+					<!-- Embedded Glassfish (for testing JEE integration) -->
+					<id>glassfish.dev.java.net</id>
+					<name>Java.net Repository for Maven</name>
+					<url>http://download.java.net/maven/glassfish/</url>
+				</repository>
+				<repository>
+					<!-- Doxia additional macros (code-snippet) -->
+					<id>com.anasoft.os.repository.releases</id>
+					<name>ANASOFT OpenSource releases</name>
+					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<!-- OfficeFloor -->
+					<id>maven2-plugin-repository.officefloor.net</id>
+					<name>OfficeFloor Plug-in Repository for Maven</name>
+					<url>http://www.officefloor.net/maven2/</url>
+				</pluginRepository>
+				<pluginRepository>
+					<!-- Embedded Glassfish (for testing JEE integration) -->
+					<id>glassfish.dev.java.net</id>
+					<name>Java.net Repository for Maven</name>
+					<url>http://download.java.net/maven/glassfish/</url>
+				</pluginRepository>
+				<pluginRepository>
+					<!-- Doxia additional macros (code-snippet) -->
+					<id>com.anasoft.os.repository.releases</id>
+					<name>ANASOFT OpenSource releases</name>
+					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
 </project>
