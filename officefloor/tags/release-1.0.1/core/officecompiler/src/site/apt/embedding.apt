@@ -1,0 +1,35 @@
+                                         --------------------
+                                         Embedding OfficeFloor
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  It is possible to embed OfficeFloor within existing applications.  The following snippet of code shows how this can be achieved.
+
++------------------------------------------------------------------------------+
+    String officeFloorConfigurationLocation = ...; // class path location, something like: your/app/Deploy.officefloor
+
+    OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
+    compiler.addSystemProperties();  // optional step to include System properties
+
+    OfficeFloor officeFloor = compiler.compile(officeFloorConfigurationLocation);
+    officeFloor.openOfficeFloor();
++------------------------------------------------------------------------------+
+
+  The next snippet then illustrates how to invoke functionality within the OfficeFloor.
+
++------------------------------------------------------------------------------+
+    String officeName = ...; // name of Office as per configuration
+    String workName = ...; // qualified name of Work as per configuration
+
+    Object argument = ...; // some object to be populated by OfficeFloor and is the parameter to the first task 
+
+    Office office = officeFloor.getOffice(officeName);
+    WorkManager workManager = office.getWorkManager(workName);
+
+    FlowFuture future = workManager.invokeWork(argument);
+    while (!future.isComplete()) {
+        // Flow not yet complete, may do other work
+    }
+    // Flow complete, may now obtain details from argument object
++------------------------------------------------------------------------------+
