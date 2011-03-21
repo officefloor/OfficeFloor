@@ -1,0 +1,15 @@
+<desk>
+    <works>
+        <work name="WORK" source="CLASS">
+            <properties>
+                <property name="class.name"
+                 value="net.officefloor.plugin.jndi.context.ValidateWork"/>
+            </properties>
+			<initial-task name="TASK" />
+            <work-task name="task"/>
+        </work>
+    </works>
+    <tasks>
+        <task name="TASK" work="WORK" task="task"/>
+    </tasks>
+</desk>
