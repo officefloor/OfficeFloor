@@ -1,7 +1,7 @@
 <web-app>
 	<servlet>
 		<servlet-name>Test</servlet-name>
-		<servlet-class>net.officefloor.plugin.servlet.war.integrate.MockWarIntegrateHttpServlet
+		<servlet-class>net.officefloor.plugin.war.integrate.MockWarIntegrateHttpServlet
 		</servlet-class>
 		<init-param>
 			<param-name>response</param-name>

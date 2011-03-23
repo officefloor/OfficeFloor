@@ -123,7 +123,7 @@
 		</managed-object>
 	</managed-objects>
 	<offices>
-		<office name="OFFICE" source="OFFICE" location="net/officefloor/plugin/servlet/war/WarOffice.office">
+		<office name="OFFICE" source="OFFICE" location="net/officefloor/plugin/war/WarOffice.office">
 			<input section="WAR" input="service" />
 			<object name="SERVLET_SERVER"
 				object-type="net.officefloor.plugin.servlet.host.ServletServer">
