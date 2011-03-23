@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.servlet.war;
+package net.officefloor.plugin.war;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -111,7 +111,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			context
 					.addCommandOption(
 							OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
-							"net/officefloor/plugin/servlet/war/WarOfficeFloor.officefloor");
+							"net/officefloor/plugin/war/WarOfficeFloor.officefloor");
 
 			// Default properties values for default OfficeFloor configuration
 			String httpPort = System.getProperty(SYSTEM_PROPERTY_HTTP_PORT,

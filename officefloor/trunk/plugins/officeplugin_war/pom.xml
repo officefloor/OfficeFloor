@@ -16,8 +16,17 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officebuilding</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.servlet.war;
+package net.officefloor.plugin.war;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -225,7 +225,7 @@ public class WarOfficeFloorDecoratorTest extends OfficeFrameTestCase {
 					officefloor.size());
 			assertEquals(
 					"Incorrect officefloor",
-					"net/officefloor/plugin/servlet/war/WarOfficeFloor.officefloor",
+					"net/officefloor/plugin/war/WarOfficeFloor.officefloor",
 					officefloor.get(0));
 
 			// Validate the property command options

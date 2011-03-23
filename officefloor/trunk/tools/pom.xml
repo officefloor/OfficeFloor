@@ -69,7 +69,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
-			<artifactId>officebuilding</artifactId>
+			<artifactId>officecompiler</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -57,7 +57,7 @@
 				<team name="SERVLET_TEAM" />
 			</responsibility>
 		</section>
-		<section name="UNHANDLED" source="DESK" location="net/officefloor/plugin/servlet/war/WarDesk.desk">
+		<section name="UNHANDLED" source="DESK" location="net/officefloor/plugin/war/WarDesk.desk">
 			<input name="unhandled" />
 			<output name="escalation" argument-type="java.lang.Exception"
 				escalation-only="true" />
