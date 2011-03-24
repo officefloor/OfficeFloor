@@ -8,7 +8,6 @@
 		<version>1.1.0</version>
 	</parent>
 	<artifactId>officeplugin_socket</artifactId>
-	<version>1.0.1</version>
 	<name>Socket Plug-in</name>
 	<description>OfficeFloor plug-in for Sockets</description>
 	<properties>

@@ -8,7 +8,6 @@
 		<version>1.0.1</version>
 	</parent>
 	<artifactId>officetool_filingcabinet</artifactId>
-	<version>1.0.1</version>
 	<name>Filing Cabinet Tool</name>
 	<description>OfficeFloor tool for filing cabinet</description>
 	<properties>

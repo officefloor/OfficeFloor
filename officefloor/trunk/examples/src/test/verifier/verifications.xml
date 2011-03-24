@@ -33,9 +33,12 @@
 			<location>ServletFilterDependencyInjection/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
+		<!-- TODO: No longer included in build and decide whether to remove -->
+		<!--  
 		<file>
 			<location>WebOrchestration/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
+		-->
 	</files>
 </verifications>

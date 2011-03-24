@@ -8,7 +8,6 @@
 		<version>1.1.0</version>
 	</parent>
 	<artifactId>officeplugin_jndi</artifactId>
-	<version>1.0.1</version>
 	<name>JNDI Plug-in</name>
 	<description>OfficeFloor plug-in for JNDI</description>
 	<properties>

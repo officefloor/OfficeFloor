@@ -8,7 +8,6 @@
 		<version>1.0.1</version>
 	</parent>
 	<artifactId>officetool_demo</artifactId>
-	<version>1.0.1</version>
 	<name>Demo Tool</name>
 	<description>OfficeFloor tool for creating demo</description>
 	<properties>

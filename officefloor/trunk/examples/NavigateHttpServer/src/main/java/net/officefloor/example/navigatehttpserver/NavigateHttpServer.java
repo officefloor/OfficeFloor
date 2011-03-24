@@ -37,10 +37,10 @@ public class NavigateHttpServer {
 
 		HttpTemplateAutoWireSection sectionTwo = source.addHttpTemplate(
 				"TemplateTwo.ofp", TemplateTwo.class, "two");
-		
-		source.link(sectionOne, "external", sectionTwo, "renderTemplate");
-		source.link(sectionTwo, "next", sectionOne, "renderTemplate");
-		
+
+		source.linkToHttpTemplate(sectionOne, "external", sectionTwo);
+		source.linkToHttpTemplate(sectionTwo, "next", sectionOne);
+
 		source.openOfficeFloor();
 	}
 
