@@ -46,42 +46,42 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_ejb</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_hibernate</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jdbc</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jms</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_jndi</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_servlet</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_socket</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_spring</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
@@ -91,7 +91,7 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_web</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
