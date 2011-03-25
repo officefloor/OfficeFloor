@@ -106,8 +106,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 				HttpResource resource = description.getResource();
 				assertNotNull("Must provide resource for description", resource);
 				assertEquals("Incorrect path for resource description",
-						expectedDescription.expectedResourcePath, resource
-								.getPath());
+						expectedDescription.expectedResourcePath,
+						resource.getPath());
 				assertTrue("File always exists", resource.isExist());
 
 				// Ensure content is as expected
@@ -187,8 +187,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 			factory.createHttpResource("/..");
 			fail("Should not succeed");
 		} catch (InvalidHttpRequestUriException ex) {
-			assertEquals("Incorrect http status", HttpStatus.SC_BAD_REQUEST, ex
-					.getHttpStatus());
+			assertEquals("Incorrect http status", HttpStatus.SC_BAD_REQUEST,
+					ex.getHttpStatus());
 		}
 	}
 
@@ -314,22 +314,29 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 	/**
 	 * Tests retrieving directory from a JAR (as most tests are using
 	 * directories).
+	 * 
+	 * Note test expects JUnit 3.8.2 on class path.
 	 */
 	public void testObtainDirectoryFromJar() throws Exception {
 		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource directory = factory.createHttpResource("/bin");
-		this.assertHttpDirectory(directory, "/bin/", "/bin/officebuilding",
-				"/bin/officeconsole", "/bin/officefloor");
+		HttpResource directory = factory.createHttpResource("/junit");
+		this.assertHttpDirectory(directory, "/junit/", "/junit/awtui/",
+				"/junit/extensions/", "/junit/framework/", "/junit/runner/",
+				"/junit/swingui/", "/junit/textui/");
 	}
 
 	/**
 	 * Tests retrieving file from a JAR (as most tests are using directories).
+	 * 
+	 * Note test expects JUnit 3.8.2 on class path.
 	 */
 	public void testObtainFileFromJar() throws Exception {
 		HttpResourceFactory factory = this.createHttpResourceFactory("");
-		HttpResource file = factory.createHttpResource("/bin/officefloor");
+		HttpResource file = factory
+				.createHttpResource("/junit/swingui/icons/ok.gif");
 		assertTrue("Expecting file", file instanceof HttpFile);
-		assertEquals("Incorrect file path", "/bin/officefloor", file.getPath());
+		assertEquals("Incorrect file path", "/junit/swingui/icons/ok.gif",
+				file.getPath());
 		assertTrue("File should exist", file.isExist());
 	}
 
@@ -380,8 +387,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 			// Always expect to return instance and have path
 			assertNotNull("Always expected to return instance", resource);
 			assertEquals("Incorrect path", expectedPath, resource.getPath());
-			assertEquals("Incorrect existance", isExpectedToExist, resource
-					.isExist());
+			assertEquals("Incorrect existance", isExpectedToExist,
+					resource.isExist());
 
 			// Return the resource
 			return resource;
@@ -410,15 +417,15 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 		HttpFile httpFile = (HttpFile) resource;
 
 		// Ensure correct path and file always exists
-		assertEquals("Incorrect path for file", expectedPath, httpFile
-				.getPath());
+		assertEquals("Incorrect path for file", expectedPath,
+				httpFile.getPath());
 		assertTrue("File should always exist", httpFile.isExist());
 
 		// Ensure correct description of file
-		assertEquals("Incorrect Content-Encoding", CONTENT_ENCODING, httpFile
-				.getContentEncoding());
-		assertEquals("Incorrect Content-Type", CONTENT_TYPE, httpFile
-				.getContentType());
+		assertEquals("Incorrect Content-Encoding", CONTENT_ENCODING,
+				httpFile.getContentEncoding());
+		assertEquals("Incorrect Content-Type", CONTENT_TYPE,
+				httpFile.getContentType());
 		assertEquals("Incorrect charset", CHARSET, httpFile.getCharset());
 
 		// Validate the contents of the file
@@ -449,8 +456,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 		HttpDirectory httpDirectory = (HttpDirectory) resource;
 
 		// Ensure correct path
-		assertEquals("Incorrect path for file", expectedPath, httpDirectory
-				.getPath());
+		assertEquals("Incorrect path for file", expectedPath,
+				httpDirectory.getPath());
 
 		// Ensure the correct children
 		HttpResource[] children = httpDirectory.listResources();
