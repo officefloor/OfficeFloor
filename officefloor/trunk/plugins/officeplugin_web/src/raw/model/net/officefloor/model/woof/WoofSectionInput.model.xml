@@ -4,4 +4,6 @@
 	<field type="String" name="parameter type" />
 	<field type="String" name="uri" />
 	<list type="WoofTemplateOutputToWoofSectionInputModel" name="woof template output" />
+	<list type="WoofSectionOutputToWoofSectionInputModel" name="woof section output" />
+	<list type="WoofExceptionToWoofSectionInputModel" name="woof exception" />
 </model>

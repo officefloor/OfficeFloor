@@ -5,4 +5,7 @@
 	<field type="String" name="template path" />
 	<field type="String" name="template class name" />
 	<list type="WoofTemplateOutputModel" name="output" />
+	<list type="WoofSectionOutputToWoofTemplateModel" name="woof section output" />
+	<list type="WoofTemplateOutputToWoofTemplateModel" name="woof template output" />
+	<list type="WoofExceptionToWoofTemplateModel" name="woof exception" />
 </model>

@@ -62,10 +62,10 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getTemplatePath", "getTemplateClassName", "getX", "getY" },
 				woof.getWoofTemplates(), new WoofTemplateModel("TEMPLATE_A",
 						"example", "example/TemplateA.ofp",
-						"net.example.ExampleClassA", null, 300, 301),
-				new WoofTemplateModel("TEMPLATE_B", null,
+						"net.example.ExampleClassA", null, null, null, null,
+						300, 301), new WoofTemplateModel("TEMPLATE_B", null,
 						"example/TemplateB.ofp", "net.example.ExampleClassB",
-						null, 302, 303));
+						null, null, null, null, 302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertList(new String[] { "getWoofTemplateOutputName",
 				"getArgumentType" }, template.getOutputs(),
@@ -130,7 +130,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		assertList(new String[] { "getWoofResourceName", "getResourcePath",
 				"getX", "getY" }, woof.getWoofResources(),
-				new WoofResourceModel("RESOURCE", "Example.html", 500, 501));
+				new WoofResourceModel("RESOURCE", "Example.html", null, null,
+						null, 500, 501));
 
 		// ----------------------------------------
 		// Validate the exceptions

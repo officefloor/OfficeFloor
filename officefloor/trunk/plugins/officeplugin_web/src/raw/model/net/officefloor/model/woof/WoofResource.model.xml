@@ -2,4 +2,7 @@
 <model>
 	<field type="String" name="woof resource name" />
 	<field type="String" name="resource path" />
+	<list type="WoofTemplateOutputToWoofResourceModel" name="woof template output" />
+	<list type="WoofSectionOutputToWoofResourceModel" name="woof section output" />
+	<list type="WoofExceptionToWoofResourceModel" name="woof exception" />
 </model>
