@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="woof section input name" />
+	<field type="String" name="parameter type" />
+	<field type="String" name="uri" />
+	<list type="WoofTemplateOutputToWoofSectionInputModel" name="woof template output" />
+</model>
