@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="woof template name" />
+	<field type="String" name="uri" />
+	<field type="String" name="template path" />
+	<field type="String" name="template class name" />
+	<list type="WoofTemplateOutputModel" name="output" />
+</model>
