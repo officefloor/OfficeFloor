@@ -68,11 +68,58 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionInputModel sectionInput = new WoofSectionInputModel(
 				"SECTION_INPUT", null, null);
 		section.addInput(sectionInput);
+		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel(
+				"SECTION_OUTPUT", null);
+		section.addOutput(sectionOutput);
+		WoofResourceModel resource = new WoofResourceModel("RESOURCE", null);
+		woof.addWoofResource(resource);
+		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
+		woof.addWoofException(exception);
 
 		// Template Output -> Section Input
 		WoofTemplateOutputToWoofSectionInputModel templateToSection = new WoofTemplateOutputToWoofSectionInputModel(
 				"SECTION", "SECTION_INPUT");
 		templateOutput.setWoofSectionInput(templateToSection);
+
+		// Template Output -> Template
+		WoofTemplateOutputToWoofTemplateModel templateToTemplate = new WoofTemplateOutputToWoofTemplateModel(
+				"TEMPLATE");
+		templateOutput.setWoofTemplate(templateToTemplate);
+
+		// Template Output -> Resource
+		WoofTemplateOutputToWoofResourceModel templateToResource = new WoofTemplateOutputToWoofResourceModel(
+				"RESOURCE");
+		templateOutput.setWoofResource(templateToResource);
+
+		// Section Output -> Section Input
+		WoofSectionOutputToWoofSectionInputModel sectionToSection = new WoofSectionOutputToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		sectionOutput.setWoofSectionInput(sectionToSection);
+
+		// Section Output -> Template
+		WoofSectionOutputToWoofTemplateModel sectionToTemplate = new WoofSectionOutputToWoofTemplateModel(
+				"TEMPLATE");
+		sectionOutput.setWoofTemplate(sectionToTemplate);
+
+		// Section Output -> Resource
+		WoofSectionOutputToWoofResourceModel sectionToResource = new WoofSectionOutputToWoofResourceModel(
+				"RESOURCE");
+		sectionOutput.setWoofResource(sectionToResource);
+
+		// Exception -> Section Input
+		WoofExceptionToWoofSectionInputModel exceptionToSection = new WoofExceptionToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		exception.setWoofSectionInput(exceptionToSection);
+
+		// Exception -> Template
+		WoofExceptionToWoofTemplateModel exceptionToTemplate = new WoofExceptionToWoofTemplateModel(
+				"TEMPLATE");
+		exception.setWoofTemplate(exceptionToTemplate);
+
+		// Exception -> Resource
+		WoofExceptionToWoofResourceModel exceptionToResource = new WoofExceptionToWoofResourceModel(
+				"RESOURCE");
+		exception.setWoofResource(exceptionToResource);
 
 		// Record retrieving the WoOF
 		this.recordReturn(this.modelRepository,
@@ -101,6 +148,54 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				templateToSection.getWoofTemplateOutput());
 		assertEquals("template output -> section input", sectionInput,
 				templateToSection.getWoofSectionInput());
+
+		// Ensure template output connected to template
+		assertEquals("template output <- template", templateOutput,
+				templateToTemplate.getWoofTemplateOutput());
+		assertEquals("template output -> template", template,
+				templateToTemplate.getWoofTemplate());
+
+		// Ensure template output connected to resource
+		assertEquals("template output <- resource", templateOutput,
+				templateToResource.getWoofTemplateOutput());
+		assertEquals("template otuput -> resource", resource,
+				templateToResource.getWoofResource());
+
+		// Ensure section output connected to section input
+		assertEquals("section output <- section input", sectionOutput,
+				sectionToSection.getWoofSectionOutput());
+		assertEquals("section output -> section input", sectionInput,
+				sectionToSection.getWoofSectionInput());
+
+		// Ensure section output connected to template
+		assertEquals("section output <- template", sectionOutput,
+				sectionToTemplate.getWoofSectionOutput());
+		assertEquals("section output -> template", template,
+				sectionToTemplate.getWoofTemplate());
+
+		// Ensure section output connected to resource
+		assertEquals("section output <- resource", sectionOutput,
+				sectionToResource.getWoofSectionOutput());
+		assertEquals("section output -> resource", resource,
+				sectionToResource.getWoofResource());
+
+		// Ensure exception connected to section input
+		assertEquals("exception <- section input", exception,
+				exceptionToSection.getWoofException());
+		assertEquals("exception -> section input", sectionInput,
+				exceptionToSection.getWoofSectionInput());
+
+		// Ensure exception connected to template
+		assertEquals("exception <- template", exception,
+				exceptionToTemplate.getWoofException());
+		assertEquals("exception -> template", template,
+				exceptionToTemplate.getWoofTemplate());
+
+		// Ensure exception connected to resource
+		assertEquals("exception <- resource", exception,
+				exceptionToResource.getWoofException());
+		assertEquals("exception -> resource", resource,
+				exceptionToResource.getWoofResource());
 	}
 
 	/**
@@ -122,12 +217,67 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionInputModel sectionInput = new WoofSectionInputModel(
 				"SECTION_INPUT", null, null);
 		section.addInput(sectionInput);
+		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel(
+				"SECTION_OUTPUT", null);
+		section.addOutput(sectionOutput);
+		WoofResourceModel resource = new WoofResourceModel("RESOURCE", null);
+		woof.addWoofResource(resource);
+		WoofExceptionModel exception = new WoofExceptionModel("EXCEPTION");
+		woof.addWoofException(exception);
 
 		// Template Output -> Section Input
 		WoofTemplateOutputToWoofSectionInputModel templateToSection = new WoofTemplateOutputToWoofSectionInputModel();
 		templateToSection.setWoofTemplateOutput(templateOutput);
 		templateToSection.setWoofSectionInput(sectionInput);
 		templateToSection.connect();
+
+		// Template Output -> Template
+		WoofTemplateOutputToWoofTemplateModel templateToTemplate = new WoofTemplateOutputToWoofTemplateModel();
+		templateToTemplate.setWoofTemplateOutput(templateOutput);
+		templateToTemplate.setWoofTemplate(template);
+		templateToTemplate.connect();
+
+		// Template Output -> Resource
+		WoofTemplateOutputToWoofResourceModel templateToResource = new WoofTemplateOutputToWoofResourceModel();
+		templateToResource.setWoofTemplateOutput(templateOutput);
+		templateToResource.setWoofResource(resource);
+		templateToResource.connect();
+
+		// Section Output -> Section Input
+		WoofSectionOutputToWoofSectionInputModel sectionToSection = new WoofSectionOutputToWoofSectionInputModel();
+		sectionToSection.setWoofSectionOutput(sectionOutput);
+		sectionToSection.setWoofSectionInput(sectionInput);
+		sectionToSection.connect();
+
+		// Section Output -> Template
+		WoofSectionOutputToWoofTemplateModel sectionToTemplate = new WoofSectionOutputToWoofTemplateModel();
+		sectionToTemplate.setWoofSectionOutput(sectionOutput);
+		sectionToTemplate.setWoofTemplate(template);
+		sectionToTemplate.connect();
+
+		// Section Output -> Resource
+		WoofSectionOutputToWoofResourceModel sectionToResource = new WoofSectionOutputToWoofResourceModel();
+		sectionToResource.setWoofSectionOutput(sectionOutput);
+		sectionToResource.setWoofResource(resource);
+		sectionToResource.connect();
+
+		// Exception -> Section Input
+		WoofExceptionToWoofSectionInputModel exceptionToSection = new WoofExceptionToWoofSectionInputModel();
+		exceptionToSection.setWoofException(exception);
+		exceptionToSection.setWoofSectionInput(sectionInput);
+		exceptionToSection.connect();
+
+		// Exception -> Template
+		WoofExceptionToWoofTemplateModel exceptionToTemplate = new WoofExceptionToWoofTemplateModel();
+		exceptionToTemplate.setWoofException(exception);
+		exceptionToTemplate.setWoofTemplate(template);
+		exceptionToTemplate.connect();
+
+		// Exception -> Resource
+		WoofExceptionToWoofResourceModel exceptionToResource = new WoofExceptionToWoofResourceModel();
+		exceptionToResource.setWoofException(exception);
+		exceptionToResource.setWoofResource(resource);
+		exceptionToResource.connect();
 
 		// Record storing the WoOf
 		this.modelRepository.store(woof, this.configurationItem);
@@ -142,6 +292,26 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"SECTION", templateToSection.getSectionName());
 		assertEquals("template output - section input (input name)",
 				"SECTION_INPUT", templateToSection.getInputName());
+		assertEquals("template output - template", "TEMPLATE",
+				templateToTemplate.getTemplateName());
+		assertEquals("template output - resource", "RESOURCE",
+				templateToResource.getResourceName());
+		assertEquals("section output - section input (section name)",
+				"SECTION", sectionToSection.getSectionName());
+		assertEquals("section output - section input (input name)",
+				"SECTION_INPUT", sectionToSection.getInputName());
+		assertEquals("section output - template", "TEMPLATE",
+				sectionToTemplate.getTemplateName());
+		assertEquals("section output - resource", "RESOURCE",
+				sectionToResource.getResourceName());
+		assertEquals("exception - section input (section name)", "SECTION",
+				exceptionToSection.getSectionName());
+		assertEquals("exception - section input (input name)", "SECTION_INPUT",
+				exceptionToSection.getInputName());
+		assertEquals("exception - template", "TEMPLATE",
+				exceptionToTemplate.getTemplateName());
+		assertEquals("exception - resource", "RESOURCE",
+				exceptionToResource.getResourceName());
 	}
 
 }
