@@ -48,11 +48,8 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
@@ -60,7 +57,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
@@ -80,7 +76,8 @@ import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
+public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
+		implements AutoWireApplication {
 
 	/**
 	 * Name of the single {@link Office}.
@@ -135,29 +132,31 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 	}
 
 	/**
-	 * <p>
-	 * Obtains the {@link OfficeFloorCompiler} being used.
-	 * <p>
-	 * This allows manipulation of the {@link OfficeFloorCompiler} before
-	 * auto-wiring to compile and open the {@link OfficeFloor}.
+	 * Allows overriding for initialising the {@link OfficeFloor} before
+	 * auto-wiring.
 	 * 
-	 * @return {@link OfficeFloorCompiler} being used.
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param context
+	 *            {@link OfficeFloorSourceContext}.
+	 * @throws Exception
+	 *             If fails to initialise.
 	 */
+	protected void initOfficeFloor(OfficeFloorDeployer deployer,
+			OfficeFloorSourceContext context) throws Exception {
+		// By default do nothing
+	}
+
+	/*
+	 * ====================== AutoWireApplication ===========================
+	 */
+
+	@Override
 	public OfficeFloorCompiler getOfficeFloorCompiler() {
 		return this.compiler;
 	}
 
-	/**
-	 * Adds an {@link OfficeSection}.
-	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
-	 * @param sectionLocation
-	 *            {@link OfficeSection} location.
-	 * @return {@link AutoWireSection} to configure properties and link flows.
-	 */
+	@Override
 	public <S extends SectionSource> AutoWireSection addSection(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation) {
@@ -165,53 +164,19 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 				sectionLocation);
 	}
 
-	/**
-	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
-	 * 
-	 * @param sourceSection
-	 *            Source section.
-	 * @param sourceOutputName
-	 *            Name of the source {@link SectionOutput}.
-	 * @param targetSection
-	 *            Target section.
-	 * @param targetInputName
-	 *            Name of the target {@link SectionInput}.
-	 */
+	@Override
 	public void link(AutoWireSection sourceSection, String sourceOutputName,
 			AutoWireSection targetSection, String targetInputName) {
 		this.officeSource.link(sourceSection, sourceOutputName, targetSection,
 				targetInputName);
 	}
 
-	/**
-	 * <p>
-	 * Determines if the {@link AutoWireSection} output is configured for
-	 * linking.
-	 * <p>
-	 * This aids configuration by allowing to know if {@link SectionOutput}
-	 * flows have been configured (linked).
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param sectionOutputName
-	 *            {@link SectionOutput} name.
-	 * @return <code>true</code> if configured for linking, otherwise
-	 *         <code>false</code>.
-	 */
+	@Override
 	public boolean isLinked(AutoWireSection section, String sectionOutputName) {
 		return this.officeSource.isLinked(section, sectionOutputName);
 	}
 
-	/**
-	 * Adds a raw object for dependency injection.
-	 * 
-	 * @param object
-	 *            Object implementing the type to be dependency injected.
-	 * @param objectTypes
-	 *            Types that the object is to provide dependency injection via
-	 *            auto-wiring. Should no types be provided the type is defaulted
-	 *            from the object.
-	 */
+	@Override
 	public void addObject(Object object, Class<?>... objectTypes) {
 
 		// Default the object type if not provided
@@ -220,24 +185,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		}
 
 		// Add the raw object
-		this.objectContexts.add(new AutoWireContext(new AutoWireObject(
+		this.objectContexts.add(new AutoWireContext(new AutoWireObjectImpl(
 				this.compiler, null, null, null, objectTypes), object));
 	}
 
-	/**
-	 * Adds a {@link ManagedObjectSource} for dependency injection.
-	 * 
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param wirer
-	 *            {@link ManagedObjectSourceWirer} to assist in configuring the
-	 *            {@link ManagedObjectSource}. May be <code>null</code> if no
-	 *            assistance is required.
-	 * @param objectTypes
-	 *            Types that the {@link ManagedObjectSource} is to provide
-	 *            dependency injection via auto-wiring.
-	 * @return {@link AutoWireObject} for the {@link ManagedObjectSource}.
-	 */
+	@Override
 	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> AutoWireObject addManagedObject(
 			Class<S> managedObjectSourceClass, ManagedObjectSourceWirer wirer,
 			Class<?>... objectTypes) {
@@ -252,7 +204,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the auto wire object
-		AutoWireObject object = new AutoWireObject(this.compiler,
+		AutoWireObject object = new AutoWireObjectImpl(this.compiler,
 				managedObjectSourceClass, properties, wirer, objectTypes);
 
 		// Add the object context
@@ -262,17 +214,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		return object;
 	}
 
-	/**
-	 * Assigns a {@link Team} responsible for {@link Task} dependent on the
-	 * specified object types.
-	 * 
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
-	 * @param objectTypes
-	 *            Dependent {@link Task} object types the {@link Team} is
-	 *            responsible for. Must have at least one object type provided.
-	 * @return {@link AutoWireTeam}.
-	 */
+	@Override
 	public <T extends TeamSource> AutoWireTeam assignTeam(
 			Class<T> teamSourceClass, Class<?>... objectTypes) {
 
@@ -296,7 +238,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the team
-		AutoWireTeam team = new AutoWireTeam(this.compiler, teamName,
+		AutoWireTeam team = new AutoWireTeamImpl(this.compiler, teamName,
 				teamSourceClass, properties, responsibilities);
 		this.teams.add(team);
 
@@ -304,13 +246,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		return team;
 	}
 
-	/**
-	 * Assigns a {@link Team} responsible for unassigned {@link Task} instances.
-	 * 
-	 * @param teamSourceClass
-	 *            {@link TeamSource} class.
-	 * @return {@link AutoWireTeam}.
-	 */
+	@Override
 	public <T extends TeamSource> AutoWireTeam assignDefaultTeam(
 			Class<T> teamSourceClass) {
 
@@ -318,20 +254,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the default team
-		this.defaultTeam = new AutoWireTeam(this.compiler, "team",
+		this.defaultTeam = new AutoWireTeamImpl(this.compiler, "team",
 				teamSourceClass, properties);
 
 		// Return the default team
 		return this.defaultTeam;
 	}
 
-	/**
-	 * Opens the {@link AutoWireOfficeFloor}.
-	 * 
-	 * @return {@link AutoWireOfficeFloor}.
-	 * @throws Exception
-	 *             If fails to open the {@link AutoWireOfficeFloor}.
-	 */
+	@Override
 	public AutoWireOfficeFloor openOfficeFloor() throws Exception {
 
 		// Open the OfficeFloor
@@ -340,24 +270,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 		officeFloor.openOfficeFloor();
 
 		// Create and return the auto-wire OfficeFloor
-		return AutoWireOfficeFloor.createAutoWireOfficeFloor(officeFloor,
+		return AutoWireAdministration.createAutoWireOfficeFloor(officeFloor,
 				OFFICE_NAME);
-	}
-
-	/**
-	 * Allows overriding for initialising the {@link OfficeFloor} before
-	 * auto-wiring.
-	 * 
-	 * @param deployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param context
-	 *            {@link OfficeFloorSourceContext}.
-	 * @throws Exception
-	 *             If fails to initialise.
-	 */
-	protected void initOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception {
-		// By default do nothing
 	}
 
 	/*
@@ -830,7 +744,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource {
 					.createPropertyList();
 
 			// Register the team mapping
-			AutoWireTeam team = new AutoWireTeam(
+			AutoWireTeam team = new AutoWireTeamImpl(
 					AutoWireOfficeFloorSource.this.compiler,
 					managedObjectSourceTeamName, teamSourceClass, properties);
 			this.teams.add(team);

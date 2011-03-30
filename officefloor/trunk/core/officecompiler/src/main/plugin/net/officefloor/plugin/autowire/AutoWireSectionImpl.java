@@ -27,7 +27,8 @@ import net.officefloor.compile.spi.section.source.SectionSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireSection extends AutoWireProperties {
+public class AutoWireSectionImpl extends AutoWirePropertiesImpl implements
+		AutoWireSection {
 
 	/**
 	 * Name of section.
@@ -58,7 +59,7 @@ public class AutoWireSection extends AutoWireProperties {
 	 * @param properties
 	 *            Properties for the section.
 	 */
-	public AutoWireSection(OfficeFloorCompiler compiler, String name,
+	public AutoWireSectionImpl(OfficeFloorCompiler compiler, String name,
 			Class<?> sourceClass, String location, PropertyList properties) {
 		super(compiler, properties);
 		this.name = name;
@@ -75,35 +76,28 @@ public class AutoWireSection extends AutoWireProperties {
 	 * @param section
 	 *            Section to copy in state.
 	 */
-	protected AutoWireSection(OfficeFloorCompiler compiler,
+	protected AutoWireSectionImpl(OfficeFloorCompiler compiler,
 			AutoWireSection section) {
-		this(compiler, section.name, section.sourceClass, section.location,
-				section.getProperties());
+		this(compiler, section.getSectionName(), section
+				.getSectionSourceClass(), section.getSectionLocation(), section
+				.getProperties());
 	}
 
-	/**
-	 * Obtains the section name.
-	 * 
-	 * @return Section name.
+	/*
+	 * ========================= AutoWireSection ========================
 	 */
+
+	@Override
 	public String getSectionName() {
 		return this.name;
 	}
 
-	/**
-	 * Obtains the {@link SectionSource} class.
-	 * 
-	 * @return {@link SectionSource} class.
-	 */
+	@Override
 	public Class<?> getSectionSourceClass() {
 		return this.sourceClass;
 	}
 
-	/**
-	 * Obtains the section location.
-	 * 
-	 * @return Section location.
-	 */
+	@Override
 	public String getSectionLocation() {
 		return this.location;
 	}

@@ -18,7 +18,7 @@
 package net.officefloor.example.pageflowhttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
+import net.officefloor.plugin.autowire.AutoWireAdministration;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -61,7 +61,7 @@ public class PageFlowHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		this.client.getConnectionManager().shutdown();
-		AutoWireOfficeFloor.closeAllOfficeFloors();
+		AutoWireAdministration.closeAllOfficeFloors();
 	}
 
 }

@@ -27,7 +27,8 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireTeam extends AutoWireProperties {
+public class AutoWireTeamImpl extends AutoWirePropertiesImpl implements
+		AutoWireTeam {
 
 	/**
 	 * Name of the {@link OfficeFloorTeam}.
@@ -58,7 +59,7 @@ public class AutoWireTeam extends AutoWireProperties {
 	 * @param responsibilities
 	 *            {@link AutoWireResponsibility} instances.
 	 */
-	public AutoWireTeam(OfficeFloorCompiler compiler, String teamName,
+	public AutoWireTeamImpl(OfficeFloorCompiler compiler, String teamName,
 			Class<? extends TeamSource> teamSourceClass,
 			PropertyList properties, AutoWireResponsibility... responsibilities) {
 		super(compiler, properties);
@@ -67,31 +68,21 @@ public class AutoWireTeam extends AutoWireProperties {
 		this.responsibilities = responsibilities;
 	}
 
-	/**
-	 * Obtains the name of the {@link OfficeFloorTeam}.
-	 * 
-	 * @return Name of the {@link OfficeFloorTeam}.
+	/*
+	 * ========================= AutoWireTeam ================================
 	 */
+
+	@Override
 	public String getTeamName() {
 		return this.teamName;
 	}
 
-	/**
-	 * Obtains the {@link TeamSource} class.
-	 * 
-	 * @return {@link TeamSource} class.
-	 */
+	@Override
 	public Class<? extends TeamSource> getTeamSourceClass() {
 		return this.teamSourceClass;
 	}
 
-	/**
-	 * Obtains the {@link AutoWireResponsibility} instances for this
-	 * {@link AutoWireTeam}.
-	 * 
-	 * @return {@link AutoWireResponsibility} instances for this
-	 *         {@link AutoWireTeam}.
-	 */
+	@Override
 	public AutoWireResponsibility[] getResponsibilities() {
 		return this.responsibilities;
 	}

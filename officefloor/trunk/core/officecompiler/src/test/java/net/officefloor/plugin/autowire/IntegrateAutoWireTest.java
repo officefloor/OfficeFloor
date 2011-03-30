@@ -142,7 +142,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	public void testMBean() throws Exception {
 
 		// Ensure all auto-wire OfficeFloors are closed
-		AutoWireOfficeFloor.closeAllOfficeFloors();
+		AutoWireAdministration.closeAllOfficeFloors();
 
 		// Create the OfficeFloor
 		final Connection connection = this.createMock(Connection.class);
@@ -153,16 +153,16 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Obtain the MBean
-		AutoWireOfficeFloorMBean[] mbeans = AutoWireOfficeFloor
-				.getOfficeFloors();
+		AutoWireAdministrationMBean[] mbeans = AutoWireAdministration
+				.getAutoWireAdministrators();
 		assertEquals("Incorrect number of OfficeFloor MBeans", 1, mbeans.length);
 
 		// Close the OfficeFloor
 		officeFloor.closeOfficeFloor();
 
 		// Ensure MBean unregistered
-		AutoWireOfficeFloorMBean[] remainingMBeans = AutoWireOfficeFloor
-				.getOfficeFloors();
+		AutoWireAdministrationMBean[] remainingMBeans = AutoWireAdministration
+				.getAutoWireAdministrators();
 		assertEquals("Should unregister OfficeFloor MBean", 0,
 				remainingMBeans.length);
 	}

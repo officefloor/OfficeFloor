@@ -24,39 +24,14 @@ import net.officefloor.compile.spi.office.OfficeTeam;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireResponsibility {
-
-	/**
-	 * Dependency type.
-	 */
-	private final Class<?> dependencyType;
-
-	/**
-	 * {@link OfficeTeam} name.
-	 */
-	private final String officeTeamName;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param dependencyType
-	 *            Dependency type.
-	 * @param officeTeamName
-	 *            {@link OfficeTeam} name.
-	 */
-	public AutoWireResponsibility(Class<?> dependencyType, String officeTeamName) {
-		this.dependencyType = dependencyType;
-		this.officeTeamName = officeTeamName;
-	}
+public interface AutoWireResponsibility {
 
 	/**
 	 * Obtains the dependency type.
 	 * 
 	 * @return Dependency type.
 	 */
-	public Class<?> getDependencyType() {
-		return this.dependencyType;
-	}
+	Class<?> getDependencyType();
 
 	/**
 	 * Obtains the corresponding {@link OfficeTeam} name for this
@@ -64,8 +39,6 @@ public class AutoWireResponsibility {
 	 * 
 	 * @return {@link OfficeTeam} name for this responsibility.
 	 */
-	public String getOfficeTeamName() {
-		return this.officeTeamName;
-	}
+	String getOfficeTeamName();
 
 }

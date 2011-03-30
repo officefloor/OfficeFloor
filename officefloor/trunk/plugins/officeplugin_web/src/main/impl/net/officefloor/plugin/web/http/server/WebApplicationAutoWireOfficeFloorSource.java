@@ -22,19 +22,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -43,19 +37,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * @author Daniel Sagenschneider
  */
 public class WebApplicationAutoWireOfficeFloorSource extends
-		AutoWireOfficeFloorSource {
-
-	/**
-	 * Name of the {@link OfficeSection} that handles the {@link HttpRequest}
-	 * instances.
-	 */
-	public static final String HANDLER_SECTION_NAME = "HANDLE_HTTP_SECTION";
-
-	/**
-	 * Name of the {@link OfficeSectionInput} that handles the
-	 * {@link HttpRequest} instances.
-	 */
-	public static final String HANDLER_INPUT_NAME = "HANDLE_HTTP_INPUT";
+		AutoWireOfficeFloorSource implements WebAutoWireApplication {
 
 	/**
 	 * {@link HttpTemplateAutoWireSection} instances.
@@ -78,18 +60,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 	private NonHandledServicer nonHandledServicer = null;
 
-	/**
-	 * Adds a {@link HttpTemplate} available at the specified URI.
-	 * 
-	 * @param templatePath
-	 *            Path to the template file.
-	 * @param templateLogicClass
-	 *            Class providing the logic for the template.
-	 * @param templateUri
-	 *            URI for the template. May be <code>null</code> indicate the
-	 *            template not publicly available.
-	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
+	/*
+	 * ======================== WebAutoWireApplication =========================
 	 */
+
+	@Override
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass, String templateUri) {
 
@@ -121,7 +96,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				templateLogicClass.getName());
 
 		// Create and register the HTTP template
-		HttpTemplateAutoWireSection wirer = new HttpTemplateAutoWireSection(
+		HttpTemplateAutoWireSection wirer = new HttpTemplateAutoWireSectionImpl(
 				this.getOfficeFloorCompiler(), section, templateLogicClass,
 				templateUri);
 		this.httpTemplates.add(wirer);
@@ -130,85 +105,35 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		return wirer;
 	}
 
-	/**
-	 * <p>
-	 * Adds a private {@link HttpTemplate}.
-	 * <p>
-	 * The {@link HttpTemplate} is not directly available via URI but is linked
-	 * by flows. This allows pre-processing before the {@link HttpTemplate} is
-	 * attempted to be rendered.
-	 * 
-	 * @param templatePath
-	 *            Path to the template file.
-	 * @param templateLogicClass
-	 *            Class providing the logic for the template.
-	 * @return {@link HttpTemplateAutoWireSection} to allow linking flows.
-	 */
+	@Override
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass) {
 		return this.addHttpTemplate(templatePath, templateLogicClass, null);
 	}
 
-	/**
-	 * Links a URI to an {@link OfficeSectionInput}.
-	 * 
-	 * @param uri
-	 *            URI to be linked.
-	 * @param section
-	 *            {@link AutoWireSection} servicing the URI.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} servicing the URI.
-	 */
+	@Override
 	public void linkUri(String uri, AutoWireSection section, String inputName) {
 		this.uriLinks.add(new UriLink(uri, section, inputName));
 	}
 
-	/**
-	 * Links the {@link OfficeSectionOutput} to render the {@link HttpTemplate}.
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
-	 * @param template
-	 *            {@link HttpTemplateAutoWireSection}.
-	 */
+	@Override
 	public void linkToHttpTemplate(AutoWireSection section, String outputName,
 			HttpTemplateAutoWireSection template) {
 		this.link(section, outputName, template,
 				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 	}
 
-	/**
-	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
-	 */
+	@Override
 	public void linkToSendResponse(AutoWireSection section, String outputName) {
 		this.sendLinks.add(new SendLink(section, outputName));
 	}
 
-	/**
-	 * Specifies the {@link OfficeSectionInput} to handle if unable to route
-	 * {@link HttpRequest}.
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput}.
-	 */
+	@Override
 	public void setNonHandledServicer(AutoWireSection section, String inputName) {
 		this.nonHandledServicer = new NonHandledServicer(section, inputName);
 	}
 
-	/**
-	 * Obtains the registered URIs.
-	 * 
-	 * @return Registered URIs.
-	 */
+	@Override
 	public String[] getURIs() {
 
 		// Create the set of URIs

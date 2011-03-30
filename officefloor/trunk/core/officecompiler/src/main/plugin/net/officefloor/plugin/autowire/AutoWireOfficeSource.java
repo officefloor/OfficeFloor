@@ -113,7 +113,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create and add the section
-		AutoWireSection section = new AutoWireSection(this.compiler,
+		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
 				sectionName, sectionSourceClass, sectionLocation, properties);
 		this.sections.add(section);
 
@@ -179,7 +179,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @return {@link AutoWireResponsibility} for the {@link OfficeTeam}.
 	 */
 	public AutoWireResponsibility addResponsibility(Class<?> dependencyType) {
-		AutoWireResponsibility responsibility = new AutoWireResponsibility(
+		AutoWireResponsibility responsibility = new AutoWireResponsibilityImpl(
 				dependencyType, "team-" + dependencyType.getName());
 		this.responsibilities.add(responsibility);
 		return responsibility;

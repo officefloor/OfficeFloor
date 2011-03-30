@@ -18,7 +18,7 @@
 package net.officefloor.example.statichttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
+import net.officefloor.plugin.autowire.AutoWireAdministration;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -57,7 +57,7 @@ public class StaticHttpServerTest extends TestCase {
 	@Override
 	// START SNIPPET: teardown
 	protected void tearDown() throws Exception {
-		AutoWireOfficeFloor.closeAllOfficeFloors();
+		AutoWireAdministration.closeAllOfficeFloors();
 	}
 	// END SNIPPET: teardown
 
