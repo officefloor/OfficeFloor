@@ -25,8 +25,8 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.autowire.AutoWireApplication;
 import net.officefloor.plugin.autowire.AutoWireObject;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.socket.server.CommunicationProtocol;
@@ -82,14 +82,14 @@ public class HttpServerSocketManagedObjectSource extends
 	/**
 	 * Convenience method to auto-wire in a
 	 * {@link HttpServerSocketManagedObjectSource} into an
-	 * {@link AutoWireOfficeFloorSource}.
+	 * {@link AutoWireApplication}.
 	 * 
 	 * @param source
-	 *            {@link AutoWireOfficeFloorSource}.
+	 *            {@link AutoWireApplication}.
 	 * @param port
 	 *            Port to listen for HTTP requests.
 	 */
-	public static void autoWire(AutoWireOfficeFloorSource source, int port,
+	public static void autoWire(AutoWireApplication source, int port,
 			String sectionName, String sectionInputName) {
 
 		// Create the wirer

@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.autowire;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -27,70 +25,21 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireObject extends AutoWireProperties {
-
-	/**
-	 * {@link ManagedObjectSource} class.
-	 */
-	private final Class<?> managedObjectSourceClass;
-
-	/**
-	 * {@link ManagedObjectSourceWirer}.
-	 */
-	private final ManagedObjectSourceWirer wirer;
-
-	/**
-	 * Object types for linking this a dependency.
-	 */
-	private final Class<?>[] objectTypes;
-
-	/**
-	 * Time-out for sourcing the {@link ManagedObject} from the
-	 * {@link ManagedObjectSource}.
-	 */
-	private long timeout = 0;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param properties
-	 *            {@link PropertyList} for the {@link ManagedObjectSource}.
-	 * @param wirer
-	 *            {@link ManagedObjectSourceWirer}.
-	 * @param objectTypes
-	 *            Object types that the {@link ManagedObjectSource} is to
-	 *            provide auto-wiring.
-	 */
-	public AutoWireObject(OfficeFloorCompiler compiler,
-			Class<?> managedObjectSourceClass, PropertyList properties,
-			ManagedObjectSourceWirer wirer, Class<?>... objectTypes) {
-		super(compiler, properties);
-		this.managedObjectSourceClass = managedObjectSourceClass;
-		this.wirer = wirer;
-		this.objectTypes = objectTypes;
-	}
+public interface AutoWireObject extends AutoWireProperties {
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} class.
 	 * 
 	 * @return {@link ManagedObjectSource} class.
 	 */
-	public Class<?> getManagedObjectSourceClass() {
-		return this.managedObjectSourceClass;
-	}
+	Class<?> getManagedObjectSourceClass();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceWirer}.
 	 * 
 	 * @return {@link ManagedObjectSourceWirer}.
 	 */
-	public ManagedObjectSourceWirer getManagedObjectSourceWirer() {
-		return this.wirer;
-	}
+	ManagedObjectSourceWirer getManagedObjectSourceWirer();
 
 	/**
 	 * Obtains the Object types that the {@link ManagedObjectSource} is to
@@ -99,9 +48,7 @@ public class AutoWireObject extends AutoWireProperties {
 	 * @return Object types that the {@link ManagedObjectSource} is to provide
 	 *         auto-wiring.
 	 */
-	public Class<?>[] getObjectTypes() {
-		return this.objectTypes;
-	}
+	Class<?>[] getObjectTypes();
 
 	/**
 	 * Obtains the time-out for sourcing the {@link ManagedObject} from the
@@ -110,9 +57,7 @@ public class AutoWireObject extends AutoWireProperties {
 	 * @return Time-out for sourcing the {@link ManagedObject} from the
 	 *         {@link ManagedObjectSource}.
 	 */
-	public long getTimeout() {
-		return this.timeout;
-	}
+	long getTimeout();
 
 	/**
 	 * Specifies the time-out for sourcing the {@link ManagedObject} from the
@@ -122,8 +67,6 @@ public class AutoWireObject extends AutoWireProperties {
 	 *            Time-out for sourcing the {@link ManagedObject} from the
 	 *            {@link ManagedObjectSource}.
 	 */
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
+	void setTimeout(long timeout);
 
 }

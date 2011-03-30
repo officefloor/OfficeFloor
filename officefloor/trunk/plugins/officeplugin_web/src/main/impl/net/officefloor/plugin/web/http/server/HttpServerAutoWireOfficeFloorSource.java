@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.autowire.AutoWireObject;
+import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
@@ -43,7 +44,8 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
  * @author Daniel Sagenschneider
  */
 public class HttpServerAutoWireOfficeFloorSource extends
-		WebApplicationAutoWireOfficeFloorSource {
+		WebApplicationAutoWireOfficeFloorSource implements
+		HttpServerAutoWireApplication {
 
 	/**
 	 * {@link HttpSocket} instances.
@@ -70,22 +72,61 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 	/**
 	 * <p>
-	 * Allows overriding the {@link ManagedObjectSource} providing the
-	 * {@link ServerHttpConnection}.
+	 * Uses the configuration of this {@link HttpServerAutoWireApplication} to
+	 * start the input {@link WebAutoWireApplication}.
 	 * <p>
-	 * This may be called multiple times to add listeners on more than one port.
+	 * Please note that the {@link WebAutoWireApplication} is not copied to the
+	 * input {@link WebAutoWireApplication}.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} providing the
-	 *            {@link ServerHttpConnection}.
-	 * @param wirer
-	 *            {@link ManagedObjectSourceWirer}. May be <code>null</code>.
-	 * @return {@link PropertyList} for configuring the
-	 *         {@link ManagedObjectSource}.
-	 * 
-	 * @see #HANDLER_SECTION_NAME
-	 * @see #HANDLER_INPUT_NAME
+	 * @param application
+	 *            {@link WebAutoWireApplication}.
+	 * @return {@link AutoWireOfficeFloor} of the started
+	 *         {@link WebAutoWireApplication}.
+	 * @throws Exception
+	 *             If fails to start the {@link WebAutoWireApplication}.
 	 */
+	public AutoWireOfficeFloor startWebApplication(
+			WebAutoWireApplication application) throws Exception {
+
+		// Configure the web application
+		this.configureWebApplication(application);
+
+		// Return the started web application
+		return application.openOfficeFloor();
+	}
+
+	/**
+	 * Configures the {@link WebAutoWireApplication}.
+	 * 
+	 * @param application
+	 *            {@link WebAutoWireApplication} to configure.
+	 */
+	@SuppressWarnings("unchecked")
+	private void configureWebApplication(WebAutoWireApplication application) {
+
+		// Add the HTTP Socket
+		if (this.httpSockets.size() == 0) {
+			// Add the default HTTP Socket
+			HttpServerSocketManagedObjectSource.autoWire(application, 7878,
+					HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+		} else {
+			// Override the HTTP Socket
+			for (HttpSocket socket : this.httpSockets) {
+				AutoWireObject object = application.addManagedObject(
+						socket.managedObjectSource, socket.wirer,
+						ServerHttpConnection.class);
+				for (Property property : socket.properties) {
+					object.addProperty(property.getName(), property.getValue());
+				}
+			}
+		}
+	}
+
+	/*
+	 * ===================== HttpServerAutoWireApplication ===================
+	 */
+
+	@Override
 	public <D extends Enum<D>, F extends Enum<F>, M extends ManagedObjectSource<D, F>> PropertyList addHttpSocket(
 			Class<M> managedObjectSource, ManagedObjectSourceWirer wirer) {
 
@@ -102,15 +143,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		return properties;
 	}
 
-	/**
-	 * <p>
-	 * Obtains the {@link AutoWireObject} for the {@link HttpSession}.
-	 * <p>
-	 * This allows overriding the default configuration for the
-	 * {@link HttpSessionManagedObjectSource}.
-	 * 
-	 * @return {@link AutoWireObject} for the {@link HttpSession}.
-	 */
+	@Override
 	public AutoWireObject getHttpSessionAutoWireObject() {
 		return this.httpSession;
 	}
@@ -120,29 +153,14 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
-		// Initiate web application
+		// Initiate this web application
 		super.initOfficeFloor(deployer, context);
 
-		// Add the HTTP Socket
-		if (this.httpSockets.size() == 0) {
-			// Add the default HTTP Socket
-			HttpServerSocketManagedObjectSource.autoWire(this, 7878,
-					HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
-		} else {
-			// Override the HTTP Socket
-			for (HttpSocket socket : this.httpSockets) {
-				AutoWireObject object = this.addManagedObject(
-						socket.managedObjectSource, socket.wirer,
-						ServerHttpConnection.class);
-				for (Property property : socket.properties) {
-					object.addProperty(property.getName(), property.getValue());
-				}
-			}
-		}
+		// Configure this web application
+		this.configureWebApplication(this);
 	}
 
 	/**

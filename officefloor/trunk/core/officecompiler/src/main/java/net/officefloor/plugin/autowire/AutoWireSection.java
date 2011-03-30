@@ -15,34 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package net.officefloor.plugin.autowire;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.section.source.SectionSource;
 
 /**
- * MBean for auto-wire {@link OfficeFloor}.
+ * Section for configuring auto-wiring.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireOfficeFloorMBean {
+public interface AutoWireSection extends AutoWireProperties {
 
 	/**
-	 * Invokes the {@link Task} on the {@link OfficeFloor}.
+	 * Obtains the section name.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @throws Exception
-	 *             If fails to invoke the {@link Task}.
+	 * @return Section name.
 	 */
-	void invokeTask(String workName, String taskName) throws Exception;
+	String getSectionName();
 
 	/**
-	 * Closes the {@link OfficeFloor}.
+	 * Obtains the {@link SectionSource} class.
+	 * 
+	 * @return {@link SectionSource} class.
 	 */
-	void closeOfficeFloor();
+	Class<?> getSectionSourceClass();
+
+	/**
+	 * Obtains the section location.
+	 * 
+	 * @return Section location.
+	 */
+	String getSectionLocation();
 
 }

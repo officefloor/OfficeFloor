@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -33,7 +32,7 @@ import net.officefloor.compile.properties.PropertyList;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AutoWireProperties {
+public abstract class AutoWirePropertiesImpl implements AutoWireProperties {
 
 	/**
 	 * {@link System} property to indicating the location of the
@@ -59,52 +58,27 @@ public abstract class AutoWireProperties {
 	 * @param properties
 	 *            {@link PropertyList}.
 	 */
-	public AutoWireProperties(OfficeFloorCompiler compiler,
+	public AutoWirePropertiesImpl(OfficeFloorCompiler compiler,
 			PropertyList properties) {
 		this.compiler = compiler;
 		this.properties = properties;
 	}
 
-	/**
-	 * Obtains the {@link PropertyList}.
-	 * 
-	 * @return {@link PropertyList}.
+	/*
+	 * ======================= AutoWireProperties =========================
 	 */
+
+	@Override
 	public PropertyList getProperties() {
 		return this.properties;
 	}
 
-	/**
-	 * Convenience method to add a {@link Property}.
-	 * 
-	 * @param name
-	 *            {@link Property} name.
-	 * @param value
-	 *            {@link Property} value.
-	 */
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
 
-	/**
-	 * <p>
-	 * Convenience method to add {@link Property} instances from a properties
-	 * file.
-	 * <p>
-	 * The location of the properties file is determined based on the system
-	 * property {@link #ENVIRONMENT_PROPERTIES_DIRECTORY}:
-	 * <ol>
-	 * <li>Not specified then the properties file is found on the class path.</li>
-	 * <li>If specified, then the properties file is found within the directory
-	 * specified by the system property. This allows specifying different
-	 * properties files for different environments.</li>
-	 * </ol>
-	 * 
-	 * @param propertiesFilePath
-	 *            Path to the properties file.
-	 * @throws IOException
-	 *             If fails to load the properties.
-	 */
+	@Override
 	public void loadProperties(String propertiesFilePath) throws IOException {
 
 		// Obtain the environment directory

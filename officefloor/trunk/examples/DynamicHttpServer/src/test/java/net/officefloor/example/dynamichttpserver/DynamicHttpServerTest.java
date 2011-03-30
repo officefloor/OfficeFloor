@@ -18,7 +18,7 @@
 package net.officefloor.example.dynamichttpserver;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
+import net.officefloor.plugin.autowire.AutoWireAdministration;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,7 +52,7 @@ public class DynamicHttpServerTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		AutoWireOfficeFloor.closeAllOfficeFloors();
+		AutoWireAdministration.closeAllOfficeFloors();
 	}
 
 }

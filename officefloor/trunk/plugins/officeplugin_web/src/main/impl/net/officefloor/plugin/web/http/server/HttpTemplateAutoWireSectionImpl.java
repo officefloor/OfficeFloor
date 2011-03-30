@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.server;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.autowire.AutoWireSectionImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -27,7 +28,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateAutoWireSection extends AutoWireSection {
+public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
+		implements HttpTemplateAutoWireSection {
 
 	/**
 	 * Logic class for the template.
@@ -53,7 +55,7 @@ public class HttpTemplateAutoWireSection extends AutoWireSection {
 	 *            URI to the template. May be <code>null</code> if not publicly
 	 *            exposed template.
 	 */
-	public HttpTemplateAutoWireSection(OfficeFloorCompiler compiler,
+	public HttpTemplateAutoWireSectionImpl(OfficeFloorCompiler compiler,
 			AutoWireSection section, Class<?> templateLogicClass,
 			String templateUri) {
 		super(compiler, section);
@@ -61,31 +63,21 @@ public class HttpTemplateAutoWireSection extends AutoWireSection {
 		this.templateUri = templateUri;
 	}
 
-	/**
-	 * Obtains path to the template file.
-	 * 
-	 * @return Path to the template file.
+	/*
+	 * ====================== HttpTemplateAutoWireSection =====================
 	 */
+
+	@Override
 	public String getTemplatePath() {
 		return this.getSectionLocation();
 	}
 
-	/**
-	 * Obtains the logic class for the template.
-	 * 
-	 * @return Logic class for the template.
-	 */
+	@Override
 	public Class<?> getTemplateLogicClass() {
 		return this.templateLogicClass;
 	}
 
-	/**
-	 * Obtains the URI to the template. May be <code>null</code> if not publicly
-	 * exposed template.
-	 * 
-	 * @return URI to the template. May be <code>null</code> if not publicly
-	 *         exposed template.
-	 */
+	@Override
 	public String getTemplateUri() {
 		return this.templateUri;
 	}
