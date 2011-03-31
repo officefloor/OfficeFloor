@@ -90,6 +90,13 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	void linkUri(String uri, AutoWireSection section, String inputName);
 
 	/**
+	 * Obtains the registered URIs.
+	 * 
+	 * @return Registered URIs.
+	 */
+	String[] getURIs();
+
+	/**
 	 * Links the {@link OfficeSectionOutput} to render the {@link HttpTemplate}.
 	 * 
 	 * @param section
@@ -101,6 +108,22 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 */
 	void linkToHttpTemplate(AutoWireSection section, String outputName,
 			HttpTemplateAutoWireSection template);
+
+	/**
+	 * <p>
+	 * Links to a resource.
+	 * <p>
+	 * The meaning of resource path is specific to implementation.
+	 * 
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param outputName
+	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param resourcePath
+	 *            Resource path.
+	 */
+	void linkToResource(AutoWireSection section, String outputName,
+			String resourcePath);
 
 	/**
 	 * Links {@link OfficeSectionOutput} to sending the {@link HttpResponse}.
@@ -122,12 +145,5 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Name of the {@link OfficeSectionInput}.
 	 */
 	void setNonHandledServicer(AutoWireSection section, String inputName);
-
-	/**
-	 * Obtains the registered URIs.
-	 * 
-	 * @return Registered URIs.
-	 */
-	String[] getURIs();
 
 }

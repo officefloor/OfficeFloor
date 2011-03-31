@@ -50,6 +50,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	private final List<UriLink> uriLinks = new LinkedList<UriLink>();
 
 	/**
+	 * {@link ResourceLink} instances.
+	 */
+	private final List<ResourceLink> resourceLinks = new LinkedList<ResourceLink>();
+
+	/**
 	 * {@link SendLink} instances.
 	 */
 	private final List<SendLink> sendLinks = new LinkedList<SendLink>();
@@ -124,6 +129,13 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
+	public void linkToResource(AutoWireSection section, String outputName,
+			String resourcePath) {
+		this.resourceLinks.add(new ResourceLink(section, outputName,
+				resourcePath));
+	}
+
+	@Override
 	public void linkToSendResponse(AutoWireSection section, String outputName) {
 		this.sendLinks.add(new SendLink(section, outputName));
 	}
@@ -161,6 +173,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
+		final String CLASS_PATH_PREFIX = "PUBLIC";
+
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
 				WebApplicationSectionSource.class, null);
@@ -182,7 +196,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					nonHandledServicer,
 					context,
 					ClasspathHttpFileSenderWorkSource.PROPERTY_CLASSPATH_PREFIX,
-					"PUBLIC");
+					CLASS_PATH_PREFIX);
 			this.addProperty(
 					nonHandledServicer,
 					context,
@@ -216,6 +230,24 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				// Not linked, so link to sending HTTP response
 				this.linkToSendResponse(section,
 						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
+			}
+		}
+
+		// Link to resources
+		if (this.resourceLinks.size() > 0) {
+
+			// Create section to send resources
+			AutoWireSection section = this.addSection("RESOURCES",
+					HttpFileSectionSource.class, CLASS_PATH_PREFIX);
+
+			// Link section outputs to the resources
+			for (ResourceLink resourceLink : this.resourceLinks) {
+				this.link(resourceLink.section, resourceLink.outputName,
+						section, resourceLink.resourcePath);
+				section.addProperty(
+						HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX
+								+ resourceLink.resourcePath,
+						resourceLink.resourcePath);
 			}
 		}
 
@@ -279,6 +311,44 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			this.uri = uri;
 			this.section = section;
 			this.inputName = inputName;
+		}
+	}
+
+	/**
+	 * Resource link.
+	 */
+	private static class ResourceLink {
+
+		/**
+		 * {@link AutoWireSection}.
+		 */
+		public final AutoWireSection section;
+
+		/**
+		 * Name of the {@link SectionOutput}.
+		 */
+		public final String outputName;
+
+		/**
+		 * Resource path.
+		 */
+		public final String resourcePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param section
+		 *            {@link AutoWireSection}.
+		 * @param outputName
+		 *            Name of the {@link SectionOutput}.
+		 * @param resourcePath
+		 *            Resource path.
+		 */
+		public ResourceLink(AutoWireSection section, String outputName,
+				String resourcePath) {
+			this.section = section;
+			this.outputName = outputName;
+			this.resourcePath = resourcePath;
 		}
 	}
 

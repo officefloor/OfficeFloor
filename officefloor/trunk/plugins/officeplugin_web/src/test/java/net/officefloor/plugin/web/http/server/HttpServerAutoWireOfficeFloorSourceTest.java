@@ -60,7 +60,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	/**
 	 * {@link HttpServerAutoWireOfficeFloorSource} to test.
 	 */
-	private final HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
+	private final HttpServerAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
 
 	/**
 	 * {@link HttpClient}.
@@ -300,6 +300,23 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to link to resource.
+	 */
+	public void testLinkToResource() throws Exception {
+
+		// Add linking to resource
+		AutoWireSection section = this.source.addSection("SECTION",
+				ClassSectionSource.class, MockLinkResource.class.getName());
+		this.source.linkUri("test", section, "service");
+		this.source.linkToResource(section, "resource", "resource.html");
+		this.source.openOfficeFloor();
+
+		// Ensure link to the HTTP template
+		this.assertHttpRequest("http://localhost:7878/test", 200,
+				"LINK to RESOURCE");
+	}
+
+	/**
 	 * Ensure able to utilise the {@link HttpSession}.
 	 */
 	public void testHttpSession() throws Exception {
@@ -522,6 +539,17 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public static class MockLinkHttpTemplate {
 		@NextTask("http-template")
+		public void service(ServerHttpConnection connection) throws IOException {
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
+					connection);
+		}
+	}
+
+	/**
+	 * Provides mock functionality to link to a resource.
+	 */
+	public static class MockLinkResource {
+		@NextTask("resource")
 		public void service(ServerHttpConnection connection) throws IOException {
 			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
 					connection);
