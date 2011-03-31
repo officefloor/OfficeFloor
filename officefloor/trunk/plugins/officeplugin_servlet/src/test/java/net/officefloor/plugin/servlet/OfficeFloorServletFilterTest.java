@@ -376,7 +376,7 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 
 			// Link to Servlet resource
 			this.linkUri("servlet-resource", section, "doServletResource");
-			this.linkToServletResource(section, "resource", "Template.jsp");
+			this.linkToResource(section, "resource", "Template.jsp");
 
 			// Enable access to EJB of filter
 			AutoWireSection ejb = this.addSection("EJB",

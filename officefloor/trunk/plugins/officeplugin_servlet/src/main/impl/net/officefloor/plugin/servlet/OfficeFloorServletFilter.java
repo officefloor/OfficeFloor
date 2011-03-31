@@ -47,6 +47,7 @@ import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHtt
 import net.officefloor.plugin.servlet.web.http.session.ServletHttpSessionManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.server.WebApplicationAutoWireOfficeFloorSource;
+import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
@@ -55,7 +56,8 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * @author Daniel Sagenschneider
  */
 public abstract class OfficeFloorServletFilter extends
-		WebApplicationAutoWireOfficeFloorSource implements Filter {
+		WebApplicationAutoWireOfficeFloorSource implements Filter,
+		WebAutoWireApplication {
 
 	/**
 	 * {@link FilterConfig}.
@@ -93,27 +95,23 @@ public abstract class OfficeFloorServletFilter extends
 	}
 
 	/**
-	 * Links {@link OfficeSectionOutput} to a {@link Servlet} container
-	 * resource.
-	 * 
-	 * @param section
-	 *            {@link AutoWireSection}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
-	 * @param requestDispatcherPath
-	 *            Path for the {@link RequestDispatcher}.
-	 */
-	public void linkToServletResource(AutoWireSection section,
-			String outputName, String requestDispatcherPath) {
-		this.servletResourceLinks.add(new ServletResourceLink(section,
-				outputName, requestDispatcherPath));
-	}
-
-	/**
 	 * Provides configuration of this as a
 	 * {@link WebApplicationAutoWireOfficeFloorSource}.
 	 */
 	protected abstract void configure();
+
+	/*
+	 * ======================= WebAutoWireApplication =====================
+	 */
+
+	@Override
+	public void linkToResource(AutoWireSection section, String outputName,
+			String requestDispatcherPath) {
+
+		// Override to use Servlet Container resource
+		this.servletResourceLinks.add(new ServletResourceLink(section,
+				outputName, requestDispatcherPath));
+	}
 
 	/*
 	 * ===================== Filter =========================
