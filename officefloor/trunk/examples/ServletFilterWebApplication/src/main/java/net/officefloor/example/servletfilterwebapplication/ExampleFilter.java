@@ -39,7 +39,7 @@ public class ExampleFilter extends OfficeFloorServletFilter {
 				"template");
 
 		// Configure rendering of link response by JSP
-		this.linkToServletResource(template, "LINK", "/Template.jsp");
+		this.linkToResource(template, "LINK", "/Template.jsp");
 
 		// Configure class
 		AutoWireSection section = this.addSection("class",
