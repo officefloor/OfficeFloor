@@ -17,14 +17,28 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
+import net.officefloor.model.woof.WoofResourceModel;
+import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
+import net.officefloor.model.woof.WoofSectionOutputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.model.woof.WoofTemplateOutputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.web.http.server.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
 
 /**
@@ -83,9 +97,11 @@ public class WoofLoaderImpl implements WoofLoader {
 		WoofModel woof = this.repository.retrieveWoOF(configuration);
 
 		// Configure the HTTP templates
+		Map<String, HttpTemplateAutoWireSection> templates = new HashMap<String, HttpTemplateAutoWireSection>();
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
 
 			// Obtain template details
+			String templateName = templateModel.getWoofTemplateName();
 			String templatePath = templateModel.getTemplatePath();
 			String templateClassName = templateModel.getTemplateClassName();
 			String uri = templateModel.getUri();
@@ -95,10 +111,16 @@ public class WoofLoaderImpl implements WoofLoader {
 					.loadClass(templateClassName);
 
 			// Configure the template
-			application.addHttpTemplate(templatePath, templateLogicClass, uri);
+			HttpTemplateAutoWireSection template = application.addHttpTemplate(
+					templatePath, templateLogicClass, uri);
+
+			// Maintain reference to template by name
+			templates.put(templateName, template);
 		}
 
 		// Configure the sections
+		Map<String, AutoWireSection> sections = new HashMap<String, AutoWireSection>();
+		Map<WoofSectionInputModel, WoofSectionModel> inputToSection = new HashMap<WoofSectionInputModel, WoofSectionModel>();
 		for (WoofSectionModel sectionModel : woof.getWoofSections()) {
 
 			// Obtain the section details
@@ -117,7 +139,147 @@ public class WoofLoaderImpl implements WoofLoader {
 			for (PropertyModel property : sectionModel.getProperties()) {
 				section.addProperty(property.getName(), property.getValue());
 			}
+
+			// Maintain reference to section by name
+			sections.put(sectionName, section);
+
+			// Maintain references from inputs to section
+			for (WoofSectionInputModel inputModel : sectionModel.getInputs()) {
+				inputToSection.put(inputModel, sectionModel);
+			}
 		}
+
+		// Link the template outputs
+		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
+
+			// Obtain the auto-wire template
+			String templateName = templateModel.getWoofTemplateName();
+			HttpTemplateAutoWireSection template = templates.get(templateName);
+
+			// Link outputs for the template
+			for (WoofTemplateOutputModel outputModel : templateModel
+					.getOutputs()) {
+
+				// Obtain output name
+				String outputName = outputModel.getWoofTemplateOutputName();
+
+				// Link potential section input
+				WoofTemplateOutputToWoofSectionInputModel sectionLink = outputModel
+						.getWoofSectionInput();
+				if (sectionLink != null) {
+					WoofSectionInputModel sectionInput = sectionLink
+							.getWoofSectionInput();
+					if (sectionInput != null) {
+
+						// Obtain target input name
+						String targetInputName = sectionInput
+								.getWoofSectionInputName();
+
+						// Obtain the target section
+						WoofSectionModel sectionModel = inputToSection
+								.get(sectionInput);
+						AutoWireSection targetSection = sections
+								.get(sectionModel.getWoofSectionName());
+
+						// Link template output to section input
+						application.link(template, outputName, targetSection,
+								targetInputName);
+					}
+				}
+
+				// Link potential template
+				WoofTemplateOutputToWoofTemplateModel templateLink = outputModel
+						.getWoofTemplate();
+				if (templateLink != null) {
+					WoofTemplateModel targetTemplateModel = templateLink
+							.getWoofTemplate();
+					if (targetTemplateModel != null) {
+						HttpTemplateAutoWireSection targetTemplate = templates
+								.get(targetTemplateModel.getWoofTemplateName());
+						application.linkToHttpTemplate(template, outputName,
+								targetTemplate);
+					}
+				}
+
+				// Link potential resource
+				WoofTemplateOutputToWoofResourceModel resourceLink = outputModel
+						.getWoofResource();
+				if (resourceLink != null) {
+					WoofResourceModel resourceModel = resourceLink
+							.getWoofResource();
+					if (resourceModel != null) {
+						application.linkToResource(template, outputName,
+								resourceModel.getResourcePath());
+					}
+				}
+			}
+		}
+
+		// Link the section outputs
+		for (WoofSectionModel sectionModel : woof.getWoofSections()) {
+
+			// Obtain the auto-wire section
+			String sectionName = sectionModel.getWoofSectionName();
+			AutoWireSection section = sections.get(sectionName);
+
+			// Link outputs for the section
+			for (WoofSectionOutputModel outputModel : sectionModel.getOutputs()) {
+
+				// Obtain output name
+				String outputName = outputModel.getWoofSectionOutputName();
+
+				// Link potential section input
+				WoofSectionOutputToWoofSectionInputModel sectionLink = outputModel
+						.getWoofSectionInput();
+				if (sectionLink != null) {
+					WoofSectionInputModel sectionInput = sectionLink
+							.getWoofSectionInput();
+					if (sectionInput != null) {
+
+						// Obtain target input name
+						String targetInputName = sectionInput
+								.getWoofSectionInputName();
+
+						// Obtain the target section
+						WoofSectionModel targetSectionModel = inputToSection
+								.get(sectionInput);
+						AutoWireSection targetSection = sections
+								.get(targetSectionModel.getWoofSectionName());
+
+						// Link section output to section input
+						application.link(section, outputName, targetSection,
+								targetInputName);
+					}
+				}
+
+				// Link potential template
+				WoofSectionOutputToWoofTemplateModel templateLink = outputModel
+						.getWoofTemplate();
+				if (templateLink != null) {
+					WoofTemplateModel targetTemplateModel = templateLink
+							.getWoofTemplate();
+					if (targetTemplateModel != null) {
+						HttpTemplateAutoWireSection targetTemplate = templates
+								.get(targetTemplateModel.getWoofTemplateName());
+						application.linkToHttpTemplate(section, outputName,
+								targetTemplate);
+					}
+				}
+
+				// Link potential resource
+				WoofSectionOutputToWoofResourceModel resourceLink = outputModel
+						.getWoofResource();
+				if (resourceLink != null) {
+					WoofResourceModel resourceModel = resourceLink
+							.getWoofResource();
+					if (resourceModel != null) {
+						application.linkToResource(section, outputName,
+								resourceModel.getResourcePath());
+					}
+				}
+			}
+		}
+
 	}
 
 }
