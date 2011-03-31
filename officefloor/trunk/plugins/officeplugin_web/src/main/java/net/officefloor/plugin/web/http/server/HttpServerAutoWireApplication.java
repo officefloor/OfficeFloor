@@ -30,7 +30,7 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpServerAutoWireApplication {
+public interface HttpServerAutoWireApplication extends WebAutoWireApplication {
 
 	/**
 	 * <p>
