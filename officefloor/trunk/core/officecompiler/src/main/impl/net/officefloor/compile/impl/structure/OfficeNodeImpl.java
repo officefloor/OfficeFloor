@@ -19,6 +19,8 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,6 +37,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -43,6 +46,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
@@ -53,6 +57,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -73,6 +78,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -141,6 +147,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * name.
 	 */
 	private final Map<String, AdministratorNode> administrators = new HashMap<String, AdministratorNode>();
+
+	/**
+	 * {@link EscalationNode} instances by their {@link OfficeEscalation} type.
+	 */
+	private final Map<String, EscalationNode> escalations = new HashMap<String, EscalationNode>();
 
 	/**
 	 * Flag indicating if in the {@link OfficeFloor} context.
@@ -296,8 +307,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must have property
 
 		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue("Failure obtaining configuration '"
-					+ ex.getLocation() + "'", ex.getCause());
+			this.addIssue(
+					"Failure obtaining configuration '" + ex.getLocation()
+							+ "'", ex.getCause());
 			return false; // must not fail in getting configurations
 
 		} catch (LoadTypeError ex) {
@@ -306,10 +318,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source "
-					+ OfficeType.class.getSimpleName() + " definition from "
-					+ OfficeSource.class.getSimpleName() + " "
-					+ officeSource.getClass().getName(), ex);
+			this.addIssue(
+					"Failed to source " + OfficeType.class.getSimpleName()
+							+ " definition from "
+							+ OfficeSource.class.getSimpleName() + " "
+							+ officeSource.getClass().getName(), ex);
 			return false; // must be successful
 		}
 
@@ -361,8 +374,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Obtain the office source
 		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
 				OfficeSource.class, LocationType.OFFICE, this.officeLocation,
-				AssetType.OFFICE, this.officeName, this.context
-						.getCompilerIssues());
+				AssetType.OFFICE, this.officeName,
+				this.context.getCompilerIssues());
 		if (officeSource == null) {
 			return; // must have office source
 		}
@@ -450,8 +463,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Build the sections of the office (in deterministic order)
-		SectionNode[] sections = CompileUtil.toSortedArray(this.sections
-				.values(), new SectionNode[0],
+		SectionNode[] sections = CompileUtil.toSortedArray(
+				this.sections.values(), new SectionNode[0],
 				new StringExtractor<SectionNode>() {
 					@Override
 					public String toString(SectionNode section) {
@@ -473,6 +486,67 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				});
 		for (AdministratorNode admin : admins) {
 			admin.buildAdministrator(officeBuilder);
+		}
+
+		// Build the list of escalations of the office
+		List<EscalationStruct> escalationStructs = new LinkedList<OfficeNodeImpl.EscalationStruct>();
+		for (EscalationNode node : this.escalations.values()) {
+			// Obtain the escalation type
+			String escalationTypeName = node.getOfficeEscalationType();
+			Class<? extends Throwable> type = CompileUtil.obtainClass(
+					escalationTypeName, Throwable.class, null,
+					this.context.getClassLoader(), LocationType.OFFICE,
+					this.officeLocation, null, null,
+					this.context.getCompilerIssues());
+			if (type == null) {
+				// Failed to obtain escalation type
+				this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+						this.officeLocation, null, null,
+						"Unknown escalation type " + escalationTypeName);
+				continue; // ignore this escalation
+			}
+
+			// Add the escalation struct
+			escalationStructs.add(new EscalationStruct(type, node));
+		}
+
+		// Order by more specific escalation first. Allows finer handling first.
+		Collections.sort(escalationStructs, new Comparator<EscalationStruct>() {
+			@Override
+			public int compare(EscalationStruct a, EscalationStruct b) {
+
+				// Compare based on type
+				if (a.type != b.type) {
+					if (a.type.isAssignableFrom(b.type)) {
+						return 1; // a is super type
+					} else if (b.type.isAssignableFrom(a.type)) {
+						return -1; // b is super type
+					}
+				}
+
+				// Either same type or no inheritance relationship.
+				// Therefore sort alphabetically to have ordering.
+				return String.CASE_INSENSITIVE_ORDER.compare(a.type.getName(),
+						b.type.getName());
+			}
+		});
+
+		// Build the escalation handling for the office (in deterministic order)
+		for (EscalationStruct escalation : escalationStructs) {
+
+			// Obtain the target task
+			TaskNode task = LinkUtil.findTarget(escalation.node,
+					TaskNode.class, "Escalation " + escalation.type.getName(),
+					LocationType.OFFICE, this.officeLocation, null, null,
+					this.context.getCompilerIssues());
+			if (task == null) {
+				continue; // task not linked
+			}
+
+			// Build the escalation handling
+			String workName = task.getWorkNode().getQualifiedWorkName();
+			String taskName = task.getOfficeTaskName();
+			officeBuilder.addEscalation(escalation.type, workName, taskName);
 		}
 
 		// Return the office builder
@@ -621,6 +695,22 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeEscalation addOfficeEscalation(String escalationTypeName) {
+		// Obtain and return the escalation for type
+		EscalationNode escalation = this.escalations.get(escalationTypeName);
+		if (escalation == null) {
+			// Add the escalation
+			escalation = new EscalationNodeImpl(escalationTypeName,
+					this.officeLocation, this.context);
+			this.escalations.put(escalationTypeName, escalation);
+		} else {
+			// Escalation already added
+			this.addIssue("Escalation " + escalationTypeName + " already added");
+		}
+		return escalation;
+	}
+
+	@Override
 	public void link(OfficeSectionObject sectionObject,
 			OfficeManagedObject managedObject) {
 		this.linkObject(sectionObject, managedObject);
@@ -652,6 +742,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void link(OfficeSectionOutput output, OfficeSectionInput input) {
 		this.linkFlow(output, input);
+	}
+
+	@Override
+	public void link(OfficeEscalation escalation, OfficeSectionInput input) {
+		this.linkFlow(escalation, input);
 	}
 
 	@Override
@@ -847,6 +942,39 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		public TeamStruct(OfficeTeamNode team, boolean isAdded) {
 			this.team = team;
 			this.isAdded = isAdded;
+		}
+	}
+
+	/**
+	 * Structure containing details of the {@link EscalationNode}.
+	 * 
+	 * 
+	 * @author Daniel Sagenschneider
+	 */
+	private class EscalationStruct {
+
+		/**
+		 * Type of {@link Escalation}.
+		 */
+		public final Class<? extends Throwable> type;
+
+		/**
+		 * {@link EscalationNode}.
+		 */
+		public final EscalationNode node;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param type
+		 *            Type of {@link Escalation}.
+		 * @param node
+		 *            {@link EscalationNode}.
+		 */
+		public EscalationStruct(Class<? extends Throwable> type,
+				EscalationNode node) {
+			this.type = type;
+			this.node = node;
 		}
 	}
 

@@ -41,10 +41,12 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -325,6 +327,22 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 						administratorSourceClass, propertyNameValues);
 		builder.setTeam(officeTeamName);
 		return builder;
+	}
+
+	/**
+	 * Records registering the {@link EscalationProcedure}.
+	 * 
+	 * @param typeOfCause
+	 *            Type of cause handled by {@link EscalationProcedure}.
+	 * @param workName
+	 *            Name of {@link Work} to handle {@link Escalation}.
+	 * @param taskName
+	 *            Name of {@link Task} within {@link Work} to handle
+	 *            {@link Escalation}.
+	 */
+	protected <E extends Throwable> void record_officeBuilder_addEscalation(
+			Class<E> typeOfCause, String workName, String taskName) {
+		this.officeBuilder.addEscalation(typeOfCause, workName, taskName);
 	}
 
 	/**
