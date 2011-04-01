@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -125,13 +126,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testGetOfficeFloorManagedObject() {
 		// Add two different managed objects verifying details
 		this.replayMockObjects();
-		OfficeObject mo = this.node.addOfficeObject("MO", Connection.class
-				.getName());
+		OfficeObject mo = this.node.addOfficeObject("MO",
+				Connection.class.getName());
 		assertNotNull("Must have managed object", mo);
-		assertEquals("Incorrect managed object name", "MO", mo
-				.getOfficeObjectName());
-		assertNotSame("Should obtain another managed object", mo, this.node
-				.addOfficeObject("ANOTHER", String.class.getName()));
+		assertEquals("Incorrect managed object name", "MO",
+				mo.getOfficeObjectName());
+		assertNotSame("Should obtain another managed object", mo,
+				this.node.addOfficeObject("ANOTHER", String.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -145,10 +146,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object twice
 		this.replayMockObjects();
-		OfficeObject moFirst = this.node.addOfficeObject("MO", Connection.class
-				.getName());
-		OfficeObject moSecond = this.node.addOfficeObject("MO", String.class
-				.getName());
+		OfficeObject moFirst = this.node.addOfficeObject("MO",
+				Connection.class.getName());
+		OfficeObject moSecond = this.node.addOfficeObject("MO",
+				String.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the managed object
@@ -165,8 +166,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeTeam team = this.node.addOfficeTeam("TEAM");
 		assertNotNull("Must have team", team);
 		assertEquals("Incorrect team name", "TEAM", team.getOfficeTeamName());
-		assertNotSame("Should obtain another team", team, this.node
-				.addOfficeTeam("ANOTHER"));
+		assertNotSame("Should obtain another team", team,
+				this.node.addOfficeTeam("ANOTHER"));
 		this.verifyMockObjects();
 	}
 
@@ -197,10 +198,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		assertNotNull("Must have section", section);
-		assertEquals("Incorrect section name", "SECTION", section
-				.getOfficeSectionName());
-		assertNotSame("Should obtain another section", section, this
-				.addSection(this.node, "ANOTHER", null));
+		assertEquals("Incorrect section name", "SECTION",
+				section.getOfficeSectionName());
+		assertNotSame("Should obtain another section", section,
+				this.addSection(this.node, "ANOTHER", null));
 		this.verifyMockObjects();
 	}
 
@@ -234,10 +235,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO", null);
 		assertNotNull("Must have managed object", moSource);
-		assertEquals("Incorrect managed object name", "MO", moSource
-				.getOfficeManagedObjectSourceName());
-		assertNotSame("Should obtain another managed object", moSource, this
-				.addManagedObjectSource(this.node, "ANOTHER", null));
+		assertEquals("Incorrect managed object name", "MO",
+				moSource.getOfficeManagedObjectSourceName());
+		assertNotSame("Should obtain another managed object", moSource,
+				this.addManagedObjectSource(this.node, "ANOTHER", null));
 		this.verifyMockObjects();
 	}
 
@@ -275,10 +276,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.PROCESS);
 		assertNotNull("Must have managed object", mo);
-		assertEquals("Incorrect managed object name", "MO", mo
-				.getOfficeManagedObjectName());
-		assertNotSame("Should obtain another managed object", mo, moSource
-				.addOfficeManagedObject("ANOTHER", ManagedObjectScope.PROCESS));
+		assertEquals("Incorrect managed object name", "MO",
+				mo.getOfficeManagedObjectName());
+		assertNotSame("Should obtain another managed object", mo,
+				moSource.addOfficeManagedObject("ANOTHER",
+						ManagedObjectScope.PROCESS));
 		this.verifyMockObjects();
 	}
 
@@ -338,6 +340,43 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Tests adding an {@link OfficeEscalation}.
+	 */
+	public void testAddOfficeEscalation() {
+		// Add two different escalations verifying details
+		this.replayMockObjects();
+		OfficeEscalation escalation = this.node
+				.addOfficeEscalation("java.sql.SQLException");
+		assertNotNull("Must have escalation", escalation);
+		assertEquals("Incorrect escalation type", "java.sql.SQLException",
+				escalation.getOfficeEscalationType());
+		assertNotSame("Should obtain another escalation", escalation,
+				this.node.addOfficeEscalation("java.io.IOException"));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add the {@link OfficeEscalation} twice.
+	 */
+	public void testAddOfficeEscalationTwice() {
+
+		// Record issue in adding the escalation twice
+		this.record_issue("Escalation java.sql.SQLException already added");
+
+		// Add the escalation twice
+		this.replayMockObjects();
+		OfficeEscalation escalationFirst = this.node
+				.addOfficeEscalation("java.sql.SQLException");
+		OfficeEscalation escalationSecond = this.node
+				.addOfficeEscalation("java.sql.SQLException");
+		this.verifyMockObjects();
+
+		// Should be the same escalation
+		assertEquals("Should be same escalation on adding twice",
+				escalationFirst, escalationSecond);
+	}
+
+	/**
 	 * Tests adding an {@link OfficeAdministrator}.
 	 */
 	public void testAddOfficeAdministrator() {
@@ -346,10 +385,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeAdministrator admin = this.addAdministrator(this.node, "ADMIN",
 				null);
 		assertNotNull("Must have administrator", admin);
-		assertEquals("Incorrect administrator name", "ADMIN", admin
-				.getOfficeAdministratorName());
-		assertNotSame("Should obtain another administrator", admin, this
-				.addAdministrator(this.node, "ANOTHER", null));
+		assertEquals("Incorrect administrator name", "ADMIN",
+				admin.getOfficeAdministratorName());
+		assertNotSame("Should obtain another administrator", admin,
+				this.addAdministrator(this.node, "ANOTHER", null));
 		this.verifyMockObjects();
 	}
 
@@ -397,8 +436,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								taskFactory, null);
 					}
 				});
-		assertEquals("Incorrect number of section tasks", 1, section
-				.getOfficeTasks().length);
+		assertEquals("Incorrect number of section tasks", 1,
+				section.getOfficeTasks().length);
 		OfficeTask task = section.getOfficeTasks()[0];
 		assertEquals("Incorrect office task", "TASK", task.getOfficeTaskName());
 
@@ -577,8 +616,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
 				"ADMINISTRATOR", null);
-		OfficeObject mo = this.node.addOfficeObject("MO", Connection.class
-				.getName());
+		OfficeObject mo = this.node.addOfficeObject("MO",
+				Connection.class.getName());
 		administrator.administerManagedObject(mo);
 		// TODO test that administering the section managed object
 
@@ -595,8 +634,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionObjectToOfficeManagedObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Office section object SECTION_OBJECT linked more than once");
+		this.record_issue("Office section object SECTION_OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -609,8 +647,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								Connection.class.getName());
 					}
 				});
-		assertEquals("Incorrect number of section objects", 1, section
-				.getOfficeSectionObjects().length);
+		assertEquals("Incorrect number of section objects", 1,
+				section.getOfficeSectionObjects().length);
 		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
 		assertEquals("Incorrect section object", "SECTION_OBJECT",
 				sectionObject.getOfficeSectionObjectName());
@@ -638,8 +676,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionObjectToOfficeObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Office section object SECTION_OBJECT linked more than once");
+		this.record_issue("Office section object SECTION_OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -655,8 +692,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
 
 		// Link
-		OfficeObject mo = this.node.addOfficeObject("MO", Connection.class
-				.getName());
+		OfficeObject mo = this.node.addOfficeObject("MO",
+				Connection.class.getName());
 		this.node.link(sectionObject, mo);
 		assertObjectLink("section object -> office floor managed object",
 				sectionObject, mo);
@@ -680,8 +717,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Record not linked on first attempt to retrieve dependent
-		this
-				.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
+		this.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
 
 		this.replayMockObjects();
 
@@ -705,8 +741,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Obtain the object dependency and ensure not linked at this stage
 		ObjectDependency dependency = section.getOfficeTasks()[0]
 				.getObjectDependencies()[0];
-		assertEquals("Incorrect dependency", "OBJECT", dependency
-				.getObjectDependencyName());
+		assertEquals("Incorrect dependency", "OBJECT",
+				dependency.getObjectDependencyName());
 		DependentManagedObject dependent = dependency
 				.getDependentManagedObject();
 		assertNull("Should not yet be linked to a managed object", dependent);
@@ -719,8 +755,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.node.link(sectionObject, mo);
 
 		// Ensure task object linked to office managed object
-		assertEquals("Incorrect linked managed object", mo, dependency
-				.getDependentManagedObject());
+		assertEquals("Incorrect linked managed object", mo,
+				dependency.getDependentManagedObject());
 
 		this.verifyMockObjects();
 	}
@@ -736,8 +772,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Record not linked on first attempt to retrieve dependent
-		this
-				.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
+		this.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
 
 		this.replayMockObjects();
 
@@ -761,19 +796,19 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Obtain the object dependency and ensure not linked at this stage
 		ObjectDependency dependency = section.getOfficeTasks()[0]
 				.getObjectDependencies()[0];
-		assertEquals("Incorrect dependency", "OBJECT", dependency
-				.getObjectDependencyName());
-		assertNull("Should not yet be linked to managed object", dependency
-				.getDependentManagedObject());
+		assertEquals("Incorrect dependency", "OBJECT",
+				dependency.getObjectDependencyName());
+		assertNull("Should not yet be linked to managed object",
+				dependency.getDependentManagedObject());
 
 		// Link section object to an office floor managed object
-		OfficeObject mo = this.node.addOfficeObject("MO", Connection.class
-				.getName());
+		OfficeObject mo = this.node.addOfficeObject("MO",
+				Connection.class.getName());
 		this.node.link(sectionObject, mo);
 
 		// Ensure task object linked to office floor managed object
-		assertEquals("Incorrect linked managed object", mo, dependency
-				.getDependentManagedObject());
+		assertEquals("Incorrect linked managed object", mo,
+				dependency.getDependentManagedObject());
 
 		this.verifyMockObjects();
 	}
@@ -874,8 +909,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeManagedObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -909,8 +943,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -929,8 +962,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(dependency, this.node.addOfficeObject("ANOTHER",
-				String.class.getName()));
+		this.node.link(dependency,
+				this.node.addOfficeObject("ANOTHER", String.class.getName()));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
@@ -943,8 +976,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToOfficeManagedObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -977,8 +1009,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToOfficeObject() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1009,8 +1040,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToOfficeSectionInput() {
 
 		// Record already being linked
-		this
-				.record_issue("Managed object source flow FLOW linked more than once");
+		this.record_issue("Managed object source flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -1052,8 +1082,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionOutputToOfficeSectionInput() {
 
 		// Record already being linked
-		this
-				.record_issue("Office section output SECTION_OUTPUT linked more than once");
+		this.record_issue("Office section output SECTION_OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1095,6 +1124,50 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Ensure only can link once
 		this.node.link(sectionOutput, inputSection.getOfficeSectionInputs()[0]); // ordered
 		assertFlowLink("Can only link once", sectionOutput, sectionInput);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link OfficeEscalation} to the
+	 * {@link OfficeSectionInput}.
+	 */
+	public void testLinkOfficeEscalationToOfficeSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Office escalation java.sql.SQLException linked more than once");
+
+		this.replayMockObjects();
+
+		// Add escalation
+		OfficeEscalation escalation = this.node
+				.addOfficeEscalation("java.sql.SQLException");
+		assertEquals("Incorrect office escalation", "java.sql.SQLException",
+				escalation.getOfficeEscalationType());
+
+		// Add section with section inputs
+		OfficeSection inputSection = this.addSection(this.node,
+				"INPUT_SECTION", new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionInput("SECTION_INPUT",
+								Object.class.getName());
+						context.getBuilder().addSectionInput("ANOTHER",
+								String.class.getName());
+					}
+				});
+		// Should be ordered (so will be second input)
+		OfficeSectionInput sectionInput = inputSection.getOfficeSectionInputs()[1];
+		assertEquals("Incorrect office section input", "SECTION_INPUT",
+				sectionInput.getOfficeSectionInputName());
+
+		// Link
+		this.node.link(escalation, sectionInput);
+		assertFlowLink("escalation -> section input", escalation, sectionInput);
+
+		// Ensure only can link once
+		this.node.link(escalation, inputSection.getOfficeSectionInputs()[0]); // ordered
+		assertFlowLink("Can only link once", escalation, sectionInput);
 
 		this.verifyMockObjects();
 	}

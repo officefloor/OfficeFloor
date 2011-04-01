@@ -35,6 +35,7 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -62,6 +63,8 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToAdministratorModel;
 import net.officefloor.model.office.OfficeChanges;
+import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeManagedObjectModel;
@@ -160,8 +163,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			// Add the managed object source
 			String mosName = mosModel.getOfficeManagedObjectSourceName();
 			OfficeManagedObjectSource mos = architect
-					.addOfficeManagedObjectSource(mosName, mosModel
-							.getManagedObjectSourceClassName());
+					.addOfficeManagedObjectSource(mosName,
+							mosModel.getManagedObjectSourceClassName());
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
@@ -353,8 +356,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			// Add the section (register for later)
 			String sectionName = sectionModel.getOfficeSectionName();
 			OfficeSection section = architect.addOfficeSection(sectionName,
-					sectionModel.getSectionSourceClassName(), sectionModel
-							.getSectionLocation(), propertyList);
+					sectionModel.getSectionSourceClassName(),
+					sectionModel.getSectionLocation(), propertyList);
 			sections.put(sectionName, section);
 
 			// Register the section inputs
@@ -492,9 +495,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 						OfficeSectionModel inputSection = this
 								.getOfficeSectionForInput(office, inputModel);
 						if (inputSection != null) {
-							input = inputs.get(inputSection
-									.getOfficeSectionName(), inputModel
-									.getOfficeSectionInputName());
+							input = inputs.get(
+									inputSection.getOfficeSectionName(),
+									inputModel.getOfficeSectionInputName());
 						}
 					}
 				}
@@ -722,6 +725,38 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 		}
 
+		// Handle escalations
+		for (OfficeEscalationModel escalationModel : office
+				.getOfficeEscalations()) {
+
+			// Obtain the escalation
+			String escalationType = escalationModel.getEscalationType();
+			OfficeEscalation escalation = architect
+					.addOfficeEscalation(escalationType);
+
+			// Link to section input for handling
+			OfficeSectionInput sectionInput = null;
+			OfficeEscalationToOfficeSectionInputModel conn = escalationModel
+					.getOfficeSectionInput();
+			if (conn != null) {
+				OfficeSectionInputModel sectionInputModel = conn
+						.getOfficeSectionInput();
+				if (sectionInputModel != null) {
+					OfficeSectionModel sectionModel = this
+							.getOfficeSectionForInput(office, sectionInputModel);
+					if (sectionModel != null) {
+						sectionInput = inputs.get(
+								sectionModel.getOfficeSectionName(),
+								sectionInputModel.getOfficeSectionInputName());
+					}
+				}
+			}
+			if (sectionInput != null) {
+				// Link escalation to section input handling
+				architect.link(escalation, sectionInput);
+			}
+		}
+
 	}
 
 	/**
@@ -807,9 +842,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					AdministratorModel adminModel = dutyAdministrators
 							.get(dutyModel);
 					if (adminModel != null) {
-						preTaskDuty = duties.get(adminModel
-								.getAdministratorName(), dutyModel
-								.getDutyName());
+						preTaskDuty = duties.get(
+								adminModel.getAdministratorName(),
+								dutyModel.getDutyName());
 					}
 				}
 				if (preTaskDuty == null) {
@@ -835,9 +870,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					AdministratorModel adminModel = dutyAdministrators
 							.get(dutyModel);
 					if (adminModel != null) {
-						postTaskDuty = duties.get(adminModel
-								.getAdministratorName(), dutyModel
-								.getDutyName());
+						postTaskDuty = duties.get(
+								adminModel.getAdministratorName(),
+								dutyModel.getDutyName());
 					}
 				}
 				if (postTaskDuty == null) {

@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -98,6 +99,15 @@ public interface OfficeArchitect {
 			String administratorSourceClassName);
 
 	/**
+	 * Adds an {@link OfficeEscalation}.
+	 * 
+	 * @param escalationTypeName
+	 *            Type of {@link Escalation}.
+	 * @return Added {@link OfficeEscalation}.
+	 */
+	OfficeEscalation addOfficeEscalation(String escalationTypeName);
+
+	/**
 	 * Links the {@link OfficeSectionObject} to be the
 	 * {@link OfficeManagedObject}.
 	 * 
@@ -162,6 +172,17 @@ public interface OfficeArchitect {
 	 *            {@link OfficeSectionInput}.
 	 */
 	void link(OfficeSectionOutput output, OfficeSectionInput input);
+
+	/**
+	 * Links the {@link OfficeEscalation} to be undertaken by the
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param escalation
+	 *            {@link OfficeEscalation}.
+	 * @param input
+	 *            {@link OfficeSectionInput}.
+	 */
+	void link(OfficeEscalation escalation, OfficeSectionInput input);
 
 	/**
 	 * Links the {@link TaskTeam} to be the {@link OfficeTeam}.
