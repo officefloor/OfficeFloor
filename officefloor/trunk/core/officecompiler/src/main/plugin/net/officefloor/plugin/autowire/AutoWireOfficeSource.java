@@ -31,6 +31,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -46,6 +47,7 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Team;
 
@@ -71,6 +73,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * {@link Link} instances.
 	 */
 	private final List<Link> links = new LinkedList<Link>();
+
+	/**
+	 * {@link EscalationLink} instances.
+	 */
+	private final List<EscalationLink> escalations = new LinkedList<EscalationLink>();
 
 	/**
 	 * {@link AutoWireResponsibility} instances.
@@ -168,6 +175,23 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		// As here, not linked
 		return false;
+	}
+
+	/**
+	 * Links the handling of the {@link Escalation} to the
+	 * {@link AutoWireSection}.
+	 * 
+	 * @param escalationType
+	 *            TYpe of {@link Escalation}.
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param sectionInputName
+	 *            Name of the {@link OfficeSectionInput}.
+	 */
+	public void linkEscalation(Class<? extends Throwable> escalationType,
+			AutoWireSection section, String sectionInputName) {
+		this.escalations.add(new EscalationLink(escalationType, section,
+				sectionInputName));
 	}
 
 	/**
@@ -320,6 +344,36 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Link the output to the input
 			architect.link(sectionOutput, sectionInput);
 		}
+
+		// Link escalations to inputs
+		for (EscalationLink link : this.escalations) {
+
+			// Obtain the link details
+			String escalationTypeName = link.escalationType.getName();
+			String sectionName = link.targetSection.getSectionName();
+			String inputName = link.targetInputName;
+
+			// Add the Escalation
+			OfficeEscalation escalation = architect
+					.addOfficeEscalation(escalationTypeName);
+
+			// Obtain the input
+			OfficeSectionInput sectionInput = null;
+			Map<String, OfficeSectionInput> sectionInputs = inputs
+					.get(sectionName);
+			if (sectionInputs != null) {
+				sectionInput = sectionInputs.get(inputName);
+			}
+			if (sectionInput == null) {
+				architect.addIssue("Unknown section input '" + sectionName
+						+ ":" + inputName + "' for linking escalation '"
+						+ escalationTypeName + "'", null, null);
+				continue; // no input so can not link
+			}
+
+			// Link the escalation to section input
+			architect.link(escalation, sectionInput);
+		}
 	}
 
 	/**
@@ -424,6 +478,44 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				AutoWireSection targetSection, String targetInputName) {
 			this.sourceSection = sourceSection;
 			this.sourceOutputName = sourceOutputName;
+			this.targetSection = targetSection;
+			this.targetInputName = targetInputName;
+		}
+	}
+
+	/**
+	 * Link of {@link Escalation} to {@link SectionInput}.
+	 */
+	private static class EscalationLink {
+
+		/**
+		 * Type of {@link Escalation}.
+		 */
+		public final Class<? extends Throwable> escalationType;
+
+		/**
+		 * Target {@link AutoWireSection}.
+		 */
+		public final AutoWireSection targetSection;
+
+		/**
+		 * Target {@link SectionInput} name.
+		 */
+		public final String targetInputName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationType
+		 *            Type of {@link Escalation}.
+		 * @param targetSection
+		 *            Target {@link AutoWireSection}.
+		 * @param targetInputName
+		 *            Target {@link SectionInput} name.
+		 */
+		public EscalationLink(Class<? extends Throwable> escalationType,
+				AutoWireSection targetSection, String targetInputName) {
+			this.escalationType = escalationType;
 			this.targetSection = targetSection;
 			this.targetInputName = targetInputName;
 		}

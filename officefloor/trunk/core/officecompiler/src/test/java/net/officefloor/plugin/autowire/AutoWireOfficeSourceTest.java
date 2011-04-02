@@ -30,6 +30,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -43,6 +44,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -262,7 +264,32 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		source.sourceOffice(this.architect, context);
+		source.sourceOffice(this.architect, this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to link {@link Escalation} to {@link OfficeSectionInput}.
+	 */
+	public void testLinkEscalationToSectionInput() throws Exception {
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		AutoWireSection section = this.addSection(source, "SECTION");
+		source.linkEscalation(Exception.class, section, "INPUT");
+
+		// Record linking escalation
+		this.recordTeam();
+		this.recordOfficeSection("SECTION");
+		this.recordSectionObjects("SECTION");
+		this.recordSectionInputs("SECTION", "INPUT");
+		this.recordSectionOutputs("SECTION");
+		this.recordAssignTeams("SECTION");
+		this.recordEscalation(Exception.class, "SECTION", "INPUT");
+
+		// Test
+		this.replayMockObjects();
+		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
 	}
 
@@ -287,7 +314,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		source.sourceOffice(this.architect, context);
+		source.sourceOffice(this.architect, this.context);
 		this.verifyMockObjects();
 	}
 
@@ -791,6 +818,27 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			this.recordReturn(task, task.getTeamResponsible(), taskTeam);
 			this.architect.link(taskTeam, this.team);
 		}
+	}
+
+	/**
+	 * Records handling of the {@link Escalation}.
+	 * 
+	 * @param escalationType
+	 *            Type of {@link Escalation}.
+	 * @param sectionName
+	 *            {@link AutoWireSection} name.
+	 * @param inputName
+	 *            Name of the {@link OfficeSectionInput}.
+	 */
+	private void recordEscalation(Class<? extends Throwable> escalationType,
+			String sectionName, String inputName) {
+		OfficeEscalation escalation = this.createMock(OfficeEscalation.class);
+		this.recordReturn(this.architect,
+				this.architect.addOfficeEscalation(escalationType.getName()),
+				escalation);
+		OfficeSectionInput sectionInput = this.inputs.get(sectionName).get(
+				inputName);
+		this.architect.link(escalation, sectionInput);
 	}
 
 	/**

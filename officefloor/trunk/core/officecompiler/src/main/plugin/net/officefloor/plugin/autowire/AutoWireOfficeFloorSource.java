@@ -177,6 +177,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public void linkEscalation(Class<? extends Throwable> escalation,
+			AutoWireSection section, String inputName) {
+		this.officeSource.linkEscalation(escalation, section, inputName);
+	}
+
+	@Override
 	public void addObject(Object object, Class<?>... objectTypes) {
 
 		// Default the object type if not provided

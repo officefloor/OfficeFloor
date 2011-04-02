@@ -19,9 +19,11 @@ package net.officefloor.plugin.autowire;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -91,6 +93,20 @@ public interface AutoWireApplication {
 	 *         <code>false</code>.
 	 */
 	boolean isLinked(AutoWireSection section, String sectionOutputName);
+
+	/**
+	 * Links the {@link Escalation} to be handled by the
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @param section
+	 *            {@link AutoWireSection}.
+	 * @param inputName
+	 *            Name of the {@link AutoWireSection} input.
+	 */
+	void linkEscalation(Class<? extends Throwable> escalation,
+			AutoWireSection section, String inputName);
 
 	/**
 	 * Adds a raw object for dependency injection.
