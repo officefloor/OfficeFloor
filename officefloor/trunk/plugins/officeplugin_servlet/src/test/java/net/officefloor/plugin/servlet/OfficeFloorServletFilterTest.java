@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -201,9 +202,17 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure handle {@link Escalation} with {@link Servlet} resource.
+	 */
+	public void testResourceHandlingEscalation() throws Exception {
+		assertEquals("Should escalate and be handled by resource",
+				"SERVLET_RESOURCE", this.doGetBody("/fail"));
+	}
+
+	/**
 	 * Ensure can link to {@link Servlet} resource.
 	 */
-	public void testLinkToServletResource() throws Exception {
+	public void testLinkToResource() throws Exception {
 		assertEquals("Should provide servlet resource", "SERVLET_RESOURCE",
 				this.doGetBody("/servlet-resource"));
 	}
@@ -382,6 +391,13 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 			AutoWireSection ejb = this.addSection("EJB",
 					ClassSectionSource.class, MockEjbSection.class.getName());
 			this.linkUri("ejb", ejb, "doEjb");
+
+			// Enable escalation handling to resource
+			AutoWireSection failSection = this.addSection("FAILURE",
+					ClassSectionSource.class,
+					MockFailureSection.class.getName());
+			this.linkUri("fail", failSection, "task");
+			this.linkEscalation(IOException.class, "Template.jsp");
 		}
 	}
 
@@ -457,6 +473,21 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 					.getBody().getOutputStream());
 			writer.write(ejb.value);
 			writer.flush();
+		}
+	}
+
+	/**
+	 * Mock failure section.
+	 */
+	public static class MockFailureSection {
+		public void task(ServerHttpConnection connection) throws Exception {
+
+			// Content should not appear as reset on resource dispatch
+			connection.getHttpResponse().getBody().getOutputStream()
+					.write("ESCALTION - ".getBytes());
+
+			// Fail
+			throw new IOException("Test failure");
 		}
 	}
 

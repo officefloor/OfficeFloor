@@ -18,6 +18,8 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -135,14 +137,23 @@ public class ServletContainerResourceSectionSource extends
 				designer);
 
 		// Create the Servlet container resource tasks
+		Set<String> registeredResources = new HashSet<String>();
 		for (String inputName : context.getPropertyNames()) {
 
 			// Obtain the request dispatcher path
 			String requestDispatcherPath = context.getProperty(inputName);
 
+			// Ensure only register the resource once
+			if (registeredResources.contains(requestDispatcherPath)) {
+				continue;
+			}
+
 			// Add Servlet Resource
 			this.addServletResource(inputName, requestDispatcherPath,
 					servletBridge, designer);
+
+			// Resource registered
+			registeredResources.add(requestDispatcherPath);
 		}
 	}
 
