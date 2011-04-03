@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
+import java.sql.SQLException;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -317,6 +319,43 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure able to link {@link Escalation} to
+	 * {@link HttpTemplateAutoWireSection}.
+	 */
+	public void testLinkEscalationToTemplate() throws Exception {
+
+		// Add escalation to template
+		AutoWireSection failingSection = this.source.addSection("FAILING",
+				ClassSectionSource.class, FailingSection.class.getName());
+		this.source.linkUri("test", failingSection, "task");
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				"template.ofp", MockTemplateLogic.class, "handler");
+		this.source.linkEscalation(SQLException.class, template);
+		this.source.openOfficeFloor();
+
+		// Ensure link escalation to template
+		this.assertHttpRequest("http://localhost:7878/test", 200,
+				"Escalated to /handler.links/submit.task");
+	}
+
+	/**
+	 * Ensure able to link {@link Escalation} to resource.
+	 */
+	public void testLinkEscalationToResource() throws Exception {
+
+		// Add escalation to resource
+		AutoWireSection failingSection = this.source.addSection("FAILING",
+				ClassSectionSource.class, FailingSection.class.getName());
+		this.source.linkUri("test", failingSection, "task");
+		this.source.linkEscalation(SQLException.class, "resource.html");
+		this.source.openOfficeFloor();
+
+		// Ensure link escalation to resource
+		this.assertHttpRequest("http://localhost:7878/test", 200,
+				"Escalated to RESOURCE");
+	}
+
+	/**
 	 * Ensure able to utilise the {@link HttpSession}.
 	 */
 	public void testHttpSession() throws Exception {
@@ -553,6 +592,17 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		public void service(ServerHttpConnection connection) throws IOException {
 			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
 					connection);
+		}
+	}
+
+	/**
+	 * Section class that fails and provides an {@link Escalation}.
+	 */
+	public static class FailingSection {
+		public void task(ServerHttpConnection connection) throws Exception {
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
+					"Escalated to ", connection);
+			throw new SQLException("Test failure");
 		}
 	}
 
