@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
 import net.officefloor.plugin.autowire.AutoWireObject;
@@ -81,6 +82,11 @@ public abstract class OfficeFloorServletFilter extends
 	private final List<ServletResourceLink> servletResourceLinks = new LinkedList<ServletResourceLink>();
 
 	/**
+	 * {@link ServletResourceEscalation} instances.
+	 */
+	private final List<ServletResourceEscalation> servletResourceEscalations = new LinkedList<ServletResourceEscalation>();
+
+	/**
 	 * Handled URIs.
 	 */
 	private final Set<String> handledURIs = new HashSet<String>();
@@ -111,6 +117,15 @@ public abstract class OfficeFloorServletFilter extends
 		// Override to use Servlet Container resource
 		this.servletResourceLinks.add(new ServletResourceLink(section,
 				outputName, requestDispatcherPath));
+	}
+
+	@Override
+	public void linkEscalation(Class<? extends Throwable> escalation,
+			String resourcePath) {
+
+		// Override to use Servlet Container resource
+		this.servletResourceEscalations.add(new ServletResourceEscalation(
+				escalation, resourcePath));
 	}
 
 	/*
@@ -176,6 +191,15 @@ public abstract class OfficeFloorServletFilter extends
 					link.requestDispatcherPath);
 			this.link(link.section, link.outputName, servletContainerResource,
 					link.requestDispatcherPath);
+		}
+
+		// Link the escalation handling by Servlet Resources
+		for (ServletResourceEscalation handling : this.servletResourceEscalations) {
+			servletContainerResource.addProperty(
+					handling.requestDispatcherPath,
+					handling.requestDispatcherPath);
+			this.linkEscalation(handling.escalationType,
+					servletContainerResource, handling.requestDispatcherPath);
 		}
 
 		// Open the OfficeFloor
@@ -257,6 +281,37 @@ public abstract class OfficeFloorServletFilter extends
 				String requestDispatcherPath) {
 			this.section = section;
 			this.outputName = outputName;
+			this.requestDispatcherPath = requestDispatcherPath;
+		}
+	}
+
+	/**
+	 * {@link Servlet} resource {@link Escalation}.
+	 */
+	private static class ServletResourceEscalation {
+
+		/**
+		 * {@link Escalation} type.
+		 */
+		public final Class<? extends Throwable> escalationType;
+
+		/**
+		 * {@link RequestDispatcher} path.
+		 */
+		public final String requestDispatcherPath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationType
+		 *            {@link Escalation} type.
+		 * @param requestDispatcherPath
+		 *            {@link RequestDispatcher} path.
+		 */
+		public ServletResourceEscalation(
+				Class<? extends Throwable> escalationType,
+				String requestDispatcherPath) {
+			this.escalationType = escalationType;
 			this.requestDispatcherPath = requestDispatcherPath;
 		}
 	}
