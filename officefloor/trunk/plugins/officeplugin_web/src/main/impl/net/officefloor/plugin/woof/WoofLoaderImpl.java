@@ -23,6 +23,10 @@ import java.util.Map;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
+import net.officefloor.model.woof.WoofExceptionModel;
+import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofResourceModel;
@@ -276,6 +280,64 @@ public class WoofLoaderImpl implements WoofLoader {
 						application.linkToResource(section, outputName,
 								resourceModel.getResourcePath());
 					}
+				}
+			}
+		}
+
+		// Link the escalations
+		for (WoofExceptionModel exceptionModel : woof.getWoofExceptions()) {
+
+			// Obtain the exception type
+			String exceptionClassName = exceptionModel.getClassName();
+			Class<? extends Throwable> exceptionType = (Class<? extends Throwable>) this.classLoader
+					.loadClass(exceptionClassName);
+
+			// Link potential section input
+			WoofExceptionToWoofSectionInputModel sectionLink = exceptionModel
+					.getWoofSectionInput();
+			if (sectionLink != null) {
+				WoofSectionInputModel sectionInput = sectionLink
+						.getWoofSectionInput();
+				if (sectionInput != null) {
+
+					// Obtain target input name
+					String targetInputName = sectionInput
+							.getWoofSectionInputName();
+
+					// Obtain the target section
+					WoofSectionModel targetSectionModel = inputToSection
+							.get(sectionInput);
+					AutoWireSection targetSection = sections
+							.get(targetSectionModel.getWoofSectionName());
+
+					// Link escalation handling to section input
+					application.linkEscalation(exceptionType, targetSection,
+							targetInputName);
+				}
+			}
+
+			// Link potential template
+			WoofExceptionToWoofTemplateModel templateLink = exceptionModel
+					.getWoofTemplate();
+			if (templateLink != null) {
+				WoofTemplateModel targetTemplateModel = templateLink
+						.getWoofTemplate();
+				if (targetTemplateModel != null) {
+					HttpTemplateAutoWireSection targetTemplate = templates
+							.get(targetTemplateModel.getWoofTemplateName());
+					application.linkEscalation(exceptionType, targetTemplate);
+				}
+			}
+
+			// Link potential resource
+			WoofExceptionToWoofResourceModel resourceLink = exceptionModel
+					.getWoofResource();
+			if (resourceLink != null) {
+				WoofResourceModel resourceModel = resourceLink
+						.getWoofResource();
+				if (resourceModel != null) {
+					application.linkEscalation(exceptionType,
+							resourceModel.getResourcePath());
 				}
 			}
 		}

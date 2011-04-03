@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.sql.SQLException;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
@@ -100,6 +102,11 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.app.link(sectionA, "OUTPUT_A", sectionB, "INPUT_1");
 		this.app.linkToHttpTemplate(sectionA, "OUTPUT_B", templateA);
 		this.app.linkToResource(sectionA, "OUTPUT_C", "Example.html");
+
+		// Record linking escalations
+		this.app.linkEscalation(Exception.class, sectionA, "INPUT_A");
+		this.app.linkEscalation(RuntimeException.class, templateA);
+		this.app.linkEscalation(SQLException.class, "Example.html");
 
 		// Test
 		this.replayMockObjects();

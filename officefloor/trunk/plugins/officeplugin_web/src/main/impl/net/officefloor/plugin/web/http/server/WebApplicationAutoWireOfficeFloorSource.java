@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
@@ -53,6 +54,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link ResourceLink} instances.
 	 */
 	private final List<ResourceLink> resourceLinks = new LinkedList<ResourceLink>();
+
+	/**
+	 * {@link EscalationResource} instances.
+	 */
+	private final List<EscalationResource> escalationResources = new LinkedList<EscalationResource>();
 
 	/**
 	 * {@link SendLink} instances.
@@ -132,6 +138,20 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	public void linkToResource(AutoWireSection section, String outputName,
 			String resourcePath) {
 		this.resourceLinks.add(new ResourceLink(section, outputName,
+				resourcePath));
+	}
+
+	@Override
+	public void linkEscalation(Class<? extends Throwable> escalation,
+			HttpTemplateAutoWireSection template) {
+		this.linkEscalation(escalation, template,
+				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+	}
+
+	@Override
+	public void linkEscalation(Class<? extends Throwable> escalation,
+			String resourcePath) {
+		this.escalationResources.add(new EscalationResource(escalation,
 				resourcePath));
 	}
 
@@ -234,7 +254,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Link to resources
-		if (this.resourceLinks.size() > 0) {
+		if ((this.resourceLinks.size() > 0)
+				|| (this.escalationResources.size() > 0)) {
 
 			// Create section to send resources
 			AutoWireSection section = this.addSection("RESOURCES",
@@ -248,6 +269,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 						HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX
 								+ resourceLink.resourcePath,
 						resourceLink.resourcePath);
+			}
+
+			// Link escalations to the resources
+			for (EscalationResource escalation : this.escalationResources) {
+				this.linkEscalation(escalation.escalationType, section,
+						escalation.resourcePath);
+				section.addProperty(
+						HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX
+								+ escalation.resourcePath,
+						escalation.resourcePath);
 			}
 		}
 
@@ -348,6 +379,36 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				String resourcePath) {
 			this.section = section;
 			this.outputName = outputName;
+			this.resourcePath = resourcePath;
+		}
+	}
+
+	/**
+	 * Resource to handle {@link Escalation}.
+	 */
+	private static class EscalationResource {
+
+		/**
+		 * {@link Escalation} type.
+		 */
+		public final Class<? extends Throwable> escalationType;
+
+		/**
+		 * Resource path.
+		 */
+		public final String resourcePath;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param escalationType
+		 *            {@link Escalation} type.
+		 * @param resourcePath
+		 *            Resource path.
+		 */
+		public EscalationResource(Class<? extends Throwable> escalationType,
+				String resourcePath) {
+			this.escalationType = escalationType;
 			this.resourcePath = resourcePath;
 		}
 	}

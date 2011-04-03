@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.server;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.plugin.autowire.AutoWireApplication;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -123,6 +124,29 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 *            Resource path.
 	 */
 	void linkToResource(AutoWireSection section, String outputName,
+			String resourcePath);
+
+	/**
+	 * Links the {@link Escalation} to be handled by the
+	 * {@link HttpTemplateAutoWireSection}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @param template
+	 *            {@link HttpTemplateAutoWireSection}.
+	 */
+	void linkEscalation(Class<? extends Throwable> escalation,
+			HttpTemplateAutoWireSection template);
+
+	/**
+	 * Links the {@link Escalation} to be handled by the resource.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @param resourcePath
+	 *            Resource path.
+	 */
+	void linkEscalation(Class<? extends Throwable> escalation,
 			String resourcePath);
 
 	/**
