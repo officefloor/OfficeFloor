@@ -26,6 +26,7 @@
 		<module>plugins/net.officefloor.socket</module>
 		<module>plugins/net.officefloor.jdbc</module>
 		<module>plugins/net.officefloor.jndi</module>
+		<module>plugins/net.officefloor.woof</module>
 		<module>plugins/net.officefloor.filingcabinet</module>
 		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
@@ -101,6 +102,11 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.ui</artifactId>
+				<version>0.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.woof</artifactId>
 				<version>0.3.1</version>
 			</dependency>
 		</dependencies>
