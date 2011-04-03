@@ -103,8 +103,11 @@ public abstract class OfficeFloorServletFilter extends
 	/**
 	 * Provides configuration of this as a
 	 * {@link WebApplicationAutoWireOfficeFloorSource}.
+	 * 
+	 * @throws Exception
+	 *             If fails to configure.
 	 */
-	protected abstract void configure();
+	protected abstract void configure() throws Exception;
 
 	/*
 	 * ======================= WebAutoWireApplication =====================
@@ -177,7 +180,15 @@ public abstract class OfficeFloorServletFilter extends
 		}
 
 		// Configure the web application
-		this.configure();
+		try {
+			this.configure();
+		} catch (Exception ex) {
+			// Propagate failure to configure
+			if (ex instanceof ServletException) {
+				throw (ServletException) ex;
+			}
+			throw new ServletException(ex);
+		}
 
 		// Load the handled URIs
 		for (String uri : this.getURIs()) {
