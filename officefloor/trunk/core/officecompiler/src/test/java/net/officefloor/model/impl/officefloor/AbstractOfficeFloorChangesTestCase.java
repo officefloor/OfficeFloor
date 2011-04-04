@@ -27,11 +27,11 @@ import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Abstract functionality for testing the {@link OfficeFloorChanges}.

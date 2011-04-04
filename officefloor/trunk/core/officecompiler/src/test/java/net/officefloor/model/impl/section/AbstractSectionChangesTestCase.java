@@ -18,11 +18,11 @@
 
 package net.officefloor.model.impl.section;
 
-import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Abstract functionality for testing the {@link SectionChanges}.

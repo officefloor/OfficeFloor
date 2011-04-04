@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.model.impl;
+package net.officefloor.model.test.changes;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -70,11 +70,6 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 		this.isSpecificSetupFilePerTest = isSpecificSetupFilePerTest;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 
@@ -177,8 +172,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 				change.getConflicts().length);
 		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
 			assertEquals("Incorrect description for conflict " + i,
-					expectedConflictDescriptions[i], change.getConflicts()[i]
-							.getConflictDescription());
+					expectedConflictDescriptions[i],
+					change.getConflicts()[i].getConflictDescription());
 		}
 
 		// Validate changes if can apply change
@@ -298,8 +293,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 		String testCasePath = this.getClass().getSimpleName();
 		testCasePath = this.getClass().getPackage().getName().replace('.', '/')
 				+ "/Test"
-				+ testCasePath.substring(0, (testCasePath.length() - "Test"
-						.length()));
+				+ testCasePath.substring(0,
+						(testCasePath.length() - "Test".length()));
 
 		// Construct the path to the model
 		String testPath = testCasePath.replace('.', '/') + "/" + testName;
