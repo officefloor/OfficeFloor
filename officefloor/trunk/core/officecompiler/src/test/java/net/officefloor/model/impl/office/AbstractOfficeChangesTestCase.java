@@ -28,11 +28,11 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Abstract functionality for testing the {@link OfficeChanges}.

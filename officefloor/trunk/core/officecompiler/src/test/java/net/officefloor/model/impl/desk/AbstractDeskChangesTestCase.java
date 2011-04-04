@@ -34,9 +34,9 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
 /**
  * Provides abstract functionality for the {@link DeskChanges}.
