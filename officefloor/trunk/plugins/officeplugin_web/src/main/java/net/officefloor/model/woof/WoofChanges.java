@@ -77,6 +77,15 @@ public interface WoofChanges {
 			PropertyList properties, Map<String, String> inputToUri);
 
 	/**
+	 * Removes the {@link WoofSectionModel}.
+	 * 
+	 * @param section
+	 *            {@link WoofSectionModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofSectionModel}.
+	 */
+	Change<WoofSectionModel> removeSection(WoofSectionModel section);
+
+	/**
 	 * Adds a {@link WoofResourceModel}.
 	 * 
 	 * @param resourceName
@@ -89,6 +98,15 @@ public interface WoofChanges {
 			String resourcePath);
 
 	/**
+	 * Removes the {@link WoofResourceModel}.
+	 * 
+	 * @param resource
+	 *            {@link WoofResourceModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofResourceModel}.
+	 */
+	Change<WoofResourceModel> removeResource(WoofResourceModel resource);
+
+	/**
 	 * Adds a {@link WoofExceptionModel}.
 	 * 
 	 * @param exceptionClassName
@@ -96,5 +114,14 @@ public interface WoofChanges {
 	 * @return {@link Change} to add the {@link WoofExceptionModel}.
 	 */
 	Change<WoofExceptionModel> addException(String exceptionClassName);
+
+	/**
+	 * Removes the {@link WoofExceptionModel}.
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel} to remove.
+	 * @return {@link Change} to remove the {@link WoofExceptionModel}.
+	 */
+	Change<WoofExceptionModel> removeException(WoofExceptionModel exception);
 
 }
