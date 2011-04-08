@@ -27,10 +27,9 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.model.change.Change;
-import net.officefloor.plugin.web.http.server.HttpTemplateAutoWireSection;
 
 /**
- * Tests adding a {@link HttpTemplateAutoWireSection}.
+ * Tests adding to a {@link WoofModel}.
  * 
  * @author Daniel Sagenschneider
  */
