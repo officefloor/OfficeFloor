@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.woof.operations;
 
-import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.wizard.template.HttpTemplateInstance;
 import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
@@ -59,14 +59,15 @@ public class AddTemplateOperation extends
 		}
 
 		// Obtain the template details
-		OfficeSection section = instance.getOfficeSection();
+		String name = instance.getTemplateName();
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
+		SectionType type = instance.getTemplateSectionType();
 		String uri = instance.getUri();
 
 		// Create change to add template
-		Change<WoofTemplateModel> change = changes.addTemplate(section, path,
-				logicClassName, uri);
+		Change<WoofTemplateModel> change = changes.addTemplate(name, path,
+				logicClassName, type, uri);
 
 		// Position template
 		context.positionModel(change.getTarget());

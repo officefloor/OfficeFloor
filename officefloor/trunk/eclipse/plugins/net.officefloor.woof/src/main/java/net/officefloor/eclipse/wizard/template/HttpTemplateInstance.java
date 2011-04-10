@@ -17,7 +17,7 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
-import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -43,9 +43,9 @@ public class HttpTemplateInstance {
 	private final String logicClassName;
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link SectionType}.
 	 */
-	private final OfficeSection officeSection;
+	private final SectionType sectionType;
 
 	/**
 	 * URI.
@@ -61,17 +61,17 @@ public class HttpTemplateInstance {
 	 *            Path to the {@link HttpTemplate}.
 	 * @param logicClassName
 	 *            Name of the logic class.
-	 * @param officeSection
-	 *            {@link OfficeSection}.
+	 * @param sectionType
+	 *            {@link SectionType}.
 	 * @param uri
 	 *            URI.
 	 */
 	public HttpTemplateInstance(String templateName, String templatePath,
-			String logicClassName, OfficeSection officeSection, String uri) {
+			String logicClassName, SectionType sectionType, String uri) {
 		this.templateName = templateName;
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
-		this.officeSection = officeSection;
+		this.sectionType = sectionType;
 		this.uri = uri;
 	}
 
@@ -103,12 +103,12 @@ public class HttpTemplateInstance {
 	}
 
 	/**
-	 * Obtains the {@link OfficeSection}.
+	 * Obtains the {@link SectionType}.
 	 * 
-	 * @return {@link OfficeSection}.
+	 * @return {@link SectionType}.
 	 */
-	public OfficeSection getOfficeSection() {
-		return this.officeSection;
+	public SectionType getTemplateSectionType() {
+		return this.sectionType;
 	}
 
 	/**

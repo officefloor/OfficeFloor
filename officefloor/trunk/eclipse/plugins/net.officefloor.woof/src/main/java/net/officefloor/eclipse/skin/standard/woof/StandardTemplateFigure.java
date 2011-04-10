@@ -19,7 +19,7 @@ package net.officefloor.eclipse.skin.standard.woof;
 
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardWoofColours;
-import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RectangleContainerFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 
@@ -40,7 +40,7 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 	public StandardTemplateFigure(TemplateFigureContext context) {
 
 		// Create the container for the template
-		RoundedContainerFigure subSectionFigure = new RoundedContainerFigure(
+		RectangleContainerFigure subSectionFigure = new RectangleContainerFigure(
 				context.getTemplateName(), StandardWoofColours.TEMPLATE(), 5,
 				false);
 

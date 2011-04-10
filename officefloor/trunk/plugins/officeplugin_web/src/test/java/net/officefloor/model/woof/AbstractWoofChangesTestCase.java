@@ -20,17 +20,14 @@ package net.officefloor.model.woof;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import junit.framework.TestCase;
+import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
-import junit.framework.TestCase;
 
 /**
  * Abstract {@link WoofChanges} {@link TestCase}.
@@ -78,55 +75,52 @@ public abstract class AbstractWoofChangesTestCase extends
 	}
 
 	/**
-	 * Constructs an {@link OfficeSection} for testing.
+	 * Constructs an {@link SectionType} for testing.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
 	 * @param constructor
-	 *            {@link OfficeSectionConstructor}.
-	 * @return {@link OfficeSection}.
+	 *            {@link SectionTypeConstructor}.
+	 * @return {@link SectionType}.
 	 */
-	protected OfficeSection constructOfficeSection(String sectionName,
-			OfficeSectionConstructor constructor) {
+	protected SectionType constructSectionType(
+			SectionTypeConstructor constructor) {
 
 		// Construct and return the office section
-		OfficeSectionContextImpl context = new OfficeSectionContextImpl(
-				sectionName);
+		SectionTypeContextImpl context = new SectionTypeContextImpl();
 		constructor.construct(context);
 		return context;
 	}
 
 	/**
-	 * Constructor of an {@link OfficeSection}.
+	 * Constructor of an {@link SectionType}.
 	 */
-	protected interface OfficeSectionConstructor {
+	protected interface SectionTypeConstructor {
 
 		/**
-		 * Constructs the {@link OfficeSection}.
+		 * Constructs the {@link SectionType}.
 		 * 
 		 * @param context
-		 *            {@link OfficeSection}.
+		 *            {@link SectionType}.
 		 */
-		void construct(OfficeSectionContext context);
+		void construct(SectionTypeContext context);
 	}
 
 	/**
-	 * Context to construct the {@link OfficeSection}.
+	 * Context to construct the {@link SectionType}.
 	 */
-	protected interface OfficeSectionContext {
+	protected interface SectionTypeContext {
 
 		/**
-		 * Adds an {@link OfficeSectionInput}.
+		 * Adds an {@link SectionInputType}.
 		 * 
 		 * @param name
 		 *            Name.
 		 * @param parameterType
 		 *            Parameter type.
 		 */
-		void addOfficeSectionInput(String name, Class<?> parameterType);
+		void addSectionInput(String name, Class<?> parameterType);
 
 		/**
-		 * Adds an {@link OfficeSectionOutput}.
+		 * Adds an {@link SectionOutputType}.
 		 * 
 		 * @param name
 		 *            Name.
@@ -135,128 +129,89 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param isEscalationOnly
 		 *            Flag indicating if escalation only.
 		 */
-		void addOfficeSectionOutput(String name, Class<?> argumentType,
+		void addSectionOutput(String name, Class<?> argumentType,
 				boolean isEscalationOnly);
 
 		/**
-		 * Adds an {@link OfficeSectionObject}.
+		 * Adds an {@link SectionObjectType}.
 		 * 
 		 * @param name
 		 *            Name.
 		 * @param objectType
 		 *            Object type.
 		 */
-		void addOfficeSectionObject(String name, Class<?> objectType);
+		void addSectionObject(String name, Class<?> objectType);
 	}
 
 	/**
-	 * {@link OfficeSectionContext} implementation.
+	 * {@link SectionTypeContext} implementation.
 	 */
-	private class OfficeSectionContextImpl implements OfficeSectionContext,
-			OfficeSection {
+	private class SectionTypeContextImpl implements SectionTypeContext,
+			SectionType {
 
 		/**
-		 * {@link OfficeSection} name.
+		 * {@link SectionInputType} instances.
 		 */
-		private final String sectionName;
+		private final List<SectionInputType> inputs = new LinkedList<SectionInputType>();
 
 		/**
-		 * {@link OfficeSectionInput} instances.
+		 * {@link SectionOutputType} instances.
 		 */
-		private final List<OfficeSectionInput> inputs = new LinkedList<OfficeSectionInput>();
+		private final List<SectionOutputType> outputs = new LinkedList<SectionOutputType>();
 
 		/**
-		 * {@link OfficeSectionOutput} instances.
+		 * {@link SectionObjectType} instances.
 		 */
-		private final List<OfficeSectionOutput> outputs = new LinkedList<OfficeSectionOutput>();
-
-		/**
-		 * {@link OfficeSectionObject} instances.
-		 */
-		private final List<OfficeSectionObject> objects = new LinkedList<OfficeSectionObject>();
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param sectionName
-		 *            Section name
-		 */
-		public OfficeSectionContextImpl(String sectionName) {
-			this.sectionName = sectionName;
-		}
+		private final List<SectionObjectType> objects = new LinkedList<SectionObjectType>();
 
 		/*
-		 * ===================== OfficeSectionContext =====================
+		 * ===================== SectionTypeContext =====================
 		 */
 
 		@Override
-		public void addOfficeSectionInput(String name, Class<?> parameterType) {
-			this.inputs.add(new OfficeSectionItem(name,
+		public void addSectionInput(String name, Class<?> parameterType) {
+			this.inputs.add(new SectionTypeItem(name,
 					(parameterType == null ? null : parameterType.getName())));
 		}
 
 		@Override
-		public void addOfficeSectionOutput(String name, Class<?> argumentType,
+		public void addSectionOutput(String name, Class<?> argumentType,
 				boolean isEscalationOnly) {
-			this.outputs.add(new OfficeSectionItem(name,
+			this.outputs.add(new SectionTypeItem(name,
 					(argumentType == null ? null : argumentType.getName()),
 					isEscalationOnly));
 		}
 
 		@Override
-		public void addOfficeSectionObject(String name, Class<?> objectType) {
-			this.objects.add(new OfficeSectionItem(name, objectType.getName()));
+		public void addSectionObject(String name, Class<?> objectType) {
+			this.objects.add(new SectionTypeItem(name, objectType.getName()));
 		}
 
 		/*
-		 * ===================== OfficeSection ===========================
+		 * ===================== SectionType ===========================
 		 */
 
 		@Override
-		public String getOfficeSectionName() {
-			return this.sectionName;
+		public SectionInputType[] getSectionInputTypes() {
+			return this.inputs.toArray(new SectionInputType[0]);
 		}
 
 		@Override
-		public OfficeSectionInput[] getOfficeSectionInputs() {
-			return this.inputs.toArray(new OfficeSectionInput[0]);
+		public SectionOutputType[] getSectionOutputTypes() {
+			return this.outputs.toArray(new SectionOutputType[0]);
 		}
 
 		@Override
-		public OfficeSectionOutput[] getOfficeSectionOutputs() {
-			return this.outputs.toArray(new OfficeSectionOutput[0]);
+		public SectionObjectType[] getSectionObjectTypes() {
+			return this.objects.toArray(new SectionObjectType[0]);
 		}
-
-		@Override
-		public OfficeSectionObject[] getOfficeSectionObjects() {
-			return this.objects.toArray(new OfficeSectionObject[0]);
-		}
-
-		@Override
-		public OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources() {
-			fail("Currently not testing sub sections");
-			return null;
-		}
-
-		@Override
-		public OfficeSubSection[] getOfficeSubSections() {
-			fail("Currently not testing sub sections");
-			return null;
-		}
-
-		@Override
-		public OfficeTask[] getOfficeTasks() {
-			fail("Currently not testing sub sections");
-			return null;
-		}
-
 	}
 
 	/**
-	 * Item from {@link OfficeSection}.
+	 * Item from {@link SectionType}.
 	 */
-	private class OfficeSectionItem implements OfficeSectionInput,
-			OfficeSectionOutput, OfficeSectionObject {
+	private class SectionTypeItem implements SectionInputType,
+			SectionOutputType, SectionObjectType {
 
 		/**
 		 * Name.
@@ -283,7 +238,7 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param isEscalation
 		 *            Flag indicating if escalation only.
 		 */
-		public OfficeSectionItem(String name, String type, boolean isEscalation) {
+		public SectionTypeItem(String name, String type, boolean isEscalation) {
 			this.name = name;
 			this.type = type;
 			this.isEscalation = isEscalation;
@@ -297,16 +252,16 @@ public abstract class AbstractWoofChangesTestCase extends
 		 * @param type
 		 *            Type.
 		 */
-		public OfficeSectionItem(String name, String type) {
+		public SectionTypeItem(String name, String type) {
 			this(name, type, false);
 		}
 
 		/*
-		 * ================ OfficeSectionInput ======================
+		 * ================ SectionInputType ======================
 		 */
 
 		@Override
-		public String getOfficeSectionInputName() {
+		public String getSectionInputName() {
 			return this.name;
 		}
 
@@ -316,11 +271,11 @@ public abstract class AbstractWoofChangesTestCase extends
 		}
 
 		/*
-		 * ================ OfficeSectionOutput ======================
+		 * ================ SectionOutputType ======================
 		 */
 
 		@Override
-		public String getOfficeSectionOutputName() {
+		public String getSectionOutputName() {
 			return this.name;
 		}
 
@@ -335,11 +290,11 @@ public abstract class AbstractWoofChangesTestCase extends
 		}
 
 		/*
-		 * ================ OfficeSectionObject ======================
+		 * ================ SectionObjectType ======================
 		 */
 
 		@Override
-		public String getOfficeSectionObjectName() {
+		public String getSectionObjectName() {
 			return this.name;
 		}
 

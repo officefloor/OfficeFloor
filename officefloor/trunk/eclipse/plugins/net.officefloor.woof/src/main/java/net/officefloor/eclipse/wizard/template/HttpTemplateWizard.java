@@ -17,9 +17,11 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.eclipse.woof.WoofExtensionClasspathProvider;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.eclipse.core.resources.IProject;
@@ -82,6 +84,12 @@ public class HttpTemplateWizard extends Wizard {
 		EditorPart editorPart = editPart.getEditor();
 		IProject project = ProjectConfigurationContext.getProject(editorPart
 				.getEditorInput());
+
+		// Ensure WoOF class path
+		ClasspathUtil
+				.attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
+						editPart, null,
+						WoofExtensionClasspathProvider.class.getName());
 
 		// Create the HTTP template wizard page
 		this.templatePage = new HttpTemplateWizardPage(project);

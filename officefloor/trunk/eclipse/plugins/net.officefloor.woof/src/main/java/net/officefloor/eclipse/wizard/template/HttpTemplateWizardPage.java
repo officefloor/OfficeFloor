@@ -21,7 +21,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
@@ -251,9 +251,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		PropertyList properties = this.compiler.createPropertyList();
 		properties.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME)
 				.setValue(this.logicClassName);
-		OfficeSection section = this.sectionLoader.loadOfficeSection(name,
+		SectionType sectionType = this.sectionLoader.loadSectionType(
 				HttpTemplateSectionSource.class, this.templatePath, properties);
-		if (section == null) {
+		if (sectionType == null) {
 			// Must have section (issue reported as error message)
 			this.setPageComplete(false);
 			return;
@@ -265,7 +265,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Create the HTTP Template Instance
 		this.instance = new HttpTemplateInstance(name, this.templatePath,
-				this.logicClassName, section, uriValue);
+				this.logicClassName, sectionType, uriValue);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);
