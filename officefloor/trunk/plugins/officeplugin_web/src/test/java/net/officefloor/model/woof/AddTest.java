@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 
 /**
@@ -41,24 +41,25 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddTemplate() {
 
 		// Create the section type
-		OfficeSection section = this.constructOfficeSection("TEMPLATE",
-				new OfficeSectionConstructor() {
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
 					@Override
-					public void construct(OfficeSectionContext context) {
-						context.addOfficeSectionInput("renderTemplate", null);
-						context.addOfficeSectionOutput("OUTPUT_1",
-								Integer.class, false);
-						context.addOfficeSectionOutput("OUTPUT_2", null, false);
-						context.addOfficeSectionOutput("NOT_INCLUDE_ESCALTION",
+					public void construct(SectionTypeContext context) {
+						context.addSectionInput("renderTemplate", null);
+						context.addSectionOutput("OUTPUT_1", Integer.class,
+								false);
+						context.addSectionOutput("OUTPUT_2", null, false);
+						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
-						context.addOfficeSectionObject("IGNORE_OBJECT",
+						context.addSectionObject("IGNORE_OBJECT",
 								DataSource.class);
 					}
 				});
 
 		// Add the template
-		Change<WoofTemplateModel> change = this.operations.addTemplate(section,
-				"example/Template.ofp", "net.example.LogicClass", "uri");
+		Change<WoofTemplateModel> change = this.operations.addTemplate(
+				"TEMPLATE", "example/Template.ofp", "net.example.LogicClass",
+				section, "uri");
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -77,20 +78,20 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSection() {
 
 		// Create the section type
-		OfficeSection section = this.constructOfficeSection("SECTION",
-				new OfficeSectionConstructor() {
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
 					@Override
-					public void construct(OfficeSectionContext context) {
-						context.addOfficeSectionInput("INPUT_A", Integer.class);
-						context.addOfficeSectionInput("INPUT_B", Long.class);
-						context.addOfficeSectionInput("INPUT_C", null);
-						context.addOfficeSectionInput("INPUT_D", null);
-						context.addOfficeSectionOutput("OUTPUT_1",
-								String.class, false);
-						context.addOfficeSectionOutput("OUTPUT_2", null, false);
-						context.addOfficeSectionOutput("NOT_INCLUDE_ESCALTION",
+					public void construct(SectionTypeContext context) {
+						context.addSectionInput("INPUT_A", Integer.class);
+						context.addSectionInput("INPUT_B", Long.class);
+						context.addSectionInput("INPUT_C", null);
+						context.addSectionInput("INPUT_D", null);
+						context.addSectionOutput("OUTPUT_1", String.class,
+								false);
+						context.addSectionOutput("OUTPUT_2", null, false);
+						context.addSectionOutput("NOT_INCLUDE_ESCALTION",
 								IOException.class, true);
-						context.addOfficeSectionObject("IGNORE_OBJECT",
+						context.addSectionObject("IGNORE_OBJECT",
 								DataSource.class);
 					}
 				});
@@ -106,9 +107,9 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		inputToUri.put("INPUT_C", "uriC");
 
 		// Add the section
-		Change<WoofSectionModel> change = this.operations.addSection(section,
+		Change<WoofSectionModel> change = this.operations.addSection("SECTION",
 				"net.example.ExampleSectionSource", "SECTION_LOCATION",
-				properties, inputToUri);
+				properties, section, inputToUri);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 

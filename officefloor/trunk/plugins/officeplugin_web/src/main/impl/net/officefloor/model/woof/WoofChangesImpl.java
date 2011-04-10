@@ -26,9 +26,9 @@ import java.util.Map;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
@@ -186,16 +186,16 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 
 	@Override
-	public Change<WoofTemplateModel> addTemplate(OfficeSection section,
-			String templatePath, String templateLogicClass, String uri) {
+	public Change<WoofTemplateModel> addTemplate(String templateName,
+			String templatePath, String templateLogicClass,
+			SectionType section, String uri) {
 
 		// Create the template
-		String templateName = section.getOfficeSectionName();
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
 				uri, "example/Template.ofp", templateLogicClass);
 
 		// Add the outputs for the template
-		for (OfficeSectionOutput output : section.getOfficeSectionOutputs()) {
+		for (SectionOutputType output : section.getSectionOutputTypes()) {
 
 			// Ignore escalations
 			if (output.isEscalationOnly()) {
@@ -203,7 +203,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 
 			// Add the Woof Template Output
-			String outputName = output.getOfficeSectionOutputName();
+			String outputName = output.getSectionOutputName();
 			String argumentType = output.getArgumentType();
 			template.addOutput(new WoofTemplateOutputModel(outputName,
 					argumentType));
@@ -282,12 +282,12 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofSectionModel> addSection(OfficeSection section,
+	public Change<WoofSectionModel> addSection(String sectionName,
 			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, Map<String, String> inputToUri) {
+			PropertyList properties, SectionType section,
+			Map<String, String> inputToUri) {
 
 		// Create the section
-		String sectionName = section.getOfficeSectionName();
 		final WoofSectionModel woofSection = new WoofSectionModel(sectionName,
 				sectionSourceClassName, sectionLocation);
 
@@ -298,8 +298,8 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Add the inputs
-		for (OfficeSectionInput input : section.getOfficeSectionInputs()) {
-			String inputName = input.getOfficeSectionInputName();
+		for (SectionInputType input : section.getSectionInputTypes()) {
+			String inputName = input.getSectionInputName();
 			String parameterType = input.getParameterType();
 			String uri = inputToUri.get(inputName);
 			woofSection.addInput(new WoofSectionInputModel(inputName,
@@ -307,7 +307,7 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Add the outputs
-		for (OfficeSectionOutput output : section.getOfficeSectionOutputs()) {
+		for (SectionOutputType output : section.getSectionOutputTypes()) {
 
 			// Ignore escalations
 			if (output.isEscalationOnly()) {
@@ -315,7 +315,7 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 
 			// Add the output
-			String outputName = output.getOfficeSectionOutputName();
+			String outputName = output.getSectionOutputName();
 			String argumentType = output.getArgumentType();
 			woofSection.addOutput(new WoofSectionOutputModel(outputName,
 					argumentType));

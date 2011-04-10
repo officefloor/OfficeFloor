@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.woof.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -42,6 +43,11 @@ public class WoofTemplateEditPart
 	protected TemplateFigure createOfficeFloorFigure() {
 		return WoofPlugin.getSkin().getWoofFigureFactory()
 				.createTemplateFigure(this);
+	}
+
+	@Override
+	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getOutputs());
 	}
 
 	@Override
