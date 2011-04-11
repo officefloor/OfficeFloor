@@ -19,6 +19,7 @@
 package net.officefloor.eclipse.extension.classpath;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.extension.ExtensionUtil;
 
 /**
  * Extensions to {@link OfficeFloorPlugin} may optionally implement this
@@ -27,6 +28,12 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
  * @author Daniel Sagenschneider
  */
 public interface ExtensionClasspathProvider {
+
+	/**
+	 * Extension ID.
+	 */
+	String EXTENSION_ID = ExtensionUtil
+			.getExtensionId("extensionclasspathproviders");
 
 	/**
 	 * Obtains the {@link ClasspathProvision} instances for the extension.

@@ -4,12 +4,15 @@ Bundle-Name: Eclipse Woof
 Bundle-SymbolicName: net.officefloor.woof;singleton:=true
 Bundle-Version: 0.3.1
 Bundle-Vendor: OfficeFloor
+Bundle-Activator: net.officefloor.eclipse.WoofPlugin
+Bundle-ActivationPolicy: lazy
 Require-Bundle: net.officefloor.core;bundle-version="0.3.1",
  net.officefloor.ui;bundle-version="0.3.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
 Bundle-ClassPath: .,
+ officeplugin_socket-1.1.0.jar,
  officeplugin_web-1.1.0.jar
 Import-Package: org.eclipse.core.commands.common,
  org.eclipse.core.resources,
@@ -30,6 +33,4 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui,
  org.eclipse.ui.part,
  org.eclipse.ui.plugin,
- org.osgi.framework;version="1.5.0"
-Bundle-Activator: net.officefloor.eclipse.WoofPlugin
-Bundle-ActivationPolicy: lazy
+ org.osgi.framework

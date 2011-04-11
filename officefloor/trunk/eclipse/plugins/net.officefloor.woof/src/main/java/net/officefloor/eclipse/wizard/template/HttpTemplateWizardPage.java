@@ -19,15 +19,19 @@ package net.officefloor.eclipse.wizard.template;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.eclipse.web.HttpTemplateSectionSourceExtension;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
@@ -49,12 +53,17 @@ import org.eclipse.swt.widgets.Text;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateWizardPage extends WizardPage implements
-		CompilerIssues {
+		CompilerIssues, SectionSourceExtensionContext {
 
 	/**
 	 * {@link IProject}.
 	 */
 	private final IProject project;
+
+	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
 
 	/**
 	 * {@link OfficeFloorCompiler}.
@@ -67,6 +76,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final SectionLoader sectionLoader;
 
 	/**
+	 * {@link PropertyList}.
+	 */
+	private final PropertyList properties;
+
+	/**
 	 * {@link Text} of the {@link HttpTemplate} name.
 	 */
 	private Text templateName;
@@ -75,11 +89,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * Path to the {@link HttpTemplate}.
 	 */
 	private String templatePath;
-
-	/**
-	 * Name of the logic {@link Class}.
-	 */
-	private String logicClassName;
 
 	/**
 	 * URI for the {@link HttpTemplate}.
@@ -92,20 +101,33 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private HttpTemplateInstance instance = null;
 
 	/**
+	 * {@link HttpTemplateSectionSourceExtension}.
+	 */
+	private HttpTemplateSectionSourceExtension templateExtension;
+
+	/**
 	 * Initiate.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
 	 */
 	protected HttpTemplateWizardPage(IProject project) {
 		super("HTTP Template");
 		this.project = project;
 
 		// Obtain the class loader for the project
-		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
+		ClassLoader parent = WoofPlugin.getDefault().getClass()
+				.getClassLoader();
+		this.classLoader = ProjectClassLoader.create(project, parent);
 
 		// Obtain the section loader
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
-		this.compiler.setClassLoader(classLoader);
+		this.compiler.setClassLoader(this.classLoader);
 		this.compiler.setCompilerIssues(this);
 		this.sectionLoader = this.compiler.getSectionLoader();
+
+		// Create the property list
+		this.properties = this.compiler.createPropertyList();
 
 		// Specify the title
 		this.setTitle("Add Template");
@@ -127,16 +149,29 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	@Override
 	public void createControl(Composite parent) {
 
-		// Obtain initial values
-		String initialTemplateName = "";
-		String initialTemplatePath = "";
-		String initialLogicClassName = "";
-		String initialUri = "";
-
 		// Initiate the page
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		page.setLayout(new GridLayout(2, false));
+
+		// Obtain HTTP Template Section Source Extension
+		this.templateExtension = (HttpTemplateSectionSourceExtension) ExtensionUtil
+				.createSectionSourceExtensionMap().get(
+						HttpTemplateSectionSource.class.getName());
+		if (this.templateExtension == null) {
+			// Provide error that not able to obtain extension
+			new Label(page, SWT.NONE)
+					.setText("FATAL ERROR: unable to obtain plug-in extension "
+							+ HttpTemplateSectionSourceExtension.class
+									.getName());
+			this.handleChange();
+			return;
+		}
+
+		// Obtain initial values
+		String initialTemplateName = "";
+		String initialTemplatePath = "";
+		String initialUri = "";
 
 		// Add means to specify HTTP Template Name
 		new Label(page, SWT.NONE).setText("Template name: ");
@@ -174,27 +209,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		path.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		// Provide means to specify logic class
-		new Label(page, SWT.NONE).setText("Logic class: ");
-		this.templatePath = initialTemplatePath;
-		InputHandler<String> logicClass = new InputHandler<String>(page,
-				new ClasspathClassInput(this.project, initialLogicClassName,
-						page.getShell()), new InputListener() {
-					@Override
-					public void notifyValueChanged(Object value) {
-						// Specify the logic class name
-						HttpTemplateWizardPage.this.logicClassName = (value == null ? ""
-								: value.toString());
-						HttpTemplateWizardPage.this.handleChange();
-					}
-
-					@Override
-					public void notifyValueInvalid(String message) {
-						HttpTemplateWizardPage.this.setErrorMessage(message);
-					}
-				});
-		logicClass.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		// Provide means to configure the properties
+		this.templateExtension.createControl(page, this);
 
 		// Add means to specify URI
 		new Label(page, SWT.NONE).setText("URI: ");
@@ -220,7 +236,16 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	/**
 	 * Handles the change.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void handleChange() {
+
+		// Ensure have template extension
+		if (this.templateExtension == null) {
+			this.setErrorMessage("FATAL ERROR: unable to source extension "
+					+ HttpTemplateSectionSourceExtension.class.getName());
+			this.setPageComplete(false);
+			return;
+		}
 
 		// Clear instance (as changing)
 		this.instance = null;
@@ -241,18 +266,22 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		}
 
 		// Ensure have logic class
-		if (EclipseUtil.isBlank(this.logicClassName)) {
+		Property propertyLogicClass = this.properties
+				.getProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME);
+		if ((propertyLogicClass == null)
+				|| (EclipseUtil.isBlank(propertyLogicClass.getValue()))) {
 			this.setErrorMessage("Must specify logic class");
 			this.setPageComplete(false);
 			return;
 		}
 
-		// Load the OfficeSection
-		PropertyList properties = this.compiler.createPropertyList();
-		properties.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME)
-				.setValue(this.logicClassName);
+		// Obtain the HTTP Template Section Source class
+		Class sectionSourceClass = this.templateExtension
+				.getSectionSourceClass();
+
+		// Load the Section Type
 		SectionType sectionType = this.sectionLoader.loadSectionType(
-				HttpTemplateSectionSource.class, this.templatePath, properties);
+				sectionSourceClass, this.templatePath, this.properties);
 		if (sectionType == null) {
 			// Must have section (issue reported as error message)
 			this.setPageComplete(false);
@@ -264,8 +293,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		uriValue = (EclipseUtil.isBlank(uriValue) ? null : uriValue.trim());
 
 		// Create the HTTP Template Instance
+		String logicClassName = propertyLogicClass.getValue();
 		this.instance = new HttpTemplateInstance(name, this.templatePath,
-				this.logicClassName, sectionType, uriValue);
+				logicClassName, sectionType, uriValue);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);
@@ -291,6 +321,25 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.setErrorMessage(issueDescription + " ("
 				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
 				+ ")");
+	}
+
+	/*
+	 * ================= SectionSourceExtensionContext ======================
+	 */
+
+	@Override
+	public IProject getProject() {
+		return this.project;
+	}
+
+	@Override
+	public PropertyList getPropertyList() {
+		return this.properties;
+	}
+
+	@Override
+	public void notifyPropertiesChanged() {
+		this.handleChange();
 	}
 
 }
