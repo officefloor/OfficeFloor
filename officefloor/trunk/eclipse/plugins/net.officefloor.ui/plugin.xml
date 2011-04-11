@@ -12,6 +12,7 @@
 	<extension-point id="officesources" name="Office Source"
 		schema="schema/officesource.exsd" />
  <extension-point id="teamsources" name="Team Source" schema="schema/teamsource.exsd"/>
+ <extension-point id="extensionclasspathproviders" name="Extension Class Path Provider" schema="schema/extensionclasspathproviders.exsd"/>
 	<extension id="net.officefloor.editors" name="Editors"
 		point="org.eclipse.ui.editors">
 		<editor class="net.officefloor.eclipse.desk.DeskEditor"

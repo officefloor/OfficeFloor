@@ -282,6 +282,38 @@ public class ExtensionUtil {
 	}
 
 	/**
+	 * {@link SourceClassExtractor} for the {@link ExtensionClasspathProvider}.
+	 */
+	private static final SourceClassExtractor<ExtensionClasspathProvider> EXTENSION_CLASS_EXTRACTOR = new SourceClassExtractor<ExtensionClasspathProvider>() {
+		@Override
+		public Class<?> getSourceClass(ExtensionClasspathProvider extension) {
+			return extension.getClass();
+		}
+	};
+
+	/**
+	 * Creates the map of {@link ExtensionClasspathProvider} instances by their
+	 * respective class name.
+	 * 
+	 * @return Map of {@link ExtensionClasspathProvider} instances by their
+	 *         respective class name.
+	 */
+	public static Map<String, ExtensionClasspathProvider> createExtensionClasspathProviderMap() {
+		return createSourceExtensionMap(
+				ExtensionClasspathProvider.EXTENSION_ID,
+				ExtensionClasspathProvider.class, EXTENSION_CLASS_EXTRACTOR);
+	}
+
+	/**
+	 * Creates the listing of {@link ExtensionClasspathProvider} instances.
+	 * 
+	 * @return Listing of {@link ExtensionClasspathProvider} instances.
+	 */
+	public static List<ExtensionClasspathProvider> createExtensionClasspathProviderList() {
+		return createSourceExtensionList(createExtensionClasspathProviderMap());
+	}
+
+	/**
 	 * Opens the {@link WorkSource}.
 	 * 
 	 * @param workSourceClassName
@@ -507,6 +539,10 @@ public class ExtensionUtil {
 		// Load the office source extensions
 		loadExtensionClasspathProviders(createOfficeSourceExtensionMap(),
 				OFFICE_SOURCE_CLASS_EXTRACTOR, providers);
+
+		// Load the non-source extension class path providers
+		loadExtensionClasspathProviders(createExtensionClasspathProviderMap(),
+				EXTENSION_CLASS_EXTRACTOR, providers);
 
 		// Return the mapping of extension class name to class path provider
 		return providers;

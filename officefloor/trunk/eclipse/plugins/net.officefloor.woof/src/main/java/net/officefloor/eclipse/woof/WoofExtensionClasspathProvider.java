@@ -20,6 +20,7 @@ package net.officefloor.eclipse.woof;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -32,8 +33,9 @@ public class WoofExtensionClasspathProvider implements
 
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				HttpTemplateSectionSource.class) };
+		return new ClasspathProvision[] {
+				new TypeClasspathProvision(HttpTemplateSectionSource.class),
+				new TypeClasspathProvision(ServerHttpConnection.class) };
 	}
 
 }
