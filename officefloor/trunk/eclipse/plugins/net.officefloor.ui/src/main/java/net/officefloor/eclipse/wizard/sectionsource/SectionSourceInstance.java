@@ -32,6 +32,7 @@ import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -135,11 +136,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 		this.context = context;
 
 		// Obtain the section loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setClassLoader(this.classLoader);
-		compiler.setCompilerIssues(this);
-		this.sectionLoader = compiler.getSectionLoader();
+		this.sectionLoader = this.createSectionLoader(this);
 	}
 
 	/**
@@ -163,39 +160,82 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * Attempts to load the {@link SectionType}.
 	 */
 	public void loadSectionType() {
+		this.loadSectionType(this.sectionLoader, this);
+	}
+
+	/**
+	 * Attempts to load the {@link SectionType} for the
+	 * {@link ClassSectionSource}.
+	 * 
+	 * @param issues
+	 *            {@link CompilerIssues} to be notified of issues in loading.
+	 * @return <code>true</code> if loaded.
+	 */
+	public boolean loadSectionType(CompilerIssues issues) {
+		// Create SectionLoader to use issues
+		SectionLoader sectionLoader = this.createSectionLoader(issues);
+
+		// Load the Section Type returning whether successful
+		return this.loadSectionType(sectionLoader, issues);
+	}
+
+	/**
+	 * Attempts to load the {@link SectionType}.
+	 * 
+	 * @param loader
+	 *            {@link SectionLoader}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return <code>true</code> if loaded.
+	 */
+	private boolean loadSectionType(SectionLoader loader, CompilerIssues issues) {
 
 		// Ensure have name
 		if (EclipseUtil.isBlank(this.sectionName)) {
 			this.sectionType = null;
 			this.officeSection = null;
-			this.setErrorMessage("Must specify section name");
-			return; // must have name
+			issues.addIssue(null, null, null, null, "Must specify section name");
+			return false; // must have name
 		}
 
 		// Ensure have location
 		if (EclipseUtil.isBlank(this.sectionLocation)) {
 			this.sectionType = null;
 			this.officeSection = null;
-			this.setErrorMessage("Must specify section location");
-			return; // must have location
+			issues.addIssue(null, null, null, null,
+					"Must specify section location");
+			return false; // must have location
 		}
 
 		// Ensure have section source class
 		if (this.sectionSourceClass == null) {
-			return; // page controls not yet loaded
+			// Attempt to load section source class
+			if (!this.loadSectionSourceClass(null, issues)) {
+				return false; // not able to load section source class
+			}
+		}
+
+		// Ensure have properties
+		if (this.properties == null) {
+			this.properties = OfficeFloorCompiler.newPropertyList();
 		}
 
 		// Load the section type or office section
 		if (this.context.isLoadType()) {
 			// Attempt to load the section type
-			this.sectionType = this.sectionLoader.loadSectionType(
-					this.sectionSourceClass, this.sectionLocation,
-					this.properties);
+			this.sectionType = loader.loadSectionType(this.sectionSourceClass,
+					this.sectionLocation, this.properties);
+
+			// Return indicating if loaded
+			return (this.sectionType != null);
 		} else {
 			// Attempt to load the office section
-			this.officeSection = this.sectionLoader.loadOfficeSection(
-					this.sectionName, this.sectionSourceClass,
-					this.sectionLocation, this.properties);
+			this.officeSection = loader.loadOfficeSection(this.sectionName,
+					this.sectionSourceClass, this.sectionLocation,
+					this.properties);
+
+			// Return indicating if loaded
+			return (this.officeSection != null);
 		}
 	}
 
@@ -284,40 +324,17 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * @param context
 	 *            {@link SectionSourceInstanceContext}.
 	 */
-	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {
 
-		// Obtain the section source class
-		if (this.sectionSourceExtension != null) {
-			this.sectionSourceClass = this.sectionSourceExtension
-					.getSectionSourceClass();
-			if (this.sectionSourceClass == null) {
-				page.setLayout(new GridLayout());
-				Label label = new Label(page, SWT.NONE);
-				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.sectionSourceClassName);
-				return;
-			}
-		} else {
-			try {
-				this.sectionSourceClass = (Class<? extends SectionSource>) this.classLoader
-						.loadClass(this.sectionSourceClassName);
-			} catch (Throwable ex) {
-				page.setLayout(new GridLayout());
-				Label label = new Label(page, SWT.NONE);
-				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.sectionSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
-				return;
-			}
+		// Obtain the section source class.
+		// (Always attempt to obtain to provide details on page)
+		if (!this.loadSectionSourceClass(page, null)) {
+			return; // did not load SectionSource class
 		}
 
 		// Obtain specification properties for section source
 		this.properties = this.sectionLoader
-				.loadSpecification(sectionSourceClass);
+				.loadSpecification(this.sectionSourceClass);
 
 		// Determine if have extension
 		if (this.sectionSourceExtension != null) {
@@ -348,6 +365,75 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 
 		// Notify properties changed to set initial state
 		this.notifyPropertiesChanged();
+	}
+
+	/**
+	 * Loads the {@link SectionSource} class.
+	 * 
+	 * @param page
+	 *            {@link Composite} to provide error if unable to load.
+	 * @param issues
+	 *            {@link CompilerIssues} to provide error if unable to load.
+	 * @return <code>true</code> if loaded the {@link SectionSource} class.
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean loadSectionSourceClass(Composite page, CompilerIssues issues) {
+
+		// Obtain the section source class
+		String errorMessage = null;
+		if (this.sectionSourceExtension != null) {
+			this.sectionSourceClass = this.sectionSourceExtension
+					.getSectionSourceClass();
+			if (this.sectionSourceClass == null) {
+				errorMessage = "Extension did not provide class "
+						+ this.sectionSourceClassName;
+			}
+		} else {
+			try {
+				this.sectionSourceClass = (Class<? extends SectionSource>) this.classLoader
+						.loadClass(this.sectionSourceClassName);
+			} catch (Throwable ex) {
+				errorMessage = "Could not find class "
+						+ this.sectionSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": "
+						+ ex.getMessage();
+			}
+		}
+
+		// Handle error
+		if (!EclipseUtil.isBlank(errorMessage)) {
+			if (page != null) {
+				// Provide error to page
+				page.setLayout(new GridLayout());
+				Label label = new Label(page, SWT.NONE);
+				label.setForeground(ColorConstants.red);
+				label.setText(errorMessage);
+			} else if (issues != null) {
+				// Provide error to issues
+				issues.addIssue(null, null, null, null, errorMessage);
+			} else {
+				throw new IllegalStateException(
+						"Must provide either Page or CompilerIssues");
+			}
+		}
+
+		// Return whether loaded
+		return (this.sectionSourceClass != null);
+	}
+
+	/**
+	 * Creates the {@link SectionLoader}.
+	 * 
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return {@link SectionLoader}.
+	 */
+	private SectionLoader createSectionLoader(CompilerIssues issues) {
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setClassLoader(this.classLoader);
+		compiler.setCompilerIssues(issues);
+		return compiler.getSectionLoader();
 	}
 
 	/*

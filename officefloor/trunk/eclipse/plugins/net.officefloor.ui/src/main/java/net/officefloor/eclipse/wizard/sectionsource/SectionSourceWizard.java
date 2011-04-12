@@ -322,13 +322,20 @@ public class SectionSourceWizard extends Wizard implements
 			this.currentPropertiesPage = this.propertiesPages
 					.get(this.selectedSectionSourceInstance);
 
-			// Activate the page
-			this.currentPropertiesPage.activatePage();
-
 			// Load section type to set state and return as next page
-			return this.currentPropertiesPage;
+			if (!this.listingPage.isClassSectionSource()) {
+				// Not ClassSectionSource, so activate properties page
+				this.currentPropertiesPage.activatePage();
 
-		} else if (page == this.currentPropertiesPage) {
+				// Obtain properties
+				return this.currentPropertiesPage;
+			} else {
+				// Skip properties page for ClassSectionSource
+				page = this.currentPropertiesPage;
+			}
+		}
+
+		if (page == this.currentPropertiesPage) {
 			// Determine if refactoring
 			if (this.officeSectionAlignPage != null) {
 				// Refactoring office section
@@ -354,12 +361,15 @@ public class SectionSourceWizard extends Wizard implements
 			return false;
 		}
 
-		// Ensure have current properties page and is complete
-		if (this.currentPropertiesPage == null) {
-			return false;
-		}
-		if (!this.currentPropertiesPage.isPageComplete()) {
-			return false;
+		// Properties only if NOT ClassSectionSource
+		if (!this.listingPage.isClassSectionSource()) {
+			// Ensure have current properties page and is complete
+			if (this.currentPropertiesPage == null) {
+				return false;
+			}
+			if (!this.currentPropertiesPage.isPageComplete()) {
+				return false;
+			}
 		}
 
 		// All pages complete, may finish
