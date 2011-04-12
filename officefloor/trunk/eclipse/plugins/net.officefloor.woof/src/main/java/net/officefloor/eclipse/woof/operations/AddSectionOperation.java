@@ -45,7 +45,7 @@ public class AddSectionOperation extends
 	 *            {@link WoofChanges}.
 	 */
 	public AddSectionOperation(WoofChanges woofChanges) {
-		super("Add Section", WoofEditPart.class, woofChanges);
+		super("Add section", WoofEditPart.class, woofChanges);
 	}
 
 	/*

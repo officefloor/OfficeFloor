@@ -48,4 +48,33 @@ public interface WoofFigureFactory {
 	TemplateOutputFigure createTemplateOutputFigure(
 			TemplateOutputFigureContext context);
 
+	/**
+	 * Creates the {@link SectionFigure}.
+	 * 
+	 * @param context
+	 *            {@link SectionFigureContext}.
+	 * @return {@link SectionFigure}.
+	 */
+	SectionFigure createSectionFigure(SectionFigureContext context);
+
+	/**
+	 * Creates the {@link SectionInputFigure}.
+	 * 
+	 * @param context
+	 *            {@link SectionInputFigureContext}.
+	 * @return {@link SectionInputFigure}.
+	 */
+	SectionInputFigure createSectionInputFigure(
+			SectionInputFigureContext context);
+
+	/**
+	 * Creates the {@link SectionOutputFigure}.
+	 * 
+	 * @param context
+	 *            {@link SectionOutputFigureContext}.
+	 * @return {@link SectionOutputFigure}.
+	 */
+	SectionOutputFigure createSectionOutputFigure(
+			SectionOutputFigureContext context);
+
 }

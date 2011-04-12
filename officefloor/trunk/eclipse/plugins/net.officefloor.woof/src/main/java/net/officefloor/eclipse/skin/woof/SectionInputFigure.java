@@ -15,33 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.woof;
 
-import org.eclipse.swt.graphics.Color;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.woof.WoofSectionInputModel;
 
 /**
- * {@link Color} values for the {@link StandardWoofSkin}.
+ * {@link OfficeFloorFigure} for the {@link WoofSectionInputModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StandardWoofColours {
-
-	/**
-	 * Template (#bbe0ff).
-	 * 
-	 * @return Template.
-	 */
-	public static Color TEMPLATE() {
-		return new Color(null, 187, 224, 255);
-	}
-
-	/**
-	 * Section (#b1e8b1);
-	 * 
-	 * @return Section.
-	 */
-	public static Color SECTION() {
-		return new Color(null, 177, 232, 177);
-	}
-
+public interface SectionInputFigure extends OfficeFloorFigure {
 }
