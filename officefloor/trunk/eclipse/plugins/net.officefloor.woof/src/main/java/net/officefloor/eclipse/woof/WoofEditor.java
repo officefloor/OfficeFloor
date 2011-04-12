@@ -32,6 +32,7 @@ import net.officefloor.eclipse.woof.editparts.WoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputEditPart;
+import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
 import net.officefloor.model.change.Change;
@@ -116,6 +117,7 @@ public class WoofEditor extends
 		// Add actions
 		list.add(new AddTemplateOperation(woofChanges));
 		list.add(new AddSectionOperation(woofChanges));
+		list.add(new AddResourceOperation(woofChanges));
 	}
 
 	@Override

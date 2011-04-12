@@ -10,9 +10,7 @@
 	<artifactId>net.officefloor.woof</artifactId>
 	<name>Eclipse Woof Plug-in</name>
 	<description>WoOF user interface Eclipse plug-in</description>
-	<!--  
 	<packaging>eclipse-plugin</packaging>
-	-->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
