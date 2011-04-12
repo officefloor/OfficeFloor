@@ -106,8 +106,8 @@ public class ManagedObjectSourceWizard extends Wizard implements
 					ManagedObjectSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				managedObjectSourceInstances.put(className,
 						new ManagedObjectSourceInstance(className, null,

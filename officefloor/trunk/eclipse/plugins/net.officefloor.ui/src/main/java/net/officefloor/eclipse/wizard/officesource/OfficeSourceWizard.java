@@ -109,8 +109,8 @@ public class OfficeSourceWizard extends Wizard implements
 					OfficeSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				officeSourceInstances.put(className, new OfficeSourceInstance(
 						className, null, classLoader, project, context));

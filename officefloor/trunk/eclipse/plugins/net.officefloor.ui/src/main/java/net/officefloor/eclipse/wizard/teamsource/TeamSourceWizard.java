@@ -108,8 +108,8 @@ public class TeamSourceWizard extends Wizard implements
 					TeamSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				teamSourceInstances.put(className, new TeamSourceInstance(
 						className, null, classLoader, project, context));

@@ -111,8 +111,8 @@ public class AdministratorSourceWizard extends Wizard implements
 					AdministratorSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				administratorSourceInstances.put(className,
 						new AdministratorSourceInstance(className, null,

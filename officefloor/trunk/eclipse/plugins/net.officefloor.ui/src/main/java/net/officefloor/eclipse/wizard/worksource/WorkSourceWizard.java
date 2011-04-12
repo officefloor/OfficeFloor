@@ -106,8 +106,8 @@ public class WorkSourceWizard extends Wizard implements
 					WorkSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				workSourceInstances.put(className, new WorkSourceInstance(
 						className, null, classLoader, project, context));

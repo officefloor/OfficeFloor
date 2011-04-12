@@ -17,35 +17,14 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.model.woof.WoofModel;
-
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.woof.WoofTemplateOutputModel;
 
 /**
- * Factory to create the {@link IFigure} instances for the skin of the
- * {@link WoofModel}.
+ * {@link OfficeFloorFigure} for the {@link WoofTemplateOutputModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofFigureFactory {
-
-	/**
-	 * Creates the {@link TemplateFigure}.
-	 * 
-	 * @param context
-	 *            {@link TemplateFigureContext}.
-	 * @return {@link TemplateFigure}.
-	 */
-	TemplateFigure createTemplateFigure(TemplateFigureContext context);
-
-	/**
-	 * Creates the {@link TemplateOutputFigure}.
-	 * 
-	 * @param context
-	 *            {@link TemplateOutputFigureContext}.
-	 * @return {@link TemplateOutputFigure}.
-	 */
-	TemplateOutputFigure createTemplateOutputFigure(
-			TemplateOutputFigureContext context);
+public interface TemplateOutputFigure extends OfficeFloorFigure {
 
 }
