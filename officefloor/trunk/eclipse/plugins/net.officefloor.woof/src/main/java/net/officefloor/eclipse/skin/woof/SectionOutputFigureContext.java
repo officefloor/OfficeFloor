@@ -15,33 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.woof;
 
-import org.eclipse.swt.graphics.Color;
+import net.officefloor.model.woof.WoofSectionOutputModel;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link Color} values for the {@link StandardWoofSkin}.
+ * Context for the {@link WoofSectionOutputModel} {@link IFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class StandardWoofColours {
+public interface SectionOutputFigureContext {
 
 	/**
-	 * Template (#bbe0ff).
+	 * Obtains the name of the section output.
 	 * 
-	 * @return Template.
+	 * @return Name of the section output.
 	 */
-	public static Color TEMPLATE() {
-		return new Color(null, 187, 224, 255);
-	}
-
-	/**
-	 * Section (#b1e8b1);
-	 * 
-	 * @return Section.
-	 */
-	public static Color SECTION() {
-		return new Color(null, 177, 232, 177);
-	}
+	String getSectionOutputName();
 
 }
