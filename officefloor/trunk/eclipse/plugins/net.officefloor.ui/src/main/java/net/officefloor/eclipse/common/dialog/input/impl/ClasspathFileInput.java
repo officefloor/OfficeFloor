@@ -21,10 +21,12 @@ package net.officefloor.eclipse.common.dialog.input.impl;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.bindings.keys.KeyStroke;
@@ -43,11 +45,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 
 /**
  * {@link Input} to obtain an file from the class path.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClasspathFileInput implements Input<Composite> {
@@ -74,7 +78,7 @@ public class ClasspathFileInput implements Input<Composite> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param container
 	 *            {@link IContainer} to find the file within.
 	 * @param initialPath
@@ -91,7 +95,7 @@ public class ClasspathFileInput implements Input<Composite> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param container
 	 *            {@link IContainer} to find the file within.
 	 * @param shell
@@ -99,6 +103,20 @@ public class ClasspathFileInput implements Input<Composite> {
 	 */
 	public ClasspathFileInput(IContainer container, Shell shell) {
 		this(container, null, shell);
+	}
+
+	/**
+	 * Convenience constructor to use the {@link IProject} and {@link Shell} of
+	 * the {@link IEditorInput}.
+	 * 
+	 * @param editor
+	 *            {@link IEditorInput}.
+	 * @param shell
+	 *            {@link Shell}.
+	 */
+	public ClasspathFileInput(IEditorPart editor) {
+		this(ProjectConfigurationContext.getProject(editor.getEditorInput()),
+				editor.getEditorSite().getShell());
 	}
 
 	/*
@@ -184,7 +202,7 @@ public class ClasspathFileInput implements Input<Composite> {
 
 	/**
 	 * Does the selection of a file.
-	 *
+	 * 
 	 * @param filter
 	 *            Filter.
 	 */
