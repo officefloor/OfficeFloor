@@ -47,6 +47,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.PrivateSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -465,6 +466,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	/**
 	 * {@link ClassSectionSource} specific to the HTTP template.
 	 */
+	@PrivateSource
 	public class HttpTemplateClassSectionSource extends ClassSectionSource {
 
 		/**

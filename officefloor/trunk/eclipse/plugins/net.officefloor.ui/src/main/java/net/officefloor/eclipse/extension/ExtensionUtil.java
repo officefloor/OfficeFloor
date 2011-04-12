@@ -45,6 +45,7 @@ import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.PrivateSource;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -661,8 +662,8 @@ public class ExtensionUtil {
 					continue; // carry on and not include
 				}
 
-				// Ignore if test source
-				if (isTestSource(sourceClass)) {
+				// Determine if ignore source
+				if (isIgnoreSource(sourceClass)) {
 					continue;
 				}
 
@@ -681,23 +682,31 @@ public class ExtensionUtil {
 	}
 
 	/**
-	 * Indicates if the input {@link Class} is a {@link TestSource} (in other
-	 * words annotated with {@link TestSource}).
+	 * Indicates if the input {@link Class} is to be ignored (in other words
+	 * annotated with {@link TestSource} or {@link PrivateSource}).
 	 * 
 	 * @param sourceClass
 	 *            {@link Class} to determine if a {@link TestSource}.
 	 * @return <code>true</code> if annotated with {@link TestSource}.
 	 */
-	public static boolean isTestSource(Class<?> sourceClass) {
+	public static boolean isIgnoreSource(Class<?> sourceClass) {
 
-		// Do textual comparison (as not may be different class loaders)
+		// Do textual comparison (as may be different class loaders)
 		String testSourceName = TestSource.class.getName();
+		String privateSourceName = PrivateSource.class.getName();
 
 		// Obtain the tags for the source class
 		for (Annotation annotation : sourceClass.getAnnotations()) {
 			Class<?> annotationClass = annotation.annotationType();
+
+			// Ignore if a test source
 			if (testSourceName.equals(annotationClass.getName())) {
-				return true; // is a test source
+				return true;
+			}
+
+			// Ignore if a private source
+			if (privateSourceName.equals(annotationClass.getName())) {
+				return true;
 			}
 		}
 
@@ -707,7 +716,7 @@ public class ExtensionUtil {
 
 	/**
 	 * Convenience method to determine if the source class is annotated with
-	 * {@link TestSource}.
+	 * {@link TestSource} or {@link PrivateSource}.
 	 * 
 	 * @param sourceClassName
 	 *            Fully qualified name of the source class.
@@ -715,20 +724,18 @@ public class ExtensionUtil {
 	 *            {@link ClassLoader} to obtain the source class.
 	 * @return <code>true</code> if annotated with {@link TestSource}.
 	 */
-	public static boolean isTestSource(String sourceClassName,
+	public static boolean isIgnoreSource(String sourceClassName,
 			ClassLoader classLoader) {
 		try {
 			// Obtain the source class
 			Class<?> sourceClass = classLoader.loadClass(sourceClassName);
 
-			// Return whether a test source
-			return isTestSource(sourceClass);
+			// Return whether a source to ignore
+			return isIgnoreSource(sourceClass);
 
 		} catch (Throwable ex) {
-			LogUtil.logError(
-					"Failed to load source class " + sourceClassName
-							+ " to determine if annotated with "
-							+ TestSource.class.getSimpleName(), ex);
+			LogUtil.logError("Failed to load source class " + sourceClassName
+					+ " to determine if annotated to be ignored", ex);
 			return false; // benefit of the doubt that not source class
 		}
 	}

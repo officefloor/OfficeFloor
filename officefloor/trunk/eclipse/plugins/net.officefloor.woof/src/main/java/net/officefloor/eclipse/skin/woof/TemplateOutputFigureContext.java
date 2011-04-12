@@ -17,35 +17,23 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
-import net.officefloor.model.woof.WoofModel;
+import net.officefloor.model.woof.WoofTemplateOutputModel;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.eclipse.draw2d.IFigure;
 
 /**
- * Factory to create the {@link IFigure} instances for the skin of the
- * {@link WoofModel}.
+ * Context for the {@link WoofTemplateOutputModel} {@link IFigure}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofFigureFactory {
+public interface TemplateOutputFigureContext {
 
 	/**
-	 * Creates the {@link TemplateFigure}.
+	 * Obtains the name of the {@link HttpTemplate} output.
 	 * 
-	 * @param context
-	 *            {@link TemplateFigureContext}.
-	 * @return {@link TemplateFigure}.
+	 * @return Name of the {@link HttpTemplate} output.
 	 */
-	TemplateFigure createTemplateFigure(TemplateFigureContext context);
-
-	/**
-	 * Creates the {@link TemplateOutputFigure}.
-	 * 
-	 * @param context
-	 *            {@link TemplateOutputFigureContext}.
-	 * @return {@link TemplateOutputFigure}.
-	 */
-	TemplateOutputFigure createTemplateOutputFigure(
-			TemplateOutputFigureContext context);
+	String getTemplateOutputName();
 
 }

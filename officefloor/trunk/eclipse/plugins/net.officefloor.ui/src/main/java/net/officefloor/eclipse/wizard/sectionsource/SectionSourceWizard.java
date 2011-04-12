@@ -145,8 +145,8 @@ public class SectionSourceWizard extends Wizard implements
 					SectionSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
-				if (ExtensionUtil.isTestSource(className, classLoader)) {
-					continue; // ignore test sources
+				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
+					continue; // ignore source
 				}
 				sectionSourceInstances.put(className,
 						new SectionSourceInstance(className, null, classLoader,

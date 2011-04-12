@@ -28,6 +28,8 @@ import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputEditPart;
+import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -94,6 +96,7 @@ public class WoofEditor extends
 		// Entities
 		map.put(WoofModel.class, WoofEditPart.class);
 		map.put(WoofTemplateModel.class, WoofTemplateEditPart.class);
+		map.put(WoofTemplateOutputModel.class, WoofTemplateOutputEditPart.class);
 	}
 
 	@Override
@@ -104,6 +107,7 @@ public class WoofEditor extends
 
 		// Add actions
 		list.add(new AddTemplateOperation(woofChanges));
+		list.add(new AddSectionOperation(woofChanges));
 	}
 
 	@Override
