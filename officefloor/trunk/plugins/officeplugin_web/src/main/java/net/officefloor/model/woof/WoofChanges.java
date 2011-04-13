@@ -270,4 +270,71 @@ public interface WoofChanges {
 	Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
 			WoofSectionOutputToWoofResourceModel link);
 
+	/**
+	 * Links the {@link WoofExceptionModel} to the {@link WoofTemplateModel} .
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(
+			WoofExceptionModel exception, WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofExceptionToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofExceptionToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(
+			WoofExceptionToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofExceptionModel} to the {@link WoofSectionInputModel}
+	 * .
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(
+			WoofExceptionModel sectionOutput, WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofExceptionToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofExceptionToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
+			WoofExceptionToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofExceptionModel} to the {@link WoofResourceModel} .
+	 * 
+	 * @param exception
+	 *            {@link WoofExceptionModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(
+			WoofExceptionModel sectionOutput, WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofExceptionToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofExceptionToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(
+			WoofExceptionToWoofResourceModel link);
+
 }
