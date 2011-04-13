@@ -545,4 +545,102 @@ public class WoofChangesImpl implements WoofChanges {
 		};
 	}
 
+	@Override
+	public Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
+			WoofTemplateOutputModel templateOutput, WoofTemplateModel template) {
+		// TODO implement WoofChanges.linkTemplateOutputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkTemplateOutputToTemplate");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofTemplateModel> removeTemplateOuputToTemplate(
+			WoofTemplateOutputToWoofTemplateModel link) {
+		// TODO implement WoofChanges.removeTemplateOuputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeTemplateOuputToTemplate");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofSectionInputModel> linkTemplateOutputToSectionInput(
+			WoofTemplateOutputModel templateOutput,
+			WoofSectionInputModel sectionInput) {
+		// TODO implement WoofChanges.linkTemplateOutputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkTemplateOutputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofSectionInputModel> removeTemplateOuputToSectionInput(
+			WoofTemplateOutputToWoofSectionInputModel link) {
+		// TODO implement WoofChanges.removeTemplateOuputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeTemplateOuputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofResourceModel> linkTemplateOutputToResource(
+			WoofTemplateOutputModel templateOutput, WoofResourceModel resource) {
+		// TODO implement WoofChanges.linkTemplateOutputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkTemplateOutputToResource");
+	}
+
+	@Override
+	public Change<WoofTemplateOutputToWoofResourceModel> removeTemplateOuputToResource(
+			WoofTemplateOutputToWoofResourceModel link) {
+		// TODO implement WoofChanges.removeTemplateOuputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeTemplateOuputToResource");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofTemplateModel> linkSectionOutputToTemplate(
+			WoofSectionOutputModel sectionOutput, WoofTemplateModel template) {
+		// TODO implement WoofChanges.linkSectionOutputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkSectionOutputToTemplate");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofTemplateModel> removeSectionOuputToTemplate(
+			WoofSectionOutputToWoofTemplateModel link) {
+		// TODO implement WoofChanges.removeSectionOuputToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeSectionOuputToTemplate");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofSectionInputModel> linkSectionOutputToSectionInput(
+			WoofSectionOutputModel sectionOutput,
+			WoofSectionInputModel sectionInput) {
+		// TODO implement WoofChanges.linkSectionOutputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkSectionOutputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofSectionInputModel> removeSectionOuputToSectionInput(
+			WoofSectionOutputToWoofSectionInputModel link) {
+		// TODO implement WoofChanges.removeSectionOuputToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeSectionOuputToSectionInput");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofResourceModel> linkSectionOutputToResource(
+			WoofSectionOutputModel sectionOutput, WoofResourceModel resource) {
+		// TODO implement WoofChanges.linkSectionOutputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkSectionOutputToResource");
+	}
+
+	@Override
+	public Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
+			WoofSectionOutputToWoofResourceModel link) {
+		// TODO implement WoofChanges.removeSectionOuputToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeSectionOuputToResource");
+	}
+
 }

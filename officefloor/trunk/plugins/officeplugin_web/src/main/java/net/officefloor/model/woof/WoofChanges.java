@@ -130,4 +130,144 @@ public interface WoofChanges {
 	 */
 	Change<WoofExceptionModel> removeException(WoofExceptionModel exception);
 
+	/**
+	 * Links the {@link WoofTemplateOutputModel} to the
+	 * {@link WoofTemplateModel}.
+	 * 
+	 * @param templateOutput
+	 *            {@link WoofTemplateOutputModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
+			WoofTemplateOutputModel templateOutput, WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofTemplateOutputToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofTemplateOutputToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofTemplateOutputToWoofTemplateModel> removeTemplateOuputToTemplate(
+			WoofTemplateOutputToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofTemplateOutputModel} to the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param templateOutput
+	 *            {@link WoofTemplateOutputModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateOutputToWoofSectionInputModel> linkTemplateOutputToSectionInput(
+			WoofTemplateOutputModel templateOutput,
+			WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofTemplateOutputToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofTemplateOutputToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofTemplateOutputToWoofSectionInputModel> removeTemplateOuputToSectionInput(
+			WoofTemplateOutputToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofTemplateOutputModel} to the
+	 * {@link WoofResourceModel}.
+	 * 
+	 * @param templateOutput
+	 *            {@link WoofTemplateOutputModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofTemplateOutputToWoofResourceModel> linkTemplateOutputToResource(
+			WoofTemplateOutputModel templateOutput, WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofTemplateOutputToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofTemplateOutputToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofTemplateOutputToWoofResourceModel> removeTemplateOuputToResource(
+			WoofTemplateOutputToWoofResourceModel link);
+
+	/**
+	 * Links the {@link WoofSectionOutputModel} to the {@link WoofTemplateModel}
+	 * .
+	 * 
+	 * @param sectionOutput
+	 *            {@link WoofSectionOutputModel}.
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSectionOutputToWoofTemplateModel> linkSectionOutputToTemplate(
+			WoofSectionOutputModel sectionOutput, WoofTemplateModel template);
+
+	/**
+	 * Removes the {@link WoofSectionOutputToWoofTemplateModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSectionOutputToWoofTemplateModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSectionOutputToWoofTemplateModel> removeSectionOuputToTemplate(
+			WoofSectionOutputToWoofTemplateModel link);
+
+	/**
+	 * Links the {@link WoofSectionOutputModel} to the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param sectionOutput
+	 *            {@link WoofSectionOutputModel}.
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSectionOutputToWoofSectionInputModel> linkSectionOutputToSectionInput(
+			WoofSectionOutputModel sectionOutput,
+			WoofSectionInputModel sectionInput);
+
+	/**
+	 * Removes the {@link WoofSectionOutputToWoofSectionInputModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSectionOutputToWoofSectionInputModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSectionOutputToWoofSectionInputModel> removeSectionOuputToSectionInput(
+			WoofSectionOutputToWoofSectionInputModel link);
+
+	/**
+	 * Links the {@link WoofSectionOutputModel} to the {@link WoofResourceModel}
+	 * .
+	 * 
+	 * @param sectionOutput
+	 *            {@link WoofSectionOutputModel}.
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @return {@link Change} to make the link.
+	 */
+	Change<WoofSectionOutputToWoofResourceModel> linkSectionOutputToResource(
+			WoofSectionOutputModel sectionOutput, WoofResourceModel resource);
+
+	/**
+	 * Removes the {@link WoofSectionOutputToWoofResourceModel}.
+	 * 
+	 * @param link
+	 *            {@link WoofSectionOutputToWoofResourceModel}.
+	 * @return {@link Change} to remove the link.
+	 */
+	Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
+			WoofSectionOutputToWoofResourceModel link);
+
 }

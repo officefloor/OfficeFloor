@@ -1,0 +1,24 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" />
+	</templates>
+
+	<sections>
+		<section name="A">
+			<input name="INPUT" />
+			<output name="OUTPUT" />
+		</section>
+		<section name="B">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<input section="B" input="INPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<resources>
+		<resource name="RESOURCE" />
+	</resources>
+
+</woof>
