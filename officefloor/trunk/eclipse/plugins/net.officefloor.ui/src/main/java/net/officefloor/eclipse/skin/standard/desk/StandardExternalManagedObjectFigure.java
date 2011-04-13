@@ -18,18 +18,20 @@
 
 package net.officefloor.eclipse.skin.standard.desk;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.EllipseFigure;
 import net.officefloor.eclipse.skin.standard.figure.ToolTipFigure;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+
 /**
  * Standard {@link ExternalManagedObjectFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardExternalManagedObjectFigure extends
@@ -42,22 +44,22 @@ public class StandardExternalManagedObjectFigure extends
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 */
 	public StandardExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
-		net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure mo = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-				context.getExternalManagedObjectName());
+		EllipseFigure mo = new EllipseFigure(
+				context.getExternalManagedObjectName(),
+				StandardOfficeFloorColours.EXTERNAL_OBJECT());
 		this.externalManagedObjectName = mo.getLabel();
 
 		// Provide tool tip
-		mo
-				.setToolTip(new ToolTipFigure(
-						"External Managed Object\n\nObject type: "
-								+ context.getObjectTypeName()
-								+ "\n\nAllows linking to a Managed Object not within this Desk."));
+		mo.setToolTip(new ToolTipFigure(
+				"External Managed Object\n\nObject type: "
+						+ context.getObjectTypeName()
+						+ "\n\nAllows linking to a Managed Object not within this Desk."));
 
 		this.setFigure(mo);
 	}

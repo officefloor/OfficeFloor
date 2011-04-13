@@ -77,4 +77,22 @@ public interface WoofFigureFactory {
 	SectionOutputFigure createSectionOutputFigure(
 			SectionOutputFigureContext context);
 
+	/**
+	 * Creates the {@link ResourceFigure}.
+	 * 
+	 * @param context
+	 *            {@link ResourceFigureContext}.
+	 * @return {@link ResourceFigure}.
+	 */
+	ResourceFigure createResourceFigure(ResourceFigureContext context);
+
+	/**
+	 * Creates the {@link ExceptionFigure}.
+	 * 
+	 * @param context
+	 *            {@link ExceptionFigureContext}.
+	 * @return {@link ExceptionFigure}.
+	 */
+	ExceptionFigure createExceptionFigure(ExceptionFigureContext context);
+
 }

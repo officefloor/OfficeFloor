@@ -23,6 +23,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * Popuates the input bean by user entered information via a dialog window.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class BeanDialog extends Dialog {
@@ -63,6 +64,11 @@ public class BeanDialog extends Dialog {
 	 * Properties not to be populated.
 	 */
 	private final String[] ignoreProperties;
+
+	/**
+	 * Types to be ignored.
+	 */
+	private final List<String> ignoreTypes = new LinkedList<String>();
 
 	/**
 	 * {@link ValueTranslatorRegistry}.
@@ -91,7 +97,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param parentShell
 	 *            Parent shell.
 	 * @param bean
@@ -112,7 +118,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Initiate without the ability to load {@link Class} instances.
-	 *
+	 * 
 	 * @param parentShell
 	 *            Parent shell.
 	 * @param bean
@@ -127,7 +133,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Populates the bean.
-	 *
+	 * 
 	 * @return <code>true<code> if bean is populated.
 	 */
 	public boolean populate() {
@@ -140,8 +146,18 @@ public class BeanDialog extends Dialog {
 	}
 
 	/**
+	 * Adds type to be ignored.
+	 * 
+	 * @param type
+	 *            Type to be ignored. May allow multiple in the one statement.
+	 */
+	public void addIgnoreType(Class<?> type) {
+		this.ignoreTypes.add(type.getName());
+	}
+
+	/**
 	 * Registers a specialised {@link Input} for the property name.
-	 *
+	 * 
 	 * @param propertyName
 	 *            Name of property.
 	 * @param builder
@@ -164,7 +180,7 @@ public class BeanDialog extends Dialog {
 	 * <p>
 	 * Named {@link ValueTranslator} instances override typed
 	 * {@link ValueTranslator} instances.
-	 *
+	 * 
 	 * @param propertyName
 	 *            Name of property.
 	 * @param translator
@@ -177,7 +193,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Obtains the {@link Control} of the dialog area.
-	 *
+	 * 
 	 * @return Dialog area.
 	 */
 	protected Control getDialogArea() {
@@ -201,8 +217,17 @@ public class BeanDialog extends Dialog {
 					&& (Void.TYPE.equals(method.getReturnType()))
 					&& (methodName.startsWith("set"))
 					&& (method.getParameterTypes().length == 1)) {
-				// Add mutator as property
+
+				// Determine if ignore type
+				Class<?> propertyType = method.getParameterTypes()[0];
+				if (this.ignoreTypes.contains(propertyType.getName())) {
+					continue; // ignore property
+				}
+
+				// Obtain the property name
 				String propertyName = this.getPropertyName(method.getName());
+
+				// Add mutator as property
 				properties.add(propertyName);
 			}
 		}
@@ -292,7 +317,7 @@ public class BeanDialog extends Dialog {
 
 	/**
 	 * Obtains the property name from the input accessor/mutator method name.
-	 *
+	 * 
 	 * @param methodName
 	 *            Accessor/mutator method name.
 	 * @return Property name for the method name.
@@ -341,7 +366,7 @@ public class BeanDialog extends Dialog {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param inputHandler
 		 *            {@link PropertyInputHandler} for this property.
 		 * @param errorText
@@ -406,8 +431,7 @@ public class BeanDialog extends Dialog {
 							value = "";
 						} else {
 							// Delete the last character
-							value = current
-									.substring(0, (current.length() - 1));
+							value = current.substring(0, (current.length() - 1));
 						}
 					} else {
 						value = current + e.text;

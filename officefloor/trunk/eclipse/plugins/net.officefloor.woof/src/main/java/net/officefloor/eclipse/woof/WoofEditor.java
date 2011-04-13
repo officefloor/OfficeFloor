@@ -27,11 +27,14 @@ import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphic
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputEditPart;
+import net.officefloor.eclipse.woof.operations.AddExceptionOperation;
 import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
@@ -106,6 +109,8 @@ public class WoofEditor extends
 		map.put(WoofSectionModel.class, WoofSectionEditPart.class);
 		map.put(WoofSectionInputModel.class, WoofSectionInputEditPart.class);
 		map.put(WoofSectionOutputModel.class, WoofSectionOutputEditPart.class);
+		map.put(WoofResourceModel.class, WoofResourceEditPart.class);
+		map.put(WoofExceptionModel.class, WoofExceptionEditPart.class);
 	}
 
 	@Override
@@ -118,6 +123,7 @@ public class WoofEditor extends
 		list.add(new AddTemplateOperation(woofChanges));
 		list.add(new AddSectionOperation(woofChanges));
 		list.add(new AddResourceOperation(woofChanges));
+		list.add(new AddExceptionOperation(woofChanges));
 	}
 
 	@Override

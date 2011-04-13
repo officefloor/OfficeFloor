@@ -17,6 +17,10 @@
  */
 package net.officefloor.eclipse.skin.standard.woof;
 
+import net.officefloor.eclipse.skin.woof.ExceptionFigure;
+import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
+import net.officefloor.eclipse.skin.woof.ResourceFigure;
+import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
 import net.officefloor.eclipse.skin.woof.SectionFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionInputFigure;
@@ -66,6 +70,16 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	public SectionOutputFigure createSectionOutputFigure(
 			SectionOutputFigureContext context) {
 		return new StandardSectionOutputFigure(context);
+	}
+
+	@Override
+	public ResourceFigure createResourceFigure(ResourceFigureContext context) {
+		return new StandardResourceFigure(context);
+	}
+
+	@Override
+	public ExceptionFigure createExceptionFigure(ExceptionFigureContext context) {
+		return new StandardExceptionFigure(context);
 	}
 
 }

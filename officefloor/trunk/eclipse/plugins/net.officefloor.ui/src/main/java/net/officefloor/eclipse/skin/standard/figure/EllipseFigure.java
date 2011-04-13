@@ -18,7 +18,6 @@
 
 package net.officefloor.eclipse.skin.standard.figure;
 
-import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 import org.eclipse.draw2d.Ellipse;
@@ -26,34 +25,37 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link ManagedObject} {@link Figure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
-public class ExternalManagedObjectFigure extends Ellipse {
+public class EllipseFigure extends Ellipse {
 
 	/**
-	 * {@link Label} for the name of the {@link ManagedObject}.
+	 * {@link Label} for the name.
 	 */
 	private final Label name;
 
 	/**
 	 * Initiate.
-	 *
-	 * @param managedObjectName
-	 *            Name of {@link ManagedObject}.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param colour
+	 *            {@link Color} of the {@link Figure}.
 	 */
-	public ExternalManagedObjectFigure(String managedObjectName) {
+	public EllipseFigure(String name, Color colour) {
 
 		// Ellipse
-		this.setBackgroundColor(StandardOfficeFloorColours.EXTERNAL_OBJECT());
+		this.setBackgroundColor(colour);
 		this.setOpaque(true);
 		this.setLayoutManager(new FlowLayout());
 
-		// Name of managed object
-		this.name = new Label(managedObjectName);
+		// Provide name
+		this.name = new Label(name);
 		this.name.setLayoutManager(new FlowLayout());
 		this.name.setBorder(new MarginBorder(5));
 		this.add(this.name);
@@ -61,7 +63,7 @@ public class ExternalManagedObjectFigure extends Ellipse {
 
 	/**
 	 * Obtains the {@link Label} containing the {@link ManagedObject} name.
-	 *
+	 * 
 	 * @return {@link Label} containing the {@link ManagedObject} name.
 	 */
 	public Label getLabel() {
@@ -69,13 +71,13 @@ public class ExternalManagedObjectFigure extends Ellipse {
 	}
 
 	/**
-	 * Specifies the {@link ManagedObject} name.
-	 *
-	 * @param managedObjectName
-	 *            {@link ManagedObject} name.
+	 * Specifies the name.
+	 * 
+	 * @param name
+	 *            Name.
 	 */
-	public void setManagedObjectName(String managedObjectName) {
-		this.name.setText(managedObjectName);
+	public void setName(String name) {
+		this.name.setText(name);
 	}
 
 }

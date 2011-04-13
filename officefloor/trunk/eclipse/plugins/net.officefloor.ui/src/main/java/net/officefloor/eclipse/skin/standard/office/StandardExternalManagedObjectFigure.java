@@ -21,13 +21,15 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.EllipseFigure;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 
 /**
  * Standard {@link ExternalManagedObjectFigure}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class StandardExternalManagedObjectFigure extends
@@ -41,19 +43,20 @@ public class StandardExternalManagedObjectFigure extends
 	/**
 	 * {@link Figure}.
 	 */
-	private final net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure figure;
+	private final net.officefloor.eclipse.skin.standard.figure.EllipseFigure figure;
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param context
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 */
 	public StandardExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
 		this.context = context;
-		this.figure = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-				this.context.getExternalManagedObjectName());
+		this.figure = new EllipseFigure(
+				this.context.getExternalManagedObjectName(),
+				StandardOfficeFloorColours.EXTERNAL_OBJECT());
 		this.setFigure(this.figure);
 	}
 
