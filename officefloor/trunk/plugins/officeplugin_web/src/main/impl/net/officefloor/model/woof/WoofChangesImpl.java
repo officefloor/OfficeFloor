@@ -643,4 +643,52 @@ public class WoofChangesImpl implements WoofChanges {
 				"TODO implement WoofChanges.removeSectionOuputToResource");
 	}
 
+	@Override
+	public Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(
+			WoofExceptionModel exception, WoofTemplateModel template) {
+		// TODO implement WoofChanges.linkExceptionToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkExceptionToTemplate");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(
+			WoofExceptionToWoofTemplateModel link) {
+		// TODO implement WoofChanges.removeExceptionToTemplate
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeExceptionToTemplate");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(
+			WoofExceptionModel sectionOutput, WoofSectionInputModel sectionInput) {
+		// TODO implement WoofChanges.linkExceptionToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkExceptionToSectionInput");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
+			WoofExceptionToWoofSectionInputModel link) {
+		// TODO implement WoofChanges.removeExceptionToSectionInput
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeExceptionToSectionInput");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(
+			WoofExceptionModel sectionOutput, WoofResourceModel resource) {
+		// TODO implement WoofChanges.linkExceptionToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.linkExceptionToResource");
+	}
+
+	@Override
+	public Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(
+			WoofExceptionToWoofResourceModel link) {
+		// TODO implement WoofChanges.removeExceptionToResource
+		throw new UnsupportedOperationException(
+				"TODO implement WoofChanges.removeExceptionToResource");
+	}
+
 }
