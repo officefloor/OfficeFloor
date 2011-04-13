@@ -18,13 +18,15 @@
 
 package net.officefloor.eclipse.skin.standard.section;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
+import net.officefloor.eclipse.skin.standard.figure.EllipseFigure;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link ExternalManagedObjectFigure}.
@@ -47,8 +49,9 @@ public class StandardExternalManagedObjectFigure extends
 	 */
 	public StandardExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
-		net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure mo = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-				context.getExternalManagedObjectName());
+		EllipseFigure mo = new EllipseFigure(
+				context.getExternalManagedObjectName(),
+				StandardOfficeFloorColours.EXTERNAL_OBJECT());
 		this.externalManagedObjectName = mo.getLabel();
 		this.setFigure(mo);
 	}
