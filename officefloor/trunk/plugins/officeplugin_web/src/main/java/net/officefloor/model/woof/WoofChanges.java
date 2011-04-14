@@ -303,7 +303,7 @@ public interface WoofChanges {
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(
-			WoofExceptionModel sectionOutput, WoofSectionInputModel sectionInput);
+			WoofExceptionModel exception, WoofSectionInputModel sectionInput);
 
 	/**
 	 * Removes the {@link WoofExceptionToWoofSectionInputModel}.
@@ -325,7 +325,7 @@ public interface WoofChanges {
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(
-			WoofExceptionModel sectionOutput, WoofResourceModel resource);
+			WoofExceptionModel exception, WoofResourceModel resource);
 
 	/**
 	 * Removes the {@link WoofExceptionToWoofResourceModel}.
