@@ -69,7 +69,8 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 				.linkTemplateOutputToTemplate(templateOutput, template);
 
 		// Validate change
-		this.assertChange(change, null, "Link Template Ouput to Template", true);
+		this.assertChange(change, null, "Link Template Output to Template",
+				true);
 	}
 
 	/**
@@ -118,15 +119,15 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates()
 				.get(templateIndex).getOutputs().get(0);
 		WoofSectionInputModel sectionInput = this.model.getWoofSections()
-				.get(0).getInputs().get(0);
+				.get(1).getInputs().get(0);
 
 		// Link the template output to section input
 		Change<WoofTemplateOutputToWoofSectionInputModel> change = this.operations
 				.linkTemplateOutputToSectionInput(templateOutput, sectionInput);
 
 		// Validate change
-		this.assertChange(change, null, "Link Template Ouput to Section Input",
-				true);
+		this.assertChange(change, null,
+				"Link Template Output to Section Input", true);
 	}
 
 	/**
@@ -174,14 +175,15 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 		// Obtain the items to link
 		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates()
 				.get(templateIndex).getOutputs().get(0);
-		WoofResourceModel resource = this.model.getWoofResources().get(0);
+		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the template output to resource
 		Change<WoofTemplateOutputToWoofResourceModel> change = this.operations
 				.linkTemplateOutputToResource(templateOutput, resource);
 
 		// Validate change
-		this.assertChange(change, null, "Link Template Ouput to Resource", true);
+		this.assertChange(change, null, "Link Template Output to Resource",
+				true);
 	}
 
 	/**
