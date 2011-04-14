@@ -17,9 +17,19 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
+import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.model.woof.WoofModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -94,5 +104,104 @@ public interface WoofFigureFactory {
 	 * @return {@link ExceptionFigure}.
 	 */
 	ExceptionFigure createExceptionFigure(ExceptionFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofTemplateOutputToWoofTemplateModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TemplateOutputToTemplateFigureContext}
+	 */
+	void decorateTemplateOutputToTemplateFigure(PolylineConnection figure,
+			TemplateOutputToTemplateFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofTemplateOutputToWoofSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TemplateOutputToSectionInputFigureContext}
+	 */
+	void decorateTemplateOutputToSectionInputFigure(PolylineConnection figure,
+			TemplateOutputToSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofTemplateOutputToWoofResourceModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TemplateOutputToResourceFigureContext}
+	 */
+	void decorateTemplateOutputToResourceFigure(PolylineConnection figure,
+			TemplateOutputToResourceFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofSectionOutputToWoofTemplateModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionOutputToTemplateFigureContext}
+	 */
+	void decorateSectionOutputToTemplateFigure(PolylineConnection figure,
+			SectionOutputToTemplateFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofSectionOutputToWoofSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionOutputToSectionInputFigureContext}
+	 */
+	void decorateSectionOutputToSectionInputFigure(PolylineConnection figure,
+			SectionOutputToSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofSectionOutputToWoofResourceModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SectionOutputToResourceFigureContext}
+	 */
+	void decorateSectionOutputToResourceFigure(PolylineConnection figure,
+			SectionOutputToResourceFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofExceptionToWoofTemplateModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link ExceptionToTemplateFigureContext}
+	 */
+	void decorateExceptionToTemplateFigure(PolylineConnection figure,
+			ExceptionToTemplateFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofExceptionToWoofSectionInputModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link ExceptionToSectionInputFigureContext}
+	 */
+	void decorateExceptionToSectionInputFigure(PolylineConnection figure,
+			ExceptionToSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link WoofExceptionToWoofResourceModel} figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link ExceptionToResourceFigureContext}
+	 */
+	void decorateExceptionToResourceFigure(PolylineConnection figure,
+			ExceptionToResourceFigureContext context);
 
 }
