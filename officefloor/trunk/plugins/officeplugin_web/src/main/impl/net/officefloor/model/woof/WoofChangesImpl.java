@@ -773,49 +773,96 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofExceptionToWoofTemplateModel> linkExceptionToTemplate(
 			WoofExceptionModel exception, WoofTemplateModel template) {
-		// TODO implement WoofChanges.linkExceptionToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkExceptionToTemplate");
+
+		// Create the connection
+		final WoofExceptionToWoofTemplateModel connection = new WoofExceptionToWoofTemplateModel(
+				template.getWoofTemplateName(), exception, template);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofTemplateModel, WoofExceptionModel>(
+				connection, exception, "Link Exception to Template") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(
 			WoofExceptionToWoofTemplateModel link) {
-		// TODO implement WoofChanges.removeExceptionToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeExceptionToTemplate");
+		return new RemoveLinkChange<WoofExceptionToWoofTemplateModel>(link,
+				"Remove Exception to Template");
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofSectionInputModel> linkExceptionToSectionInput(
-			WoofExceptionModel sectionOutput, WoofSectionInputModel sectionInput) {
-		// TODO implement WoofChanges.linkExceptionToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkExceptionToSectionInput");
+			WoofExceptionModel exception, WoofSectionInputModel sectionInput) {
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofExceptionToWoofSectionInputModel>(
+					new WoofExceptionToWoofSectionInputModel(),
+					"The section input '"
+							+ sectionInput.getWoofSectionInputName()
+							+ "' was not found");
+		}
+
+		// Create the connection
+		final WoofExceptionToWoofSectionInputModel connection = new WoofExceptionToWoofSectionInputModel(
+				section.getWoofSectionName(),
+				sectionInput.getWoofSectionInputName(), exception, sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofSectionInputModel, WoofExceptionModel>(
+				connection, exception, "Link Exception to Section Input") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
 			WoofExceptionToWoofSectionInputModel link) {
-		// TODO implement WoofChanges.removeExceptionToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeExceptionToSectionInput");
+		return new RemoveLinkChange<WoofExceptionToWoofSectionInputModel>(link,
+				"Remove Exception to Section Input");
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofResourceModel> linkExceptionToResource(
-			WoofExceptionModel sectionOutput, WoofResourceModel resource) {
-		// TODO implement WoofChanges.linkExceptionToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkExceptionToResource");
+			WoofExceptionModel exception, WoofResourceModel resource) {
+
+		// Create the connection
+		final WoofExceptionToWoofResourceModel connection = new WoofExceptionToWoofResourceModel(
+				resource.getWoofResourceName(), exception, resource);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofResourceModel, WoofExceptionModel>(
+				connection, exception, "Link Exception to Resource") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source,
+					List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(
 			WoofExceptionToWoofResourceModel link) {
-		// TODO implement WoofChanges.removeExceptionToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeExceptionToResource");
+		return new RemoveLinkChange<WoofExceptionToWoofResourceModel>(link,
+				"Remove Exception to Resource");
 	}
 
 	/**

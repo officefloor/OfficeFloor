@@ -62,7 +62,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 		// Obtain the items to link
 		WoofExceptionModel exception = this.model.getWoofExceptions().get(
 				exceptionIndex);
-		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
+		WoofTemplateModel template = this.model.getWoofTemplates().get(1);
 
 		// Link the exception to template
 		Change<WoofExceptionToWoofTemplateModel> change = this.operations
@@ -129,7 +129,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofSectionInputModel}.
 	 */
-	public void testRemoveToSectionInput() {
+	public void testRemoveToSectionInputLink() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofSectionInputModel link = this.model
@@ -170,7 +170,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 		// Obtain the items to link
 		WoofExceptionModel exception = this.model.getWoofExceptions().get(
 				exceptionIndex);
-		WoofResourceModel resource = this.model.getWoofResources().get(0);
+		WoofResourceModel resource = this.model.getWoofResources().get(1);
 
 		// Link the exception to resource
 		Change<WoofExceptionToWoofResourceModel> change = this.operations
@@ -183,7 +183,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Ensure can remove the {@link WoofExceptionToWoofResourceModel}.
 	 */
-	public void testRemoveToResource() {
+	public void testRemoveToResourceLink() {
 
 		// Obtain the link to remove
 		WoofExceptionToWoofResourceModel link = this.model.getWoofExceptions()
