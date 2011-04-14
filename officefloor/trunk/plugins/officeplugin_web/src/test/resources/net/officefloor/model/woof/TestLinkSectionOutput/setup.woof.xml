@@ -2,6 +2,7 @@
 
 	<templates>
 		<template name="TEMPLATE" />
+		<template name="TEMPLATE_LINK" />
 	</templates>
 
 	<sections>
@@ -21,6 +22,7 @@
 
 	<resources>
 		<resource name="RESOURCE" />
+		<resource name="RESOURCE_LINK" />
 	</resources>
 
 </woof>
