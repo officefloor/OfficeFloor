@@ -675,50 +675,99 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofTemplateModel> linkSectionOutputToTemplate(
 			WoofSectionOutputModel sectionOutput, WoofTemplateModel template) {
-		// TODO implement WoofChanges.linkSectionOutputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkSectionOutputToTemplate");
+
+		// Create the connection
+		final WoofSectionOutputToWoofTemplateModel connection = new WoofSectionOutputToWoofTemplateModel(
+				template.getWoofTemplateName(), sectionOutput, template);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofTemplateModel, WoofSectionOutputModel>(
+				connection, sectionOutput, "Link Section Output to Template") {
+			@Override
+			protected void addExistingConnections(
+					WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofTemplateModel> removeSectionOuputToTemplate(
 			WoofSectionOutputToWoofTemplateModel link) {
-		// TODO implement WoofChanges.removeSectionOuputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeSectionOuputToTemplate");
+		return new RemoveLinkChange<WoofSectionOutputToWoofTemplateModel>(link,
+				"Remove Section Output to Template");
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofSectionInputModel> linkSectionOutputToSectionInput(
 			WoofSectionOutputModel sectionOutput,
 			WoofSectionInputModel sectionInput) {
-		// TODO implement WoofChanges.linkSectionOutputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkSectionOutputToSectionInput");
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofSectionOutputToWoofSectionInputModel>(
+					new WoofSectionOutputToWoofSectionInputModel(),
+					"The section input '"
+							+ sectionInput.getWoofSectionInputName()
+							+ "' was not found");
+		}
+
+		// Create the connection
+		final WoofSectionOutputToWoofSectionInputModel connection = new WoofSectionOutputToWoofSectionInputModel(
+				section.getWoofSectionName(),
+				sectionInput.getWoofSectionInputName(), sectionOutput,
+				sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofSectionInputModel, WoofSectionOutputModel>(
+				connection, sectionOutput,
+				"Link Section Output to Section Input") {
+			@Override
+			protected void addExistingConnections(
+					WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofSectionInputModel> removeSectionOuputToSectionInput(
 			WoofSectionOutputToWoofSectionInputModel link) {
-		// TODO implement WoofChanges.removeSectionOuputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeSectionOuputToSectionInput");
+		return new RemoveLinkChange<WoofSectionOutputToWoofSectionInputModel>(
+				link, "Remove Section Output to Section Input");
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofResourceModel> linkSectionOutputToResource(
 			WoofSectionOutputModel sectionOutput, WoofResourceModel resource) {
-		// TODO implement WoofChanges.linkSectionOutputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkSectionOutputToResource");
+
+		// Create the connection
+		final WoofSectionOutputToWoofResourceModel connection = new WoofSectionOutputToWoofResourceModel(
+				resource.getWoofResourceName(), sectionOutput, resource);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofResourceModel, WoofSectionOutputModel>(
+				connection, sectionOutput, "Link Section Output to Resource") {
+			@Override
+			protected void addExistingConnections(
+					WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofResourceModel> removeSectionOuputToResource(
 			WoofSectionOutputToWoofResourceModel link) {
-		// TODO implement WoofChanges.removeSectionOuputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeSectionOuputToResource");
+		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link,
+				"Remove Section Output to Resource");
 	}
 
 	@Override
