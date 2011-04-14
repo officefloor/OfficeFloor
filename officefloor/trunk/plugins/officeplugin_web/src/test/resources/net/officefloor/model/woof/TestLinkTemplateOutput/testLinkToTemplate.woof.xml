@@ -19,10 +19,14 @@
 		<section name="SECTION">
 			<input name="INPUT" />
 		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
 	</sections>
 
 	<resources>
 		<resource name="RESOURCE" />
+		<resource name="RESOURCE_LINK" />
 	</resources>
 
 </woof>

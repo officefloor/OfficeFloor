@@ -30,6 +30,7 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
@@ -179,6 +180,33 @@ public class WoofChangesImpl implements WoofChanges {
 								a.getClassName(), b.getClassName());
 					}
 				});
+	}
+
+	/**
+	 * Obtains the {@link WoofSectionModel} for the
+	 * {@link WoofSectionInputModel}.
+	 * 
+	 * @param input
+	 *            {@link WoofSectionInputModel}.
+	 * @return {@link WoofSectionModel} containing the
+	 *         {@link WoofSectionInputModel} or <code>null</code> if not within
+	 *         {@link WoofModel}.
+	 */
+	public WoofSectionModel getSection(WoofSectionInputModel input) {
+
+		// Find the containing section
+		WoofSectionModel containingSection = null;
+		for (WoofSectionModel section : this.model.getWoofSections()) {
+			for (WoofSectionInputModel check : section.getInputs()) {
+				if (check == input) {
+					// Found containing section
+					containingSection = section;
+				}
+			}
+		}
+
+		// Return the containing section
+		return containingSection;
 	}
 
 	/*
@@ -547,51 +575,101 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> linkTemplateOutputToTemplate(
-			WoofTemplateOutputModel templateOutput, WoofTemplateModel template) {
-		// TODO implement WoofChanges.linkTemplateOutputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkTemplateOutputToTemplate");
+			final WoofTemplateOutputModel templateOutput,
+			WoofTemplateModel template) {
+
+		// Create the connection
+		final WoofTemplateOutputToWoofTemplateModel connection = new WoofTemplateOutputToWoofTemplateModel(
+				template.getWoofTemplateName(), templateOutput, template);
+
+		// Return change to link
+		return new AddLinkChange<WoofTemplateOutputToWoofTemplateModel, WoofTemplateOutputModel>(
+				connection, templateOutput, "Link Template Output to Template") {
+			@Override
+			protected void addExistingConnections(
+					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> removeTemplateOuputToTemplate(
-			WoofTemplateOutputToWoofTemplateModel link) {
-		// TODO implement WoofChanges.removeTemplateOuputToTemplate
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeTemplateOuputToTemplate");
+			final WoofTemplateOutputToWoofTemplateModel link) {
+		return new RemoveLinkChange<WoofTemplateOutputToWoofTemplateModel>(
+				link, "Remove Template Output to Template");
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofSectionInputModel> linkTemplateOutputToSectionInput(
-			WoofTemplateOutputModel templateOutput,
+			final WoofTemplateOutputModel templateOutput,
 			WoofSectionInputModel sectionInput) {
-		// TODO implement WoofChanges.linkTemplateOutputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkTemplateOutputToSectionInput");
+
+		// Obtain the containing section
+		WoofSectionModel section = this.getSection(sectionInput);
+		if (section == null) {
+			return new NoChange<WoofTemplateOutputToWoofSectionInputModel>(
+					new WoofTemplateOutputToWoofSectionInputModel(),
+					"The section input '"
+							+ sectionInput.getWoofSectionInputName()
+							+ "' was not found");
+		}
+
+		// Create the connection
+		final WoofTemplateOutputToWoofSectionInputModel connection = new WoofTemplateOutputToWoofSectionInputModel(
+				section.getWoofSectionName(),
+				sectionInput.getWoofSectionInputName(), templateOutput,
+				sectionInput);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofTemplateOutputToWoofSectionInputModel, WoofTemplateOutputModel>(
+				connection, templateOutput,
+				"Link Template Output to Section Input") {
+			@Override
+			protected void addExistingConnections(
+					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofSectionInputModel> removeTemplateOuputToSectionInput(
 			WoofTemplateOutputToWoofSectionInputModel link) {
-		// TODO implement WoofChanges.removeTemplateOuputToSectionInput
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeTemplateOuputToSectionInput");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofSectionInputModel>(
+				link, "Remove Template Output to Section Input");
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofResourceModel> linkTemplateOutputToResource(
 			WoofTemplateOutputModel templateOutput, WoofResourceModel resource) {
-		// TODO implement WoofChanges.linkTemplateOutputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.linkTemplateOutputToResource");
+
+		// Create the connection
+		final WoofTemplateOutputToWoofResourceModel connection = new WoofTemplateOutputToWoofResourceModel(
+				resource.getWoofResourceName(), templateOutput, resource);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofTemplateOutputToWoofResourceModel, WoofTemplateOutputModel>(
+				connection, templateOutput, "Link Template Output to Resource") {
+			@Override
+			protected void addExistingConnections(
+					WoofTemplateOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofTemplateOutputToWoofResourceModel> removeTemplateOuputToResource(
 			WoofTemplateOutputToWoofResourceModel link) {
-		// TODO implement WoofChanges.removeTemplateOuputToResource
-		throw new UnsupportedOperationException(
-				"TODO implement WoofChanges.removeTemplateOuputToResource");
+		return new RemoveLinkChange<WoofTemplateOutputToWoofResourceModel>(
+				link, "Remove Template Output to Resource");
 	}
 
 	@Override
@@ -690,5 +768,115 @@ public class WoofChangesImpl implements WoofChanges {
 		throw new UnsupportedOperationException(
 				"TODO implement WoofChanges.removeExceptionToResource");
 	}
+
+	/**
+	 * Abstract {@link Change} to add a {@link ConnectionModel}.
+	 */
+	private abstract class AddLinkChange<C extends ConnectionModel, S extends Model>
+			extends AbstractChange<C> {
+
+		/**
+		 * Source for {@link ConnectionModel}.
+		 */
+		private final S source;
+
+		/**
+		 * {@link ConnectionModel} instances.
+		 */
+		private ConnectionModel[] connections;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param connection
+		 *            {@link ConnectionModel}.
+		 * @param source
+		 *            Source for {@link ConnectionModel}.
+		 * @param changeDescription
+		 *            Change descriptions.
+		 */
+		public AddLinkChange(C connection, S source, String changeDescription) {
+			super(connection, changeDescription);
+			this.source = source;
+		}
+
+		/**
+		 * Adds the existing {@link ConnectionModel} instances.
+		 * 
+		 * @param source
+		 *            Source of the {@link ConnectionModel}.
+		 * @param list
+		 *            List to add the {@link ConnectionModel} instances.
+		 */
+		protected abstract void addExistingConnections(S source,
+				List<ConnectionModel> list);
+
+		/*
+		 * ====================== Change ======================
+		 */
+
+		@Override
+		public void apply() {
+
+			// Obtain existing connections
+			List<ConnectionModel> existingLinks = new LinkedList<ConnectionModel>();
+			this.addExistingConnections(this.source, existingLinks);
+
+			// Remove the existing connections
+			List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+			for (ConnectionModel existingLink : existingLinks) {
+				removeConnection(existingLink, list);
+			}
+			this.connections = list.toArray(new ConnectionModel[list.size()]);
+
+			// Connect
+			this.getTarget().connect();
+		}
+
+		@Override
+		public void revert() {
+
+			// Remove the connection
+			this.getTarget().remove();
+
+			// Reconnect previous connections
+			reconnectConnections(this.connections);
+		}
+	};
+
+	/**
+	 * {@link Change} to remove the {@link ConnectionModel}.
+	 */
+	private class RemoveLinkChange<C extends ConnectionModel> extends
+			AbstractChange<C> {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param connection
+		 *            {@link ConnectionModel}.
+		 * @param changeDescription
+		 *            Change description.
+		 */
+		public RemoveLinkChange(C connection, String changeDescription) {
+			super(connection, changeDescription);
+		}
+
+		/*
+		 * ==================== Change =======================
+		 */
+
+		@Override
+		public void apply() {
+			// Remove connection
+			this.getTarget().remove();
+		}
+
+		@Override
+		public void revert() {
+			// Reconnect
+			this.getTarget().connect();
+		}
+	};
 
 }
