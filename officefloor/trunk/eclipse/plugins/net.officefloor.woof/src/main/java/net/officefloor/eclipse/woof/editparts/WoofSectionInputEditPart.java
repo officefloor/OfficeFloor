@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.woof.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -45,6 +46,13 @@ public class WoofSectionInputEditPart
 	}
 
 	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
+		models.addAll(this.getCastedModel().getWoofSectionOutputs());
+		models.addAll(this.getCastedModel().getWoofExceptions());
+	}
+
+	@Override
 	protected Class<WoofSectionInputEvent> getPropertyChangeEventType() {
 		return WoofSectionInputEvent.class;
 	}
@@ -59,7 +67,7 @@ public class WoofSectionInputEditPart
 		case REMOVE_WOOF_SECTION_OUTPUT:
 		case ADD_WOOF_EXCEPTION:
 		case REMOVE_WOOF_EXCEPTION:
-			// TODO refresh connections
+			this.refreshTargetConnections();
 			break;
 		}
 	}

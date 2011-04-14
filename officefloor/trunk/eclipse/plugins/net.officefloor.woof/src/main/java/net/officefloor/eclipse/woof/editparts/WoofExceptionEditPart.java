@@ -18,11 +18,13 @@
 package net.officefloor.eclipse.woof.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.woof.WoofExceptionModel;
 import net.officefloor.model.woof.WoofExceptionModel.WoofExceptionEvent;
 
@@ -45,6 +47,14 @@ public class WoofExceptionEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel().getWoofTemplate());
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getWoofSectionInput());
+		EclipseUtil.addToList(models, this.getCastedModel().getWoofResource());
+	}
+
+	@Override
 	protected Class<WoofExceptionEvent> getPropertyChangeEventType() {
 		return WoofExceptionEvent.class;
 	}
@@ -53,11 +63,11 @@ public class WoofExceptionEditPart
 	protected void handlePropertyChange(WoofExceptionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_CLASS_NAME:
-			// TODO handle name change
-			System.out.println("TODO handle name change");
+		case CHANGE_WOOF_TEMPLATE:
+		case CHANGE_WOOF_SECTION_INPUT:
+		case CHANGE_WOOF_RESOURCE:
+			this.refreshSourceConnections();
 			break;
-		// TODO remaining events
 		}
 	}
 

@@ -51,6 +51,13 @@ public class WoofTemplateEditPart
 	}
 
 	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
+		models.addAll(this.getCastedModel().getWoofSectionOutputs());
+		models.addAll(this.getCastedModel().getWoofExceptions());
+	}
+
+	@Override
 	protected Class<WoofTemplateEvent> getPropertyChangeEventType() {
 		return WoofTemplateEvent.class;
 	}
@@ -59,11 +66,18 @@ public class WoofTemplateEditPart
 	protected void handlePropertyChange(WoofTemplateEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_WOOF_TEMPLATE_NAME:
-			// TODO handle name change
-			System.out.println("TODO handle name change");
+		case ADD_OUTPUT:
+		case REMOVE_OUTPUT:
+			this.refreshChildren();
 			break;
-		// TODO remaining events
+		case ADD_WOOF_TEMPLATE_OUTPUT:
+		case REMOVE_WOOF_TEMPLATE_OUTPUT:
+		case ADD_WOOF_SECTION_OUTPUT:
+		case REMOVE_WOOF_SECTION_OUTPUT:
+		case ADD_WOOF_EXCEPTION:
+		case REMOVE_WOOF_EXCEPTION:
+			this.refreshTargetConnections();
+			break;
 		}
 	}
 
