@@ -28,12 +28,21 @@ import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofResourceEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofSectionInputEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofResourceEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionInputEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofSectionOutputEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofResourceEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofSectionInputEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofSectionOutputToWoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofResourceEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofSectionInputEditPart;
+import net.officefloor.eclipse.woof.editparts.WoofTemplateOutputToWoofTemplateEditPart;
 import net.officefloor.eclipse.woof.operations.AddExceptionOperation;
 import net.officefloor.eclipse.woof.operations.AddResourceOperation;
 import net.officefloor.eclipse.woof.operations.AddSectionOperation;
@@ -44,14 +53,23 @@ import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofChangesImpl;
 import net.officefloor.model.woof.WoofExceptionModel;
+import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
+import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.model.woof.WoofResourceModel;
 import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionModel;
 import net.officefloor.model.woof.WoofSectionOutputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
@@ -111,6 +129,26 @@ public class WoofEditor extends
 		map.put(WoofSectionOutputModel.class, WoofSectionOutputEditPart.class);
 		map.put(WoofResourceModel.class, WoofResourceEditPart.class);
 		map.put(WoofExceptionModel.class, WoofExceptionEditPart.class);
+
+		// Connections
+		map.put(WoofTemplateOutputToWoofTemplateModel.class,
+				WoofTemplateOutputToWoofTemplateEditPart.class);
+		map.put(WoofTemplateOutputToWoofSectionInputModel.class,
+				WoofTemplateOutputToWoofSectionInputEditPart.class);
+		map.put(WoofTemplateOutputToWoofResourceModel.class,
+				WoofTemplateOutputToWoofResourceEditPart.class);
+		map.put(WoofSectionOutputToWoofTemplateModel.class,
+				WoofSectionOutputToWoofTemplateEditPart.class);
+		map.put(WoofSectionOutputToWoofSectionInputModel.class,
+				WoofSectionOutputToWoofSectionInputEditPart.class);
+		map.put(WoofSectionOutputToWoofResourceModel.class,
+				WoofSectionOutputToWoofResourceEditPart.class);
+		map.put(WoofExceptionToWoofTemplateModel.class,
+				WoofExceptionToWoofTemplateEditPart.class);
+		map.put(WoofExceptionToWoofSectionInputModel.class,
+				WoofExceptionToWoofSectionInputEditPart.class);
+		map.put(WoofExceptionToWoofResourceModel.class,
+				WoofExceptionToWoofResourceEditPart.class);
 	}
 
 	@Override
@@ -172,6 +210,112 @@ public class WoofEditor extends
 								.removeException(target);
 					}
 				});
+
+		// Allow deleting template output to template
+		policy.addDelete(
+				WoofTemplateOutputToWoofTemplateModel.class,
+				new DeleteChangeFactory<WoofTemplateOutputToWoofTemplateModel>() {
+					@Override
+					public Change<WoofTemplateOutputToWoofTemplateModel> createChange(
+							WoofTemplateOutputToWoofTemplateModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeTemplateOuputToTemplate(target);
+					}
+				});
+
+		// Allow deleting template output to section input
+		policy.addDelete(
+				WoofTemplateOutputToWoofSectionInputModel.class,
+				new DeleteChangeFactory<WoofTemplateOutputToWoofSectionInputModel>() {
+					@Override
+					public Change<WoofTemplateOutputToWoofSectionInputModel> createChange(
+							WoofTemplateOutputToWoofSectionInputModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeTemplateOuputToSectionInput(target);
+					}
+				});
+
+		// Allow deleting template output to resource
+		policy.addDelete(
+				WoofTemplateOutputToWoofResourceModel.class,
+				new DeleteChangeFactory<WoofTemplateOutputToWoofResourceModel>() {
+					@Override
+					public Change<WoofTemplateOutputToWoofResourceModel> createChange(
+							WoofTemplateOutputToWoofResourceModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeTemplateOuputToResource(target);
+					}
+				});
+
+		// Allow deleting section output to template
+		policy.addDelete(
+				WoofSectionOutputToWoofTemplateModel.class,
+				new DeleteChangeFactory<WoofSectionOutputToWoofTemplateModel>() {
+					@Override
+					public Change<WoofSectionOutputToWoofTemplateModel> createChange(
+							WoofSectionOutputToWoofTemplateModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeSectionOuputToTemplate(target);
+					}
+				});
+
+		// Allow deleting section output to section input
+		policy.addDelete(
+				WoofSectionOutputToWoofSectionInputModel.class,
+				new DeleteChangeFactory<WoofSectionOutputToWoofSectionInputModel>() {
+					@Override
+					public Change<WoofSectionOutputToWoofSectionInputModel> createChange(
+							WoofSectionOutputToWoofSectionInputModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeSectionOuputToSectionInput(target);
+					}
+				});
+
+		// Allow deleting section output to resource
+		policy.addDelete(
+				WoofSectionOutputToWoofResourceModel.class,
+				new DeleteChangeFactory<WoofSectionOutputToWoofResourceModel>() {
+					@Override
+					public Change<WoofSectionOutputToWoofResourceModel> createChange(
+							WoofSectionOutputToWoofResourceModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeSectionOuputToResource(target);
+					}
+				});
+
+		// Allow deleting exception to template
+		policy.addDelete(WoofExceptionToWoofTemplateModel.class,
+				new DeleteChangeFactory<WoofExceptionToWoofTemplateModel>() {
+					@Override
+					public Change<WoofExceptionToWoofTemplateModel> createChange(
+							WoofExceptionToWoofTemplateModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeExceptionToTemplate(target);
+					}
+				});
+
+		// Allow deleting exception to section input
+		policy.addDelete(
+				WoofExceptionToWoofSectionInputModel.class,
+				new DeleteChangeFactory<WoofExceptionToWoofSectionInputModel>() {
+					@Override
+					public Change<WoofExceptionToWoofSectionInputModel> createChange(
+							WoofExceptionToWoofSectionInputModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeExceptionToSectionInput(target);
+					}
+				});
+
+		// Allow deleting exception to resource
+		policy.addDelete(WoofExceptionToWoofResourceModel.class,
+				new DeleteChangeFactory<WoofExceptionToWoofResourceModel>() {
+					@Override
+					public Change<WoofExceptionToWoofResourceModel> createChange(
+							WoofExceptionToWoofResourceModel target) {
+						return WoofEditor.this.getModelChanges()
+								.removeExceptionToResource(target);
+					}
+				});
 	}
 
 	@Override
@@ -188,10 +332,127 @@ public class WoofEditor extends
 							WoofTemplateOutputModel source,
 							WoofTemplateModel target,
 							CreateConnectionRequest request) {
-						// TODO implement
-						// ConnectionChangeFactory<WoofTemplateOutputModel,WoofTemplateModel>.createChange
-						throw new UnsupportedOperationException(
-								"TODO implement ConnectionChangeFactory<WoofTemplateOutputModel,WoofTemplateModel>.createChange");
+						return WoofEditor.this.getModelChanges()
+								.linkTemplateOutputToTemplate(source, target);
+					}
+				});
+
+		// Connect template output to section input
+		policy.addConnection(
+				WoofTemplateOutputModel.class,
+				WoofSectionInputModel.class,
+				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofSectionInputModel>() {
+					@Override
+					public Change<?> createChange(
+							WoofTemplateOutputModel source,
+							WoofSectionInputModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkTemplateOutputToSectionInput(source,
+										target);
+					}
+				});
+
+		// Connect template output to resource
+		policy.addConnection(
+				WoofTemplateOutputModel.class,
+				WoofResourceModel.class,
+				new ConnectionChangeFactory<WoofTemplateOutputModel, WoofResourceModel>() {
+					@Override
+					public Change<?> createChange(
+							WoofTemplateOutputModel source,
+							WoofResourceModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkTemplateOutputToResource(source, target);
+					}
+				});
+
+		// Connect section output to template
+		policy.addConnection(
+				WoofSectionOutputModel.class,
+				WoofTemplateModel.class,
+				new ConnectionChangeFactory<WoofSectionOutputModel, WoofTemplateModel>() {
+					@Override
+					public Change<?> createChange(
+							WoofSectionOutputModel source,
+							WoofTemplateModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkSectionOutputToTemplate(source, target);
+					}
+				});
+
+		// Connect section output to section input
+		policy.addConnection(
+				WoofSectionOutputModel.class,
+				WoofSectionInputModel.class,
+				new ConnectionChangeFactory<WoofSectionOutputModel, WoofSectionInputModel>() {
+					@Override
+					public Change<?> createChange(
+							WoofSectionOutputModel source,
+							WoofSectionInputModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this
+								.getModelChanges()
+								.linkSectionOutputToSectionInput(source, target);
+					}
+				});
+
+		// Connect section output to resource
+		policy.addConnection(
+				WoofSectionOutputModel.class,
+				WoofResourceModel.class,
+				new ConnectionChangeFactory<WoofSectionOutputModel, WoofResourceModel>() {
+					@Override
+					public Change<?> createChange(
+							WoofSectionOutputModel source,
+							WoofResourceModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkSectionOutputToResource(source, target);
+					}
+				});
+
+		// Connect exception to template
+		policy.addConnection(
+				WoofExceptionModel.class,
+				WoofTemplateModel.class,
+				new ConnectionChangeFactory<WoofExceptionModel, WoofTemplateModel>() {
+					@Override
+					public Change<?> createChange(WoofExceptionModel source,
+							WoofTemplateModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkExceptionToTemplate(source, target);
+					}
+				});
+
+		// Connect exception to section input
+		policy.addConnection(
+				WoofExceptionModel.class,
+				WoofSectionInputModel.class,
+				new ConnectionChangeFactory<WoofExceptionModel, WoofSectionInputModel>() {
+					@Override
+					public Change<?> createChange(WoofExceptionModel source,
+							WoofSectionInputModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkExceptionToSectionInput(source, target);
+					}
+				});
+
+		// Connect exception to resource
+		policy.addConnection(
+				WoofExceptionModel.class,
+				WoofResourceModel.class,
+				new ConnectionChangeFactory<WoofExceptionModel, WoofResourceModel>() {
+					@Override
+					public Change<?> createChange(WoofExceptionModel source,
+							WoofResourceModel target,
+							CreateConnectionRequest request) {
+						return WoofEditor.this.getModelChanges()
+								.linkExceptionToResource(source, target);
 					}
 				});
 	}

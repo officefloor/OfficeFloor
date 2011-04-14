@@ -17,8 +17,14 @@
  */
 package net.officefloor.eclipse.skin.standard.woof;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
+
 import net.officefloor.eclipse.skin.woof.ExceptionFigure;
 import net.officefloor.eclipse.skin.woof.ExceptionFigureContext;
+import net.officefloor.eclipse.skin.woof.ExceptionToResourceFigureContext;
+import net.officefloor.eclipse.skin.woof.ExceptionToSectionInputFigureContext;
+import net.officefloor.eclipse.skin.woof.ExceptionToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.ResourceFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionFigure;
@@ -27,10 +33,16 @@ import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
 import net.officefloor.eclipse.skin.woof.SectionOutputFigure;
 import net.officefloor.eclipse.skin.woof.SectionOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.SectionOutputToResourceFigureContext;
+import net.officefloor.eclipse.skin.woof.SectionOutputToSectionInputFigureContext;
+import net.officefloor.eclipse.skin.woof.SectionOutputToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigure;
 import net.officefloor.eclipse.skin.woof.TemplateOutputFigureContext;
+import net.officefloor.eclipse.skin.woof.TemplateOutputToResourceFigureContext;
+import net.officefloor.eclipse.skin.woof.TemplateOutputToSectionInputFigureContext;
+import net.officefloor.eclipse.skin.woof.TemplateOutputToTemplateFigureContext;
 import net.officefloor.eclipse.skin.woof.WoofFigureFactory;
 
 /**
@@ -80,6 +92,67 @@ public class StandardWoofFigureFactory implements WoofFigureFactory {
 	@Override
 	public ExceptionFigure createExceptionFigure(ExceptionFigureContext context) {
 		return new StandardExceptionFigure(context);
+	}
+
+	@Override
+	public void decorateTemplateOutputToTemplateFigure(
+			PolylineConnection figure,
+			TemplateOutputToTemplateFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateTemplateOutputToSectionInputFigure(
+			PolylineConnection figure,
+			TemplateOutputToSectionInputFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateTemplateOutputToResourceFigure(
+			PolylineConnection figure,
+			TemplateOutputToResourceFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionOutputToTemplateFigure(
+			PolylineConnection figure,
+			SectionOutputToTemplateFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionOutputToSectionInputFigure(
+			PolylineConnection figure,
+			SectionOutputToSectionInputFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSectionOutputToResourceFigure(
+			PolylineConnection figure,
+			SectionOutputToResourceFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateExceptionToTemplateFigure(PolylineConnection figure,
+			ExceptionToTemplateFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateExceptionToSectionInputFigure(
+			PolylineConnection figure,
+			ExceptionToSectionInputFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateExceptionToResourceFigure(PolylineConnection figure,
+			ExceptionToResourceFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 }
