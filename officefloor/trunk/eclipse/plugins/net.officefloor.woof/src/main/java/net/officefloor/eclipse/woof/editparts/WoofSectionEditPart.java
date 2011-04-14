@@ -47,9 +47,8 @@ public class WoofSectionEditPart
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		WoofSectionModel section = this.getCastedModel();
-		childModels.addAll(section.getInputs());
-		childModels.addAll(section.getOutputs());
+		childModels.addAll(this.getCastedModel().getInputs());
+		childModels.addAll(this.getCastedModel().getOutputs());
 	}
 
 	@Override
@@ -61,11 +60,12 @@ public class WoofSectionEditPart
 	protected void handlePropertyChange(WoofSectionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_WOOF_SECTION_NAME:
-			// TODO handle name change
-			System.out.println("TODO handle name change");
+		case ADD_INPUT:
+		case REMOVE_INPUT:
+		case ADD_OUTPUT:
+		case REMOVE_OUTPUT:
+			this.refreshChildren();
 			break;
-		// TODO remaining events
 		}
 	}
 

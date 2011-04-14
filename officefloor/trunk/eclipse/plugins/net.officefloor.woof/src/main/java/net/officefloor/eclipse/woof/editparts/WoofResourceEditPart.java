@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.woof.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -45,6 +46,13 @@ public class WoofResourceEditPart
 	}
 
 	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getWoofTemplateOutputs());
+		models.addAll(this.getCastedModel().getWoofSectionOutputs());
+		models.addAll(this.getCastedModel().getWoofExceptions());
+	}
+
+	@Override
 	protected Class<WoofResourceEvent> getPropertyChangeEventType() {
 		return WoofResourceEvent.class;
 	}
@@ -53,11 +61,14 @@ public class WoofResourceEditPart
 	protected void handlePropertyChange(WoofResourceEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case CHANGE_WOOF_RESOURCE_NAME:
-			// TODO handle name change
-			System.out.println("TODO handle name change");
+		case ADD_WOOF_TEMPLATE_OUTPUT:
+		case REMOVE_WOOF_TEMPLATE_OUTPUT:
+		case ADD_WOOF_SECTION_OUTPUT:
+		case REMOVE_WOOF_SECTION_OUTPUT:
+		case ADD_WOOF_EXCEPTION:
+		case REMOVE_WOOF_EXCEPTION:
+			this.refreshTargetConnections();
 			break;
-		// TODO remaining events
 		}
 	}
 
