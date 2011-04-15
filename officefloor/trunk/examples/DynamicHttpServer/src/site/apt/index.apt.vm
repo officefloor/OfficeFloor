@@ -30,7 +30,7 @@ Code
 
   To provide the developer dynamic control of rendering the template, there are non-obtrusive hooks for controlling the dynamic rending of the page.  The two hooks used in the above template are:
   
-   * <<< <!-- [TaskName] --> >>> : which delimits content of the template into {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances.  Note that it is only the task name surrounding by the square brackets within the comment.  Adding other content outside the square brackets will have OfficeFloor consider it just a comment.
+   * <<< <!-- \{TaskName\} --> >>> : which delimits content of the template into {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances.  Note that it is only the task name surrounding by the square brackets within the comment.  Adding other content outside the square brackets will have OfficeFloor consider it just a comment.
    
    * <<< $\{name\} >>> : which substitutes dynamic values for rending to the page
   
