@@ -6,12 +6,12 @@ Template ${TemplateName}:
         <td>Name</td>
         <td>Description</td>
     </tr>
-    <!-- [List] -->
+    <!-- {List} -->
     <tr>
         <td>${Name}</td>
         <td>${description}</td>
     </tr>
-    <!-- [Tail] -->
+    <!-- {Tail} -->
 </table>
 <form action="#{nextTask}">
 	<input type="submit" />

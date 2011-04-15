@@ -2,7 +2,7 @@
 <body>
 Template ${TemplateName}
 <br />
-<!-- [NullBean] -->
+<!-- {NullBean} -->
 Should be no template name ${TemplateName} available.
 <br />
 with a listing of <a href="#{beans}">beans</a>:
@@ -14,14 +14,14 @@ with a listing of <a href="#{beans}">beans</a>:
         <td>Property toString</td>
         <td>Property Value</td>
     </tr>
-    <!-- [List] -->
+    <!-- {List} -->
     <tr>
         <td>${Name}</td>
         <td>${description}</td>
         <td>${Property}</td>
         <td>${property.value}</td>
     </tr>
-    <!-- [Tail] -->
+    <!-- {Tail} -->
 </table>
 <form action="#{submit}">
     <input type="submit" />

@@ -5,12 +5,12 @@
         <td>Name</td>
         <td>Description</td>
     </tr>
-    <!-- [List] -->
+    <!-- {List} -->
     <tr>
         <td>${name}</td>
         <td>${description}</td>
     </tr>
-    <!-- [Tail] -->
+    <!-- {Tail} -->
 </table>
 </body>
 </html>
