@@ -108,7 +108,7 @@ public class HttpTemplateParserImpl implements HttpTemplateParser {
 	public static SectionStruct parseSection(String rawSectionContent) {
 
 		// Obtain the index of section name start
-		int nameStartBracket = rawSectionContent.indexOf("[");
+		int nameStartBracket = rawSectionContent.indexOf("{");
 		if (nameStartBracket < 0) {
 			// Section must have a name
 			return null;
@@ -123,7 +123,7 @@ public class HttpTemplateParserImpl implements HttpTemplateParser {
 		}
 
 		// Obtain the index of the section name finish
-		int nameFinishBracket = rawSectionContent.indexOf("]");
+		int nameFinishBracket = rawSectionContent.indexOf("}");
 		if (nameFinishBracket < 0) {
 			// Section must have name
 			return null;

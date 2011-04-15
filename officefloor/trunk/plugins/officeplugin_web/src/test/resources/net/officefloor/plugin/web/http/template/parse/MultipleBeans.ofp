@@ -1,12 +1,12 @@
 <html>
 <body>
-<!-- [one] -->
+<!-- {one} -->
 Name for bean one: ${name}
 <br />
-<!-- [two] -->
+<!-- {two} -->
 Name for bean two: ${name}
 <br />
-<!--  [three] -->
+<!--  {three} -->
 Name for bean three: ${name}
 <br />
 </body>
