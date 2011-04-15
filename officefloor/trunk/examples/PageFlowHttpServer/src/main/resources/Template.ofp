@@ -1,22 +1,22 @@
 <html>
 	<body>
-		<!-- [listItems] -->
+		<!-- {listItems} -->
 		<table>
 			<tr>
 				<td>Name</td>
 				<td>Description</td>
 			</tr>
-			<!-- [items] -->
+			<!-- {items} -->
 			<tr>
 				<td>${name}</td>
 				<td>${description}</td>
 			</tr>
-			<!-- [endItems] -->
+			<!-- {endItems} -->
 		</table>
 		<p><a href="#{clear}">Clear</a></p>
-		<!-- [noItems] -->
+		<!-- {noItems} -->
 		<p>Currently no items in list.</p>
-		<!-- [endListItems] -->
+		<!-- {endListItems} -->
 		<form action="#{addItem}">
 			Name: <input name="name" type="text" /> 
 			Description: <input name="description" type="text" />

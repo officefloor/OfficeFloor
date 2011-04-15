@@ -34,7 +34,7 @@ Code
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
 
-  The <<< <!-- [name] --> >>> and <<< $\{name\} >>> respectively provide separation of the template into tasks and the ability to substitute java bean property values.  This example will use the template section divisions ( <<< <!-- [name] --> >>> ) to enable controlling what is rendered along with the <<< #\{name\} >>> (notice the # rather than $) for extending task execution to enable user interactions.
+  The <<< <!-- \{name\} --> >>> and <<< $\{name\} >>> respectively provide separation of the template into tasks and the ability to substitute java bean property values.  This example will use the template section divisions ( <<< <!-- \{name\} --> >>> ) to enable controlling what is rendered along with the <<< #\{name\} >>> (notice the # rather than $) for extending task execution to enable user interactions.
 
 * TemplateLogic Class
 
@@ -48,7 +48,7 @@ Code
   
   One reason why this is possible with OfficeFloor rather than other dependency injection containers is that OfficeFloor dependency injects into methods (i.e. via parameters) rather than the object itself (i.e. via fields).  Because of this objects within OfficeFloor do not need to hold reference to dependencies and subsequently can be made serialisable - something not easily possible with object dependency injection as dependencies are typically not serialisable.
   
-  As the items are now stored across HTTP requests, they must be exposed for rendering the values to the template.  The below method via naming convention (prefixing the template section name <<< <!-- [items] --> >>> with <<<get>>>) exposes the <<<Item>>> objects for being rendered by that section (i.e. the <<< $\{name\} >>> and <<< $\{description\} >>>).
+  As the items are now stored across HTTP requests, they must be exposed for rendering the values to the template.  The below method via naming convention (prefixing the template section name <<< <!-- \{items\} --> >>> with <<<get>>>) exposes the <<<Item>>> objects for being rendered by that section (i.e. the <<< $\{name\} >>> and <<< $\{description\} >>>).
 
 %{code-snippet|brush-autodetect=1|id=items|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 

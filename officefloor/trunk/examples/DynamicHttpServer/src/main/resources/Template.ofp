@@ -1,18 +1,18 @@
 <html>
 	<body>
-		<!-- [time] -->
+		<!-- {time} -->
 		<p>Milliseconds since epoc is ${time}</p>
 		<table>
 			<tr>
 				<td>Name</td>
 				<td>Value</td>
 			</tr>
-			<!-- [systemProperties] -->
+			<!-- {systemProperties} -->
 			<tr>
 				<td>${name}</td>
 				<td>${value}</td>
 			</tr>
-			<!-- [endSystemProperties] -->
+			<!-- {endSystemProperties} -->
 		</table>
 	</body>
 </html>

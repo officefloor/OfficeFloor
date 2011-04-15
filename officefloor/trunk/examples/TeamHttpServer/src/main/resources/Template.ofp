@@ -6,7 +6,7 @@
 		</form>
 		<p>Code: ${code}</p>
 		<br />
-		<!-- [ThreadNames] -->
+		<!-- {ThreadNames} -->
 		<p>Encrypt thread: ${encryptThreadName}</p>
 		<p>Retrieve from database thread: ${retrieveFromDatabaseThreadName}</p>
 	</body>
