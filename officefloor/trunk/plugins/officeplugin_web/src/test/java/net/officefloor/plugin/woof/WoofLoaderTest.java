@@ -90,6 +90,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				ClassSectionSource.class, Section.class.getName()), sectionA);
 		sectionA.addProperty("name.one", "value.one");
 		sectionA.addProperty("name.two", "value.two");
+		this.app.linkUri("example", sectionA, "INPUT_B");
 		this.recordReturn(this.app, this.app.addSection("SECTION_B",
 				ClassSectionSource.class, Section.class.getName()), sectionB);
 

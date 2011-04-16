@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,9 +94,13 @@ public class WoofLoaderImpl implements WoofLoader {
 	public void loadWoofConfiguration(String woofLocation,
 			WebAutoWireApplication application) throws Exception {
 
-		// Obtain the woof configuration
+		// Obtain the woof configuration (ensuring exists)
 		ConfigurationItem configuration = this.context
 				.getConfigurationItem(woofLocation);
+		if (configuration == null) {
+			throw new FileNotFoundException("Can not find configuration file '"
+					+ woofLocation + "'");
+		}
 
 		// Load the WoOF model
 		WoofModel woof = this.repository.retrieveWoOF(configuration);
@@ -147,8 +152,19 @@ public class WoofLoaderImpl implements WoofLoader {
 			// Maintain reference to section by name
 			sections.put(sectionName, section);
 
-			// Maintain references from inputs to section
+			// Link URIs to inputs
 			for (WoofSectionInputModel inputModel : sectionModel.getInputs()) {
+
+				// Obtain the name of the input
+				String inputName = inputModel.getWoofSectionInputName();
+
+				// Link to URI if configured
+				String uri = inputModel.getUri();
+				if ((uri != null) && (uri.trim().length() > 0)) {
+					application.linkUri(uri, section, inputName);
+				}
+
+				// Maintain references from inputs to section
 				inputToSection.put(inputModel, sectionModel);
 			}
 		}
