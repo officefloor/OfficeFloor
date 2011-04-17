@@ -140,6 +140,26 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	}
 
 	/**
+	 * Determines if the {@link OfficeBuilding} is available for use.
+	 * 
+	 * @param hostName
+	 *            Name of host where the {@link OfficeBuilding} should be
+	 *            available.
+	 * @param port
+	 *            Port on which the {@link OfficeBuilding} should be available.
+	 * @return <code>true</code> if the {@link OfficeBuilding} is available.
+	 */
+	public static boolean isOfficeBuildingAvailable(String hostName, int port) {
+		try {
+			// Obtain the OfficeBuilding manager
+			getOfficeBuildingManager(hostName, port);
+			return true; // available
+		} catch (Exception ex) {
+			return false; // not available
+		}
+	}
+
+	/**
 	 * <p>
 	 * Obtains the {@link OfficeBuildingManagerMBean} for the
 	 * {@link OfficeBuilding}.
@@ -245,8 +265,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			String hostName, int port, String processNamespace)
 			throws Exception {
 		ObjectName objectName = ProcessManager.getLocalObjectName(
-				processNamespace, OfficeFloorManager
-						.getOfficeFloorManagerObjectName());
+				processNamespace,
+				OfficeFloorManager.getOfficeFloorManagerObjectName());
 		return getMBeanProxy(hostName, port, objectName,
 				OfficeFloorManagerMBean.class);
 	}
