@@ -52,7 +52,7 @@ public class WoofMain extends HttpServerAutoWireOfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to run.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 		run(new WoofMain());
 	}
 
