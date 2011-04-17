@@ -30,7 +30,7 @@ public class WoofNewWizard extends AbstractNewWizard {
 	 * Initiate.
 	 */
 	public WoofNewWizard() {
-		super("New WoOF", "Create a new Web on OfficeFloor", "new_woof",
+		super("New WoOF", "Create a new Web on OfficeFloor", "application",
 				"woof", "<woof/>");
 	}
 
