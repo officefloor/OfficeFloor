@@ -80,12 +80,10 @@ public class OfficeBuildingManagerTest extends TestCase {
 				+ OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath() };
 		this.environment
-				.put(
-						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
+				.put(LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
 						localRepositoryDirectory.getAbsoluteFile());
 		this.environment
-				.put(
-						RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
+				.put(RemoteRepositoryUrlsOfficeFloorCommandParameter.PARAMETER_REMOTE_REPOSITORY_URLS,
 						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
 								.transformForParameterValue(remoteRepositoryUrls));
 	}
@@ -109,6 +107,10 @@ public class OfficeBuildingManagerTest extends TestCase {
 		long beforeTime = System.currentTimeMillis();
 		OfficeBuildingManager manager = this.startOfficeBuilding();
 		long afterTime = System.currentTimeMillis();
+
+		// Ensure OfficeBuilding is available
+		assertTrue("OfficeBuilding should be available",
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
 
 		// Ensure correct JMX Service URL
 		String actualServiceUrl = manager.getOfficeBuildingJmxServiceUrl();
@@ -145,10 +147,19 @@ public class OfficeBuildingManagerTest extends TestCase {
 		String processNamespaces = managerMBean.listProcessNamespaces();
 		assertEquals("Should be no processes running", "", processNamespaces);
 
+		// OfficeBuilding should still be available
+		assertTrue("OfficeBuilding should still be available",
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
+
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
 		assertEquals("Incorrect stop details", "OfficeBuilding stopped",
 				stopDetails);
+
+		// OfficeBuilding now not be available
+		assertFalse(
+				"OfficeBuilding should be stopped and therefore unavailable",
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, PORT));
 	}
 
 	/**
@@ -316,8 +327,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 
 		// Invoke the work
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		localFloorManager.invokeTask("OFFICE", "SECTION.WORK", null, file
-				.getAbsolutePath());
+		localFloorManager.invokeTask("OFFICE", "SECTION.WORK", null,
+				file.getAbsolutePath());
 
 		// Ensure work invoked (content in file)
 		OfficeBuildingTestUtil.validateFileContent("Work should be invoked",
@@ -345,8 +356,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 			fail("Process should already be stopped");
 		} catch (Exception ex) {
 			// Ensure issue connecting
-			assertTrue("Should have issue connecting as process stopped", (ex
-					.getCause() instanceof ConnectException));
+			assertTrue("Should have issue connecting as process stopped",
+					(ex.getCause() instanceof ConnectException));
 		}
 	}
 
@@ -381,8 +392,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 				.getMBeanServerConnection();
 		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(
 				localMBeanServer, ProcessManager.getLocalObjectName(
-						processNamespace, ProcessShell
-								.getProcessShellObjectName()),
+						processNamespace,
+						ProcessShell.getProcessShellObjectName()),
 				ProcessShellMBean.class);
 
 		// Obtain the remote process shell (containing the OfficeFloor)
@@ -406,8 +417,8 @@ public class OfficeBuildingManagerTest extends TestCase {
 			fail("OfficeFloor should already be closed and process stopped");
 		} catch (Exception ex) {
 			// Ensure issue connecting
-			assertTrue("Should have issue finding as OfficeFloor closed", (ex
-					.getCause() instanceof ConnectException));
+			assertTrue("Should have issue finding as OfficeFloor closed",
+					(ex.getCause() instanceof ConnectException));
 		}
 	}
 
