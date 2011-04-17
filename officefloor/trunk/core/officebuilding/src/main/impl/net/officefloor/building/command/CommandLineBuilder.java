@@ -27,6 +27,7 @@ import net.officefloor.building.command.parameters.JarOfficeFloorCommandParamete
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
@@ -34,6 +35,7 @@ import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandP
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -63,10 +65,9 @@ public class CommandLineBuilder {
 	 *            Local repository.
 	 */
 	public void addLocalRepository(String localRepository) {
-		this
-				.addOption(
-						LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
-						localRepository);
+		this.addOption(
+				LocalRepositoryOfficeFloorCommandParameter.PARAMETER_LOCAL_REPOSITORY,
+				localRepository);
 	}
 
 	/**
@@ -88,10 +89,9 @@ public class CommandLineBuilder {
 	 *            Artifact identifier.
 	 */
 	public void addArtifact(String artifactIdentifier) {
-		this
-				.addOption(
-						MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
-						artifactIdentifier);
+		this.addOption(
+				MultipleArtifactsOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
+				artifactIdentifier);
 	}
 
 	/**
@@ -107,16 +107,27 @@ public class CommandLineBuilder {
 	}
 
 	/**
+	 * Adds the {@link OfficeFloorSource} class name to the command line.
+	 * 
+	 * @param officeFloorSourceClassName
+	 *            {@link OfficeFloorSource} class name.
+	 */
+	public void addOfficeFloorSource(String officeFloorSourceClassName) {
+		this.addOption(
+				OfficeFloorSourceOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_SOURCE,
+				officeFloorSourceClassName);
+	}
+
+	/**
 	 * Adds an {@link OfficeFloor} location to the command line.
 	 * 
 	 * @param officeFloorLocation
 	 *            {@link OfficeFloor} location.
 	 */
 	public void addOfficeFloor(String officeFloorLocation) {
-		this
-				.addOption(
-						OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
-						officeFloorLocation);
+		this.addOption(
+				OfficeFloorLocationOfficeFloorCommandParameter.PARAMETER_OFFICE_FLOOR_LOCATION,
+				officeFloorLocation);
 	}
 
 	/**

@@ -34,6 +34,7 @@ import net.officefloor.building.command.parameters.MultipleArtifactsOfficeFloorC
 import net.officefloor.building.command.parameters.OfficeBuildingHostOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
@@ -44,6 +45,7 @@ import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -78,6 +80,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * {@link Process} name.
 	 */
 	private final ProcessNameOfficeFloorCommandParameter processName = new ProcessNameOfficeFloorCommandParameter();
+
+	/**
+	 * {@link OfficeFloorSource} class name.
+	 */
+	private final OfficeFloorSourceOfficeFloorCommandParameter officeFloorSource = new OfficeFloorSourceOfficeFloorCommandParameter();
 
 	/**
 	 * Location of the {@link OfficeFloor}.
@@ -151,9 +158,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	public OfficeFloorCommandParameter[] getParameters() {
 		return new OfficeFloorCommandParameter[] { this.officeBuildingHost,
 				this.officeBuildingPort, this.jvmOptions, this.processName,
-				this.officeFloorLocation, this.officeFloorProperties,
-				this.archives, this.artifacts, this.classpath, this.officeName,
-				this.workName, this.taskName, this.parameter };
+				this.officeFloorSource, this.officeFloorLocation,
+				this.officeFloorProperties, this.archives, this.artifacts,
+				this.classpath, this.officeName, this.workName, this.taskName,
+				this.parameter };
 	}
 
 	@Override
@@ -172,8 +180,8 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 		// Include the artifacts on the class path
 		for (ArtifactArgument artifact : this.artifacts.getArtifacts()) {
-			context.includeClassPathArtifact(artifact.getGroupId(), artifact
-					.getArtifactId(), artifact.getVersion(),
+			context.includeClassPathArtifact(artifact.getGroupId(),
+					artifact.getArtifactId(), artifact.getVersion(),
 					artifact.getType(), artifact.getClassifier());
 		}
 	}
@@ -200,6 +208,10 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		String processName = this.processName.getProcessName();
 		environment.setProcessName(processName);
 		arguments.addProcessName(processName);
+
+		// Add the OfficeFloorSource
+		arguments.addOfficeFloorSource(this.officeFloorSource
+				.getOfficeFloorSourceClassName());
 
 		// Add the OfficeFloor
 		arguments.addOfficeFloor(this.officeFloorLocation
