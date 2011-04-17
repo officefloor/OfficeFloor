@@ -64,11 +64,10 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM";
 		this.doMain(openCommand);
-		out
-				.add("Opening OfficeFloor within process name space '"
-						+ PROCESS_NAME
-						+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
-						+ tempFile.getAbsolutePath() + ")");
+		out.add("Opening OfficeFloor within process name space '"
+				+ PROCESS_NAME
+				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+				+ tempFile.getAbsolutePath() + ")");
 		out.add("OfficeFloor within process name space '" + PROCESS_NAME
 				+ "' closed");
 
@@ -92,25 +91,25 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 
 		// Validate no error and appropriate help message
 		this.assertErr();
-		this
-				.assertOut(
-						"                                                                 ",
-						"Opens an OfficeFloor                                             ",
-						"                                                                 ",
-						"usage: script [options]                                          ",
-						"                                                                 ",
-						"Options:                                                         ",
-						" -a,--artifact <arg>       Artifact to include on the class path ",
-						" -cp,--classpath <arg>     Raw entry to include on the class path",
-						" -h,--help                 This help message                     ",
-						" -j,--jar <arg>            Archive to include on the class path  ",
-						" -o,--office <arg>         Name of the Office                    ",
-						" -of,--officefloor <arg>   Location of the OfficeFloor           ",
-						" --parameter <arg>         Parameter for the Task                ",
-						" --process-name <arg>      Process name space. Default is Process",
-						" --property <arg>          Property for the OfficeFloor in the form of name=value",
-						" -t,--task <arg>           Name of the Task                      ",
-						" -w,--work <arg>           Name of the Work                      ");
+		this.assertOut(
+				"                                                                 ",
+				"Opens an OfficeFloor                                             ",
+				"                                                                 ",
+				"usage: script [options]                                          ",
+				"                                                                 ",
+				"Options:                                                         ",
+				" -a,--artifact <arg>              Artifact to include on the class path ",
+				" -cp,--classpath <arg>            Raw entry to include on the class path",
+				" -h,--help                        This help message                     ",
+				" -j,--jar <arg>                   Archive to include on the class path  ",
+				" -o,--office <arg>                Name of the Office                    ",
+				" -of,--officefloor <arg>          Location of the OfficeFloor           ",
+				" -ofs,--officefloorsource <arg>   OfficeFloorSource",
+				" --parameter <arg>                Parameter for the Task                ",
+				" --process-name <arg>             Process name space. Default is Process",
+				" --property <arg>                 Property for the OfficeFloor in the form of name=value",
+				" -t,--task <arg>                  Name of the Task                      ",
+				" -w,--work <arg>                  Name of the Work                      ");
 	}
 
 }

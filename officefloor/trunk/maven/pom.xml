@@ -47,6 +47,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>maven-woof-plugin</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven-officefloor-skin</artifactId>
 				<version>1.0.1</version>
 			</dependency>

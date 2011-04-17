@@ -32,6 +32,7 @@ import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -73,6 +74,11 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	/**
+	 * Class name of the {@link OfficeFloorSource}.
+	 */
+	private final String officeFloorSourceClassName;
+
+	/**
 	 * Location of the {@link OfficeFloor} configuration.
 	 */
 	private final String officeFloorLocation;
@@ -106,13 +112,18 @@ public class OfficeFloorManager implements ManagedProcess,
 	/**
 	 * Initiate.
 	 * 
+	 * @param officeFloorSourceClassName
+	 *            Class name of the {@link OfficeFloorSource}. May be
+	 *            <code>null</code> to use the default {@link OfficeFloorSource}
+	 *            of the {@link OfficeFloorCompiler}.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor} configuration.
 	 * @param officeFloorProperties
 	 *            Properties for the {@link OfficeFloor}.
 	 */
-	public OfficeFloorManager(String officeFloorLocation,
-			Properties officeFloorProperties) {
+	public OfficeFloorManager(String officeFloorSourceClassName,
+			String officeFloorLocation, Properties officeFloorProperties) {
+		this.officeFloorSourceClassName = officeFloorSourceClassName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.officeFloorProperties = officeFloorProperties;
 	}
@@ -163,8 +174,7 @@ public class OfficeFloorManager implements ManagedProcess,
 								+ taskName
 								+ " ("
 								+ (parameterType == null ? "" : parameterType
-										.getSimpleName()
-										+ ")"));
+										.getSimpleName() + ")"));
 					}
 				}
 			}
@@ -200,6 +210,7 @@ public class OfficeFloorManager implements ManagedProcess,
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public synchronized void init(ManagedProcessContext context)
 			throws Throwable {
 		this.context = context;
@@ -236,6 +247,19 @@ public class OfficeFloorManager implements ManagedProcess,
 						+ (cause == null ? "" : cause.getMessage()), cause);
 			}
 		});
+
+		// Determine if override the default OfficeFloorSource
+		if ((this.officeFloorSourceClassName != null)
+				&& (this.officeFloorSourceClassName.trim().length() > 0)) {
+
+			// Load the OfficeFloorSource class
+			Class<? extends OfficeFloorSource> officeFloorSourceClass = (Class<? extends OfficeFloorSource>) compiler
+					.getClassLoader()
+					.loadClass(this.officeFloorSourceClassName);
+
+			// Override the default OfficeFloorSource
+			compiler.setOfficeFloorSourceClass(officeFloorSourceClass);
+		}
 
 		// Compile the OfficeFloor
 		this.officeFloor = compiler.compile(this.officeFloorLocation);

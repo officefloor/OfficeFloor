@@ -30,8 +30,10 @@ import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloor
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.officefloor.MockOfficeFloorSource;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -117,8 +119,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		final String HOST = "server";
 
 		// Obtain the URL
-		this
-				.doMain("--office-building-host server --office-building-port 13778 url");
+		this.doMain("--office-building-host server --office-building-port 13778 url");
 
 		// Validate output URL
 		String expectedUrl = OfficeBuildingManager
@@ -149,11 +150,10 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		out.add(this.officeBuildingStartLine);
 
 		// Open the OfficeFloor (via a Jar)
-		this
-				.doMain("--jar "
-						+ jarFilePath.getParentFile().getAbsolutePath()
-						+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-						+ " --property team.name=TEAM" + " open");
+		this.doMain("--jar "
+				+ jarFilePath.getParentFile().getAbsolutePath()
+				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
+				+ " --property team.name=TEAM" + " open");
 		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
 				+ "'");
 
@@ -214,9 +214,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doMain("--process-name " + PROCESS_NAME + " --office OFFICE"
 				+ " --work SECTION.WORK" + " --task writeMessage"
 				+ " --parameter " + tempFile.getAbsolutePath() + " invoke");
-		out
-				.add("Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
-						+ tempFile.getAbsolutePath());
+		out.add("Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
+				+ tempFile.getAbsolutePath());
 
 		// Ensure message written to file (passive team so should be done)
 		String fileContent = this.getFileContents(tempFile);
@@ -266,11 +265,10 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ tempFile.getAbsolutePath() + " --property team.name=TEAM"
 				+ " open";
 		this.doMain(openCommand);
-		out
-				.add("OfficeFloor open under process name space '"
-						+ PROCESS_NAME
-						+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
-						+ tempFile.getAbsolutePath() + ")");
+		out.add("OfficeFloor open under process name space '"
+				+ PROCESS_NAME
+				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
+				+ tempFile.getAbsolutePath() + ")");
 
 		// Wait for office floor to complete
 		try {
@@ -311,6 +309,51 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
+	 * Ensure able to open an alternate {@link OfficeFloorSource}.
+	 */
+	public void testAlternateOfficeFloorSource() throws Throwable {
+
+		final String PROCESS_NAME = this.getName();
+		final String MESSAGE = "MESSAGE";
+
+		// Expected output
+		List<String> out = new LinkedList<String>();
+
+		// Start the OfficeBuilding
+		this.doMain("start");
+		out.add(this.officeBuildingStartLine);
+
+		// File
+		File tempFile = File.createTempFile(this.getName(), "txt");
+
+		// Run the OfficeFloor with alternate OfficeFloorSource
+		String openCommand = "--process-name " + PROCESS_NAME
+				+ " --officefloorsource "
+				+ MockOfficeFloorSource.class.getName() + " --officefloor "
+				+ tempFile.getAbsolutePath() + " --property "
+				+ MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE
+				+ " open";
+		this.doMain(openCommand);
+		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
+				+ "'");
+
+		// Ensure message written to file
+		OfficeBuildingTestUtil.validateFileContent(
+				"Message should be written to file", MESSAGE, tempFile);
+
+		// Stop the OfficeBuilding (ensuring running processes are stopped)
+		this.doMain("stop");
+		out.add("Stopping processes:");
+		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
+		out.add("");
+		out.add("OfficeBuilding stopped");
+
+		// Validate no error and correct output
+		this.assertErr();
+		this.assertOut(out.toArray(new String[out.size()]));
+	}
+
+	/**
 	 * Ensure correct Help.
 	 */
 	public void testHelp() throws Throwable {
@@ -320,70 +363,70 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate output Help
 		this.assertErr();
-		this
-				.assertOut(
-						"                                                         ",
-						"usage: script [options] <commands>                       ",
-						"                                                         ",
-						"Commands:                                                ",
-						"                                                         ",
-						"start : Starts the OfficeBuilding                        ",
-						"      Options:                                           ",
-						"       -lr,--local-repository <arg>         Local repository for caching Artifacts",
-						"       -p,--office-building-port <arg>      Port for the OfficeBuilding. Default is 13778",
-						"       -rr,--remote-repository-urls <arg>   Remote repository URL to retrieve Artifacts",
-						"                                                         ",
-						"url : Obtains the URL for the OfficeBuilding             ",
-						"    Options:                                             ",
-						"     --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"     -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"                                                         ",
-						"open : Opens an OfficeFloor within the OfficeBuilding    ",
-						"     Options:                                            ",
-						"      -a,--artifact <arg>               Artifact to include on the class path",
-						"      -cp,--classpath <arg>             Raw entry to include on the class path",
-						"      -j,--jar <arg>                    Archive to include on the class path",
-						"      --jvm-option <arg>                JVM option       ",
-						"      -o,--office <arg>                 Name of the Office",
-						"      -of,--officefloor <arg>           Location of the OfficeFloor",
-						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"      --parameter <arg>                 Parameter for the Task",
-						"      --process-name <arg>              Process name space. Default is Process",
-						"      --property <arg>                  Property for the OfficeFloor in the form of name=value",
-						"      -t,--task <arg>                   Name of the Task ",
-						"      -w,--work <arg>                   Name of the Work ",
-						"                                                         ",
-						"list : Lists details of the OfficeBuilding/OfficeFloor   ",
-						"     Options:                                            ",
-						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"      --process-name <arg>              Process name space. Default is Process",
-						"                                                         ",
-						"invoke : Invokes a Task within a running OfficeFloor     ",
-						"       Options:                                          ",
-						"        -o,--office <arg>                 Name of the Office",
-						"        --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"        -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"        --parameter <arg>                 Parameter for the Task",
-						"        --process-name <arg>              Process name space. Default is Process",
-						"        -t,--task <arg>                   Name of the Task",
-						"        -w,--work <arg>                   Name of the Work",
-						"                                                         ",
-						"close : Closes an OfficeFloor within the OfficeBuilding  ",
-						"      Options:                                           ",
-						"       --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"       -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"       --process-name <arg>              Process name space. Default is Process",
-						"       --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
-						"                                                         ",
-						"stop : Stops the OfficeBuilding                          ",
-						"     Options:                                            ",
-						"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
-						"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
-						"      --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
-						"                                                         ",
-						"help : This help message                                 ");
+		this.assertOut(
+				"                                                         ",
+				"usage: script [options] <commands>                       ",
+				"                                                         ",
+				"Commands:                                                ",
+				"                                                         ",
+				"start : Starts the OfficeBuilding                        ",
+				"      Options:                                           ",
+				"       -lr,--local-repository <arg>         Local repository for caching Artifacts",
+				"       -p,--office-building-port <arg>      Port for the OfficeBuilding. Default is 13778",
+				"       -rr,--remote-repository-urls <arg>   Remote repository URL to retrieve Artifacts",
+				"                                                         ",
+				"url : Obtains the URL for the OfficeBuilding             ",
+				"    Options:                                             ",
+				"     --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"     -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"                                                         ",
+				"open : Opens an OfficeFloor within the OfficeBuilding    ",
+				"     Options:                                            ",
+				"      -a,--artifact <arg>               Artifact to include on the class path",
+				"      -cp,--classpath <arg>             Raw entry to include on the class path",
+				"      -j,--jar <arg>                    Archive to include on the class path",
+				"      --jvm-option <arg>                JVM option       ",
+				"      -o,--office <arg>                 Name of the Office",
+				"      -of,--officefloor <arg>           Location of the OfficeFloor",
+				"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"      -ofs,--officefloorsource <arg>    OfficeFloorSource",
+				"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"      --parameter <arg>                 Parameter for the Task",
+				"      --process-name <arg>              Process name space. Default is Process",
+				"      --property <arg>                  Property for the OfficeFloor in the form of name=value",
+				"      -t,--task <arg>                   Name of the Task ",
+				"      -w,--work <arg>                   Name of the Work ",
+				"                                                         ",
+				"list : Lists details of the OfficeBuilding/OfficeFloor   ",
+				"     Options:                                            ",
+				"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"      --process-name <arg>              Process name space. Default is Process",
+				"                                                         ",
+				"invoke : Invokes a Task within a running OfficeFloor     ",
+				"       Options:                                          ",
+				"        -o,--office <arg>                 Name of the Office",
+				"        --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"        -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"        --parameter <arg>                 Parameter for the Task",
+				"        --process-name <arg>              Process name space. Default is Process",
+				"        -t,--task <arg>                   Name of the Task",
+				"        -w,--work <arg>                   Name of the Work",
+				"                                                         ",
+				"close : Closes an OfficeFloor within the OfficeBuilding  ",
+				"      Options:                                           ",
+				"       --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"       -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"       --process-name <arg>              Process name space. Default is Process",
+				"       --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
+				"                                                         ",
+				"stop : Stops the OfficeBuilding                          ",
+				"     Options:                                            ",
+				"      --office-building-host <arg>      OfficeBuilding Host. Default is localhost",
+				"      -p,--office-building-port <arg>   Port for the OfficeBuilding. Default is 13778",
+				"      --stop-max-wait-time <arg>        Maximum time in milliseconds to wait to stop. Default is 10000",
+				"                                                         ",
+				"help : This help message                                 ");
 	}
 
 }
