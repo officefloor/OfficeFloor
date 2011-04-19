@@ -90,8 +90,6 @@
 					<settingsFile>src/it/settings.xml</settingsFile>
 					<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
 					<debug>true</debug>
-					<preBuildHookScript>setup.bsh</preBuildHookScript>
-					<postBuildHookScript>verify.bsh</postBuildHookScript>
 				</configuration>
 				<executions>
 					<execution>
@@ -109,6 +107,14 @@
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officebuilding</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.maven</groupId>
+			<artifactId>maven-officefloor-plugin</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

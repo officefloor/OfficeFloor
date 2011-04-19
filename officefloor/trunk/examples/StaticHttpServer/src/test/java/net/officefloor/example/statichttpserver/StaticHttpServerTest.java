@@ -19,7 +19,7 @@ package net.officefloor.example.statichttpserver;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
-import net.officefloor.plugin.woof.WoofMain;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,7 +35,7 @@ public class StaticHttpServerTest extends TestCase {
 	@Override
 	// START SNIPPET: setup
 	protected void setUp() throws Exception {
-		WoofMain.main();
+		WoofOfficeFloorSource.main();
 	}
 	// END SNIPPET: setup
 

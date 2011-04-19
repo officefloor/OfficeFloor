@@ -34,11 +34,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
- * Tests the {@link WoofMain}.
+ * Tests the {@link WoofOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofMainTest extends OfficeFrameTestCase {
+public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -51,7 +51,7 @@ public class WoofMainTest extends OfficeFrameTestCase {
 	public void testLoadsAndRuns() throws Exception {
 
 		// Run the application
-		WoofMain.main(new String[0]);
+		WoofOfficeFloorSource.main(new String[0]);
 
 		// Test
 		this.doTestRequest("/test");
@@ -70,9 +70,9 @@ public class WoofMainTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Provides additional configuration to {@link WoofMain} for testing.
+	 * Provides additional configuration to {@link WoofOfficeFloorSource} for testing.
 	 */
-	private static class MockWoofMain extends WoofMain {
+	private static class MockWoofMain extends WoofOfficeFloorSource {
 
 		/**
 		 * Main for running.
@@ -80,7 +80,7 @@ public class WoofMainTest extends OfficeFrameTestCase {
 		 * @param args
 		 *            Command line arguments.
 		 */
-		public static void main(String[] args) throws Exception {
+		public static void main(String... args) throws Exception {
 			run(new MockWoofMain());
 		}
 
@@ -97,7 +97,7 @@ public class WoofMainTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Sends request to test {@link WoofMain} running.
+	 * Sends request to test {@link WoofOfficeFloorSource} running.
 	 * 
 	 * @param uri
 	 *            URI.

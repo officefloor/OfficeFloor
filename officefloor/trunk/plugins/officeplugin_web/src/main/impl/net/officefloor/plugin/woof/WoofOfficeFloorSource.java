@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.woof;
 
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -32,7 +34,7 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofMain extends HttpServerAutoWireOfficeFloorSource {
+public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource {
 
 	/**
 	 * Property for the location of the WoOF configuration for the application.
@@ -53,39 +55,18 @@ public class WoofMain extends HttpServerAutoWireOfficeFloorSource {
 	 *             If fails to run.
 	 */
 	public static void main(String... args) throws Exception {
-		run(new WoofMain());
+		run(new WoofOfficeFloorSource());
 	}
 
 	/**
 	 * Configures and runs the {@link HttpServerAutoWireApplication}.
 	 * 
 	 * @param application
-	 *            {@link WoofMain}.
+	 *            {@link WoofOfficeFloorSource}.
 	 * @throws Exception
 	 *             If fails to run.
 	 */
-	public static void run(WoofMain application) throws Exception {
-
-		// Obtain the WoOF location
-		String woofLocation = System.getProperty(
-				PROPERTY_WOOF_CONFIGURATION_LOCATION,
-				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
-
-		// Obtain objects to load configuration
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		ConfigurationContext context = new ClassLoaderConfigurationContext(
-				classLoader);
-		WoofRepository repository = new WoofRepositoryImpl(
-				new ModelRepositoryImpl());
-
-		// Load the WoOF configuration to the application
-		new WoofLoaderImpl(classLoader, context, repository)
-				.loadWoofConfiguration(woofLocation, application);
-
-		// Providing additional configuration
-		application.configure(application);
-
+	public static void run(WoofOfficeFloorSource application) throws Exception {
 		// Start the application
 		application.openOfficeFloor();
 	}
@@ -98,6 +79,38 @@ public class WoofMain extends HttpServerAutoWireOfficeFloorSource {
 	 */
 	protected void configure(HttpServerAutoWireOfficeFloorSource application) {
 		// No additional configuration by default
+	}
+
+	/*
+	 * =================== AutoWireOfficeFloorSource ======================
+	 */
+
+	@Override
+	protected void initOfficeFloor(OfficeFloorDeployer deployer,
+			OfficeFloorSourceContext context) throws Exception {
+
+		// Obtain the WoOF location
+		String woofLocation = context.getProperty(
+				PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
+
+		// Obtain objects to load configuration
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
+				classLoader);
+		WoofRepository repository = new WoofRepositoryImpl(
+				new ModelRepositoryImpl());
+
+		// Load the WoOF configuration to the application
+		new WoofLoaderImpl(classLoader, configurationContext, repository)
+				.loadWoofConfiguration(woofLocation, this);
+
+		// Providing additional configuration
+		this.configure(this);
+
+		// Initialise parent
+		super.initOfficeFloor(deployer, context);
 	}
 
 }
