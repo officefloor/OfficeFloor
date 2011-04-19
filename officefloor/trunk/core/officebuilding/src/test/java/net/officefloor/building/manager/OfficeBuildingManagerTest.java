@@ -45,6 +45,7 @@ import net.officefloor.building.process.officefloor.OfficeFloorManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -419,6 +420,39 @@ public class OfficeBuildingManagerTest extends TestCase {
 			// Ensure issue connecting
 			assertTrue("Should have issue finding as OfficeFloor closed",
 					(ex.getCause() instanceof ConnectException));
+		}
+	}
+
+	/**
+	 * Ensure able to spawn the {@link OfficeBuilding}.
+	 */
+	public void testSpawnOfficeBuilding() throws Exception {
+
+		final int SPAWN_PORT = PORT + 1;
+
+		// Spawn the OfficeBuilding
+		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
+				SPAWN_PORT, null, null);
+		try {
+
+			// Ensure the OfficeBuilding is available
+			assertTrue("OfficeBuilding should be available",
+					OfficeBuildingManager.isOfficeBuildingAvailable(null,
+							SPAWN_PORT));
+
+			// Stop the spawned OfficeBuilding
+			OfficeBuildingManagerMBean manager = OfficeBuildingManager
+					.getOfficeBuildingManager(null, SPAWN_PORT);
+			manager.stopOfficeBuilding(1000);
+
+			// Ensure the OfficeBuilding stopped
+			assertFalse("OfficeBuilding should be stopped",
+					OfficeBuildingManager.isOfficeBuildingAvailable(null,
+							SPAWN_PORT));
+
+		} finally {
+			// Ensure process stopped
+			process.destroyProcess();
 		}
 	}
 
