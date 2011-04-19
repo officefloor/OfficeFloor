@@ -174,8 +174,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 			// Connect to parent to send notifications
 			Socket parentSocket = new Socket();
 			parentSocket.connect(new InetSocketAddress(parentPort));
-			toParentPipe = new ObjectOutputStream(parentSocket
-					.getOutputStream());
+			toParentPipe = new ObjectOutputStream(
+					parentSocket.getOutputStream());
 
 			// Create the MBean Server
 			MBeanServer mbeanServer = ManagementFactory
@@ -334,9 +334,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	}
 
 	@Override
-	public void triggerStopProcess() {
+	public synchronized void triggerStopProcess() {
+
 		// Flag to stop processing
 		this.isContinueProcessing = false;
+
+		// Notify process stopped
+		this.notifyAll();
 	}
 
 	/*

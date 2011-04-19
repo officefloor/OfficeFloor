@@ -44,6 +44,8 @@ import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.console.OfficeFloorConsole;
 import net.officefloor.building.process.ProcessCompletionListener;
+import net.officefloor.building.process.ProcessConfiguration;
+import net.officefloor.building.process.ProcessException;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
@@ -152,11 +154,54 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	public static boolean isOfficeBuildingAvailable(String hostName, int port) {
 		try {
 			// Obtain the OfficeBuilding manager
-			getOfficeBuildingManager(hostName, port);
-			return true; // available
+			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(
+					hostName, port);
+
+			// Available if not stopped
+			return (!manager.isOfficeBuildingStopped());
 		} catch (Exception ex) {
 			return false; // not available
 		}
+	}
+
+	/**
+	 * Spawns an {@link OfficeBuilding} in a new {@link Process}.
+	 * 
+	 * @param port
+	 *            Port for the {@link OfficeBuilding}.
+	 * @param environment
+	 *            Environment {@link Properties}. May be <code>null</code>.
+	 * @param configuration
+	 *            {@link ProcessConfiguration}. May be <code>null</code>.
+	 * @return {@link ProcessManager} managing the started
+	 *         {@link OfficeBuilding}.
+	 * @throws ProcessException
+	 *             If fails to spawn the {@link OfficeBuilding}.
+	 */
+	public static ProcessManager spawnOfficeBuilding(int port,
+			Properties environment, ProcessConfiguration configuration)
+			throws ProcessException {
+
+		// Ensure have environment
+		if (environment == null) {
+			environment = new Properties();
+		}
+
+		// Create the OfficeBuilding managed process
+		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
+				port, environment);
+
+		// Ensure have process configuration
+		if (configuration == null) {
+			configuration = new ProcessConfiguration();
+		}
+
+		// Spawn the OfficeBuilding
+		ProcessManager manager = ProcessManager.startProcess(managedProcess,
+				configuration);
+
+		// Return the Process Manager
+		return manager;
 	}
 
 	/**
@@ -345,6 +390,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 	 * Flags if the {@link OfficeBuilding} is open.
 	 */
 	private boolean isOfficeBuildingOpen = true;
+
+	/**
+	 * Flags if the {@link OfficeBuilding} has been stopped.
+	 */
+	private volatile boolean isOfficeBuildingStopped = false;
 
 	/**
 	 * Start time of the {@link OfficeBuilding}.
@@ -651,13 +701,24 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 			return status.toString();
 
 		} finally {
+			// Flag the OfficeBuilding as stopped
+			this.isOfficeBuildingStopped = true;
+
 			// Stop the connector server
 			this.connectorServer.stop();
 
 			// Unregister the Office Building Manager MBean
 			this.mbeanServer
 					.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+
+			// Notify that stopped (responsive stop spawned OfficeBuilding)
+			this.notifyAll();
 		}
+	}
+
+	@Override
+	public boolean isOfficeBuildingStopped() {
+		return this.isOfficeBuildingStopped;
 	}
 
 	/*

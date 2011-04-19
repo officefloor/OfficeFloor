@@ -148,4 +148,11 @@ public interface OfficeBuildingManagerMBean {
 	 */
 	String stopOfficeBuilding(long waitTime) throws Exception;
 
+	/**
+	 * Indicates if the {@link OfficeBuilding} has been stopped.
+	 * 
+	 * @return <code>true</code> should the {@link OfficeBuilding} be stopped.
+	 */
+	boolean isOfficeBuildingStopped();
+
 }
