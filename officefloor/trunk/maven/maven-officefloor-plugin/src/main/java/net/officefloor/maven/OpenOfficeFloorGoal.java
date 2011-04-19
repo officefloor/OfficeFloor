@@ -23,12 +23,14 @@ import java.util.List;
 import net.officefloor.building.command.CommandLineBuilder;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -45,6 +47,40 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 * Default process name.
 	 */
 	public static final String DEFAULT_PROCESS_NAME = "maven-officefloor-plugin";
+
+	/**
+	 * Creates the {@link OpenOfficeFloorGoal} with the required parameters.
+	 * 
+	 * @param project
+	 *            {@link MavenProject}.
+	 * @param pluginDependencies
+	 *            Plug-in dependencies.
+	 * @param port
+	 *            Port.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 * @param log
+	 *            {@link Log}.
+	 * @return {@link OpenOfficeFloorGoal}.
+	 */
+	public static OpenOfficeFloorGoal createOfficeFloorGoal(
+			String defaultProcessName, MavenProject project,
+			List<Artifact> pluginDependencies, Integer port,
+			String officeFloorLocation, Log log) {
+		OpenOfficeFloorGoal goal = new OpenOfficeFloorGoal();
+		goal.defaultProcessName = defaultProcessName;
+		goal.project = project;
+		goal.pluginDependencies = pluginDependencies;
+		goal.port = port;
+		goal.officeFloorLocation = officeFloorLocation;
+		goal.setLog(log);
+		return goal;
+	}
+
+	/**
+	 * Default process name.
+	 */
+	private String defaultProcessName = DEFAULT_PROCESS_NAME;
 
 	/**
 	 * {@link MavenProject}.
@@ -79,11 +115,38 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	private String officeFloorLocation;
 
 	/**
+	 * {@link OfficeFloorSource} class name.
+	 * 
+	 * @parameter
+	 */
+	private String officeFloorSource;
+
+	/**
+	 * Specifies the {@link OfficeFloorSource} class name.
+	 * 
+	 * @param officeFloorSource
+	 *            {@link OfficeFloorSource} class name.
+	 */
+	public void setOfficeFloorSource(String officeFloorSource) {
+		this.officeFloorSource = officeFloorSource;
+	}
+
+	/**
 	 * Process name to open the {@link OfficeFloor} within.
 	 * 
 	 * @parameter
 	 */
 	private String processName;
+
+	/**
+	 * Specifies the process name.
+	 * 
+	 * @param processName
+	 *            Process name.
+	 */
+	public void setProcessName(String processName) {
+		this.processName = processName;
+	}
 
 	/**
 	 * JVM options for running the {@link OfficeFloor}.
@@ -93,11 +156,31 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	private String[] jvmOptions;
 
 	/**
+	 * Specifies the JVM options.
+	 * 
+	 * @param jvmOptions
+	 *            JVM options.
+	 */
+	public void setJvmOptions(String... jvmOptions) {
+		this.jvmOptions = jvmOptions;
+	}
+
+	/**
 	 * Indicates whether to provide verbose output.
 	 * 
 	 * @parameter
 	 */
-	private Boolean verbose = new Boolean(false);
+	private Boolean verbose = Boolean.valueOf(false);
+
+	/**
+	 * Specifies whether verbose.
+	 * 
+	 * @param isVerbose
+	 *            <code>true</code> if verbose.
+	 */
+	public void setVerbose(boolean isVerbose) {
+		this.verbose = Boolean.valueOf(isVerbose);
+	}
 
 	/*
 	 * ======================== Mojo ==========================
@@ -109,14 +192,16 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Ensure have required values
 		assertNotNull("Must have project", this.project);
 		assertNotNull("Must have plug-in dependencies", this.pluginDependencies);
-		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
+		assertNotNull(
+				"Port not configured for the "
+						+ OfficeBuilding.class.getSimpleName(), this.port);
 		assertNotNull(OfficeFloor.class.getSimpleName()
 				+ " configuration location not specified",
 				this.officeFloorLocation);
 
 		// Ensure default non-required values
-		this.processName = defaultValue(this.processName, DEFAULT_PROCESS_NAME);
+		this.processName = defaultValue(this.processName,
+				this.defaultProcessName);
 
 		// Obtain the OfficeBuilding manager
 		OfficeBuildingManagerMBean officeBuildingManager;
@@ -145,6 +230,9 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		for (Artifact artifact : this.pluginDependencies) {
 			arguments.addClassPathEntry(artifact.getFile().getAbsolutePath());
 		}
+
+		// Specify the OfficeFloorSource
+		arguments.addOfficeFloorSource(this.officeFloorSource);
 
 		// Specify location of OfficeFloor
 		arguments.addOfficeFloor(this.officeFloorLocation);

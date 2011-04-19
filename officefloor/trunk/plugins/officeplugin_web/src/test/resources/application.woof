@@ -2,7 +2,7 @@
     
     <sections>
         <section name="SECTION" source="net.officefloor.plugin.section.clazz.ClassSectionSource"
-         location="net.officefloor.plugin.woof.WoofMainTest$Section">
+         location="net.officefloor.plugin.woof.WoofOfficeFloorSourceTest$Section">
             <input name="service" uri="test" />
         </section>
     </sections>
