@@ -66,6 +66,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean,
 		ProcessCompletionListener {
 
 	/**
+	 * Artifact Id for this {@link OfficeBuilding}.
+	 */
+	public static final String OFFICE_BUIDLING_ARTIFACT_ID = "officebuilding";
+
+	/**
 	 * {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
 	 */
 	static ObjectName OFFICE_BUILDING_MANAGER_OBJECT_NAME;

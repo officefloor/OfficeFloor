@@ -55,8 +55,6 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 *            {@link MavenProject}.
 	 * @param pluginDependencies
 	 *            Plug-in dependencies.
-	 * @param port
-	 *            Port.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 * @param log
@@ -65,13 +63,12 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 */
 	public static OpenOfficeFloorGoal createOfficeFloorGoal(
 			String defaultProcessName, MavenProject project,
-			List<Artifact> pluginDependencies, Integer port,
-			String officeFloorLocation, Log log) {
+			List<Artifact> pluginDependencies, String officeFloorLocation,
+			Log log) {
 		OpenOfficeFloorGoal goal = new OpenOfficeFloorGoal();
 		goal.defaultProcessName = defaultProcessName;
 		goal.project = project;
 		goal.pluginDependencies = pluginDependencies;
-		goal.port = port;
 		goal.officeFloorLocation = officeFloorLocation;
 		goal.setLog(log);
 		return goal;
@@ -102,9 +99,18 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 * Port that {@link OfficeBuilding} is running on.
 	 * 
 	 * @parameter
-	 * @required
 	 */
-	private Integer port;
+	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
+
+	/**
+	 * Specifies the port that {@link OfficeBuilding} is running on.
+	 * 
+	 * @param port
+	 *            Port that {@link OfficeBuilding} is running on.
+	 */
+	public void setOfficeBuildingPort(int port) {
+		this.port = port;
+	}
 
 	/**
 	 * Path to the {@link OfficeFloor} configuration.

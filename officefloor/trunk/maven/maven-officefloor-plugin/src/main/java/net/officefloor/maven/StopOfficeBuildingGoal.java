@@ -38,9 +38,8 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 	 * Port that {@link OfficeBuilding} is running on.
 	 * 
 	 * @parameter
-	 * @required
 	 */
-	private Integer port;
+	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Time to wait in stopping the {@link OfficeBuilding}.
@@ -57,8 +56,9 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have required values
-		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
+		assertNotNull(
+				"Port not configured for the "
+						+ OfficeBuilding.class.getSimpleName(), this.port);
 
 		// Ensure default non-required values
 		long stopWaitTime = defaultValue(this.waitTime, new Long(10000))
