@@ -1,6 +1,6 @@
 <verifications>
 	<files>
-		<!-- Ensure releasing latest version -->
+		<!-- Ensure depending on latest version -->
 		<file>
 			<location>${basedir}/../maven/pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>

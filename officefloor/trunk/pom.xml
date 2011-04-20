@@ -66,7 +66,7 @@
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.skin.version>1.0.1</officefloor.skin.version>
+		<officefloor.skin.version>1.1.0</officefloor.skin.version>
 		<tycho-version>0.10.0</tycho-version>
 	</properties>
 	<dependencyManagement>
@@ -345,7 +345,7 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>maven-site-aggregate-plugin</artifactId>
-					<version>1.0.1</version>
+					<version>1.1.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
