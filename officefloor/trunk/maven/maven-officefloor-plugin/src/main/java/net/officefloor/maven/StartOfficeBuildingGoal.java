@@ -27,19 +27,35 @@ import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandPa
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.console.OfficeBuilding;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.internal.DefaultServiceLocator;
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.collection.CollectRequest;
+import org.sonatype.aether.connector.wagon.WagonProvider;
+import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
+import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.repository.LocalRepository;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
+import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
 
 /**
  * Maven goal to start the {@link OfficeBuilding}.
  * 
  * @goal start
+ * @requiresDependencyResolution compile
  * 
  * @author Daniel Sagenschneider
  */
@@ -57,8 +73,12 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * 
 	 * @param project
 	 *            {@link MavenProject}.
+	 * @param pluginDependencies
+	 *            Plug-in dependencies.
 	 * @param localRepository
 	 *            Local repository.
+	 * @param wagonProvider
+	 *            {@link WagonProvider}.
 	 * @param log
 	 *            {@link Log}.
 	 * @throws MojoExecutionException
@@ -67,8 +87,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 *             As per {@link Mojo} API.
 	 */
 	public static void ensureDefaultOfficeBuildingAvailable(
-			MavenProject project, ArtifactRepository localRepository, Log log)
-			throws MojoExecutionException, MojoFailureException {
+			MavenProject project, List<Artifact> pluginDependencies,
+			ArtifactRepository localRepository, WagonProvider wagonProvider,
+			Log log) throws MojoExecutionException, MojoFailureException {
 
 		// Ensure the OfficeBuilding is available
 		if (!OfficeBuildingManager.isOfficeBuildingAvailable(null,
@@ -76,8 +97,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 			// OfficeBuilding not available, so start it
 			StartOfficeBuildingGoal.createStartOfficeBuildingGoal(project,
-					localRepository, DEFAULT_OFFICE_BUILDING_PORT.intValue(),
-					log).execute();
+					pluginDependencies, localRepository, wagonProvider, log)
+					.execute();
 		}
 	}
 
@@ -86,21 +107,25 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * 
 	 * @param project
 	 *            {@link MavenProject}.
+	 * @param pluginDependencies
+	 *            Plug-in dependencies.
 	 * @param localRepository
 	 *            Local repository.
-	 * @param port
-	 *            Port to run {@link OfficeBuilding} on.
+	 * @param wagonProvider
+	 *            {@link WagonProvider}.
 	 * @param log
 	 *            {@link Log}.
 	 * @return {@link StartOfficeBuildingGoal}.
 	 */
 	public static StartOfficeBuildingGoal createStartOfficeBuildingGoal(
-			MavenProject project, ArtifactRepository localRepository,
-			Integer port, Log log) {
+			MavenProject project, List<Artifact> pluginDependencies,
+			ArtifactRepository localRepository, WagonProvider wagonProvider,
+			Log log) {
 		StartOfficeBuildingGoal goal = new StartOfficeBuildingGoal();
 		goal.project = project;
+		goal.wagonProvider = wagonProvider;
+		goal.pluginDependencies = pluginDependencies;
 		goal.localRepository = localRepository;
-		goal.port = port;
 		goal.setLog(log);
 		return goal;
 	}
@@ -112,6 +137,21 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * @required
 	 */
 	private MavenProject project;
+
+	/**
+	 * {@link WagonProvider}.
+	 * 
+	 * @component
+	 */
+	private WagonProvider wagonProvider;
+
+	/**
+	 * Plug-in dependencies.
+	 * 
+	 * @parameter expression="${plugin.artifacts}"
+	 * @required
+	 */
+	private List<Artifact> pluginDependencies;
 
 	/**
 	 * Local repository.
@@ -137,7 +177,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Ensure have configured values
 		assertNotNull("Must have project", this.project);
+		assertNotNull("Must have plug-in dependencies", this.pluginDependencies);
 		assertNotNull("Must have local repository", this.localRepository);
+		assertNotNull("Must have wagon provider", this.wagonProvider);
 		assertNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
@@ -167,10 +209,87 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
 								.transformForParameterValue(remoteRepositoryURLs));
 
+		// Obtain the OfficeBuilding Artifact
+		Artifact officeBuildingArtifact = null;
+		for (Artifact dependency : this.pluginDependencies) {
+			if (OfficeBuildingManager.OFFICE_BUIDLING_ARTIFACT_ID
+					.equals(dependency.getArtifactId())) {
+				// Found the OfficeBuilding Artifact
+				officeBuildingArtifact = dependency;
+			}
+		}
+		if (officeBuildingArtifact == null) {
+			// Must have OfficeBuilding Artifact
+			throw this
+					.newMojoExecutionException(
+							"Failed to obtain plug-in dependency "
+									+ OfficeBuildingManager.OFFICE_BUIDLING_ARTIFACT_ID,
+							null);
+		}
+
+		// Obtain the class path for OfficeBuilding
+		String classPath = null;
+		try {
+
+			// Obtain the repository system
+			DefaultServiceLocator locator = new DefaultServiceLocator();
+			locator.setServices(WagonProvider.class, this.wagonProvider);
+			locator.addService(RepositoryConnectorFactory.class,
+					WagonRepositoryConnectorFactory.class);
+			RepositorySystem repoSystem = locator
+					.getService(RepositorySystem.class);
+
+			// Obtain the repository session
+			MavenRepositorySystemSession repoSession = new MavenRepositorySystemSession();
+			LocalRepository localRepo = new LocalRepository(
+					this.localRepository.getBasedir());
+			repoSession.setLocalRepositoryManager(repoSystem
+					.newLocalRepositoryManager(localRepo));
+
+			// Create the OfficeBuilding dependency
+			Dependency dependency = new Dependency(new DefaultArtifact(
+					officeBuildingArtifact.getGroupId(),
+					officeBuildingArtifact.getArtifactId(),
+					officeBuildingArtifact.getType(),
+					officeBuildingArtifact.getVersion()), "compile");
+
+			// Create the Collect Request for OfficeBuilding dependencies
+			CollectRequest collectRequest = new CollectRequest();
+			collectRequest.setRoot(dependency);
+			for (Object object : this.project.getRemoteArtifactRepositories()) {
+				ArtifactRepository repository = (ArtifactRepository) object;
+				RemoteRepository remoteRepository = new RemoteRepository(
+						repository.getId(), repository.getLayout().getId(),
+						repository.getUrl());
+				collectRequest.addRepository(remoteRepository);
+			}
+
+			// Collect the dependencies and generate the Class Path
+			DependencyNode node = repoSystem.collectDependencies(repoSession,
+					collectRequest).getRoot();
+			repoSystem.resolveDependencies(repoSession, node, null);
+			PreorderNodeListGenerator generator = new PreorderNodeListGenerator();
+			node.accept(generator);
+			classPath = generator.getClassPath();
+
+			// Indicate the class path
+			this.getLog().debug("OfficeBuilding class path: " + classPath);
+
+		} catch (Exception ex) {
+			throw this
+					.newMojoExecutionException(
+							"Failed obtaining dependencies for launching OfficeBuilding",
+							ex);
+		}
+
+		// Create the process configuration
+		ProcessConfiguration configuration = new ProcessConfiguration();
+		configuration.setAdditionalClassPath(classPath);
+
 		// Start the OfficeBuilding
 		try {
-			OfficeBuildingManager.startOfficeBuilding(this.port.intValue(),
-					environment, null);
+			OfficeBuildingManager.spawnOfficeBuilding(this.port.intValue(),
+					environment, configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
 			final String MESSAGE = "Failed starting the "
@@ -178,9 +297,11 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			this.getLog().error(
 					MESSAGE + ": " + ex.getMessage() + " ["
 							+ ex.getClass().getSimpleName() + "]");
+			this.getLog().error("DIAGNOSIS INFORMATION:");
 			this.getLog().error(
-					"DIAGNOSIS INFORMATION: classpath='"
-							+ System.getProperty("java.class.path") + "'");
+					"   classpath='" + System.getProperty("java.class.path")
+							+ "'");
+			this.getLog().error("   additional classpath='" + classPath + "'");
 
 			// Propagate the failure
 			throw this.newMojoExecutionException(MESSAGE, ex);

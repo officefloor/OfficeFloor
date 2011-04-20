@@ -19,7 +19,6 @@ package net.officefloor.maven;
 
 import java.util.List;
 
-import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
@@ -29,6 +28,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.sonatype.aether.connector.wagon.WagonProvider;
 
 /**
  * Maven goal to run the {@link WoofOfficeFloorSource}.
@@ -49,6 +49,13 @@ public class RunWoofGoal extends AbstractMojo {
 	private MavenProject project;
 
 	/**
+	 * {@link WagonProvider}.
+	 * 
+	 * @component
+	 */
+	private WagonProvider wagonProvider;
+
+	/**
 	 * Plug-in dependencies.
 	 * 
 	 * @parameter expression="${plugin.artifacts}"
@@ -63,13 +70,6 @@ public class RunWoofGoal extends AbstractMojo {
 	 * @required
 	 */
 	private ArtifactRepository localRepository;
-
-	/**
-	 * Port that {@link OfficeBuilding} is to run on.
-	 * 
-	 * @parameter
-	 */
-	private Integer officeBuildingPort = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
@@ -87,13 +87,14 @@ public class RunWoofGoal extends AbstractMojo {
 
 		// Ensure the OfficeBuilding is available
 		StartOfficeBuildingGoal.ensureDefaultOfficeBuildingAvailable(
-				this.project, this.localRepository, this.getLog());
+				this.project, this.pluginDependencies, this.localRepository,
+				this.wagonProvider, this.getLog());
 
 		// Create the open goal and configure for WoOF
 		OpenOfficeFloorGoal openGoal = OpenOfficeFloorGoal
 				.createOfficeFloorGoal("maven-woof-plugin", this.project,
-						this.pluginDependencies, this.officeBuildingPort,
-						this.officeFloorLocation, this.getLog());
+						this.pluginDependencies, this.officeFloorLocation,
+						this.getLog());
 		openGoal.setOfficeFloorSource(WoofOfficeFloorSource.class.getName());
 
 		// Indicate WoOF application running

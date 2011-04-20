@@ -43,9 +43,8 @@ public class InvokeGoal extends AbstractGoal {
 	 * Port that {@link OfficeBuilding} is running on.
 	 * 
 	 * @parameter
-	 * @required
 	 */
-	private Integer port;
+	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Process name for the {@link OfficeFloor} to invoke the {@link Task}
@@ -94,12 +93,15 @@ public class InvokeGoal extends AbstractGoal {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Ensure have required values
-		assertNotNull("Port not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.port);
-		assertNotNull("Office not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.office);
-		assertNotNull("Work not configured for the "
-				+ OfficeBuilding.class.getSimpleName(), this.office);
+		assertNotNull(
+				"Port not configured for the "
+						+ OfficeBuilding.class.getSimpleName(), this.port);
+		assertNotNull(
+				"Office not configured for the "
+						+ OfficeBuilding.class.getSimpleName(), this.office);
+		assertNotNull(
+				"Work not configured for the "
+						+ OfficeBuilding.class.getSimpleName(), this.office);
 
 		// Ensure default non-required values
 		this.processName = defaultValue(this.processName,
