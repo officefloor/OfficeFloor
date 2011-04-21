@@ -49,6 +49,18 @@ public interface WoofChanges {
 			String templateLogicClass, SectionType sectionType, String uri);
 
 	/**
+	 * Changes the URI for the {@link WoofTemplateModel}.
+	 * 
+	 * @param template
+	 *            {@link WoofTemplateModel}.
+	 * @param uri
+	 *            URI.
+	 * @return {@link Change} for the URI.
+	 */
+	Change<WoofTemplateModel> changeTemplateUri(WoofTemplateModel template,
+			String uri);
+
+	/**
 	 * Removes the {@link WoofTemplateModel}.
 	 * 
 	 * @param template
@@ -80,6 +92,18 @@ public interface WoofChanges {
 			Map<String, String> inputToUri);
 
 	/**
+	 * Changes the URI for the {@link WoofSectionInputModel}.
+	 * 
+	 * @param sectionInput
+	 *            {@link WoofSectionInputModel}.
+	 * @param uri
+	 *            URI.
+	 * @return {@link Change} for the URI.
+	 */
+	Change<WoofSectionInputModel> changeSectionInputUri(
+			WoofSectionInputModel sectionInput, String uri);
+
+	/**
 	 * Removes the {@link WoofSectionModel}.
 	 * 
 	 * @param section
@@ -96,6 +120,18 @@ public interface WoofChanges {
 	 * @return {@link Change} to add the {@link WoofResourceModel}.
 	 */
 	Change<WoofResourceModel> addResource(String resourcePath);
+
+	/**
+	 * Changes the resource path for the {@link WoofResourceModel}.
+	 * 
+	 * @param resource
+	 *            {@link WoofResourceModel}.
+	 * @param resourcePath
+	 *            Resource path.
+	 * @return {@link Change} for the resource path.
+	 */
+	Change<WoofResourceModel> changeResourcePath(WoofResourceModel resource,
+			String resourcePath);
 
 	/**
 	 * Removes the {@link WoofResourceModel}.
