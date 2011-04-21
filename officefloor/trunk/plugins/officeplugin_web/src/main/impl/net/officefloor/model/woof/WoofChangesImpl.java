@@ -133,6 +133,9 @@ public class WoofChangesImpl implements WoofChanges {
 			// Check if name already exists
 			isNameExist = false;
 			for (M check : models) {
+				if (check == model) {
+					continue; // ignore same model
+				}
 				String extractedName = nameExtractor.extractName(check);
 				if (uniqueName.equals(extractedName)) {
 					isNameExist = true;
@@ -157,6 +160,45 @@ public class WoofChangesImpl implements WoofChanges {
 		 * @return Name of the model.
 		 */
 		String extractName(M model);
+	}
+
+	/**
+	 * Obtains the {@link WoofTemplateModel} name.
+	 * 
+	 * @param templatePath
+	 *            Template Path.
+	 * @param uri
+	 *            URI.
+	 * @param template
+	 *            {@link WoofTemplateModel}. May be <code>null</code>.
+	 * @param templates
+	 *            {@link WoofTemplateModel} instances.
+	 * @return Unique {@link WoofTemplateModel} name.
+	 */
+	private static String getTemplateName(String templatePath, String uri,
+			WoofTemplateModel template, List<WoofTemplateModel> templates) {
+
+		// Obtain the base template name
+		String templateName = uri;
+		if (CompileUtil.isBlank(templateName)) {
+			// Use simple name from template path
+			templateName = templatePath;
+			int index = templateName.lastIndexOf('/');
+			if (index >= 0) {
+				templateName = templateName.substring(index + "/".length());
+			}
+			index = templateName.indexOf('.');
+			if (index > 0) {
+				templateName = templateName.substring(0, index);
+			}
+		}
+
+		// Obtain the unique template name
+		templateName = getUniqueName(templateName, template, templates,
+				TEMPLATE_NAME_EXTRACTOR);
+
+		// Return the template name
+		return templateName;
 	}
 
 	/**
@@ -303,24 +345,9 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateModel> addTemplate(String templatePath,
 			String templateLogicClass, SectionType section, String uri) {
 
-		// Obtain the base template name
-		String templateName = uri;
-		if (CompileUtil.isBlank(templateName)) {
-			// Use simple name from template path
-			templateName = templatePath;
-			int index = templateName.lastIndexOf('/');
-			if (index >= 0) {
-				templateName = templateName.substring(index + "/".length());
-			}
-			index = templateName.indexOf('.');
-			if (index > 0) {
-				templateName = templateName.substring(0, index);
-			}
-		}
-
-		// Obtain the unique template name
-		templateName = getUniqueName(templateName, null,
-				this.model.getWoofTemplates(), TEMPLATE_NAME_EXTRACTOR);
+		// Obtain the template name
+		String templateName = getTemplateName(templatePath, uri, null,
+				this.model.getWoofTemplates());
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
@@ -352,6 +379,38 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void revert() {
 				WoofChangesImpl.this.model.removeWoofTemplate(template);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofTemplateModel> changeTemplateUri(
+			final WoofTemplateModel template, final String uri) {
+
+		// Keep track of original values
+		final String originalTemplateName = template.getWoofTemplateName();
+		final String originalUri = template.getUri();
+
+		// Obtain the template name after URI change
+		final String newTemplateName = getTemplateName(
+				template.getTemplatePath(), uri, template,
+				this.model.getWoofTemplates());
+
+		// Return change to template URI
+		return new AbstractChange<WoofTemplateModel>(template,
+				"Change Template URI") {
+			@Override
+			public void apply() {
+				template.setUri(uri);
+				template.setWoofTemplateName(newTemplateName);
+				WoofChangesImpl.this.sortTemplates();
+			}
+
+			@Override
+			public void revert() {
+				template.setUri(originalUri);
+				template.setWoofTemplateName(originalTemplateName);
+				WoofChangesImpl.this.sortTemplates();
 			}
 		};
 	}
@@ -475,6 +534,28 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofSectionInputModel> changeSectionInputUri(
+			final WoofSectionInputModel sectionInput, final String uri) {
+
+		// Maintain original URI
+		final String originalUri = sectionInput.getUri();
+
+		// Return change to URI
+		return new AbstractChange<WoofSectionInputModel>(sectionInput,
+				"Change Section Input URI") {
+			@Override
+			public void apply() {
+				sectionInput.setUri(uri);
+			}
+
+			@Override
+			public void revert() {
+				sectionInput.setUri(originalUri);
+			}
+		};
+	}
+
+	@Override
 	public Change<WoofSectionModel> removeSection(final WoofSectionModel section) {
 
 		// Ensure section available to remove
@@ -557,6 +638,43 @@ public class WoofChangesImpl implements WoofChanges {
 			}
 		};
 	}
+
+	@Override
+	public Change<WoofResourceModel> changeResourcePath(
+			final WoofResourceModel resource, final String resourcePath) {
+
+		// No change if no resource path
+		if (CompileUtil.isBlank(resourcePath)) {
+			return new NoChange<WoofResourceModel>(resource,
+					"Change Resource Path", "Must provide resource path");
+		}
+
+		// Track original values
+		final String originalName = resource.getWoofResourceName();
+		final String originalPath = resource.getResourcePath();
+
+		// Obtain the resource name after the resource path
+		final String newName = getUniqueName(resourcePath, resource,
+				this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
+
+		// Return change to resource path
+		return new AbstractChange<WoofResourceModel>(resource,
+				"Change Resource Path") {
+			@Override
+			public void apply() {
+				resource.setResourcePath(resourcePath);
+				resource.setWoofResourceName(newName);
+				WoofChangesImpl.this.sortResources();
+			}
+
+			@Override
+			public void revert() {
+				resource.setResourcePath(originalPath);
+				resource.setWoofResourceName(originalName);
+				WoofChangesImpl.this.sortResources();
+			}
+		};
+	};
 
 	@Override
 	public Change<WoofResourceModel> removeResource(
@@ -1114,6 +1232,6 @@ public class WoofChangesImpl implements WoofChanges {
 			// Reconnect
 			this.getTarget().connect();
 		}
-	};
+	}
 
 }
