@@ -81,11 +81,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final PropertyList properties;
 
 	/**
-	 * {@link Text} of the {@link HttpTemplate} name.
-	 */
-	private Text templateName;
-
-	/**
 	 * Path to the {@link HttpTemplate}.
 	 */
 	private String templatePath;
@@ -169,23 +164,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		}
 
 		// Obtain initial values
-		String initialTemplateName = "";
 		String initialTemplatePath = "";
 		String initialUri = "";
-
-		// Add means to specify HTTP Template Name
-		new Label(page, SWT.NONE).setText("Template name: ");
-		this.templateName = new Text(page, SWT.BORDER);
-		this.templateName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
-		this.templateName.setText(initialTemplateName);
-		this.templateName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				// Flag the name changed
-				HttpTemplateWizardPage.this.handleChange();
-			}
-		});
 
 		// Provide means to specify template location
 		new Label(page, SWT.NONE).setText("Template path: ");
@@ -250,14 +230,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Clear instance (as changing)
 		this.instance = null;
 
-		// Ensure have template name
-		String name = this.templateName.getText();
-		if (EclipseUtil.isBlank(name)) {
-			this.setErrorMessage("Must specify name of template");
-			this.setPageComplete(false);
-			return;
-		}
-
 		// Ensure have template path
 		if (EclipseUtil.isBlank(this.templatePath)) {
 			this.setErrorMessage("Must specify location of template");
@@ -294,7 +266,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Create the HTTP Template Instance
 		String logicClassName = propertyLogicClass.getValue();
-		this.instance = new HttpTemplateInstance(name, this.templatePath,
+		this.instance = new HttpTemplateInstance(this.templatePath,
 				logicClassName, sectionType, uriValue);
 
 		// Specification of template details complete

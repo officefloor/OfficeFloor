@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
+import org.eclipse.draw2d.IFigure;
+
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.woof.WoofTemplateModel;
 
@@ -26,5 +28,20 @@ import net.officefloor.model.woof.WoofTemplateModel;
  * @author Daniel Sagenschneider
  */
 public interface TemplateFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the URI.
+	 * 
+	 * @param uri
+	 *            URI.
+	 */
+	void setUri(String uri);
+
+	/**
+	 * Obtains the URI {@link IFigure}.
+	 * 
+	 * @return URI {@link IFigure}.
+	 */
+	IFigure getUriFigure();
 
 }

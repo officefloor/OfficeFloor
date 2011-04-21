@@ -28,11 +28,6 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 public class HttpTemplateInstance {
 
 	/**
-	 * {@link HttpTemplate} name.
-	 */
-	private final String templateName;
-
-	/**
 	 * Path to the {@link HttpTemplate}.
 	 */
 	private final String templatePath;
@@ -55,8 +50,6 @@ public class HttpTemplateInstance {
 	/**
 	 * Initiate.
 	 * 
-	 * @param templateName
-	 *            {@link HttpTemplate} name.
 	 * @param templatePath
 	 *            Path to the {@link HttpTemplate}.
 	 * @param logicClassName
@@ -66,22 +59,12 @@ public class HttpTemplateInstance {
 	 * @param uri
 	 *            URI.
 	 */
-	public HttpTemplateInstance(String templateName, String templatePath,
-			String logicClassName, SectionType sectionType, String uri) {
-		this.templateName = templateName;
+	public HttpTemplateInstance(String templatePath, String logicClassName,
+			SectionType sectionType, String uri) {
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
 		this.uri = uri;
-	}
-
-	/**
-	 * Obtains the {@link HttpTemplate} name.
-	 * 
-	 * @return {@link HttpTemplate} name.
-	 */
-	public String getTemplateName() {
-		return this.templateName;
 	}
 
 	/**
