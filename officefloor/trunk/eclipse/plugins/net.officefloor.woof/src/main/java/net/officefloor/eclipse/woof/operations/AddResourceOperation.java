@@ -59,7 +59,7 @@ public class AddResourceOperation extends
 		// Create the populated Resource
 		final WoofResourceModel resource = new WoofResourceModel();
 		BeanDialog dialog = context.getEditPart().createBeanDialog(resource,
-				"X", "Y");
+				"Woof Resource Name", "X", "Y");
 		dialog.addIgnoreType(WoofTemplateOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofSectionOutputToWoofResourceModel.class);
 		dialog.addIgnoreType(WoofExceptionToWoofResourceModel.class);
@@ -71,8 +71,8 @@ public class AddResourceOperation extends
 		}
 
 		// Create the change
-		Change<WoofResourceModel> change = changes.addResource(
-				resource.getWoofResourceName(), resource.getResourcePath());
+		Change<WoofResourceModel> change = changes.addResource(resource
+				.getResourcePath());
 
 		// Position the resource
 		context.positionModel(change.getTarget());

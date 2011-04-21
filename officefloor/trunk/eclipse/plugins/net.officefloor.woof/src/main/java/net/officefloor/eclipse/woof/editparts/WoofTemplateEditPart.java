@@ -22,11 +22,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.woof.TemplateFigure;
 import net.officefloor.eclipse.skin.woof.TemplateFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateModel.WoofTemplateEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -58,6 +63,29 @@ public class WoofTemplateEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<WoofTemplateModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofTemplateModel>() {
+			@Override
+			public String getInitialValue() {
+				return WoofTemplateEditPart.this.getCastedModel().getUri();
+			}
+
+			@Override
+			public IFigure getLocationFigure() {
+				return WoofTemplateEditPart.this.getOfficeFloorFigure()
+						.getUriFigure();
+			}
+
+			@Override
+			public Change<WoofTemplateModel> createChange(WoofChanges changes,
+					WoofTemplateModel target, String newValue) {
+				return changes.changeTemplateUri(target, newValue);
+			}
+		});
+	}
+
+	@Override
 	protected Class<WoofTemplateEvent> getPropertyChangeEventType() {
 		return WoofTemplateEvent.class;
 	}
@@ -66,6 +94,10 @@ public class WoofTemplateEditPart
 	protected void handlePropertyChange(WoofTemplateEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WOOF_TEMPLATE_NAME:
+		case CHANGE_URI:
+			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
+			break;
 		case ADD_OUTPUT:
 		case REMOVE_OUTPUT:
 			this.refreshChildren();

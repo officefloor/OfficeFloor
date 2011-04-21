@@ -62,7 +62,9 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 		M model = editPart.getCastedModel();
 
 		// Open the model
-		this.handler.doOpen(new OpenCommandContextImpl(model, editPart));
+		if (this.handler != null) {
+			this.handler.doOpen(new OpenCommandContextImpl(model, editPart));
+		}
 	}
 
 	/**
@@ -110,8 +112,9 @@ public class OfficeFloorOpenEditPolicy<M extends Model> extends
 
 		@Override
 		public PropertyList createPropertyList() {
-			return OfficeFloorPlugin.getDefault().createCompiler(
-					this.editPart.getEditor()).createPropertyList();
+			return OfficeFloorPlugin.getDefault()
+					.createCompiler(this.editPart.getEditor())
+					.createPropertyList();
 		}
 	}
 

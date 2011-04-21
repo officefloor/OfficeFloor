@@ -59,14 +59,13 @@ public class AddTemplateOperation extends
 		}
 
 		// Obtain the template details
-		String name = instance.getTemplateName();
 		String path = instance.getTemplatePath();
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
 		String uri = instance.getUri();
 
 		// Create change to add template
-		Change<WoofTemplateModel> change = changes.addTemplate(name, path,
+		Change<WoofTemplateModel> change = changes.addTemplate(path,
 				logicClassName, type, uri);
 
 		// Position template

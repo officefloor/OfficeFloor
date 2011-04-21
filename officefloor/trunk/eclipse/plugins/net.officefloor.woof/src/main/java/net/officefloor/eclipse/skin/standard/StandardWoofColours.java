@@ -53,4 +53,13 @@ public class StandardWoofColours {
 		return new Color(null, 229, 229, 229);
 	}
 
+	/**
+	 * Connector (#000000).
+	 * 
+	 * @return Connector.
+	 */
+	public static Color CONNECTOR() {
+		return new Color(null, 0, 0, 0);
+	}
+
 }
