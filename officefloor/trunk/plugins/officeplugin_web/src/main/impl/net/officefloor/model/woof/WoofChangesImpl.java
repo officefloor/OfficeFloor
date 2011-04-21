@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
@@ -41,6 +42,122 @@ import net.officefloor.model.impl.change.NoChange;
  * @author Daniel Sagenschneider
  */
 public class WoofChangesImpl implements WoofChanges {
+
+	/**
+	 * {@link WoofTemplateModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofTemplateModel> TEMPLATE_NAME_EXTRACTOR = new NameExtractor<WoofTemplateModel>() {
+		@Override
+		public String extractName(WoofTemplateModel model) {
+			return model.getWoofTemplateName();
+		}
+	};
+
+	/**
+	 * {@link WoofSectionModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofSectionModel> SECTION_NAME_EXTRACTOR = new NameExtractor<WoofSectionModel>() {
+		@Override
+		public String extractName(WoofSectionModel model) {
+			return model.getWoofSectionName();
+		}
+	};
+
+	/**
+	 * {@link WoofResourceModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofResourceModel> RESOURCE_NAME_EXTRACTOR = new NameExtractor<WoofResourceModel>() {
+		@Override
+		public String extractName(WoofResourceModel model) {
+			return model.getWoofResourceName();
+		}
+	};
+
+	/**
+	 * {@link WoofExceptionModel} {@link NameExtractor}.
+	 */
+	private static final NameExtractor<WoofExceptionModel> EXCEPTION_NAME_EXTRACTOR = new NameExtractor<WoofExceptionModel>() {
+		@Override
+		public String extractName(WoofExceptionModel model) {
+			return model.getClassName();
+		}
+	};
+
+	/**
+	 * Sorts the models by name.
+	 * 
+	 * @param models
+	 *            Models.
+	 * @param nameExtractor
+	 *            {@link NameExtractor}.
+	 */
+	private static <M> void sortByName(List<M> models,
+			final NameExtractor<M> nameExtractor) {
+		Collections.sort(models, new Comparator<M>() {
+			@Override
+			public int compare(M a, M b) {
+				String nameA = nameExtractor.extractName(a);
+				String nameB = nameExtractor.extractName(b);
+				return String.CASE_INSENSITIVE_ORDER.compare(nameA, nameB);
+			}
+		});
+	}
+
+	/**
+	 * Obtains the unique name.
+	 * 
+	 * @param name
+	 *            Base name.
+	 * @param model
+	 *            Model being named. May be <code>null</code>.
+	 * @param models
+	 *            Listing of the existing models.
+	 * @param nameExtractor
+	 *            {@link NameExtractor}.
+	 * @return Unique name.
+	 */
+	private static <M> String getUniqueName(final String name, M model,
+			List<M> models, NameExtractor<M> nameExtractor) {
+
+		// Determine suffix
+		String uniqueName = name;
+		int suffix = 1;
+		boolean isNameExist = false; // first time not include suffix
+		do {
+			// Increment suffix should name exist
+			if (isNameExist) {
+				suffix++;
+				uniqueName = name + "-" + suffix;
+			}
+
+			// Check if name already exists
+			isNameExist = false;
+			for (M check : models) {
+				String extractedName = nameExtractor.extractName(check);
+				if (uniqueName.equals(extractedName)) {
+					isNameExist = true;
+				}
+			}
+		} while (isNameExist);
+
+		// Return the unique name
+		return uniqueName;
+	}
+
+	/**
+	 * Extracts the name from the model.
+	 */
+	private static interface NameExtractor<M> {
+
+		/**
+		 * Obtains the name from the model.
+		 * 
+		 * @param model
+		 *            Model.
+		 * @return Name of the model.
+		 */
+		String extractName(M model);
+	}
 
 	/**
 	 * Removes the {@link ConnectionModel}.
@@ -127,59 +244,28 @@ public class WoofChangesImpl implements WoofChanges {
 	 * Sorts the {@link WoofTemplateModel} instances.
 	 */
 	private void sortTemplates() {
-		Collections.sort(this.model.getWoofTemplates(),
-				new Comparator<WoofTemplateModel>() {
-					@Override
-					public int compare(WoofTemplateModel a, WoofTemplateModel b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.getWoofTemplateName(),
-								b.getWoofTemplateName());
-					}
-				});
+		sortByName(this.model.getWoofTemplates(), TEMPLATE_NAME_EXTRACTOR);
 	}
 
 	/**
 	 * Sorts the {@link WoofSectionModel} instances.
 	 */
 	private void sortSections() {
-		Collections.sort(this.model.getWoofSections(),
-				new Comparator<WoofSectionModel>() {
-					@Override
-					public int compare(WoofSectionModel a, WoofSectionModel b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.getWoofSectionName(), b.getWoofSectionName());
-					}
-				});
+		sortByName(this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
 	}
 
 	/**
 	 * Sorts the {@link WoofResourceModel} instances.
 	 */
 	private void sortResources() {
-		Collections.sort(this.model.getWoofResources(),
-				new Comparator<WoofResourceModel>() {
-					@Override
-					public int compare(WoofResourceModel a, WoofResourceModel b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.getWoofResourceName(),
-								b.getWoofResourceName());
-					}
-				});
+		sortByName(this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
 	}
 
 	/**
 	 * Sorts the {@link WoofExceptionModel} instances.
 	 */
 	private void sortExceptions() {
-		Collections.sort(this.model.getWoofExceptions(),
-				new Comparator<WoofExceptionModel>() {
-					@Override
-					public int compare(WoofExceptionModel a,
-							WoofExceptionModel b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.getClassName(), b.getClassName());
-					}
-				});
+		sortByName(this.model.getWoofExceptions(), EXCEPTION_NAME_EXTRACTOR);
 	}
 
 	/**
@@ -214,13 +300,31 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 
 	@Override
-	public Change<WoofTemplateModel> addTemplate(String templateName,
-			String templatePath, String templateLogicClass,
-			SectionType section, String uri) {
+	public Change<WoofTemplateModel> addTemplate(String templatePath,
+			String templateLogicClass, SectionType section, String uri) {
+
+		// Obtain the base template name
+		String templateName = uri;
+		if (CompileUtil.isBlank(templateName)) {
+			// Use simple name from template path
+			templateName = templatePath;
+			int index = templateName.lastIndexOf('/');
+			if (index >= 0) {
+				templateName = templateName.substring(index + "/".length());
+			}
+			index = templateName.indexOf('.');
+			if (index > 0) {
+				templateName = templateName.substring(0, index);
+			}
+		}
+
+		// Obtain the unique template name
+		templateName = getUniqueName(templateName, null,
+				this.model.getWoofTemplates(), TEMPLATE_NAME_EXTRACTOR);
 
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
-				uri, "example/Template.ofp", templateLogicClass);
+				uri, templatePath, templateLogicClass);
 
 		// Add the outputs for the template
 		for (SectionOutputType output : section.getSectionOutputTypes()) {
@@ -315,14 +419,20 @@ public class WoofChangesImpl implements WoofChanges {
 			PropertyList properties, SectionType section,
 			Map<String, String> inputToUri) {
 
+		// Obtain the unique section name
+		sectionName = getUniqueName(sectionName, null,
+				this.model.getWoofSections(), SECTION_NAME_EXTRACTOR);
+
 		// Create the section
 		final WoofSectionModel woofSection = new WoofSectionModel(sectionName,
 				sectionSourceClassName, sectionLocation);
 
-		// Add the properties
-		for (Property property : properties) {
-			woofSection.addProperty(new PropertyModel(property.getName(),
-					property.getValue()));
+		// Add the properties (if available)
+		if (properties != null) {
+			for (Property property : properties) {
+				woofSection.addProperty(new PropertyModel(property.getName(),
+						property.getValue()));
+			}
 		}
 
 		// Add the inputs
@@ -423,8 +533,11 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofResourceModel> addResource(String resourceName,
-			String resourcePath) {
+	public Change<WoofResourceModel> addResource(String resourcePath) {
+
+		// Obtain unique resource name
+		String resourceName = getUniqueName(resourcePath, null,
+				this.model.getWoofResources(), RESOURCE_NAME_EXTRACTOR);
 
 		// Create the resource
 		final WoofResourceModel resource = new WoofResourceModel(resourceName,
@@ -499,6 +612,34 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofExceptionModel> addException(String exceptionClassName) {
+
+		// Determine if the exception has already been added
+		WoofExceptionModel existingModel = null;
+		for (WoofExceptionModel model : this.model.getWoofExceptions()) {
+			if (model.getClassName().equals(exceptionClassName)) {
+				existingModel = model;
+			}
+		}
+		if (existingModel != null) {
+			// Provide change to only move model back on revert
+			final WoofExceptionModel model = existingModel;
+			final int x = existingModel.getX();
+			final int y = existingModel.getY();
+			return new AbstractChange<WoofExceptionModel>(model,
+					"Add Exception") {
+				@Override
+				public void apply() {
+					// No change as will be positioned
+				}
+
+				@Override
+				public void revert() {
+					// Move back to old position
+					model.setX(x);
+					model.setY(y);
+				}
+			};
+		}
 
 		// Create the exception
 		final WoofExceptionModel exception = new WoofExceptionModel(

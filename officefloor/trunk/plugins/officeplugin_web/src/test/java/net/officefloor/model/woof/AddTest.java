@@ -18,6 +18,7 @@
 package net.officefloor.model.woof;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,8 +59,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
-				"TEMPLATE", "example/Template.ofp", "net.example.LogicClass",
-				section, "uri");
+				"example/Template.ofp", "net.example.LogicClass", section,
+				"uri");
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -70,6 +71,33 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		change.apply();
 		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
 		assertSame("Incorrect template", template, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add multiple with clashing names.
+	 */
+	public void testAddMultipleTemplates() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Add the templates
+		this.operations.addTemplate("example/Template.ofp", "Class1", section,
+				"Template").apply();
+		this.operations.addTemplate("example/Template.ofp", "Class2", section,
+				"Template").apply(); // add twice
+		this.operations.addTemplate("example/Template.ofp", "Class3", section,
+				null).apply(); // add with same name by template path
+		this.operations.addTemplate("Template.html", "Class4", section, null)
+				.apply(); // add with template path resulting in same name
+
+		// Ensure appropriately added templates
+		this.validateModel();
 	}
 
 	/**
@@ -123,13 +151,36 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to add multiple sections with clashing names.
+	 */
+	public void testAddMultipleSections() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Add the sections
+		this.operations.addSection("SECTION", "Section1", "Location1", null,
+				section, null).apply();
+		this.operations.addSection("SECTION", "Section2", "Location2", null,
+				section, null).apply();
+
+		// Ensure appropriately added sections
+		this.validateModel();
+	}
+
+	/**
 	 * Ensure able to add {@link WoofResourceModel}.
 	 */
 	public void testAddResource() {
 
 		// Validate add resource
-		Change<WoofResourceModel> change = this.operations.addResource(
-				"RESOURCE", "index.html");
+		Change<WoofResourceModel> change = this.operations
+				.addResource("index.html");
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -140,6 +191,20 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		change.apply();
 		WoofResourceModel resource = this.model.getWoofResources().get(0);
 		assertSame("Incorrect resource", resource, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add multiple {@link WoofResourceModel} instances with
+	 * clashing names.
+	 */
+	public void testAddMultipleResources() {
+
+		// Add the resources
+		this.operations.addResource("example/index.html").apply();
+		this.operations.addResource("example/index.html").apply();
+
+		// Validate appropriately added resources
+		this.validateModel();
 	}
 
 	/**
@@ -160,6 +225,25 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		change.apply();
 		WoofExceptionModel exception = this.model.getWoofExceptions().get(0);
 		assertSame("Incorrect exception", exception, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add multiple {@link WoofExceptionModel} instances with
+	 * clashing classes.
+	 */
+	public void testAddMultipleExceptions() {
+
+		// Add the exceptions
+		for (int i = 0; i <= 2; i++) {
+			Change<WoofExceptionModel> change = this.operations
+					.addException(SQLException.class.getName());
+			change.getTarget().setX(i);
+			change.getTarget().setY(i);
+			change.apply();
+		}
+
+		// Validate appropriately added one exception moved
+		this.validateModel();
 	}
 
 }
