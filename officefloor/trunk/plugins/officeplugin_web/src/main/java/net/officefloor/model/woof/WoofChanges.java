@@ -34,8 +34,6 @@ public interface WoofChanges {
 	/**
 	 * Adds a {@link WoofTemplateModel}.
 	 * 
-	 * @param templateName
-	 *            Name of the {@link WoofTemplateModel}.
 	 * @param templatePath
 	 *            Path to the template file.
 	 * @param templateLogicClass
@@ -47,9 +45,8 @@ public interface WoofChanges {
 	 *            if private {@link WoofTemplateModel}.
 	 * @return {@link Change} to add the {@link WoofTemplateModel}.
 	 */
-	Change<WoofTemplateModel> addTemplate(String templateName,
-			String templatePath, String templateLogicClass,
-			SectionType sectionType, String uri);
+	Change<WoofTemplateModel> addTemplate(String templatePath,
+			String templateLogicClass, SectionType sectionType, String uri);
 
 	/**
 	 * Removes the {@link WoofTemplateModel}.
@@ -94,14 +91,11 @@ public interface WoofChanges {
 	/**
 	 * Adds a {@link WoofResourceModel}.
 	 * 
-	 * @param resourceName
-	 *            Name of the {@link WoofResourceModel}.
 	 * @param resourcePath
 	 *            Path to the resource.
 	 * @return {@link Change} to add the {@link WoofResourceModel}.
 	 */
-	Change<WoofResourceModel> addResource(String resourceName,
-			String resourcePath);
+	Change<WoofResourceModel> addResource(String resourcePath);
 
 	/**
 	 * Removes the {@link WoofResourceModel}.
