@@ -16,5 +16,4 @@ Export-Package: net.officefloor.eclipse.jdbc,
  net.officefloor.plugin.jdbc.connection,
  net.officefloor.plugin.jdbc.datasource,
  net.officefloor.plugin.jdbc.util
-Bundle-ClassPath: .,
- officeplugin_jdbc-1.1.0.jar
+Bundle-ClassPath: .

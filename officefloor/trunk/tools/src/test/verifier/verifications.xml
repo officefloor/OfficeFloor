@@ -11,9 +11,5 @@
 			<location>officetool_demo/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
-		<file>
-			<location>officetool_filingcabinet/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
 	</files>
 </verifications>
