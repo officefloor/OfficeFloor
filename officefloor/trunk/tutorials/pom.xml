@@ -11,7 +11,7 @@
 	<artifactId>tutorials</artifactId>
 	<version>1.1.0</version>
 	<packaging>pom</packaging>
-	<name>Examples</name>
+	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>StaticHttpServer</module>
