@@ -2,7 +2,7 @@
 	<files>
 		<!-- Ensure depending on latest version -->
 		<file>
-			<location>${basedir}/../examples/pom.xml</location>
+			<location>${basedir}/../tutorials/pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
 		</file>
 		

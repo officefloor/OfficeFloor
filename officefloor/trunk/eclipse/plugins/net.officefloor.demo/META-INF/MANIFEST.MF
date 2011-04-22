@@ -21,5 +21,4 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.eclipse.ui
-Bundle-ClassPath: .,
- officetool_demo-1.1.0.jar
+Bundle-ClassPath: .

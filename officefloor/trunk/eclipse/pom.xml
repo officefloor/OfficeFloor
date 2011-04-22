@@ -71,22 +71,27 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.ui</artifactId>
+				<version>1.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.plugins.feature</artifactId>
+				<artifactId>net.officefloor.socket</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.demo</artifactId>
+				<artifactId>net.officefloor.woof</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.filingcabinet</artifactId>
+				<artifactId>net.officefloor.woof.feature</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
@@ -101,17 +106,17 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.socket</artifactId>
+				<artifactId>net.officefloor.plugins.feature</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.ui</artifactId>
+				<artifactId>net.officefloor.demo</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof</artifactId>
+				<artifactId>net.officefloor.tools.feature</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 		</dependencies>

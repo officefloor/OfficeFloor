@@ -62,7 +62,7 @@
 		<module>tools</module>
 		<module>eclipse</module>
 		<module>maven</module>
-		<module>examples</module>
+		<module>tutorials</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

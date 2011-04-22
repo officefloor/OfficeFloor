@@ -18,7 +18,4 @@ Export-Package: net.officefloor.plugin.socket.server,
  net.officefloor.plugin.socket.server.tcp,
  net.officefloor.plugin.socket.server.tcp.source,
  net.officefloor.plugin.stream
-Bundle-ClassPath: .,
- commons-codec-1.4.jar,
- officeplugin_socket-1.1.0.jar,
- officeplugin_web-1.1.0.jar
+Bundle-ClassPath: .
