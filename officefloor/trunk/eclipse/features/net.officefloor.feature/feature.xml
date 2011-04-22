@@ -2,7 +2,7 @@
 <feature
       label="OfficeFloor Feature"
       id="net.officefloor.feature"
-      version="0.3.1"
+      version="1.1.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -10,7 +10,7 @@
    </description>
 
    <copyright>
-      Copyright (C) 2005-2010 Daniel Sagenschneider
+      Copyright (C) 2005-2011 Daniel Sagenschneider
    </copyright>
 
    <license url="http://www.gnu.org/licenses/gpl.html">
@@ -23,12 +23,12 @@
 
    <plugin
          id="net.officefloor.core"
-         version="0.3.1"
+         version="1.1.0"
          unpack="true"/>
 
    <plugin
          id="net.officefloor.ui"
-         version="0.3.1"
+         version="1.1.0"
          unpack="false"/>
 
 </feature>

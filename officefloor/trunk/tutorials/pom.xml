@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.1</version>
+		<version>1.1.0</version>
 	</parent>
-	<groupId>net.officefloor.example</groupId>
-	<artifactId>examples</artifactId>
+	<groupId>net.officefloor.tutorial</groupId>
+	<artifactId>tutorials</artifactId>
 	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>Examples</name>
-	<description>Example uses of OfficeFloor</description>
+	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>StaticHttpServer</module>
 		<module>DynamicHttpServer</module>

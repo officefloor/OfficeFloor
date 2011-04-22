@@ -60,7 +60,17 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.woof.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.plugins.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.tools.feature</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

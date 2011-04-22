@@ -3,15 +3,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.example</groupId>
-		<artifactId>examples</artifactId>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
 		<version>1.1.0</version>
 	</parent>
-	<groupId>net.officefloor.example</groupId>
+	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>ServletFilterDependencyInjection</artifactId>
 	<packaging>war</packaging>
-	<name>Servlet Filter Dependency Injection Example</name>
-	<description>Example of using the OfficeFloorServletFilter with dependency injection</description>
+	<name>Servlet Filter Dependency Injection Tutorial</name>
+	<description>Tutorial of using the OfficeFloorServletFilter with dependency injection</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>

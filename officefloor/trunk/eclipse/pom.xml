@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.0.1</version>
+		<version>1.1.0</version>
 	</parent>
 	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>eclipse</artifactId>
-	<version>0.3.1</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>Eclipse</name>
 	<description>Eclipse plugins and features for OfficeFloor</description>
@@ -26,10 +26,15 @@
 		<module>plugins/net.officefloor.socket</module>
 		<module>plugins/net.officefloor.jdbc</module>
 		<module>plugins/net.officefloor.jndi</module>
-		<module>plugins/net.officefloor.woof</module>
-		<module>plugins/net.officefloor.filingcabinet</module>
-		<module>plugins/net.officefloor.demo</module>
 		<module>features/net.officefloor.plugins.feature</module>
+
+		<!-- Tools eclipse functionality -->
+		<module>plugins/net.officefloor.demo</module>
+		<module>features/net.officefloor.tools.feature</module>
+
+		<!-- WoOF eclipse functionality -->
+		<module>plugins/net.officefloor.woof</module>
+		<module>features/net.officefloor.woof.feature</module>
 
 		<!-- Deploy to Update Site -->
 		<module>update.site</module>
@@ -47,7 +52,7 @@
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
 				<artifactId>tools</artifactId>
-				<version>1.0.1</version>
+				<version>1.1.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -62,52 +67,52 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.core</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.plugins.feature</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.demo</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.filingcabinet</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.jdbc</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.jndi</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.socket</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.ui</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof</artifactId>
-				<version>0.3.1</version>
+				<version>1.1.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

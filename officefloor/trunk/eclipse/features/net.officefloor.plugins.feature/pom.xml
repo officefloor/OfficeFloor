@@ -5,7 +5,7 @@
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>0.3.1</version>
+		<version>1.1.0</version>
 	</parent>
 	<artifactId>net.officefloor.plugins.feature</artifactId>
 	<name>Plug-ins Eclipse Feature</name>
@@ -22,27 +22,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.demo</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.filingcabinet</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.jdbc</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.jndi</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>net.officefloor.socket</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
