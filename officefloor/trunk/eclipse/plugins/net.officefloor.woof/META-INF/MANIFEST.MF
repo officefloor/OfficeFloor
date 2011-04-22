@@ -33,4 +33,6 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.part,
  org.eclipse.ui.plugin,
  org.osgi.framework
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ officeplugin_socket-1.1.0.jar,
+ officeplugin_web-1.1.0.jar
