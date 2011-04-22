@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.example;
+package net.officefloor.tutorial;
 
 /**
  * Example class which is private from being displayed.
