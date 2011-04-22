@@ -1,14 +1,8 @@
 <woof>
   <templates>
-    <template name="example" uri="example" path="Template.ofp" class="net.officefloor.example.dynamichttpserver.TemplateLogic" x="109" y="88">
+    <template name="example" uri="example" path="Template.ofp" class="net.officefloor.tutorial.dynamichttpserver.TemplateLogic" x="109" y="88">
       <output name="output" argument-type="">
       </output>
     </template>
   </templates>
-  <sections>
-  </sections>
-  <resources>
-  </resources>
-  <exceptions>
-  </exceptions>
 </woof>
