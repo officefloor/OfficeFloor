@@ -22,11 +22,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -53,6 +58,30 @@ public class WoofSectionInputEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<WoofSectionInputModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofSectionInputModel>() {
+			@Override
+			public String getInitialValue() {
+				return WoofSectionInputEditPart.this.getCastedModel().getUri();
+			}
+
+			@Override
+			public IFigure getLocationFigure() {
+				return WoofSectionInputEditPart.this.getOfficeFloorFigure()
+						.getUriFigure();
+			}
+
+			@Override
+			public Change<WoofSectionInputModel> createChange(
+					WoofChanges changes, WoofSectionInputModel target,
+					String newValue) {
+				return changes.changeSectionInputUri(target, newValue);
+			}
+		});
+	}
+
+	@Override
 	protected Class<WoofSectionInputEvent> getPropertyChangeEventType() {
 		return WoofSectionInputEvent.class;
 	}
@@ -61,6 +90,10 @@ public class WoofSectionInputEditPart
 	protected void handlePropertyChange(WoofSectionInputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WOOF_SECTION_INPUT_NAME:
+		case CHANGE_URI:
+			this.getOfficeFloorFigure().setUri(this.getCastedModel().getUri());
+			break;
 		case ADD_WOOF_TEMPLATE_OUTPUT:
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
@@ -79,6 +112,11 @@ public class WoofSectionInputEditPart
 	@Override
 	public String getSectionInputName() {
 		return this.getCastedModel().getWoofSectionInputName();
+	}
+
+	@Override
+	public String getUri() {
+		return this.getCastedModel().getUri();
 	}
 
 }

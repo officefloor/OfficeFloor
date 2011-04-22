@@ -35,4 +35,11 @@ public interface SectionInputFigureContext {
 	 */
 	String getSectionInputName();
 
+	/**
+	 * Obtains the URI.
+	 * 
+	 * @return URI. May be <code>null</code>.
+	 */
+	String getUri();
+
 }

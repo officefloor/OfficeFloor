@@ -38,7 +38,7 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link RoundedRectangle} that has a header section and content pane.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RoundedContainerFigure extends Figure {
@@ -60,7 +60,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param containerName
 	 *            Name of the container.
 	 * @param backgroundColour
@@ -74,7 +74,7 @@ public class RoundedContainerFigure extends Figure {
 			int contentPaneLeftInset, boolean includeIsPublicFigure) {
 
 		// Specify the layout
-		this.setLayoutManager(new NoSpacingToolbarLayout(false));
+		this.setLayoutManager(new NoSpacingGridLayout(1));
 
 		// Create the rounded rectangle container
 		RoundedRectangle container = new RoundedRectangle();
@@ -97,7 +97,8 @@ public class RoundedContainerFigure extends Figure {
 		} else {
 			this.isPublicFigure = new Ellipse();
 			this.isPublicFigure.setSize(6, 6);
-			this.isPublicFigure.setBackgroundColor(StandardOfficeFloorColours.BLACK());
+			this.isPublicFigure.setBackgroundColor(StandardOfficeFloorColours
+					.BLACK());
 			header.add(this.isPublicFigure);
 		}
 
@@ -106,24 +107,28 @@ public class RoundedContainerFigure extends Figure {
 		this.containerName.setLayoutManager(new NoSpacingToolbarLayout(true));
 		header.add(this.containerName);
 
-		// Content pane
+		// Content pane wrapper to allow indent
 		Figure contentPaneWrap = new Figure();
-		contentPaneWrap.setLayoutManager(new NoSpacingToolbarLayout(false));
+		NoSpacingGridLayout contentPaneWrapLayout = new NoSpacingGridLayout(1);
+		contentPaneWrap.setLayoutManager(contentPaneWrapLayout);
 		contentPaneWrap.setBorder(new ContentBorder());
-		this.contentPane = new Figure();
-		NoSpacingToolbarLayout contentLayout = new NoSpacingToolbarLayout(false);
-		this.contentPane.setLayoutManager(contentLayout);
-		this.contentPane.setBorder(new MarginBorder(2, contentPaneLeftInset, 2,
-				2));
-		contentPaneWrap.add(this.contentPane);
-		container.add(contentPaneWrap);
 		containerLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL,
 				0, true, false));
+		container.add(contentPaneWrap);
+
+		// Content pane
+		this.contentPane = new Figure();
+		this.contentPane.setLayoutManager(new NoSpacingGridLayout(1));
+		this.contentPane.setBorder(new MarginBorder(2, contentPaneLeftInset, 2,
+				2));
+		contentPaneWrapLayout.setConstraint(this.contentPane, new GridData(
+				SWT.FILL, 0, true, false));
+		contentPaneWrap.add(this.contentPane);
 	}
 
 	/**
 	 * Obtains the content pane.
-	 *
+	 * 
 	 * @return Content pane.
 	 */
 	public Figure getContentPane() {
@@ -132,7 +137,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Obtains the {@link Label} for the container name.
-	 *
+	 * 
 	 * @return {@link Label} for the container name.
 	 */
 	public Label getContainerName() {
@@ -141,7 +146,7 @@ public class RoundedContainerFigure extends Figure {
 
 	/**
 	 * Specifies if public.
-	 *
+	 * 
 	 * @param isPublic
 	 *            <code>true</code> if public.
 	 */
@@ -165,8 +170,8 @@ public class RoundedContainerFigure extends Figure {
 		@Override
 		public void paint(IFigure figure, Graphics graphics, Insets insets) {
 			Rectangle paintRectangle = getPaintRectangle(figure, insets);
-			graphics.drawLine(paintRectangle.getTopLeft(), paintRectangle
-					.getTopRight());
+			graphics.drawLine(paintRectangle.getTopLeft(),
+					paintRectangle.getTopRight());
 		}
 	}
 

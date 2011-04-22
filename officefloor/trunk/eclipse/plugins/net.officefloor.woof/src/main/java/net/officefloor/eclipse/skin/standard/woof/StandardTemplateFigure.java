@@ -88,8 +88,7 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 
 		// Create the container for the template
 		RectangleContainerFigure templateFigure = new RectangleContainerFigure(
-				context.getTemplateName(), StandardWoofColours.TEMPLATE(), 5,
-				false);
+				this.getDisplayName(), StandardWoofColours.TEMPLATE(), 5, false);
 		figure.add(templateFigure);
 
 		// Specify the template name figure
@@ -100,20 +99,28 @@ public class StandardTemplateFigure extends AbstractOfficeFloorFigure implements
 		this.setContentPane(templateFigure.getContentPane());
 	}
 
+	/**
+	 * Obtains the display name.
+	 * 
+	 * @return Display name.
+	 */
+	private String getDisplayName() {
+
+		// Determine if URI
+		String templateName = this.context.getTemplateName();
+		boolean isUri = (templateName.equals(this.context.getUri()));
+
+		// Reflect whether template name or URI
+		return (isUri ? "" : "[") + templateName + (isUri ? "" : "]");
+	}
+
 	/*
 	 * ========================== TemplateFigure =============================
 	 */
 
 	@Override
 	public void setUri(String uri) {
-
-		// Determine if URI
-		String templateName = this.context.getTemplateName();
-		boolean isUri = (templateName.equals(this.context.getUri()));
-
-		// Reflect the name on URI change
-		this.templateNameFigure.setText((isUri ? "" : "[") + templateName
-				+ (isUri ? "" : "]"));
+		this.templateNameFigure.setText(this.getDisplayName());
 	}
 
 	@Override

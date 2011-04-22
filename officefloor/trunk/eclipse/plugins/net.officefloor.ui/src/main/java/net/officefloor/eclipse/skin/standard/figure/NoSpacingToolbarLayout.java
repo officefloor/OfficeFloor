@@ -36,6 +36,7 @@ public class NoSpacingToolbarLayout extends ToolbarLayout {
 	public NoSpacingToolbarLayout(boolean isHorizontal) {
 		super(isHorizontal);
 		this.setSpacing(0);
+		this.setStretchMinorAxis(true);
 	}
 
 }
