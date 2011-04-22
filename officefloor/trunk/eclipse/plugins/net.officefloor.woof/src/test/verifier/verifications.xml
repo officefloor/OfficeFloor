@@ -7,7 +7,6 @@
 		</file>
 
 		<!-- Ensure correct versions in Eclipse plugin -->
-		<!--  
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
@@ -20,22 +19,9 @@
 			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.ui;bundle-version="@{net.officefloor.ui_version}"]]></contains>
 		</file>
-		-->
-		
-		<!-- Ensure correct versions on build class path -->
-		<!--  
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_jdbc-@{officeplugin_jdbc_version}.jar]]></contains>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.socket;bundle-version="@{net.officefloor.socket_version}"]]></contains>
 		</file>
-		-->
-
-		<!-- Ensure correct versions included for build -->
-		<!--  
-		<file>
-			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_jdbc-@{officeplugin_jdbc_version}.jar]]></contains>
-		</file>
-		-->
 	</files>
 </verifications>
