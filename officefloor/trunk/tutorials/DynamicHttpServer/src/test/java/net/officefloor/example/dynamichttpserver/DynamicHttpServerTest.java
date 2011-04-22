@@ -19,6 +19,7 @@ package net.officefloor.example.dynamichttpserver;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,7 +36,7 @@ public class DynamicHttpServerTest extends TestCase {
 	public void testDynamicPage() throws Exception {
 
 		// Start server
-		DynamicHttpServer.main(new String[0]);
+		WoofOfficeFloorSource.main();
 
 		// Send request for dynamic page
 		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
