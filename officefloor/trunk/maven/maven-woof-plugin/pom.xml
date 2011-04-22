@@ -7,7 +7,6 @@
 		<version>1.1.0</version>
 	</parent>
 	<artifactId>maven-woof-plugin</artifactId>
-	<version>1.1.0</version>
 	<packaging>maven-plugin</packaging>
 	<name>Maven WoOF Plugin</name>
 	<description>Maven plug-in for Web on OfficeFloor</description>
