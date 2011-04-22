@@ -27,6 +27,7 @@ import net.officefloor.eclipse.skin.woof.TemplateOutputFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel.WoofTemplateOutputEvent;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.eclipse.gef.EditPart;
 
@@ -78,6 +79,12 @@ public class WoofTemplateOutputEditPart
 	@Override
 	public String getTemplateOutputName() {
 		return this.getCastedModel().getWoofTemplateOutputName();
+	}
+
+	@Override
+	public boolean isRenderCompleteOutput() {
+		return HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME.equals(this
+				.getCastedModel().getWoofTemplateOutputName());
 	}
 
 }

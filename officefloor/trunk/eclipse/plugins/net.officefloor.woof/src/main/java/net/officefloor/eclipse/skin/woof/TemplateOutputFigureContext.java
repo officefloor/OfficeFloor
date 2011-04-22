@@ -36,4 +36,11 @@ public interface TemplateOutputFigureContext {
 	 */
 	String getTemplateOutputName();
 
+	/**
+	 * Flags if the render complete output.
+	 * 
+	 * @return <code>true</code> if render complete output.
+	 */
+	boolean isRenderCompleteOutput();
+
 }
