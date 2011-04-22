@@ -27,6 +27,24 @@ import org.eclipse.swt.graphics.Color;
 public class StandardWoofColours {
 
 	/**
+	 * Black (#000000).
+	 * 
+	 * @return Black.
+	 */
+	public static Color BLACK() {
+		return new Color(null, 0, 0, 0);
+	}
+
+	/**
+	 * Render complete template output.
+	 * 
+	 * @return Render complete template output.
+	 */
+	public static Color RENDER_COMPLETE_TEMPLATE_OUTPUT() {
+		return new Color(null, 240, 240, 240);
+	}
+
+	/**
 	 * Template (#bbe0ff).
 	 * 
 	 * @return Template.
