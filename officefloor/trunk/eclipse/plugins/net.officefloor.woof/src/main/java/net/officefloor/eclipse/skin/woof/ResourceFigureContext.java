@@ -35,4 +35,11 @@ public interface ResourceFigureContext {
 	 */
 	String getResourceName();
 
+	/**
+	 * Obtains the resource path.
+	 * 
+	 * @return Resource path.
+	 */
+	String getResourcePath();
+
 }

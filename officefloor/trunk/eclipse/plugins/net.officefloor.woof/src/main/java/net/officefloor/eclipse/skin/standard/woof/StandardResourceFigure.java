@@ -18,6 +18,9 @@
 
 package net.officefloor.eclipse.skin.standard.woof;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.StandardWoofColours;
 import net.officefloor.eclipse.skin.standard.figure.EllipseFigure;
@@ -33,15 +36,56 @@ public class StandardResourceFigure extends AbstractOfficeFloorFigure implements
 		ResourceFigure {
 
 	/**
+	 * {@link ResourceFigureContext}.
+	 */
+	private final ResourceFigureContext context;
+
+	/**
+	 * Name.s
+	 */
+	private final Label name;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
 	 *            {@link ResourceFigureContext}.
 	 */
 	public StandardResourceFigure(ResourceFigureContext context) {
-		EllipseFigure mo = new EllipseFigure(context.getResourceName(),
+		this.context = context;
+		EllipseFigure figure = new EllipseFigure(this.getDisplayName(),
 				StandardWoofColours.RESOURCE());
-		this.setFigure(mo);
+		this.name = figure.getLabel();
+		this.setFigure(figure);
+	}
+
+	/**
+	 * Obtains the display name.
+	 * 
+	 * @return Display name.
+	 */
+	private String getDisplayName() {
+
+		// Determine if resource path
+		String resourceName = this.context.getResourceName();
+		boolean isPath = (resourceName.equals(this.context.getResourcePath()));
+
+		// Return based on whether resource path
+		return (isPath ? "" : "[") + resourceName + (isPath ? "" : "]");
+	}
+
+	/*
+	 * ======================= ResourceFigure ===============================
+	 */
+
+	@Override
+	public void setResourcePath(String resourcePath) {
+		this.name.setText(this.getDisplayName());
+	}
+
+	@Override
+	public IFigure getResourcePathFigure() {
+		return this.name;
 	}
 
 }

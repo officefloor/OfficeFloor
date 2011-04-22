@@ -22,11 +22,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.woof.ResourceFigure;
 import net.officefloor.eclipse.skin.woof.ResourceFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofResourceModel;
 import net.officefloor.model.woof.WoofResourceModel.WoofResourceEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -53,6 +58,30 @@ public class WoofResourceEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<WoofResourceModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<WoofChanges, WoofResourceModel>() {
+			@Override
+			public String getInitialValue() {
+				return WoofResourceEditPart.this.getCastedModel()
+						.getResourcePath();
+			}
+
+			@Override
+			public IFigure getLocationFigure() {
+				return WoofResourceEditPart.this.getOfficeFloorFigure()
+						.getResourcePathFigure();
+			}
+
+			@Override
+			public Change<WoofResourceModel> createChange(WoofChanges changes,
+					WoofResourceModel target, String newValue) {
+				return changes.changeResourcePath(target, newValue);
+			}
+		});
+	}
+
+	@Override
 	protected Class<WoofResourceEvent> getPropertyChangeEventType() {
 		return WoofResourceEvent.class;
 	}
@@ -61,6 +90,11 @@ public class WoofResourceEditPart
 	protected void handlePropertyChange(WoofResourceEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WOOF_RESOURCE_NAME:
+		case CHANGE_RESOURCE_PATH:
+			this.getOfficeFloorFigure().setResourcePath(
+					this.getCastedModel().getResourcePath());
+			break;
 		case ADD_WOOF_TEMPLATE_OUTPUT:
 		case REMOVE_WOOF_TEMPLATE_OUTPUT:
 		case ADD_WOOF_SECTION_OUTPUT:
@@ -79,6 +113,11 @@ public class WoofResourceEditPart
 	@Override
 	public String getResourceName() {
 		return this.getCastedModel().getWoofResourceName();
+	}
+
+	@Override
+	public String getResourcePath() {
+		return this.getCastedModel().getResourcePath();
 	}
 
 }

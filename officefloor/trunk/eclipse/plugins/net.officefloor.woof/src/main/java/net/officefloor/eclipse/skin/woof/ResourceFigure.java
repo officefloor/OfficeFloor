@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
+import org.eclipse.draw2d.IFigure;
+
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.woof.WoofResourceModel;
 
@@ -26,4 +28,20 @@ import net.officefloor.model.woof.WoofResourceModel;
  * @author Daniel Sagenschneider
  */
 public interface ResourceFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the display resource path.
+	 * 
+	 * @param resourcePath
+	 *            Resource path to display.
+	 */
+	void setResourcePath(String resourcePath);
+
+	/**
+	 * Obtains the {@link IFigure} for the resource path.
+	 * 
+	 * @return {@link IFigure} for the resource path.
+	 */
+	IFigure getResourcePathFigure();
+
 }

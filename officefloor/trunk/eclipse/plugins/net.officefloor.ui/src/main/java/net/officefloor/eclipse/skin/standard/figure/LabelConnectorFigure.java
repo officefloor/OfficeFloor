@@ -94,8 +94,8 @@ public class LabelConnectorFigure extends Figure {
 		figure.setLayoutManager(figureLayout);
 
 		// Provide name
-		label.setLayoutManager(new NoSpacingToolbarLayout(true));
-		label.setForegroundColor(colour);
+		this.label.setLayoutManager(new NoSpacingToolbarLayout(true));
+		this.label.setForegroundColor(colour);
 
 		// Provide connector
 		this.connector = new ConnectorFigure(direction, colour);

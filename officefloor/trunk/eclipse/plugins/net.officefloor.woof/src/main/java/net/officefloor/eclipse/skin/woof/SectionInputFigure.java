@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
+import org.eclipse.draw2d.IFigure;
+
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.woof.WoofSectionInputModel;
 
@@ -26,4 +28,20 @@ import net.officefloor.model.woof.WoofSectionInputModel;
  * @author Daniel Sagenschneider
  */
 public interface SectionInputFigure extends OfficeFloorFigure {
+
+	/**
+	 * Specifies the URI to be displayed.
+	 * 
+	 * @param uri
+	 *            URI to be displayed.
+	 */
+	void setUri(String uri);
+
+	/**
+	 * Obtains the {@link IFigure} for the URI.
+	 * 
+	 * @return {@link IFigure} for the URI.
+	 */
+	IFigure getUriFigure();
+
 }

@@ -24,10 +24,14 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigure;
 import net.officefloor.eclipse.skin.woof.SectionInputFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link SectionInputFigure}.
@@ -38,28 +42,65 @@ public class StandardSectionInputFigure extends AbstractOfficeFloorFigure
 		implements SectionInputFigure {
 
 	/**
+	 * {@link SectionInputFigureContext}.
+	 */
+	private final SectionInputFigureContext context;
+
+	/**
+	 * Name.
+	 */
+	private final Label name;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
 	 *            {@link SectionInputFigureContext}.
 	 */
 	public StandardSectionInputFigure(SectionInputFigureContext context) {
+		this.context = context;
 
 		// Create figure
 		LabelConnectorFigure connector = new LabelConnectorFigure(
-				context.getSectionInputName(), ConnectorDirection.WEST,
+				this.getDisplayName(), ConnectorDirection.WEST,
 				StandardOfficeFloorColours.BLACK());
+		this.name = connector.getLabel();
 
 		// Register the anchors
 		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				WoofSectionOutputToWoofSectionInputModel.class, anchor);
+				WoofTemplateOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofSectionOutputToWoofSectionInputModel.class, anchor);
 		this.registerConnectionAnchor(
 				WoofExceptionToWoofSectionInputModel.class, anchor);
 
 		this.setFigure(connector);
+	}
+
+	/**
+	 * Obtains the display name.
+	 * 
+	 * @return Display name.
+	 */
+	private String getDisplayName() {
+		String uri = this.context.getUri();
+		return this.context.getSectionInputName()
+				+ (EclipseUtil.isBlank(uri) ? "" : " : " + uri);
+	}
+
+	/*
+	 * ============================ SectionInputFigure =======================
+	 */
+
+	@Override
+	public void setUri(String uri) {
+		this.name.setText(this.getDisplayName());
+	}
+
+	@Override
+	public IFigure getUriFigure() {
+		return this.name;
 	}
 
 }
