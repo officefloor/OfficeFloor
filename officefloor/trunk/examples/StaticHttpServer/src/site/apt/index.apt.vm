@@ -1,14 +1,14 @@
                                                -----------------------
-                                              Static HTTP Server Example 
+                                              Static HTTP Server Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Static Http Server Example>>
+  <<Static Http Server Tutorial>>
 
-  This example shows the basic layout of a web application and how to run the web application.  To demonstrate this the below example will start a HTTP server and respond with a static <<<index.html>>> page - later examples will look at dynamic content but is out of scope for this example.
+  This tutorial shows the basic layout of a web application and how to run the web application.  To demonstrate this the below example will start a HTTP server and respond with a static <<<index.html>>> page - later tutorials will look at dynamic content but is out of scope for this example.
   
-  Please note that this example utilises the {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}} for running the web application.  In utilising within a JEE Servlet Container, there are slight differences to layout as the {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} will adhere to the WAR layout and defers all unhandled requests to be handled by the JEE Servlet Container (allowing integration with your existing Servlet applications).  Please see later examples as running within JEE Servlet Containers is beyond the scope of this example.
+  Please note that {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}} is utilised for running the web application.  In using within a JEE Servlet Container, there are slight differences to layout and the {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} will adhere to the WAR layout - deferring all unhandled requests to be handled by the JEE Servlet Container (allowing integration with your existing Servlet applications).  Please see later examples as running within JEE Servlet Containers is beyond the scope of this example.
   
   The <<<WoOF>>> acronym stands for <<<Web on OfficeFloor>>>.
    
@@ -39,6 +39,18 @@ Layout
 +-------------------------------+
         mvn woof:run
 +-------------------------------+
+
+  To ensure the plug-in can be found you may need to add the following to your Maven settings.xml file:
+  
++-------------------------------+
+        <settings>
+            ...
+            <pluginGroups>
+                <pluginGroup>net.officefloor.maven</pluginGroup>
+            </pluginGroups>
+            ...
+        </settings>
++-------------------------------+
   
   The above command will start a HTTP Server on the default port 7878 (i.e. http://localhost:7878) servicing files from the class path under the <<<PUBLIC>>> directory.  In other words the <<<index.html>>> file would be located on the class path as <<<PUBLIC/index.html>>>.
 
@@ -48,9 +60,9 @@ OfficeBuilding
 
   Running the above command will actually start two processes.  
   
-  The first process is the OfficeBuilding which is a central control process.  Rather than having a single process which hosts each application that must be run, OfficeFloor has a central process (OfficeBuilding) which runs each application (OfficeFloor) in its own process.  This central control process, OfficeBuilding, will expose JMX beans for controlling the OfficeFloor instances on port 13778.  The above command will ensure OfficeBuilding is running and then start the WoOF application.
+  The first process is the OfficeBuilding which is a central control process.  Rather than having a single process which hosts each application that must be run, OfficeFloor has a central process (OfficeBuilding) which runs each application (OfficeFloor) in its own process.  This central control process, OfficeBuilding, will expose JMX beans for controlling the OfficeFloor instances on port 13778.  The above command will ensure OfficeBuilding is running and then start the web application.
   
-  The second process is an OfficeFloor process which is the actual Web Application.  It is possible to run this without OfficeBuiling by using the main class {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}}.  The advantage of using the OfficeBuilding is that OfficeFloor integrates with {{{http://maven.apache.org}Maven}} to take advantage of the repositories to obtain the artifacts which comprise the application.  Therefore there is no need to package your application to run it - making it much faster to run the code just developed.
+  The second process is an OfficeFloor process which is the actual Web Application.  It is possible to run this without OfficeBuiling by using the main class {{{/apidocs/net/officefloor/plugin/woof/WoofOfficeFloorSource.html}WoofOfficeFloorSource}}.  The advantage of using the OfficeBuilding is that OfficeFloor integrates with {{{http://maven.apache.org}Maven}} to take advantage of the Maven repositories to obtain the artifacts and add them to the class path to run the application.  Therefore there is no need to package your application to run it - making it much faster to run the code just developed.  It also enables easier management of applications on a grid as the OfficeBuilding process acts as an agent on each grid node that can start any application by downloading the necessary artifacts from a Maven repository - further discussion of this however is beyond the scope of this example.
   
   To stop the OfficeBuilding and the OfficeFloor instances running within it, use the following command:
   
@@ -80,4 +92,8 @@ Unit Test
 %{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=teardown|file=${basedir}/src/test/java/net/officefloor/example/statichttpserver/StaticHttpServerTest.java}
 
   As the code to run the HTTP Server is contained within the <<<main>>> method, the {{{/apidocs/net/officefloor/plugin/autowire/AutoWireAdministration.html}AutoWireAdministration}} provides means to stop the HTTP Server via JMX.  This means that the unit test code need not maintain reference to the underlying {{{/apidocs/net/officefloor/frame/api/manage/OfficeFloor.html}OfficeFloor}} for closing between tests.
+
+Next
+
+  The {{{../DynamicHttpServer/index.html}next tutorial}} looks at dynamic content.
 
