@@ -8,22 +8,12 @@
 
   This tutorial demonstrates the simplicity in creating dynamic content for a web application.  The example below will be a simple dynamic page to show the current time and the listing of System properties.  This will illustrate the following:
   
-    * <<<application.woof>>> : graphically configuring your web application
+    * <<< <!-- \{section\} --> >>> and <<< $\{property\} >>> : which are 2 of the only 3 instrumentation types necessary in the HTML for building web applications
     
-    * <<< <!-- \{TaskName\} --> >>> and <<< $\{property\} >>> : which are 2 of the only 3 instrumentation types necessary in the HTML for building web applications
+    * <<<application.woof>>> : graphically configuring your web application
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-application.woof
-
-%{code-snippet|sh-params=highlight:[5]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/dynamichttpserver/DynamicHttpServer.java}
-
-  The above code will start the HTTP Server with a dynamic template available at url <<<http://localhost:7878/example>>> where the web page is rendered from two template files:
-  
-   * <<<Template.ofp>>> which contains the HTML template.
-   
-   * <<<TemplateLogic.class>>> which contains the dynamic logic of the template.
-   
 * Template.ofp
 
   The below is the content of the <<<Template.ofp>>>.
@@ -61,7 +51,7 @@ application.woof
 
   The <<<TemplateLogic>>> class has two methods that correspond to <<<Template.ofp>>> via naming conventions (method name is the template section name prefixed with <<<get>>> to obtain the java object providing the bean properties).  Note that only template sections containing a $\{tag\} entry must have a corresponding <<<getXxx()>>> method within the template logic class.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/dynamichttpserver/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
 
   The <<<TemplateLogic>>> class has been kept simple in this example returning static content.  Use of dependency injection into the methods will allow retrieving values from the HTTP session or database but is beyond the scope of this example.
 
@@ -81,6 +71,16 @@ application.woof
   
   Each of the above steps is its own {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} within OfficeFloor and are strung together and executed sequentially to render the dynamic web page.  The order of {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} execution can be altered along with having different threads execute each {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}}.  This however is beyond the scope of this example which was to show the break down of dynamic web page rendering into {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances.
 
+application.woof
+
+  TODO provide explanation of configuring a Template graphically.
+
+  The above code will start the HTTP Server with a dynamic template available at url <<<http://localhost:7878/example>>> where the web page is rendered from two template files:
+  
+   * <<<Template.ofp>>> which contains the HTML template.
+   
+   * <<<TemplateLogic.class>>> which contains the dynamic logic of the template.
+   
 
 * Remaining classes
 
@@ -88,15 +88,17 @@ application.woof
 
 ** Time class
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/dynamichttpserver/Time.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/Time.java}
 
 ** Property class
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/dynamichttpserver/Property.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/Property.java}
 
 Unit Test
 
+  TODO provide POJO unit testing of TemplateLogic.
+
   The unit test requests the dynamic web page from the HTTP Server.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/dynamichttpserver/DynamicHttpServerTest.java}
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java}
 
