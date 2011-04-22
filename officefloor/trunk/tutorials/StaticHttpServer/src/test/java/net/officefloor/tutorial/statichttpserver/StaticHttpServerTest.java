@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.example.statichttpserver;
+package net.officefloor.tutorial.statichttpserver;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
