@@ -19,6 +19,7 @@ package net.officefloor.example.pageflowhttpserver;
 
 import junit.framework.TestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -38,7 +39,7 @@ public class PageFlowHttpServerTest extends TestCase {
 	public void testPageInteraction() throws Exception {
 
 		// Start server
-		PageFlowHttpServer.main(new String[0]);
+		WoofOfficeFloorSource.main();
 
 		// Request the template
 		this.doRequest("http://localhost:7878/example");

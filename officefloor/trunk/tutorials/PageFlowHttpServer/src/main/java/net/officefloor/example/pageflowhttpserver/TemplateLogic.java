@@ -57,13 +57,13 @@ public class TemplateLogic implements Serializable {
 	// START SNIPPET: control
 	public void getListItems(PageFlows flows) {
 		if (this.items.size() == 0) {
-			flows.getNoItems(); // skip to getNoItems task
+			flows.getNoItems(); // skip to getNoItems
 		}
 	}
 
 	public void getNoItems(PageFlows flows) {
 		if (this.items.size() > 0) {
-			flows.endListItems(); // skip to endListItems task
+			flows.endListItems(); // skip to endListItems
 		}
 	}
 	// END SNIPPET: control
@@ -72,7 +72,6 @@ public class TemplateLogic implements Serializable {
 	public void addItem(Item item) {
 		this.items.add(item);
 	}
-
 	// END SNIPPET: addItem
 
 	// START SNIPPET: clear
