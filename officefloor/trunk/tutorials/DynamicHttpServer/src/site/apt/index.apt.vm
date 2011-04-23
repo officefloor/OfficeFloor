@@ -94,7 +94,7 @@ application.woof
 
   Clicking ok will add the template and result in the <<<application.woof>>> looking as follows:
   
-[./images/woof.png] application.woof configuration.
+[./images/dynamic-woof.png] application.woof configuration.
 
   This is the only configuration necessary for this web application as the template will be made available at <<<http://localhost:7878/example>>> .  Further tutorials will look at linking page flows and dynamic behaviour however is beyond the scope of this tutorial.
    
