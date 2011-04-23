@@ -7,6 +7,7 @@
 		<relativePath>../../pom.xml</relativePath>
 		<version>1.1.0</version>
 	</parent>
+	<groupId>net.officefloor.maven</groupId>
 	<artifactId>maven-site-aggregate-plugin</artifactId>
 	<version>1.1.0</version>
 	<packaging>maven-plugin</packaging>
