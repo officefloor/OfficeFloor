@@ -1,47 +1,50 @@
                                                -----------------------
-                                             Navigate HTTP Server Example 
+                                             Navigate HTTP Server Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Navigate Http Server Example>>
+  <<Navigate Http Server Tutorial>>
 
-  This example demonstrates that a HTTP template is a section (implementation of {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} which is a functional building block of OfficeFloor) by navigating between two templates. 
+  This tutorial demonstrates navigating between two templates. 
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-Code
+application.woof
 
-  The following is the <<<main>>> method configures the two HTTP templates and the links the navigation between the templates.
+  The following shows the configuration of the two HTTP templates and the navigation between the templates.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/NavigateHttpServer.java}
+[./images/navigate-woof.png] application.woof configuration.
 
+  The links are the navigation paths between the templates.  Each template provides outputs that by the above configuration navigates the user to the other page.  The rest of this tutorial will detail how to add the template outputs.
   
-* TemplateOne
+TemplateOne
 
   The first template provides a link to navigate to the other template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateOne.ofp}
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateOne.html}
 
   The link is handled by the backing method which in this case of navigating does nothing except provide the annotation to indicate what is the next task within the flow.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateOne.java}
 
-  As the next task name is not a template method name nor name of a section it becomes an output to the HTTP template.  From the <<<main>>> method above, the output is configured to the input of the HTTP template.
+  As the next task name is not a template method name nor name of a section it becomes an output from the HTTP template.  From the configuration above, the output is configured to the other HTTP template.
   
-  A section has named flow inputs and outputs that are linked together which is the mechanism by which OfficeFloor joins sections together as functional building blocks.  The reason for sections is to group tasks together to ease management of large numbers of tasks.  As sections can contain other sections, this provides simple means to effectively organise tasks of an application.
+  OfficeFloor strings {{{apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances together into a {{{apidocs/net/officefloor/frame/internal/structure/Flow.html}Flow}} which allows this ability to control the rendering of templates and navigation between templates.  It is actually possible to string together templates in the one response by linking the <<<output>>> of the template to render further templates.  The <<<output>>> link is optional to be connected, however all other outputs must be linked.
 
-* TemplateTwo
+  A template is actually an implementation of a {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} within OfficeFloor which results in a section that has named flow inputs and outputs that are linked together which is the mechanism by which OfficeFloor joins sections together as functional building blocks.  The reason for sections is to group tasks together to ease management of large numbers of tasks.  As sections can contain other sections, this provides simple means to effectively organise tasks of an application.
+
+TemplateTwo
 
   The second template submits to navigate to original template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateTwo.ofp}
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateTwo.html}
 
   Much like the first template the backing logic also navigates via annotation to an external flow.
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateTwo.java}
 
-  The above <<<main>>> main method has the external flow linked back to the first template.
+  The above configuration has the external flow linked back to the first template.
 
 
 Unit Test
@@ -50,3 +53,6 @@ Unit Test
 
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/navigatehttpserver/NavigateHttpServerTest.java}
 
+Next
+
+  The basics of WoOF have now been covered.  Please look at the {{{../index.html}next group of tutorials}} for using WoOF within a JEE Servlet Container.
