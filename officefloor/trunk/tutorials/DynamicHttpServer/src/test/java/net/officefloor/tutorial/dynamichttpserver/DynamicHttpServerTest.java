@@ -32,7 +32,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class DynamicHttpServerTest extends TestCase {
 
-	// START SNIPPET: test
+	// START SNIPPET: pojo
+	public void testTemplateLogic() {
+
+		TemplateLogic logic = new TemplateLogic();
+
+		assertEquals("Number of properties", System.getProperties()
+				.size(), logic.getSystemProperties().length);
+
+	}
+	// END SNIPPET: pojo
+
 	public void testDynamicPage() throws Exception {
 
 		// Start server
@@ -49,10 +59,10 @@ public class DynamicHttpServerTest extends TestCase {
 		// Indicate response
 		response.getEntity().writeTo(System.out);
 	}
-	// END SNIPPET: test
 
 	@Override
 	protected void tearDown() throws Exception {
+		// Stop server
 		AutoWireAdministration.closeAllOfficeFloors();
 	}
 
