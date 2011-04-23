@@ -19,12 +19,15 @@ package net.officefloor.example.pageflowhttpserver;
 
 import java.io.Serializable;
 
+import net.officefloor.plugin.web.http.template.HttpParameters;
+
 /**
  * Shopping cart bean.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
+@HttpParameters
 public class Item implements Serializable {
 
 	private String name;

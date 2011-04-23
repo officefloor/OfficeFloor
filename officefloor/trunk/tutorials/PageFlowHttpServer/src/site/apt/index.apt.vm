@@ -1,128 +1,124 @@
                                                -----------------------
-                                            Page Flow HTTP Server Example 
+                                            Interactive HTTP Server Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Page Flow Http Server Example>>
+  <<Interactive HTTP Server Tutorial>>
 
-  This example demonstrates controlling the flow of {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} executions into a {{{/apidocs/net/officefloor/frame/internal/structure/Flow.html}Flow}} to be able to:
+  This tutorial introduces the the final of the three instrumentations to HTML for WoOF which is:
+  
+  <<< #\{link\} >>>  
+  
+  The previous two instrumentations ( <<< <!-- \{section\} --> >>> and <<< $\{property\} >>> ) focused on dynamic content for rending to the web client while this final instrumentation is focused on receiving content from the web client.
+  
+  Additionally covered in this tutorial is:
   
    * rendering only parts of the template
-   
-   * user interaction with the web page (i.e. links and form submission)
-   
+    
    * maintaining state across requests (via HTTP session)
    
   Also touched on are some of OfficeFloor's dependency injection capabilities.
   
-  The example will implement the ability to add items to a list along with clearing the list.  Different parts of the template will be shown based on whether there are items in the list.
+  The below example for this tutorial will implement the ability to add items to a list along with clearing the list.  Different parts of the template will be shown based on whether there are items in the list.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/PageFlowHttpServer/${projectVersion}/PageFlowHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PageFlowHttpServer/${projectVersion}/PageFlowHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
-Code
+Template.html
 
-  The following is the <<<main>>> method to run the application.
+  The below is the content of the <<<Template.html>>>.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServer.java}
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
 
-  The above starts the HTTP Server with the dynamic template <<<Template.ofp>>> and a dependency injected object <<<Item>>> which is populated from form submission parameters.
+  This example will use the template section divisions to enable controlling what is rendered along with the <<< #\{link\} >>> (notice the # rather than $) to enable user interactions.  The above contains all instrumentations required by WoOF within the HTML templates ( <<< <!-- \{section\} --> >>> , <<< $\{property\} >>> , <<< #\{link\} >>> ) and as always with WoOF the template can be rendered directly within a web browser without any code being available.  The details of how this template is used to provide an interactive page is discussed with the <<<TemplateLogic>>> class providing the functionality to the page.
 
-* Template.ofp
+TemplateLogic Class
 
-  The below is the content of the template.
-
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.ofp}
-
-  The <<< <!-- \{name\} --> >>> and <<< $\{name\} >>> respectively provide separation of the template into tasks and the ability to substitute java bean property values.  This example will use the template section divisions ( <<< <!-- \{name\} --> >>> ) to enable controlling what is rendered along with the <<< #\{name\} >>> (notice the # rather than $) for extending task execution to enable user interactions.
-
-* TemplateLogic Class
-
-  The <<<Template.ofp>>> has its logic provided by the <<<TemplateLogic>>> class.
+  The <<<Template.html>>> has its logic provided by the <<<TemplateLogic>>> class.
   
   The first aspect of this class is the annotation to indicate that it should be bound to the HTTP Session.
 
 %{code-snippet|brush-autodetect=1|id=class|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
-  The annotation is a flag to OfficeFloor that the <<<TemplateLogic>>> object for the page should be stored in the HTTP Session so that the list of items is subsequently stored across user requests.  The class implements <<<Serializable>>> as must all objects bound to a HTTP session.
+  The annotation is a flag to WoOF that the <<<TemplateLogic>>> object for the page should be stored in the HTTP Session so that the list of items is subsequently stored across user requests.  The class implements <<<Serializable>>> as must all objects bound to a HTTP session.
   
-  One reason why this is possible with OfficeFloor rather than other dependency injection containers is that OfficeFloor dependency injects into methods (i.e. via parameters) rather than the object itself (i.e. via fields).  Because of this objects within OfficeFloor do not need to hold reference to dependencies and subsequently can be made serialisable - something not easily possible with object dependency injection as dependencies are typically not serialisable.
+  One reason why this is possible with WoOF is that OfficeFloor dependency injects into methods (i.e. via parameters) rather than the object itself (i.e. via fields).  Because of this objects within OfficeFloor do not need to hold reference to dependencies and subsequently can be made serialisable - something not easily possible with object dependency injection as dependencies are typically not serialisable (e.g. a <<<DataSource>>>).  It is also possible to dependency inject HTTP session objects so that the <<<TemplateLogic>>> need not be stored in the HTTP session, however this is beyond the scope of this tutorial as relies on OfficeFloor's method dependency injection.
   
-  As the items are now stored across HTTP requests, they must be exposed for rendering the values to the template.  The below method via naming convention (prefixing the template section name <<< <!-- \{items\} --> >>> with <<<get>>>) exposes the <<<Item>>> objects for being rendered by that section (i.e. the <<< $\{name\} >>> and <<< $\{description\} >>>).
+  As the items are now stored across HTTP requests, they must be exposed for rendering the values to the template.  The below method via naming convention (prefixing the template section name <<< <!-- \{items\} --> >>> with <<<get>>>) exposes the <<<Item>>> objects for being rendered (i.e. the <<< $\{name\} >>> and <<< $\{description\} >>>).
 
-%{code-snippet|brush-autodetect=1|id=items|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=items|sh-params=first-line:5|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
+  With the above methods, the template can be rendered to the web client.
+
+* Handling request for interactivity
+  
   Initially there will be no items in the list so the page provides the form submission to add an item.  Looking back at the template you will notice that the action url is actually <<< #\{addItem\} >>> which corresponds to the following method via naming convention (same name).
 
-%{code-snippet|brush-autodetect=1|id=addItem|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=addItem|sh-params=first-line:8|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
-  Notice that the method has a single parameter <<< Item >>>.  Within the main method above the {{{/apidocs/net/officefloor/plugin/web/http/parameters/source/HttpParametersObjectManagedObjectSource.html}HttpParametersObjectManagedObjectSource}} configures it for dependency injection.  The result is that on invoking the <<< addItem >>> method, the following occurs:
+  Notice that the method has a single parameter <<<Item>>>.  The <<<Item>>> class is annotated as follows which identifies to WoOF that the object should be loaded with the HTTP parameter values.  
   
-   [[1]] <<< Item >>> dependency is instantiated from its default constructor
-   
-   [[1]] form submission parameters are reflectively loaded onto it
-   
-   [[1]] the <<< Item >>> object is passed to the invocation of the <<< addItem >>> method as the parameter value (what OfficeFloor refers to as dependency injection into methods)
-   
-  This relieves the developer of writing this code and allows them to focus on handling the values submitted by the user (in this case adding the item to the list).  It also makes for cleaner code.
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/Item.java}
   
-  Once the <<< addItem >>> method returns, OfficeFloor will by default re-render the template back to the user.  It is possible to direct flow to other tasks however this is beyond the scope of this example.
+  The result is that on invoking the <<<addItem>>> method, the following occurs:
+  
+   [[1]] the <<<Item>>> dependency is instantiated from its default constructor
+   
+   [[1]] form submission parameters are reflectively loaded onto the <<<Item>>> instance by matching HTTP parameter name to property setter method - e.g. name to <<<setName(String name)>>>
+   
+   [[1]] the <<< Item >>> object is passed to the invocation of the <<< addItem >>> method as the parameter value (what OfficeFloor refers to as method dependency injection)
+   
+  This relieves the developer of writing this code and allows them to focus on handling the values submitted by the user (in this case adding the item to the list).  It also makes for cleaner and easier to test code.
+  
+  Once the <<<addItem>>> method returns, WoOF will by default re-render the template back to the user.  It is possible to direct flow to other templates however this is beyond the scope of this tutorial.
   
   Along with adding an item to the list the template also provides the ability to clear the list of items.  In this case the template puts the <<< #\{clear\} >>> within a link which maps to the following method.
 
-%{code-snippet|brush-autodetect=1|id=clear|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=clear|sh-params=first-line:11|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
-  Again by default, the template will be re-rendered once the <<< clear >>> method returns.
+  Again by default, the template will be re-rendered once the <<<clear>>> method returns.
   
-  OfficeFloor achieves this simple interactive programming model by subsituting into the rendered page a unique url which it can map back to the corresponding method.  The method is matched by its name and is free to have any parameters it requires (enabled by OfficeFloor's dependency injection into methods).  For example in more complex applications the handling methods may include a parameter for a <<< DataSource >>> or <<< EntityManager >>> to enable database interaction rather than just storing content into the object.  This however is beyond the scope of this example.
+  OfficeFloor achieves this simple interactive programming model by subsituting into the rendered page a unique url which it can map back to the corresponding method.  The method is matched by its name and is free to have any parameters it requires (enabled by OfficeFloor's method dependency injection).  For example in more complex applications the handling methods may include a parameter for a <<<DataSource>>> or <<<EntityManager>>> to enable database interaction rather than just storing content into the object.  This however is beyond the scope of this example.
 
+* Dynamic section rendering
+  
   Now that the user is able to add and clear items, control is necessary to only render certain parts of the template.  In this case:
   
    * if there are items in the list, display them in a table
    
    * if there are no items in the list, provide message indicating no items
    
-  To provide control over the tasks rendering the page, the following interface is created.
+  To provide control over the sections rendered in the page, the following interface is created.
   
 %{code-snippet|brush-autodetect=1|id=flows|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
-  The interface is annotated to indicated it provides flow links and its methods correspond by name to template sections (and also other methods of the logic class).  The interface is then used for a parameter into the following methods to allow them control over rendering of the template. 
+  The interface is annotated to indicated it provides flow links and its methods correspond by name to template sections (and also other methods of the logic class).  The interface is then used as a parameter into the following methods to allow them control over rendering of the template. 
 
-%{code-snippet|brush-autodetect=1|id=control|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=control|sh-params=first-line:14|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
 
-  For the above methods, OfficeFloor will invoke them before rendering the corresponding template section.  On invoking the method, OfficeFloor will generate an object implementing the interface that will change the next task to be executed based on whether a method is invoked.  Should no method be invoked then the next task as per the template is executed.  Should however a method be invoked by the code then the corresponding task by the interface method name becomes the next task to execute.  In this case:
+  For the above methods, WoOF will invoke them before rendering the corresponding template sections.  On invoking the method, WoOF will generate an object implementing the <<<PageFlows>>> interface that will change the next section to be rendered based on whether a method on this object is invoked.  Should no method be invoked then the next section as per the template is rendered.  Should however a method be invoked by the logic class code then the corresponding section by the interface method name becomes the next section to be rendered.  In this case:
   
-   * For <<< getListItems >>>:
+   * For <<<getListItems>>> :
    
-     * An empty items list will have rendering skip to the <<< getNoItems >>> method task and subsequently the <<< noItems >>> template section task (skipping the rending of the table to display the items)
+     * An empty items list will have rendering skip to the <<<getNoItems>>> method along with its corresponding section (skipping the rending of the table to display the items)
      
-     * With items in the list no flow interface method is invoked so rendering will carry onto the next task which will be the <<< listItems >>> template section task
+     * With items in the list no flow interface method is invoked so rendering will carry onto the next section which will be the <<<listItems>>> template section.
      
-   * For <<< getNoItems >>>:
+   * For <<<getNoItems>>> :
    
-     * Having items in the list will have rendering skip to the <<< endListItems >>> template section task, skipping the rendering of the message indicating no items within the list.
+     * Having items in the list will have rendering skip to the <<<endListItems>>> template section, skipping the rendering of the message indicating no items within the list.
      
-     * An empty items list will cause no flow interface method to be invoked so rendering will carry on to the next task which will be the <<< noItems >>> template section task
-     
-  Controlling rendering of the template like this means that the code is not dependent on OfficeFloor API's and subsequently allows easier unit testing (via mocking the interface).
+     * An empty items list will cause no flow interface method to be invoked so rendering will carry on to the next section which will be the <<<noItems>>> template section.
 
-  Further to this is that with method dependency injection, the method being skipped to is likely to have parameters (dependencies) that the invoking method will not have.  In this case <<< getNoItems >>> does happen to have similar dependencies however later refactoring may see its functionality need a <<< DataSource >>> dependency. For example: 
+  Controlling rendering of the template like this means that the code is not dependent on any framework API's and subsequently allows easier unit testing (via mocking the interface).
+
+  Further to this is that with method dependency injection, the method being skipped to is likely to have parameters (dependencies) that the invoking method will not have.  In this case <<<getNoItems>>> does happen to have similar dependencies however later refactoring may see its functionality need a <<<DataSource>>> dependency. For example: 
   
 %{code-snippet|brush-autodetect=1|id=extraDependency|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/TemplateLogic.java}
   
-  OfficeFloor will happily inject the additional <<< DataSource >>> dependency on invoking the method with the client call (from <<< getListItems >>>) not aware that the method has had a change in dependencies.
+  WoOF will happily inject the additional <<<DataSource>>> dependency on invoking the method.  The client call from <<<getListItems>>> will not need to be aware that the method has had a change in dependencies.
   
-  This ability to dependency inject into methods is only the start of the functionality contained within OfficeFloor as this starts to touch on the {{{/core/officeframe/job-based-architecture.html}Job Based Architecture}} at the heart of OfficeFloor.  This is also the means by which you can have different threads execute different methods (tasks) within your application.
-
-
-* Remaining Classes
-
-** Item Class
-
-  As the Item is stored within the TemplateLogic object which is bound to the {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}}, it must be serialisable. 
-
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/pageflowhttpserver/Item.java}
-
+  This ability to dependency inject into methods is only the start of the functionality contained within WoOF (and the underlying OfficeFloor) as this starts to touch on the {{{/core/officeframe/job-based-architecture.html}Job Based Architecture}} at the heart of OfficeFloor.  This is also the means by which different threads can be used to execute different methods (tasks) within the application.
 
 
 Unit Test
@@ -131,3 +127,7 @@ Unit Test
 
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/pageflowhttpserver/PageFlowHttpServerTest.java}
 
+
+Next
+
+  The {{{../NavigateHttpServer/index.html}next tutorial}} looks at navigating between pages (templates).
