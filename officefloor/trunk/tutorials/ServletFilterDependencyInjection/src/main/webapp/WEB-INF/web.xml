@@ -2,11 +2,11 @@
 <web-app>
 
 	<filter>
-		<filter-name>Example</filter-name>
+		<filter-name>WoOF</filter-name>
 		<filter-class>net.officefloor.example.servletfilterdependencyinjection.ExampleFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>Example</filter-name>
+		<filter-name>WoOF</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
