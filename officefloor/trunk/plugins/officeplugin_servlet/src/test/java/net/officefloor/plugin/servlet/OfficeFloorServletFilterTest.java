@@ -189,8 +189,8 @@ public class OfficeFloorServletFilterTest extends OfficeFrameTestCase {
 	 * Ensure can invoke a link.
 	 */
 	public void testlink() throws Exception {
-		assertEquals("Should handle link", "LINK - /link.links/link.task",
-				this.doGetBody("/link.links/link.task"));
+		assertEquals("Should handle link", "LINK - /link.links-link.task",
+				this.doGetBody("/link.links-link.task"));
 	}
 
 	/**
