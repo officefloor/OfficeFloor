@@ -1,23 +1,24 @@
                                                -----------------------
-                                              Team HTTP Server Example 
+                                              Team HTTP Server Tutorial
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Team Http Server Example>>
+  <<Team Http Server Tutorial>>
 
   OfficeFloor refers to a thread pool as a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
 
-  This example demonstrates the ability to assign a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}} (thread pool) to execute specific tasks.
+  This tutorial demonstrates the ability to assign a {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}} (thread pool) to execute specific tasks.
   
-  The application for this example provides encrypting of a letter.  The letter is encrypted by a database table providing mapping of the letter to an alternate letter.  The mapping is cached within the application to provide quicker lookups.  The database tasks of the application are executed by a separate {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
+  The application for this tutorial provides encrypting of a letter.  The letter is encrypted by a database table providing mapping of the letter to an alternate letter.  The mapping is cached within the application to provide quicker lookups.  The database tasks of the application are executed by a separate {{{/apidocs/net/officefloor/frame/spi/team/Team.html}Team}}.
   
   The reason for separating the database tasks to be executed by another thread is to increase through put and responsiveness of the application.  Web servers hosting applications will typically have a single thread pool to service all requests.  Database I/O is blocking meaning that the thread is blocked while servicing the HTTP request.  Under heavy loads, all threads can end up in this blocked state and the web server has to queue remaining requests as no threads are available to service the requests.  Many requests for the web server are however for static content that is typically cached and only requires a few cpu cycles of a thread to service the request.  Increasing the number of threads causes increased lock contention and potential stavation from the cpu leading to degraded performance.  The answer is not in a single thread pool (or optimsing the scheduling of requests to service as this can lead to stavation and increased application complexity) but in creating further thread pools. 
   
-  This example shows how OfficeFloor makes it simple for all database tasks to be executed by a separate thread pool leaving the HTTP request servicing thread pool free to service these smaller requests.
+  This tutorial shows how OfficeFloor makes it simple for all database tasks to be executed by a separate thread pool leaving the HTTP request servicing thread pool free to service these smaller requests.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
-  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
 Code
 
   The following is the <<<main>>> method to run the application.
@@ -94,7 +95,7 @@ Code
   
 * Remaining code
 
-  The remaining code is included for completeness of this example. 
+  The remaining code is included for completeness of this tutorial. 
 
 ** datasource.properties
   
