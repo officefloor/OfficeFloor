@@ -74,7 +74,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
 				new HttpTemplateRequestHandlerDifferentiator());
-		this.record_requestURI("/WORK/TASK.task");
+		this.record_requestURI("/WORK-TASK.task");
 		this.taskContext.doFlow("WORK", "TASK", null);
 
 		// Test
@@ -102,7 +102,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
 				new HttpTemplateRequestHandlerDifferentiator());
-		this.record_requestURI("/NON_MATCHING/TASK.task");
+		this.record_requestURI("/NON_MATCHING-TASK.task");
 		this.record_doNonMatchedRequestFlow();
 
 		// Test
@@ -116,7 +116,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
 				new HttpTemplateRequestHandlerDifferentiator());
-		this.record_requestURI("/WORK/NON_MATCHING.task");
+		this.record_requestURI("/WORK-NON_MATCHING.task");
 		this.record_doNonMatchedRequestFlow();
 
 		// Test
@@ -131,7 +131,7 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		// Record
 		this.record_cacheOfficeMetaData("WORK", "TASK",
 				"Wrong differentiator type");
-		this.record_requestURI("/WORK/TASK.task");
+		this.record_requestURI("/WORK-TASK.task");
 		this.record_doNonMatchedRequestFlow();
 
 		// Test

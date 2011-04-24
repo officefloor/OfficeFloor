@@ -57,7 +57,7 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	public LinkHttpTemplateWriter(LinkHttpTemplateSectionContent content,
 			String contentType) {
 		this.linkPrefix = "/";
-		this.linkSuffix = "/" + content.getName()
+		this.linkSuffix = "-" + content.getName()
 				+ HttpTemplateWorkSource.LINK_URL_EXTENSION;
 		this.contentType = contentType;
 	}

@@ -158,7 +158,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testTemplateWithUri() throws Exception {
 
-		final String SUBMIT_URI = "/uri.ofp.links/submit.task";
+		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
 
 		// Add HTTP template (with URL)
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
@@ -239,7 +239,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testTemplateLinkWithUri() throws Exception {
 
-		final String SUBMIT_URI = "/uri.ofp.links/submit.task";
+		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
 
 		// Add HTTP template
 		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class,
@@ -256,7 +256,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testTemplateLinkWithoutUri() throws Exception {
 
-		final String SUBMIT_URI = "/resource0.links/submit.task";
+		final String SUBMIT_URI = "/resource0.links-submit.task";
 
 		// Add HTTP template
 		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class);
@@ -298,7 +298,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure link to the HTTP template
 		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"LINK to /resource0.links/submit.task");
+				"LINK to /resource0.links-submit.task");
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 
 		// Ensure link escalation to template
 		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"Escalated to /handler.links/submit.task");
+				"Escalated to /handler.links-submit.task");
 	}
 
 	/**

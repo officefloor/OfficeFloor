@@ -84,7 +84,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 		// Request the initial page (PageOne)
 		Properties initialPage = this.doRequest(
-				"/PageTwo.HttpTemplate-PageTwo.ofp/link.task", client);
+				"/PageTwo.HttpTemplate-PageTwo.ofp-link.task", client);
 		assertEquals("Incorrect initial page", "One", initialPage
 				.getProperty("page"));
 

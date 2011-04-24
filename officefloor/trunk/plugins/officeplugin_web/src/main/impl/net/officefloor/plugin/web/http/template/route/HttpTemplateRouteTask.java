@@ -131,11 +131,11 @@ public class HttpTemplateRouteTask
 			// Link task request, so obtain work and task names from path
 			path = path.substring("/".length(), path.length()
 					- HttpTemplateWorkSource.LINK_URL_EXTENSION.length());
-			int workTaskPos = path.lastIndexOf('/');
+			int workTaskPos = path.lastIndexOf('-');
 			if (workTaskPos > 0) {
 				// Work and Task name within URL
 				String workName = path.substring(0, workTaskPos);
-				String taskName = path.substring(workTaskPos + "/".length());
+				String taskName = path.substring(workTaskPos + "-".length());
 
 				// Determine if handler task
 				String[] taskNames = this.templateHandlerTasks.get(workName);
