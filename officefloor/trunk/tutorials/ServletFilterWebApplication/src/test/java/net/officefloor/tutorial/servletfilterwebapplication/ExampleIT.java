@@ -43,11 +43,11 @@ public class ExampleIT extends TestCase {
 
 	public void testHttpTemplateAndLinkToJsp() throws IOException {
 		this.assertRequest("/template",
-				"<html><body><a href=\"/template.links/link.task\">TEMPLATE</a></body></html>");
+				"<html><body><a href=\"/template.links-link.task\">TEMPLATE</a></body></html>");
 	}
 
 	public void testLinkToJsp() throws IOException {
-		this.assertRequest("/template.links/link.task",
+		this.assertRequest("/template.links-link.task",
 				"<html><body>Linked to JSP</body></html>");
 	}
 

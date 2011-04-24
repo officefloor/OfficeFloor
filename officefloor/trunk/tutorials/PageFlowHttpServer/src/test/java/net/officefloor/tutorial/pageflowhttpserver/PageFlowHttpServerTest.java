@@ -45,10 +45,10 @@ public class PageFlowHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/example");
 
 		// Add an item
-		this.doRequest("http://localhost:7878/example.links/addItem.task?name=Daniel&description=founder");
+		this.doRequest("http://localhost:7878/example.links-addItem.task?name=Daniel&description=founder");
 
 		// Clear the items
-		this.doRequest("http://localhost:7878/example.links/clear.task");
+		this.doRequest("http://localhost:7878/example.links-clear.task");
 	}
 
 	private void doRequest(String url) throws Exception {
