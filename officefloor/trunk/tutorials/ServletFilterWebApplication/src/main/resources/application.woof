@@ -1,0 +1,21 @@
+<woof>
+  <templates>
+    <template name="template" uri="template" path="Template.html" class="net.officefloor.example.servletfilterwebapplication.ExampleTemplateLogic" x="105" y="57">
+      <output name="LINK" argument-type="">
+        <resource name="/Template.jsp"/>
+      </output>
+      <output name="output" argument-type="">
+      </output>
+    </template>
+  </templates>
+  <sections>
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.example.servletfilterwebapplication.ExampleClass" x="109" y="161">
+      <input name="example" parameter-type="" uri="class"/>
+    </section>
+  </sections>
+  <resources>
+    <resource name="/Template.jsp" path="/Template.jsp" x="243" y="78"/>
+  </resources>
+  <exceptions>
+  </exceptions>
+</woof>

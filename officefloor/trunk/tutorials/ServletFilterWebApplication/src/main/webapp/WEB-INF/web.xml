@@ -3,7 +3,7 @@
 
 	<filter>
 		<filter-name>Example</filter-name>
-		<filter-class>net.officefloor.example.servletfilterwebapplication.ExampleFilter</filter-class>
+		<filter-class>net.officefloor.plugin.servlet.WoofServletFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>Example</filter-name>
