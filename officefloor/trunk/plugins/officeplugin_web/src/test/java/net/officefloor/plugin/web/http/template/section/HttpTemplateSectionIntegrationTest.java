@@ -61,8 +61,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private static final String RENDERED_TEMPLATE_XML = "<html><body>Template Test:<table>"
 			+ "<tr><td>Name</td><td>Description</td></tr>"
 			+ "<tr><td>row</td><td>test row</td></tr></table>"
-			+ "<form action=\"/SECTION.links/nextTask.task\"><input type=\"submit\"/></form>"
-			+ "<form action=\"/SECTION.links/submit.task\"><input type=\"submit\"/></form>"
+			+ "<form action=\"/SECTION.links-nextTask.task\"><input type=\"submit\"/></form>"
+			+ "<form action=\"/SECTION.links-submit.task\"><input type=\"submit\"/></form>"
 			+ "</body></html>";
 
 	/**
@@ -123,7 +123,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "nextTask - finished(NextTask)";
 
 		// Ensure correctly renders template on submit
-		this.assertHttpRequest("/SECTION.links/nextTask.task", RESPONSE);
+		this.assertHttpRequest("/SECTION.links-nextTask.task", RESPONSE);
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "<submit />" + RENDERED_TEMPLATE_XML;
 
 		// Ensure correctly renders template on submit not invoking flow
-		String response = this.doHttpRequest("/SECTION.links/submit.task");
+		String response = this.doHttpRequest("/SECTION.links-submit.task");
 		assertXmlEquals("Incorrect rendering", RESPONSE, response);
 	}
 
@@ -154,7 +154,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		final String RESPONSE = "<submit /> - doInternalFlow[1] - finished(Parameter for External Flow)";
 
 		// Ensure correctly renders template on submit when invoking flow
-		this.assertHttpRequest("/SECTION.links/submit.task?doFlow=true",
+		this.assertHttpRequest("/SECTION.links-submit.task?doFlow=true",
 				RESPONSE);
 	}
 
@@ -192,15 +192,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure retains state across HTTP requests (by incrementing counter)
 		this.assertHttpRequest("",
-				"<a href='/SECTION.links/increment.task'>1</a>");
-		this.assertHttpRequest("/SECTION.links/increment.task",
+				"<a href='/SECTION.links-increment.task'>1</a>");
+		this.assertHttpRequest("/SECTION.links-increment.task",
 				"increment - finished(2)");
 		this.assertHttpRequest("",
-				"<a href='/SECTION.links/increment.task'>2</a>");
-		this.assertHttpRequest("/SECTION.links/increment.task",
+				"<a href='/SECTION.links-increment.task'>2</a>");
+		this.assertHttpRequest("/SECTION.links-increment.task",
 				"increment - finished(3)");
 		this.assertHttpRequest("",
-				"<a href='/SECTION.links/increment.task'>3</a>");
+				"<a href='/SECTION.links-increment.task'>3</a>");
 	}
 
 	/**
@@ -215,12 +215,12 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				HttpParametersTemplateLogic.class);
 
 		// Ensure provides response with parameter value
-		this.assertHttpRequest("/SECTION.links/submit.task?text=TEST",
-				"<a href=\"/SECTION.links/submit.task\">TEST</a>");
+		this.assertHttpRequest("/SECTION.links-submit.task?text=TEST",
+				"<a href=\"/SECTION.links-submit.task\">TEST</a>");
 
 		// Ensure reflects another value on request
-		this.assertHttpRequest("/SECTION.links/submit.task?text=ANOTHER",
-				"<a href=\"/SECTION.links/submit.task\">ANOTHER</a>");
+		this.assertHttpRequest("/SECTION.links-submit.task?text=ANOTHER",
+				"<a href=\"/SECTION.links-submit.task\">ANOTHER</a>");
 	}
 
 	/**
@@ -235,8 +235,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				RenderByDefaultTemplateLogic.class);
 
 		// Ensure render template again by default on link submit
-		this.assertHttpRequest("/SECTION.links/submit.task",
-				"Submit-RenderByDefault-/SECTION.links/submit.task");
+		this.assertHttpRequest("/SECTION.links-submit.task",
+				"Submit-RenderByDefault-/SECTION.links-submit.task");
 	}
 
 	/**

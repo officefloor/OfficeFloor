@@ -5,7 +5,7 @@ Template Test
 
 Should be no template name  available.
 <br />
-with a listing of <a href="/WORK/beans.task">beans</a>:
+with a listing of <a href="/WORK-beans.task">beans</a>:
 <br />
 <table>
     <tr>
@@ -30,7 +30,7 @@ with a listing of <a href="/WORK/beans.task">beans</a>:
     </tr>
     
 </table>
-<form action="/WORK/submit.task">
+<form action="/WORK-submit.task">
     <input type="submit" />
 </form>
 </body>
