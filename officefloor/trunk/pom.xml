@@ -68,6 +68,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>1.1.0</officefloor.skin.version>
 		<tycho-version>0.10.0</tycho-version>
+		<maven-version>3.0.1</maven-version>
+		<aether-version>1.8</aether-version>
+		<plexus-version>1.5.5</plexus-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -90,37 +93,42 @@
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-container-default</artifactId>
-				<version>1.5.5</version>
+				<version>${plexus-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-core</artifactId>
-				<version>3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.sonatype.aether</groupId>
-				<artifactId>aether-api</artifactId>
-				<version>1.8</version>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-utils</artifactId>
+				<version>${plexus-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-aether-provider</artifactId>
-				<version>3.0.1</version>
+				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-core</artifactId>
+				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonatype.aether</groupId>
+				<artifactId>aether-api</artifactId>
+				<version>${aether-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sonatype.aether</groupId>
 				<artifactId>aether-connector-wagon</artifactId>
-				<version>1.8</version>
+				<version>${aether-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sonatype.aether</groupId>
 				<artifactId>aether-connector-file</artifactId>
-				<version>1.8</version>
+				<version>${aether-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sonatype.aether</groupId>
 				<artifactId>aether-connector-asynchttpclient</artifactId>
-				<version>1.8</version>
+				<version>${aether-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
