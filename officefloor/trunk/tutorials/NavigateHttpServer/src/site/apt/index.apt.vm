@@ -25,6 +25,8 @@ TemplateOne
 %{code-snippet|brush=xml|file=${basedir}/src/main/resources/TemplateOne.html}
 
   The link is handled by the backing method which in this case of navigating does nothing except provide the annotation to indicate what is the next task within the flow.
+  
+  The stylesheet is not necessary for navigation linking but is included to show that the navigation links continue to work with relative content to the page.  The stylesheets in this case just provide background colouring to the page to highlight the navigation back and forth between the two pages (templates).
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateOne.java}
 
