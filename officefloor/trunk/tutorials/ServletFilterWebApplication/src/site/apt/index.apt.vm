@@ -42,7 +42,7 @@ ExampleClass
 
   The class used for the section has the input parameter {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} which wraps the <<<ServletRequest>>> and <<<ServletResponse>>> so that existing stand-alone WoOF applications can be run within a JEE Servlet Container.  It is actually by re-implementing the base objects for the WoOF interfaces ( {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} , {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}} ) to use the JEE Servlet Container APIs that the JEE Servlet integration is achieved. 
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/servletfilterwebapplication/ExampleClass.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleClass.java}
 
 
 Remaining Code
@@ -59,7 +59,7 @@ Remaining Code
 
   Identifies that the <<<link>>> in the above template should be handled by <<<LINK>>> output which in the above configuration is mapped to a JSP.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/servletfilterwebapplication/ExampleTemplateLogic.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleTemplateLogic.java}
 
 * Template.jsp
 
@@ -71,7 +71,7 @@ Remaining Code
 
   Not part of the WoOF but is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/servletfilterwebapplication/MockHttpServlet.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterwebapplication/MockHttpServlet.java}
 
 
 
@@ -87,7 +87,7 @@ Unit Test
    
    * Request being serviced by a class
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/example/servletfilterwebapplication/ExampleIT.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterwebapplication/ExampleIT.java}
 
 
 Next
