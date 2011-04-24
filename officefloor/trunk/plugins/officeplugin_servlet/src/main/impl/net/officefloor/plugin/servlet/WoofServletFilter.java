@@ -30,6 +30,7 @@ import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
  * WoOF (Web on OfficeFloor) {@link Servlet} {@link Filter}.
@@ -41,12 +42,12 @@ public class WoofServletFilter extends OfficeFloorServletFilter {
 	/**
 	 * Default WoOF configuration location.
 	 */
-	public static final String DEFAULT_WOOF_CONFIGUARTION_LOCATION = "WEB-INF/application.woof";
+	public static final String DEFAULT_WOOF_CONFIGUARTION_LOCATION = WoofOfficeFloorSource.DEFAULT_WOOF_CONFIGUARTION_LOCATION;
 
 	/**
 	 * Property for the location of the WoOF configuration for the application.
 	 */
-	public static final String PROPERTY_WOOF_CONFIGURATION_LOCATION = "woof.configuration.location";
+	public static final String PROPERTY_WOOF_CONFIGURATION_LOCATION = WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION;
 
 	/*
 	 * ======================= OfficeFloorServletFilter ====================
