@@ -19,24 +19,18 @@ package net.officefloor.example.servletfilterdependencyinjection;
 
 import javax.ejb.EJB;
 
-import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
+import net.officefloor.plugin.servlet.WoofServletFilter;
 
 /**
- * Example {@link OfficeFloorServletFilter} with {@link EJB} dependency.
+ * Example {@link WoofServletFilter} with {@link EJB} dependency.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: example
-public class ExampleFilter extends OfficeFloorServletFilter {
+public class ExampleFilter extends WoofServletFilter {
 
 	@EJB
 	ExampleDependencyLocal dependency;
-
-	@Override
-	protected void configure() {
-		this.addHttpTemplate("templates/Template.ofp",
-				ExampleTemplateLogic.class, "template");
-	}
 
 }
 // END SNIPPET: example
