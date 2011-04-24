@@ -3,7 +3,7 @@
 
 	<filter>
 		<filter-name>WoOF</filter-name>
-		<filter-class>net.officefloor.example.servletfilterdependencyinjection.ExampleFilter</filter-class>
+		<filter-class>net.officefloor.tutorial.servletfilterdependencyinjection.ExampleFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>WoOF</filter-name>
@@ -12,7 +12,7 @@
 
 	<servlet>
 		<servlet-name>Mock</servlet-name>
-		<servlet-class>net.officefloor.example.servletfilterdependencyinjection.MockHttpServlet</servlet-class>
+		<servlet-class>net.officefloor.tutorial.servletfilterdependencyinjection.MockHttpServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Mock</servlet-name>

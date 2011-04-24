@@ -28,7 +28,7 @@ TemplateOne
   
   The stylesheet is not necessary for navigation linking but is included to show that the navigation links continue to work with relative content to the page.  The stylesheets in this case just provide background colouring to the page to highlight the navigation back and forth between the two pages (templates).
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateOne.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
 
   As the next task name is not a template method name nor name of a section it becomes an output from the HTTP template.  From the configuration above, the output is configured to the other HTTP template.
   
@@ -44,7 +44,7 @@ TemplateTwo
 
   Much like the first template the backing logic also navigates via annotation to an external flow.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/navigatehttpserver/TemplateTwo.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
 
   The above configuration has the external flow linked back to the first template.
 
@@ -53,7 +53,7 @@ Unit Test
 
   The unit test navigates between the templates.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/navigatehttpserver/NavigateHttpServerTest.java}
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
 
 Next
 
