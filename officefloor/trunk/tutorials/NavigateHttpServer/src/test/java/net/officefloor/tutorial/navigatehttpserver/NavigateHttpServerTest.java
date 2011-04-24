@@ -45,10 +45,10 @@ public class NavigateHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/one");
 
 		// Click on link on template one
-		this.doRequest("http://localhost:7878/one.links/navigate.task");
+		this.doRequest("http://localhost:7878/one.links-navigate.task");
 
 		// Submit on template two
-		this.doRequest("http://localhost:7878/two.links/process.task");
+		this.doRequest("http://localhost:7878/two.links-process.task");
 	}
 
 	private void doRequest(String url) throws Exception {

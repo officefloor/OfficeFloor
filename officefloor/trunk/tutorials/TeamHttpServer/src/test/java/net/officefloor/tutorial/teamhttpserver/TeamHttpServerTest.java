@@ -106,10 +106,10 @@ public class TeamHttpServerTest extends TestCase {
 		this.doRequest("http://localhost:7878/example");
 
 		// Retrieving from database
-		this.doRequest("http://localhost:7878/example.links/encrypt.task?letter=A");
+		this.doRequest("http://localhost:7878/example.links-encrypt.task?letter=A");
 
 		// Looking up within cache
-		this.doRequest("http://localhost:7878/example.links/encrypt.task?letter=A");
+		this.doRequest("http://localhost:7878/example.links-encrypt.task?letter=A");
 	}
 
 	private void doRequest(String url) throws Exception {
