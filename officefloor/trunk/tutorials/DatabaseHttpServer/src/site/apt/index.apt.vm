@@ -1,16 +1,18 @@
                                                -----------------------
-                                             Database HTTP Server Example 
+                                      Dependency Injection HTTP Server Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Database Http Server Example>>
+  <<Dependency Injection Http Server Tutorial>>
 
-  This example demonstrates dependency injection of a <<<DataSource>>> via a HTTP Server that interacts with a database.  The application will display the data from a database table along with the functionality to clear the table and add rows to the table.
+  This tutorial demonstrates dependency injection of a <<<DataSource>>> via a HTTP Server that interacts with a database.  The example application will display the data from a database table along with the functionality to clear the table and add rows to the table.
   
   The <<<DataSource>>> is provided for dependency injection via a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/example/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Example Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
   
 Code
 
@@ -75,9 +77,16 @@ Code
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/example/databasehttpserver/Row.java}
 
 
+
 Unit Test
 
   The unit test requests the page and then adds a row and deletes a row.
 
 %{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/example/databasehttpserver/DatabaseHttpServerTest.java}
+
+
+
+Next
+
+  {{{../index.html}Further tutorials}} are available to look at threading within OfficeFloor.
 
