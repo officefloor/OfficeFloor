@@ -18,10 +18,10 @@
 		<module>DynamicHttpServer</module>
 		<module>PageFlowHttpServer</module>
 		<module>NavigateHttpServer</module>
-		<module>DatabaseHttpServer</module>
-		<module>TeamHttpServer</module>
 		<module>ServletFilterWebApplication</module>
 		<module>ServletFilterDependencyInjection</module>
+		<module>DatabaseHttpServer</module>
+		<module>TeamHttpServer</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
