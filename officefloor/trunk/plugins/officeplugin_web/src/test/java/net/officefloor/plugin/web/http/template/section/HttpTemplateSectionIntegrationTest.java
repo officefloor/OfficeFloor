@@ -182,7 +182,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure stateful across {@link HttpRequest}.
+	 * Ensure template stateful across {@link HttpRequest}.
 	 */
 	public void testStatefulTemplate() throws Exception {
 
@@ -201,6 +201,20 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"increment - finished(3)");
 		this.assertHttpRequest("",
 				"<a href='/SECTION.links-increment.task'>3</a>");
+	}
+
+	/**
+	 * Ensure parameter object stateful across {@link HttpRequest}.
+	 */
+	public void testStatefulObject() throws Exception {
+
+		// Start the server
+		this.startHttpServer("StatefulObject.ofp", StatefulObjectLogic.class);
+
+		// Ensure retains state across HTTP requests (by incrementing counter)
+		this.assertHttpRequest("", "1");
+		this.assertHttpRequest("", "2");
+		this.assertHttpRequest("", "3");
 	}
 
 	/**
