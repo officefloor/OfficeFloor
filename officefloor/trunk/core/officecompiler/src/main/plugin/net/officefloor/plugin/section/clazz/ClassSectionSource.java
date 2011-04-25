@@ -741,6 +741,19 @@ public class ClassSectionSource extends AbstractSectionSource {
 			}
 		}
 
+		// Ensure the section class has tasks
+		boolean hasTaskMethod = false;
+		for (Method method : sectionClass.getMethods()) {
+			if (!(method.getDeclaringClass().equals(Object.class))) {
+				hasTaskMethod = true; // declared a class
+			}
+		}
+		if (!hasTaskMethod) {
+			designer.addIssue(
+					"Must have at least one public method on template logic class "
+							+ sectionClassName, null, null);
+		}
+
 		// Load the work type for the class
 		PropertyList workProperties = context.createPropertyList();
 		workProperties.addProperty(

@@ -37,10 +37,8 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpParameters;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;
 
 import org.apache.http.HttpResponse;
@@ -201,40 +199,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				"increment - finished(3)");
 		this.assertHttpRequest("",
 				"<a href='/SECTION.links-increment.task'>3</a>");
-	}
-
-	/**
-	 * Ensure parameter object stateful across {@link HttpRequest}.
-	 */
-	public void testStatefulObject() throws Exception {
-
-		// Start the server
-		this.startHttpServer("StatefulObject.ofp", StatefulObjectLogic.class);
-
-		// Ensure retains state across HTTP requests (by incrementing counter)
-		this.assertHttpRequest("", "1");
-		this.assertHttpRequest("", "2");
-		this.assertHttpRequest("", "3");
-	}
-
-	/**
-	 * Ensure configures the parameter class annotated with
-	 * {@link HttpParameters} as a
-	 * {@link HttpParametersObjectManagedObjectSource}.
-	 */
-	public void testHttpParametersAnnotation() throws Exception {
-
-		// Start the server
-		this.startHttpServer("HttpParametersTemplate.ofp",
-				HttpParametersTemplateLogic.class);
-
-		// Ensure provides response with parameter value
-		this.assertHttpRequest("/SECTION.links-submit.task?text=TEST",
-				"<a href=\"/SECTION.links-submit.task\">TEST</a>");
-
-		// Ensure reflects another value on request
-		this.assertHttpRequest("/SECTION.links-submit.task?text=ANOTHER",
-				"<a href=\"/SECTION.links-submit.task\">ANOTHER</a>");
 	}
 
 	/**

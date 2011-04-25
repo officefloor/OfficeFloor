@@ -23,7 +23,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import net.officefloor.plugin.web.http.template.HttpSessionStateful;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**

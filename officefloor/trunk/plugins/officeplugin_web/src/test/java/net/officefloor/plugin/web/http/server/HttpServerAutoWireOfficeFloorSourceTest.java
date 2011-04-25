@@ -22,23 +22,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
-import java.sql.SQLException;
 
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -55,24 +48,24 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Value indicating that connection was expected to be refused.
-	 */
-	private static final int CONNECTION_REFUSED_STATUS = -1;
-
-	/**
 	 * {@link HttpServerAutoWireOfficeFloorSource} to test.
 	 */
 	private final HttpServerAutoWireApplication source = new HttpServerAutoWireOfficeFloorSource();
 
 	/**
-	 * {@link HttpClient}.
+	 * Value indicating that connection was expected to be refused.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private static final int CONNECTION_REFUSED_STATUS = -1;
 
 	/**
 	 * Default not found file path.
 	 */
 	private final String DEFAULT_NOT_FOUND_PATH = ClasspathHttpFileSenderWorkSource.DEFAULT_NOT_FOUND_FILE_PATH;
+
+	/**
+	 * {@link HttpClient}.
+	 */
+	private final HttpClient client = new DefaultHttpClient();
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -154,215 +147,13 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure able to add HTTP template that is available via URI.
-	 */
-	public void testTemplateWithUri() throws Exception {
-
-		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
-
-		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"template.ofp", MockTemplateLogic.class, "uri.ofp");
-		this.source.openOfficeFloor();
-
-		// Ensure correct section details
-		assertEquals("Incorrect section name", "uri.ofp",
-				section.getSectionName());
-		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class,
-				section.getSectionSourceClass());
-		assertEquals("Incorrect section location", "template.ofp",
-				section.getSectionLocation());
-		assertEquals("Incorrect template path", "template.ofp",
-				section.getTemplatePath());
-		assertEquals("Incorrect template URI", "uri.ofp",
-				section.getTemplateUri());
-
-		// Ensure template available
-		this.assertHttpRequest("http://localhost:7878/uri.ofp", 200, SUBMIT_URI);
-	}
-
-	/**
-	 * Ensure issue if attempt to add more than one HTTP template for a URI.
-	 */
-	public void testMultipleTemplatesWithSameUri() throws Exception {
-
-		final String TEMPLATE_URI = "template.ofp";
-
-		// Add HTTP template
-		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class,
-				TEMPLATE_URI);
-
-		// Ensure indicates template already registered for URI
-		try {
-			this.source.addHttpTemplate("template.ofp",
-					MockTemplateLogic.class, TEMPLATE_URI);
-			fail("Should not successfully add template for duplicate URI");
-		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause",
-					"HTTP Template already added for URI '" + TEMPLATE_URI
-							+ "'", ex.getMessage());
-		}
-	}
-
-	/**
-	 * Ensure able to add HTTP template that is NOT available via URI.
-	 */
-	public void testTemplateWithoutUri() throws Exception {
-
-		String fileNotFound = this.getFileContents(DEFAULT_NOT_FOUND_PATH);
-
-		// Add HTTP template (without URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"template.ofp", MockTemplateLogic.class);
-		this.source.openOfficeFloor();
-
-		// Ensure correct section details
-		assertEquals("Incorrect section name", "resource0",
-				section.getSectionName());
-		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class,
-				section.getSectionSourceClass());
-		assertEquals("Incorrect section location", "template.ofp",
-				section.getSectionLocation());
-		assertEquals("Incorrect template path", "template.ofp",
-				section.getTemplatePath());
-		assertNull("Should not have a template URI", section.getTemplateUri());
-
-		// Ensure template NOT available
-		this.assertHttpRequest("http://localhost:7878/template.ofp", 404,
-				fileNotFound);
-	}
-
-	/**
-	 * Ensure able to request the template link on public template.
-	 */
-	public void testTemplateLinkWithUri() throws Exception {
-
-		final String SUBMIT_URI = "/uri.ofp.links-submit.task";
-
-		// Add HTTP template
-		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class,
-				"uri.ofp");
-		this.source.openOfficeFloor();
-
-		// Ensure submit on task for template is correct
-		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submitted" + SUBMIT_URI);
-	}
-
-	/**
-	 * Ensure able to request the template link on private template.
-	 */
-	public void testTemplateLinkWithoutUri() throws Exception {
-
-		final String SUBMIT_URI = "/resource0.links-submit.task";
-
-		// Add HTTP template
-		this.source.addHttpTemplate("template.ofp", MockTemplateLogic.class);
-		this.source.openOfficeFloor();
-
-		// Ensure submit on task for template is correct
-		this.assertHttpRequest("http://localhost:7878" + SUBMIT_URI, 200,
-				"submitted" + SUBMIT_URI);
-	}
-
-	/**
-	 * Ensure able to link URI to {@link OfficeSectionInput} for processing.
-	 */
-	public void testLinkUriToSectionInput() throws Exception {
-
-		// Add section for handling request
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockTemplateLogic.class.getName());
-		this.source.linkUri("test", section, "submit");
-		this.source.openOfficeFloor();
-
-		// Ensure can send to URI
-		this.assertHttpRequest("http://localhost:7878/test", 200, "submitted");
-	}
-
-	/**
-	 * Ensure able to link {@link OfficeSectionOutput} to {@link HttpTemplate}.
-	 */
-	public void testLinkToHttpTemplate() throws Exception {
-
-		// Add linking to HTTP template
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockLinkHttpTemplate.class.getName());
-		this.source.linkUri("test", section, "service");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template.ofp", MockTemplateLogic.class);
-		this.source.linkToHttpTemplate(section, "http-template", template);
-		this.source.openOfficeFloor();
-
-		// Ensure link to the HTTP template
-		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"LINK to /resource0.links-submit.task");
-	}
-
-	/**
-	 * Ensure able to link to resource.
-	 */
-	public void testLinkToResource() throws Exception {
-
-		// Add linking to resource
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockLinkResource.class.getName());
-		this.source.linkUri("test", section, "service");
-		this.source.linkToResource(section, "resource", "resource.html");
-		this.source.openOfficeFloor();
-
-		// Ensure link to the HTTP template
-		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"LINK to RESOURCE");
-	}
-
-	/**
-	 * Ensure able to link {@link Escalation} to
-	 * {@link HttpTemplateAutoWireSection}.
-	 */
-	public void testLinkEscalationToTemplate() throws Exception {
-
-		// Add escalation to template
-		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class, FailingSection.class.getName());
-		this.source.linkUri("test", failingSection, "task");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template.ofp", MockTemplateLogic.class, "handler");
-		this.source.linkEscalation(SQLException.class, template);
-		this.source.openOfficeFloor();
-
-		// Ensure link escalation to template
-		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"Escalated to /handler.links-submit.task");
-	}
-
-	/**
-	 * Ensure able to link {@link Escalation} to resource.
-	 */
-	public void testLinkEscalationToResource() throws Exception {
-
-		// Add escalation to resource
-		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class, FailingSection.class.getName());
-		this.source.linkUri("test", failingSection, "task");
-		this.source.linkEscalation(SQLException.class, "resource.html");
-		this.source.openOfficeFloor();
-
-		// Ensure link escalation to resource
-		this.assertHttpRequest("http://localhost:7878/test", 200,
-				"Escalated to RESOURCE");
-	}
-
-	/**
 	 * Ensure able to utilise the {@link HttpSession}.
 	 */
 	public void testHttpSession() throws Exception {
 
 		// Add section that uses the HTTP Session
 		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class, MockTemplateLogic.class.getName());
+				ClassSectionSource.class, MockSection.class.getName());
 		this.source.linkUri("increment", section, "incrementCounter");
 
 		// Ensure have the auto-wire object for HTTP Session
@@ -378,59 +169,6 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		// State should be maintained across requests to get incremented count
 		this.assertHttpRequest("http://localhost:7878/increment", 200, "2");
 		this.assertHttpRequest("http://localhost:7878/increment", 200, "3");
-	}
-
-	/**
-	 * Ensure able to override the non-routed servicing.
-	 */
-	public void testOverrideNonHandledServicing() throws Exception {
-
-		// Add section to override servicing
-		AutoWireSection section = this.source
-				.addSection("SECTION", ClassSectionSource.class,
-						MockNonRoutedServicer.class.getName());
-		this.source.setNonHandledServicer(section, "service");
-		this.source.linkToSendResponse(section, "send");
-
-		// Start the HTTP Server
-		this.source.openOfficeFloor();
-
-		// Ensure override non-routed servicing
-		this.assertHttpRequest("http://localhost:7878/unhandled", 200,
-				"NON_ROUTED - /unhandled");
-	}
-
-	/**
-	 * Convenience method to add a {@link HttpServerSocketManagedObjectSource}.
-	 * 
-	 * @param port
-	 *            Port to listen on.
-	 */
-	private void addHttpSocket(int port) {
-		this.source
-				.addHttpSocket(
-						HttpServerSocketManagedObjectSource.class,
-						HttpServerSocketManagedObjectSource
-								.createManagedObjectSourceWirer(
-										HttpServerAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
-										HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME))
-				.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT)
-				.setValue(String.valueOf(port));
-	}
-
-	/**
-	 * Obtains the content.
-	 * 
-	 * @param path
-	 *            Path to the content.
-	 * @return Content.
-	 */
-	private String getFileContents(String path) {
-		try {
-			return this.getFileContents(this.findFile(path));
-		} catch (Exception ex) {
-			throw fail(ex);
-		}
 	}
 
 	/**
@@ -482,6 +220,39 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Convenience method to add a {@link HttpServerSocketManagedObjectSource}.
+	 * 
+	 * @param port
+	 *            Port to listen on.
+	 */
+	private void addHttpSocket(int port) {
+		this.source
+				.addHttpSocket(
+						HttpServerSocketManagedObjectSource.class,
+						HttpServerSocketManagedObjectSource
+								.createManagedObjectSourceWirer(
+										HttpServerAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
+										HttpServerAutoWireOfficeFloorSource.HANDLER_INPUT_NAME))
+				.addProperty(HttpServerSocketManagedObjectSource.PROPERTY_PORT)
+				.setValue(String.valueOf(port));
+	}
+
+	/**
+	 * Obtains the content.
+	 * 
+	 * @param path
+	 *            Path to the content.
+	 * @return Content.
+	 */
+	private String getFileContents(String path) {
+		try {
+			return this.getFileContents(this.findFile(path));
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
+	}
+
+	/**
 	 * Writes the response.
 	 * 
 	 * @param response
@@ -498,27 +269,9 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Mock logic for the template.
+	 * Mock section.
 	 */
-	public static class MockTemplateLogic {
-
-		/**
-		 * Submit handler.
-		 * 
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 */
-		@NextTask("doNothing")
-		public void submit(ServerHttpConnection connection) throws IOException {
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("submitted",
-					connection);
-		}
-
-		/**
-		 * Do nothing after submit.
-		 */
-		public void doNothing() {
-		}
+	public static class MockSection {
 
 		/**
 		 * Increment counter handler.
@@ -559,51 +312,6 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 		 * Count.
 		 */
 		public int count = 0;
-	}
-
-	/**
-	 * Provides mock functionality of non-routed servicing.
-	 */
-	public static class MockNonRoutedServicer {
-		@NextTask("send")
-		public void service(ServerHttpConnection connection) throws IOException {
-			String uri = connection.getHttpRequest().getRequestURI();
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
-					"NON_ROUTED - " + uri, connection);
-		}
-	}
-
-	/**
-	 * Provides mock functionality to link to a HTTP template.
-	 */
-	public static class MockLinkHttpTemplate {
-		@NextTask("http-template")
-		public void service(ServerHttpConnection connection) throws IOException {
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
-					connection);
-		}
-	}
-
-	/**
-	 * Provides mock functionality to link to a resource.
-	 */
-	public static class MockLinkResource {
-		@NextTask("resource")
-		public void service(ServerHttpConnection connection) throws IOException {
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse("LINK to ",
-					connection);
-		}
-	}
-
-	/**
-	 * Section class that fails and provides an {@link Escalation}.
-	 */
-	public static class FailingSection {
-		public void task(ServerHttpConnection connection) throws Exception {
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
-					"Escalated to ", connection);
-			throw new SQLException("Test failure");
-		}
 	}
 
 }

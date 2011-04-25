@@ -47,8 +47,8 @@ import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnec
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
 import net.officefloor.plugin.servlet.web.http.session.ServletHttpSessionManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.server.WebApplicationAutoWireOfficeFloorSource;
-import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**

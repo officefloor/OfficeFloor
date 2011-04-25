@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.server;
+package net.officefloor.plugin.web.http.application;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import net.officefloor.plugin.socket.server.http.response.source.HttpResponseSen
 import net.officefloor.plugin.web.http.resource.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.route.source.HttpRouteTask.HttpRouteTaskDependencies;
 import net.officefloor.plugin.web.http.route.source.HttpRouteWorkSource;
+import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteDependencies;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.HttpTemplateRouteTaskFlows;
 import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteWorkSource;

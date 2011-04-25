@@ -15,11 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.server;
+package net.officefloor.plugin.web.http.application;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
@@ -27,9 +30,12 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
+import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
@@ -44,6 +50,16 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * {@link HttpTemplateAutoWireSection} instances.
 	 */
 	private final List<HttpTemplateAutoWireSection> httpTemplates = new LinkedList<HttpTemplateAutoWireSection>();
+
+	/**
+	 * Registry of HTTP Session Object class to its {@link AutoWireObject}.
+	 */
+	private final Map<Class<?>, AutoWireObject> httpSessionObjects = new HashMap<Class<?>, AutoWireObject>();
+
+	/**
+	 * Registry of HTTP Parameters Object class to its {@link AutoWireObject}.
+	 */
+	private final Map<Class<?>, AutoWireObject> httpParametersObjects = new HashMap<Class<?>, AutoWireObject>();
 
 	/**
 	 * {@link UriLink} instances.
@@ -112,6 +128,23 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				templateUri);
 		this.httpTemplates.add(wirer);
 
+		// Add the annotated parameters
+		for (Method method : templateLogicClass.getMethods()) {
+			for (Class<?> parameterType : method.getParameterTypes()) {
+
+				// HTTP Session Stateful
+				if (parameterType
+						.isAnnotationPresent(HttpSessionStateful.class)) {
+					this.addHttpSessionObject(parameterType);
+				}
+
+				// HTTP Parameters
+				if (parameterType.isAnnotationPresent(HttpParameters.class)) {
+					this.addHttpParametersObject(parameterType);
+				}
+			}
+		}
+
 		// Return the wirer
 		return wirer;
 	}
@@ -120,6 +153,49 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass) {
 		return this.addHttpTemplate(templatePath, templateLogicClass, null);
+	}
+
+	@Override
+	public AutoWireObject addHttpSessionObject(Class<?> objectClass) {
+
+		// Determine if already registered the type
+		AutoWireObject object = this.httpSessionObjects.get(objectClass);
+		if (object != null) {
+			return object; // return the already registered object
+		}
+
+		// Not registered, so register
+		object = this.addManagedObject(
+				HttpSessionClassManagedObjectSource.class, null, objectClass);
+		object.addProperty(
+				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				objectClass.getName());
+		this.httpSessionObjects.put(objectClass, object);
+
+		// Return the object
+		return object;
+	}
+
+	@Override
+	public AutoWireObject addHttpParametersObject(Class<?> objectClass) {
+
+		// Determine if already registered the type
+		AutoWireObject object = this.httpParametersObjects.get(objectClass);
+		if (object != null) {
+			return object; // return the already registered object
+		}
+
+		// Not registered, so register
+		object = this.addManagedObject(
+				HttpParametersObjectManagedObjectSource.class, null,
+				objectClass);
+		object.addProperty(
+				HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+				objectClass.getName());
+		this.httpParametersObjects.put(objectClass, object);
+
+		// Return the object
+		return object;
 	}
 
 	@Override

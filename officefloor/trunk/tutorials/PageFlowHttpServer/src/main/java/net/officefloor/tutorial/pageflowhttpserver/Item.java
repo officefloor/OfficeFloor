@@ -19,7 +19,7 @@ package net.officefloor.tutorial.pageflowhttpserver;
 
 import java.io.Serializable;
 
-import net.officefloor.plugin.web.http.template.HttpParameters;
+import net.officefloor.plugin.web.http.application.HttpParameters;
 
 /**
  * Shopping cart bean.

@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.woof;
 
-import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * Loads the WoOF configuration to the {@link WebAutoWireApplication}.

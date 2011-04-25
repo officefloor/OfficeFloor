@@ -43,8 +43,8 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.plugin.autowire.AutoWireSection;
-import net.officefloor.plugin.web.http.server.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * {@link WoofLoader} implementation.
