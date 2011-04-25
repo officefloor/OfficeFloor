@@ -101,7 +101,7 @@
 			<item name="Releases" href="./changes-report.html" />
 		</menu>
 		<menu name="Start using">
-			<item name="Examples" href="./examples/index.html" />
+			<item name="Tutorials" href="./tutorials/index.html" />
 			<item name="Download" href="./download.html" />
 			<item name="Eclipse" href="./eclipse/index.html" />
 		</menu>

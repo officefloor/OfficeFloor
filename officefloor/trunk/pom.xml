@@ -829,6 +829,14 @@
 									<!-- Ignore source repositories -->
 									<excludedPage>**/source-repository.html</excludedPage>
 								</excludedPages>
+								<excludedLinks>
+									<!-- PDF not available in site:stage -->
+									<excludedLink>./OfficeFloor.pdf</excludedLink>
+									<!-- Common links not to check -->
+									<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
+									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
+									<excludedLink>http://sourceforge.net/project/platformdownload.php?group_id=156349</excludedLink>
+								</excludedLinks>
 							</configuration>
 						</plugin>
 					</reportPlugins>
