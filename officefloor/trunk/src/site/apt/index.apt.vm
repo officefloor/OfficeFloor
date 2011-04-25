@@ -36,7 +36,7 @@ Simple Example
 
 %{code-snippet|sh-params=highlight:[10,11]|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 
-  Further examples can be found {{{./examples/index.html}here}}.
+  Further examples can be found in the {{{./tutorials/index.html}tutorials}}.
 
 * Graphical Configuration
 
