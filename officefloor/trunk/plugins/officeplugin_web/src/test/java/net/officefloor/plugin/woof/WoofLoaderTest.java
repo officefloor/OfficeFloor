@@ -27,8 +27,8 @@ import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.web.http.server.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.server.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
  * Tests the {@link WoofLoader}.

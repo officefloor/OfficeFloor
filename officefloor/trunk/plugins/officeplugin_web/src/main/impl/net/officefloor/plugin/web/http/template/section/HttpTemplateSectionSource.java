@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -40,11 +39,9 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
@@ -57,12 +54,8 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
-import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource.Dependencies;
-import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
-import net.officefloor.plugin.web.http.template.HttpParameters;
-import net.officefloor.plugin.web.http.template.HttpSessionStateful;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
@@ -477,17 +470,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public class HttpTemplateClassSectionSource extends ClassSectionSource {
 
 		/**
-		 * {@link HttpParametersObjectManagedObjectSource} instances by their
-		 * type.
-		 */
-		private final Map<Class<?>, SectionManagedObject> httpParmeters = new HashMap<Class<?>, SectionManagedObject>();
-
-		/**
-		 * {@link HttpSessionClassManagedObjectSource} instances by their type.
-		 */
-		private final Map<Class<?>, SectionManagedObject> httpSessionObjects = new HashMap<Class<?>, SectionManagedObject>();
-
-		/**
 		 * Determine if the section class is stateful - annotated with
 		 * {@link HttpSessionStateful}.
 		 * 
@@ -636,100 +618,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Not template bean task, so link next task
 			super.linkNextTask(task, taskType, taskMethod, argumentType,
 					nextTaskAnnotation);
-		}
-
-		@Override
-		protected void linkTaskObject(SectionTask task,
-				TaskType<?, ?, ?> taskType, TaskObjectType<?> objectType) {
-
-			// Obtain the object name and its type
-			String objectName = objectType.getObjectName();
-			Class<?> type = objectType.getObjectType();
-
-			// Determine if a HttpParameters object
-			if (type.isAnnotationPresent(HttpParameters.class)) {
-				// Is a HttpParameters object, so configure as such
-				TaskObject taskObject = task.getTaskObject(objectName);
-
-				// Lazy obtain the HttpParmeters object
-				SectionManagedObject mo = this.httpParmeters.get(type);
-				if (mo == null) {
-					// Add the HttpParameters object
-					SectionManagedObjectSource source = this
-							.getDesigner()
-							.addSectionManagedObjectSource(
-									"HTTP_PARAMETER_" + type.getName(),
-									HttpParametersObjectManagedObjectSource.class
-											.getName());
-					source.addProperty(
-							HttpParametersObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-							type.getName());
-					mo = source.addSectionManagedObject("HTTP_PARAMETER_MO_"
-							+ type.getName(), ManagedObjectScope.PROCESS);
-
-					// Link Server HTTP Connection dependency
-					SectionObject serverHttpConnectionObject = this
-							.getOrCreateObject(ServerHttpConnection.class
-									.getName());
-					ManagedObjectDependency serverHttpConnectionDependency = mo
-							.getManagedObjectDependency(Dependencies.SERVER_HTTP_CONNECTION
-									.name());
-					this.getDesigner().link(serverHttpConnectionDependency,
-							serverHttpConnectionObject);
-
-					// Register the HttpParameters object
-					this.httpParmeters.put(type, mo);
-				}
-
-				// Link parameter as HttpParameter
-				this.getDesigner().link(taskObject, mo);
-
-				// Setup as HttpParameters object
-				return;
-			}
-
-			// Determine if a HttpSessionStateful object
-			if (type.isAnnotationPresent(HttpSessionStateful.class)) {
-				// Is a HttpSessionStateful object, so configure as such
-				TaskObject taskObject = task.getTaskObject(objectName);
-
-				// Lazy obtain the HttpSessionStateful object
-				SectionManagedObject mo = this.httpSessionObjects.get(type);
-				if (mo == null) {
-					// Add the HttpSessionStateful object
-					SectionManagedObjectSource source = this.getDesigner()
-							.addSectionManagedObjectSource(
-									"HTTP_SESSION_" + type.getName(),
-									HttpSessionClassManagedObjectSource.class
-											.getName());
-					source.addProperty(
-							HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
-							type.getName());
-					mo = source.addSectionManagedObject("HTTP_SESSION_MO_"
-							+ type.getName(), ManagedObjectScope.PROCESS);
-
-					// Link HTTP Session dependency
-					SectionObject httpSessionObject = this
-							.getOrCreateObject(HttpSession.class.getName());
-					ManagedObjectDependency httpSessionDependency = mo
-							.getManagedObjectDependency(net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObject.Dependencies.HTTP_SESSION
-									.name());
-					this.getDesigner().link(httpSessionDependency,
-							httpSessionObject);
-
-					// Register the HttpSessionStateful object
-					this.httpSessionObjects.put(type, mo);
-				}
-
-				// Link parameter as HttpSessionStateful
-				this.getDesigner().link(taskObject, mo);
-
-				// Setup as HttpSessionStateful object
-				return;
-			}
-
-			// Not HttpParameters or HttpSessionStateful object so do default
-			super.linkTaskObject(task, taskType, objectType);
 		}
 	}
 

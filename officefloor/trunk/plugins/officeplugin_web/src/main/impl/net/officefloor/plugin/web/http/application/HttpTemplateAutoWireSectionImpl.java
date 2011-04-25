@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.plugin.web.http.server;
+package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.plugin.autowire.AutoWireSection;

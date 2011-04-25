@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.web.http.server;
+package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.plugin.autowire.AutoWireApplication;
+import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
@@ -77,6 +79,25 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 */
 	HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass);
+
+	/**
+	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpSession}.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpSessionObject(Class<?> objectClass);
+
+	/**
+	 * Adds an object to be lazily created and loaded with the HTTP parameters.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpParametersObject(Class<?> objectClass);
 
 	/**
 	 * Links a URI to an {@link OfficeSectionInput}.

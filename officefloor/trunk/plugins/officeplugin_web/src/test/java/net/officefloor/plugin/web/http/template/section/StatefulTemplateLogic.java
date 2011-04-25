@@ -24,7 +24,7 @@ import java.io.Writer;
 
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.template.HttpSessionStateful;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 
 /**
  * Provides stateful logic for the template.
