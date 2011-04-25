@@ -5,40 +5,25 @@
 
 	<description name="OfficeFloor" url="http://www.officefloor.net">Eclipse update site for OfficeFloor</description>
 
-	<!-- OfficeFloor -->
 	<feature url="features/net.officefloor.feature_1.1.0.jar" id="net.officefloor.feature"
 		version="1.1.0">
 		<category name="OfficeFloor" />
 	</feature>
-	<category-def name="OfficeFloor" label="OfficeFloor">
-		<description>OfficeFloor</description>
-	</category-def>
-	
-	<!-- WoOF -->
 	<feature url="features/net.officefloor.woof.feature_1.1.0.jar"
 		id="net.officefloor.woof.feature" version="1.1.0">
-		<category name="WoOF" />
+		<category name="OfficeFloor" />
 	</feature>
-	<category-def name="WoOF" label="WoOF">
-		<description>Web on OfficeFloor</description>
-	</category-def>
-
-	<!-- Plug-ins -->
 	<feature url="features/net.officefloor.plugins.feature_1.1.0.jar"
 		id="net.officefloor.plugins.feature" version="1.1.0">
-		<category name="Plugins" />
+		<category name="OfficeFloor" />
 	</feature>
-	<category-def name="Plugins" label="Plug-ins">
-		<description>OfficeFloor additional plug-ins</description>
-	</category-def>
-
-	<!-- Tools -->
 	<feature url="features/net.officefloor.tools.feature_1.1.0.jar"
 		id="net.officefloor.tools.feature" version="1.1.0">
-		<category name="Tools" />
+		<category name="OfficeFloor" />
 	</feature>
-	<category-def name="Tools" label="Tools">
-		<description>OfficeFloor additional tools</description>
+	
+	<category-def name="OfficeFloor" label="OfficeFloor">
+		<description>OfficeFloor</description>
 	</category-def>
 
 </site>
