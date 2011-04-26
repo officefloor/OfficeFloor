@@ -12,46 +12,48 @@
   
 Features
 
-  * Combines the object oriented / procedural ease of programming with the multi-threaded performance of functional programming
-  
+  * Combines the object oriented ease of programming with the multi-threaded performance of functional programming
+
   * Provides both auto-wiring of dependencies and manual graphical configuration
-  
+
   * Abstraction of plug-ins to enable more course grained integration than individual classes (allows easier assembly and management of applications)
+
+  * WoOF (Web on OfficeFloor - {{{http://webfloor.org}http://webfloor.org}} ) provides simplified web application development that allows easy integration with WSYWIG web design tools
   
-  * Web Framework built on OfficeFloor that:
-  
-    * focuses on simplicity in building web applications - complex code only for complex problems
-  
-    * provides web page instrumentation without intrusive tags that allows the raw page to be viewed in a browser
-    
-    * graphically wires together the web application's navigation giving easy overview of how the web application works  (currently under development)
-    
-    * JEE integration for running within a Servlet container and optionally making use of EJBs
-  
+  * Servlet Filter for running within a JEE Servlet Container that can optionally make use of EJBs
+
   * Spring plug-in to enable re-use of your existing Spring beans
 
-Simple Example
 
-  The following provides a simple example of OfficeFloor capabilities via its web plug-in: 
+Example Capabilities
 
-%{code-snippet|sh-params=highlight:[10,11]|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
+  The following code provides simple examples of OfficeFloor capabilities: 
+
+%{code-snippet|brush-autodetect=1|file=src/site/snippets/HttpServer.java}
 
   Further examples can be found in the {{{./tutorials/index.html}tutorials}}.
 
-* Graphical Configuration
+  
+Graphical Configuration
 
-  The above example was limited to code configuration of OfficeFloor.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}.  An example of the graphical configuration is below:
+  The above example was limited to code configuration.  The further value of OfficeFloor lies in its {{{./eclipse/graphical-configuration.html}graphical configuration}}.  
+  
+  An example graphical configuration from {{{http://webfloor.org}WoOF (Web on OfficeFloor)}} for web site navigation is:
 
-[./images/graphical-configuration.png] Example graphical configuration of OfficeFloor
+[./images/graphical-configuration.png] Example graphical configuration of WoOF.
 
-  See the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}} for further configuration and watch the {{{./demo.html}demo}}.
+  To use the graphical configuration install the {{{./eclipse/index.html}OfficeFloor Eclipse plug-ins}}.
 
+  
 So why another framework?
   
   Existing dependency injection frameworks typically restrict your threading design by assuming single thread of execution.  OfficeFloor removes this assumption so that you can have different Threads execute different functions of your application - something very useful since performance gains these days are occurring by parrallelising your applications with more CPU cores.  See OfficeFloor's {{{./core/officeframe/job-based-architecture.html}Job Based Architecture}} for more details.
   
-  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending days maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enables {{{./promote-good-design.html}promoting good designs}}.
+  Further to this, OfficeFloor has been built from the ground up to use graphical configuration (it is one of the {{{./principles.html}principles}} behind OfficeFloor).  No longer should you be spending time maintaining long error prone XML configuration files.  OfficeFloor is {{{./eclipse/graphical-configuration.html}graphically configured}} to provide you visually rich configuration that enables {{{./promote-good-design.html}promoting good designs}}.
   
+  Both of these aspects result in simpler application development.  {{{http://webfloor.org}Web on OfficeFloor (WoOF)}} is testiment of the simplicity that OfficeFloor brings to development.
+  
+
 Find out more
 
   To find out more about OfficeFloor:
