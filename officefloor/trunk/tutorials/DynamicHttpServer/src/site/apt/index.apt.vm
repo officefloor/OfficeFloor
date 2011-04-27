@@ -6,12 +6,16 @@
 
   <<Dynamic Http Server Tutorial>>
 
-  This tutorial demonstrates the simplicity in creating dynamic content for a web application.  The example below will be a simple dynamic page to show the current time and the listing of System properties.  This will illustrate the following:
+  This tutorial demonstrates the simplicity in creating dynamic content for a web application.  This will illustrate the following:
   
     * <<< <!-- \{section\} --> >>> and <<< $\{property\} >>> : which are 2 of the only 3 instrumentation types necessary in the HTML for building web applications
     
     * <<<application.woof>>> : for graphically configuring your web application
   
+  The example used in this tutorial is the following simple dynamic page to show the current time and the listing of System properties:
+  
+[./images/DynamicHttpServer-screenshot.png] DynamicHttpServer screenshot.
+    
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
 Template.html
@@ -56,7 +60,7 @@ TemplateLogic Class
 
 %{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
 
-  The <<<TemplateLogic>>> class has been kept simple in this example returning static content.  Use of dependency injection into the methods will allow retrieving values from the HTTP session or database but is beyond the scope of this example.
+  The <<<TemplateLogic>>> class has been kept simple in this example returning static content.  Use of dependency injection into the methods will allow retrieving values from the HTTP session or database but is beyond the scope of this tutorial.
 
   The rendering of the template is as follows:
   
@@ -113,7 +117,7 @@ Remaining classes
 
 Unit Test
 
-  As the template is just a POJO, WoOF adheres to OfficeFloor's focus on simplicity in testing.  The following example unit test shows the ease in which the <<<TemplateLogic>>> can be tested.
+  As the template is just a POJO, WoOF adheres to OfficeFloor's focus on simplicity in testing.  The following example unit test shows the ease in which the <<<TemplateLogic>>> class can be tested.
 
 %{code-snippet|brush-autodetect=1|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java}
 

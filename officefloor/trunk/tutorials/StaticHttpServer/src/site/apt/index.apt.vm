@@ -6,9 +6,13 @@
 
   <<Static Http Server Tutorial>>
 
-  This tutorial explains the basic layout of a web application and how to run the web application.  To demonstrate this the below example will start a HTTP server and respond with a static <<<index.html>>> page - later tutorials will look at dynamic content but is out of scope for this tutorial.
+  This tutorial explains the basic layout of a web application and how to run the web application.  
   
-  The <<<WoOF>>> acronym stands for <<<Web on OfficeFloor>>>.
+  To demonstrate this the tutorial will illustrate starting a HTTP server and have it respond with the following static <<<index.html>>> page:
+  
+[./images/StaticHttpServer-screenshot.png] StaticHttpServer screenshot.
+  
+  You may skip ahead to the {{{../DynamicHttpServer/index.html}next tutorial}} to look a dynamic content as this tutorial covers some very basics regarding static content.  Later you can come back to this tutorial for running a WoOF (Web on OfficeFloor) application. 
    
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/StaticHttpServer/${projectVersion}/StaticHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
@@ -75,19 +79,19 @@ Unit Test
 
 * Setup
 
-%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=setup|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|brush-autodetect=1|id=setup|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
 
   Starts the example HTTP Server.
 
 * Test by requesting index.html
 
-%{code-snippet|sh-params=highlight:[4,5]|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|brush-autodetect=1|sh-params=first-line:4|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
 
   Requests <<<index.html>>> from the HTTP Server.
 
 * TearDown
 
-%{code-snippet|sh-params=highlight:[2]|brush-autodetect=1|id=teardown|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
+%{code-snippet|brush-autodetect=1|sh-params=first-line:17|id=teardown|file=${basedir}/src/test/java/net/officefloor/tutorial/statichttpserver/StaticHttpServerTest.java}
 
   As the code to run the HTTP Server is contained within the <<<main>>> method, the {{{/apidocs/net/officefloor/plugin/autowire/AutoWireAdministration.html}AutoWireAdministration}} provides means to stop the HTTP Server via JMX.  This means that the unit test code need not maintain reference to the underlying {{{/apidocs/net/officefloor/frame/api/manage/OfficeFloor.html}OfficeFloor}} for closing between tests.
 

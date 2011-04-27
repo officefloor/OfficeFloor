@@ -29,11 +29,11 @@ Making use of the EJB within the WoofServletFilter
 
   Making the above EJB available to WoOF is no different to making it available to any other Servlet component via dependency injection within a JEE application server.  The following example {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} is the only code necessary to make use of the above EJB:
 
-%{code-snippet|sh-params=highlight:[3,4]|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleFilter.java}
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterdependencyinjection/ExampleFilter.java}
 
   Configured into the <<<web.xml>>> as follows:
 
-%{code-snippet|brush-autodetect=1|sh-params=highlight:[4,5,6,7,8,9,10,11]|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
   Notice that the <<<Filter>>> extends {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} and only provides the EJB declarations.  Nothing needs to be implemented as on start up, the {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} will configure itself from the <<<application.woof>>> file and will also automatically interrogate itself for Servlet container dependency injected objects.  WoOF will then make these Servlet dependency injected objects available for dependency injection into the methods within the template logic methods.
   

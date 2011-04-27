@@ -6,7 +6,11 @@
 
   <<Navigate Http Server Tutorial>>
 
-  This tutorial demonstrates navigating between two templates. 
+  This tutorial demonstrates navigating back and forth between the following two pages:
+  
+[./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screenshot.
+
+[./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screenshot.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
