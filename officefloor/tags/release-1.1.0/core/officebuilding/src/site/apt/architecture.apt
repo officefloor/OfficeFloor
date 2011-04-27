@@ -1,0 +1,16 @@
+                                         --------------------
+                                     OfficeBuilding - Architecture
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  OfficeBuilding is designed as an agent running on a host that can manage the OfficeFloor instances running on the host.  The OfficeBuilding is only aware of the OfficeFloor instances it starts.  It does not contain discovery services to identify OfficeFloor instances running on the host.
+
+  Each OfficeFloor instance is run in its own process so that they are isolated.  Having each OfficeFloor instance run in its own process enables both isolation and the ability to not share process space allowing each OfficeFloor to grow to the maximum resources allowed of a process on the host.  It also enables normal process management provided by the hosts operating system (and supporting applications) of an OfficeFloor.
+
+  To enable ease of scripting and operational control, OfficeBuilding provides both a:
+
+   * Command line interface
+
+   * JMX interface
+
