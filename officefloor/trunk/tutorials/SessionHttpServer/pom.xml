@@ -7,10 +7,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>1.1.1</version>
 	</parent>
-	<groupId>net.officefloor.tutorial</groupId>
-	<artifactId>DatabaseHttpServer</artifactId>
-	<name>Database HTTP Server Tutorial</name>
-	<description>Tutorial of using OfficeFloor for a HTTP Server connected to a database</description>
+	<artifactId>SessionHttpServer</artifactId>
+	<name>Session HTTP Server Tutorial</name>
+	<description>Tutorial of using OfficeFloor for a HTTP Server with storing content in the HTTP Session</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -20,14 +19,6 @@
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
