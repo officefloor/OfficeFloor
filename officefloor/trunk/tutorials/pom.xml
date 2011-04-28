@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>tutorials</artifactId>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 	<packaging>pom</packaging>
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
@@ -18,6 +18,7 @@
 		<module>DynamicHttpServer</module>
 		<module>PageFlowHttpServer</module>
 		<module>NavigateHttpServer</module>
+		<module>SessionHttpServer</module>
 		<module>ServletFilterWebApplication</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>DatabaseHttpServer</module>
