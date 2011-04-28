@@ -16,17 +16,19 @@ WoOF (Web on OfficeFloor)
 
   The following tutorials cover the basics of using WoOF (Web on OfficeFloor) for building web applications.
 
-*----------------------------------------------------------+-----------------------------------------------------------+
-|| Tutorial                                                || Description                                             
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./StaticHttpServer/index.html}Static HTTP server}}    | Illustrates the jar layout of WoOF (Web on OfficeFloor).
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./DynamicHttpServer/index.html}Dynamic web page}}  | Rendering of dynamic content.
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./PageFlowHttpServer/index.html}Interactive web page}}  | Handling of requests to provide interactive pages.
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./NavigateHttpServer/index.html}Navigate between pages}}  | Navigation between pages.
-*----------------------------------------------------------+-----------------------------------------------------------+
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                              || Covered                                        
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./StaticHttpServer/index.html}Static HTTP server}}        | Illustrates the jar layout of WoOF (Web on OfficeFloor).  |
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./DynamicHttpServer/index.html}Dynamic web page}}         | Rendering of dynamic content.                             | \<!-- {section} --\> , $\{property\}
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./PageFlowHttpServer/index.html}Interactive web page}}    | Handling of requests to provide interactive pages.        | #\{link\} , @HttpParameters
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./NavigateHttpServer/index.html}Navigate between pages}}  | Navigation between pages.                                 | @NextTask , @FlowInterface
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.   | @HttpSessionStateful
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 
 
@@ -34,13 +36,13 @@ WoOF running within a JEE Servlet Container
 
   Explans how to make use of WoOF within a JEE Servlet Container.
 
-*----------------------------------------------------------+-----------------------------------------------------------+
-|| Tutorial                                                || Description                                             
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./ServletFilterWebApplication/index.html}Running within Servlet Container}}  | Running the above web functionality within a JEE Servlet container.
-*----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./ServletFilterDependencyInjection/index.html}Utilising dependency injection of the Servlet Container}}  | Use of Servlet container dependency injection (e.g. making use of EJBs).
-*----------------------------------------------------------+-----------------------------------------------------------+
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+|| Tutorial                                                || Description                                              || Covered
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ServletFilterWebApplication/index.html}Running within Servlet Container}}  | Running the above web functionality within a JEE Servlet container. | WoofServletFilter
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ServletFilterDependencyInjection/index.html}Utilising dependency injection of the Servlet Container}}  | Use of Servlet container dependency injection (e.g. making use of EJBs). | @EJB
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 
 
