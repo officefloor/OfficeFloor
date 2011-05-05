@@ -9,7 +9,7 @@
 		<!-- Ensure generating PDF with latest version -->
 		<file>
 			<location>${basedir}/../../pom.xml</location>
-			<contains><![CDATA[<plugin>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</plugin>]]></contains>
+			<contains><![CDATA[<pluginManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</pluginManagement>]]></contains>
 		</file>
 	</files>
 </verifications>

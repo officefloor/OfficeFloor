@@ -19,6 +19,7 @@
 		<module>PageFlowHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>SessionHttpServer</module>
+		<module>ExceptionHttpServer</module>
 		<module>ServletFilterWebApplication</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>DatabaseHttpServer</module>

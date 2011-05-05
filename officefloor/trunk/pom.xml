@@ -249,6 +249,21 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>maven-site-aggregate-plugin</artifactId>
+					<version>1.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>maven-officefloor-plugin</artifactId>
+					<version>1.1.0</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>maven-woof-plugin</artifactId>
+					<version>1.1.0</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.0-beta-3</version>
@@ -351,11 +366,6 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-site-aggregate-plugin</artifactId>
-					<version>1.1.0</version>
-				</plugin>
-				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.7</version>
@@ -415,11 +425,6 @@
 					<groupId>org.sonatype.tycho</groupId>
 					<artifactId>target-platform-configuration</artifactId>
 					<version>${tycho-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-officefloor-plugin</artifactId>
-					<version>1.0.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
