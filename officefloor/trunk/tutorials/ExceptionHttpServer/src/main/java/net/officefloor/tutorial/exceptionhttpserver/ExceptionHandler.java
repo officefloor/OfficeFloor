@@ -27,13 +27,14 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ExceptionHandler {
 
 	@NextTask("TechnicalFault")
 	public void handleSqlException(@Parameter SQLException ex) {
-		// Simple for example.
-		// Production code may take some action and would use a Logger.
+		// Production code may take some action and would use a Logger
 		System.err.println(ex.getMessage());
 	}
 
 }
+// END SNIPPET: tutorial

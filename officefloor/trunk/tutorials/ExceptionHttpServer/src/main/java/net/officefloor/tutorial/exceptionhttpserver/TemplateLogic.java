@@ -24,6 +24,7 @@ import java.sql.SQLException;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class TemplateLogic {
 
 	public void submit() throws Exception {
@@ -31,3 +32,4 @@ public class TemplateLogic {
 	}
 
 }
+// END SNIPPET: tutorial
