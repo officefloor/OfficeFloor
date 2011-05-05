@@ -7,9 +7,9 @@
 	</bannerLeft>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html" />
+			<item name="Tutorials" href="./index.html" />
+			<item name="WoOF" href="http://webfloor.org" />
 		</menu>
-		<menu ref="modules" />
 		<menu ref="parent" />
 	</body>
 </project>
