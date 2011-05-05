@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.navigatehttpserver;
 
-import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Logic for <code>TemplateTwo.ofp</code>.
@@ -27,8 +27,13 @@ import net.officefloor.plugin.section.clazz.NextTask;
 // START SNIPPET: example
 public class TemplateTwo {
 
-	@NextTask("next")
-	public void process() {
+	@FlowInterface
+	public interface Flows {
+		void next();
+	}
+
+	public void process(Flows flows) {
+		flows.next();
 	}
 
 }
