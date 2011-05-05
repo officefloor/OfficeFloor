@@ -17,7 +17,7 @@ WoOF (Web on OfficeFloor)
   The following tutorials cover the basics of using WoOF (Web on OfficeFloor) for building web applications.
 
 *--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                              || Covered                                        
+|| Tutorial                                                    || Description                                              || Covered
 *--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./StaticHttpServer/index.html}Static HTTP server}}        | Illustrates the jar layout of WoOF (Web on OfficeFloor).  |
 *--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
@@ -28,6 +28,8 @@ WoOF (Web on OfficeFloor)
 | {{{./NavigateHttpServer/index.html}Navigate between pages}}  | Navigation between pages.                                 | @NextTask , @FlowInterface
 *--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.   | @HttpSessionStateful
+*--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                      | @Parameter
 *--------------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
 

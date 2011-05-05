@@ -64,6 +64,4 @@ Unit Test
 
 Next
 
-  The basics of WoOF have now been covered. Please look at the {{{../index.html}next group of tutorials}} for using WoOF within a JEE Servlet Container.
-
-
+  The {{{../ExceptionHttpServer/index.html}next tutorial}} will look at exception handling.
