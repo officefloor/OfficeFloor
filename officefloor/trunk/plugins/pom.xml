@@ -15,6 +15,7 @@
 	<description>Plugin components for OfficeFloor</description>
 	<modules>
 		<module>officeplugin_ejb</module>
+		<module>officeplugin_gwt</module>
 		<module>officeplugin_hibernate</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
@@ -46,6 +47,11 @@
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
 				<artifactId>officeplugin_ejb</artifactId>
+				<version>1.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_gwt</artifactId>
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
