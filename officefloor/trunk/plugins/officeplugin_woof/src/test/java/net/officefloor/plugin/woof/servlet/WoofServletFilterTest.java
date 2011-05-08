@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.servlet;
+package net.officefloor.plugin.woof.servlet;
 
 import java.io.ByteArrayOutputStream;
 
@@ -57,6 +57,10 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
 
+		// Obtain the path to the application.woof
+		String applicationWoofPath = this.getPackageRelativePath(this
+				.getClass()) + "/application.woof";
+
 		// Start servlet container with filter
 		this.server = new Server(this.port);
 		ServletContextHandler context = new ServletContextHandler();
@@ -65,8 +69,11 @@ public class WoofServletFilterTest extends OfficeFrameTestCase {
 		this.server.setHandler(context);
 
 		// Add the WoOF Servlet Filter
-		context.addFilter(new FilterHolder(new WoofServletFilter()), "/*",
-				FilterMapping.REQUEST);
+		FilterHolder filter = new FilterHolder(new WoofServletFilter());
+		filter.setInitParameter(
+				WoofServletFilter.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				applicationWoofPath);
+		context.addFilter(filter, "/*", FilterMapping.REQUEST);
 
 		// Add Servlet for being filtered
 		context.addServlet(MockHttpServlet.class, "/");
