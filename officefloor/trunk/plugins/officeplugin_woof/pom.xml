@@ -29,7 +29,6 @@
 							<sources>
 								<source>src/main/impl</source>
 								<source>src/auto/model</source>
-								<source>src/main/test</source>
 							</sources>
 						</configuration>
 					</execution>
