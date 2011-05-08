@@ -171,6 +171,11 @@
 				<artifactId>officeplugin_web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.plugin</groupId>
+				<artifactId>officeplugin_woof</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Tools -->
 			<dependency>
 				<groupId>net.officefloor.tool</groupId>
