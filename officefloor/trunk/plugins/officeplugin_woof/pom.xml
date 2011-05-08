@@ -15,7 +15,6 @@
 	</properties>
 	<build>
 		<plugins>
-<!--  
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -51,7 +50,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!- - Generate model source files - ->
+				<!-- Generate model source files -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -63,10 +62,10 @@
 						</goals>
 						<configuration>
 							<target>
-								<!- - Specifying properties - ->
+								<!-- Specifying properties -->
 								<property name="modelprojectdir" value="${basedir}" />
 								<property name="compile_classpath" refid="maven.compile.classpath" />
-								<!- - Generating the model classes - ->
+								<!-- Generating the model classes -->
 								<java classname="net.officefloor.model.generate.GenerateOfficeFloorModel">
 									<arg value="${modelprojectdir}/src/raw/model" />
 									<arg value="${modelprojectdir}/src/auto/model" />
@@ -79,7 +78,6 @@
 					</execution>
 				</executions>
 			</plugin>
--->
 			<plugin>
 				<!-- Additionally clean the model source files -->
 				<groupId>org.apache.maven.plugins</groupId>
