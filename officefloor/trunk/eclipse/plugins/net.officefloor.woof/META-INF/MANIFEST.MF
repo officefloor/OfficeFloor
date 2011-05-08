@@ -34,4 +34,6 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.part,
  org.eclipse.ui.plugin,
  org.osgi.framework
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ officeplugin_woof-1.2.0.jar,
+ officeplugin_servlet-1.2.0.jar
