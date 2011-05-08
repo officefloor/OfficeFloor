@@ -1,9 +1,9 @@
 <verifications>
 	<files>
 		<file>
-			<!-- Ensure releasing latest version -->
-			<location>${basedir}/../pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+			<!-- Ensure using latest version -->
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
 		<file>
 			<!-- Ensure install pom installs latest version -->

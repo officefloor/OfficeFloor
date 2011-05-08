@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 	</parent>
 	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>tutorials</artifactId>
-	<version>1.1.1</version>
 	<packaging>pom</packaging>
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
@@ -25,25 +24,6 @@
 		<module>DatabaseHttpServer</module>
 		<module>TeamHttpServer</module>
 	</modules>
-	<dependencyManagement>
-		<dependencies>
-			<!-- Dependency Management for dependencies -->
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>plugins</artifactId>
-				<version>1.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven</artifactId>
-				<version>1.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>

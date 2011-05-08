@@ -5,14 +5,13 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 	</parent>
 	<groupId>net.officefloor.plugin</groupId>
 	<artifactId>plugins</artifactId>
-	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>Plugins</name>
-	<description>Plugin components for OfficeFloor</description>
+	<description>Plug-ins OfficeFloor to provide specific functionality</description>
 	<modules>
 		<module>officeplugin_ejb</module>
 		<module>officeplugin_gwt</module>
@@ -26,81 +25,6 @@
 		<module>officeplugin_war</module>
 		<module>officeplugin_web</module>
 	</modules>
-	<dependencyManagement>
-		<dependencies>
-			<!-- Dependency Management for dependencies -->
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>core</artifactId>
-				<version>1.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<!-- Dependency Management for plug-ins -->
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>plugins</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_ejb</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_gwt</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_hibernate</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jdbc</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jms</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_jndi</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_servlet</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_socket</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_spring</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_war</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_web</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>

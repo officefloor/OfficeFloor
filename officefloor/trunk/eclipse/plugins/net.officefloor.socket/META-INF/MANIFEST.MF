@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Socket
 Bundle-SymbolicName: net.officefloor.socket;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.2.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="1.1.0",
- net.officefloor.ui;bundle-version="1.1.0",
+Require-Bundle: net.officefloor.core;bundle-version="1.2.0",
+ net.officefloor.ui;bundle-version="1.2.0",
  org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
@@ -62,5 +62,5 @@ Export-Package: net.officefloor.eclipse.socket,
  net.officefloor.plugin.web.http.tokenise,
  net.officefloor.plugin.woof
 Bundle-ClassPath: .,
- officeplugin_socket-1.1.0.jar,
- officeplugin_web-1.1.0.jar
+ officeplugin_socket-1.2.0.jar,
+ officeplugin_web-1.2.0.jar

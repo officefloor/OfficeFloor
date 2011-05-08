@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven</artifactId>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 	</parent>
 	<artifactId>maven-woof-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>Maven WoOF Plugin</name>
-	<description>Maven plug-in for Web on OfficeFloor</description>
+	<description>Maven plug-in for WoOF (Web on OfficeFloor)</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Properties for reporting -->
