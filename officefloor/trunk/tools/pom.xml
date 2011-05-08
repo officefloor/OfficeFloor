@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 	</parent>
 	<groupId>net.officefloor.tool</groupId>
 	<artifactId>tools</artifactId>
@@ -18,31 +18,6 @@
 	<modules>
 		<module>officetool_demo</module>
 	</modules>
-	<dependencyManagement>
-		<dependencies>
-			<!-- Dependency Management for dependencies -->
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>core</artifactId>
-				<version>1.1.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<!-- Dependency Management for tools -->
-			<dependency>
-				<groupId>net.officefloor.tool</groupId>
-				<artifactId>tools</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.tool</groupId>
-				<artifactId>officetool_demo</artifactId>
-				<version>1.1.0</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<build>
 		<plugins>
 			<plugin>

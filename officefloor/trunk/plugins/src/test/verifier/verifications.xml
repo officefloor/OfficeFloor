@@ -1,17 +1,9 @@
 <verifications>
 	<files>
-		<!-- Ensure depending on latest version -->
+		<!-- Ensure using latest version -->
 		<file>
-			<location>${basedir}/../maven/pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
-		</file>
-		<file>
-			<location>${basedir}/../eclipse/pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
-		</file>
-		<file>
-			<location>${basedir}/../tutorials/pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>(\s)*<version>${project.version}</version>[^;]*</dependencyManagement>]]></contains>
+			<location>${basedir}/../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
 		
 		<!-- Ensure all the modules inheriting latest -->

@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Woof Plug-in
 Bundle-SymbolicName: net.officefloor.woof;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.2.0
 Bundle-Vendor: OfficeFloor
 Bundle-Activator: net.officefloor.eclipse.WoofPlugin
 Bundle-ActivationPolicy: lazy
-Require-Bundle: net.officefloor.core;bundle-version="1.1.0",
- net.officefloor.ui;bundle-version="1.1.0",
- net.officefloor.socket;bundle-version="1.1.0"
+Require-Bundle: net.officefloor.core;bundle-version="1.2.0",
+ net.officefloor.ui;bundle-version="1.2.0",
+ net.officefloor.socket;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
