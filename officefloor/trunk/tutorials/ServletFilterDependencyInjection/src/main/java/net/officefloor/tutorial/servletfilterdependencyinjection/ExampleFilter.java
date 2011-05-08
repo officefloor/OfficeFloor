@@ -19,7 +19,7 @@ package net.officefloor.tutorial.servletfilterdependencyinjection;
 
 import javax.ejb.EJB;
 
-import net.officefloor.plugin.servlet.WoofServletFilter;
+import net.officefloor.plugin.woof.servlet.WoofServletFilter;
 
 /**
  * Example {@link WoofServletFilter} with {@link EJB} dependency.

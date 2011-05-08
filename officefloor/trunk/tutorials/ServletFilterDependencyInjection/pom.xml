@@ -20,7 +20,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_servlet</artifactId>
+			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
