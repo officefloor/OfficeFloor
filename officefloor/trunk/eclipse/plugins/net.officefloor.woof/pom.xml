@@ -26,11 +26,21 @@
 			<artifactId>net.officefloor.ui</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.socket</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Required -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>net.officefloor.feature</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>net.officefloor.plugins.feature</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
