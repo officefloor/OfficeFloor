@@ -109,7 +109,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_web</artifactId>
+			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.maven</groupId>
