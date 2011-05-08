@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.servlet;
+package net.officefloor.plugin.woof.servlet;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -28,6 +28,7 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
+import net.officefloor.plugin.servlet.OfficeFloorServletFilter;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
