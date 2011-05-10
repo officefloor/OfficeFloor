@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -31,6 +30,7 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -45,7 +45,8 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceContex
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
+import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 
 /**
  * {@link AdministratorLoader} implementation.
@@ -109,8 +110,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 				.newInstance(administratorSourceClass,
 						AdministratorSource.class, LocationType.OFFICE,
 						this.officeLocation, AssetType.ADMINISTRATOR,
-						this.administratorName, this.nodeContext
-								.getCompilerIssues());
+						this.administratorName,
+						this.nodeContext.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
@@ -172,14 +173,16 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 				try {
 					name = adminProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ AdministratorSourceProperty.class.getSimpleName()
-							+ " "
-							+ i
-							+ " from "
-							+ AdministratorSourceSpecification.class
-									.getSimpleName() + " for "
-							+ administratorSourceClass.getName(), ex);
+					this.addIssue(
+							"Failed to get name for "
+									+ AdministratorSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ AdministratorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ administratorSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -200,16 +203,18 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 				try {
 					label = adminProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ AdministratorSourceProperty.class.getSimpleName()
-							+ " "
-							+ i
-							+ " ("
-							+ name
-							+ ") from "
-							+ AdministratorSourceSpecification.class
-									.getSimpleName() + " for "
-							+ administratorSourceClass.getName(), ex);
+					this.addIssue(
+							"Failed to get label for "
+									+ AdministratorSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " ("
+									+ name
+									+ ") from "
+									+ AdministratorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ administratorSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -240,7 +245,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		ClassLoader classLoader = this.nodeContext.getClassLoader();
 
 		// Create the administrator source context
-		Properties properties = propertyList.getProperties();
+		SourceProperties properties = new PropertyListSourceProperties(
+				propertyList);
 		AdministratorSourceContext sourceContext = new AdministratorSourceContextImpl(
 				properties, classLoader);
 
@@ -248,7 +254,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			// Initialise the administrator source
 			administratorSource.init(sourceContext);
 
-		} catch (AdministratorSourceUnknownPropertyError ex) {
+		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "'");
 			return null; // must have property
@@ -263,8 +269,10 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		try {
 			metaData = administratorSource.getMetaData();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to get "
-					+ AdministratorSourceMetaData.class.getSimpleName(), ex);
+			this.addIssue(
+					"Failed to get "
+							+ AdministratorSourceMetaData.class.getSimpleName(),
+					ex);
 			return null; // must successfully get meta-data
 		}
 		if (metaData == null) {
@@ -383,8 +391,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			}
 
 		} catch (Throwable ex) {
-			this.addIssue("Exception from "
-					+ administratorSourceClass.getName(), ex);
+			this.addIssue(
+					"Exception from " + administratorSourceClass.getName(), ex);
 			return null; // must be successful with meta-data
 		}
 

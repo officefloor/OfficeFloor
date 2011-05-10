@@ -20,16 +20,17 @@ package net.officefloor.frame.impl.construct.administrator;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DutyBuilder;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -52,9 +53,9 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 	private final Class<AS> administratorSourceClass;
 
 	/**
-	 * {@link Properties} for the {@link AdministratorSource}.
+	 * {@link SourceProperties} for the {@link AdministratorSource}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * Name of the {@link Team} responsible for the {@link Duty} instances of
@@ -92,7 +93,7 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 
 	@Override
 	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	@Override
@@ -127,7 +128,7 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 	}
 
 	@Override
-	public Properties getProperties() {
+	public SourceProperties getProperties() {
 		return this.properties;
 	}
 

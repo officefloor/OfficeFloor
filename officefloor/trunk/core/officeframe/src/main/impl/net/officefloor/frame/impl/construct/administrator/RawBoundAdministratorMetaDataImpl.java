@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -65,9 +64,10 @@ import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -262,7 +262,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		ClassLoader classLoader = OfficeFrame.class.getClassLoader();
 
 		// Obtain context to initialise the administrator source
-		Properties properties = configuration.getProperties();
+		SourceProperties properties = configuration.getProperties();
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
 				properties, classLoader);
 
@@ -270,7 +270,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Initialise the administrator source
 			adminSource.init(context);
 
-		} catch (AdministratorSourceUnknownPropertyError ex) {
+		} catch (UnknownPropertyError ex) {
 			issues.addIssue(assetType, assetName, "Property '"
 					+ ex.getUnknownPropertyName() + "' must be specified");
 			return null; // must have property

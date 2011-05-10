@@ -18,13 +18,12 @@
 
 package net.officefloor.frame.internal.configuration;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -49,11 +48,13 @@ public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends 
 	Class<AS> getAdministratorSourceClass();
 
 	/**
-	 * Obtains the properties to initialise the {@link AdministratorSource}.
+	 * Obtains the {@link SourceProperties} to initialise the
+	 * {@link AdministratorSource}.
 	 * 
-	 * @return Properties to initialise the {@link AdministratorSource}.
+	 * @return {@link SourceProperties} to initialise the
+	 *         {@link AdministratorSource}.
 	 */
-	Properties getProperties();
+	SourceProperties getProperties();
 
 	/**
 	 * Obtains the name of the {@link Team} within the {@link Office}

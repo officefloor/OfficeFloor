@@ -18,8 +18,6 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -51,7 +49,8 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
+import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 
 /**
  * Raw {@link ManagedObjectMetaData}.
@@ -220,7 +219,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		ClassLoader classLoader = OfficeFrame.class.getClassLoader();
 
 		// Obtain the properties to initialise the managed object source
-		Properties properties = configuration.getProperties();
+		SourceProperties properties = configuration.getProperties();
 
 		// Obtain the managing office for the managed object source
 		ManagingOfficeConfiguration<h> managingOfficeConfiguration = configuration
@@ -262,7 +261,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			// Initialise the managed object source
 			managedObjectSource.init(context);
 
-		} catch (ManagedObjectSourceUnknownPropertyError ex) {
+		} catch (UnknownPropertyError ex) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					"Property '" + ex.getUnknownPropertyName()
 							+ "' must be specified");

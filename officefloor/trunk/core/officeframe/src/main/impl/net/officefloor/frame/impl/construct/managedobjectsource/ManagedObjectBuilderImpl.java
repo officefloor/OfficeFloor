@@ -18,20 +18,20 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Implements the {@link ManagedObjectBuilder}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>>
@@ -54,9 +54,9 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	private ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
-	 * {@link Properties} for the {@link ManagedObjectSource}.
+	 * {@link SourceProperties} for the {@link ManagedObjectSource}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -70,7 +70,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
@@ -88,7 +88,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 
 	@Override
 	public void addProperty(String name, String value) {
-		this.properties.put(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	}
 
 	@Override
-	public Properties getProperties() {
+	public SourceProperties getProperties() {
 		return this.properties;
 	}
 

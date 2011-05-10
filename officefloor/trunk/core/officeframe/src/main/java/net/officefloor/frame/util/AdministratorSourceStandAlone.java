@@ -18,14 +18,14 @@
 
 package net.officefloor.frame.util;
 
-import java.util.Properties;
-
 import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Loads {@link AdministratorSource} for stand-alone use.
@@ -35,9 +35,9 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceContex
 public class AdministratorSourceStandAlone {
 
 	/**
-	 * {@link Properties}.
+	 * {@link SourceProperties}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * Adds a property for the {@link AdministratorSource}.
@@ -48,7 +48,7 @@ public class AdministratorSourceStandAlone {
 	 *            Value for the property.
 	 */
 	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	/**

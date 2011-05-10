@@ -18,10 +18,9 @@
 
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.spi.TestSource;
@@ -141,7 +140,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testMissingProperty() {
 
-		Properties noProperties = new Properties();
+		SourcePropertiesImpl noProperties = new SourcePropertiesImpl();
 
 		// Record team source that has missing required property
 		this.recordReturn(this.configuration, this.configuration.getTeamName(),
@@ -196,7 +195,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), FailInitTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
 				"Failed to initialise TeamSource", failure);
 
@@ -237,7 +236,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), FailCreateTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
 				"Failed to create Team", failure);
 
@@ -276,7 +275,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), SourceTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 		this.issues.addIssue(AssetType.TEAM, TEAM_NAME,
 				"TeamSource failed to provide Team");
 
@@ -301,7 +300,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), NameTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -367,7 +366,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), SourceTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();
@@ -414,7 +413,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamSourceClass(), ProcessContextListenerTeamSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 
 		// Attempt to construct team
 		this.replayMockObjects();

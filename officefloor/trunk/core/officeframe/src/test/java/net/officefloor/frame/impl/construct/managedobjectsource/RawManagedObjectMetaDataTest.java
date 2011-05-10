@@ -19,21 +19,21 @@
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.io.InputStream;
-import java.util.Properties;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -259,7 +259,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getManagedObjectSourceClass(),
 				MockManagedObjectSource.class);
 		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new Properties());
+				this.configuration.getProperties(), new SourcePropertiesImpl());
 		this.recordReturn(this.configuration,
 				this.configuration.getManagingOfficeConfiguration(), null);
 		this.record_issue("No managing office configuration");
@@ -283,7 +283,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getManagedObjectSourceClass(),
 				MockManagedObjectSource.class);
 		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new Properties());
+				this.configuration.getProperties(), new SourcePropertiesImpl());
 		this.recordReturn(this.configuration,
 				this.configuration.getManagingOfficeConfiguration(),
 				this.managingOfficeConfiguration);
@@ -310,7 +310,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getManagedObjectSourceClass(),
 				MockManagedObjectSource.class);
 		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new Properties());
+				this.configuration.getProperties(), new SourcePropertiesImpl());
 		this.recordReturn(this.configuration,
 				this.configuration.getManagingOfficeConfiguration(),
 				this.managingOfficeConfiguration);
@@ -846,7 +846,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record obtaining details from configuration to init
 		this.recordReturn(this.configuration,
-				this.configuration.getProperties(), new Properties());
+				this.configuration.getProperties(), new SourcePropertiesImpl());
 
 		// Record obtaining the managing office
 		final String managingOfficeName = "OFFICE";

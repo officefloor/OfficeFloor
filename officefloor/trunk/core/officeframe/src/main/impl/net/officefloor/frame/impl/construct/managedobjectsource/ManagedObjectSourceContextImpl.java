@@ -18,8 +18,6 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -29,21 +27,22 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Implementation of the {@link ManagedObjectSourceContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
-		ManagedObjectSourceContext<F> {
+public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
+		SourcePropertiesImpl implements ManagedObjectSourceContext<F> {
 
 	/**
 	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
@@ -54,11 +53,6 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	 * Name of the {@link ManagedObject}.
 	 */
 	private final String managedObjectName;
-
-	/**
-	 * Properties.
-	 */
-	private final Properties properties;
 
 	/**
 	 * {@link ClassLoader}.
@@ -97,11 +91,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	 *            {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectName,
-			Properties properties, ClassLoader classLoader,
+			SourceProperties properties, ClassLoader classLoader,
 			ManagingOfficeBuilder<F> managingOfficeBuilder,
 			OfficeBuilder officeBuilder) {
+		super(properties);
 		this.managedObjectName = managedObjectName;
-		this.properties = properties;
 		this.classLoader = classLoader;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
@@ -132,41 +126,6 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	/*
 	 * =============== ManagedObjectSourceContext =====================
 	 */
-
-	@Override
-	public Properties getProperties() {
-		return this.properties;
-	}
-
-	@Override
-	public String getProperty(String name)
-			throws ManagedObjectSourceUnknownPropertyError {
-		// Obtain the value
-		String value = this.getProperty(name, null);
-
-		// Ensure have a value
-		if (value == null) {
-			throw new ManagedObjectSourceUnknownPropertyError(
-					"Unknown property '" + name + "'", name);
-		}
-
-		// Return the value
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		// Obtain the value
-		String value = this.properties.getProperty(name);
-
-		// Default value if not specified
-		if (value == null) {
-			value = defaultValue;
-		}
-
-		// Return the value
-		return value;
-	}
 
 	@Override
 	public ClassLoader getClassLoader() {
@@ -208,14 +167,14 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 
 	@Override
 	public void linkProcess(F key, String workName, String taskName) {
-		this.managingOfficeBuilder.linkProcess(key, this
-				.getNamespacedName(workName), taskName);
+		this.managingOfficeBuilder.linkProcess(key,
+				this.getNamespacedName(workName), taskName);
 	}
 
 	@Override
 	public void linkProcess(int flowIndex, String workName, String taskName) {
-		this.managingOfficeBuilder.linkProcess(flowIndex, this
-				.getNamespacedName(workName), taskName);
+		this.managingOfficeBuilder.linkProcess(flowIndex,
+				this.getNamespacedName(workName), taskName);
 	}
 
 	@Override

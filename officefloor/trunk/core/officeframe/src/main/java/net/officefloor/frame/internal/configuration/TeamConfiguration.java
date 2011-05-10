@@ -18,8 +18,7 @@
 
 package net.officefloor.frame.internal.configuration;
 
-import java.util.Properties;
-
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -45,9 +44,11 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	Class<TS> getTeamSourceClass();
 
 	/**
-	 * Obtains the {@link Properties} to initialise the {@link TeamSource}.
+	 * Obtains the {@link SourceProperties} for initialising the
+	 * {@link TeamSource}.
 	 * 
-	 * @return {@link Properties} to initialise the {@link TeamSource}.
+	 * @return {@link SourceProperties} for initialising the {@link TeamSource}.
 	 */
-	Properties getProperties();
+	SourceProperties getProperties();
+
 }

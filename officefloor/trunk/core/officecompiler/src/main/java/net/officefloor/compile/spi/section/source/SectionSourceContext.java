@@ -18,8 +18,6 @@
 
 package net.officefloor.compile.spi.section.source;
 
-import java.util.Properties;
-
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
@@ -30,6 +28,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -37,7 +36,7 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionSourceContext {
+public interface SectionSourceContext extends SourceProperties {
 
 	/**
 	 * <p>
@@ -60,49 +59,6 @@ public interface SectionSourceContext {
 	 *         the {@link ConfigurationItem}.
 	 */
 	ConfigurationItem getConfiguration(String location);
-
-	/**
-	 * <p>
-	 * Obtains the names of the available properties in the order they were
-	 * defined. This allows for ability to provide variable number of properties
-	 * identified by a naming convention and being able to maintain their order.
-	 * <p>
-	 * An example would be providing a listing of routing configurations, each
-	 * entry named <code>route.[something]</code> and order indicating priority.
-	 * 
-	 * @return Names of the properties in the order defined.
-	 */
-	String[] getPropertyNames();
-
-	/**
-	 * Obtains a required property value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @return Value of the property.
-	 * @throws SectionUnknownPropertyError
-	 *             If property was not configured. Let this propagate as the
-	 *             framework will handle it.
-	 */
-	String getProperty(String name) throws SectionUnknownPropertyError;
-
-	/**
-	 * Obtains the property value or subsequently the default value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param defaultValue
-	 *            Default value if property not specified.
-	 * @return Value of the property or the the default value if not specified.
-	 */
-	String getProperty(String name, String defaultValue);
-
-	/**
-	 * Properties to configure the {@link SectionType}.
-	 * 
-	 * @return Properties specific for the {@link SectionType}.
-	 */
-	Properties getProperties();
 
 	/**
 	 * Obtains the {@link ClassLoader} for loading the {@link SectionType}.

@@ -18,40 +18,40 @@
 
 package net.officefloor.frame.util;
 
-import java.util.Properties;
-
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TeamSourceStandAlone {
 
 	/**
-	 * {@link Properties} to initialise the {@link TeamSource}.
+	 * {@link SourceProperties} to initialise the {@link TeamSource}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * Adds a property for initialising the {@link TeamSource}.
-	 *
+	 * 
 	 * @param name
 	 *            Name of property.
 	 * @param value
 	 *            Value of property.
 	 */
 	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
-	 *
+	 * 
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return Initialised {@link TeamSource}.
@@ -65,8 +65,8 @@ public class TeamSourceStandAlone {
 		TS teamSource = teamSourceClass.newInstance();
 
 		// Initialise the team source
-		TeamSourceContext context = new TeamSourceContextImpl(teamSourceClass
-				.getSimpleName(), this.properties);
+		TeamSourceContext context = new TeamSourceContextImpl(
+				teamSourceClass.getSimpleName(), this.properties);
 		teamSource.init(context);
 
 		// Return the initialised team source
@@ -75,7 +75,7 @@ public class TeamSourceStandAlone {
 
 	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
-	 *
+	 * 
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return {@link Team} from the loaded {@link TeamSource}.

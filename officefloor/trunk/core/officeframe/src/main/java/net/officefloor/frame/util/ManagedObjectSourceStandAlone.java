@@ -20,7 +20,6 @@ package net.officefloor.frame.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -32,10 +31,12 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Loads {@link ManagedObjectSource} for stand-alone use.
@@ -56,9 +57,9 @@ public class ManagedObjectSourceStandAlone {
 	public static final String STAND_ALONE_MANAGING_OFFICE_NAME = "office";
 
 	/**
-	 * {@link Properties}.
+	 * {@link SourceProperties}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * {@link InvokeProcessTaskStruct} instances by their {@link ProcessState}
@@ -75,7 +76,7 @@ public class ManagedObjectSourceStandAlone {
 	 *            Value for the property.
 	 */
 	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	/**

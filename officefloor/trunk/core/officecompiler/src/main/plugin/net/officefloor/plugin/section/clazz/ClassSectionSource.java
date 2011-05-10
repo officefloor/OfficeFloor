@@ -341,6 +341,20 @@ public class ClassSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * Obtains the section class.
+	 * 
+	 * @param sectionClassName
+	 *            Name of the section class.
+	 * @return Section class.
+	 * @throws Exception
+	 *             If fails to obtain the section class.
+	 */
+	protected Class<?> getSectionClass(String sectionClassName)
+			throws Exception {
+		return this.getContext().getClassLoader().loadClass(sectionClassName);
+	}
+
+	/**
 	 * Creates the {@link SectionManagedObject} for providing the section
 	 * object.
 	 * 
@@ -622,7 +636,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 		this._designer = designer;
 		this._context = context;
 
-		// Obtain the class
+		// Obtain the class name
 		String sectionClassName = this.getSectionClassName();
 		if ((sectionClassName == null)
 				|| (sectionClassName.trim().length() == 0)) {
@@ -631,8 +645,9 @@ public class ClassSectionSource extends AbstractSectionSource {
 					null, null);
 			return; // not able to load if no section class specified
 		}
-		Class<?> sectionClass = context.getClassLoader().loadClass(
-				sectionClassName);
+
+		// Obtain the class
+		Class<?> sectionClass = this.getSectionClass(sectionClassName);
 
 		final String CLASS_OBJECT_NAME = "OBJECT";
 

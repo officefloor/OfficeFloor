@@ -69,7 +69,6 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
-import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -81,6 +80,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -300,8 +300,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Source the office
 			officeSource.sourceOffice(this, context);
 
-		} catch (OfficeUnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + OfficeSource.class.getSimpleName() + " "
 					+ officeSource.getClass().getName());
 			return false; // must have property

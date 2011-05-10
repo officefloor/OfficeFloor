@@ -28,6 +28,7 @@ import java.util.Set;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -62,7 +63,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 
 /**
  * {@link ManagedObjectLoader} implementation.
@@ -271,7 +272,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
-				namespaceName, propertyList.getProperties(),
+				namespaceName, new PropertyListSourceProperties(propertyList),
 				this.nodeContext.getClassLoader(), managingOffice.getBuilder(),
 				office.getBuilder());
 
@@ -279,7 +280,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Initialise the managed object source
 			managedObjectSource.init(sourceContext);
 
-		} catch (ManagedObjectSourceUnknownPropertyError ex) {
+		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "'");
 			return null; // must have property
