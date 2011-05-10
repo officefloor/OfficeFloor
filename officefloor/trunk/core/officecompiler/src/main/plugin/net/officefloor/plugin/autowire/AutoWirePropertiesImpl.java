@@ -111,8 +111,7 @@ public abstract class AutoWirePropertiesImpl implements AutoWireProperties {
 
 		// Add the properties
 		for (String name : loader.stringPropertyNames()) {
-			this.properties.addProperty(name)
-					.setValue(loader.getProperty(name));
+			this.addProperty(name, loader.getProperty(name));
 		}
 	}
 
