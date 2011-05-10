@@ -15,28 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package net.officefloor.plugin.web.http.security.scheme;
-
-import net.officefloor.frame.spi.source.SourceProperties;
+package net.officefloor.plugin.web.http.template.section;
 
 /**
- * Context for the {@link HttpSecuritySource}.
+ * Extension for the {@link HttpTemplateSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecuritySourceContext<D extends Enum<D>> extends
-		SourceProperties {
+public interface HttpTemplateSectionExtension {
 
 	/**
-	 * Flags that the {@link HttpSecuritySource} requires a dependency.
+	 * Extends the template.
 	 * 
-	 * @param key
-	 *            Key allowing {@link HttpSecuritySource} to identify the
-	 *            dependency.
-	 * @param dependencyType
-	 *            Type expected for the dependency.
+	 * @param context
+	 *            {@link HttpTemplateSectionExtensionContext}.
+	 * @throws Exception
+	 *             If fails to extend the template.
 	 */
-	void requireDependency(D key, Class<?> dependencyType);
+	void extendTemplate(HttpTemplateSectionExtensionContext context)
+			throws Exception;
 
 }

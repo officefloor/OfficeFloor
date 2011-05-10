@@ -24,14 +24,13 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.security.HttpSecurity;
-import net.officefloor.plugin.web.http.security.HttpSecurityService;
 import net.officefloor.plugin.web.http.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.scheme.HttpSecuritySource;
@@ -142,24 +141,8 @@ public class HttpSecurityServiceManagedObjectSource extends
 
 		// Initialise the source (obtaining necessary dependencies)
 		final Map<Enum, Class> additionalDependencies = new HashMap<Enum, Class>();
-		this.source.init(new HttpSecuritySourceContext() {
-			@Override
-			public String getProperty(String name)
-					throws ManagedObjectSourceUnknownPropertyError {
-				return mosContext.getProperty(name);
-			}
-
-			@Override
-			public String getProperty(String name, String defaultValue) {
-				return mosContext.getProperty(name, defaultValue);
-			}
-
-			@Override
-			public void requireDependency(Enum key, Class dependencyType) {
-				// Register the required dependency
-				additionalDependencies.put(key, dependencyType);
-			}
-		});
+		this.source.init(new HttpSecuritySourceContextImpl(mosContext,
+				additionalDependencies));
 
 		// Obtains the dependency keys
 		this.dependencyKeyMapping = additionalDependencies.keySet().toArray(
@@ -196,6 +179,43 @@ public class HttpSecurityServiceManagedObjectSource extends
 		// Create and return the managed object
 		return new HttpSecurityServiceManagedObject(this.source,
 				this.dependencyKeyMapping);
+	}
+
+	/**
+	 * {@link HttpSecuritySourceContext} implementation.
+	 */
+	private static class HttpSecuritySourceContextImpl<D extends Enum<D>>
+			extends SourcePropertiesImpl implements
+			HttpSecuritySourceContext<D> {
+
+		/**
+		 * Additional dependencies.
+		 */
+		private final Map<Enum<D>, Class<?>> additionalDependencies;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param properties
+		 *            {@link SourceProperties}.
+		 * @param additionalDependencies
+		 *            Additional dependencies.
+		 */
+		public HttpSecuritySourceContextImpl(SourceProperties properties,
+				Map<Enum<D>, Class<?>> additionalDependencies) {
+			super(properties);
+			this.additionalDependencies = additionalDependencies;
+		}
+
+		/*
+		 * ================= HttpSecuritySourceContext ===================
+		 */
+
+		@Override
+		public void requireDependency(D key, Class<?> dependencyType) {
+			// Register the required dependency
+			this.additionalDependencies.put(key, dependencyType);
+		}
 	}
 
 }

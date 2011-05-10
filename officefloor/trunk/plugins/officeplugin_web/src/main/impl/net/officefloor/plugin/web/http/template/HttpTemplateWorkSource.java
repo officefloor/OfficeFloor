@@ -22,6 +22,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,6 +40,7 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactory;
 import net.officefloor.plugin.socket.server.http.response.HttpResponseWriterFactoryImpl;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
@@ -60,6 +63,12 @@ public class HttpTemplateWorkSource extends
 	 * Property to specify the {@link HttpTemplate} file.
 	 */
 	public static final String PROPERTY_TEMPLATE_FILE = "template.path";
+
+	/**
+	 * Property to obtain the raw {@link HttpTemplate} content. This is tried if
+	 * there is no template path.
+	 */
+	public static final String PROPERTY_TEMPLATE_CONTENT = "template.content";
 
 	/**
 	 * Property to specify the <code>Content-Type</code> for the template.
@@ -85,7 +94,7 @@ public class HttpTemplateWorkSource extends
 	 * Obtains the {@link HttpTemplate}.
 	 * 
 	 * @param properties
-	 *            {@link Properties} providing details about the
+	 *            {@link SourceProperties} providing details about the
 	 *            {@link HttpTemplate}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
@@ -93,10 +102,46 @@ public class HttpTemplateWorkSource extends
 	 * @throws IOException
 	 *             If fails to obtain the {@link HttpTemplate}.
 	 */
-	public static HttpTemplate getHttpTemplate(Properties properties,
+	public static HttpTemplate getHttpTemplate(SourceProperties properties,
 			ClassLoader classLoader) throws IOException {
 
-		// Obtain the details of the template
+		// Obtain the template content
+		Reader content = getHttpTemplateContent(properties, classLoader);
+
+		// Obtain the template
+		HttpTemplate template = getHttpTemplate(content);
+
+		// Template content read
+		content.close();
+
+		// Return the template
+		return template;
+	}
+
+	/**
+	 * Obtains the raw {@link HttpTemplate} content.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties} providing details about the
+	 *            {@link HttpTemplate}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @return Raw {@link HttpTemplate} content.
+	 * @throws IOException
+	 *             If fails to obtain the raw {@link HttpTemplate} content.
+	 */
+	public static Reader getHttpTemplateContent(SourceProperties properties,
+			ClassLoader classLoader) throws IOException {
+
+		// Determine if content provided by property
+		String templateContent = properties.getProperty(
+				PROPERTY_TEMPLATE_CONTENT, null);
+		if (templateContent != null) {
+			// Provided template content
+			return new StringReader(templateContent);
+		}
+
+		// Not in property, so obtain details from file
 		String templateFilePath = properties
 				.getProperty(PROPERTY_TEMPLATE_FILE);
 		Charset charset = getCharset(properties);
@@ -109,10 +154,25 @@ public class HttpTemplateWorkSource extends
 					+ templateFilePath + "'");
 		}
 
+		// Return the reader to the template content
+		return new InputStreamReader(configuration, charset);
+	}
+
+	/**
+	 * Obtains the {@link HttpTemplate}.
+	 * 
+	 * @param templateContent
+	 *            Raw {@link HttpTemplate} content.
+	 * @return {@link HttpTemplate}.
+	 * @throws IOException
+	 *             If fails to obtain the {@link HttpTemplate}.
+	 */
+	public static HttpTemplate getHttpTemplate(Reader templateContent)
+			throws IOException {
+
 		// Parse the template
 		HttpTemplate template = new HttpTemplateParserImpl()
-				.parse(new InputStreamReader(configuration, charset));
-		configuration.close();
+				.parse(templateContent);
 
 		// Return the template
 		return template;
@@ -176,10 +236,10 @@ public class HttpTemplateWorkSource extends
 	 * Obtains the {@link Charset} from the {@link Properties}.
 	 * 
 	 * @param properties
-	 *            {@link Properties}.
+	 *            {@link SourceProperties}.
 	 * @return {@link Charset}.
 	 */
-	private static Charset getCharset(Properties properties) {
+	private static Charset getCharset(SourceProperties properties) {
 
 		// Obtain the charset
 		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
@@ -217,18 +277,14 @@ public class HttpTemplateWorkSource extends
 	public void sourceWork(WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
-		// Ensure the template is available
-		context.getProperty(PROPERTY_TEMPLATE_FILE);
-
 		// Obtain the template
-		Properties properties = context.getProperties();
-		HttpTemplate template = getHttpTemplate(properties,
+		HttpTemplate template = getHttpTemplate(context,
 				context.getClassLoader());
 
 		// Obtain the details of the template
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE,
 				"text/html");
-		Charset charset = getCharset(properties);
+		Charset charset = getCharset(context);
 
 		// Create the writer factory
 		HttpResponseWriterFactory writerFactory = new HttpResponseWriterFactoryImpl();

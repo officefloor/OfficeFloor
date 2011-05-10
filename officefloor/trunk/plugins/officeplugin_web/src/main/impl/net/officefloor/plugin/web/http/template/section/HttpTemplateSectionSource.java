@@ -19,18 +19,21 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -45,9 +48,11 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.PrivateSource;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -145,23 +150,63 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
+		// Obtain the class loader
+		ClassLoader classLoader = context.getClassLoader();
+
 		// Obtain the template location
 		String templateLocation = context.getSectionLocation();
 
-		// Obtain the class name
-		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
+		// Obtain the HTTP template content
+		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(
+				context);
+		templateProperties
+				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
+						templateLocation);
+		Reader templateContentReader = HttpTemplateWorkSource
+				.getHttpTemplateContent(templateProperties, classLoader);
+		StringBuilder templateContentBuffer = new StringBuilder();
+		for (int character = templateContentReader.read(); character != -1; character = templateContentReader
+				.read()) {
+			templateContentBuffer.append((char) character);
+		}
+		String templateContent = templateContentBuffer.toString();
 
-		// Create the input to the section
-		SectionInput sectionInput = designer.addSectionInput(
-				RENDER_TEMPLATE_INPUT_NAME, null);
+		// Obtain the section class
+		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
+		Class<?> sectionClass = classLoader.loadClass(sectionClassName);
+
+		// Extend the template as necessary
+		final String EXTENSION_PREFIX = "extension.";
+		int extensionIndex = 1;
+		String extensionClassName = context.getProperty(EXTENSION_PREFIX
+				+ extensionIndex, null);
+		while (extensionClassName != null) {
+
+			// Create an instance of the extension class
+			HttpTemplateSectionExtension extension = (HttpTemplateSectionExtension) classLoader
+					.loadClass(extensionClassName).newInstance();
+
+			// Extend the template
+			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex
+					+ ".";
+			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
+					templateContent, sectionClass, extensionPropertyPrefix,
+					designer, context);
+			extension.extendTemplate(extensionContext);
+
+			// Override template details
+			templateContent = extensionContext.getTemplateContent();
+			sectionClass = extensionContext.getTemplateClass();
+
+			// Initiate for next extension
+			extensionIndex++;
+			extensionClassName = context.getProperty(EXTENSION_PREFIX
+					+ extensionIndex, null);
+		}
 
 		// Obtain the HTTP template
-		PropertyList templateProperties = context.createPropertyList();
-		templateProperties.addProperty(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE).setValue(
-				templateLocation);
-		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(
-				templateProperties.getProperties(), context.getClassLoader());
+		HttpTemplate template = HttpTemplateWorkSource
+				.getHttpTemplate(new StringReader(templateContent));
 
 		// Obtain the listing of task link names
 		String[] linkNames = HttpTemplateWorkSource
@@ -177,18 +222,24 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 					new Boolean(isRequireBean));
 		}
 
+		// Create the input to the section
+		SectionInput sectionInput = designer.addSectionInput(
+				RENDER_TEMPLATE_INPUT_NAME, null);
+
 		// Name of work is exposed on URL for links.
-		// Result is: /<section>.links/<link>.task
+		// Result is: /<section>.links-<link>.task
 		final String TEMPLATE_WORK_NANE = "links";
 
 		// Load the HTTP template
 		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE,
 				HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
-				templateLocation);
+		templateWork.addProperty(
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT,
+				templateContent);
 
 		// Create the template tasks and ensure registered for logic flows
-		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource();
+		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource(
+				sectionClass);
 		Map<String, SectionTask> templateTasks = new HashMap<String, SectionTask>();
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
@@ -259,7 +310,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 				// Must have template bean task
 				if (beanTask == null) {
 					designer.addIssue("Missing method '" + beanTaskName
-							+ "' on class " + sectionClassName
+							+ "' on class " + sectionClass.getName()
 							+ " to provide bean for template "
 							+ templateLocation, AssetType.WORK,
 							TEMPLATE_WORK_NANE);
@@ -464,10 +515,187 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	}
 
 	/**
+	 * {@link HttpTemplateSectionExtensionContext} implementation.
+	 */
+	private class HttpTemplateSectionExtensionContextImpl implements
+			HttpTemplateSectionExtensionContext {
+
+		/**
+		 * Raw {@link HttpTemplate} content.
+		 */
+		private String templateContent;
+
+		/**
+		 * {@link HttpTemplate} logic class.
+		 */
+		private Class<?> templateClass;
+
+		/**
+		 * Prefix for a property of this extension.
+		 */
+		private final String extensionPropertyPrefix;
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner sectionDesigner;
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext sectionSourceContext;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param templateContent
+		 *            Raw {@link HttpTemplate} content.
+		 * @param templateClass
+		 *            {@link HttpTemplate} logic class. May be <code>null</code>
+		 *            if not overridden.
+		 * @param extensionPropertyPrefix
+		 *            Prefix for a property of this extension.
+		 * @param sectionDesigner
+		 *            {@link SectionDesigner}.
+		 * @param sectionSourceContext
+		 *            {@link SectionSourceContext}.
+		 */
+		public HttpTemplateSectionExtensionContextImpl(String templateContent,
+				Class<?> templateClass, String extensionPropertyPrefix,
+				SectionDesigner sectionDesigner,
+				SectionSourceContext sectionSourceContext) {
+			this.templateContent = templateContent;
+			this.templateClass = templateClass;
+			this.extensionPropertyPrefix = extensionPropertyPrefix;
+			this.sectionDesigner = sectionDesigner;
+			this.sectionSourceContext = sectionSourceContext;
+		}
+
+		/*
+		 * ============== HttpTemplateSectionExtensionContext ================
+		 */
+
+		@Override
+		public String getTemplateContent() {
+			return this.templateContent;
+		}
+
+		@Override
+		public void setTemplateContent(String templateContent) {
+			this.templateContent = templateContent;
+		}
+
+		@Override
+		public Class<?> getTemplateClass() {
+			return this.templateClass;
+		}
+
+		@Override
+		public void setTemplateClass(Class<?> templateClass) {
+			this.templateClass = templateClass;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+
+			// Obtain all the property names
+			String[] contextNames = this.sectionSourceContext
+					.getPropertyNames();
+
+			// Filter to just this extension's properties
+			List<String> extensionNames = new LinkedList<String>();
+			for (String contextName : contextNames) {
+				if (contextName.startsWith(this.extensionPropertyPrefix)) {
+					// Add the extension property name
+					String extensionName = contextName
+							.substring(this.extensionPropertyPrefix.length());
+					extensionNames.add(extensionName);
+				}
+			}
+
+			// Return the extension names
+			return extensionNames.toArray(new String[extensionNames.size()]);
+		}
+
+		@Override
+		public String getProperty(String name) throws UnknownPropertyError {
+			// Obtain the extension property value
+			return this.sectionSourceContext
+					.getProperty(this.extensionPropertyPrefix + name);
+		}
+
+		@Override
+		public String getProperty(String name, String defaultValue) {
+			// Obtain the extension property value
+			return this.sectionSourceContext.getProperty(
+					this.extensionPropertyPrefix + name, defaultValue);
+		}
+
+		@Override
+		public Properties getProperties() {
+
+			// Obtain all the properties
+			Properties properties = new Properties();
+
+			// Filter to just this extension's properties
+			String[] contextNames = this.sectionSourceContext
+					.getPropertyNames();
+			for (String contextName : contextNames) {
+				if (contextName.startsWith(this.extensionPropertyPrefix)) {
+					// Add the extension property name
+					String extensionName = contextName
+							.substring(this.extensionPropertyPrefix.length());
+					String value = this.sectionSourceContext
+							.getProperty(contextName);
+					properties.setProperty(extensionName, value);
+				}
+			}
+
+			// Return the properties
+			return properties;
+		}
+
+		@Override
+		public SectionSourceContext getSectionSourceContext() {
+			return this.sectionSourceContext;
+		}
+
+		@Override
+		public SectionDesigner getSectionDesigner() {
+			return this.sectionDesigner;
+		}
+	}
+
+	/**
 	 * {@link ClassSectionSource} specific to the HTTP template.
 	 */
 	@PrivateSource
 	public class HttpTemplateClassSectionSource extends ClassSectionSource {
+
+		/**
+		 * Section class.
+		 */
+		private final Class<?> sectionClass;
+
+		/**
+		 * <p>
+		 * Default constructor necessary for sources.
+		 * <p>
+		 * Provided just in case.
+		 */
+		public HttpTemplateClassSectionSource() {
+			this(null);
+		}
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param sectionClass
+		 *            Section class.
+		 */
+		public HttpTemplateClassSectionSource(Class<?> sectionClass) {
+			this.sectionClass = sectionClass;
+		}
 
 		/**
 		 * Determine if the section class is stateful - annotated with
@@ -493,8 +721,27 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 		@Override
 		protected String getSectionClassName() {
+
+			// Determine if overridden
+			if (this.sectionClass != null) {
+				return this.sectionClass.getName(); // overridden
+			}
+
 			// Obtain class name from property as location is for template
 			return this.getContext().getProperty(PROPERTY_CLASS_NAME);
+		}
+
+		@Override
+		protected Class<?> getSectionClass(String sectionClassName)
+				throws Exception {
+
+			// Determine if overridden
+			if (this.sectionClass != null) {
+				return this.sectionClass;
+			}
+
+			// Defer to super class to obtain
+			return super.getSectionClass(sectionClassName);
 		}
 
 		@Override
