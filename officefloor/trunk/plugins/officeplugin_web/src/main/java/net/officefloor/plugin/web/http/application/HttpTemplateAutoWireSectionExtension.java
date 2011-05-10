@@ -15,28 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package net.officefloor.plugin.web.http.application;
 
-package net.officefloor.plugin.web.http.security.scheme;
-
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.plugin.autowire.AutoWireProperties;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
- * Context for the {@link HttpSecuritySource}.
+ * Allows configuring the {@link HttpTemplateSectionExtension} for the
+ * {@link HttpTemplateAutoWireSection}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HttpSecuritySourceContext<D extends Enum<D>> extends
-		SourceProperties {
-
-	/**
-	 * Flags that the {@link HttpSecuritySource} requires a dependency.
-	 * 
-	 * @param key
-	 *            Key allowing {@link HttpSecuritySource} to identify the
-	 *            dependency.
-	 * @param dependencyType
-	 *            Type expected for the dependency.
-	 */
-	void requireDependency(D key, Class<?> dependencyType);
-
+public interface HttpTemplateAutoWireSectionExtension extends
+		AutoWireProperties {
 }

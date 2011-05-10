@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.application;
 
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
  * Allows wiring the flows of the {@link HttpTemplate}.
@@ -50,5 +51,16 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 *         exposed template.
 	 */
 	String getTemplateUri();
+
+	/**
+	 * Adds an {@link HttpTemplateSectionExtension} to this
+	 * {@link HttpTemplateAutoWireSection}.
+	 * 
+	 * @param extensionClass
+	 *            Class of the {@link HttpTemplateSectionExtension}.
+	 * @return {@link HttpTemplateAutoWireSectionExtension}.
+	 */
+	HttpTemplateAutoWireSectionExtension addTemplateExtension(
+			Class<? extends HttpTemplateSectionExtension> extensionClass);
 
 }

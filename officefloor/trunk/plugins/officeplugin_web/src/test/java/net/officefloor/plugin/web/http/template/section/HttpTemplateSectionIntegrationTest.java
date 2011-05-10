@@ -25,6 +25,7 @@ import java.sql.Connection;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
@@ -240,6 +241,143 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to use a {@link HttpTemplateSectionExtension}.
+	 */
+	public void testTemplateSectionExtension() throws Exception {
+
+		// Reset the mock extension for testing
+		MockHttpTemplateSectionExtension.reset();
+
+		// Start the server (with extension)
+		this.startHttpServer("ExtensionTemplate.ofp", Object.class,
+				"extension.1",
+				MockHttpTemplateSectionExtension.class.getName(),
+				"extension.1.name", "value", "extension.2",
+				MockHttpTemplateSectionExtension.class.getName(),
+				"extension.2.name", "value", "section.name", "section.value");
+
+		// Ensure change with extension
+		this.assertHttpRequest("", "Overridden template with overridden class");
+	}
+
+	/**
+	 * Mock {@link HttpTemplateSectionExtension} for testing.
+	 */
+	public static class MockHttpTemplateSectionExtension implements
+			HttpTemplateSectionExtension {
+
+		/**
+		 * Indicates if first.
+		 */
+		private static int extensionIndex = 1;
+
+		/**
+		 * Resets for testing.
+		 */
+		public static void reset() {
+			extensionIndex = 1;
+		}
+
+		/*
+		 * ================== HttpTemplateSectionExtension ====================
+		 */
+
+		@Override
+		public void extendTemplate(HttpTemplateSectionExtensionContext context)
+				throws Exception {
+
+			final String TEMPLATE_CONTENT = "Overridden template with ${property}";
+			final Class<?> TEMPLATE_CLASS = MockExtensionTemplateLogic.class;
+
+			// Validate overriding details
+			switch (extensionIndex) {
+			case 1:
+				// Ensure original template details
+				assertEquals("Incorrect original template content",
+						"extension", context.getTemplateContent());
+				assertEquals("Incorrect original template class", Object.class,
+						context.getTemplateClass());
+				break;
+			case 2:
+				// Ensure overridden template details
+				assertEquals("Template content should be overridden",
+						TEMPLATE_CONTENT, context.getTemplateContent());
+				assertEquals("Template class should be overridden",
+						TEMPLATE_CLASS, context.getTemplateClass());
+				break;
+			default:
+				fail("Should only be two extensions");
+			}
+
+			// Validate extension configuration
+			String[] names = context.getPropertyNames();
+			assertEquals("Incorrect number of properties", 1, names.length);
+			assertEquals("Incorrect property name", "name", names[0]);
+			assertEquals("Incorrect property value", "value",
+					context.getProperty("name"));
+			assertEquals("Not defaulting property", "default",
+					context.getProperty("unknown", "default"));
+			try {
+				// Ensure failure on unknown property
+				context.getProperty("unknown");
+				fail("Should not successfully obtain unknown property");
+			} catch (UnknownPropertyError ex) {
+				String unknownPropertyName = "extension." + extensionIndex
+						+ ".unknown";
+				assertEquals("Incorrect unknown property", unknownPropertyName,
+						ex.getUnknownPropertyName());
+				assertEquals("Incurrect unknown property message",
+						"Unknown property '" + unknownPropertyName + "'",
+						ex.getMessage());
+			}
+
+			// Validate section details
+			assertEquals("Incorrect section context", "section.value", context
+					.getSectionSourceContext().getProperty("section.name"));
+			assertNotNull("Assuming correct designer",
+					context.getSectionDesigner());
+
+			// Extend the template (via overriding)
+			context.setTemplateContent(TEMPLATE_CONTENT);
+			context.setTemplateClass(TEMPLATE_CLASS);
+
+			// Increment for next extension use
+			extensionIndex++;
+		}
+	}
+
+	/**
+	 * Template logic for the extension test.
+	 */
+	public static class MockExtensionTemplateLogic {
+
+		/**
+		 * Necessary as using this for overriding template logic class.
+		 * 
+		 * @return This.
+		 */
+		public MockExtensionTemplateLogic getTemplate() {
+			return this;
+		}
+
+		/**
+		 * Property to flag that overriding.
+		 * 
+		 * @return Value of property on template.
+		 */
+		public String getProperty() {
+			return "overridden class";
+		}
+
+		/**
+		 * Necessary as using this for overriding template logic class.
+		 */
+		@NextTask("doExternalFlow")
+		public void submit() {
+		}
+	}
+
+	/**
 	 * Sends the {@link HttpRequest}.
 	 * 
 	 * @param uri
@@ -286,9 +424,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	 *            Name of the template file.
 	 * @param logicClass
 	 *            Template logic class.
+	 * @param templateProperties
+	 *            Template name/value property pairs.
 	 */
-	protected void startHttpServer(String templateName, Class<?> logicClass)
-			throws Exception {
+	protected void startHttpServer(String templateName, Class<?> logicClass,
+			String... templatePropertyPairs) throws Exception {
 
 		// Auto-wire for testing
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
@@ -317,6 +457,11 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				logicClass.getName());
+		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
+			String name = templatePropertyPairs[i];
+			String value = templatePropertyPairs[i + 1];
+			templateSection.addProperty(name, value);
+		}
 
 		// Load mock section for handling outputs
 		AutoWireSection handleOutputSection = source.addSection("OUTPUT",

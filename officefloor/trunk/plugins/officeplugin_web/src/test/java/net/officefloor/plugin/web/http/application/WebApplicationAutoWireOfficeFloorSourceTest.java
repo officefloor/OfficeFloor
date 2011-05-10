@@ -38,6 +38,8 @@ import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWo
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
@@ -206,6 +208,54 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure submit on task for template is correct
 		this.assertHttpRequest(SUBMIT_URI, 200, "submitted" + SUBMIT_URI);
+	}
+
+	/**
+	 * Ensure able to provide {@link HttpTemplateSectionExtension}.
+	 */
+	public void testTemplateExtension() throws Exception {
+
+		// Add HTTP template
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
+				this.getClassPath("Extension.ofp"), Object.class, "template");
+
+		// Add template extension
+		HttpTemplateAutoWireSectionExtension extension = template
+				.addTemplateExtension(MockHttpTemplateSectionExtension.class);
+		extension.addProperty("name", "value");
+
+		// Open
+		this.source.openOfficeFloor();
+
+		// Ensure extend the template
+		this.assertHttpRequest("/template", 200, "extended");
+	}
+
+	/**
+	 * Mock {@link HttpTemplateSectionExtension} for testing.
+	 */
+	public static class MockHttpTemplateSectionExtension implements
+			HttpTemplateSectionExtension {
+		@Override
+		public void extendTemplate(HttpTemplateSectionExtensionContext context)
+				throws Exception {
+			context.setTemplateContent("${extend}");
+			context.setTemplateClass(MockExtensionTemplateLogic.class);
+		}
+	}
+
+	/**
+	 * Template logic for the extension test.
+	 */
+	public static class MockExtensionTemplateLogic {
+
+		public MockExtensionTemplateLogic getTemplate() {
+			return this;
+		}
+
+		public String getExtend() {
+			return "extended";
+		}
 	}
 
 	/**
