@@ -18,10 +18,10 @@
 
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -44,9 +44,9 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
 	private final Class<TS> teamSourceClass;
 
 	/**
-	 * {@link Properties} to initialise the {@link TeamSource}.
+	 * {@link SourceProperties} for initialising the {@link TeamSource}.
 	 */
-	private final Properties properties = new Properties();
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
 	 * Initiate.
@@ -67,7 +67,7 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
 
 	@Override
 	public void addProperty(String name, String value) {
-		this.properties.setProperty(name, value);
+		this.properties.addProperty(name, value);
 	}
 
 	/*
@@ -85,7 +85,7 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>,
 	}
 
 	@Override
-	public Properties getProperties() {
+	public SourceProperties getProperties() {
 		return this.properties;
 	}
 

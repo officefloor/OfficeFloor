@@ -18,8 +18,6 @@
 
 package net.officefloor.frame.spi.managedobject.source;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -28,44 +26,14 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Context for a {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceContext<F extends Enum<F>> {
-
-	/**
-	 * Obtains a required property value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @return Value of the property.
-	 * @throws ManagedObjectSourceUnknownPropertyError
-	 *             If property was not configured. Let this propagate as the
-	 *             framework will handle it.
-	 */
-	String getProperty(String name)
-			throws ManagedObjectSourceUnknownPropertyError;
-
-	/**
-	 * Obtains the property value or subsequently the default value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param defaultValue
-	 *            Default value if property not specified.
-	 * @return Value of the property or the the default value if not specified.
-	 */
-	String getProperty(String name, String defaultValue);
-
-	/**
-	 * Properties to configure the {@link ManagedObjectSource}.
-	 * 
-	 * @return Properties specific for the {@link ManagedObjectSource}.
-	 */
-	Properties getProperties();
+public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceProperties {
 
 	/**
 	 * <p>

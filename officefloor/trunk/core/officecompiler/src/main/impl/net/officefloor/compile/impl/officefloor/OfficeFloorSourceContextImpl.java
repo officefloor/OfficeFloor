@@ -18,9 +18,7 @@
 
 package net.officefloor.compile.impl.officefloor;
 
-import java.util.Properties;
-
-import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -29,11 +27,10 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorUnknownPropertyError;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -41,17 +38,13 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
+public class OfficeFloorSourceContextImpl extends SourcePropertiesImpl
+		implements OfficeFloorSourceContext {
 
 	/**
 	 * Location of the {@link OfficeFloor}.
 	 */
 	private final String officeFloorLocation;
-
-	/**
-	 * {@link PropertyList}.
-	 */
-	private final PropertyList propertyList;
 
 	/**
 	 * {@link NodeContext}.
@@ -70,8 +63,8 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 	 */
 	public OfficeFloorSourceContextImpl(String officeFloorLocation,
 			PropertyList propertyList, NodeContext nodeContext) {
+		super(new PropertyListSourceProperties(propertyList));
 		this.officeFloorLocation = officeFloorLocation;
-		this.propertyList = propertyList;
 		this.context = nodeContext;
 	}
 
@@ -93,37 +86,6 @@ public class OfficeFloorSourceContextImpl implements OfficeFloorSourceContext {
 			// Propagate failure to office floor loader
 			throw new ConfigurationContextPropagateError(location, ex);
 		}
-	}
-
-	@Override
-	public String[] getPropertyNames() {
-		return this.propertyList.getPropertyNames();
-	}
-
-	@Override
-	public String getProperty(String name)
-			throws OfficeFloorUnknownPropertyError {
-		String value = this.getProperty(name, null);
-		if (value == null) {
-			throw new OfficeFloorUnknownPropertyError("Unknown property '"
-					+ name + "'", name);
-		}
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		Property property = this.propertyList.getProperty(name);
-		String value = (property != null ? property.getValue() : null);
-		if (CompileUtil.isBlank(value)) {
-			return defaultValue;
-		}
-		return value;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.propertyList.getProperties();
 	}
 
 	@Override

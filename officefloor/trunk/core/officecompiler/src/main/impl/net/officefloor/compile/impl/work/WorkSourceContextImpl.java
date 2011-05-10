@@ -18,25 +18,18 @@
 
 package net.officefloor.compile.impl.work;
 
-import java.util.Properties;
-
-import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 
 /**
  * {@link WorkSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkSourceContextImpl implements WorkSourceContext {
-
-	/**
-	 * {@link PropertyList}.
-	 */
-	private final PropertyList propertyList;
+public class WorkSourceContextImpl extends SourcePropertiesImpl implements
+		WorkSourceContext {
 
 	/**
 	 * {@link ClassLoader}.
@@ -53,43 +46,13 @@ public class WorkSourceContextImpl implements WorkSourceContext {
 	 */
 	public WorkSourceContextImpl(PropertyList propertyList,
 			ClassLoader classLoader) {
-		this.propertyList = propertyList;
+		super(new PropertyListSourceProperties(propertyList));
 		this.classLoader = classLoader;
 	}
 
 	/*
 	 * ==================== WorkLoaderContext ================================
 	 */
-
-	@Override
-	public String[] getPropertyNames() {
-		return this.propertyList.getPropertyNames();
-	}
-
-	@Override
-	public String getProperty(String name) throws WorkUnknownPropertyError {
-		String value = this.getProperty(name, null);
-		if (value == null) {
-			throw new WorkUnknownPropertyError("Unknown property '" + name
-					+ "'", name);
-		}
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		Property property = this.propertyList.getProperty(name);
-		String value = (property != null ? property.getValue() : null);
-		if (CompileUtil.isBlank(value)) {
-			return defaultValue;
-		}
-		return value;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.propertyList.getProperties();
-	}
 
 	@Override
 	public ClassLoader getClassLoader() {

@@ -32,7 +32,6 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
@@ -40,12 +39,13 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 
 /**
  * {@link WorkLoader} implementation.
@@ -108,8 +108,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
 				WorkSource.class, LocationType.SECTION, this.sectionLocation,
-				AssetType.WORK, this.workName, this.nodeContext
-						.getCompilerIssues());
+				AssetType.WORK, this.workName,
+				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
 		}
@@ -119,9 +119,10 @@ public class WorkLoaderImpl implements WorkLoader {
 		try {
 			specification = workSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ WorkSourceSpecification.class.getSimpleName() + " from "
-					+ workSourceClass.getName(), ex);
+			this.addIssue(
+					"Failed to obtain "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " from " + workSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -137,11 +138,12 @@ public class WorkLoaderImpl implements WorkLoader {
 		try {
 			workProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ WorkSourceProperty.class.getSimpleName()
-					+ " instances from "
-					+ WorkSourceSpecification.class.getSimpleName() + " for "
-					+ workSourceClass.getName(), ex);
+			this.addIssue(
+					"Failed to obtain "
+							+ WorkSourceProperty.class.getSimpleName()
+							+ " instances from "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " for " + workSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -165,11 +167,15 @@ public class WorkLoaderImpl implements WorkLoader {
 				try {
 					name = workProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ WorkSourceProperty.class.getSimpleName() + " "
-							+ i + " from "
-							+ WorkSourceSpecification.class.getSimpleName()
-							+ " for " + workSourceClass.getName(), ex);
+					this.addIssue(
+							"Failed to get name for "
+									+ WorkSourceProperty.class.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ WorkSourceSpecification.class
+											.getSimpleName() + " for "
+									+ workSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -209,8 +215,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
 				WorkSource.class, LocationType.SECTION, this.sectionLocation,
-				AssetType.WORK, this.workName, this.nodeContext
-						.getCompilerIssues());
+				AssetType.WORK, this.workName,
+				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
 		}
@@ -226,8 +232,8 @@ public class WorkLoaderImpl implements WorkLoader {
 			// Source the work type
 			workSource.sourceWork(workType, context);
 
-		} catch (WorkUnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + WorkSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have property

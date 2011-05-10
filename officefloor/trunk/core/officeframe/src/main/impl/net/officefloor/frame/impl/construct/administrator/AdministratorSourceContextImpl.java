@@ -18,23 +18,17 @@
 
 package net.officefloor.frame.impl.construct.administrator;
 
-import java.util.Properties;
-
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Implementation of the {@link AdministratorSourceContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorSourceContextImpl implements
-		AdministratorSourceContext {
-
-	/**
-	 * {@link Properties}.
-	 */
-	private final Properties properties;
+public class AdministratorSourceContextImpl extends SourcePropertiesImpl
+		implements AdministratorSourceContext {
 
 	/**
 	 * {@link ClassLoader}.
@@ -45,54 +39,19 @@ public class AdministratorSourceContextImpl implements
 	 * Initiate.
 	 * 
 	 * @param properties
-	 *            {@link Properties}.
+	 *            {@link SourceProperties}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public AdministratorSourceContextImpl(Properties properties,
+	public AdministratorSourceContextImpl(SourceProperties properties,
 			ClassLoader classLoader) {
-		this.properties = properties;
+		super(properties);
 		this.classLoader = classLoader;
 	}
 
 	/*
 	 * ================== AdministratorSourceContext ===========================
 	 */
-
-	@Override
-	public String getProperty(String name)
-			throws AdministratorSourceUnknownPropertyError {
-		// Obtain the value
-		String value = this.getProperty(name, null);
-
-		// Ensure have a value
-		if (value == null) {
-			throw new AdministratorSourceUnknownPropertyError(
-					"Unknown property '" + name + "'", name);
-		}
-
-		// Return the value
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		// Obtain the value
-		String value = this.properties.getProperty(name);
-
-		// Default value if not specified
-		if (value == null) {
-			value = defaultValue;
-		}
-
-		// Return the value
-		return value;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.properties;
-	}
 
 	@Override
 	public ClassLoader getClassLoader() {

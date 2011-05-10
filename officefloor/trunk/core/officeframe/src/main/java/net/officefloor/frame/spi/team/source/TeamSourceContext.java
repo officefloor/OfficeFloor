@@ -18,8 +18,7 @@
 
 package net.officefloor.frame.spi.team.source;
 
-import java.util.Properties;
-
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -27,7 +26,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TeamSourceContext {
+public interface TeamSourceContext extends SourceProperties {
 
 	/**
 	 * Obtains the name of the {@link Team} to be created from the
@@ -37,36 +36,6 @@ public interface TeamSourceContext {
 	 *         {@link TeamSource}.
 	 */
 	String getTeamName();
-
-	/**
-	 * Obtains a required property value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @return Value of the property.
-	 * @throws TeamSourceUnknownPropertyError
-	 *             If property was not configured. Let this propagate as the
-	 *             framework will handle it.
-	 */
-	String getProperty(String name) throws TeamSourceUnknownPropertyError;
-
-	/**
-	 * Obtains the property value or subsequently the default value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param defaultValue
-	 *            Default value if property not specified.
-	 * @return Value of the property or the the default value if not specified.
-	 */
-	String getProperty(String name, String defaultValue);
-
-	/**
-	 * Properties to configure the {@link TeamSource}.
-	 * 
-	 * @return Properties specific for the {@link TeamSource}.
-	 */
-	Properties getProperties();
 
 	/**
 	 * Registers a {@link ProcessContextListener}.

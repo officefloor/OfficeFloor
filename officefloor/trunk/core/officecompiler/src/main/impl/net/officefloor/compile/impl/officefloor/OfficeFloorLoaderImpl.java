@@ -32,9 +32,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorUnknownPropertyError;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 
 /**
  * {@link OfficeFloorLoader} implementation.
@@ -69,8 +69,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		// Instantiate the office floor source
 		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
 				officeFloorSourceClass, OfficeFloorSource.class,
-				LocationType.OFFICE_FLOOR, null, null, null, this.nodeContext
-						.getCompilerIssues());
+				LocationType.OFFICE_FLOOR, null, null, null,
+				this.nodeContext.getCompilerIssues());
 		if (officeFloorSource == null) {
 			return null; // failed to instantiate
 		}
@@ -88,10 +88,11 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ OfficeFloorSourceSpecification.class.getSimpleName()
-					+ " returned from " + officeFloorSourceClass.getName(),
-					null);
+			this.addIssue(
+					"No "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName() + " returned from "
+							+ officeFloorSourceClass.getName(), null);
 			return null; // no specification obtained
 		}
 
@@ -100,11 +101,13 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		try {
 			officeFloorProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ OfficeFloorSourceProperty.class.getSimpleName()
-					+ " instances from "
-					+ OfficeFloorSourceSpecification.class.getSimpleName()
-					+ " for " + officeFloorSourceClass.getName(), ex, null);
+			this.addIssue(
+					"Failed to obtain "
+							+ OfficeFloorSourceProperty.class.getSimpleName()
+							+ " instances from "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName() + " for "
+							+ officeFloorSourceClass.getName(), ex, null);
 			return null; // failed to obtain properties
 		}
 
@@ -116,15 +119,14 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 				// Ensure have the office floor property
 				if (officeFloorProperty == null) {
-					this.addIssue(OfficeFloorSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " is null from "
-							+ OfficeFloorSourceSpecification.class
-									.getSimpleName()
-							+ " for "
-							+ officeFloorSourceClass.getName(), null);
+					this.addIssue(
+							OfficeFloorSourceProperty.class.getSimpleName()
+									+ " "
+									+ i
+									+ " is null from "
+									+ OfficeFloorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ officeFloorSourceClass.getName(), null);
 					return null; // must have complete property details
 				}
 
@@ -133,26 +135,28 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 				try {
 					name = officeFloorProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ OfficeFloorSourceProperty.class.getSimpleName()
-							+ " "
-							+ i
-							+ " from "
-							+ OfficeFloorSourceSpecification.class
-									.getSimpleName() + " for "
-							+ officeFloorSourceClass.getName(), ex, null);
+					this.addIssue(
+							"Failed to get name for "
+									+ OfficeFloorSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ OfficeFloorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ officeFloorSourceClass.getName(), ex,
+							null);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(OfficeFloorSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " provided blank name from "
-							+ OfficeFloorSourceSpecification.class
-									.getSimpleName()
-							+ " for "
-							+ officeFloorSourceClass.getName(), null);
+					this.addIssue(
+							OfficeFloorSourceProperty.class.getSimpleName()
+									+ " "
+									+ i
+									+ " provided blank name from "
+									+ OfficeFloorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ officeFloorSourceClass.getName(), null);
 					return null; // must have complete property details
 				}
 
@@ -161,16 +165,19 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 				try {
 					label = officeFloorProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ OfficeFloorSourceProperty.class.getSimpleName()
-							+ " "
-							+ i
-							+ " ("
-							+ name
-							+ ") from "
-							+ OfficeFloorSourceSpecification.class
-									.getSimpleName() + " for "
-							+ officeFloorSourceClass.getName(), ex, null);
+					this.addIssue(
+							"Failed to get label for "
+									+ OfficeFloorSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " ("
+									+ name
+									+ ") from "
+									+ OfficeFloorSourceSpecification.class
+											.getSimpleName() + " for "
+									+ officeFloorSourceClass.getName(), ex,
+							null);
 					return null; // must have complete property details
 				}
 
@@ -240,16 +247,16 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			officeFloorSource.specifyConfigurationProperties(
 					requiredProperties, sourceContext);
 
-		} catch (OfficeFloorUnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
 					+ officeFloorSourceClass.getName(), officeFloorLocation);
 			return null; // must have property
 
 		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue("Failure obtaining configuration '"
-					+ ex.getLocation() + "'", ex.getCause(),
-					officeFloorLocation);
+			this.addIssue(
+					"Failure obtaining configuration '" + ex.getLocation()
+							+ "'", ex.getCause(), officeFloorLocation);
 			return null; // must not fail in getting configurations
 
 		} catch (Throwable ex) {
@@ -295,16 +302,16 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			// Source the office floor
 			officeFloorSource.sourceOfficeFloor(deployer, sourceContext);
 
-		} catch (OfficeFloorUnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
 					+ officeFloorSourceClass.getName(), officeFloorLocation);
 			return null; // must have property
 
 		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue("Failure obtaining configuration '"
-					+ ex.getLocation() + "'", ex.getCause(),
-					officeFloorLocation);
+			this.addIssue(
+					"Failure obtaining configuration '" + ex.getLocation()
+							+ "'", ex.getCause(), officeFloorLocation);
 			return null; // must not fail in getting configurations
 
 		} catch (LoadTypeError ex) {
@@ -314,11 +321,13 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // must not fail in loading types
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source "
-					+ OfficeFloor.class.getSimpleName() + " from "
-					+ OfficeFloorSource.class.getSimpleName() + " (source="
-					+ officeFloorSourceClass.getName() + ", location="
-					+ officeFloorLocation + ")", ex, officeFloorLocation);
+			this.addIssue(
+					"Failed to source " + OfficeFloor.class.getSimpleName()
+							+ " from "
+							+ OfficeFloorSource.class.getSimpleName()
+							+ " (source=" + officeFloorSourceClass.getName()
+							+ ", location=" + officeFloorLocation + ")", ex,
+					officeFloorLocation);
 			return null; // must be successful
 		}
 

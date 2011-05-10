@@ -21,12 +21,12 @@ package net.officefloor.frame.impl.construct.administrator;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
@@ -978,7 +978,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration
 				.getAdministratorSourceClass(), MockAdministratorSource.class);
 		this.recordReturn(this.configuration, this.configuration
-				.getProperties(), new Properties());
+				.getProperties(), new SourcePropertiesImpl());
 	}
 
 	/**

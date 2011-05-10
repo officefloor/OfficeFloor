@@ -16,19 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.compile.spi.office.source;
+package net.officefloor.frame.spi.source;
 
 /**
  * <p>
- * Indicates a property was not configured within the
- * {@link OfficeSourceContext}.
+ * Indicates a property was not configured within the {@link SourceProperties}.
  * <p>
- * This is a serious error as the {@link OfficeSource} is requiring this
- * property to initialise.
+ * This is a serious error as the source is requiring this property to
+ * initialise and subsequently start.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeUnknownPropertyError extends Error {
+public class UnknownPropertyError extends Error {
 
 	/**
 	 * Name of the unknown property.
@@ -43,8 +42,7 @@ public class OfficeUnknownPropertyError extends Error {
 	 * @param unknownPropertyName
 	 *            Name of the unknown property.
 	 */
-	public OfficeUnknownPropertyError(String message,
-			String unknownPropertyName) {
+	public UnknownPropertyError(String message, String unknownPropertyName) {
 		super(message);
 		this.unknownPropertyName = unknownPropertyName;
 	}
@@ -54,7 +52,7 @@ public class OfficeUnknownPropertyError extends Error {
 	 * 
 	 * @return Name of the unknown property.
 	 */
-	public String getUnknonwnPropertyName() {
+	public String getUnknownPropertyName() {
 		return this.unknownPropertyName;
 	}
 

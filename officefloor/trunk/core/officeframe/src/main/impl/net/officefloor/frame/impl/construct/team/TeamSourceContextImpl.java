@@ -20,30 +20,26 @@ package net.officefloor.frame.impl.construct.team;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * {@link TeamSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamSourceContextImpl implements TeamSourceContext {
+public class TeamSourceContextImpl extends SourcePropertiesImpl implements
+		TeamSourceContext {
 
 	/**
 	 * Name of the {@link Team} to be created from the {@link TeamSource}.
 	 */
 	private final String teamName;
-
-	/**
-	 * {@link Properties} to initialise the {@link TeamSource}.
-	 */
-	private final Properties properties;
 
 	/**
 	 * <p>
@@ -61,11 +57,11 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 	 *            Name of the {@link Team} to be created from the
 	 *            {@link TeamSource}.
 	 * @param properties
-	 *            {@link Properties} to initialise the {@link TeamSource}.
+	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
 	 */
-	public TeamSourceContextImpl(String teamName, Properties properties) {
+	public TeamSourceContextImpl(String teamName, SourceProperties properties) {
+		super(properties);
 		this.teamName = teamName;
-		this.properties = properties;
 	}
 
 	/**
@@ -96,35 +92,6 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 	@Override
 	public String getTeamName() {
 		return this.teamName;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.properties;
-	}
-
-	@Override
-	public String getProperty(String name)
-			throws TeamSourceUnknownPropertyError {
-
-		// Ensure have value
-		String value = this.properties.getProperty(name);
-		if (value == null) {
-			throw new TeamSourceUnknownPropertyError("Unknown property '"
-					+ name + "'", name);
-		}
-
-		// Return the value
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		// Obtain the value
-		String value = this.properties.getProperty(name);
-
-		// Return value (or default if no value)
-		return (value != null ? value : defaultValue);
 	}
 
 	@Override

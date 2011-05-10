@@ -18,23 +18,20 @@
 
 package net.officefloor.compile.impl.section;
 
-import java.util.Properties;
-
-import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -42,17 +39,13 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceContextImpl implements SectionSourceContext {
+public class SectionSourceContextImpl extends SourcePropertiesImpl implements
+		SectionSourceContext {
 
 	/**
 	 * Location of the {@link section}.
 	 */
 	private final String sectionLocation;
-
-	/**
-	 * {@link PropertyList}.
-	 */
-	private final PropertyList propertyList;
 
 	/**
 	 * {@link NodeContext}.
@@ -64,15 +57,13 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	 * 
 	 * @param sectionLocation
 	 *            Location of the {@link section}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionSourceContextImpl(String sectionLocation,
 			PropertyList propertyList, NodeContext context) {
+		super(new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
-		this.propertyList = propertyList;
 		this.context = context;
 	}
 
@@ -94,36 +85,6 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 			// Propagate failure to section loader
 			throw new ConfigurationContextPropagateError(location, ex);
 		}
-	}
-
-	@Override
-	public String[] getPropertyNames() {
-		return this.propertyList.getPropertyNames();
-	}
-
-	@Override
-	public String getProperty(String name) throws SectionUnknownPropertyError {
-		String value = this.getProperty(name, null);
-		if (value == null) {
-			throw new SectionUnknownPropertyError("Unknown property '" + name
-					+ "'", name);
-		}
-		return value;
-	}
-
-	@Override
-	public String getProperty(String name, String defaultValue) {
-		Property property = this.propertyList.getProperty(name);
-		String value = (property != null ? property.getValue() : null);
-		if (CompileUtil.isBlank(value)) {
-			return defaultValue;
-		}
-		return value;
-	}
-
-	@Override
-	public Properties getProperties() {
-		return this.propertyList.getProperties();
 	}
 
 	@Override

@@ -18,8 +18,6 @@
 
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -27,10 +25,11 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
+import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceUnknownPropertyError;
 
 /**
  * Raw {@link Team} meta-data implementation.
@@ -92,8 +91,9 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class
-					.getSimpleName(), "Team added without a name");
+			issues.addIssue(AssetType.OFFICE_FLOOR,
+					OfficeFloor.class.getSimpleName(),
+					"Team added without a name");
 			return null; // can not carry on
 		}
 
@@ -116,7 +116,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 		ProcessContextListener[] processContextListeners;
 		try {
 			// Initialise the team source
-			Properties properties = configuration.getProperties();
+			SourceProperties properties = configuration.getProperties();
 			TeamSourceContextImpl context = new TeamSourceContextImpl(teamName,
 					properties);
 			teamSource.init(context);
@@ -125,10 +125,10 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			processContextListeners = context
 					.lockAndGetProcessContextListeners();
 
-		} catch (TeamSourceUnknownPropertyError ex) {
+		} catch (UnknownPropertyError ex) {
 			// Indicate an unknown property
 			issues.addIssue(AssetType.TEAM, teamName, "Must specify property '"
-					+ ex.getUnkonwnPropertyName() + "'");
+					+ ex.getUnknownPropertyName() + "'");
 			return null; // can not carry on
 
 		} catch (Throwable ex) {
