@@ -11,8 +11,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
 Export-Package: net.officefloor.eclipse.socket,
- net.officefloor.model.service,
- net.officefloor.model.woof,
  net.officefloor.plugin.socket.server,
  net.officefloor.plugin.socket.server.http,
  net.officefloor.plugin.socket.server.http.conversation,
@@ -59,8 +57,7 @@ Export-Package: net.officefloor.eclipse.socket,
  net.officefloor.plugin.web.http.template.parse,
  net.officefloor.plugin.web.http.template.route,
  net.officefloor.plugin.web.http.template.section,
- net.officefloor.plugin.web.http.tokenise,
- net.officefloor.plugin.woof
+ net.officefloor.plugin.web.http.tokenise
 Bundle-ClassPath: .,
  officeplugin_socket-1.2.0.jar,
  officeplugin_web-1.2.0.jar
