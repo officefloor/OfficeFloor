@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
@@ -48,4 +49,15 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface HttpSessionStateful {
+
+	/**
+	 * Allows specifying the name to bind the object into the
+	 * {@link HttpSession}.
+	 * 
+	 * @return Name to bind the object into the {@link HttpSession}. The blank
+	 *         default value indicates for the {@link ManagedObject} to assign
+	 *         its own unique value.
+	 */
+	String value() default "";
+
 }

@@ -133,9 +133,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			for (Class<?> parameterType : method.getParameterTypes()) {
 
 				// HTTP Session Stateful
-				if (parameterType
-						.isAnnotationPresent(HttpSessionStateful.class)) {
-					this.addHttpSessionObject(parameterType);
+				HttpSessionStateful sessionAnnotation = parameterType
+						.getAnnotation(HttpSessionStateful.class);
+				if (sessionAnnotation != null) {
+					this.addHttpSessionObject(parameterType,
+							sessionAnnotation.value());
 				}
 
 				// HTTP Parameters
@@ -156,7 +158,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpSessionObject(Class<?> objectClass) {
+	public AutoWireObject addHttpSessionObject(Class<?> objectClass,
+			String bindName) {
 
 		// Determine if already registered the type
 		AutoWireObject object = this.httpSessionObjects.get(objectClass);
@@ -170,10 +173,20 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		object.addProperty(
 				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
+		if ((bindName != null) && (bindName.trim().length() > 0)) {
+			object.addProperty(
+					HttpSessionClassManagedObjectSource.PROPERTY_BIND_NAME,
+					bindName);
+		}
 		this.httpSessionObjects.put(objectClass, object);
 
 		// Return the object
 		return object;
+	}
+
+	@Override
+	public AutoWireObject addHttpSessionObject(Class<?> objectClass) {
+		return this.addHttpSessionObject(objectClass, null);
 	}
 
 	@Override
