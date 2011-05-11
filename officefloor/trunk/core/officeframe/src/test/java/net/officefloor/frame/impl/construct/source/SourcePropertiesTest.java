@@ -135,4 +135,18 @@ public class SourcePropertiesTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect four", "4", clone.getProperty("four"));
 	}
 
+	/**
+	 * Ensure able to initialise with <code>null</code> value.
+	 */
+	public void testInitialiseWithNullValue() {
+		this.properties.addProperty("blank", null);
+
+		// Initialise from properties
+		SourcePropertiesImpl clone = new SourcePropertiesImpl(this.properties);
+
+		// Ensure null value loaded
+		Properties props = clone.getProperties();
+		assertTrue("Ensure load null value", props.keySet().contains("blank"));
+	}
+
 }
