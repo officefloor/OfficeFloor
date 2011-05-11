@@ -51,7 +51,8 @@ public class SourcePropertiesImpl implements SourceProperties {
 	 */
 	public SourcePropertiesImpl(SourceProperties sourceProperties) {
 		for (String name : sourceProperties.getPropertyNames()) {
-			String value = sourceProperties.getProperty(name);
+			// Allow value to be not available
+			String value = sourceProperties.getProperty(name, null);
 			this.properties.add(new PropertyStruct(name, value));
 		}
 	}
@@ -119,7 +120,8 @@ public class SourcePropertiesImpl implements SourceProperties {
 		// Load up the properties
 		Properties props = new Properties();
 		for (PropertyStruct property : this.properties) {
-			props.setProperty(property.name, property.value);
+			props.setProperty(property.name, (property.value == null ? ""
+					: property.value));
 		}
 
 		// Return the properties
