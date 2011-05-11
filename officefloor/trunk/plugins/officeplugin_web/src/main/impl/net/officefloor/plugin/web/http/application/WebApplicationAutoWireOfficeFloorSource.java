@@ -52,9 +52,19 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	private final List<HttpTemplateAutoWireSection> httpTemplates = new LinkedList<HttpTemplateAutoWireSection>();
 
 	/**
+	 * Registry of HTTP Application Object class to its {@link AutoWireObject}.
+	 */
+	private final Map<Class<?>, AutoWireObject> httpApplicationObjects = new HashMap<Class<?>, AutoWireObject>();
+
+	/**
 	 * Registry of HTTP Session Object class to its {@link AutoWireObject}.
 	 */
 	private final Map<Class<?>, AutoWireObject> httpSessionObjects = new HashMap<Class<?>, AutoWireObject>();
+
+	/**
+	 * Registry of HTTP Request Object class to its {@link AutoWireObject}.
+	 */
+	private final Map<Class<?>, AutoWireObject> httpRequestObjects = new HashMap<Class<?>, AutoWireObject>();
 
 	/**
 	 * Registry of HTTP Parameters Object class to its {@link AutoWireObject}.
@@ -132,12 +142,28 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		for (Method method : templateLogicClass.getMethods()) {
 			for (Class<?> parameterType : method.getParameterTypes()) {
 
+				// HTTP Application Stateful
+				HttpApplicationStateful applicationAnnotation = parameterType
+						.getAnnotation(HttpApplicationStateful.class);
+				if (applicationAnnotation != null) {
+					this.addHttpApplicationObject(parameterType,
+							applicationAnnotation.value());
+				}
+
 				// HTTP Session Stateful
 				HttpSessionStateful sessionAnnotation = parameterType
 						.getAnnotation(HttpSessionStateful.class);
 				if (sessionAnnotation != null) {
 					this.addHttpSessionObject(parameterType,
 							sessionAnnotation.value());
+				}
+
+				// HTTP Request Stateful
+				HttpRequestStateful requestAnnotation = parameterType
+						.getAnnotation(HttpRequestStateful.class);
+				if (requestAnnotation != null) {
+					this.addHttpRequestObject(parameterType,
+							requestAnnotation.value());
 				}
 
 				// HTTP Parameters
@@ -155,6 +181,39 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
 			Class<?> templateLogicClass) {
 		return this.addHttpTemplate(templatePath, templateLogicClass, null);
+	}
+
+	@Override
+	public AutoWireObject addHttpApplicationObject(Class<?> objectClass,
+			String bindName) {
+
+		// Determine if already registered the type
+		AutoWireObject object = this.httpApplicationObjects.get(objectClass);
+		if (object != null) {
+			return object; // return the already registered object
+		}
+
+		// Not registered, so register
+		object = this.addManagedObject(
+				HttpApplicationClassManagedObjectSource.class, null,
+				objectClass);
+		object.addProperty(
+				HttpApplicationClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				objectClass.getName());
+		if ((bindName != null) && (bindName.trim().length() > 0)) {
+			object.addProperty(
+					HttpApplicationClassManagedObjectSource.PROPERTY_BIND_NAME,
+					bindName);
+		}
+		this.httpApplicationObjects.put(objectClass, object);
+
+		// Return the object
+		return object;
+	}
+
+	@Override
+	public AutoWireObject addHttpApplicationObject(Class<?> objectClass) {
+		return this.addHttpApplicationObject(objectClass, null);
 	}
 
 	@Override
@@ -187,6 +246,38 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	@Override
 	public AutoWireObject addHttpSessionObject(Class<?> objectClass) {
 		return this.addHttpSessionObject(objectClass, null);
+	}
+
+	@Override
+	public AutoWireObject addHttpRequestObject(Class<?> objectClass,
+			String bindName) {
+
+		// Determine if already registered the type
+		AutoWireObject object = this.httpRequestObjects.get(objectClass);
+		if (object != null) {
+			return object; // return the already registered object
+		}
+
+		// Not registered, so register
+		object = this.addManagedObject(
+				HttpRequestClassManagedObjectSource.class, null, objectClass);
+		object.addProperty(
+				HttpRequestClassManagedObjectSource.PROPERTY_CLASS_NAME,
+				objectClass.getName());
+		if ((bindName != null) && (bindName.trim().length() > 0)) {
+			object.addProperty(
+					HttpRequestClassManagedObjectSource.PROPERTY_BIND_NAME,
+					bindName);
+		}
+		this.httpRequestObjects.put(objectClass, object);
+
+		// Return the object
+		return object;
+	}
+
+	@Override
+	public AutoWireObject addHttpRequestObject(Class<?> objectClass) {
+		return this.addHttpRequestObject(objectClass, null);
 	}
 
 	@Override

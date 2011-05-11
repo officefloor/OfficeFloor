@@ -82,6 +82,33 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 
 	/**
 	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpApplicationState}.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @param bindName
+	 *            Name to bind the object within the
+	 *            {@link HttpApplicationState}.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpApplicationObject(Class<?> objectClass,
+			String bindName);
+
+	/**
+	 * <p>
+	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpApplicationState}.
+	 * <p>
+	 * The bound name is arbitrarily chosen but will be unique for the object.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpApplicationObject(Class<?> objectClass);
+
+	/**
+	 * Adds an object to be lazily created and stored within the
 	 * {@link HttpSession}.
 	 * 
 	 * @param objectClass
@@ -104,6 +131,31 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * @return {@link AutoWireObject}.
 	 */
 	AutoWireObject addHttpSessionObject(Class<?> objectClass);
+
+	/**
+	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpRequestState}.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @param bindName
+	 *            Name to bind the object within the {@link HttpRequestState}.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpRequestObject(Class<?> objectClass, String bindName);
+
+	/**
+	 * <p>
+	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpRequestState}.
+	 * <p>
+	 * The bound name is arbitrarily chosen but will be unique for the object.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpRequestObject(Class<?> objectClass);
 
 	/**
 	 * Adds an object to be lazily created and loaded with the HTTP parameters.

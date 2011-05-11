@@ -126,6 +126,30 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Mock logic for the template.
+	 */
+	public static class MockTemplateLogic {
+
+		/**
+		 * Submit handler.
+		 * 
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		@NextTask("doNothing")
+		public void submit(ServerHttpConnection connection) throws IOException {
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"submitted", connection);
+		}
+
+		/**
+		 * Do nothing after submit.
+		 */
+		public void doNothing() {
+		}
+	}
+
+	/**
 	 * Ensure issue if attempt to add more than one HTTP template for a URI.
 	 */
 	public void testMultipleTemplatesWithSameUri() throws Exception {
@@ -293,6 +317,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Provides mock functionality to link to a HTTP template.
+	 */
+	public static class MockLinkHttpTemplate {
+		@NextTask("http-template")
+		public void service(ServerHttpConnection connection) throws IOException {
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"LINK to ", connection);
+		}
+	}
+
+	/**
 	 * Ensure able to link to resource.
 	 */
 	public void testLinkToResource() throws Exception {
@@ -306,6 +341,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure link to the HTTP template
 		this.assertHttpRequest("/test", 200, "LINK to RESOURCE");
+	}
+
+	/**
+	 * Provides mock functionality to link to a resource.
+	 */
+	public static class MockLinkResource {
+		@NextTask("resource")
+		public void service(ServerHttpConnection connection) throws IOException {
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"LINK to ", connection);
+		}
 	}
 
 	/**
@@ -327,6 +373,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Ensure link escalation to template
 		this.assertHttpRequest("/test", 200,
 				"Escalated to /handler.links-submit.task");
+	}
+
+	/**
+	 * Section class that fails and provides an {@link Escalation}.
+	 */
+	public static class FailingSection {
+		public void task(ServerHttpConnection connection) throws Exception {
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"Escalated to ", connection);
+			throw new SQLException("Test failure");
+		}
 	}
 
 	/**
@@ -365,6 +422,31 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Provides mock template logic for the HTTP Parameters Object.
+	 */
+	public static class MockHttpParametersObjectTemplate {
+		public MockHttpParametersObject getTemplate(
+				MockHttpParametersObject object) {
+			return object;
+		}
+	}
+
+	/**
+	 * Mock HTTP Parameters Object.
+	 */
+	public static class MockHttpParametersObject {
+		private String text;
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
+	}
+
+	/**
 	 * Ensure {@link HttpParameters} is honoured for templates.
 	 */
 	public void testAnnotatedHttpParameters() throws Exception {
@@ -378,6 +460,32 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure provide HTTP parameters
 		this.assertHttpRequest("/template?text=VALUE", 200, "VALUE");
+	}
+
+	/**
+	 * Provides mock template logic for the HTTP Parameters Object.
+	 */
+	public static class MockAnnotatedHttpParametersTemplate {
+		public MockAnnotatedHttpParameters getTemplate(
+				MockAnnotatedHttpParameters object) {
+			return object;
+		}
+	}
+
+	/**
+	 * Mock HTTP Parameters Object.
+	 */
+	@HttpParameters
+	public static class MockAnnotatedHttpParameters {
+		private String text;
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
 	}
 
 	/**
@@ -413,6 +521,27 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Provides mock template logic for Http Session Object.
+	 */
+	public static class MockHttpSessionObjectTemplate {
+		public MockHttpSessionObject getTemplate(MockHttpSessionObject object) {
+			object.count++; // increment count to indicate maintaining state
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Session Object.
+	 */
+	public static class MockHttpSessionObject implements Serializable {
+		public int count = 0;
+
+		public int getCount() {
+			return count;
+		}
+	}
+
+	/**
 	 * Ensure {@link HttpSessionStateful} annotation is honoured for templates.
 	 */
 	public void testHttpSessionStatefulAnnotation() throws Exception {
@@ -444,6 +573,31 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Provides mock template logic for using the {@link HttpSessionStateful}
+	 * annotation.
+	 */
+	public static class MockAnnotatedHttpSessionStatefulTemplate {
+		public MockAnnotatedHttpSessionStatefulObject getTemplate(
+				MockAnnotatedHttpSessionStatefulObject object) {
+			object.count++; // increment count to indicate maintaining state
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Session Object as annotated.
+	 */
+	@HttpSessionStateful
+	public static class MockAnnotatedHttpSessionStatefulObject implements
+			Serializable {
+		public int count = 0;
+
+		public int getCount() {
+			return count;
+		}
+	}
+
+	/**
 	 * Ensure can override the binding name to the {@link HttpSession}.
 	 */
 	public void testHttpSessionStatefulAnnotationOverridingBoundName()
@@ -470,6 +624,156 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Provides mock template logic for validating the overriding binding name
+	 * for the {@link HttpSession} object.
+	 */
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate {
+		public MockAnnotatedOverriddenBindNameHttpSessionStatefulObject getTemplate(
+				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object,
+				HttpSession session) {
+
+			// Ensure object bound under annotated name within the session
+			Object sessionObject = session.getAttribute("BIND");
+			assertEquals("Should be same object", object, sessionObject);
+
+			// Return for rendering
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Session Object with overridden binding name.
+	 */
+	@HttpSessionStateful("BIND")
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject {
+		public int getCount() {
+			return 1;
+		}
+	}
+
+	/**
+	 * Ensure able to utilise the {@link HttpRequestState} object.
+	 */
+	public void testHttpRequestObject() throws Exception {
+
+		final String URI = "/template.links-submit.task";
+
+		// Provide HTTP Request State
+		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class,
+				null, HttpRequestState.class);
+
+		// Add the template
+		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
+				MockHttpRequestStateTemplate.class, "template");
+
+		// No HTTP request state object as should be detected and added
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure same object (test within template logic)
+		this.assertHttpRequest(URI, 200, "maintained state-" + URI);
+	}
+
+	/**
+	 * Provides mock template logic for validating the {@link HttpRequestState}.
+	 */
+	public static class MockHttpRequestStateTemplate {
+
+		public void submit(MockHttpRequestStateObject object,
+				HttpRequestState state) {
+
+			// Ensure object bound under annotated name within the request state
+			Object requestObject = state.getAttribute("BIND");
+			assertEquals("Should be same object", object, requestObject);
+
+			// Specify value as should maintain state through request
+			object.text = "maintained state";
+		}
+
+		public MockHttpRequestStateObject getTemplate(
+				MockHttpRequestStateObject object) {
+			// Value should be specified in submit
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Request State Object with overridden binding name.
+	 */
+	@HttpRequestStateful("BIND")
+	public static class MockHttpRequestStateObject {
+
+		public String text = "not specified";
+
+		public String getText() {
+			return this.text;
+		}
+	}
+
+	/**
+	 * Ensure able to utilise the HTTP Application object.
+	 */
+	public void testHttpApplicationObject() throws Exception {
+
+		final String URI = "/template.links-submit.task";
+
+		// Provide HTTP Application State
+		this.source.addManagedObject(
+				HttpApplicationStateManagedObjectSource.class, null,
+				HttpApplicationState.class);
+
+		// Add the template
+		this.source.addHttpTemplate(this.getClassPath("HttpStateObject.ofp"),
+				MockHttpApplicationStateTemplate.class, "template");
+
+		// No HTTP application state object as should be detected and added
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure same object (test within template logic)
+		this.assertHttpRequest(URI, 200, "maintained state-" + URI);
+	}
+
+	/**
+	 * Provides mock template logic for validating the
+	 * {@link HttpApplicationState}.
+	 */
+	public static class MockHttpApplicationStateTemplate {
+
+		public void submit(MockHttpApplicationStateObject object,
+				HttpApplicationState state) {
+
+			// Ensure object bound under annotated name within application state
+			Object applicationObject = state.getAttribute("BIND");
+			assertEquals("Should be same object", object, applicationObject);
+
+			// Specify value as should maintain state through application
+			object.text = "maintained state";
+		}
+
+		public MockHttpApplicationStateObject getTemplate(
+				MockHttpApplicationStateObject object) {
+			// Value should be specified in submit
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Application State Object with overridden binding name.
+	 */
+	@HttpApplicationStateful("BIND")
+	public static class MockHttpApplicationStateObject {
+
+		public String text = "not specified";
+
+		public String getText() {
+			return this.text;
+		}
+	}
+
+	/**
 	 * Ensure able to override the non-routed servicing.
 	 */
 	public void testOverrideNonHandledServicing() throws Exception {
@@ -486,6 +790,18 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure override non-routed servicing
 		this.assertHttpRequest("/unhandled", 200, "NON_ROUTED - /unhandled");
+	}
+
+	/**
+	 * Provides mock functionality of non-routed servicing.
+	 */
+	public static class MockNonRoutedServicer {
+		@NextTask("send")
+		public void service(ServerHttpConnection connection) throws IOException {
+			String uri = connection.getHttpRequest().getRequestURI();
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
+					"NON_ROUTED - " + uri, connection);
+		}
 	}
 
 	/**
@@ -563,200 +879,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				.getBody().getOutputStream());
 		writer.append(response);
 		writer.flush();
-	}
-
-	/**
-	 * Mock logic for the template.
-	 */
-	public static class MockTemplateLogic {
-
-		/**
-		 * Submit handler.
-		 * 
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 */
-		@NextTask("doNothing")
-		public void submit(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"submitted", connection);
-		}
-
-		/**
-		 * Do nothing after submit.
-		 */
-		public void doNothing() {
-		}
-	}
-
-	/**
-	 * Provides mock functionality of non-routed servicing.
-	 */
-	public static class MockNonRoutedServicer {
-		@NextTask("send")
-		public void service(ServerHttpConnection connection) throws IOException {
-			String uri = connection.getHttpRequest().getRequestURI();
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"NON_ROUTED - " + uri, connection);
-		}
-	}
-
-	/**
-	 * Provides mock functionality to link to a HTTP template.
-	 */
-	public static class MockLinkHttpTemplate {
-		@NextTask("http-template")
-		public void service(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"LINK to ", connection);
-		}
-	}
-
-	/**
-	 * Provides mock functionality to link to a resource.
-	 */
-	public static class MockLinkResource {
-		@NextTask("resource")
-		public void service(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"LINK to ", connection);
-		}
-	}
-
-	/**
-	 * Section class that fails and provides an {@link Escalation}.
-	 */
-	public static class FailingSection {
-		public void task(ServerHttpConnection connection) throws Exception {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"Escalated to ", connection);
-			throw new SQLException("Test failure");
-		}
-	}
-
-	/**
-	 * Provides mock template logic for the HTTP Parameters Object.
-	 */
-	public static class MockHttpParametersObjectTemplate {
-		public MockHttpParametersObject getTemplate(
-				MockHttpParametersObject object) {
-			return object;
-		}
-	}
-
-	/**
-	 * Mock HTTP Parameters Object.
-	 */
-	public static class MockHttpParametersObject {
-		private String text;
-
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return this.text;
-		}
-	}
-
-	/**
-	 * Provides mock template logic for the HTTP Parameters Object.
-	 */
-	public static class MockAnnotatedHttpParametersTemplate {
-		public MockAnnotatedHttpParameters getTemplate(
-				MockAnnotatedHttpParameters object) {
-			return object;
-		}
-	}
-
-	/**
-	 * Mock HTTP Parameters Object.
-	 */
-	@HttpParameters
-	public static class MockAnnotatedHttpParameters {
-		private String text;
-
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return this.text;
-		}
-	}
-
-	/**
-	 * Provides mock template logic for Http Session Object.
-	 */
-	public static class MockHttpSessionObjectTemplate {
-		public MockHttpSessionObject getTemplate(MockHttpSessionObject object) {
-			object.count++; // increment count to indicate maintaining state
-			return object;
-		}
-	}
-
-	/**
-	 * Mock Http Session Object.
-	 */
-	public static class MockHttpSessionObject implements Serializable {
-		public int count = 0;
-
-		public int getCount() {
-			return count;
-		}
-	}
-
-	/**
-	 * Provides mock template logic for using the {@link HttpSessionStateful}
-	 * annotation.
-	 */
-	public static class MockAnnotatedHttpSessionStatefulTemplate {
-		public MockAnnotatedHttpSessionStatefulObject getTemplate(
-				MockAnnotatedHttpSessionStatefulObject object) {
-			object.count++; // increment count to indicate maintaining state
-			return object;
-		}
-	}
-
-	/**
-	 * Mock Http Session Object as annotated.
-	 */
-	@HttpSessionStateful
-	public static class MockAnnotatedHttpSessionStatefulObject implements
-			Serializable {
-		public int count = 0;
-
-		public int getCount() {
-			return count;
-		}
-	}
-
-	/**
-	 * Provides mock template logic for validating the overriding binding name
-	 * for the {@link HttpSession} object.
-	 */
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate {
-		public MockAnnotatedOverriddenBindNameHttpSessionStatefulObject getTemplate(
-				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object,
-				HttpSession session) {
-
-			// Ensure object bound under annotated name within the session
-			Object sessionObject = session.getAttribute("BIND");
-			assertEquals("Should be same object", object, sessionObject);
-
-			// Return for rendering
-			return object;
-		}
-	}
-
-	/**
-	 * Mock Http Session Object with overridden binding name.
-	 */
-	@HttpSessionStateful("BIND")
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject {
-		public int getCount() {
-			return 1;
-		}
 	}
 
 }
