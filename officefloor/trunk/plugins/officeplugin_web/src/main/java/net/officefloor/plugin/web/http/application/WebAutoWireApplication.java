@@ -86,6 +86,21 @@ public interface WebAutoWireApplication extends AutoWireApplication {
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
+	 * @param bindName
+	 *            Name to bind the object within the {@link HttpSession}.
+	 * @return {@link AutoWireObject}.
+	 */
+	AutoWireObject addHttpSessionObject(Class<?> objectClass, String bindName);
+
+	/**
+	 * <p>
+	 * Adds an object to be lazily created and stored within the
+	 * {@link HttpSession}.
+	 * <p>
+	 * The bound name is arbitrarily chosen but will be unique for the object.
+	 * 
+	 * @param objectClass
+	 *            Class of the object.
 	 * @return {@link AutoWireObject}.
 	 */
 	AutoWireObject addHttpSessionObject(Class<?> objectClass);

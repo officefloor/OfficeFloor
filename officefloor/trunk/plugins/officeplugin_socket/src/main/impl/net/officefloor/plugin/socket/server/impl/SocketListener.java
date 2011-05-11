@@ -41,7 +41,7 @@ import net.officefloor.plugin.stream.InputBufferStream;
 
 /**
  * Listens to {@link Socket} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class SocketListener<CH extends ConnectionHandler>
@@ -106,7 +106,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param selectorFactory
 	 *            {@link SelectorFactory}.
 	 * @param server
@@ -124,7 +124,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Registers a {@link Connection} with this {@link SocketListener}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ConnectionImpl}.
 	 * @return <code>true</code> if registered, otherwise <code>false</code>.
@@ -333,9 +333,14 @@ public class SocketListener<CH extends ConnectionHandler>
 						// Terminate connection on failure
 						this.terminateConnection(key, connection);
 
-						// TODO how to handle exception issues
-						System.err.println("TODO handle failure of connection");
-						ex.printStackTrace();
+						// Indicate failure details
+						if (ex instanceof IOException) {
+							// I/O exception (likely peer closing connection)
+							System.err.println("WARNING: " + ex.getMessage());
+						} else {
+							// Another error so provide full details
+							ex.printStackTrace();
+						}
 					}
 				}
 			}
@@ -372,7 +377,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Closes the {@link Connection}.
-	 *
+	 * 
 	 * @param key
 	 *            {@link SelectionKey} for the {@link Connection}.
 	 * @param connection
@@ -402,7 +407,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Terminates the {@link Connection} immediately.
-	 *
+	 * 
 	 * @param key
 	 *            {@link SelectionKey} for the {@link Connection}.
 	 * @param connection
@@ -426,7 +431,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Listens to the {@link Connection}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link Connection}.
 	 * @throws IOException
@@ -457,7 +462,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Reads data from the {@link Connection}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ConnectionImpl}.
 	 * @return Number of bytes read.
@@ -508,7 +513,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Writes data to the {@link Connection}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ConnectionImpl}.
 	 * @return Number of bytes written.
@@ -578,7 +583,7 @@ public class SocketListener<CH extends ConnectionHandler>
 
 	/**
 	 * Resets the context for the {@link Connection}.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link ConnectionImpl} currently being processed.
 	 */
@@ -638,8 +643,8 @@ public class SocketListener<CH extends ConnectionHandler>
 	@Override
 	public void processRequest(Object attachment) throws IOException {
 		// Have the server process the request
-		this.server.processRequest(this.contextConnection
-				.getConnectionHandler(), attachment);
+		this.server.processRequest(
+				this.contextConnection.getConnectionHandler(), attachment);
 	}
 
 	/*

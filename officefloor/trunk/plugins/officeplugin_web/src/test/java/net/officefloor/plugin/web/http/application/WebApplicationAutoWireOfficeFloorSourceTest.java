@@ -444,6 +444,32 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Ensure can override the binding name to the {@link HttpSession}.
+	 */
+	public void testHttpSessionStatefulAnnotationOverridingBoundName()
+			throws Exception {
+
+		// Provide HTTP Session
+		this.source.addManagedObject(HttpSessionManagedObjectSource.class,
+				null, HttpSession.class).setTimeout(10 * 1000);
+
+		// Add the template
+		this.source
+				.addHttpTemplate(
+						this.getClassPath("StatefulObject.ofp"),
+						MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class,
+						"template");
+
+		// No HTTP Session object as should be detected and added
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Ensure same object (test within template logic)
+		this.assertHttpRequest("/template", 200, "1");
+	}
+
+	/**
 	 * Ensure able to override the non-routed servicing.
 	 */
 	public void testOverrideNonHandledServicing() throws Exception {
@@ -483,14 +509,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			HttpGet request = new HttpGet(url);
 			HttpResponse response = this.client.execute(request);
 
-			// Ensure correct response status
-			assertEquals("Should be successful", expectedResponseStatus,
-					response.getStatusLine().getStatusCode());
-
 			// Ensure obtained as expected
 			String actualResponseBody = MockHttpServer.getEntityBody(response);
 			assertEquals("Incorrect response for URL '" + url + "'",
 					expectedResponseBody, actualResponseBody);
+
+			// Ensure correct response status
+			assertEquals("Should be successful", expectedResponseStatus,
+					response.getStatusLine().getStatusCode());
 
 		} catch (Exception ex) {
 			throw fail(ex);
@@ -702,6 +728,34 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		public int getCount() {
 			return count;
+		}
+	}
+
+	/**
+	 * Provides mock template logic for validating the overriding binding name
+	 * for the {@link HttpSession} object.
+	 */
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate {
+		public MockAnnotatedOverriddenBindNameHttpSessionStatefulObject getTemplate(
+				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object,
+				HttpSession session) {
+
+			// Ensure object bound under annotated name within the session
+			Object sessionObject = session.getAttribute("BIND");
+			assertEquals("Should be same object", object, sessionObject);
+
+			// Return for rendering
+			return object;
+		}
+	}
+
+	/**
+	 * Mock Http Session Object with overridden binding name.
+	 */
+	@HttpSessionStateful("BIND")
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject {
+		public int getCount() {
+			return 1;
 		}
 	}
 
