@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
@@ -157,8 +158,9 @@ public class HttpTemplateWorkSourceExtension
 		// Obtain the template file
 		HttpTemplate template;
 		try {
-			template = HttpTemplateWorkSource.getHttpTemplate(properties
-					.getProperties(), context.getClassLoader());
+			template = HttpTemplateWorkSource.getHttpTemplate(
+					new PropertyListSourceProperties(properties),
+					context.getClassLoader());
 		} catch (FileNotFoundException ex) {
 			// No file so no properties
 			return;
