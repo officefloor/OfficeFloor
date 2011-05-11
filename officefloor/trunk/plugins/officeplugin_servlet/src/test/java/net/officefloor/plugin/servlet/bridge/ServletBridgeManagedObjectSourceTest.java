@@ -47,6 +47,20 @@ import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * Ensure the dependency annotation type names are correct.
+	 */
+	public void testDependencyAnnotationTypeNames() {
+		assertEquals(
+				"Incorrect Resource",
+				Resource.class.getName(),
+				ServletBridgeManagedObjectSource.DEPENDENCY_ANNOTATION_TYPE_NAMES[0]);
+		assertEquals(
+				"Incorrect EJB",
+				EJB.class.getName(),
+				ServletBridgeManagedObjectSource.DEPENDENCY_ANNOTATION_TYPE_NAMES[1]);
+	}
+
+	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {

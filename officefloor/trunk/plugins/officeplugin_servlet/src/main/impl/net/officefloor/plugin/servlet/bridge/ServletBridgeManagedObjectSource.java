@@ -18,13 +18,12 @@
 package net.officefloor.plugin.servlet.bridge;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +61,14 @@ public class ServletBridgeManagedObjectSource
 	public static enum FlowKeys {
 		SERVICE
 	}
+
+	/**
+	 * Type names for the dependency annotations. Using the qualified name
+	 * rather than the class name as some dependencies such as EJBs may not have
+	 * the annotation class available within the class path.
+	 */
+	public static final String[] DEPENDENCY_ANNOTATION_TYPE_NAMES = new String[] {
+			"javax.annotation.Resource", "javax.ejb.EJB" };
 
 	/**
 	 * Name of property identifying the instance of the {@link Servlet}.
@@ -145,10 +152,23 @@ public class ServletBridgeManagedObjectSource
 			// Interrogate fields for injected dependencies
 			for (Field field : clazz.getDeclaredFields()) {
 
-				// Ensure is an injected dependency
-				if (field.isAnnotationPresent(Resource.class)
-						|| field.isAnnotationPresent(EJB.class)) {
+				// Determine if a dependency annotation
+				boolean isDependency = false;
+				IS_DEPENDENCY: for (Annotation annotation : field
+						.getAnnotations()) {
+					String annotationTypeName = annotation.annotationType()
+							.getName();
+					for (String dependencyAnnotationTypeName : DEPENDENCY_ANNOTATION_TYPE_NAMES) {
+						if (dependencyAnnotationTypeName
+								.equals(annotationTypeName)) {
+							isDependency = true; // annotated as dependency
+							break IS_DEPENDENCY;
+						}
+					}
+				}
 
+				// Register if dependency
+				if (isDependency) {
 					// Register the field as injected dependency
 					Class<?> dependencyType = field.getType();
 					injectedDependencies.put(dependencyType, field);
