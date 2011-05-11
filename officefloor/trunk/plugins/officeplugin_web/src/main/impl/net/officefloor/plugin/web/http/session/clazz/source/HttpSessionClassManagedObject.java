@@ -45,6 +45,11 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 	private final Class<?> objectClass;
 
 	/**
+	 * Specific name to bind the object into the {@link HttpSession}.
+	 */
+	private final String bindName;
+
+	/**
 	 * Name to bind the object to the {@link HttpSession}.
 	 */
 	private String boundName;
@@ -59,9 +64,12 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 	 * 
 	 * @param objectClass
 	 *            Class of the object.
+	 * @param bindName
+	 *            Specific name to bind the object into the {@link HttpSession}.
 	 */
-	public HttpSessionClassManagedObject(Class<?> objectClass) {
+	public HttpSessionClassManagedObject(Class<?> objectClass, String bindName) {
 		this.objectClass = objectClass;
+		this.bindName = bindName;
 	}
 
 	/*
@@ -70,7 +78,9 @@ public class HttpSessionClassManagedObject implements NameAwareManagedObject,
 
 	@Override
 	public void setBoundManagedObjectName(String boundManagedObjectName) {
-		this.boundName = boundManagedObjectName;
+		// Use bind name in preference to managed object name
+		this.boundName = (this.bindName != null ? this.bindName
+				: boundManagedObjectName);
 	}
 
 	@Override

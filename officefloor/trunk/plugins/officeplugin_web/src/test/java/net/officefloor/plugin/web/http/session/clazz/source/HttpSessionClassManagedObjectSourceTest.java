@@ -69,22 +69,43 @@ public class HttpSessionClassManagedObjectSourceTest extends
 	}
 
 	/**
-	 * Ensure can load the {@link ManagedObject}.
+	 * Ensure can use the {@link ManagedObject} name.
 	 */
-	public void testLoad() throws Throwable {
+	public void testUseManagedObjectName() throws Throwable {
+		this.doTest(null);
+	}
 
-		final String BOUND_NAME = "BOUND";
+	/**
+	 * Ensure can override binding name.
+	 */
+	public void testOverrideBindingName() throws Throwable {
+		this.doTest("OVERRIDDEN");
+	}
+
+	/**
+	 * Undertakes the test to use the {@link HttpSession}.
+	 * 
+	 * @param boundName
+	 *            Name to bind object within {@link HttpSession}.
+	 *            <code>null</code> to use {@link ManagedObject} name.
+	 */
+	public void doTest(String boundName) throws Throwable {
+
 		final HttpSession httpSession = this.createMock(HttpSession.class);
+
+		// Determine the managed object name
+		final String MO_NAME = "MO";
+		final String RETRIEVE_NAME = (boundName == null ? MO_NAME : boundName);
 
 		// Record instantiate and cache in session
 		final MockObject[] instantiatedObject = new MockObject[1];
-		this.recordReturn(httpSession, httpSession.getAttribute(BOUND_NAME),
+		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME),
 				null);
-		httpSession.setAttribute(BOUND_NAME, null);
+		httpSession.setAttribute(RETRIEVE_NAME, null);
 		this.control(httpSession).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect bound name", BOUND_NAME, actual[0]);
+				assertEquals("Incorrect bound name", RETRIEVE_NAME, actual[0]);
 				MockObject object = (MockObject) actual[1];
 				assertNotNull("Expecting instantiated object", object);
 				instantiatedObject[0] = object;
@@ -94,7 +115,7 @@ public class HttpSessionClassManagedObjectSourceTest extends
 
 		// Record cached within session
 		final MockObject CACHED_OBJECT = new MockObject();
-		this.recordReturn(httpSession, httpSession.getAttribute(BOUND_NAME),
+		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME),
 				CACHED_OBJECT);
 
 		this.replayMockObjects();
@@ -104,12 +125,17 @@ public class HttpSessionClassManagedObjectSourceTest extends
 		loader.addProperty(
 				HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
 				MockObject.class.getName());
+		if (boundName != null) {
+			loader.addProperty(
+					HttpSessionClassManagedObjectSource.PROPERTY_BIND_NAME,
+					boundName);
+		}
 		HttpSessionClassManagedObjectSource source = loader
 				.loadManagedObjectSource(HttpSessionClassManagedObjectSource.class);
 
 		// Instantiate and cache object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.setBoundManagedObjectName(BOUND_NAME);
+		user.setBoundManagedObjectName(MO_NAME);
 		user.mapDependency(Dependencies.HTTP_SESSION, httpSession);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertEquals("Incorrect instantiated object", instantiatedObject[0],

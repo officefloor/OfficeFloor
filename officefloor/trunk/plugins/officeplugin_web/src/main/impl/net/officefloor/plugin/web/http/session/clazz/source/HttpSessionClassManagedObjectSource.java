@@ -40,9 +40,20 @@ public class HttpSessionClassManagedObjectSource extends
 	public static final String PROPERTY_CLASS_NAME = "class.name";
 
 	/**
+	 * Name of property containing the name to bind the object within the
+	 * {@link HttpSession}.
+	 */
+	public static final String PROPERTY_BIND_NAME = "bind.name";
+
+	/**
 	 * Class of the object.
 	 */
 	private Class<?> objectClass;
+
+	/**
+	 * Name to bind the object within the {@link HttpSession}.
+	 */
+	private String bindName;
 
 	/*
 	 * ======================= ManagedObjectSource ===========================
@@ -63,6 +74,9 @@ public class HttpSessionClassManagedObjectSource extends
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
 		this.objectClass = mosContext.getClassLoader().loadClass(className);
 
+		// Obtain the overridden bind name
+		this.bindName = mosContext.getProperty(PROPERTY_BIND_NAME, null);
+
 		// Specify the meta-data
 		context.setObjectClass(this.objectClass);
 		context.setManagedObjectClass(HttpSessionClassManagedObject.class);
@@ -71,7 +85,8 @@ public class HttpSessionClassManagedObjectSource extends
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new HttpSessionClassManagedObject(this.objectClass);
+		return new HttpSessionClassManagedObject(this.objectClass,
+				this.bindName);
 	}
 
 }
