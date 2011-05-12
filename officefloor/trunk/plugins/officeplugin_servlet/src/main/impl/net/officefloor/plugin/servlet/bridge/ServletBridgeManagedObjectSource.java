@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -316,8 +317,8 @@ public class ServletBridgeManagedObjectSource
 
 		@Override
 		public void service(S servlet, HttpServletRequest request,
-				HttpServletResponse response) throws IOException,
-				ServletException {
+				HttpServletResponse response, ServletContext context)
+				throws IOException, ServletException {
 
 			// Obtain the instance
 			ServletBridgeManagedObjectSource instance = ServletBridgeManagedObjectSource
@@ -330,7 +331,7 @@ public class ServletBridgeManagedObjectSource
 
 			// Create the managed object
 			ServletBridgeManagedObject managedObject = new ServletBridgeManagedObject(
-					this, servlet, request, response);
+					this, servlet, request, response, context);
 
 			try {
 				// Service the request (blocking re-using this thread)
@@ -374,6 +375,11 @@ public class ServletBridgeManagedObjectSource
 		private final HttpServletResponse response;
 
 		/**
+		 * {@link ServletContext}.
+		 */
+		private final ServletContext servletContext;
+
+		/**
 		 * Escalation.
 		 */
 		private volatile Throwable escalation = null;
@@ -389,14 +395,17 @@ public class ServletBridgeManagedObjectSource
 		 *            {@link HttpServletRequest}.
 		 * @param response
 		 *            {@link HttpServletResponse}.
+		 * @param servletContext
+		 *            {@link ServletContext}.
 		 */
 		public ServletBridgeManagedObject(ServletServiceBridgerImpl<?> bridger,
 				Object servlet, HttpServletRequest request,
-				HttpServletResponse response) {
+				HttpServletResponse response, ServletContext servletContext) {
 			this.bridger = bridger;
 			this.servlet = servlet;
 			this.request = request;
 			this.response = response;
+			this.servletContext = servletContext;
 		}
 
 		/**
@@ -440,6 +449,11 @@ public class ServletBridgeManagedObjectSource
 		@Override
 		public HttpServletResponse getResponse() {
 			return this.response;
+		}
+
+		@Override
+		public ServletContext getServletContext() {
+			return this.servletContext;
 		}
 
 		@Override

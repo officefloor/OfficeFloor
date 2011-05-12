@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.bridge.spi;
 import java.io.IOException;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,12 +58,15 @@ public interface ServletServiceBridger<S> {
 	 *            {@link HttpServletRequest}.
 	 * @param response
 	 *            {@link HttpServletResponse}.
+	 * @param context
+	 *            {@link ServletContext}.
 	 * @throws IOException
 	 *             As per {@link Servlet} API.
 	 * @throws ServletException
 	 *             As per {@link Servlet} API.
 	 */
 	void service(S servlet, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException;
+			HttpServletResponse response, ServletContext context)
+			throws IOException, ServletException;
 
 }
