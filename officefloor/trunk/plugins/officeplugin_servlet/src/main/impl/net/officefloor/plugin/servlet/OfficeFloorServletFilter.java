@@ -18,6 +18,10 @@
 package net.officefloor.plugin.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,6 +58,8 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
+import net.officefloor.plugin.web.http.template.RawHttpTemplateLoader;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 /**
  * {@link Filter} to invoke processing within an {@link OfficeFloor}.
@@ -149,6 +155,29 @@ public abstract class OfficeFloorServletFilter extends
 		this.bridger = ServletBridgeManagedObjectSource
 				.createServletServiceBridger(this.getClass(), this,
 						HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+
+		// Allow loading template content from ServletContext.
+		// (Allows integration into the WAR structure)
+		HttpTemplateSectionSource
+				.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
+					@Override
+					public Reader loadRawHttpTemplate(String templatePath,
+							Charset charset) throws IOException {
+
+						// Ensure template path is always absolute
+						templatePath = (templatePath.startsWith("/") ? templatePath
+								: "/" + templatePath);
+
+						// Attempt to obtain resource
+						InputStream resource = OfficeFloorServletFilter.this
+								.getFilterConfig().getServletContext()
+								.getResourceAsStream(templatePath);
+
+						// Return resource (if obtained)
+						return (resource == null ? null
+								: new InputStreamReader(resource, charset));
+					}
+				});
 
 		// Configure Server HTTP connection
 		this.addManagedObject(
