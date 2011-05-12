@@ -62,6 +62,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.RawHttpTemplateLoader;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
@@ -71,6 +72,29 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
  * @author Daniel Sagenschneider
  */
 public class HttpTemplateSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Registers the {@link RawHttpTemplateLoader}.
+	 * 
+	 * @param rawHttpTemplateLoader
+	 *            {@link RawHttpTemplateLoader}.
+	 */
+	public static void registerRawHttpTemplateLoader(
+			RawHttpTemplateLoader rawHttpTemplateLoader) {
+		HttpTemplateWorkSource
+				.registerRawHttpTemplateLoader(rawHttpTemplateLoader);
+	}
+
+	/**
+	 * <p>
+	 * Unregisters all the {@link RawHttpTemplateLoader} instances.
+	 * <p>
+	 * This is typically only made available to allow resetting content for
+	 * testing.
+	 */
+	public static void unregisterAllRawHttpTemplateLoaders() {
+		HttpTemplateWorkSource.unregisterAllRawHttpTemplateLoaders();
+	}
 
 	/**
 	 * Property name for the {@link Class} providing the backing logic to the

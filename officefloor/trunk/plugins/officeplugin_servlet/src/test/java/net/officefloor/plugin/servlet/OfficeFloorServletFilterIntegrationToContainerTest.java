@@ -19,6 +19,7 @@ package net.officefloor.plugin.servlet;
 
 import java.io.ByteArrayOutputStream;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -52,7 +53,7 @@ import org.eclipse.jetty.util.resource.Resource;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorServletFilterIntegrationToJspTest extends
+public class OfficeFloorServletFilterIntegrationToContainerTest extends
 		OfficeFrameTestCase {
 
 	/**
@@ -66,52 +67,33 @@ public class OfficeFloorServletFilterIntegrationToJspTest extends
 	private Server server;
 
 	/**
+	 * {@link ServletContextHandler}.
+	 */
+	private ServletContextHandler context;
+
+	/**
 	 * {@link HttpClient}.
 	 */
 	private HttpClient client;
 
-	/**
-	 * Ensure able to render JSP from HTTP state objects.
-	 */
-	public void testJspStateIntegration() throws Exception {
+	@Override
+	protected void setUp() throws Exception {
 
 		// Obtain the port for the application
 		this.port = MockHttpServer.getAvailablePort();
 
 		// Start servlet container with filter
 		this.server = new Server(this.port);
-		ServletContextHandler context = new ServletContextHandler();
-		context.setBaseResource(Resource.newClassPathResource(this.getClass()
-				.getPackage().getName().replace('.', '/')
+		this.context = new ServletContextHandler();
+		this.context.setBaseResource(Resource.newClassPathResource(this
+				.getClass().getPackage().getName().replace('.', '/')
 				+ "/jsp"));
-		context.setContextPath("/");
-		context.setSessionHandler(new SessionHandler());
-		this.server.setHandler(context);
-
-		// Add the filter for handling requests
-		context.addFilter(new FilterHolder(MockOfficeFloorServletFilter.class),
-				"/*", FilterMapping.REQUEST);
-
-		// Add the JSP
-		context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
-
-		// Add the servlet for testing (should initialise application object)
-		ServletHolder servlet = new ServletHolder(MockHttpServlet.class);
-		servlet.setInitOrder(1);
-		context.addServlet(servlet, "/");
-
-		// Start the server
-		this.server.start();
+		this.context.setContextPath("/");
+		this.context.setSessionHandler(new SessionHandler());
+		this.server.setHandler(this.context);
 
 		// Create client
 		this.client = new DefaultHttpClient();
-
-		// Ensure can invoke JSP directly (without initialising)
-		this.assertHttpRequest("/Template.jsp", "INIT null null");
-
-		// Invoke to use template submit to create state for JSP
-		this.assertHttpRequest("/template.links-submit.task",
-				"application session request");
 	}
 
 	@Override
@@ -128,35 +110,37 @@ public class OfficeFloorServletFilterIntegrationToJspTest extends
 	}
 
 	/**
-	 * Asserts the HTTP request.
-	 * 
-	 * @param uri
-	 *            URI.
-	 * @param expectedResponse
-	 *            Expected response.
+	 * Ensure able to render JSP from HTTP state objects.
 	 */
-	private void assertHttpRequest(String uri, String expectedResponse)
-			throws Exception {
+	public void testJspStateIntegration() throws Exception {
 
-		// Send request
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:" + this.port + uri));
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		// Add the filter for handling requests
+		this.context.addFilter(new FilterHolder(MockJspIntergateFilter.class),
+				"/*", FilterMapping.REQUEST);
 
-		// Ensure appropriately integrated state for JSP
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		response.getEntity().writeTo(buffer);
-		String body = buffer.toString();
-		assertEquals("Incorrect response", expectedResponse, body.trim());
+		// Add the JSP
+		this.context.addServlet(new ServletHolder(JspServlet.class), "*.jsp");
 
+		// Add the servlet for testing (should initialise application object)
+		ServletHolder servlet = new ServletHolder(MockHttpServlet.class);
+		servlet.setInitOrder(1);
+		this.context.addServlet(servlet, "/");
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can invoke JSP directly (without initialising)
+		this.assertHttpRequest("/Template.jsp", "INIT null null");
+
+		// Invoke to use template submit to create state for JSP
+		this.assertHttpRequest("/template.links-submit.task",
+				"application session request");
 	}
 
 	/**
-	 * {@link OfficeFloorServletFilter} for testing.
+	 * {@link OfficeFloorServletFilter} for testing JSP HTTP state integration.
 	 */
-	public static class MockOfficeFloorServletFilter extends
-			OfficeFloorServletFilter {
+	public static class MockJspIntergateFilter extends OfficeFloorServletFilter {
 		@Override
 		protected void configure() throws Exception {
 			String templatePath = this.getClass().getPackage().getName()
@@ -233,6 +217,85 @@ public class OfficeFloorServletFilterIntegrationToJspTest extends
 			object.text = "INIT";
 			this.getServletContext().setAttribute("ApplicationBean", object);
 		}
+	}
+
+	/**
+	 * Ensure able to retrieve HTTP template content from the
+	 * {@link ServletContext}.
+	 */
+	public void testServletContextResourceIntegration() throws Exception {
+
+		// Add the filter for handling requests
+		this.context.addFilter(new FilterHolder(
+				MockServletContextResourceFilter.class), "/*",
+				FilterMapping.REQUEST);
+
+		// Add the servlet to be filtered
+		this.context.addServlet(new ServletHolder(MockHttpServlet.class), "/");
+
+		// Start the server
+		this.server.start();
+
+		// Ensure can obtain template content from ServletContext
+		this.assertHttpRequest("/template", "ServletContext Resource");
+	}
+
+	/**
+	 * {@link OfficeFloorServletFilter} for testing {@link ServletContext}
+	 * resource for template content.
+	 */
+	public static class MockServletContextResourceFilter extends
+			OfficeFloorServletFilter {
+		@Override
+		protected void configure() throws Exception {
+
+			// Should obtain template content from ServletContext
+			final String templatePath = "ServletContextResourceTemplate.ofp";
+
+			// Add the template
+			this.addHttpTemplate(templatePath,
+					MockServletContextResourceTemplate.class, "template");
+		}
+	}
+
+	/**
+	 * Template for testing obtaining template content from the
+	 * {@link ServletContext}.
+	 */
+	public static class MockServletContextResourceTemplate {
+
+		public MockServletContextResourceTemplate getTemplate() {
+			return this;
+		}
+
+		public String getText() {
+			return "ServletContext Resource";
+		}
+	}
+
+	/**
+	 * Asserts the HTTP request.
+	 * 
+	 * @param uri
+	 *            URI.
+	 * @param expectedResponse
+	 *            Expected response.
+	 */
+	private void assertHttpRequest(String uri, String expectedResponse)
+			throws Exception {
+
+		// Send request
+		HttpResponse response = this.client.execute(new HttpGet(
+				"http://localhost:" + this.port + uri));
+		assertEquals("Should be successful", 200, response.getStatusLine()
+				.getStatusCode());
+
+		// Ensure appropriately integrated state for JSP
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		response.getEntity().writeTo(buffer);
+		String body = buffer.toString();
+		assertEquals("Incorrect response", expectedResponse, body.trim());
+
 	}
 
 }
