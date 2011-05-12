@@ -30,6 +30,11 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpApplicationState;
+import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateful;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
@@ -172,6 +177,122 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
+	 * Mock section.
+	 */
+	public static class MockSection {
+
+		/**
+		 * Increment counter handler.
+		 * 
+		 * @param session
+		 *            {@link HttpSession}.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		public void incrementCounter(HttpSession session,
+				ServerHttpConnection connection) throws IOException {
+
+			final String COUNTER_NAME = "counter";
+
+			// Obtain the counter
+			RequestCounter counter = (RequestCounter) session
+					.getAttribute(COUNTER_NAME);
+			if (counter == null) {
+				counter = new RequestCounter();
+				session.setAttribute(COUNTER_NAME, counter);
+			}
+
+			// Increment the counter for this request
+			counter.count++;
+
+			// Indicate the number of requests
+			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
+					String.valueOf(counter.count), connection);
+		}
+	}
+
+	/**
+	 * Request counter to be stored within the {@link HttpSession}.
+	 */
+	public static class RequestCounter implements Serializable {
+
+		/**
+		 * Count.
+		 */
+		public int count = 0;
+	}
+
+	/**
+	 * Ensure able to utilise the various states.
+	 */
+	public void testHttpState() throws Exception {
+
+		// Obtain the template path
+		String templatePath = this.getClass().getPackage().getName()
+				.replace('.', '/')
+				+ "/HttpStateTemplate.ofp";
+
+		// Add the template
+		this.source.addHttpTemplate(templatePath,
+				MockHttpStateTemplateLogic.class, "template");
+
+		// Start the HTTP Server
+		this.source.openOfficeFloor();
+
+		// Should provide content from each state type object
+		this.assertHttpRequest("http://localhost:7878/template", 200,
+				"Application Session Request");
+	}
+
+	/**
+	 * Provides template logic for HTTP state test.
+	 */
+	public static class MockHttpStateTemplateLogic {
+
+		public MockApplicationObject getApplication(MockApplicationObject object) {
+			return object;
+		}
+
+		public MockSessionObject getSession(MockSessionObject object) {
+			return object;
+		}
+
+		public MockRequestObject getRequest(MockRequestObject object) {
+			return object;
+		}
+	}
+
+	/**
+	 * {@link HttpApplicationState} object.
+	 */
+	@HttpApplicationStateful
+	public static class MockApplicationObject {
+		public String getText() {
+			return "Application";
+		}
+	}
+
+	/**
+	 * {@link HttpSession} object.
+	 */
+	@HttpSessionStateful
+	public static class MockSessionObject {
+		public String getText() {
+			return "Session";
+		}
+	}
+
+	/**
+	 * {@link HttpRequestState} object.
+	 */
+	@HttpRequestStateful
+	public static class MockRequestObject {
+		public String getText() {
+			return "Request";
+		}
+	}
+
+	/**
 	 * Asserts the HTTP request returns expected result.
 	 * 
 	 * @param url
@@ -266,52 +387,6 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				.getBody().getOutputStream());
 		writer.append(response);
 		writer.flush();
-	}
-
-	/**
-	 * Mock section.
-	 */
-	public static class MockSection {
-
-		/**
-		 * Increment counter handler.
-		 * 
-		 * @param session
-		 *            {@link HttpSession}.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 */
-		public void incrementCounter(HttpSession session,
-				ServerHttpConnection connection) throws IOException {
-
-			final String COUNTER_NAME = "counter";
-
-			// Obtain the counter
-			RequestCounter counter = (RequestCounter) session
-					.getAttribute(COUNTER_NAME);
-			if (counter == null) {
-				counter = new RequestCounter();
-				session.setAttribute(COUNTER_NAME, counter);
-			}
-
-			// Increment the counter for this request
-			counter.count++;
-
-			// Indicate the number of requests
-			HttpServerAutoWireOfficeFloorSourceTest.writeResponse(
-					String.valueOf(counter.count), connection);
-		}
-	}
-
-	/**
-	 * Request counter to be stored within the {@link HttpSession}.
-	 */
-	public static class RequestCounter implements Serializable {
-
-		/**
-		 * Count.
-		 */
-		public int count = 0;
 	}
 
 }

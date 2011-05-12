@@ -33,6 +33,10 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpApplicationState;
+import net.officefloor.plugin.web.http.application.HttpApplicationStateManagedObjectSource;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
+import net.officefloor.plugin.web.http.application.HttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -70,6 +74,12 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		this.httpSession = this.addManagedObject(
 				HttpSessionManagedObjectSource.class, null, HttpSession.class);
 		this.httpSession.setTimeout(10 * 1000);
+
+		// Configure the HTTP Application and Request States
+		this.addManagedObject(HttpApplicationStateManagedObjectSource.class,
+				null, HttpApplicationState.class);
+		this.addManagedObject(HttpRequestStateManagedObjectSource.class, null,
+				HttpRequestState.class);
 	}
 
 	/**
