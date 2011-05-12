@@ -45,8 +45,12 @@ import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
 import net.officefloor.plugin.servlet.socket.server.http.ServletServerHttpConnection;
 import net.officefloor.plugin.servlet.socket.server.http.source.ServletServerHttpConnectionManagedObjectSource;
+import net.officefloor.plugin.servlet.web.http.application.ServletHttpApplicationStateManagedObjectSource;
+import net.officefloor.plugin.servlet.web.http.application.ServletHttpRequestStateManagedObjectSource;
 import net.officefloor.plugin.servlet.web.http.session.ServletHttpSessionManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.application.HttpApplicationState;
+import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.WebApplicationAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.session.HttpSession;
@@ -155,6 +159,13 @@ public abstract class OfficeFloorServletFilter extends
 		this.addManagedObject(ServletHttpSessionManagedObjectSource.class,
 				null, HttpSession.class);
 
+		// Configure the HTTP Application and Request State
+		this.addManagedObject(
+				ServletHttpApplicationStateManagedObjectSource.class, null,
+				HttpApplicationState.class);
+		this.addManagedObject(ServletHttpRequestStateManagedObjectSource.class,
+				null, HttpRequestState.class);
+
 		// Configure the Servlet container resource section
 		AutoWireSection servletContainerResource = this.addSection(
 				"SERVLET_CONTAINER_RESOURCE",
@@ -237,7 +248,8 @@ public abstract class OfficeFloorServletFilter extends
 		if (this.handledURIs.contains(uri) || (uri.endsWith(".task"))) {
 
 			// Handle by OfficeFloor
-			this.bridger.service(this, httpRequest, httpResponse);
+			this.bridger.service(this, httpRequest, httpResponse, this
+					.getFilterConfig().getServletContext());
 
 			// Determine if handled
 			if (ServletContainerResourceSectionSource.completeServletService(

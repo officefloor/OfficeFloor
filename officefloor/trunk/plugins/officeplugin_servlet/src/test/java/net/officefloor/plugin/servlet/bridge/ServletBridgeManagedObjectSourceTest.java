@@ -23,6 +23,7 @@ import java.util.Comparator;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +98,8 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 				.createMock(HttpServletRequest.class);
 		final HttpServletResponse response = this
 				.createMock(HttpServletResponse.class);
+		final ServletContext servletContext = this
+				.createMock(ServletContext.class);
 
 		// Create the servlet
 		MockHttpServlet servlet = new MockHttpServlet();
@@ -145,17 +148,19 @@ public class ServletBridgeManagedObjectSourceTest extends OfficeFrameTestCase {
 		try {
 			// Ensure appropriately service
 			SectionClass.servletBridge = null;
-			servicer.service(servlet, request, response);
+			servicer.service(servlet, request, response, servletContext);
 
 			// Ensure completed servicing
 			assertNotNull("Ensure servlet bridge provided",
 					SectionClass.servletBridge);
 
-			// Ensure correct request and response
+			// Ensure correct request, response and context
 			assertSame("Incorrect request", request,
 					SectionClass.servletBridge.getRequest());
 			assertSame("Incorrect response", response,
 					SectionClass.servletBridge.getResponse());
+			assertSame("Incorrect servlet context", servletContext,
+					SectionClass.servletBridge.getServletContext());
 
 			// Ensure obtain dependency injection on Servlet
 			ServletDependency servletDependency = SectionClass.servletBridge

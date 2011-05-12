@@ -18,6 +18,7 @@
 package net.officefloor.plugin.servlet.bridge;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,6 +43,13 @@ public interface ServletBridge {
 	 * @return {@link HttpServletResponse}.
 	 */
 	HttpServletResponse getResponse();
+
+	/**
+	 * Obtains the {@link ServletContext}.
+	 * 
+	 * @return {@link ServletContext}.
+	 */
+	ServletContext getServletContext();
 
 	/**
 	 * <p>
