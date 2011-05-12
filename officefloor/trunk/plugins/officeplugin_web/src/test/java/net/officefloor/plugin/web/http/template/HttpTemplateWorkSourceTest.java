@@ -19,6 +19,9 @@
 package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -37,6 +40,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
 
 import org.easymock.AbstractMatcher;
@@ -61,15 +65,20 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 			+ "/TemplateMissing.ofp";
 
 	/**
+	 * Template path.
+	 */
+	private final String templatePath = this.getClass().getPackage().getName()
+			.replace('.', '/')
+			+ "/Template.ofp";
+
+	/**
 	 * Initiate.
 	 */
 	public HttpTemplateWorkSourceTest() {
 		// Create the properties
 		this.properties = new String[8];
 		this.properties[0] = HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE;
-		this.properties[1] = this.getClass().getPackage().getName()
-				.replace('.', '/')
-				+ "/Template.ofp";
+		this.properties[1] = templatePath;
 		this.properties[2] = HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
 				+ "template";
 		this.properties[3] = TemplateBean.class.getName();
@@ -303,6 +312,79 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
+	}
+
+	/**
+	 * Ensure able to override loading the raw {@link HttpTemplate} content.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testRawHttpTemplateLoader() throws Throwable {
+		try {
+
+			// Create the mock objects
+			TaskContext taskContext = this.createMock(TaskContext.class);
+			ServerHttpConnection httpConnection = this
+					.createMock(ServerHttpConnection.class);
+			MockHttpResponse httpResponse = new MockHttpResponse();
+
+			// Template Content
+			final String templateContent = "RAW TEMPLATE";
+			final Reader reader = new StringReader(templateContent);
+
+			// Register Loader to not provide content
+			HttpTemplateWorkSource
+					.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
+						@Override
+						public Reader loadRawHttpTemplate(String templatePath,
+								Charset charset) throws IOException {
+							return null; // not able to provide content
+						}
+					});
+
+			// Register the Raw HTTP Template Loader
+			HttpTemplateWorkSource
+					.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
+						@Override
+						public Reader loadRawHttpTemplate(String templatePath,
+								Charset charset) throws IOException {
+							// Ensure appropriate template path
+							assertEquals(
+									"Incorrect template path",
+									HttpTemplateWorkSourceTest.this.templatePath,
+									templatePath);
+							return reader;
+						}
+					});
+
+			// Load the work type
+			WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(
+					HttpTemplateWorkSource.class, this.properties);
+
+			// Create the work and provide name
+			HttpTemplateWork work = workType.getWorkFactory().createWork();
+			work.setBoundWorkName("WORK");
+
+			// Record undertaking task to use raw content
+			this.recordReturn(taskContext, taskContext.getObject(0),
+					httpConnection);
+			this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
+					httpResponse);
+			this.recordReturn(taskContext, taskContext.getWork(), work);
+
+			// Test
+			this.replayMockObjects();
+			this.doTask("template", work, workType, taskContext);
+			this.verifyMockObjects();
+
+			// Ensure raw HTTP template content
+			String output = UsAsciiUtil.convertToString(httpResponse
+					.getBodyContent());
+			assertTextEquals("Incorrect output", templateContent, output);
+
+		} finally {
+			// Ensure clear loaders
+			HttpTemplateWorkSource.unregisterAllRawHttpTemplateLoaders();
+		}
 	}
 
 	/**

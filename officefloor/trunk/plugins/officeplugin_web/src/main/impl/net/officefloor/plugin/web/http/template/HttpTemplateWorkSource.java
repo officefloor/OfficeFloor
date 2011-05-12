@@ -91,6 +91,37 @@ public class HttpTemplateWorkSource extends
 	public static final String LINK_URL_EXTENSION = ".task";
 
 	/**
+	 * Registered {@link RawHttpTemplateLoader} instances.
+	 */
+	private static final List<RawHttpTemplateLoader> loaders = new LinkedList<RawHttpTemplateLoader>();
+
+	/**
+	 * Registers the {@link RawHttpTemplateLoader}.
+	 * 
+	 * @param rawHttpTemplateLoader
+	 *            {@link RawHttpTemplateLoader}.
+	 */
+	public static void registerRawHttpTemplateLoader(
+			RawHttpTemplateLoader rawHttpTemplateLoader) {
+		synchronized (loaders) {
+			loaders.add(rawHttpTemplateLoader);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Unregisters all the {@link RawHttpTemplateLoader} instances.
+	 * <p>
+	 * This is typically only made available to allow resetting content for
+	 * testing.
+	 */
+	public static void unregisterAllRawHttpTemplateLoaders() {
+		synchronized (loaders) {
+			loaders.clear();
+		}
+	}
+
+	/**
 	 * Obtains the {@link HttpTemplate}.
 	 * 
 	 * @param properties
@@ -146,7 +177,18 @@ public class HttpTemplateWorkSource extends
 				.getProperty(PROPERTY_TEMPLATE_FILE);
 		Charset charset = getCharset(properties);
 
-		// Obtain the template configuration
+		// Try the Raw HTTP Template Loaders first
+		synchronized (loaders) {
+			for (RawHttpTemplateLoader loader : loaders) {
+				Reader content = loader.loadRawHttpTemplate(templateFilePath,
+						charset);
+				if (content != null) {
+					return content; // found content
+				}
+			}
+		}
+
+		// Last attempt on the class path
 		InputStream configuration = classLoader
 				.getResourceAsStream(templateFilePath);
 		if (configuration == null) {
