@@ -43,6 +43,8 @@ WoOF running within a JEE Servlet Container
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./ServletFilterWebApplication/index.html}Running within Servlet Container}}  | Running the above web functionality within a JEE Servlet container. | WoofServletFilter
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
+| {{{./ServletFilterJspIntegration/index.html}Integration with a JSP}}  | Enables re-use of an existing JSP by providing it the necessary beans. | @HttpApplicationStateful, @HttpSessionStateful, @HttpRequestStateful
+*----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./ServletFilterDependencyInjection/index.html}Utilising dependency injection of the Servlet Container}}  | Use of Servlet container dependency injection (e.g. making use of EJBs). | @EJB
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 
