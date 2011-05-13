@@ -25,27 +25,20 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Deploy the site content -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-upload-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>deploy-update-site-content</id>
+						<id>upload-site</id>
 						<phase>deploy</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>upload</goal>
 						</goals>
 						<configuration>
-							<target>
-								<echo>Deploying the update site content to SourceForge</echo>
-								<copy todir="${project.basedir}/target/site"
-									file="${project.basedir}/src/main/resources/index.html" />
-								<exec dir="${project.basedir}/target/site" executable="rsync"
-									failonerror="true">
-									<arg
-										line="-v -e ssh -r . sagenschneider,officefloor@shell.sourceforge.net:/home/frs/project/o/of/officefloor/eclipse/update" />
-								</exec>
-							</target>
+							<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
+							<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
+							<resourceDest>home/frs/project/o/of/officefloor/eclipse/update</resourceDest>
+							<serverId>repo.officefloor.sf.net</serverId>
 						</configuration>
 					</execution>
 				</executions>
