@@ -43,7 +43,7 @@ Making use of the EJB within the WoofServletFilter
 
   The dynamic web template is as follows:
   
-%{code-snippet|sh-params=highlight:[13]|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|sh-params=highlight:[13]|brush=xml|file=${basedir}/src/main/webapp/Template.html}
 
   For further explanation of WoOF dynamic web templates please see the specific tutorials.  Please note the continued ease of unit testing the template logic class just as a POJO (plain old java object) by mocking the EJB interface.
 
