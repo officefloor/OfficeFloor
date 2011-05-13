@@ -20,6 +20,7 @@
 		<module>SessionHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>ServletFilterWebApplication</module>
+		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterDependencyInjection</module>
 		<module>DatabaseHttpServer</module>
 		<module>TeamHttpServer</module>
