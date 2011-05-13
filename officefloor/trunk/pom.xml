@@ -478,7 +478,7 @@
 					<artifactId>maven-woof-plugin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
-				
+
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->
 				<!-- ================================================ -->
@@ -644,6 +644,11 @@
 					<groupId>org.sonatype.tycho</groupId>
 					<artifactId>target-platform-configuration</artifactId>
 					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>com.atlassian.maven.plugins</groupId>
+					<artifactId>maven-upload-plugin</artifactId>
+					<version>1.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1167,6 +1172,12 @@
 					<name>ANASOFT OpenSource releases</name>
 					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
 				</repository>
+				<repository>
+					<!-- Atlassian -->
+					<id>maven2-repository.atlassian.com</id>
+					<name>Atlassian</name>
+					<url>http://maven.atlassian.com/public</url>
+				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
@@ -1186,6 +1197,12 @@
 					<id>com.anasoft.os.repository.releases</id>
 					<name>ANASOFT OpenSource releases</name>
 					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
+				</pluginRepository>
+				<pluginRepository>
+					<!-- Atlassian -->
+					<id>maven2-repository.atlassian.com</id>
+					<name>Atlassian</name>
+					<url>http://maven.atlassian.com/public</url>
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>
