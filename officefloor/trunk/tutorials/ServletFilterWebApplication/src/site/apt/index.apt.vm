@@ -53,7 +53,7 @@ Remaining Code
 
   Has the <<< #\{link\} >>> for handling by <<<ExampleTemplateLogic>>>.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/Template.html}
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
 
 * ExampleTemplateLogic
 
