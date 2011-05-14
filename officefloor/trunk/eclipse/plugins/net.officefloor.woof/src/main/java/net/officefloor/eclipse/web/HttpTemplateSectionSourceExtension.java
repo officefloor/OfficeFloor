@@ -17,6 +17,11 @@
  */
 package net.officefloor.eclipse.web;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
@@ -24,8 +29,12 @@ import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.plugin.web.http.template.RawHttpTemplateLoader;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -56,6 +65,31 @@ public class HttpTemplateSectionSourceExtension implements
 	@Override
 	public void createControl(Composite page,
 			final SectionSourceExtensionContext context) {
+
+		// Add Raw HTTP Template Loader for Maven WebApp
+		HttpTemplateSectionSource.unregisterAllRawHttpTemplateLoaders();
+		HttpTemplateSectionSource
+				.registerRawHttpTemplateLoader(new RawHttpTemplateLoader() {
+					@Override
+					public Reader loadRawHttpTemplate(String templatePath,
+							Charset charset) throws IOException {
+						// Attempt to find file within project
+						IProject project = context.getProject();
+						IFile file = project.getFile("src/main/webapp/"
+								+ templatePath);
+						if (file == null) {
+							return null; // Not within webapp
+						}
+
+						// Found file so return
+						try {
+							return new InputStreamReader(file.getContents(),
+									charset);
+						} catch (CoreException ex) {
+							throw new IOException(ex);
+						}
+					}
+				});
 
 		// Provide layout if necessary.
 		// (Used within HttpTemplateWizardPage)
