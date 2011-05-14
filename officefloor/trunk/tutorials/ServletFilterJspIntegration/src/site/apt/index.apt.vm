@@ -1,0 +1,93 @@
+                                               -----------------------
+                                          WoOF integration with JSP Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<WoOF integration with JSP Tutorial>>
+
+  This tutorial demonstrates integrating WoOF with existing Java Server Pages (JSP).
+  
+  As integration occurs by registering beans within the <<<HttpServletRequest>>>, <<<HttpSession>>> and <<<ServletContext>>> the tutorial will provide a simple page that renders a text property a bean registered in each respectively.  The following shows the resulting pages:
+
+[./images/ServletFilterJspIntegration-woof-screenshot.png] WoOF screenshot.
+
+  WoOF page.
+
+[./images/ServletFilterJspIntegration-jsp-screenshot.png] JSP screenshot.
+
+  JSP.
+    
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterJspIntegration/${projectVersion}/ServletFilterJspIntegration-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+Templates
+
+  The following illustrates the necessary JSP to render three beans text property to the page:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
+
+  The equivalent WoOF template is as follows:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
+
+  As WoOF focuses on minimising the impact to the HTML you can see the significant difference between the intrusion of the frameworks on the web page. 
+  
+
+
+web.xml
+
+  The following highlighted configuration provides the necessary configuration in the <<<web.xml>>> for running WoOF within the Servlet container.
+
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+
+  For WoOF to effectively be used, its Filter mapping should be to <<</*>>> so that it has the ability to intercept each request.  WoOF will only service the requests it is configured for and will allow the Servlet container to process all remaining requests.
+
+
+Remaining Code
+
+  For completeness of this tutorial the remaining code is included below.
+
+* TemplateLogic
+
+  Identifies that the <<<link>>> in the above template should be handled by <<<LINK>>> output which in the above configuration is mapped to a JSP.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/TemplateLogic.java}
+
+* MockHttpServlet
+
+  Not part of the WoOF but is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/MockHttpServlet.java}
+
+* ApplicationBean
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/ApplicationBean.java}
+
+* SessionBean
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/SessionBean.java}
+
+* RequestBean
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/RequestBean.java}
+
+
+Unit Test
+
+  The unit test highlights the servicing of a request by:
+  
+   * Servlet container (for request not to be handled by WoOF as per its configuration)
+  
+   * WoOF dynamic template
+   
+   * Dynamic template link to be serviced by a JSP from the Servlet container
+   
+   * Request being serviced by a class
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterjspintegration/JspIT.java}
+
+
+Next
+
+  The {{{../ServletFilterDependencyInjection/index.html}next tutorial}} looks at making use of JEE Servlet dependencies (e.g. EJBs).
+

@@ -26,6 +26,7 @@ import net.officefloor.plugin.web.http.application.HttpRequestStateful;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @HttpRequestStateful("RequestBean")
 public class RequestBean {
 
@@ -38,5 +39,5 @@ public class RequestBean {
 	public void setText(String text) {
 		this.text = text;
 	}
-
 }
+// END SNIPPET: tutorial

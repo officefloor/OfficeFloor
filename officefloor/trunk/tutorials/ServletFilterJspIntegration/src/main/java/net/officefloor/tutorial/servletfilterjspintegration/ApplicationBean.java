@@ -26,6 +26,7 @@ import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @HttpApplicationStateful("ApplicationBean")
 public class ApplicationBean {
 
@@ -38,5 +39,5 @@ public class ApplicationBean {
 	public void setText(String text) {
 		this.text = text;
 	}
-
 }
+// END SNIPPET: tutorial

@@ -26,6 +26,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @HttpSessionStateful("SessionBean")
 public class SessionBean {
 
@@ -38,5 +39,5 @@ public class SessionBean {
 	public void setText(String text) {
 		this.text = text;
 	}
-
 }
+// END SNIPPET: tutorial

@@ -32,6 +32,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class JspIT extends TestCase {
 
 	public void testTemplate() throws IOException {
@@ -43,7 +44,7 @@ public class JspIT extends TestCase {
 	public void testLinkToJsp() throws IOException {
 		this.assertRequest(
 				"/template.links-link.task",
-				"<html> <body> REQUEST SESSION application <a href='template'>Template</a> </body> </html>");
+				"<html> <body> REQUEST SESSION application <a href='/template'>Template</a> </body> </html>");
 	}
 
 	private void assertRequest(String uri, String expectedContent)
@@ -76,5 +77,5 @@ public class JspIT extends TestCase {
 			client.getConnectionManager().shutdown();
 		}
 	}
-
 }
+// END SNIPPET: tutorial
