@@ -97,8 +97,13 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	@Override
 	public void write(HttpResponseWriter writer, String workName, Object bean)
 			throws IOException {
+
+		// Duplicate to not move original buffer position when written
+		ByteBuffer writeContent = this.content.duplicate();
+
+		// Write the content
 		writer.write(NO_CONTENT_ENCODING, this.contentType, this.charset,
-				this.content);
+				writeContent);
 	}
 
 }

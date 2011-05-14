@@ -92,5 +92,5 @@ Unit Test
 
 Next
 
-  The {{{../ServletFilterDependencyInjection/index.html}next tutorial}} looks at making use of JEE Servlet dependencies (e.g. EJBs).
+  The {{{../ServletFilterJspIntegration/index.html}next tutorial}} looks at making use of existing Java Server Pages (JSP).
 

@@ -24,6 +24,7 @@ import net.officefloor.plugin.section.clazz.NextTask;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class TemplateLogic {
 
 	public RequestBean getTemplate(RequestBean bean) {
@@ -48,5 +49,5 @@ public class TemplateLogic {
 		sessionBean.setText("SESSION");
 		applicationBean.setText("application"); // show change by dropping case
 	}
-
 }
+// END SNIPPET: tutorial

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServlet;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class MockHttpServlet extends HttpServlet {
 
 	@Override
@@ -37,5 +38,5 @@ public class MockHttpServlet extends HttpServlet {
 		// Bind to ServletContext as attribute
 		this.getServletContext().setAttribute("ApplicationBean", bean);
 	}
-
 }
+// END SNIPPET: tutorial

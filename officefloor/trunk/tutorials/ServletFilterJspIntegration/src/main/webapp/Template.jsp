@@ -3,6 +3,6 @@
 <jsp:useBean id="ApplicationBean" scope="application" class="net.officefloor.tutorial.servletfilterjspintegration.ApplicationBean" />
 <html>
     <body>
-        <jsp:getProperty name="RequestBean" property="text" /> <jsp:getProperty name="SessionBean" property="text" /> <jsp:getProperty name="ApplicationBean" property="text" /> <a href='template'>Template</a>
+        <jsp:getProperty name="RequestBean" property="text" /> <jsp:getProperty name="SessionBean" property="text" /> <jsp:getProperty name="ApplicationBean" property="text" /> <a href='/template'>Template</a>
     </body>
 </html>

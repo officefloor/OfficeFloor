@@ -39,18 +39,14 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	private final OutputStream output;
 
 	/**
-	 * {@link SynchronizedOutputStream} if using {@link OutputStream} directly.
-	 */
-	private SynchronizedOutputStream synchronizedOutput = null;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param output
 	 *            Wrapped {@link OutputStream}.
 	 */
 	public OutputStreamOutputBufferStream(OutputStream output) {
-		this.output = output;
+		// Ensure output is synchronized
+		this.output = new SynchronizedOutputStream(output, this);
 	}
 
 	/*
@@ -59,25 +55,16 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 
 	@Override
 	public synchronized OutputStream getOutputStream() {
-
-		// Lazy create the output stream
-		if (this.synchronizedOutput == null) {
-			this.synchronizedOutput = new SynchronizedOutputStream(this.output,
-					this);
-		}
-
-		// Return the output stream
-		return this.synchronizedOutput;
+		return this.output;
 	}
 
 	@Override
-	public synchronized void write(byte[] bytes) throws IOException {
+	public void write(byte[] bytes) throws IOException {
 		this.output.write(bytes);
 	}
 
 	@Override
-	public synchronized void write(byte[] data, int offset, int length)
-			throws IOException {
+	public void write(byte[] data, int offset, int length) throws IOException {
 		this.output.write(data, offset, length);
 	}
 
@@ -102,7 +89,7 @@ public class OutputStreamOutputBufferStream implements OutputBufferStream {
 	}
 
 	@Override
-	public synchronized void close() throws IOException {
+	public void close() throws IOException {
 		this.output.close();
 	}
 
