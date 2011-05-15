@@ -34,7 +34,15 @@ Layout
         +- application.woof
 ---------------------------------
   
-  Note that only files under the <<<PUBLIC>>> directory will be made available which keeps the code private (e.g. the <<<net.officefloor.tutorial.Example>>> and <<<application.woof>>> files will not be visible).  This structure also allows using the classes within the jar without special class loading - such as is the case with the WAR layout.
+  Note that only files under the <<<PUBLIC>>> directory will be made available which keeps the code private (e.g. the <<<net.officefloor.tutorial.Example>>> and <<<application.woof>>> files will not be visible).  This structure also allows using the jar normally on a class path without any special class loading - unlike the WAR layout that requires special class loading to access its contained classes.
+
+JEE Servlet Container (WAR Layout)
+  
+  Please note that when using WoOF within a JEE Servlet Container, WoOF will respect the WAR layout and obtain web content from the top level and classes from the respective <<<WEB-INF>>> directories.  This enables both easier integration of WoOF into your existing Servlet applications and also lets you use standard build tools (such as {{{http://maven.apache.org}Maven}}) to continue to create the WAR (i.e. there is no special build steps required to integrate WoOF into existing Servlet applications).  The above WoOF layout is <only> for using WoOF stand alone outside a JEE Servlet Container.
+  
+  Please see the {{{../index.html}Servlet tutorials}} for running WoOF within a JEE Servlet Container.
+
+Running
   
   A {{{http://maven.apache.org}Maven}} plug-in is available to run the web application using the following command:
 
