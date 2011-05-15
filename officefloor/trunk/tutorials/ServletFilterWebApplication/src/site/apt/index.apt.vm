@@ -12,7 +12,7 @@
   
 WoofServletFilter
 
-  To utilise WoOF within a JEE Servlet container, {{{/apidocs/net/officefloor/plugin/servlet/WoofServletFilter.html}WoofServletFilter}} is a Servlet Filter which provides the necessary hooks for running WoOF within a JEE Servlet container.  The following is the configuration for this tutorial:
+  To utilise WoOF within a JEE Servlet container, {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServletFilter.html}WoofServletFilter}} is a Servlet Filter which provides the necessary hooks for running WoOF within a JEE Servlet container.  The following is the configuration for this tutorial:
 
 [./images/servlet-woof.png] application.woof configuration.
 
