@@ -62,6 +62,7 @@ public class JspIT extends TestCase {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			response.getEntity().writeTo(buffer);
 			String html = buffer.toString();
+			html = html.replace('\t', ' ');
 			html = html.replace('\n', ' ');
 			html = html.replace('\r', ' ');
 			while (html.contains("  ")) {
