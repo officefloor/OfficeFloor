@@ -8,21 +8,49 @@
 
   This tutorial demonstrates integrating WoOF with existing Java Server Pages (JSP).
   
-  As integration occurs by registering beans within the <<<HttpServletRequest>>>, <<<HttpSession>>> and <<<ServletContext>>> the tutorial will provide a simple page that renders a text property a bean registered in each respectively.  The following shows the resulting pages:
+  As integration occurs by registering beans within the <<<HttpServletRequest>>>, <<<HttpSession>>> and <<<ServletContext>>>, the tutorial will provide a simple page that renders a text property from a bean registered in each context respectively.  The following shows the resulting pages:
+
+  <<WoOF page>>
 
 [./images/ServletFilterJspIntegration-woof-screenshot.png] WoOF screenshot.
 
-  WoOF page.
+  <<JSP>>
 
 [./images/ServletFilterJspIntegration-jsp-screenshot.png] JSP screenshot.
-
-  JSP.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ServletFilterJspIntegration/${projectVersion}/ServletFilterJspIntegration-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
+
+
+Beans
+
+  A bean is simple Java object adhering to a {{{http://wikipedia.org/wiki/JavaBean}few conventions}}. 
+
+  The following are the beans being registered as attributes for integration.  As you can see the beans have been deliberately kept simple with only a single <<<text>>> property.  The annotations on the beans will be explained later.
+
+* RequestBean
+
+  The following bean is registered in the <<<HttpServletRequest>>>.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/RequestBean.java}
+
+* SessionBean
+
+  The following bean is registered in the <<<HttpSession>>>.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/SessionBean.java}
+
+* ApplicationBean
+
+  The following bean is registered in the <<<ServletContext>>>.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/ApplicationBean.java}
+
+
+
 Templates
 
-  The following illustrates the necessary JSP to render three beans text property to the page:
+  The following illustrates the necessary JSP to render the three beans' text property to the page:
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
 
@@ -30,59 +58,68 @@ Templates
 
 %{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.html}
 
-  As WoOF focuses on minimising the impact to the HTML you can see the significant difference between the intrusion of the frameworks on the web page. 
+  As WoOF focuses on minimising the impact to the HTML you can see the significant difference between the intrusion of each framework on the web page.  WoOF enables this light instrumentation of the HTML by providing the detail on a POJO (plain old java object) that is the logic for the web page rendering.  This allows using the flexibility of developing with Java for controlling dynamic behaviour rather than having to embed this behaviour within the HTML (JSP).  The following is the logic class for the above WoOF template:
   
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/TemplateLogic.java}
+
+  Describing how the above logic class is used by WoOF to dynamically render the web page is beyond the scope of this tutorial as it is covered in {{{../index.html}other tutorials}}.  However for a quick overview:
+  
+    * The <<< <!-- \{section\} --> >>> are instrumentations in the web page to separate it into sections.
+    
+    * The method by naming convention (section name prefixed with <<<get>>>) provides the bean with the properties for the section (in this case the one property <<< $\{text\} >>>).  Note that the first section is defaultly called <<<Template>>>.
+    
+    * The <<< #\{link\} >>> is mapped directly by name to a method to handle the logic for clicking on the link in the web page.
+
+    * The parameters to the methods are dependency injected by WoOF (or more correctly OfficeFloor which is the underlying framework to WoOF - hence the WoOF acronym: Web on OfficeFloor).
+    
+  The configuration of WoOF occurs graphically and is as follows:
+    
+[./images/ServletFilterJspIntegration-woof.png] application.woof.
+
+  The reason for WoOF using this minimalistic instrumentation of the HTML is to allow Graphic Designers using tools, such as {{{http://dreamweaver.com}DreamWeaver}}, to create and change the web pages and Developers to use Java to provide the logic.  The programming knowledge necessary of Graphic Designers is little (if any) and therefore leaves them to their strength of creating highly presentable and useable web pages.  Developers can also focus on their strengths of programming the dynamic logic in Java and leave web page presentation to the Graphic Designers.
+
+Integration
+
+  At this point, WoOF has already been integrated with JSP.
+  
+  The integration has occurred by the annotations on the beans.  The annotations are flags to WoOF to find the bean within the respective context under the name supplied in the annotation.  Should the bean not be registered within the context under the name, it is instantiated by its default constructor and stored within the respective context.  The result of the above beans are:
+  
+*-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
+|| Bean             || Context Access                                      || WoOF access                                                       || JSP access 
+*-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
+| RequestBean       | <<<HttpServletRequest.getAttribute("RequestBean")>>> | Method parameter and bean annotated with @HttpRequestStateful("RequestBean") | Used directly in web page via <<< <jsp:useBean id="RequestBean" scope="request" class="net.officefloor.tutorial.servletfilterjspintegration.RequestBean" /> >>> and then <<< <jsp:property name="RequestBean" property="text" /> >>> 
+*-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
+| SessionBean       | <<<HttpSession.getAttribute("SessionBean")>>>        | Method parameter and bean annotated with @HttpSessionStateful("SessionBean") | Used directly in web page via <<< <jsp:useBean id="SessionBean" scope="session" class="net.officefloor.tutorial.servletfilterjspintegration.SessionBean" /> >>> and then <<< <jsp:property name="SessionBean" property="text" /> >>>
+*-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
+| ApplicationBean   | <<<ServletContext.getAttribute("ApplicationBean")>>> | Method parameter and bean annotated with @HttpApplicationStateful("ApplicationBean") | Used directly in web page via <<< <jsp:useBean id="ApplicationBean" scope="application" class="net.officefloor.tutorial.servletfilterjspintegration.ApplicationBean" /> >>> and then <<< <jsp:property name="ApplicationBean" property="text" /> >>>
+*-------------------+---------------------------------+---------------------------------------------+---------------------------------------------------------------------+
+
+  
+  The method dependency injection of the underlying framework to WoOF (OfficeFloor) handles this logic so that the developer need only provide the bean with the annotation as a parameter to the template logic method.  You can see this functionality with the method handling the link, as it dependency injects all of the beans and sets the values before having the response handled by the JSP - which subsequently re-obtains the beans from the respective contexts. 
+  
+  The integration works both ways also as you will notice that for the <<<ApplicationBean>>> the value is not set by the WoOF template logic object.  The value is actually specified by the following <<<HttpServlet>>> on start-up:
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/MockHttpServlet.java}
+
+  As the above <<<HttpServlet>>> registers the <<<ApplicationBean>>> within the <<<ServletContext>>>, WoOF will obtain this bean in rendering the web page and therefore have the <<<text>>> property specified already.
+
 
 
 web.xml
 
-  The following highlighted configuration provides the necessary configuration in the <<<web.xml>>> for running WoOF within the Servlet container.
+  For completeness of this tutorial, the remaining file <<<web.xml>>> is also included:
 
 %{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
-  For WoOF to effectively be used, its Filter mapping should be to <<</*>>> so that it has the ability to intercept each request.  WoOF will only service the requests it is configured for and will allow the Servlet container to process all remaining requests.
-
-
-Remaining Code
-
-  For completeness of this tutorial the remaining code is included below.
-
-* TemplateLogic
-
-  Identifies that the <<<link>>> in the above template should be handled by <<<LINK>>> output which in the above configuration is mapped to a JSP.
-
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/TemplateLogic.java}
-
-* MockHttpServlet
-
-  Not part of the WoOF but is included to know when a request is being serviced by the Servlet container (and not OfficeFloor).
-
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/MockHttpServlet.java}
-
-* ApplicationBean
-
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/ApplicationBean.java}
-
-* SessionBean
-
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/SessionBean.java}
-
-* RequestBean
-
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletfilterjspintegration/RequestBean.java}
 
 
 Unit Test
 
   The unit test highlights the servicing of a request by:
   
-   * Servlet container (for request not to be handled by WoOF as per its configuration)
+   * WoOF template
   
-   * WoOF dynamic template
-   
-   * Dynamic template link to be serviced by a JSP from the Servlet container
-   
-   * Request being serviced by a class
+   * JSP
 
 %{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletfilterjspintegration/JspIT.java}
 
