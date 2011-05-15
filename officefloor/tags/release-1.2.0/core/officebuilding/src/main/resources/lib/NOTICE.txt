@@ -1,0 +1,1 @@
+Artifacts within this directory are downloaded as is from the public Maven repository - except of course the additional OfficeFloor artifacts.
