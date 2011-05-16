@@ -77,7 +77,7 @@ public class HttpTemplateSectionSourceExtension implements
 						IProject project = context.getProject();
 						IFile file = project.getFile("src/main/webapp/"
 								+ templatePath);
-						if (file == null) {
+						if ((file == null) || (!file.exists())) {
 							return null; // Not within webapp
 						}
 
