@@ -4,11 +4,13 @@
 				      Daniel Sagenschneider
 				       ------------------
   
-  <<Tutorials>>
+  <<Quick Tutorials>>
   
-  The tutorials cover various features and capabilities of OfficeFloor.
+  The tutorials below provide 2 minute overviews of various features and capabilities of OfficeFloor.
   
-  All tutorials have respective sources that can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the tutorials within an IDE, use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within Eclipse).
+  Should you have any questions you can catch us online (click on the bottom right box and click on one of us to chat).  We are happy to assist in answering any questions, as we know that static documentation can never answer all questions.  If we all happen to be offline, please see {{{../getting-help.html}getting help}}.
+  
+  All tutorials have respective sources that can be downloaded and run with {{{http://maven.apache.org}Maven}}.  To view and run the tutorials within an IDE, use the appropriate Maven setup for the IDE (for example run <<<mvn eclipse:eclipse>>> to use within Eclipse).  Also installing the {{{../eclipse/index.html}Eclipse plug-ins}} will allow viewing the graphical configuration.
 
   
   
@@ -54,7 +56,7 @@ Services
 
   The following tutorials focus on providing services when using WoOF outside of a JEE Servlet Container.
   
-  Please note that current focus has been on running WoOF within a JEE Servlet Container and making use of the JEE application container services (e.g. EJBs).  As {{{http://java.sun.com/products/ejb/docs.html}EJB 3}} has now simplified creating and using managed services (EJBs), WoOF has focused on re-using this capability - especially as it allows re-use of existing EJBs.  Also the use of services outside the JEE Servlet Container is still in alpha and under development - OfficeFloor does actually provide the functionality but it is still alpha as the graphical configuration is currently under development for integrating these with WoOF.
+  Please note that current focus has been on running WoOF within a JEE Servlet Container and making use of the JEE application container services (e.g. EJBs).  As {{{http://java.sun.com/products/ejb/docs.html}EJB 3}} has now simplified creating and using managed services (EJBs), WoOF has focused on re-using this capability - especially as it allows re-use of existing EJBs.
 
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
@@ -68,7 +70,7 @@ Threading
 
   OfficeFloor provides the ability for multi-threaded services.
   
-  Again current focus has been on running within a JEE Servlet Container which assumes a single thread for servicing each request - due to the typical heavy reliance on ThreadLocal variables.  OfficeFloor at is foundation is a multi-threaded container that does not have this constraint.  As focus has been on running within a JEE Servlet Container the integration of multi-threading for WoOF is still in alpha (possible to manually code but no graphical configuration yet available for this feature - though watch this space).
+  Running applications within a JEE Servlet Container typically assumes a single thread for servicing each request - due to the heavy reliance on ThreadLocal variables.  OfficeFloor at is foundation is a multi-threaded container that does not have this constraint.  The below tutorials show how to use the multi-threaded nature of OfficeFloor.
 
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
