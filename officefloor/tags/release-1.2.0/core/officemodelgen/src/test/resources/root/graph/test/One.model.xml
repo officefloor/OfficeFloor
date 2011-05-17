@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="non model field" />
-	<field type="ConnectionModel" name="two field" />
-	<field type="CascadeModel" name="cascade field" cascade-remove="true" />
-	<list type="CascadeModel" name="cascade list" cascade-remove="true" />
-</model>

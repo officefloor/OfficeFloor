@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="administrator name" />
-	<field type="String" name="order" />
-	<field type="OfficeManagedObjectModel" name="office managed object"
-		end-list="administrator" />
-	<field type="AdministratorModel" name="administrator" end-list="office managed object" />
-</model>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="section managed object dependency name" />
-	<field type="String" name="dependency type" />
-	<field type="SectionManagedObjectDependencyToSectionManagedObjectModel"
-		name="section managed object" />
-	<field type="SectionManagedObjectDependencyToExternalManagedObjectModel"
-		name="external managed object" />
-</model>

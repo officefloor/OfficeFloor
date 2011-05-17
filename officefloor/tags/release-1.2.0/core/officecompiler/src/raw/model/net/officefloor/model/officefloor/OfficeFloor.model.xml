@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<list type="OfficeFloorManagedObjectSourceModel" name="office floor managed object source" />
-	<list type="OfficeFloorInputManagedObjectModel" name="office floor input managed object" />
-	<list type="OfficeFloorManagedObjectModel" name="office floor managed object" />
-	<list type="OfficeFloorTeamModel" name="office floor team" />
-	<list type="DeployedOfficeModel" name="deployed office" />
-</model>

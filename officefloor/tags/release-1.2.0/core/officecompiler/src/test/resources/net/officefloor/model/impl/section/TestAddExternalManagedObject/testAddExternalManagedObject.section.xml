@@ -1,6 +1,0 @@
-<section>
-	<external-managed-objects>
-		<external-managed-object name="OBJECT"
-			object-type="java.sql.Connection" />
-	</external-managed-objects>
-</section>
