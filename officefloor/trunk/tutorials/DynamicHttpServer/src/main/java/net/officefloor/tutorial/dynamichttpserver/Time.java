@@ -17,6 +17,9 @@
  */
 package net.officefloor.tutorial.dynamichttpserver;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Time bean.
  * 
@@ -25,8 +28,9 @@ package net.officefloor.tutorial.dynamichttpserver;
 // START SNIPPET: example
 public class Time {
 
-	public long getTime() {
-		return System.currentTimeMillis();
+	public String getTime() {
+		return SimpleDateFormat.getTimeInstance().format(
+				new Date(System.currentTimeMillis()));
 	}
 
 }
