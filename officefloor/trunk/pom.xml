@@ -1056,6 +1056,7 @@
 							<configuration>
 								<!-- Check staged content (jetty started for absolute HTTP paths) -->
 								<baseURL>http://localhost:9999</baseURL>
+								<timeout>10000</timeout>
 								<outputDirectory>${basedir}/target/staging/shell.sourceforge.net/home/project-web/officefloor/htdocs</outputDirectory>
 								<!-- Not generating as site is being generated/staged -->
 								<forceSite>false</forceSite>
