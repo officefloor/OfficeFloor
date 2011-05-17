@@ -103,7 +103,8 @@
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
 		</menu>
-		<menu name="Start using">
+		<menu name="Getting Started">
+			<item name="My First WoOF App" href="./tutorials/MyFirstWoofApp/index.html" />
 			<item name="Quick Tutorials" href="./tutorials/index.html" />
 			<item name="Eclipse Plug-ins" href="./eclipse/index.html" />
 			<item name="Download/Maven" href="./download.html" />
