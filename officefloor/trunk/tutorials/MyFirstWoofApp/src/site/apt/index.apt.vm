@@ -157,7 +157,7 @@ Steps
     mvn org.mortbay.jetty:jetty-maven-plugin:run
 +-----------------------------------------+
 
-  After running the above command, the WoOF template content will be available at {{{http://localhost:8080/template}http://localhost:8080/template}} and look as follows:
+  After running the above command, the WoOF template content will be available at <<<http://localhost:8080/template>>> and look as follows:
   
 [./images/MyFirstWoofApp-hello-world.png] Hello World screenshot.
   
