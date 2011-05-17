@@ -1,0 +1,10 @@
+<unmarshall class="net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer" node="officefloor">
+    <object method="addSourceAttachmentEntry" node="source-attachment" class="net.officefloor.eclipse.classpathcontainer.SourceAttachmentEntry">
+        <value method="setClasspathPath" node="source-attachment@class-path"/>
+        <value method="setSourceAttachmentPath" node="source-attachment@path"/>
+        <value method="setSourceAttachmentRootPath" node="source-attachment@root-path"/>
+    </object>
+    <object method="addExtensionClasspathProviderEntry" node="extension-classpath-provider" class="net.officefloor.eclipse.classpathcontainer.ExtensionClasspathProviderEntry">
+    	<value method="setExtensionClassName" node="extension-classpath-provider@class-name" />
+    </object>
+</unmarshall>

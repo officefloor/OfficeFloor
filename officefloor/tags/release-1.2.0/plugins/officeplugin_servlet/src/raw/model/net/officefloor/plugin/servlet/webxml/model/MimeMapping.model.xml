@@ -1,0 +1,4 @@
+<model>
+	<field type="String" name="extension" />
+	<field type="String" name="mime type" />
+</model>
