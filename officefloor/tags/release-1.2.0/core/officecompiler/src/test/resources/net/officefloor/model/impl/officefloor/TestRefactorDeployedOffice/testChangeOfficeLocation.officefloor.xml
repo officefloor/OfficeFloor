@@ -1,6 +1,0 @@
-<office-floor>
-	<offices>
-		<office name="NAME" source="net.example.ExampleOfficeSource"
-			location="ANOTHER_LOCATION" />
-	</offices>
-</office-floor>

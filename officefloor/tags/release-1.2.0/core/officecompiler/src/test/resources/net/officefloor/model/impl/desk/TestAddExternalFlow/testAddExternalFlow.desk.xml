@@ -1,5 +1,0 @@
-<desk>
-	<external-flows>
-		<external-flow name="FLOW" argument-type="java.lang.String" />
-	</external-flows>
-</desk>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="office sub section name" />
-	<list type="OfficeTaskModel" name="office task" />
-	<list type="OfficeSectionManagedObjectModel" name="office section managed object" />
-	<list type="OfficeSubSectionModel" name="office sub section" />
-</model>

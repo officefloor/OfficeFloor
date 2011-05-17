@@ -1,8 +1,0 @@
-<woof>
-
-	<templates>
-		<template name="Path1" path="Path1" class="Class1" />
-		<template name="same/uri" path="Path2" class="Class2" uri="same/uri" />
-	</templates>
-
-</woof>

@@ -1,1 +1,0 @@
-Class Path Resource within a lib for testing
