@@ -13,6 +13,7 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
+		<module>MyFirstWoofApp</module>
 		<module>StaticHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>PageFlowHttpServer</module>
