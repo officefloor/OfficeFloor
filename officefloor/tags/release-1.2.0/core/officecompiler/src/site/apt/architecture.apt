@@ -1,0 +1,85 @@
+                                         --------------------
+                                         OfficeCompiler Design
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  OfficeFloor is strongly typed to aid development teams to build large componentised applications and enable improved application execution performance.  The type safety ensures the connections between the Sources are valid so that the OfficeFrame can rely on this for execution and graphical editors can use this to inform developers of 'correctness'.
+
+  To ensure type safety compilation of the Sources by the OfficeCompiler produces types.  These types represent meta-data describing the public details of a Source and its particular configuration.  To ensure flexibility of Sources the Sources may use configuration to define how they are to be used rather than have all their details hard coded.  For example, a ManagedObjectSource for a socket allows the port to be defined in configuration.  This itself is likely not to change its type, however if the same socket ManagedObjectSource were to also allow security delegation by requiring a security object dependency, turning security on/off would change its type (whether a security object dependency is required).  Therefore, to ascertain a type from a source the source and its configuration must be compiled together.
+
+  Once the types are made available connections between Sources can be validated for type safety by comparing the meta-data provided by the Source types.  This is much like ensuring the calling code of the method (name and its arguments) match the declared method signature (name and its parameters).  Doing this up front means that errors are caught early in the development lifecycle reducing the likelihood of them creeping into production applications.
+
+  Therefore, the OfficeCompiler must provide the following:
+
+   * Compilation of the Sources into the OfficeFrame for execution ensuring type safety
+
+   * Compilation of the Sources to produce their types so these can be used by the graphical editors
+
+
+
+Making configuration manageable
+
+  OfficeCompiler is built on top of OfficeFrame and introduces additional Sources that aid in organising the other Sources.  The purpose of these Sources are to organise the configuration of OfficeFloor into modules to prevent creating 'monolithic' configuration files.  It also enables developers to work in isolated Sections of the application and not be contending for single configuration files.  These Sources are as follows:
+
+*-------------------+-----------------------------------------------------------------------------------------------------------+
+|| Source           || Description                                                                                              |
+*-------------------+-----------------------------------------------------------------------------------------------------------+
+| SectionSource     | Provides the organisation of an application's functionality into modules.  Sections can have Sub-Section, with each Sub-Section having its own Sub-Sections.  This is similar to the concept of packages in java, except that a Section is compiled into a single type that can be added to other Sections or an Office. |
+*-------------------+-----------------------------------------------------------------------------------------------------------+
+| OfficeSource      | Provides the assembly details of an application.  An Office contains the top level Sections with each Section subsequently containing Sub-Sections and so forth.  This is similar in concept to a <<<META-INF/web.xml>>> for a web application, except that an Office is compiled into a type that provides details of what the application requires for deployment. | 
+*-------------------+-----------------------------------------------------------------------------------------------------------+
+| OfficeFloorSource | Provides the deployment details of applications to the hardware.  An OfficeFloor contains one or more Offices and the necessary ManagedObjectSources and Teams to run the Offices. |
+*-------------------+-----------------------------------------------------------------------------------------------------------+
+
+  Further to these Sources organising the configuration, they have also been designed to allow the configuration to be graphical.  In other words, rather than developers writing these configurations out by hand, developers use graphical editors for configuring the Sources.  This means that developers can stop spending large amounts of time writing time consuming and error prone configuration files and get back to writing code.
+
+
+
+Compiling the Sources
+
+  The main focus of the OfficeCompiler is to compile the Sources configured by the graphical editors into the OfficeFrame for execution.  Typically compilation follows these steps:
+
+   [[1]] OfficeCompiler is given the OfficeFloorSource and its configuration location
+
+   [[1]] Compiling the OfficeFloorSource identifies the necessary OfficeSources and their configuration locations
+
+   [[1]] Compiling the subsequent OfficeSources identifies the SectionSources and their configuration locations
+
+   [[1]] SectionSources may themselves contain other SectionSources creating a hierarchical organisation of the Sections within an Office (ie Sections containing Sub-Sections, containing Sub-Sub-Sections, and so forth).
+
+   [[1]] As each of these above Sources are compiled they may result in any of the following Sources to be loaded, validated and confirmed to be type safe in their connections to other Sources:
+
+      * ManagedObjectSource (available in each of OfficeFloorSource, OfficeSource and SectionSource)
+
+      * WorkSource (available only within SectionSource)
+
+      * AdministratorSource (available only within OfficeSource)
+
+      * TeamSource (available only within OfficeFloorSource)
+
+   [[1]] On compiling all Sources a meta-data model of the application has been created.  This model is then loaded into the OfficeFrame (via the OfficeFrame configuration API).  Typically this step is known as "building" the OfficeFloor.
+
+   [[1]] The result of compilation is an OfficeFloor object which may be started by calling its <<<openOfficeFloor>>> method (representing the idea of 'opening the offices for business')
+
+
+
+Compiling Sources to obtain types
+
+  To aid in rapid application development (RAD), graphical editors are available in the IDEs to reduce time spent configuring.  To allow the graphical editors to validate the connections between Sources, the graphical editors require the type information of the Sources.  OfficeCompiler provides this functionality so that the graphical editors can focus on graphical editing.
+
+
+
+Starting points
+
+  Much like OfficeFrame, OfficeCompiler should be seldom directly used.  Understanding that the OfficeCompiler compiles the configurations generated by the graphical editors into the OfficeFrame is enough detail to start using OfficeFloor.  Graphical editors will use OfficeCompiler 'under the hood' allowing developers to not be too involved in its specifics.
+
+  Should you want to gain more insight into how OfficeCompiler works, the following classes are recommended starting points:
+
+*---------------------------------------------+---------------------------------------------------------------------------------+
+|| Class                                      || Description                                                                    |
+*---------------------------------------------+---------------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/OfficeFloorCompiler.html}net.officefloor.compile.OfficeFloorCompiler}} | Provides the starting point to compile an OfficeFloor.  It also provides access to the Loaders which enable obtaining the types for the Sources. |
+*---------------------------------------------+---------------------------------------------------------------------------------+
+| {{{/apidocs/net/officefloor/compile/test/work/package-summary.html}net.officefloor.compile.test.work}}, {{{/apidocs/net/officefloor/compile/test/managedobject/package-summary.html}net.officefloor.compile.test.managedobject}}, {{{/apidocs/net/officefloor/compile/test/section/package-summary.html}net.officefloor.compile.test.section}}, {{{/apidocs/net/officefloor/compile/test/office/package-summary.html}net.officefloor.compile.test.office}},         | Provides utility classes for testing Sources                                    |
+*---------------------------------------------+---------------------------------------------------------------------------------+

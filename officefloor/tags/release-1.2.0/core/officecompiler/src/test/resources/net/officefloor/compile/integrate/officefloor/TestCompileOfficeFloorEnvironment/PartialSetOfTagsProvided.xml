@@ -1,0 +1,13 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<properties>
+					<property name="one" value="${provided}" />
+					<property name="one" value="${not.provided}" />
+				</properties>
+			</office>
+		</offices>
+	</office-floor>
+	<office />
+</context>
