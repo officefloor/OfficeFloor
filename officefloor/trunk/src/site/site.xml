@@ -5,6 +5,8 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
+		<logo name="Donate"
+			href="http://sourceforge.net/donate/index.php?group_id=156349" img="http://images.sourceforge.net/images/project-support.jpg" />
 		<logo name="SourceForge" href="http://sourceforge.net/"
 			img="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" />
 		<logo name="OpenSourceScripts"
@@ -89,13 +91,17 @@
 			</script>
 			<!-- Start of Woopra Code -->
 			<script>
-				var woo_settings = {idle_timeout:'300000', domain:'officefloor.net'};
+				var woo_settings = {idle_timeout:'300000',
+				domain:'officefloor.net'};
 				(function(){
-				var wsc = document.createElement('script');
-				wsc.src = document.location.protocol+'//static.woopra.com/js/woopra.js';
+				var wsc =
+				document.createElement('script');
+				wsc.src =
+				document.location.protocol+'//static.woopra.com/js/woopra.js';
 				wsc.type = 'text/javascript';
 				wsc.async = true;
-				var ssc = document.getElementsByTagName('script')[0];
+				var ssc =
+				document.getElementsByTagName('script')[0];
 				ssc.parentNode.insertBefore(wsc, ssc);
 				})();
 			</script>
