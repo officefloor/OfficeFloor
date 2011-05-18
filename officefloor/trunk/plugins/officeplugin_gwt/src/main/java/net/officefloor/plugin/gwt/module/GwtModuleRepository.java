@@ -15,19 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.gwt.client;
-
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+package net.officefloor.plugin.gwt.module;
 
 /**
- * GWT service. 
- *
+ * Repository for GWT modules.
+ * 
  * @author Daniel Sagenschneider
  */
-@RemoteServiceRelativePath("example")
-public interface SomeService extends RemoteService {
-
-	String doService(String argument);
+public interface GwtModuleRepository {
 
 }
