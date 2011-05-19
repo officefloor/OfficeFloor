@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
