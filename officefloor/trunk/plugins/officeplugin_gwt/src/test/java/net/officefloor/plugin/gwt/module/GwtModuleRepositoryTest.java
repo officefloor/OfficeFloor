@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -38,7 +39,8 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link GwtModuleRepository} to test.
 	 */
-	private final GwtModuleRepository repository = new GwtModuleRepositoryImpl();
+	private final GwtModuleRepository repository = new GwtModuleRepositoryImpl(
+			new ModelRepositoryImpl());
 
 	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel}.

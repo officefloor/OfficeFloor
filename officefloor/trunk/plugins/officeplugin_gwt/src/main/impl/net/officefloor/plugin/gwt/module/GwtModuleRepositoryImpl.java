@@ -18,6 +18,7 @@
 package net.officefloor.plugin.gwt.module;
 
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepository;
 
 /**
  * {@link GwtModuleRepository} implementation.
@@ -26,12 +27,30 @@ import net.officefloor.model.repository.ConfigurationItem;
  */
 public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 
+	/**
+	 * {@link ModelRepository}.
+	 */
+	private final ModelRepository modelRepository;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param modelRepository
+	 *            {@link ModelRepository}.
+	 */
+	public GwtModuleRepositoryImpl(ModelRepository modelRepository) {
+		this.modelRepository = modelRepository;
+	}
+
+	/*
+	 * ===================== GwtModuleRepository =========================
+	 */
+
 	@Override
 	public GwtModuleModel retrieveGwtModule(ConfigurationItem configuration)
 			throws Exception {
-		// TODO implement GwtModuleRepository.retrieveGwtModule
-		throw new UnsupportedOperationException(
-				"TODO implement GwtModuleRepository.retrieveGwtModule");
+		return this.modelRepository.retrieve(new GwtModuleModel(),
+				configuration);
 	}
 
 	@Override

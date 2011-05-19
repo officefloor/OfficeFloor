@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall node="module" class="net.officefloor.model.gwt.module.GwtModule">
+	<value method="setRenameTo" node="module@rename-to" />
+</unmarshall>
