@@ -8,7 +8,6 @@
 		<version>1.3.0</version>
 	</parent>
 	<artifactId>officeplugin_gwt</artifactId>
-	<packaging>war</packaging>
 	<name>GWT Plug-in</name>
 	<description>OfficeFloor plug-in for GWT</description>
 	<properties>
