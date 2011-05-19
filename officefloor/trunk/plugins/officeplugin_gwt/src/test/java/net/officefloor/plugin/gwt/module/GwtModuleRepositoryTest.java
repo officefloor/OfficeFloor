@@ -77,7 +77,9 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	public void testCreateGwtModule() throws Exception {
 
 		// Create the configuration item
-		ConfigurationItem configuration = new MemoryConfigurationItem("TEST");
+		ConfigurationItem configuration = new MemoryConfigurationItem("TEST",
+				new ClassLoaderConfigurationContext(Thread.currentThread()
+						.getContextClassLoader()));
 
 		// Configure the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
