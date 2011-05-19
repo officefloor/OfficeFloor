@@ -17,6 +17,13 @@
  */
 package net.officefloor.plugin.gwt.module;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
@@ -57,14 +64,48 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 	@Override
 	public void createGwtModule(GwtModuleModel module,
 			ConfigurationItem configuration) throws Exception {
-		// TODO implement GwtModuleRepository.createGwtModule
-		throw new UnsupportedOperationException(
-				"TODO implement GwtModuleRepository.createGwtModule");
+
+		// Obtain the location of template GWT Module
+		final String TEMPLATE_LOCATION = this.getClass().getPackage().getName()
+				.replace('.', '/')
+				+ "/Template.gwt.xml";
+
+		// Load the Template GWT Module
+		ConfigurationItem templateItem = configuration.getContext()
+				.getConfigurationItem(TEMPLATE_LOCATION);
+		if (templateItem == null) {
+			throw new FileNotFoundException("Can not find GWT Module template "
+					+ TEMPLATE_LOCATION);
+		}
+		StringWriter buffer = new StringWriter();
+		Reader templateReader = new InputStreamReader(
+				templateItem.getConfiguration());
+		for (int character = templateReader.read(); character != -1; character = templateReader
+				.read()) {
+			buffer.write(character);
+		}
+		String template = buffer.toString();
+
+		// Fill out the template
+		template = template.replace("${rename.to}", module.getRenameTo());
+		template = template.replace("${entry.point.class.name}",
+				module.getEntryPointClassName());
+
+		// Write configuration for creating module
+		Charset defaultCharset = Charset.defaultCharset();
+		ByteArrayInputStream templateConfiguration = new ByteArrayInputStream(
+				template.getBytes(defaultCharset));
+		configuration.setConfiguration(templateConfiguration);
 	}
 
 	@Override
 	public void updateGwtModule(GwtModuleModel module,
 			ConfigurationItem configuration) throws Exception {
+
+		// Only want to change the module configuration and leave rest as is.
+		// Therefore loading DOM to be changed and written back.
+		
+
 		// TODO implement GwtModuleRepository.updateGwtModule
 		throw new UnsupportedOperationException(
 				"TODO implement GwtModuleRepository.updateGwtModule");
