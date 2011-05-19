@@ -50,20 +50,80 @@ public class GwtHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			.createMock(HttpTemplateSectionExtensionContext.class);
 
 	/**
-	 * Ensure can include GWT.
+	 * Ensure can include GWT on empty HTML.
 	 */
-	public void testSimpleIncludeGwt() throws Exception {
+	public void testEmptyHtml() throws Exception {
+		this.doTest("<html/>", "<html><head>" + SCRIPT + "</head><body>"
+				+ IFRAME + "</body></html>");
+	}
+
+	/**
+	 * Ensure can include on simple HTML.
+	 */
+	public void testSimpleHtml() throws Exception {
+		this.doTest("<html><head>SCRIPT</head><body>IFRAME</body></html>");
+	}
+
+	/**
+	 * Ensure can include on BODY only HTML.
+	 */
+	public void testBodyOnlyHtml() throws Exception {
+		this.doTest("<html><body/></html>",
+				"<html><head>SCRIPT</head><body>IFRAME</body></html>");
+	}
+
+	/**
+	 * Ensure can include on HEAD only HTML.
+	 */
+	public void testHeadOnlyHtml() throws Exception {
+		this.doTest("<html><head/></html>",
+				"<html><head>SCRIPT</head><body>IFRAME</body></html>");
+	}
+
+	/**
+	 * Ensure can include with additional content.
+	 */
+	public void testAdditionalContent() throws Exception {
+		this.doTest("<html><head>SCRIPT<title>Test</title><body>IFRAME<p>Hellow World</p></body></html>");
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param templateHtml
+	 *            Template HTML.
+	 */
+	private void doTest(String templateHtml) throws Exception {
+		this.doTest(templateHtml, templateHtml);
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param rawHtml
+	 *            Raw HTML.
+	 * @param transformedHtml
+	 *            Transformed HTML.
+	 */
+	private void doTest(String rawHtml, String transformedHtml)
+			throws Exception {
+
+		// Transform template
+		final String SCRIPT_TAG = "SCRIPT";
+		final String IFRAME_TAG = "IFRAME";
+		rawHtml = rawHtml.replace(SCRIPT_TAG, "").replace(IFRAME_TAG, "");
+		transformedHtml = transformedHtml.replace(SCRIPT_TAG, SCRIPT).replace(
+				IFRAME_TAG, IFRAME);
 
 		// Record adding GWT
 		this.recordReturn(this.context, this.context.getTemplateContent(),
-				"<html><head></head><body></body></html>");
+				rawHtml);
 		this.recordReturn(
 				this.context,
 				this.context
 						.getProperty(GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI),
 				"template");
-		this.context.setTemplateContent("<html><head>" + SCRIPT
-				+ "</head><body>" + IFRAME + "</body></html>");
+		this.context.setTemplateContent(transformedHtml);
 
 		// Test
 		this.replayMockObjects();

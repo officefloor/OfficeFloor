@@ -253,8 +253,9 @@ public class HtmlTemplateTransformerImpl implements HtmlTemplateTransformer {
 							attributeValue.length() - 1);
 				}
 
-				// Add the attribute
-				this.attributes.put(attributeName, attributeValue);
+				// Add the attribute (with case insensitive name)
+				this.attributes
+						.put(attributeName.toUpperCase(), attributeValue);
 			}
 		}
 
@@ -274,7 +275,8 @@ public class HtmlTemplateTransformerImpl implements HtmlTemplateTransformer {
 
 		@Override
 		public String getAttributeValue(String name) {
-			return this.attributes.get(name);
+			// Obtain attribute by case insensitive name
+			return this.attributes.get(name.toUpperCase());
 		}
 
 		@Override
