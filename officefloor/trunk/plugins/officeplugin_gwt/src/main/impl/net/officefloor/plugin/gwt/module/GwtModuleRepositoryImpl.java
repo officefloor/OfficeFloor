@@ -19,14 +19,27 @@ package net.officefloor.plugin.gwt.module;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * {@link GwtModuleRepository} implementation.
@@ -92,10 +105,7 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 				module.getEntryPointClassName());
 
 		// Write configuration for creating module
-		Charset defaultCharset = Charset.defaultCharset();
-		ByteArrayInputStream templateConfiguration = new ByteArrayInputStream(
-				template.getBytes(defaultCharset));
-		configuration.setConfiguration(templateConfiguration);
+		this.writeConfiguration(template, configuration);
 	}
 
 	@Override
@@ -104,11 +114,82 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 
 		// Only want to change the module configuration and leave rest as is.
 		// Therefore loading DOM to be changed and written back.
-		
+		DocumentBuilderFactory domFactory = DocumentBuilderFactory
+				.newInstance();
+		domFactory.setIgnoringElementContentWhitespace(false);
+		domFactory.setIgnoringComments(false);
+		domFactory.setCoalescing(false);
+		Document document = domFactory.newDocumentBuilder().parse(
+				configuration.getConfiguration());
+		document.setXmlStandalone(true);
 
-		// TODO implement GwtModuleRepository.updateGwtModule
-		throw new UnsupportedOperationException(
-				"TODO implement GwtModuleRepository.updateGwtModule");
+		// Obtain the module node
+		Element moduleNode = (Element) this.getFirstDirectChild(document,
+				"module");
+		if (moduleNode == null) {
+			throw new IOException(
+					"Can not find <module> within configuration.  Please ensure file is a GWT Module");
+		}
+
+		// Ensure rename-to attribute is updated
+		moduleNode.setAttribute("rename-to", module.getRenameTo());
+
+		// Ensure entry-point class is updated
+		final String ENTRY_POINT = "entry-point";
+		Element entryPointNode = (Element) this.getFirstDirectChild(moduleNode,
+				ENTRY_POINT);
+		if (entryPointNode == null) {
+			// No entry-point element, so add one before source nodes
+			entryPointNode = document.createElement(ENTRY_POINT);
+			Element sourceNode = (Element) this.getFirstDirectChild(moduleNode,
+					"source");
+			moduleNode.insertBefore(entryPointNode, sourceNode);
+		}
+		entryPointNode.setAttribute("class", module.getEntryPointClassName());
+
+		// Obtain the changed module configuration
+		TransformerFactory transformFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		StringWriter buffer = new StringWriter();
+		transformer
+				.transform(new DOMSource(document), new StreamResult(buffer));
+
+		// Write the updated configuration
+		this.writeConfiguration(buffer.toString(), configuration);
+	}
+
+	private Node getFirstDirectChild(Node parent, String tagName) {
+
+		// Search for the first direct child with Tag Name
+		NodeList children = parent.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			if (tagName.equals(child.getNodeName())) {
+				return child; // found direct child by Tag Name
+			}
+		}
+
+		// As here, did not find child
+		return null;
+	}
+
+	/**
+	 * Writes the module configuration to the {@link ConfigurationItem}.
+	 * 
+	 * @param moduleConfiguration
+	 *            Module configuration.
+	 * @param configurationItem
+	 *            {@link ConfigurationItem}.
+	 * @throws Exception
+	 *             If fails to write the configuration.
+	 */
+	private void writeConfiguration(String moduleConfiguration,
+			ConfigurationItem configurationItem) throws Exception {
+		Charset defaultCharset = Charset.defaultCharset();
+		ByteArrayInputStream templateConfiguration = new ByteArrayInputStream(
+				moduleConfiguration.getBytes(defaultCharset));
+		configurationItem.setConfiguration(templateConfiguration);
 	}
 
 }

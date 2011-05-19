@@ -94,7 +94,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
-				"expected.gwt.xml"));
+				"create.gwt.xml"));
 		assertEquals("Incorrect created module", expected, actual);
 	}
 
@@ -105,13 +105,13 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the configuration item
 		InputStream initial = this.findInputStream(this.getClass(),
-				"test.gwt.xml");
+				"change.gwt.xml");
 		ConfigurationItem configuration = new MemoryConfigurationItem("TEST");
 		configuration.setConfiguration(initial);
 
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
-		module.setRenameTo("updated");
+		module.setRenameTo("update");
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
 
 		// Update the GWT Module
@@ -119,6 +119,38 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 
 		// Obtain the file content
 		String actual = this.getText(configuration.getConfiguration());
+
+		// Validate content as expected
+		String expected = this.getText(this.findInputStream(this.getClass(),
+				"updated.gwt.xml"));
+		assertEquals("Incorrect created module", expected, actual);
+	}
+
+	/**
+	 * Ensure able to update the {@link GwtModuleModel} with empty
+	 * configuration.
+	 */
+	public void testUpdateEmptyGwtModule() throws Exception {
+
+		// Create the configuration item
+		InputStream initial = this.findInputStream(this.getClass(),
+				"empty.gwt.xml");
+		ConfigurationItem configuration = new MemoryConfigurationItem("TEST");
+		configuration.setConfiguration(initial);
+
+		// Configure to update the GWT Module
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("update");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+
+		// Update the GWT Module
+		this.repository.updateGwtModule(module, configuration);
+
+		// Obtain the file content
+		String actual = this.getText(configuration.getConfiguration());
+
+		// Touch up due to not adding white-space
+		actual = actual.replace("<source", "\t<source");
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
