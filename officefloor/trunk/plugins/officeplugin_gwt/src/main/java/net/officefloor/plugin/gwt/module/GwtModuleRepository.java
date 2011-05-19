@@ -17,11 +17,55 @@
  */
 package net.officefloor.plugin.gwt.module;
 
+import net.officefloor.model.repository.ConfigurationItem;
+
 /**
  * Repository for GWT modules.
  * 
  * @author Daniel Sagenschneider
  */
 public interface GwtModuleRepository {
+
+	/**
+	 * Retrieves the {@link GwtModuleModel} from the {@link ConfigurationItem}.
+	 * 
+	 * @param configuration
+	 *            {@link ConfigurationItem} containing the
+	 *            {@link GwtModuleModel} configuration.
+	 * @return {@link GwtModuleModel} for the {@link ConfigurationItem}.
+	 * @throws Exception
+	 *             If fails to retrieve the {@link GwtModuleModel}.
+	 */
+	GwtModuleModel retrieveGwtModule(ConfigurationItem configuration)
+			throws Exception;
+
+	/**
+	 * Creates a new GWT Module.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel} for the new GWT Module.
+	 * @param configuration
+	 *            {@link ConfigurationItem} to receive the GWT Module
+	 *            configuration.
+	 * @throws Exception
+	 *             If fails to create the GWT Module.
+	 */
+	void createGwtModule(GwtModuleModel module, ConfigurationItem configuration)
+			throws Exception;
+
+	/**
+	 * Updates an existing GWT Module.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel} with details to update the existing GWT
+	 *            Module.
+	 * @param configuration
+	 *            {@link ConfigurationItem} containing the existing GWT Module
+	 *            configuration and also used to update its configuration.
+	 * @throws Exception
+	 *             If fails to update the GWT Module.
+	 */
+	void updateGwtModule(GwtModuleModel module, ConfigurationItem configuration)
+			throws Exception;
 
 }

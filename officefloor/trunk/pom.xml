@@ -72,6 +72,7 @@
 		<aether-version>1.8</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<jetty-version>7.1.5.v20100705</jetty-version>
+		<gwt-version>2.2.0</gwt-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -448,6 +449,11 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.gwt</groupId>
+				<artifactId>gwt-user</artifactId>
+				<version>${gwt-version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
