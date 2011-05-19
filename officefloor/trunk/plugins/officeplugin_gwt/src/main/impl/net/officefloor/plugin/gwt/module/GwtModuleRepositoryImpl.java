@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.gwt.module;
 
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
