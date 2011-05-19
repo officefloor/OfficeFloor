@@ -78,6 +78,14 @@ public class HtmlTemplateTransformerTest extends OfficeFrameTestCase implements
 	}
 
 	/**
+	 * Ensure attribute name may be case insensitive.
+	 */
+	public void testCaseInsensitiveAttributeName() {
+		this.addTag(HtmlTagType.OPEN_CLOSE, "html", "VaRiOuS_CaSe", "value");
+		this.doTransformTest("<html various_CASE=value />", null);
+	}
+
+	/**
 	 * Ensure can prepend content.
 	 */
 	public void testPrepend() {

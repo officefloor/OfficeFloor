@@ -17,6 +17,9 @@
  */
 package net.officefloor.plugin.gwt.web.http.section;
 
+import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformation;
+import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformationContext;
+import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
 import net.officefloor.plugin.gwt.template.transform.HtmlTemplateTransformerImpl;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
@@ -63,11 +66,202 @@ public class GwtHttpTemplateSectionExtension implements
 		String script = "<script type=\"text/javascript\" language=\"javascript\" src=\""
 				+ scriptPath + "\"></script>";
 
-		// Transform the content
-		template = new HtmlTemplateTransformerImpl().transform(template, null);
+		// Create the transformer
+		HtmlTemplateTransformer transformer = new HtmlTemplateTransformerImpl();
 
-		// Write back the template
-		context.setTemplateContent(template);
+		// Check whether GWT content already included
+		Transformation transformation = new Transformation(scriptPath, script);
+		transformer.transform(template, transformation);
+
+		// Determine if require adding GWT content
+		if ((!transformation.isGwtScriptIncluded)
+				|| (!transformation.isGwtHistoryIncluded)) {
+
+			// Ensure have HTML element to include the GWT content
+			if (!transformation.isHtmlIncluded) {
+				throw new IllegalStateException(
+						"Template must include HTML element");
+			}
+
+			// Check complete, now undertake transformation
+			transformation.isCheck = false;
+			template = transformer.transform(template, transformation);
+
+			// Write back the template
+			context.setTemplateContent(template);
+		}
+	}
+
+	/**
+	 * Checks the template for content.
+	 */
+	private static class Transformation implements HtmlTemplateTransformation {
+
+		/**
+		 * GWT script path.
+		 */
+		private final String scriptPath;
+
+		/**
+		 * GWT script content.
+		 */
+		private final String script;
+
+		/**
+		 * Determining if checking.
+		 */
+		public boolean isCheck = true;
+
+		/**
+		 * Flag indicating if HTML included.
+		 */
+		private boolean isHtmlIncluded = false;
+
+		/**
+		 * Flag indicating if HEAD included.
+		 */
+		private boolean isHeadIncluded = false;
+
+		/**
+		 * Flag indicating if the GWT script is included.
+		 */
+		public boolean isGwtScriptIncluded = false;
+
+		/**
+		 * Flag indicating if BODY included.
+		 */
+		private boolean isBodyIncluded = false;
+
+		/**
+		 * Flag indicating if the GWT history is included.
+		 */
+		public boolean isGwtHistoryIncluded = false;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param scriptPath
+		 *            GWT script path.
+		 * @param script
+		 *            GWT script content.
+		 */
+		public Transformation(String scriptPath, String script) {
+			this.scriptPath = scriptPath;
+			this.script = script;
+		}
+
+		/*
+		 * =============== HtmlTemplateTransformation ====================
+		 */
+
+		@Override
+		public void transform(HtmlTemplateTransformationContext context) {
+
+			// Determine if checking
+			if (this.isCheck) {
+				// Checking content
+
+				// Determine if HTML element
+				if ("html".equalsIgnoreCase(context.getTagName())) {
+					this.isHtmlIncluded = true;
+				}
+
+				// Determine if HEAD element
+				if ("head".equalsIgnoreCase(context.getTagName())) {
+					this.isHeadIncluded = true;
+				}
+
+				// Determine if BODY element
+				if ("body".equalsIgnoreCase(context.getTagName())) {
+					this.isBodyIncluded = true;
+				}
+
+				// Determine if GWT script
+				if ("script".equalsIgnoreCase(context.getTagName())
+						&& (this.scriptPath.equals(context
+								.getAttributeValue("src")))) {
+					// GWT script included
+					this.isGwtScriptIncluded = true;
+				}
+
+				// Determine if GWT iframe
+				if ("iframe".equalsIgnoreCase(context.getTagName())
+						&& (GWT_HISTORY_ID.equals(context
+								.getAttributeValue("id")))) {
+					// GWT history included
+					this.isGwtHistoryIncluded = true;
+				}
+
+			} else {
+				// Transform the content
+
+				// Determine if GWT script
+				if (!this.isGwtScriptIncluded) {
+					// Include GWT script
+					boolean isInclude = false;
+					String prefix = "";
+					String suffix = "";
+					if ((!this.isHeadIncluded)
+							&& ("html".equalsIgnoreCase(context.getTagName()))) {
+						isInclude = true;
+						prefix = "<head>";
+						suffix = "</head>";
+					}
+					if ("head".equalsIgnoreCase(context.getTagName())) {
+						isInclude = true;
+					}
+
+					// Include GWT if appropriate
+					if (isInclude) {
+						context.inputContent(prefix + this.script + suffix);
+						this.isGwtScriptIncluded = true;
+					}
+				}
+
+				// Determine if GWT history
+				if (!this.isGwtHistoryIncluded) {
+					// Include GWT history
+					boolean isInclude = false;
+					boolean isAppend = false;
+					String prefix = "";
+					String suffix = "";
+					if (!this.isBodyIncluded) {
+						prefix = "<body>";
+						suffix = "</body>";
+						if (!this.isHeadIncluded) {
+							// No head so include in HTML
+							if ("html".equalsIgnoreCase(context.getTagName())) {
+								isInclude = true;
+							}
+						} else {
+							// Append after the HEAD
+							if ("head".equalsIgnoreCase(context.getTagName())) {
+								switch (context.getTagType()) {
+								case OPEN_CLOSE:
+								case CLOSE:
+									isAppend = true;
+									break;
+								}
+							}
+						}
+					}
+					if ("body".equalsIgnoreCase(context.getTagName())) {
+						isInclude = true;
+					}
+
+					// Include GWT if appropriate
+					if (isInclude) {
+						context.inputContent(prefix + GWT_HISTORY_IFRAME
+								+ suffix);
+						this.isGwtHistoryIncluded = true;
+					} else if (isAppend) {
+						context.appendContent(prefix + GWT_HISTORY_IFRAME
+								+ suffix);
+						this.isGwtHistoryIncluded = true;
+					}
+				}
+			}
+		}
 	}
 
 }
