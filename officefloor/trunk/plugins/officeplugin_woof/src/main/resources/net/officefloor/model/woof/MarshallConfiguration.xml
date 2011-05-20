@@ -38,6 +38,23 @@
 					</object>
 				</item>
 			</collection>
+			<collection method="getExtensions">
+				<item type="net.officefloor.model.woof.WoofTemplateExtensionModel"
+					element="extension">
+					<attributes>
+						<attribute method="getExtensionClassName" attribute="class" />
+					</attributes>
+					<collection method="getProperties">
+						<item type="net.officefloor.model.woof.PropertyModel"
+							element="property">
+							<attributes>
+								<attribute method="getName" attribute="name" />
+								<attribute method="getValue" attribute="value" />
+							</attributes>
+						</item>
+					</collection>
+				</item>
+			</collection>
 		</item>
 	</collection>
 

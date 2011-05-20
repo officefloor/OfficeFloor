@@ -63,9 +63,10 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				woof.getWoofTemplates(), new WoofTemplateModel("TEMPLATE_A",
 						"example", "example/TemplateA.ofp",
 						"net.example.ExampleClassA", null, null, null, null,
-						300, 301), new WoofTemplateModel("TEMPLATE_B", null,
-						"example/TemplateB.ofp", "net.example.ExampleClassB",
-						null, null, null, null, 302, 303));
+						null, 300, 301), new WoofTemplateModel("TEMPLATE_B",
+						null, "example/TemplateB.ofp",
+						"net.example.ExampleClassB", null, null, null, null,
+						null, 302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertList(new String[] { "getWoofTemplateOutputName",
 				"getArgumentType" }, template.getOutputs(),
@@ -84,6 +85,16 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofTemplateOutputModel output3 = template.getOutputs().get(2);
 		assertProperties(new WoofTemplateOutputToWoofResourceModel("RESOURCE"),
 				output3.getWoofResource(), "getResourceName");
+
+		// Validate Template extensions
+		assertList(new String[] { "getExtensionClassName" },
+				template.getExtensions(),
+				new WoofTemplateExtensionModel("GWT"),
+				new WoofTemplateExtensionModel("net.example.Extension"));
+		WoofTemplateExtensionModel extension = template.getExtensions().get(0);
+		assertList(new String[] { "getName", "getValue" },
+				extension.getProperties(), new PropertyModel("NAME.1",
+						"VALUE.1"), new PropertyModel("NAME.2", "VALUE.2"));
 
 		// ----------------------------------------
 		// Validate the sections
