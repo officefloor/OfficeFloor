@@ -19,8 +19,15 @@ package net.officefloor.plugin.woof;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
@@ -37,6 +44,7 @@ import net.officefloor.model.woof.WoofSectionOutputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofSectionOutputToWoofTemplateModel;
+import net.officefloor.model.woof.WoofTemplateExtensionModel;
 import net.officefloor.model.woof.WoofTemplateModel;
 import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
@@ -44,7 +52,9 @@ import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 
 /**
  * {@link WoofLoader} implementation.
@@ -52,6 +62,12 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * @author Daniel Sagenschneider
  */
 public class WoofLoaderImpl implements WoofLoader {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOG = Logger.getLogger(WoofLoaderImpl.class
+			.getName());
 
 	/**
 	 * {@link ClassLoader}.
@@ -105,6 +121,30 @@ public class WoofLoaderImpl implements WoofLoader {
 		// Load the WoOF model
 		WoofModel woof = this.repository.retrieveWoOF(configuration);
 
+		// Load the extension services
+		Map<String, WoofTemplateExtensionService> extensionServices = new HashMap<String, WoofTemplateExtensionService>();
+		ServiceLoader<WoofTemplateExtensionService> extensionServiceLoader = ServiceLoader
+				.load(WoofTemplateExtensionService.class, this.classLoader);
+		Iterator<WoofTemplateExtensionService> extensionIterator = extensionServiceLoader
+				.iterator();
+		while (extensionIterator.hasNext()) {
+			try {
+				WoofTemplateExtensionService extensionService = extensionIterator
+						.next();
+				extensionServices.put(
+						extensionService.getTemplateExtensionAlias(),
+						extensionService);
+			} catch (ServiceConfigurationError ex) {
+				// Warning that service not available
+				if (LOG.isLoggable(Level.WARNING)) {
+					LOG.log(Level.WARNING,
+							WoofTemplateExtensionService.class.getSimpleName()
+									+ " configuration failure: "
+									+ ex.getMessage(), ex);
+				}
+			}
+		}
+
 		// Configure the HTTP templates
 		Map<String, HttpTemplateAutoWireSection> templates = new HashMap<String, HttpTemplateAutoWireSection>();
 		for (WoofTemplateModel templateModel : woof.getWoofTemplates()) {
@@ -125,6 +165,47 @@ public class WoofLoaderImpl implements WoofLoader {
 
 			// Maintain reference to template by name
 			templates.put(templateName, template);
+
+			// Configure the HTTP template extensions
+			for (WoofTemplateExtensionModel extensionModel : templateModel
+					.getExtensions()) {
+
+				// Obtain the extension
+				String extensionClassName = extensionModel
+						.getExtensionClassName();
+				try {
+					WoofTemplateExtensionService extensionService = extensionServices
+							.get(extensionClassName);
+					if (extensionService != null) {
+						// Load via extension service
+						PropertyList properties = OfficeFloorCompiler
+								.newPropertyList();
+						for (PropertyModel property : extensionModel
+								.getProperties()) {
+							properties.addProperty(property.getName())
+									.setValue(property.getValue());
+						}
+						extensionService.extendTemplate(template, properties);
+
+					} else {
+						// Load via extension class name
+						Class<? extends HttpTemplateSectionExtension> extensionClass = (Class<? extends HttpTemplateSectionExtension>) this.classLoader
+								.loadClass(extensionClassName);
+						HttpTemplateAutoWireSectionExtension extension = template
+								.addTemplateExtension(extensionClass);
+						for (PropertyModel property : extensionModel
+								.getProperties()) {
+							extension.addProperty(property.getName(),
+									property.getValue());
+						}
+					}
+				} catch (Exception ex) {
+					// Indicate failure to extend template
+					throw new WoofTemplateExtensionException(
+							"Failed loading Template Extension "
+									+ extensionClassName, ex);
+				}
+			}
 		}
 
 		// Configure the sections

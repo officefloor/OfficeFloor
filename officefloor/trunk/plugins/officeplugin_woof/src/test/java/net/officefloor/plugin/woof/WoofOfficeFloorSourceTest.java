@@ -41,6 +41,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	@Override
+	protected void setUp() throws Exception {
+		WoofLoaderTest.ignoreExtensionServiceFailures();
+	}
+
+	@Override
 	protected void tearDown() throws Exception {
 		AutoWireAdministration.closeAllOfficeFloors();
 	}
@@ -70,7 +75,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Provides additional configuration to {@link WoofOfficeFloorSource} for testing.
+	 * Provides additional configuration to {@link WoofOfficeFloorSource} for
+	 * testing.
 	 */
 	private static class MockWoofMain extends WoofOfficeFloorSource {
 

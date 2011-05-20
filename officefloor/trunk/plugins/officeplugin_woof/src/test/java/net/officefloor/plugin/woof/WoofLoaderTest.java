@@ -18,6 +18,11 @@
 package net.officefloor.plugin.woof;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -26,8 +31,10 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
@@ -36,6 +43,13 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * @author Daniel Sagenschneider
  */
 public class WoofLoaderTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ignores failures to load {@link WoofTemplateExtensionService} instances.
+	 */
+	public static void ignoreExtensionServiceFailures() {
+		new WoofLoaderTest().setUp();
+	}
 
 	/**
 	 * {@link ClassLoader}.
@@ -66,6 +80,80 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 */
 	private final WebAutoWireApplication app = this
 			.createMock(WebAutoWireApplication.class);
+
+	/**
+	 * {@link Logger}.
+	 */
+	private final Logger logger = Logger.getLogger(WoofLoaderImpl.class
+			.getName());
+
+	/**
+	 * {@link LogRecord} instances.
+	 */
+	private final List<LogRecord> logRecords = new LinkedList<LogRecord>();
+
+	/**
+	 * {@link Handler} instances.
+	 */
+	private final List<Handler> logHandlers = new LinkedList<Handler>();
+
+	@Override
+	protected void setUp() {
+
+		// Set up to intercept all logging
+		this.logger.setUseParentHandlers(false);
+
+		// Remove the existing handlers
+		for (Handler handler : logger.getHandlers()) {
+			logger.removeHandler(handler);
+			this.logHandlers.add(handler);
+		}
+
+		// Add handler to intercept message
+		this.logger.addHandler(new Handler() {
+			@Override
+			public void publish(LogRecord record) {
+				synchronized (WoofLoaderTest.this.logRecords) {
+					WoofLoaderTest.this.logRecords.add(record);
+				}
+			}
+
+			@Override
+			public void flush() {
+				// Do nothing
+			}
+
+			@Override
+			public void close() throws SecurityException {
+				// Do nothing
+			}
+		});
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Reinstate handlers and logger state
+		this.logger.setUseParentHandlers(true);
+		for (Handler handler : this.logger.getHandlers()) {
+			this.logger.removeHandler(handler);
+		}
+		for (Handler handler : this.logHandlers) {
+			this.logger.addHandler(handler);
+		}
+
+		// Validate warned failed to load unknown service
+		synchronized (this.logRecords) {
+			assertEquals("Should warn of service failure", 1,
+					this.logRecords.size());
+			LogRecord record = this.logRecords.get(0);
+			assertEquals(
+					"Incorrect cause message",
+					WoofTemplateExtensionService.class.getName()
+							+ ": Provider woof.template.extension.not.available.Service not found",
+					record.getThrown().getMessage());
+		}
+	}
 
 	/**
 	 * Ensure can load configuration to {@link WebAutoWireApplication}.
@@ -114,6 +202,67 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.loader.loadWoofConfiguration(
 				this.getFileLocation(this.getClass(), "application.woof"),
 				this.app);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load GWT extension.
+	 */
+	public void testGwt() throws Exception {
+
+		final HttpTemplateAutoWireSection template = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSectionExtension extension = this
+				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record loading template
+		this.recordReturn(this.app, this.app.addHttpTemplate(
+				"WOOF/Template.html", Template.class, "example"), template);
+
+		// Record extending with GWT
+		this.recordReturn(template, template.getTemplateUri(), "example");
+		this.recordReturn(template, template
+				.addTemplateExtension(GwtHttpTemplateSectionExtension.class),
+				extension);
+		extension.addProperty(
+				GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI,
+				"example");
+
+		// Test
+		this.replayMockObjects();
+		this.loader.loadWoofConfiguration(
+				this.getFileLocation(this.getClass(), "gwt.woof"), this.app);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if unknown template extension.
+	 */
+	public void testUnknownTemplateExtension() throws Exception {
+
+		final HttpTemplateAutoWireSection template = this
+				.createMock(HttpTemplateAutoWireSection.class);
+
+		// Record loading template
+		this.recordReturn(this.app, this.app.addHttpTemplate(
+				"WOOF/Template.html", Template.class, "example"), template);
+
+		// Should not load further as unknown template extension
+
+		// Test
+		this.replayMockObjects();
+		try {
+			this.loader.loadWoofConfiguration(this.getFileLocation(
+					this.getClass(), "unknown-template-extension.woof"),
+					this.app);
+			fail("Should not load successfully");
+		} catch (WoofTemplateExtensionException ex) {
+			assertEquals("Incorrect exception",
+					"Failed loading Template Extension UNKNOWN",
+					ex.getMessage());
+			assertTrue("Incorrect cause",
+					ex.getCause() instanceof ClassNotFoundException);
+		}
 		this.verifyMockObjects();
 	}
 

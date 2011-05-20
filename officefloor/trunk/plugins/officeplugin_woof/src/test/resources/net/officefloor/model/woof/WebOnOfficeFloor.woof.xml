@@ -13,6 +13,11 @@
 				<resource name="RESOURCE" />
 			</output>
 			<output name="OUTPUT_4" />
+			<extension class="GWT">
+				<property name="NAME.1" value="VALUE.1" />
+				<property name="NAME.2" value="VALUE.2" />
+			</extension>
+			<extension class="net.example.Extension" />
 		</template>
 		<template name="TEMPLATE_B" path="example/TemplateB.ofp"
 			class="net.example.ExampleClassB" x="302" y="303" />

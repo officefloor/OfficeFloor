@@ -28,6 +28,15 @@
 				<value method="setResourceName" node="resource@name" />
 			</object>
 		</object>
+		<object method="addExtension" node="extension"
+			class="net.officefloor.model.woof.WoofTemplateExtensionModel">
+			<value method="setExtensionClassName" node="extension@class" />
+			<object method="addProperty" node="property"
+				class="net.officefloor.model.woof.PropertyModel">
+				<value method="setName" node="property@name" />
+				<value method="setValue" node="property@value" />
+			</object>
+		</object>
 	</object>
 
 	<!-- SECTIONS -->
