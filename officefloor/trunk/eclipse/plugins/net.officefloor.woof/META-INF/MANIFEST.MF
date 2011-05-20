@@ -36,4 +36,5 @@ Import-Package: org.eclipse.core.commands.common,
  org.osgi.framework
 Bundle-ClassPath: .,
  officeplugin_woof-1.3.0.jar,
- officeplugin_servlet-1.3.0.jar
+ officeplugin_servlet-1.3.0.jar,
+ officeplugin_gwt-1.3.0.jar
