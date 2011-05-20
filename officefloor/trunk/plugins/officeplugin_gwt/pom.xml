@@ -15,7 +15,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>officeplugin_web</artifactId>
 		</dependency>
 		<dependency>
