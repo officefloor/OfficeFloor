@@ -111,7 +111,9 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadWoofConfiguration("WOOF/Application.woof", this.app);
+		this.loader.loadWoofConfiguration(
+				this.getFileLocation(this.getClass(), "application.woof"),
+				this.app);
 		this.verifyMockObjects();
 	}
 
