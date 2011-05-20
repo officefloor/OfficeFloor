@@ -26,7 +26,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
  * 
  * @author Daniel Sagenschneider
  */
-public class GwtHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
+public class GwtTransformationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Script to be added to the template.

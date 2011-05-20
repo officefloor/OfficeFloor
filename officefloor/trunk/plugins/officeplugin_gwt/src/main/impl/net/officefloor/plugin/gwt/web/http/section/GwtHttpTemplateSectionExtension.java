@@ -21,6 +21,8 @@ import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformation;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformationContext;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
 import net.officefloor.plugin.gwt.template.transform.HtmlTemplateTransformerImpl;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
+import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 
@@ -48,6 +50,28 @@ public class GwtHttpTemplateSectionExtension implements
 	private static final String GWT_HISTORY_IFRAME = "<iframe src=\"javascript:''\" id=\""
 			+ GWT_HISTORY_ID
 			+ "\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>";
+
+	/**
+	 * Initiates the extending of the template with GWT.
+	 * 
+	 * @param template
+	 *            {@link HttpTemplateAutoWireSection}.
+	 */
+	public static void extendTemplate(HttpTemplateAutoWireSection template) {
+
+		// Obtain the template URI
+		String templateUri = template.getTemplateUri();
+		if ((templateUri == null) || (templateUri.trim().length() == 0)) {
+			throw new IllegalStateException(
+					"Template must have a URI for extending with GWT (Template="
+							+ template.getTemplatePath() + ")");
+		}
+
+		// Configure this extension
+		HttpTemplateAutoWireSectionExtension extension = template
+				.addTemplateExtension(GwtHttpTemplateSectionExtension.class);
+		extension.addProperty(PROPERTY_TEMPLATE_URI, templateUri);
+	}
 
 	/*
 	 * ================== HttpTemplateSectionExtension ====================
