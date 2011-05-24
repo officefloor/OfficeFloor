@@ -22,11 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
+import org.easymock.AbstractMatcher;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;

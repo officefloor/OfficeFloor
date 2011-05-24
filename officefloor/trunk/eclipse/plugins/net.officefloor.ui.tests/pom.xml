@@ -20,5 +20,9 @@
 			<artifactId>net.officefloor.ui</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+		</dependency>
 	</dependencies>
 </project>
