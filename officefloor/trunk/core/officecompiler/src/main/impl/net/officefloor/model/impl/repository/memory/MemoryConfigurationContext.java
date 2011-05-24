@@ -61,12 +61,6 @@ public class MemoryConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public String[] getClasspath() {
-		// No class path for memory configuration
-		return new String[0];
-	}
-
-	@Override
 	public ConfigurationItem getConfigurationItem(String relativeLocation)
 			throws Exception {
 		return this.items.get(relativeLocation);

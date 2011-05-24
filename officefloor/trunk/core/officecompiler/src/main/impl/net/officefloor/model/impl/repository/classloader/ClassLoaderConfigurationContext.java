@@ -55,13 +55,6 @@ public class ClassLoaderConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public String[] getClasspath() {
-		throw new UnsupportedOperationException(
-				"Can not obtain class path from a "
-						+ this.getClass().getSimpleName());
-	}
-
-	@Override
 	public ConfigurationItem getConfigurationItem(String location)
 			throws Exception {
 

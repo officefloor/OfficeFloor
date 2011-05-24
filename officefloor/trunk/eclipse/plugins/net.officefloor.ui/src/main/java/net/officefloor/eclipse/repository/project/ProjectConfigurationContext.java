@@ -21,7 +21,6 @@ package net.officefloor.eclipse.repository.project;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.officefloor.eclipse.util.LogUtil;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -29,15 +28,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.IEditorInput;
 
 /**
  * Implementation of {@link ConfigurationContext} for a {@link IProject}
  * providing context for a {@link IFile}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ProjectConfigurationContext implements ConfigurationContext {
@@ -48,18 +44,13 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	private final IProject project;
 
 	/**
-	 * Class path for the {@link IProject}.
-	 */
-	private final String[] classpath;
-
-	/**
 	 * {@link IProgressMonitor}.
 	 */
 	private final IProgressMonitor monitor;
 
 	/**
 	 * Obtains the {@link IProject} from the input {@link IEditorInput}.
-	 *
+	 * 
 	 * @param editorInput
 	 *            {@link IEditorInput}.
 	 * @return {@link IProject} for the input {@link IEditorInput}.
@@ -70,7 +61,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 	/**
 	 * Initiate with the {@link IProject} providing context.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject} providing context.
 	 */
@@ -80,7 +71,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 	/**
 	 * Convenience constructor.
-	 *
+	 * 
 	 * @param editorInput
 	 *            {@link IEditorInput}.
 	 */
@@ -90,7 +81,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 	/**
 	 * Initiate with the {@link IProject} providing context.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject} providing context.
 	 * @param monitor
@@ -101,26 +92,11 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 			IProgressMonitor monitor) {
 		this.project = project;
 		this.monitor = monitor;
-
-		String[] computedClassPath;
-		try {
-			// Create the Java Project
-			IJavaProject javaProject = JavaCore.create(project);
-
-			// Obtain the class path
-			computedClassPath = JavaRuntime
-					.computeDefaultRuntimeClassPath(javaProject);
-
-		} catch (Throwable ex) {
-			LogUtil.logError("Failed to compute class path for project", ex);
-			computedClassPath = new String[0]; // provide empty class path
-		}
-		this.classpath = computedClassPath;
 	}
 
 	/**
 	 * Obtain the {@link IProject}.
-	 *
+	 * 
 	 * @return {@link IProject}.
 	 */
 	public IProject getProject() {
@@ -134,11 +110,6 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	@Override
 	public String getLocation() {
 		return this.project.getFullPath().toPortableString();
-	}
-
-	@Override
-	public String[] getClasspath() {
-		return this.classpath;
 	}
 
 	@Override
