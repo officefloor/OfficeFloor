@@ -36,6 +36,12 @@ Import-Package: org.eclipse.core.commands.common,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-ClassPath: .,
+ officecompiler-1.3.0.jar,
+ officeframe-1.3.0.jar,
+ officemodelgen-1.3.0.jar,
+ officexml-1.3.0.jar,
  officeplugin_gwt-1.3.0.jar,
  officeplugin_servlet-1.3.0.jar,
+ officeplugin_socket-1.3.0.jar,
+ officeplugin_web-1.3.0.jar,
  officeplugin_woof-1.3.0.jar

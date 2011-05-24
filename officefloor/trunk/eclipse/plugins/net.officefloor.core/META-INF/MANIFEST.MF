@@ -153,7 +153,8 @@ Export-Package: net.officefloor.bootstrap,
  net.officefloor.plugin.xml.unmarshall.flat,
  net.officefloor.plugin.xml.unmarshall.load,
  net.officefloor.plugin.xml.unmarshall.translate,
- net.officefloor.plugin.xml.unmarshall.tree
+ net.officefloor.plugin.xml.unmarshall.tree,
+ org.easymock
 Bundle-ClassPath: .,
  aether-api-1.8.jar,
  aether-connector-asynchttpclient-1.8.jar,
@@ -194,4 +195,6 @@ Bundle-ClassPath: .,
  sisu-inject-bean-1.4.3.1.jar,
  sisu-inject-plexus-1.4.3.1.jar,
  wagon-provider-api-1.0-beta-6.jar,
- xbean-reflect-3.4.jar
+ xbean-reflect-3.4.jar,
+ easymock-1.1.jar,
+ plexus-utils-1.5.5.jar
