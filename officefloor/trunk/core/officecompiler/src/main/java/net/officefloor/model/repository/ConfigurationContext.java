@@ -39,13 +39,6 @@ public interface ConfigurationContext {
 	String getLocation();
 
 	/**
-	 * Obtains the class path for the context.
-	 *
-	 * @return Class path for the context.
-	 */
-	String[] getClasspath();
-
-	/**
 	 * Obtains the {@link ConfigurationItem} at the relative location.
 	 *
 	 * @param relativeLocation

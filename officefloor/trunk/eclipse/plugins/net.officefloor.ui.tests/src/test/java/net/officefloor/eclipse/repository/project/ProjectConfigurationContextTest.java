@@ -44,18 +44,22 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	private final IProject project = this.createMock(IProject.class);
 
 	/**
+	 * Mock {@link IProgressMonitor}.
+	 */
+	private final IProgressMonitor monitor = this
+			.createMock(IProgressMonitor.class);
+
+	/**
 	 * {@link ProjectConfigurationContext} to test.
 	 */
 	private final ConfigurationContext context = new ProjectConfigurationContext(
-			this.project);
+			this.project, this.monitor);
 
 	/**
 	 * Ensure able to create item under {@link IProject}.
 	 */
 	public void testCreateItemFromProject() throws Exception {
 
-		final IProgressMonitor monitor = this
-				.createMock(IProgressMonitor.class);
 		final IFolder folder = this.createMock(IFolder.class);
 		final IFolder parentFolder = this.createMock(IFolder.class);
 		final IFolder grandParentFolder = this.createMock(IFolder.class);

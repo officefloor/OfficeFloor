@@ -32,12 +32,15 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.IEditorPart;
 
 /**
  * {@link java.lang.ClassLoader} to load classes from a
  * {@link org.eclipse.core.resources.IProject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ProjectClassLoader extends URLClassLoader {
@@ -56,7 +59,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Convenience method to find a {@link ConfigurationItem} on the class path
 	 * of the project of the input {@link IEditorPart}.
-	 *
+	 * 
 	 * @param editorPart
 	 *            {@link IEditorPart}.
 	 * @param path
@@ -76,25 +79,25 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Convenience method to create the {@link ProjectClassLoader} from the
 	 * input {@link IEditorPart}.
-	 *
+	 * 
 	 * @param editorPart
 	 *            {@link IEditorPart}.
 	 * @return {@link ProjectClassLoader}.
 	 */
 	public static ProjectClassLoader create(IEditorPart editorPart) {
 
-		// Obtain the configuration context
-		ConfigurationContext context = new ProjectConfigurationContext(
-				editorPart.getEditorInput());
+		// Obtain the project
+		IProject project = ProjectConfigurationContext.getProject(editorPart
+				.getEditorInput());
 
 		// Return the class loader
-		return create(context);
+		return create(project);
 	}
 
 	/**
 	 * Convenience method to create the {@link ProjectClassLoader} from an
 	 * {@link IProject}.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject}.
 	 * @return {@link ProjectClassLoader}.
@@ -105,7 +108,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Initiates from the {@link IProject} with the parent {@link ClassLoader}.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject}.
 	 * @param parentClassLoader
@@ -115,50 +118,28 @@ public class ProjectClassLoader extends URLClassLoader {
 	public static ProjectClassLoader create(IProject project,
 			ClassLoader parentClassLoader) {
 
-		// Obtain the configuration context
-		ConfigurationContext context = new ProjectConfigurationContext(project);
+		// Compute the Project's class path
+		String[] computedClassPath;
+		try {
+			// Create the Java Project
+			IJavaProject javaProject = JavaCore.create(project);
 
-		// Return created class loader
-		return create(context, parentClassLoader);
-	}
+			// Obtain the class path
+			computedClassPath = JavaRuntime
+					.computeDefaultRuntimeClassPath(javaProject);
 
-	/**
-	 * Initiates from the {@link ConfigurationContext}.
-	 *
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @return {@link ProjectClassLoader}.
-	 */
-	public static ProjectClassLoader create(ConfigurationContext context) {
-		return create(context, null);
-	}
-
-	/**
-	 * Initiates from the {@link ConfigurationContext} using the parent
-	 * {@link ClassLoader}.
-	 *
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @param parentClassLoader
-	 *            Parent {@link ClassLoader}.
-	 * @return {@link ProjectClassLoader}.
-	 */
-	public static ProjectClassLoader create(ConfigurationContext context,
-			ClassLoader parentClassLoader) {
-
-		// Default parent class loader from office floor plugin
-		if (parentClassLoader == null) {
-			parentClassLoader = DEFAULT_CLASS_LOADER;
+		} catch (Throwable ex) {
+			LogUtil.logError("Failed to compute class path for project", ex);
+			computedClassPath = new String[0]; // provide empty class path
 		}
 
 		// Return the class loader
-		return create(context.getLocation(), context.getClasspath(),
-				parentClassLoader);
+		return create(project.getName(), computedClassPath, parentClassLoader);
 	}
 
 	/**
 	 * Initiates from the specified class path.
-	 *
+	 * 
 	 * @param id
 	 *            Id of the {@link ProjectClassLoader}.
 	 * @param classpath
@@ -192,7 +173,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Ensure creates via static
 	 * {@link #create(ConfigurationContext, ClassLoader)} method.
-	 *
+	 * 
 	 * @param urls
 	 *            URLs.
 	 * @param parent
@@ -208,7 +189,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Obtains the {@link ConfigurationContext}.
-	 *
+	 * 
 	 * @return {@link ConfigurationContext}.
 	 */
 	public ConfigurationContext getConfigurationContext() {
@@ -217,7 +198,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Finds the {@link ConfigurationItem}.
-	 *
+	 * 
 	 * @param path
 	 *            Path of the {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
@@ -229,7 +210,7 @@ public class ProjectClassLoader extends URLClassLoader {
 	/**
 	 * Finds the {@link ConfigurationItem} and uses the input
 	 * {@link ConfigurationContext}.
-	 *
+	 * 
 	 * @param path
 	 *            Path of the {@link ConfigurationItem}.
 	 * @param context
@@ -253,7 +234,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 	/**
 	 * Creates the {@link URL} from the path.
-	 *
+	 * 
 	 * @param path
 	 *            Path to create as a {@link URL}.
 	 * @return {@link URL} of the path or <code>null</code> if fails to create
@@ -297,7 +278,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param path
 		 *            Path to the resource.
 		 * @param context
@@ -357,7 +338,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param location
 		 *            Location of this {@link ConfigurationContext}.
 		 * @param classLoader
@@ -376,20 +357,6 @@ public class ProjectClassLoader extends URLClassLoader {
 		@Override
 		public String getLocation() {
 			return this.location;
-		}
-
-		@Override
-		public String[] getClasspath() {
-
-			// Obtain the class path as strings
-			URL[] urls = this.classLoader.getURLs();
-			String[] classpath = new String[urls.length];
-			for (int i = 0; i < classpath.length; i++) {
-				classpath[i] = urls[i].toExternalForm();
-			}
-
-			// Return the class path
-			return classpath;
 		}
 
 		@Override

@@ -31,10 +31,8 @@ import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectE
 import net.officefloor.eclipse.common.editpolicies.layout.MovePositionalModelCommand;
 import net.officefloor.eclipse.common.editpolicies.open.OfficeFloorOpenEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
-import net.officefloor.model.repository.ConfigurationContext;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.draw2d.ChopboxAnchor;
@@ -141,12 +139,8 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 */
 	public BeanDialog createBeanDialog(Object bean, String... ignoreProperties) {
 
-		// Obtain the configuration context
-		ConfigurationContext context = new FileConfigurationItem(this.editor
-				.getEditorInput()).getContext();
-
 		// Create a new Class Loader to ensure latest version of classes
-		ClassLoader classLoader = ProjectClassLoader.create(context);
+		ClassLoader classLoader = ProjectClassLoader.create(this.editor);
 
 		// Obtain the Shell for the dialog
 		Shell editorShell = this.editor.getSite().getShell();

@@ -72,12 +72,6 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public String[] getClasspath() {
-		// Only single entry in class path being root directory
-		return new String[] { this.rootDir.getAbsolutePath() };
-	}
-
-	@Override
 	public ConfigurationItem createConfigurationItem(String location,
 			InputStream configuration) throws Exception {
 		// Create the file

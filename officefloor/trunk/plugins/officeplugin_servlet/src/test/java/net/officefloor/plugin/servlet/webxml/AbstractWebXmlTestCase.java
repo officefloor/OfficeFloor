@@ -627,12 +627,6 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			fail("Should not be creating configuration item in loading");
 			return null;
 		}
-
-		@Override
-		public String[] getClasspath() {
-			fail("Should not need class path for configuration item");
-			return null;
-		}
 	}
 
 	/**
