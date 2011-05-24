@@ -27,6 +27,7 @@ import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
@@ -89,6 +90,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * URI for the {@link HttpTemplate}.
 	 */
 	private Text uri;
+
+	/**
+	 * GWT EntryPoint class name.
+	 */
+	private String gwtEntryPointClassName;
 
 	/**
 	 * {@link HttpTemplateInstance}.
@@ -166,6 +172,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Obtain initial values
 		String initialTemplatePath = "";
 		String initialUri = "";
+		String initialGwtEntryPoint = "";
 
 		// Provide means to specify template location
 		new Label(page, SWT.NONE).setText("Template path: ");
@@ -206,6 +213,27 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			}
 		});
 
+		// Provide means to specify GWT extension
+		new Label(page, SWT.NONE).setText("GWT Enty Point Class: ");
+		InputHandler<String> gwtEntryPoint = new InputHandler<String>(page,
+				new ClasspathClassInput(this.project, initialGwtEntryPoint,
+						page.getShell()), new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Specify the EntyPoint and indicate changed
+						HttpTemplateWizardPage.this.gwtEntryPointClassName = (value == null ? ""
+								: value.toString());
+						HttpTemplateWizardPage.this.handleChange();
+					}
+
+					@Override
+					public void notifyValueInvalid(String message) {
+						HttpTemplateWizardPage.this.setErrorMessage(message);
+					}
+				});
+		gwtEntryPoint.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
 		// Indicate initial state
 		this.handleChange();
 
@@ -218,6 +246,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void handleChange() {
+
+		// Clear error message (as change may have corrected it)
+		this.setErrorMessage(null);
 
 		// Ensure have template extension
 		if (this.templateExtension == null) {
@@ -264,10 +295,21 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String uriValue = this.uri.getText();
 		uriValue = (EclipseUtil.isBlank(uriValue) ? null : uriValue.trim());
 
+		// Ensure have URI if have GWT Entry Point Class
+		String gwtEntryPoint = (EclipseUtil
+				.isBlank(this.gwtEntryPointClassName) ? null
+				: this.gwtEntryPointClassName);
+		if ((this.gwtEntryPointClassName != null) && (uriValue == null)) {
+			// Must have URI if using GWT
+			this.setErrorMessage("Must provide URI if using GWT");
+			this.setPageComplete(false);
+			return;
+		}
+
 		// Create the HTTP Template Instance
 		String logicClassName = propertyLogicClass.getValue();
 		this.instance = new HttpTemplateInstance(this.templatePath,
-				logicClassName, sectionType, uriValue);
+				logicClassName, sectionType, uriValue, gwtEntryPoint);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);

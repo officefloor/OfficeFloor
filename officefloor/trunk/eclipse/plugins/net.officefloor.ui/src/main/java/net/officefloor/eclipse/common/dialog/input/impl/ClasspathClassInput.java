@@ -55,7 +55,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 /**
  * {@link Input} to obtain an item from the class path.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ClasspathClassInput implements Input<Composite> {
@@ -82,7 +82,7 @@ public class ClasspathClassInput implements Input<Composite> {
 
 	/**
 	 * Initialise.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject} to be root.
 	 * @param initialClassName
@@ -100,7 +100,7 @@ public class ClasspathClassInput implements Input<Composite> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param project
 	 *            {@link IProject} to be root.
 	 * @param shell
@@ -113,7 +113,7 @@ public class ClasspathClassInput implements Input<Composite> {
 	/**
 	 * Convenience constructor to use the {@link IProject} and {@link Shell} of
 	 * the {@link IEditorInput}.
-	 *
+	 * 
 	 * @param editor
 	 *            {@link IEditorInput}.
 	 * @param shell
@@ -209,14 +209,15 @@ public class ClasspathClassInput implements Input<Composite> {
 
 	/**
 	 * Does the selection of a class.
-	 *
+	 * 
 	 * @param filter
 	 *            Filter.
 	 */
 	private void doClassSelection(String filter) {
 		try {
-			IJavaSearchScope scope = SearchEngine
-					.createJavaSearchScope(new IJavaProject[] { ClasspathClassInput.this.project });
+			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
+					new IJavaProject[] { ClasspathClassInput.this.project },
+					true);
 			SelectionDialog dialog = JavaUI
 					.createTypeDialog(
 							ClasspathClassInput.this.shell,
