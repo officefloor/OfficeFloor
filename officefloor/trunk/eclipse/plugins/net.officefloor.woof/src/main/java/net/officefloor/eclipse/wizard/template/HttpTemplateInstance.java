@@ -48,6 +48,11 @@ public class HttpTemplateInstance {
 	private final String uri;
 
 	/**
+	 * GWT EntryPoint class name.
+	 */
+	private final String gwtEntryPointClassName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templatePath
@@ -58,13 +63,16 @@ public class HttpTemplateInstance {
 	 *            {@link SectionType}.
 	 * @param uri
 	 *            URI.
+	 * @param gwtEntryPointClassName
+	 *            GWT EntryPoint class name.
 	 */
 	public HttpTemplateInstance(String templatePath, String logicClassName,
-			SectionType sectionType, String uri) {
+			SectionType sectionType, String uri, String gwtEntryPointClassName) {
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
 		this.uri = uri;
+		this.gwtEntryPointClassName = gwtEntryPointClassName;
 	}
 
 	/**
@@ -101,6 +109,15 @@ public class HttpTemplateInstance {
 	 */
 	public String getUri() {
 		return this.uri;
+	}
+
+	/**
+	 * Obtains the GWT EntryPoint class name.
+	 * 
+	 * @return GWT EntryPoint class name.
+	 */
+	public String getGwtEntryPointClassName() {
+		return this.gwtEntryPointClassName;
 	}
 
 }
