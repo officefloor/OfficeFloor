@@ -33,15 +33,17 @@ public interface GwtModuleRepository {
 	/**
 	 * Retrieves the {@link GwtModuleModel} from the {@link ConfigurationItem}.
 	 * 
-	 * @param configuration
-	 *            {@link ConfigurationItem} containing the
-	 *            {@link GwtModuleModel} configuration.
-	 * @return {@link GwtModuleModel} for the {@link ConfigurationItem}.
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @return {@link GwtModuleModel} for the {@link ConfigurationItem} or
+	 *         <code>null</code> if no {@link GwtModuleModel} at the path.
 	 * @throws Exception
 	 *             If fails to retrieve the {@link GwtModuleModel}.
 	 */
-	GwtModuleModel retrieveGwtModule(ConfigurationItem configuration)
-			throws Exception;
+	GwtModuleModel retrieveGwtModule(String gwtModulePath,
+			ConfigurationContext context) throws Exception;
 
 	/**
 	 * Stores the GWT Module.
@@ -53,11 +55,25 @@ public interface GwtModuleRepository {
 	 *            {@link ConfigurationContext}.
 	 * @param existingGwtModulePath
 	 *            Existing GWT Module path.
+	 * @return Path to the stored GWT Module.
 	 * @throws Exception
 	 *             If fails to store the GWT Module.
 	 */
-	void storeGwtModule(GwtModuleModel module, ConfigurationContext context,
+	String storeGwtModule(GwtModuleModel module, ConfigurationContext context,
 			String existingGwtModulePath) throws Exception;
+
+	/**
+	 * Deletes the GWT Module.
+	 * 
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @throws Exception
+	 *             If fails to delete the GWT Module.
+	 */
+	void deleteGwtModule(String gwtModulePath, ConfigurationContext context)
+			throws Exception;
 
 	/**
 	 * Creates new GWT Module content.

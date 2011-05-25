@@ -96,14 +96,23 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 	 */
 
 	@Override
-	public GwtModuleModel retrieveGwtModule(ConfigurationItem configuration)
-			throws Exception {
+	public GwtModuleModel retrieveGwtModule(String gwtModulePath,
+			ConfigurationContext context) throws Exception {
+
+		// Obtain the configuration
+		ConfigurationItem configuration = context
+				.getConfigurationItem(this.pathPrefix + gwtModulePath);
+		if (configuration == null) {
+			return null; // No configuration, so no GWT Module
+		}
+
+		// Return the GWT Module
 		return this.modelRepository.retrieve(new GwtModuleModel(),
 				configuration);
 	}
 
 	@Override
-	public void storeGwtModule(GwtModuleModel module,
+	public String storeGwtModule(GwtModuleModel module,
 			ConfigurationContext context, String existingGwtModulePath)
 			throws Exception {
 
@@ -119,8 +128,8 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 
 		// Obtain path for storing the GWT Module
 		String templateName = module.getRenameTo();
-		String storeLocation = this.pathPrefix + modulePath + "/"
-				+ templateName + ".gwt.xml";
+		modulePath = modulePath + "/" + templateName + ".gwt.xml";
+		String storeLocation = this.pathPrefix + modulePath;
 
 		// Obtain the existing GWT Module
 		String existingLocation = this.pathPrefix + existingGwtModulePath;
@@ -152,10 +161,21 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		}
 
 		// Remove the old GWT Module if applicable
-		if (!(storeLocation.equals(existingLocation))) {
+		if ((existingConfiguration != null)
+				&& (!(storeLocation.equals(existingLocation)))) {
 			// Relocated, so remove old GWT Module
 			context.deleteConfigurationItem(existingLocation);
 		}
+
+		// Return path to the GWT Module
+		return modulePath;
+	}
+
+	@Override
+	public void deleteGwtModule(String gwtModulePath,
+			ConfigurationContext context) throws Exception {
+		// Delete the configuration
+		context.deleteConfigurationItem(this.pathPrefix + gwtModulePath);
 	}
 
 	@Override
