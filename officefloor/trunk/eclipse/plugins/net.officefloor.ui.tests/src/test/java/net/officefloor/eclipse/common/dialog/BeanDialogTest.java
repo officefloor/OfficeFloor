@@ -38,6 +38,7 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 	 * Ensures dialog populates the bean.
 	 */
 	@Test
+	@GuiTest
 	public void testPopulateBean() {
 
 		// Create the shell to display the dialog
