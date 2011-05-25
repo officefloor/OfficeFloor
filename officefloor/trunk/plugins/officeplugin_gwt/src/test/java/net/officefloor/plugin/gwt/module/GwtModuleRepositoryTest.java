@@ -46,6 +46,20 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 					.getContextClassLoader(), "src");
 
 	/**
+	 * Ensure able to retrieve the {@link GwtModuleModel} not existing.
+	 */
+	public void testRetrieveNonExistentGwtModule() throws Exception {
+
+		// Create the configuration context
+		ConfigurationContext context = new MemoryConfigurationContext();
+
+		// Retrieve the GWT Module
+		GwtModuleModel module = this.repository.retrieveGwtModule(
+				"not/exist/Resource.gwt.xml", context);
+		assertNull("Should not retrieve GWT Module", module);
+	}
+
+	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel}.
 	 */
 	public void testRetrieveGwtModule() throws Exception {
@@ -54,16 +68,21 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		final String LOCATION = this.getFileLocation(this.getClass(),
 				"test.gwt.xml");
 
-		// Obtain the configuration item
-		ClassLoaderConfigurationContext context = new ClassLoaderConfigurationContext(
-				Thread.currentThread().getContextClassLoader());
-		ConfigurationItem configuration = context
-				.getConfigurationItem(LOCATION);
-		assertNotNull("Must have configuration", configuration);
+		// Create the configuration context
+		ConfigurationContext context = new ClassLoaderConfigurationContext(
+				Thread.currentThread().getContextClassLoader()) {
+			@Override
+			public ConfigurationItem getConfigurationItem(String location)
+					throws Exception {
+				assertTrue("Ensure prefix path", location.startsWith("src/"));
+				location = location.substring("src/".length());
+				return super.getConfigurationItem(location);
+			}
+		};
 
 		// Retrieve the GWT Module
-		GwtModuleModel module = this.repository
-				.retrieveGwtModule(configuration);
+		GwtModuleModel module = this.repository.retrieveGwtModule(LOCATION,
+				context);
 		assertNotNull("Should have module", module);
 
 		// Ensure correct values
@@ -159,7 +178,10 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		ConfigurationContext context = new MemoryConfigurationContext();
 
 		// Store (creating) GWT Module
-		this.repository.storeGwtModule(module, context, null);
+		String modulePath = this.repository.storeGwtModule(module, context,
+				null);
+		assertEquals("Incorrect GWT Module path",
+				"net/officefloor/plugin/gwt/example.gwt.xml", modulePath);
 
 		// Ensure create appropriate content
 		ConfigurationItem item = context
@@ -192,7 +214,10 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		context.createConfigurationItem("src/" + MODULE_PATH, initial);
 
 		// Store (update) the GWT Module
-		this.repository.storeGwtModule(module, context, MODULE_PATH);
+		String modulePath = this.repository.storeGwtModule(module, context,
+				MODULE_PATH);
+		assertEquals("Incorrect GWT Module path",
+				"net/officefloor/plugin/gwt/update.gwt.xml", modulePath);
 
 		// Obtain the updated content
 		ConfigurationItem item = context.getConfigurationItem("src/"
@@ -224,7 +249,10 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		context.createConfigurationItem("src/" + MODULE_PATH, initial);
 
 		// Store (relocated and update) the GWT Module
-		this.repository.storeGwtModule(module, context, MODULE_PATH);
+		String modulePath = this.repository.storeGwtModule(module, context,
+				MODULE_PATH);
+		assertEquals("Incorrect GWT Module path",
+				"net/officefloor/plugin/gwt/update.gwt.xml", modulePath);
 
 		// Obtain the relocated and updated content
 		ConfigurationItem item = context
@@ -239,6 +267,48 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the previous GWT Module is removed
 		assertNull("Previous GWT Module should be removed",
 				context.getConfigurationItem("src/" + MODULE_PATH));
+	}
+
+	/**
+	 * Ensure can delete GWT Module that does not exist.
+	 */
+	public void testDeleteNonExistentGwtModule() throws Exception {
+
+		final String MODULE_PATH = "net/officefloor/test.gwt.xml";
+
+		// Create the configuration context with no GWT Module
+		ConfigurationContext context = new MemoryConfigurationContext();
+
+		// Ensure delete the GWT Module
+		this.repository.deleteGwtModule(MODULE_PATH, context);
+
+		// Ensure GWT Module still not exist
+		assertNull("GWT Module should not exist",
+				context.getConfigurationItem(MODULE_PATH));
+	}
+
+	/**
+	 * Ensure can delete GWT Module.
+	 */
+	public void testDeleteGwtModule() throws Exception {
+
+		final String MODULE_PATH = "net/officefloor/test.gwt.xml";
+		final String CONFIG_PATH = "src/" + MODULE_PATH;
+
+		// Create the configuration context with GWT Module
+		ConfigurationContext context = new MemoryConfigurationContext();
+		InputStream initial = this.findInputStream(this.getClass(),
+				"change.gwt.xml");
+		context.createConfigurationItem(CONFIG_PATH, initial);
+		assertNotNull("Should have configuration for GWT Module",
+				context.getConfigurationItem(CONFIG_PATH));
+
+		// Ensure delete the GWT Module
+		this.repository.deleteGwtModule(MODULE_PATH, context);
+
+		// Ensure GWT Module deleted
+		assertNull("GWT Module should be deleted",
+				context.getConfigurationItem(CONFIG_PATH));
 	}
 
 	/**
