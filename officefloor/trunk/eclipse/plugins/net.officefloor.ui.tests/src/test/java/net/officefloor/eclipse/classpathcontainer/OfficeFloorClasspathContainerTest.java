@@ -23,6 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.junit.Test;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -40,6 +42,7 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load the {@link OfficeFloorClasspathContainer}.
 	 */
+	@Test
 	public void testLoad() throws Exception {
 
 		// Obtain the raw container data
@@ -77,6 +80,7 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can store the {@link OfficeFloorClasspathContainer}.
 	 */
+	@Test
 	public void testStore() throws Exception {
 
 		// Create the container

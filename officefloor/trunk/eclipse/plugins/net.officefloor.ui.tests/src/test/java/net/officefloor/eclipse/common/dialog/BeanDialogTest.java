@@ -18,26 +18,26 @@
 
 package net.officefloor.eclipse.common.dialog;
 
-import junit.framework.TestCase;
-
-import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.junit.Test;
 
 /**
  * Tests the {@link net.officefloor.eclipse.common.dialog.BeanDialog}.
  * 
  * @author Daniel Sagenschneider
  */
-public class BeanDialogTest extends TestCase {
-
+public class BeanDialogTest extends OfficeFrameTestCase {
+	
 	/**
 	 * Ensures dialog populates the bean.
 	 */
+	@Test
 	public void testPopulateBean() {
 
 		// Create the shell to display the dialog

@@ -867,25 +867,7 @@
 			<!-- END: project validation -->
 
 			<plugin>
-				<!-- Include source jars for release -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources-for-release</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-							<goal>test-jar-no-fork</goal>
-						</goals>
-						<configuration>
-							<includePom>true</includePom>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Generate Javadoc for site documentation and release jar -->
+				<!-- Generate Javadoc for site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<executions>
@@ -895,13 +877,6 @@
 						<phase>pre-site</phase>
 						<goals>
 							<goal>aggregate</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>attach-javadoc-for-release</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -1094,6 +1069,50 @@
 	</build>
 	<profiles>
 		<profile>
+			<id>javadoc-sources-for-deploy</id>
+			<activation>
+				<property>
+					<name>deploy</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Include source jars for release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-sources-for-release</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+									<goal>test-jar-no-fork</goal>
+								</goals>
+								<configuration>
+									<includePom>true</includePom>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<!-- Generate Javadoc release jar -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadoc-for-release</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<!-- Profile on deploying to SourceForge -->
 			<!-- -->
 			<!-- ssh -t sagenschneider,officefloor@shell.sourceforge.net create -->
@@ -1101,8 +1120,8 @@
 			<id>release-to-sourceforge</id>
 			<activation>
 				<property>
-					<name>sourceforge</name>
-					<value>deploy</value>
+					<name>deploy</name>
+					<value>sourceforge</value>
 				</property>
 			</activation>
 			<distributionManagement>
@@ -1135,8 +1154,8 @@
 			<id>release-to-sonatype</id>
 			<activation>
 				<property>
-					<name>sonatype</name>
-					<value>deploy</value>
+					<name>deploy</name>
+					<value>sonatype</value>
 				</property>
 			</activation>
 			<distributionManagement>
