@@ -21,6 +21,7 @@
  */
 package net.officefloor.frame.test;
 
+import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,8 +78,28 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	protected static @interface StressTest {
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	protected static @interface GuiTest {
+	}
+
 	@Override
 	public void runBare() throws Throwable {
+
+		// Determine if a graphical test
+		try {
+			Method testMethod = this.getClass().getMethod(this.getName());
+			if (testMethod.getAnnotation(GuiTest.class) != null) {
+				// Determine if headed environment (i.e. can run graphical test)
+				if (GraphicsEnvironment.isHeadless()) {
+					System.out.println("NOT RUNNING GUI TEST "
+							+ this.getClass().getSimpleName() + "."
+							+ this.getName());
+					return;
+				}
+			}
+		} catch (Throwable ex) {
+			// Ignore and not consider a graphical test
+		}
 
 		// Determine if a stress test
 		boolean isStressTest = false;

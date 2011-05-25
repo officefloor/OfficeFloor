@@ -27,15 +27,15 @@ import java.awt.Robot;
 
 import javax.swing.JFrame;
 
-import net.officefloor.demo.AbstractGuiTestCase;
 import net.officefloor.demo.record.RecordComponent;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link DemoTool}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DemoToolTest extends AbstractGuiTestCase {
+public class DemoToolTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link JFrame} for the {@link DemoTool}.

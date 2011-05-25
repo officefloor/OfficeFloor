@@ -32,18 +32,18 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-import net.officefloor.demo.AbstractGuiTestCase;
 import net.officefloor.demo.macro.Macro;
 import net.officefloor.demo.macro.MacroTask;
 import net.officefloor.demo.macro.MacroTaskContext;
 import net.officefloor.demo.macro.WaitMacro;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link MacroPlayer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MacroPlayerTest extends AbstractGuiTestCase {
+public class MacroPlayerTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link MacroPlayer} to test.
