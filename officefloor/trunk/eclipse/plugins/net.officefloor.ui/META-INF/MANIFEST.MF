@@ -6,7 +6,8 @@ Bundle-Version: 1.3.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
-Import-Package: junit.framework;version="3.8.2",
+Eclipse-RegisterBuddy: net.officefloor.core
+Import-Package: junit.framework,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
@@ -68,6 +69,7 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.classpath,
  net.officefloor.eclipse.common.action,
  net.officefloor.eclipse.common.commands,
+ net.officefloor.eclipse.common.dialog,
  net.officefloor.eclipse.common.dialog.input,
  net.officefloor.eclipse.common.dialog.input.filter,
  net.officefloor.eclipse.common.dialog.input.impl,
@@ -111,6 +113,7 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.officefloor,
  net.officefloor.eclipse.officefloor.editparts,
  net.officefloor.eclipse.officefloor.operations,
+ net.officefloor.eclipse.repository.project,
  net.officefloor.eclipse.section,
  net.officefloor.eclipse.section.editparts,
  net.officefloor.eclipse.section.operations,

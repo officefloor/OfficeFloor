@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.junit.Test;
 
 /**
  * Tests the {@link ProjectConfigurationContext}.
@@ -58,6 +59,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Should be able to edit the {@link IProject}.
 	 */
+	@Test
 	public void testNotReadOnly() {
 		assertFalse("Should be able to edit project", this.context.isReadOnly());
 	}
@@ -65,6 +67,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure failure if {@link IFile} already exists.
 	 */
+	@Test
 	public void testCreateItem_FileAlreadyExists() throws Exception {
 
 		// Record file already existing
@@ -89,6 +92,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	 * Ensure able to create item under {@link IProject} by creating the
 	 * necessary folders.
 	 */
+	@Test
 	public void testCreateItem_EnsureFoldersExist() throws Exception {
 
 		final InputStream CONTENTS = new ByteArrayInputStream("TEST".getBytes());
@@ -141,6 +145,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure does not nothing if non-existent file.
 	 */
+	@Test
 	public void testDeleteNonExistentFile() throws Exception {
 
 		// Record obtaining file (no existing)
@@ -155,6 +160,7 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure deletes file.
 	 */
+	@Test
 	public void testDeleteFile() throws Exception {
 
 		// Record obtaining file (no existing)
