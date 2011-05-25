@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 /**
  * {@link ConfigurationContext} for a {@link ClassLoader} class path.
@@ -74,10 +75,23 @@ public class ClassLoaderConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
+	public boolean isReadOnly() {
+		return true;
+	}
+
+	@Override
 	public ConfigurationItem createConfigurationItem(String id,
-			InputStream configuration) throws Exception {
-		throw new UnsupportedOperationException(
+			InputStream configuration) throws ReadOnlyConfigurationException {
+		throw new ReadOnlyConfigurationException(
 				"Can not create items on the class path from a "
+						+ this.getClass().getSimpleName());
+	}
+
+	@Override
+	public void deleteConfigurationItem(String relativeLocation)
+			throws Exception, ReadOnlyConfigurationException {
+		throw new ReadOnlyConfigurationException(
+				"Can not delete items on the class path from a "
 						+ this.getClass().getSimpleName());
 	}
 

@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 /**
  * {@link ConfigurationItem} for the {@link ClassLoader}.
@@ -110,7 +111,7 @@ public class ClassLoaderConfigurationItem implements ConfigurationItem {
 
 	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
-		throw new UnsupportedOperationException(
+		throw new ReadOnlyConfigurationException(
 				"Can not change item on class path for a "
 						+ this.getClass().getSimpleName());
 	}

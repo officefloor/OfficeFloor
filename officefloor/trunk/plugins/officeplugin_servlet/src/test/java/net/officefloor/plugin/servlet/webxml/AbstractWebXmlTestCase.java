@@ -54,6 +54,7 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
@@ -127,8 +128,8 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 					this, "OfficeFloor.xml");
 			xmlContext.addTag("port", String.valueOf(this.port));
 			xmlContext.addTag("web.xml.file.name", webXmlFileName);
-			xmlContext.addTag("password.file.location", passwordFile
-					.getAbsolutePath());
+			xmlContext.addTag("password.file.location",
+					passwordFile.getAbsolutePath());
 			ConfigurationContext context = new MockConfigurationContext(
 					xmlContext, new ClassLoaderConfigurationContext(this
 							.getClass().getClassLoader()));
@@ -208,12 +209,10 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			String unmarshallerLocation = WebAppModel.class.getPackage()
 					.getName().replace('.', '/')
 					+ "/UnmarshalWebXml.xml";
-			this.recordReturn(context, context
-					.getConfiguration(unmarshallerLocation), item);
-			this
-					.recordReturn(item, item.getConfiguration(), this
-							.getClass().getClassLoader().getResourceAsStream(
-									unmarshallerLocation));
+			this.recordReturn(context,
+					context.getConfiguration(unmarshallerLocation), item);
+			this.recordReturn(item, item.getConfiguration(), this.getClass()
+					.getClassLoader().getResourceAsStream(unmarshallerLocation));
 
 			// Do further recording
 			if (recorder != null) {
@@ -320,19 +319,21 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 		protected void recordInit() {
 
 			// Record the input
-			recordReturn(this.designer, this.designer.addSectionInput(
-					"service", null), SERVICE_INPUT);
+			recordReturn(this.designer,
+					this.designer.addSectionInput("service", null),
+					SERVICE_INPUT);
 
 			// Record the outputs
-			recordReturn(this.designer, this.designer.addSectionOutput(
-					"unhandled", null, false), UNHANDLED_OUTPUT);
+			recordReturn(this.designer,
+					this.designer.addSectionOutput("unhandled", null, false),
+					UNHANDLED_OUTPUT);
 			recordReturn(this.designer, this.designer.addSectionOutput(
 					ServletException.class.getSimpleName(),
 					ServletException.class.getName(), true),
 					SERVLET_EXCEPTION_OUTPUT);
 			recordReturn(this.designer, this.designer.addSectionOutput(
-					IOException.class.getSimpleName(), IOException.class
-							.getName(), true), IO_EXCEPTION_OUTPUT);
+					IOException.class.getSimpleName(),
+					IOException.class.getName(), true), IO_EXCEPTION_OUTPUT);
 
 			// Record the objects
 			recordReturn(this.designer, this.designer.addSectionObject(
@@ -394,23 +395,22 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Record loading the office servlet context managed object source
 			final SectionManagedObjectSource source = createMock(SectionManagedObjectSource.class);
-			recordReturn(this.designer, this.designer
-					.addSectionManagedObjectSource("OfficeServletContext",
+			recordReturn(this.designer,
+					this.designer.addSectionManagedObjectSource(
+							"OfficeServletContext",
 							OfficeServletContextManagedObjectSource.class
 									.getName()), source);
-			source
-					.addProperty(
-							OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
-							"OfficeFloor");
+			source.addProperty(
+					OfficeServletContextManagedObjectSource.PROPERTY_SERVLET_CONTEXT_NAME,
+					"OfficeFloor");
 
 			// Record the context parameters
 			for (int i = 0; i < contextParamNameValuePairs.length; i += 2) {
 				String name = contextParamNameValuePairs[i];
 				String value = contextParamNameValuePairs[i + 1];
-				source
-						.addProperty(
-								OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
-										+ name, value);
+				source.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_INIT_PARAMETER
+								+ name, value);
 			}
 
 			// Record loading the office servlet context managed object
@@ -420,16 +420,16 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Record the MIME mappings
 			for (MimeMapping mapping : this.mimeMappings) {
-				source
-						.addProperty(
-								OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
-										+ mapping.extension, mapping.mimeType);
+				source.addProperty(
+						OfficeServletContextManagedObjectSource.PROPERTY_PREFIX_FILE_EXTENSION_TO_MIME_TYPE
+								+ mapping.extension, mapping.mimeType);
 			}
 
 			// Record linking servlet server dependency
 			final ManagedObjectDependency servletServerDependency = createMock(ManagedObjectDependency.class);
-			recordReturn(OFFICE_SERVLET_CONTEXT_MO, OFFICE_SERVLET_CONTEXT_MO
-					.getManagedObjectDependency("SERVLET_SERVER"),
+			recordReturn(OFFICE_SERVLET_CONTEXT_MO,
+					OFFICE_SERVLET_CONTEXT_MO
+							.getManagedObjectDependency("SERVLET_SERVER"),
 					servletServerDependency);
 			this.designer.link(servletServerDependency, SERVLET_SERVER_OBJECT);
 
@@ -443,8 +443,8 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Record the filter properties
 			for (Property filterProperty : filterProperties) {
-				source.addProperty(filterProperty.getName(), filterProperty
-						.getValue());
+				source.addProperty(filterProperty.getName(),
+						filterProperty.getValue());
 			}
 		}
 
@@ -516,8 +516,10 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Record creating the task
 			final SectionTask task = createMock(SectionTask.class);
-			recordReturn(work, work.addSectionTask("service-by-" + servletName,
-					"service"), task);
+			recordReturn(
+					work,
+					work.addSectionTask("service-by-" + servletName, "service"),
+					task);
 
 			// Record linking the servicer mapping
 			final TaskObject servicerMapping = createMock(TaskObject.class);
@@ -556,15 +558,17 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Record linking the servlet exception escalation
 			final TaskFlow servletException = createMock(TaskFlow.class);
-			recordReturn(task, task.getTaskEscalation(ServletException.class
-					.getName()), servletException);
+			recordReturn(task,
+					task.getTaskEscalation(ServletException.class.getName()),
+					servletException);
 			this.designer.link(servletException, SERVLET_EXCEPTION_OUTPUT,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 
 			// Record linking the io exception escalation
 			final TaskFlow ioException = createMock(TaskFlow.class);
-			recordReturn(task, task.getTaskEscalation(IOException.class
-					.getName()), ioException);
+			recordReturn(task,
+					task.getTaskEscalation(IOException.class.getName()),
+					ioException);
 			this.designer.link(ioException, IO_EXCEPTION_OUTPUT,
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 
@@ -626,6 +630,18 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 				throws Exception {
 			fail("Should not be creating configuration item in loading");
 			return null;
+		}
+
+		@Override
+		public boolean isReadOnly() {
+			fail("Should not need to check if read-only");
+			return true;
+		}
+
+		@Override
+		public void deleteConfigurationItem(String relativeLocation)
+				throws Exception, ReadOnlyConfigurationException {
+			fail("Should not be deleting configuration item in loading");
 		}
 	}
 

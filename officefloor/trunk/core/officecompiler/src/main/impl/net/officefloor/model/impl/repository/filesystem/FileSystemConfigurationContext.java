@@ -25,6 +25,7 @@ import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 /**
  * File system {@link ConfigurationContext}.
@@ -72,8 +73,24 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
+	public ConfigurationItem getConfigurationItem(String location)
+			throws Exception {
+		// Create the file
+		File file = new File(this.rootDir, location);
+
+		// Return the configuration item
+		return new FileSystemConfigurationItem(location, file, this);
+	}
+
+	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	@Override
 	public ConfigurationItem createConfigurationItem(String location,
 			InputStream configuration) throws Exception {
+
 		// Create the file
 		File file = new File(this.rootDir, location);
 
@@ -88,13 +105,19 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String location)
-			throws Exception {
-		// Create the file
-		File file = new File(this.rootDir, location);
+	public void deleteConfigurationItem(String relativeLocation)
+			throws Exception, ReadOnlyConfigurationException {
 
-		// Return the configuration item
-		return new FileSystemConfigurationItem(location, file, this);
+		// Obtain the file
+		File file = new File(this.rootDir, relativeLocation);
+		if (!(file.exists())) {
+			return; // File not exists, so no need to delete it
+		}
+
+		// Delete the file
+		if (!(file.delete())) {
+			throw new IOException("Failed deleting file " + relativeLocation);
+		}
 	}
 
 }

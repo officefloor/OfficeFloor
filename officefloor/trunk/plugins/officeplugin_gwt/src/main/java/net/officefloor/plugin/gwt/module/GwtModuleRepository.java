@@ -17,7 +17,10 @@
  */
 package net.officefloor.plugin.gwt.module;
 
+import java.io.InputStream;
+
 import net.officefloor.model.gwt.module.GwtModuleModel;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -41,32 +44,45 @@ public interface GwtModuleRepository {
 			throws Exception;
 
 	/**
-	 * Creates a new GWT Module.
+	 * Stores the GWT Module.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel} containing the details of the required
+	 *            GWT Module.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @param existingGwtModulePath
+	 *            Existing GWT Module path.
+	 * @throws Exception
+	 *             If fails to store the GWT Module.
+	 */
+	void storeGwtModule(GwtModuleModel module, ConfigurationContext context,
+			String existingGwtModulePath) throws Exception;
+
+	/**
+	 * Creates new GWT Module content.
 	 * 
 	 * @param module
 	 *            {@link GwtModuleModel} for the new GWT Module.
-	 * @param configuration
-	 *            {@link ConfigurationItem} to receive the GWT Module
-	 *            configuration.
+	 * @return {@link InputStream} to the new GWT Module content.
 	 * @throws Exception
 	 *             If fails to create the GWT Module.
 	 */
-	void createGwtModule(GwtModuleModel module, ConfigurationItem configuration)
-			throws Exception;
+	InputStream createGwtModule(GwtModuleModel module) throws Exception;
 
 	/**
-	 * Updates an existing GWT Module.
+	 * Updates existing GWT Module content.
 	 * 
 	 * @param module
 	 *            {@link GwtModuleModel} with details to update the existing GWT
 	 *            Module.
-	 * @param configuration
-	 *            {@link ConfigurationItem} containing the existing GWT Module
-	 *            configuration and also used to update its configuration.
+	 * @param existingContent
+	 *            Existing GWT Module content.
+	 * @return {@link InputStream} to the updated GWT Module content.
 	 * @throws Exception
 	 *             If fails to update the GWT Module.
 	 */
-	void updateGwtModule(GwtModuleModel module, ConfigurationItem configuration)
-			throws Exception;
+	InputStream updateGwtModule(GwtModuleModel module,
+			InputStream existingContent) throws Exception;
 
 }

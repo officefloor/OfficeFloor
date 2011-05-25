@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 /**
  * XML {@link ConfigurationItem}.
@@ -79,7 +80,7 @@ public class XmlConfigurationItem implements ConfigurationItem {
 
 	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
-		throw new UnsupportedOperationException(
+		throw new ReadOnlyConfigurationException(
 				"Can not change content of XML context");
 	}
 

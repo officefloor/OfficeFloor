@@ -17,18 +17,18 @@
  */
 package net.officefloor.eclipse.repository.project;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 import org.easymock.AbstractMatcher;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -56,18 +56,46 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 			this.project, this.monitor);
 
 	/**
-	 * Ensure able to create item under {@link IProject}.
+	 * Ensure failure if {@link IFile} already exists.
 	 */
-	public void testCreateItemFromProject() throws Exception {
+	public void testCreateItem_FileAlreadyExists() throws Exception {
+
+		// Record file already existing
+		this.recordGetFile("Resource.xml", true);
+
+		// Test
+		this.replayMockObjects();
+		try {
+			this.context.createConfigurationItem("Resource.xml", null);
+			fail("Should not be successful");
+		} catch (IOException ex) {
+			assertEquals("Incorrect exception",
+					"File 'Resource.xml' can not be created as already exists",
+					ex.getMessage());
+		}
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to create item under {@link IProject} by creating the
+	 * necessary folders.
+	 */
+	public void testCreateItem_EnsureFoldersExist() throws Exception {
+
+		final InputStream CONTENTS = new ByteArrayInputStream("TEST".getBytes());
 
 		final IFolder folder = this.createMock(IFolder.class);
 		final IFolder parentFolder = this.createMock(IFolder.class);
 		final IFolder grandParentFolder = this.createMock(IFolder.class);
-		final IFile file = this.createMock(IFile.class);
 
-		// Record creating all folders
-		this.recordReturn(project, project.getFolder("src/main/resources"),
-				folder);
+		// Record obtaining the file
+		final IFile file = this.recordGetFile(
+				"src/main/resources/Resource.xml", false);
+
+		// Record ensuring all folders exist
+		this.recordReturn(file, file.getParent(), folder);
 		this.recordReturn(folder, folder.exists(), false);
 		this.recordReturn(folder, folder.getParent(), parentFolder);
 		this.recordReturn(parentFolder, parentFolder.exists(), false);
@@ -75,15 +103,14 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 				grandParentFolder);
 		this.recordReturn(grandParentFolder, grandParentFolder.exists(), false);
 		this.recordReturn(grandParentFolder, grandParentFolder.getParent(),
-				project);
-		grandParentFolder.create(true, true, monitor);
-		parentFolder.create(true, true, monitor);
-		folder.create(true, true, monitor);
+				this.project);
+		grandParentFolder.create(true, true, this.monitor);
+		parentFolder.create(true, true, this.monitor);
+		folder.create(true, true, this.monitor);
 
-		// Create the GWT Module
+		// Record creating the file
 		final InputStream[] contents = new InputStream[1];
-		this.recordReturn(folder, folder.getFile("Resource.xml"), file);
-		file.create(null, true, monitor);
+		file.create(null, true, this.monitor);
 		this.control(file).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -96,25 +123,42 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ConfigurationItem configurationItem = this.context
-				.createConfigurationItem("src/main/resources/Resources.xml",
-						null);
+		this.context.createConfigurationItem("src/main/resources/Resource.xml",
+				CONTENTS);
 		this.verifyMockObjects();
+
+		// Validate expected content
+		assertSame("Incorrect contents for file", CONTENTS, contents[0]);
 	}
 
 	/**
-	 * Obtains the content.
+	 * Records obtaining the {@link IFile}.
 	 * 
-	 * @param input
-	 *            {@link InputStream}.
-	 * @return Contents.
+	 * @param expectedPath
+	 *            {@link IFile} path.
+	 * @param isExist
+	 *            Indicates if {@link IFile} exists.
 	 */
-	private String getContents(InputStream input) throws IOException {
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		for (int value = input.read(); value != -1; value = input.read()) {
-			buffer.write(value);
-		}
-		return buffer.toString();
+	private IFile recordGetFile(final String expectedPath, boolean isExist) {
+
+		// Create the file
+		final IFile file = this.createMock(IFile.class);
+
+		// Record obtaining the file
+		this.recordReturn(this.project, this.project.getFile((IPath) null),
+				file, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						IPath path = (IPath) actual[0];
+						assertEquals("Incorrect path", expectedPath,
+								path.toPortableString());
+						return true;
+					}
+				});
+		this.recordReturn(file, file.exists(), isExist);
+
+		// Return the file
+		return file;
 	}
 
 }

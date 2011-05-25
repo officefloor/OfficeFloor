@@ -24,8 +24,11 @@ import java.io.InputStream;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorInput;
@@ -141,11 +144,34 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 					+ "' can not be created as already exists");
 		}
 
+		// Ensure the parent folders exist
+		this.ensureFolderExists(file.getParent());
+
 		// Create the file
 		file.create(configuration, true, this.monitor);
 
 		// Return the File by the Id
 		return new FileConfigurationItem(file, this.monitor);
+	}
+
+	/**
+	 * Ensures the {@link IFolder} exists.
+	 * 
+	 * @param folder
+	 *            {@link IFolder}.
+	 * @throws CoreException
+	 *             If fails to ensure {@link IFolder} exists.
+	 */
+	private void ensureFolderExists(IContainer folder) throws CoreException {
+		if (folder instanceof IProject) {
+			return; // Assume project created
+		} else if (folder.exists()) {
+			return; // Folder exists
+		} else {
+			// Ensure parent folder exists
+			this.ensureFolderExists(folder.getParent());
+			((IFolder) folder).create(true, true, this.monitor);
+		}
 	}
 
 }

@@ -56,8 +56,11 @@ public interface ConfigurationItem {
 	 *            Configuration.
 	 * @throws Exception
 	 *             If fails to set the configuration.
+	 * @throws ReadOnlyConfigurationException
+	 *             Should the configuration be read-only.
 	 */
-	void setConfiguration(InputStream configuration) throws Exception;
+	void setConfiguration(InputStream configuration) throws Exception,
+			ReadOnlyConfigurationException;
 
 	/**
 	 * Obtains the {@link ConfigurationContext} for this
