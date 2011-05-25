@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -132,6 +133,11 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	@Override
 	public ConfigurationItem createConfigurationItem(String location,
 			InputStream configuration) throws Exception {
 
@@ -152,6 +158,22 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 		// Return the File by the Id
 		return new FileConfigurationItem(file, this.monitor);
+	}
+
+	@Override
+	public void deleteConfigurationItem(String path) throws Exception,
+			ReadOnlyConfigurationException {
+		
+		// Obtain the file
+		IFile file = this.project.getFile(Path.fromPortableString(path));
+		
+		// Do nothing if file not exists
+		if (!(file.exists())) {
+			return;
+		}
+		
+		// Delete the file
+		file.delete(true, this.monitor);
 	}
 
 	/**

@@ -56,6 +56,13 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 			this.project, this.monitor);
 
 	/**
+	 * Should be able to edit the {@link IProject}.
+	 */
+	public void testNotReadOnly() {
+		assertFalse("Should be able to edit project", this.context.isReadOnly());
+	}
+
+	/**
 	 * Ensure failure if {@link IFile} already exists.
 	 */
 	public void testCreateItem_FileAlreadyExists() throws Exception {
@@ -129,6 +136,35 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 		// Validate expected content
 		assertSame("Incorrect contents for file", CONTENTS, contents[0]);
+	}
+
+	/**
+	 * Ensure does not nothing if non-existent file.
+	 */
+	public void testDeleteNonExistentFile() throws Exception {
+
+		// Record obtaining file (no existing)
+		this.recordGetFile("path", false);
+
+		// Test
+		this.replayMockObjects();
+		this.context.deleteConfigurationItem("path");
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure deletes file.
+	 */
+	public void testDeleteFile() throws Exception {
+
+		// Record obtaining file (no existing)
+		IFile file = this.recordGetFile("path", true);
+		file.delete(true, this.monitor);
+
+		// Test
+		this.replayMockObjects();
+		this.context.deleteConfigurationItem("path");
+		this.verifyMockObjects();
 	}
 
 	/**

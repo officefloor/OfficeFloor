@@ -28,6 +28,7 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.LogUtil;
+import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -134,21 +135,19 @@ public class ProjectClassLoader extends URLClassLoader {
 		}
 
 		// Return the class loader
-		return create(project.getName(), computedClassPath, parentClassLoader);
+		return create(computedClassPath, parentClassLoader);
 	}
 
 	/**
 	 * Initiates from the specified class path.
 	 * 
-	 * @param id
-	 *            Id of the {@link ProjectClassLoader}.
 	 * @param classpath
 	 *            Class path.
 	 * @param parentClassLoader
 	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(String id, String[] classpath,
+	public static ProjectClassLoader create(String[] classpath,
 			ClassLoader parentClassLoader) {
 
 		// Create the list of URLs
@@ -167,7 +166,7 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		// Return the created class loader
 		return new ProjectClassLoader(urls.toArray(new URL[0]),
-				parentClassLoader, id);
+				parentClassLoader);
 	}
 
 	/**
@@ -178,13 +177,10 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            URLs.
 	 * @param parent
 	 *            Parent {@link java.lang.ClassLoader}.
-	 * @param contextId
-	 *            Context Id.
 	 */
-	private ProjectClassLoader(URL[] urls, ClassLoader parent, String contextId) {
+	private ProjectClassLoader(URL[] urls, ClassLoader parent) {
 		super(urls, parent);
-		this.configurationContext = new ClassPathConfigurationContext(
-				contextId, this);
+		this.configurationContext = new ClassLoaderConfigurationContext(this);
 	}
 
 	/**
@@ -317,60 +313,6 @@ public class ProjectClassLoader extends URLClassLoader {
 				throws Exception {
 			throw new UnsupportedOperationException(
 					"Classpath resource may not be overridden");
-		}
-	}
-
-	/**
-	 * Class path {@link ConfigurationContext}.
-	 */
-	private static class ClassPathConfigurationContext implements
-			ConfigurationContext {
-
-		/**
-		 * Location of this {@link ConfigurationContext}.
-		 */
-		private final String location;
-
-		/**
-		 * {@link ProjectClassLoader}.
-		 */
-		private final ProjectClassLoader classLoader;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param location
-		 *            Location of this {@link ConfigurationContext}.
-		 * @param classLoader
-		 *            {@link ProjectClassLoader}.
-		 */
-		public ClassPathConfigurationContext(String location,
-				ProjectClassLoader classLoader) {
-			this.location = this.getClass().getSimpleName() + "-" + location;
-			this.classLoader = classLoader;
-		}
-
-		/*
-		 * ================ ConfigurationContext ========================
-		 */
-
-		@Override
-		public String getLocation() {
-			return this.location;
-		}
-
-		@Override
-		public ConfigurationItem getConfigurationItem(String location)
-				throws Exception {
-			// Return the found configuration item
-			return this.classLoader.findConfigurationItem(location, this);
-		}
-
-		@Override
-		public ConfigurationItem createConfigurationItem(String location,
-				InputStream configuration) throws Exception {
-			throw new UnsupportedOperationException(
-					"May not create a resource on the classpath");
 		}
 	}
 
