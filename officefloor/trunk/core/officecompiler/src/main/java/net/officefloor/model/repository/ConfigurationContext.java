@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 /**
  * Context of the {@link ConfigurationItem} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ConfigurationContext {
@@ -33,14 +33,14 @@ public interface ConfigurationContext {
 	 * <p>
 	 * This value is used in the equality of {@link ConfigurationContext}
 	 * instances.
-	 *
+	 * 
 	 * @return Location for this {@link ConfigurationContext}.
 	 */
 	String getLocation();
 
 	/**
 	 * Obtains the {@link ConfigurationItem} at the relative location.
-	 *
+	 * 
 	 * @param relativeLocation
 	 *            Relative location of the {@link ConfigurationItem} to obtain.
 	 * @return {@link ConfigurationItem}.
@@ -52,8 +52,15 @@ public interface ConfigurationContext {
 			throws Exception;
 
 	/**
+	 * Indicates if the configuration is read-only.
+	 * 
+	 * @return <code>true</code> should the configuration be read-only.
+	 */
+	boolean isReadOnly();
+
+	/**
 	 * Creates a new {@link ConfigurationItem} at the relative location.
-	 *
+	 * 
 	 * @param relativeLocation
 	 *            Relative location of the {@link ConfigurationItem} to create.
 	 * @param configuration
@@ -61,8 +68,25 @@ public interface ConfigurationContext {
 	 * @return The created {@link ConfigurationItem}.
 	 * @throws Exception
 	 *             If fails to create the {@link ConfigurationItem}.
+	 * @throws ReadOnlyConfigurationException
+	 *             Should the underlying implementation be read-only.
 	 */
 	ConfigurationItem createConfigurationItem(String relativeLocation,
-			InputStream configuration) throws Exception;
+			InputStream configuration) throws Exception,
+			ReadOnlyConfigurationException;
+
+	/**
+	 * Deletes the {@link ConfigurationItem} at the relative location.
+	 * 
+	 * @param relativeLocation
+	 *            Relative location of the {@link ConfigurationItem} to delete.
+	 * @throws Exception
+	 *             If can not delete the {@link ConfigurationItem} at the
+	 *             relative location.
+	 * @throws ReadOnlyConfigurationException
+	 *             Should the underlying implementation be read-only.
+	 */
+	void deleteConfigurationItem(String relativeLocation) throws Exception,
+			ReadOnlyConfigurationException;
 
 }

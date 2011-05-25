@@ -27,7 +27,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
+import net.officefloor.model.impl.repository.memory.MemoryConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -41,7 +42,8 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	 * {@link GwtModuleRepository} to test.
 	 */
 	private final GwtModuleRepository repository = new GwtModuleRepositoryImpl(
-			new ModelRepositoryImpl());
+			new ModelRepositoryImpl(), Thread.currentThread()
+					.getContextClassLoader(), "src");
 
 	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel}.
@@ -76,25 +78,18 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateGwtModule() throws Exception {
 
-		// Create the configuration item
-		ConfigurationItem configuration = new MemoryConfigurationItem("TEST",
-				new ClassLoaderConfigurationContext(Thread.currentThread()
-						.getContextClassLoader()));
-
 		// Configure the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("example");
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Example");
 
 		// Create the GWT Module
-		this.repository.createGwtModule(module, configuration);
-
-		// Obtain the file content
-		String actual = this.getText(configuration.getConfiguration());
+		InputStream content = this.repository.createGwtModule(module);
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"create.gwt.xml"));
+		String actual = this.getText(content);
 		assertEquals("Incorrect created module", expected, actual);
 	}
 
@@ -106,8 +101,6 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Create the configuration item
 		InputStream initial = this.findInputStream(this.getClass(),
 				"change.gwt.xml");
-		ConfigurationItem configuration = new MemoryConfigurationItem("TEST");
-		configuration.setConfiguration(initial);
 
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
@@ -115,15 +108,13 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
 
 		// Update the GWT Module
-		this.repository.updateGwtModule(module, configuration);
-
-		// Obtain the file content
-		String actual = this.getText(configuration.getConfiguration());
+		InputStream updated = this.repository.updateGwtModule(module, initial);
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertEquals("Incorrect created module", expected, actual);
+		String actual = this.getText(updated);
+		assertEquals("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -135,8 +126,6 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Create the configuration item
 		InputStream initial = this.findInputStream(this.getClass(),
 				"empty.gwt.xml");
-		ConfigurationItem configuration = new MemoryConfigurationItem("TEST");
-		configuration.setConfiguration(initial);
 
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
@@ -144,18 +133,112 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
 
 		// Update the GWT Module
-		this.repository.updateGwtModule(module, configuration);
+		InputStream updated = this.repository.updateGwtModule(module, initial);
 
-		// Obtain the file content
-		String actual = this.getText(configuration.getConfiguration());
-
-		// Touch up due to not adding white-space
+		// Obtain the file content (touch up due to not adding white-space)
+		String actual = this.getText(updated);
 		actual = actual.replace("<source", "\t<source");
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertEquals("Incorrect created module", expected, actual);
+		assertEquals("Incorrect updated module", expected, actual);
+	}
+
+	/**
+	 * Ensure appropriately creates a new GWT Module.
+	 */
+	public void testStoreGwtModule_Create() throws Exception {
+
+		// Configure the GWT Module to create
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("example");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Example");
+
+		// Configure context
+		ConfigurationContext context = new MemoryConfigurationContext();
+
+		// Store (creating) GWT Module
+		this.repository.storeGwtModule(module, context, null);
+
+		// Ensure create appropriate content
+		ConfigurationItem item = context
+				.getConfigurationItem("src/net/officefloor/plugin/gwt/example.gwt.xml");
+		assertNotNull("Ensure module created", item);
+		String actual = this.getText(item.getConfiguration());
+
+		// Ensure appropriate content
+		String expected = this.getText(this.findInputStream(this.getClass(),
+				"create.gwt.xml"));
+		assertEquals("Incorrect stored (created) module", expected, actual);
+	}
+
+	/**
+	 * Ensure appropriately updates the existing GWT Module.
+	 */
+	public void testStoreGwtModule_Update() throws Exception {
+
+		final String MODULE_PATH = "net/officefloor/plugin/gwt/update.gwt.xml";
+
+		// Configure to update the GWT Module
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("update");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+
+		// Create the configuration context
+		ConfigurationContext context = new MemoryConfigurationContext();
+		InputStream initial = this.findInputStream(this.getClass(),
+				"change.gwt.xml");
+		context.createConfigurationItem("src/" + MODULE_PATH, initial);
+
+		// Store (update) the GWT Module
+		this.repository.storeGwtModule(module, context, MODULE_PATH);
+
+		// Obtain the updated content
+		ConfigurationItem item = context.getConfigurationItem("src/"
+				+ MODULE_PATH);
+		String actual = this.getText(item.getConfiguration());
+
+		// Validate content as expected
+		String expected = this.getText(this.findInputStream(this.getClass(),
+				"updated.gwt.xml"));
+		assertEquals("Incorrect stored (updated) module", expected, actual);
+	}
+
+	/**
+	 * Ensure appropriately relocates and updates the GWT Module.
+	 */
+	public void testStoreGwtModule_Relocate() throws Exception {
+
+		final String MODULE_PATH = "old/location/change.gwt.xml";
+
+		// Configure to update the GWT Module
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("update");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+
+		// Create the configuration context
+		ConfigurationContext context = new MemoryConfigurationContext();
+		InputStream initial = this.findInputStream(this.getClass(),
+				"change.gwt.xml");
+		context.createConfigurationItem("src/" + MODULE_PATH, initial);
+
+		// Store (relocated and update) the GWT Module
+		this.repository.storeGwtModule(module, context, MODULE_PATH);
+
+		// Obtain the relocated and updated content
+		ConfigurationItem item = context
+				.getConfigurationItem("src/net/officefloor/plugin/gwt/update.gwt.xml");
+		String actual = this.getText(item.getConfiguration());
+
+		// Validate content as expected
+		String expected = this.getText(this.findInputStream(this.getClass(),
+				"updated.gwt.xml"));
+		assertEquals("Incorrect stored (updated) module", expected, actual);
+
+		// Ensure the previous GWT Module is removed
+		assertNull("Previous GWT Module should be removed",
+				context.getConfigurationItem("src/" + MODULE_PATH));
 	}
 
 	/**

@@ -48,6 +48,17 @@ public class MemoryConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
+	public ConfigurationItem getConfigurationItem(String relativeLocation)
+			throws Exception {
+		return this.items.get(relativeLocation);
+	}
+
+	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	@Override
 	public ConfigurationItem createConfigurationItem(String relativeLocation,
 			InputStream configuration) throws Exception {
 		// Create, load, and register the configuration item
@@ -61,9 +72,8 @@ public class MemoryConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String relativeLocation)
-			throws Exception {
-		return this.items.get(relativeLocation);
+	public void deleteConfigurationItem(String relativeLocation) {
+		this.items.remove(relativeLocation);
 	}
 
 }

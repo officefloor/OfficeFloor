@@ -58,7 +58,6 @@ public class GwtUtil {
 		// Ensure the folder exists to create the GWT Module
 		IFolder folder = project.getFolder(RESOURCES_SOURCE_FOLDER + "/"
 				+ modulePath);
-		ensureFolderExists(folder, monitor);
 
 		// Create the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
@@ -68,29 +67,6 @@ public class GwtUtil {
 				new ModelRepositoryImpl());
 		repository.createGwtModule(module, new ProjectConfigurationContext(
 				project).getConfigurationItem(templateUri + ".gwt.xml"));
-	}
-
-	/**
-	 * Ensures the {@link IFolder} exists.
-	 * 
-	 * @param folder
-	 *            {@link IFolder}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}.
-	 * @throws CoreException
-	 *             If fails to ensure {@link IFolder} exists.
-	 */
-	private static void ensureFolderExists(IContainer folder,
-			IProgressMonitor monitor) throws CoreException {
-		if (folder instanceof IProject) {
-			return; // Assume project created
-		} else if (folder.exists()) {
-			return; // Folder exists
-		} else {
-			// Ensure parent folder exists
-			ensureFolderExists(folder.getParent(), monitor);
-			((IFolder) folder).create(true, true, monitor);
-		}
 	}
 
 }

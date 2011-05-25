@@ -36,6 +36,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ReadOnlyConfigurationException;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -83,8 +84,8 @@ public class XmlConfigurationContext implements ConfigurationContext {
 			throws Exception {
 
 		// Obtain the location of the XML file
-		this.location = offsetObject.getClass().getPackage().getName().replace(
-				'.', '/')
+		this.location = offsetObject.getClass().getPackage().getName()
+				.replace('.', '/')
 				+ "/" + singleXmlFileName;
 
 		// Obtain the raw XML text from the resource
@@ -161,19 +162,33 @@ public class XmlConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
+	public ConfigurationItem getConfigurationItem(String relativeLocation)
+			throws Exception {
+		this.ensureParsedIntoConfigurationItems();
+		return this.items.get(relativeLocation);
+	}
+
+	@Override
+	public boolean isReadOnly() {
+		return true;
+	}
+
+	@Override
 	public ConfigurationItem createConfigurationItem(String relativeLocation,
 			InputStream configuration) throws Exception {
-		throw new UnsupportedOperationException("Can not create "
+		throw new ReadOnlyConfigurationException("Can not create "
 				+ ConfigurationItem.class.getSimpleName()
 				+ " instances within a "
 				+ XmlConfigurationContext.class.getSimpleName());
 	}
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String relativeLocation)
-			throws Exception {
-		this.ensureParsedIntoConfigurationItems();
-		return this.items.get(relativeLocation);
+	public void deleteConfigurationItem(String relativeLocation)
+			throws Exception, ReadOnlyConfigurationException {
+		throw new ReadOnlyConfigurationException("Can not delete "
+				+ ConfigurationItem.class.getSimpleName()
+				+ " instances within a "
+				+ XmlConfigurationContext.class.getSimpleName());
 	}
 
 	/**
