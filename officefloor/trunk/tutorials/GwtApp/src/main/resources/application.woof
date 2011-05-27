@@ -1,0 +1,14 @@
+<woof>
+  <templates>
+    <template name="template" uri="template" path="Template.html" class="net.officefloor.tutorial.gwtapp.TemplateLogic" x="34" y="25">
+      <output name="output" argument-type="">
+      </output>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+</woof>

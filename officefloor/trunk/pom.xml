@@ -668,6 +668,11 @@
 					<artifactId>maven-upload-plugin</artifactId>
 					<version>1.1</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>gwt-maven-plugin</artifactId>
+					<version>${gwt-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
