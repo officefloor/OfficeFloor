@@ -20,6 +20,7 @@
 		<module>NavigateHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>GwtApp</module>
 		<module>ServletFilterWebApplication</module>
 		<module>ServletFilterJspIntegration</module>
 		<module>ServletFilterDependencyInjection</module>
