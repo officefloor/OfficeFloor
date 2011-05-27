@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.easymock.AbstractMatcher;
 import org.eclipse.core.resources.IFile;
@@ -171,6 +172,42 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.context.deleteConfigurationItem("path");
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure get file.
+	 */
+	@Test
+	public void testGetFile() throws Exception {
+
+		// Record obtaining file (existing)
+		this.recordGetFile("path", true);
+
+		// Test
+		this.replayMockObjects();
+		ConfigurationItem item = this.context.getConfigurationItem("path");
+		this.verifyMockObjects();
+
+		// Ensure item obtained
+		assertNotNull("Should obtain configuration item", item);
+	}
+
+	/**
+	 * Ensure get unknown file.
+	 */
+	@Test
+	public void testGetUnknownFile() throws Exception {
+
+		// Record obtaining file (not existing)
+		this.recordGetFile("path", false);
+
+		// Test
+		this.replayMockObjects();
+		ConfigurationItem item = this.context.getConfigurationItem("path");
+		this.verifyMockObjects();
+
+		// Ensure item not obtained
+		assertNull("Should not obtain configuration item", item);
 	}
 
 	/**

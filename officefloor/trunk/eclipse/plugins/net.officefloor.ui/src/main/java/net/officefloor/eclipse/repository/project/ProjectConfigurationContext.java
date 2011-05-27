@@ -125,7 +125,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 
 		// Ensure the file exists
 		if (!file.exists()) {
-			throw new IOException("File '" + location + "' can not be found");
+			return null; // no configuration for file not existing
 		}
 
 		// Return the configuration of the file
@@ -163,15 +163,15 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	@Override
 	public void deleteConfigurationItem(String path) throws Exception,
 			ReadOnlyConfigurationException {
-		
+
 		// Obtain the file
 		IFile file = this.project.getFile(Path.fromPortableString(path));
-		
+
 		// Do nothing if file not exists
 		if (!(file.exists())) {
 			return;
 		}
-		
+
 		// Delete the file
 		file.delete(true, this.monitor);
 	}

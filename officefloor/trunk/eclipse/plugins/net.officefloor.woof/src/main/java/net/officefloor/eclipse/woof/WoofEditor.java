@@ -158,7 +158,7 @@ public class WoofEditor extends
 		WoofChanges woofChanges = this.getModelChanges();
 
 		// Add actions
-		list.add(new AddTemplateOperation(woofChanges));
+		list.add(new AddTemplateOperation(woofChanges, this));
 		list.add(new AddSectionOperation(woofChanges));
 		list.add(new AddResourceOperation(woofChanges));
 		list.add(new AddExceptionOperation(woofChanges));
