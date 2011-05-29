@@ -66,6 +66,11 @@ public class GwtChangesImpl implements GwtChanges {
 	 */
 
 	@Override
+	public String createGwtModulePath(GwtModuleModel module) {
+		return this.repository.createGwtModulePath(module);
+	}
+
+	@Override
 	public Change<GwtModuleModel> updateGwtModule(final GwtModuleModel module,
 			final String existingGwtModulePath) {
 

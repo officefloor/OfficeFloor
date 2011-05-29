@@ -26,6 +26,7 @@ import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFa
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionEditPart;
 import net.officefloor.eclipse.woof.editparts.WoofExceptionToWoofResourceEditPart;
@@ -49,6 +50,7 @@ import net.officefloor.eclipse.woof.operations.AddSectionOperation;
 import net.officefloor.eclipse.woof.operations.AddTemplateOperation;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.WoofChanges;
 import net.officefloor.model.woof.WoofChangesImpl;
@@ -70,6 +72,10 @@ import net.officefloor.model.woof.WoofTemplateOutputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofTemplateOutputToWoofTemplateModel;
+import net.officefloor.plugin.gwt.module.GwtChanges;
+import net.officefloor.plugin.gwt.module.GwtChangesImpl;
+import net.officefloor.plugin.gwt.module.GwtFailureListener;
+import net.officefloor.plugin.gwt.module.GwtModuleRepositoryImpl;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
@@ -99,7 +105,25 @@ public class WoofEditor extends
 
 	@Override
 	protected WoofChanges createModelChanges(WoofModel model) {
-		return new WoofChangesImpl(model);
+
+		// Create changes to update GWT Module configuration
+		ClassLoader classLoader = Thread.currentThread()
+				.getContextClassLoader();
+		ConfigurationContext configurationContext = new ProjectConfigurationContext(
+				this.getEditorInput());
+		GwtFailureListener listener = new GwtFailureListener() {
+			@Override
+			public void notifyFailure(String message, Throwable cause) {
+				// Provide error message of GWT failure
+				WoofEditor.this.messageError(message, cause);
+			}
+		};
+		GwtChanges gwtChanges = new GwtChangesImpl(new GwtModuleRepositoryImpl(
+				new ModelRepositoryImpl(), classLoader, "src/main/resources"),
+				configurationContext, listener);
+
+		// Create and return the WoOF changes
+		return new WoofChangesImpl(model, gwtChanges);
 	}
 
 	@Override

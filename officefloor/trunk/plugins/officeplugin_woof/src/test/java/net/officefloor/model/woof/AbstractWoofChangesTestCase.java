@@ -20,14 +20,20 @@ package net.officefloor.model.woof;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.easymock.AbstractMatcher;
+import org.easymock.internal.AlwaysMatcher;
+
 import junit.framework.TestCase;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
+import net.officefloor.plugin.gwt.module.GwtChanges;
 
 /**
  * Abstract {@link WoofChanges} {@link TestCase}.
@@ -36,6 +42,11 @@ import net.officefloor.model.test.changes.AbstractChangesTestCase;
  */
 public abstract class AbstractWoofChangesTestCase extends
 		AbstractChangesTestCase<WoofModel, WoofChanges> {
+
+	/**
+	 * Mock {@link GwtChanges}.
+	 */
+	private final GwtChanges gwtChanges = this.createMock(GwtChanges.class);
 
 	/**
 	 * Initiate.
@@ -51,6 +62,68 @@ public abstract class AbstractWoofChangesTestCase extends
 	 */
 	public AbstractWoofChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
+	}
+
+	/**
+	 * Obtains the {@link GwtChanges}.
+	 * 
+	 * @return {@link GwtChanges}.
+	 */
+	protected GwtChanges getGwtChanges() {
+		return this.gwtChanges;
+	}
+
+	/**
+	 * Records the GWT Module path.
+	 * 
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 */
+	protected void recordGwtModulePath(String gwtModulePath) {
+		GwtChanges changes = this.getGwtChanges();
+		this.recordReturn(changes, changes.createGwtModulePath(null),
+				gwtModulePath, new AlwaysMatcher());
+	}
+
+	/**
+	 * Record GWT update on the {@link GwtChanges}.
+	 * 
+	 * @param templateUri
+	 *            Expected template URI.
+	 * @param entryPointClassName
+	 *            Expected EntryPoint class name.
+	 * @param existingGwtModulePath
+	 *            Expected existing GWT Module path.
+	 * @return {@link Change}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected Change<GwtModuleModel> recordGwtUpdate(final String templateUri,
+			final String entryPointClassName, final String existingGwtModulePath) {
+
+		// Create the change
+		final Change<GwtModuleModel> change = this.createMock(Change.class);
+
+		// Record updating GWT Module
+		GwtChanges changes = this.getGwtChanges();
+		this.recordReturn(changes,
+				changes.updateGwtModule(null, existingGwtModulePath), change,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						GwtModuleModel module = (GwtModuleModel) actual[0];
+						assertEquals("Incorrect rename-to", templateUri,
+								module.getRenameTo());
+						assertEquals("Incorrect EntryPoint class name",
+								entryPointClassName,
+								module.getEntryPointClassName());
+						assertEquals("Incorrect existing GWT Module Path",
+								existingGwtModulePath, actual[1]);
+						return true;
+					}
+				});
+
+		// Return the change
+		return change;
 	}
 
 	/*
@@ -71,7 +144,7 @@ public abstract class AbstractWoofChangesTestCase extends
 
 	@Override
 	protected WoofChanges createModelOperations(WoofModel model) {
-		return new WoofChangesImpl(model);
+		return new WoofChangesImpl(model, this.getGwtChanges());
 	}
 
 	/**

@@ -57,6 +57,17 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 			this.context, this.listener);
 
 	/**
+	 * Ensure correct GWT Module path.
+	 */
+	public void testGwtModulePath() throws Exception {
+		GwtModuleModel module = new GwtModuleModel("template",
+				"net.example.client.ExampleEntryPoint");
+		String gwtModulePath = this.changes.createGwtModulePath(module);
+		assertEquals("Incorrect GWT Module path",
+				"net/example/template.gwt.xml", gwtModulePath);
+	}
+
+	/**
 	 * Ensure can create.
 	 */
 	public void testCreate() throws Exception {

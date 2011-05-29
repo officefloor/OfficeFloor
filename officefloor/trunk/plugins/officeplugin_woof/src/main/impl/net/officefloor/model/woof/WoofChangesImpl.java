@@ -33,8 +33,12 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
+import net.officefloor.plugin.gwt.module.GwtChanges;
+import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
 /**
  * {@link Change} for the {@link WoofModel}.
@@ -273,13 +277,21 @@ public class WoofChangesImpl implements WoofChanges {
 	private final WoofModel model;
 
 	/**
+	 * {@link GwtChanges}.
+	 */
+	private final GwtChanges gwtChanges;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param model
 	 *            {@link WoofModel} to change.
+	 * @param gwtChanges
+	 *            {@link GwtChanges}.
 	 */
-	public WoofChangesImpl(WoofModel model) {
+	public WoofChangesImpl(WoofModel model, GwtChanges gwtChanges) {
 		this.model = model;
+		this.gwtChanges = gwtChanges;
 	}
 
 	/**
@@ -343,7 +355,8 @@ public class WoofChangesImpl implements WoofChanges {
 
 	@Override
 	public Change<WoofTemplateModel> addTemplate(String templatePath,
-			String templateLogicClass, SectionType section, String uri) {
+			String templateLogicClass, SectionType section, String uri,
+			String gwtEntryPointClassName) {
 
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
@@ -369,7 +382,8 @@ public class WoofChangesImpl implements WoofChanges {
 		}
 
 		// Return change to add template
-		return new AbstractChange<WoofTemplateModel>(template, "Add Template") {
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
+				template, "Add Template") {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofTemplate(template);
@@ -381,6 +395,35 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.removeWoofTemplate(template);
 			}
 		};
+
+		// Determine if have GWT Extension
+		if ((gwtEntryPointClassName != null)
+				&& (gwtEntryPointClassName.trim().length() > 0)) {
+
+			// Add the GWT Extension
+			WoofTemplateExtensionModel gwtExtension = new WoofTemplateExtensionModel(
+					GwtWoofTemplateExtensionService.EXTENSION_ALIAS);
+			template.addExtension(gwtExtension);
+
+			// Create the GWT Module
+			GwtModuleModel module = new GwtModuleModel(uri,
+					gwtEntryPointClassName);
+
+			// Add property for the GWT Module path
+			String gwtModulePath = this.gwtChanges.createGwtModulePath(module);
+			gwtExtension.addProperty(new PropertyModel("gwt.module.path",
+					gwtModulePath));
+
+			// Include change for adding GWT Module
+			Change<?> gwtChange = this.gwtChanges.updateGwtModule(module, null);
+
+			// Create aggregate change to include GWT changes
+			change = new AggregateChange<WoofTemplateModel>(change.getTarget(),
+					change.getChangeDescription(), change, gwtChange);
+		}
+
+		// Return the change
+		return change;
 	}
 
 	@Override

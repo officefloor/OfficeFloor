@@ -116,19 +116,10 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 			ConfigurationContext context, String existingGwtModulePath)
 			throws Exception {
 
-		// Determine the module path
-		String entryPointClassName = module.getEntryPointClassName();
-		int index = entryPointClassName.lastIndexOf('.');
-		if (index >= 0) {
-			index = entryPointClassName
-					.lastIndexOf('.', (index - ".".length()));
-		}
-		String modulePath = entryPointClassName.substring(0, index).replace(
-				'.', '/');
+		// Obtain the module path
+		String modulePath = this.createGwtModulePath(module);
 
 		// Obtain path for storing the GWT Module
-		String templateName = module.getRenameTo();
-		modulePath = modulePath + "/" + templateName + ".gwt.xml";
 		String storeLocation = this.pathPrefix + modulePath;
 
 		// Obtain the existing GWT Module
@@ -176,6 +167,27 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 			ConfigurationContext context) throws Exception {
 		// Delete the configuration
 		context.deleteConfigurationItem(this.pathPrefix + gwtModulePath);
+	}
+
+	@Override
+	public String createGwtModulePath(GwtModuleModel module) {
+
+		// Determine the module path
+		String entryPointClassName = module.getEntryPointClassName();
+		int index = entryPointClassName.lastIndexOf('.');
+		if (index >= 0) {
+			index = entryPointClassName
+					.lastIndexOf('.', (index - ".".length()));
+		}
+		String modulePath = entryPointClassName.substring(0, index).replace(
+				'.', '/');
+
+		// Obtain path to GWT Module
+		String templateName = module.getRenameTo();
+		modulePath = modulePath + "/" + templateName + ".gwt.xml";
+
+		// Return the GWT Module path
+		return modulePath;
 	}
 
 	@Override
