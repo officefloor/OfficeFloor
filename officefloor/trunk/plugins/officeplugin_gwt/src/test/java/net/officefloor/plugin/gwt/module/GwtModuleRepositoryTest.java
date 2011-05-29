@@ -46,6 +46,17 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 					.getContextClassLoader(), "src");
 
 	/**
+	 * Ensure correct GWT Module path.
+	 */
+	public void testGwtModulePath() throws Exception {
+		GwtModuleModel module = new GwtModuleModel("template",
+				"net.example.client.ExampleEntryPoint");
+		String gwtModulePath = this.repository.createGwtModulePath(module);
+		assertEquals("Incorrect GWT Module path",
+				"net/example/template.gwt.xml", gwtModulePath);
+	}
+
+	/**
 	 * Ensure able to retrieve the {@link GwtModuleModel} not existing.
 	 */
 	public void testRetrieveNonExistentGwtModule() throws Exception {

@@ -76,6 +76,15 @@ public interface GwtModuleRepository {
 			throws Exception;
 
 	/**
+	 * Obtains the path to the GWT Module.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel}.
+	 * @return GWT Module path.
+	 */
+	String createGwtModulePath(GwtModuleModel module);
+
+	/**
 	 * Creates new GWT Module content.
 	 * 
 	 * @param module

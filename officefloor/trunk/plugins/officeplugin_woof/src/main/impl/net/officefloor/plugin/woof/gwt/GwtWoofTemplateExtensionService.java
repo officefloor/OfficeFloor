@@ -30,13 +30,18 @@ import net.officefloor.plugin.woof.WoofTemplateExtensionService;
 public class GwtWoofTemplateExtensionService implements
 		WoofTemplateExtensionService {
 
+	/**
+	 * Extension alias.
+	 */
+	public static final String EXTENSION_ALIAS = "GWT";
+
 	/*
 	 * ==================== WoofTemplateExtensionService ======================
 	 */
 
 	@Override
 	public String getTemplateExtensionAlias() {
-		return "GWT";
+		return EXTENSION_ALIAS;
 	}
 
 	@Override

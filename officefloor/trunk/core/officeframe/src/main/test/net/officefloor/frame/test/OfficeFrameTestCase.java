@@ -82,6 +82,15 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	protected static @interface GuiTest {
 	}
 
+	/**
+	 * Indicates if the GUI is available.
+	 * 
+	 * @return <code>true</code> if the GUI is available.
+	 */
+	protected boolean isGuiAvailable() {
+		return !GraphicsEnvironment.isHeadless();
+	}
+
 	@Override
 	public void runBare() throws Throwable {
 
@@ -90,7 +99,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			Method testMethod = this.getClass().getMethod(this.getName());
 			if (testMethod.getAnnotation(GuiTest.class) != null) {
 				// Determine if headed environment (i.e. can run graphical test)
-				if (GraphicsEnvironment.isHeadless()) {
+				if (!this.isGuiAvailable()) {
 					System.out.println("NOT RUNNING GUI TEST "
 							+ this.getClass().getSimpleName() + "."
 							+ this.getName());

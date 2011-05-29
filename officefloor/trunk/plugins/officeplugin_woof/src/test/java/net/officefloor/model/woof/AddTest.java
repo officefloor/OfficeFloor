@@ -60,7 +60,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"example/Template.ofp", "net.example.LogicClass", section,
-				"uri");
+				"uri", null);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -88,13 +88,50 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the templates
 		this.operations.addTemplate("example/Template.ofp", "Class1", section,
-				"Template").apply();
+				"Template", null).apply();
 		this.operations.addTemplate("example/Template.ofp", "Class2", section,
-				"Template").apply(); // add twice
+				"Template", null).apply(); // add twice
 		this.operations.addTemplate("example/Template.ofp", "Class3", section,
-				null).apply(); // add with same name by template path
-		this.operations.addTemplate("Template.html", "Class4", section, null)
-				.apply(); // add with template path resulting in same name
+				null, null).apply(); // add with same name by template path
+		this.operations.addTemplate("Template.html", "Class4", section, null,
+				null).apply(); // add with template path resulting in same name
+
+		// Ensure appropriately added templates
+		this.validateModel();
+	}
+
+	/**
+	 * Ensure can add a template with a GWT extension.
+	 */
+	public void testAddTemplateWithGwtExtension() {
+
+		final String TEMPLATE_URI = "uri";
+		final String ENTRY_POINT_CLASS_NAME = "net.example.client.ExampleGwtEntryPoint";
+
+		// Record GWT changes
+		this.recordGwtModulePath("net/example/uri.gwt.xml");
+		Change<?> change = this.recordGwtUpdate(TEMPLATE_URI,
+				ENTRY_POINT_CLASS_NAME, null);
+		change.apply();
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+					}
+				});
+
+		// Test
+		this.replayMockObjects();
+
+		// Add the template with GWT
+		this.operations.addTemplate("example/Template.ofp",
+				"net.example.LogicClass", section, TEMPLATE_URI,
+				ENTRY_POINT_CLASS_NAME).apply();
+
+		// Verify
+		this.verifyMockObjects();
 
 		// Ensure appropriately added templates
 		this.validateModel();

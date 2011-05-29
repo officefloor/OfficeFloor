@@ -28,6 +28,15 @@ import net.officefloor.model.gwt.module.GwtModuleModel;
 public interface GwtChanges {
 
 	/**
+	 * Obtains the path to the GWT Module.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel}.
+	 * @return GWT Module path.
+	 */
+	String createGwtModulePath(GwtModuleModel module);
+
+	/**
 	 * Updates the GWT Module.
 	 * 
 	 * @param module
