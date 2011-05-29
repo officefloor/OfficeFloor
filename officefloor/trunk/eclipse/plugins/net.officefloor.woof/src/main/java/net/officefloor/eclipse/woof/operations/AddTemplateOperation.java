@@ -19,7 +19,6 @@ package net.officefloor.eclipse.woof.operations;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.wizard.template.HttpTemplateInstance;
 import net.officefloor.eclipse.wizard.template.HttpTemplateWizard;
 import net.officefloor.eclipse.woof.editparts.WoofEditPart;
@@ -36,22 +35,13 @@ public class AddTemplateOperation extends
 		AbstractWoofChangeOperation<WoofEditPart> {
 
 	/**
-	 * {@link AbstractOfficeFloorEditor}.
-	 */
-	private final AbstractOfficeFloorEditor<?, ?> editor;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param woofChanges
 	 *            {@link WoofChanges}.
-	 * @param editor
-	 *            {@link AbstractOfficeFloorEditor}.
 	 */
-	public AddTemplateOperation(WoofChanges woofChanges,
-			AbstractOfficeFloorEditor<?, ?> editor) {
+	public AddTemplateOperation(WoofChanges woofChanges) {
 		super("Add template", WoofEditPart.class, woofChanges);
-		this.editor = editor;
 	}
 
 	/*
