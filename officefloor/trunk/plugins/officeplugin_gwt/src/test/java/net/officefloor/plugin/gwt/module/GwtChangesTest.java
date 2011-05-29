@@ -59,12 +59,33 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure correct GWT Module path.
 	 */
-	public void testGwtModulePath() throws Exception {
+	public void testGwtModulePath() {
 		GwtModuleModel module = new GwtModuleModel("template",
 				"net.example.client.ExampleEntryPoint");
 		String gwtModulePath = this.changes.createGwtModulePath(module);
 		assertEquals("Incorrect GWT Module path",
 				"net/example/template.gwt.xml", gwtModulePath);
+	}
+
+	/**
+	 * Ensure able to retrieve the GWT Module.
+	 */
+	public void testRetrieveGwtModule() throws Exception {
+
+		// Create the GWT Module to retrieve
+		GwtModuleModel module = new GwtModuleModel("uri",
+				"net.officefloor.client.ExampleEntryPoint");
+		this.repository.storeGwtModule(module, this.context, null);
+
+		// Retrieve the module
+		GwtModuleModel retrieved = this.changes
+				.retrieveGwtModule("net/officefloor/uri.gwt.xml");
+		assertNotNull("Should obtain module", retrieved);
+		assertEquals("Incorrect retrieved module rename-to", "uri",
+				retrieved.getRenameTo());
+		assertEquals("Incorrect retrieved module EntryPoint",
+				"net.officefloor.client.ExampleEntryPoint",
+				retrieved.getEntryPointClassName());
 	}
 
 	/**

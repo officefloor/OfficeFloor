@@ -48,6 +48,11 @@ import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 public class WoofChangesImpl implements WoofChanges {
 
 	/**
+	 * Name of the property for the GWT Module path.
+	 */
+	private static final String PROPERTY_GWT_MODULE_PATH = "gwt.module.path";
+
+	/**
 	 * {@link WoofTemplateModel} {@link NameExtractor}.
 	 */
 	private static final NameExtractor<WoofTemplateModel> TEMPLATE_NAME_EXTRACTOR = new NameExtractor<WoofTemplateModel>() {
@@ -439,23 +444,79 @@ public class WoofChangesImpl implements WoofChanges {
 				template.getTemplatePath(), uri, template,
 				this.model.getWoofTemplates());
 
-		// Return change to template URI
-		return new AbstractChange<WoofTemplateModel>(template,
-				"Change Template URI") {
+		// Obtain GWT Extension and GWT Module path property
+		PropertyModel gwtModuleProperty = null;
+		WoofTemplateExtensionModel gwtExtension = null;
+		for (WoofTemplateExtensionModel extension : template.getExtensions()) {
+			if (GwtWoofTemplateExtensionService.EXTENSION_ALIAS
+					.equals(extension.getExtensionClassName())) {
+				gwtExtension = extension;
+			}
+		}
+		if (gwtExtension != null) {
+			// Obtain the GWT Module path
+			for (PropertyModel property : gwtExtension.getProperties()) {
+				if (PROPERTY_GWT_MODULE_PATH.equals(property.getName())) {
+					gwtModuleProperty = property;
+				}
+			}
+		}
+		final String existingGwtModulePath = (gwtModuleProperty == null ? null
+				: gwtModuleProperty.getValue());
+
+		// Retrieve the new GWT Module path (keeping existing if not found)
+		GwtModuleModel gwtModule = null;
+		if (existingGwtModulePath != null) {
+			gwtModule = this.gwtChanges
+					.retrieveGwtModule(existingGwtModulePath);
+			gwtModule.setRenameTo(uri);
+		}
+		final String newGwtModulePath = (gwtModule == null ? null
+				: this.gwtChanges.createGwtModulePath(gwtModule));
+
+		// Create change to template URI
+		final PropertyModel finalGwtModuleProperty = gwtModuleProperty;
+		Change<WoofTemplateModel> change = new AbstractChange<WoofTemplateModel>(
+				template, "Change Template URI") {
 			@Override
 			public void apply() {
+				// Update template URI
 				template.setUri(uri);
 				template.setWoofTemplateName(newTemplateName);
 				WoofChangesImpl.this.sortTemplates();
+
+				// Update GWT (if able to update)
+				if ((finalGwtModuleProperty != null)
+						&& (newGwtModulePath != null)) {
+					finalGwtModuleProperty.setValue(newGwtModulePath);
+				}
 			}
 
 			@Override
 			public void revert() {
+
+				// Revert template URI
 				template.setUri(originalUri);
 				template.setWoofTemplateName(originalTemplateName);
 				WoofChangesImpl.this.sortTemplates();
+
+				// Revert GWT (if able to revert)
+				if (finalGwtModuleProperty != null) {
+					finalGwtModuleProperty.setValue(existingGwtModulePath);
+				}
 			}
 		};
+
+		// Include change to update GWT Module
+		if (existingGwtModulePath != null) {
+			Change<GwtModuleModel> gwtChange = this.gwtChanges.updateGwtModule(
+					gwtModule, existingGwtModulePath);
+			change = new AggregateChange<WoofTemplateModel>(change.getTarget(),
+					change.getChangeDescription(), change, gwtChange);
+		}
+
+		// Return the change
+		return change;
 	}
 
 	@Override
