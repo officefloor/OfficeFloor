@@ -71,6 +71,17 @@ public class GwtChangesImpl implements GwtChanges {
 	}
 
 	@Override
+	public GwtModuleModel retrieveGwtModule(String gwtModulePath) {
+		try {
+			return this.repository.retrieveGwtModule(gwtModulePath,
+					this.context);
+		} catch (Exception ex) {
+			this.listener.notifyFailure("Failed to retrieve GWT Module", ex);
+			return null; // not able to obtain GWT Module
+		}
+	}
+
+	@Override
 	public Change<GwtModuleModel> updateGwtModule(final GwtModuleModel module,
 			final String existingGwtModulePath) {
 

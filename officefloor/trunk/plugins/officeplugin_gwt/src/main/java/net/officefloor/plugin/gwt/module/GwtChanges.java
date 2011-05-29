@@ -37,6 +37,15 @@ public interface GwtChanges {
 	String createGwtModulePath(GwtModuleModel module);
 
 	/**
+	 * Retrieves the GWT Module.
+	 * 
+	 * @param gwtModulePath
+	 *            GWT Module path.
+	 * @return {@link GwtModuleModel}.
+	 */
+	GwtModuleModel retrieveGwtModule(String gwtModulePath);
+
+	/**
 	 * Updates the GWT Module.
 	 * 
 	 * @param module
