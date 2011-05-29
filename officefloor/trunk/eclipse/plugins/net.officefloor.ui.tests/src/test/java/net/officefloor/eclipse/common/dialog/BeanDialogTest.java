@@ -33,13 +33,18 @@ import org.junit.Test;
  * @author Daniel Sagenschneider
  */
 public class BeanDialogTest extends OfficeFrameTestCase {
-	
+
 	/**
 	 * Ensures dialog populates the bean.
 	 */
 	@Test
 	@GuiTest
 	public void testPopulateBean() {
+
+		// Do not test if no GUI
+		if (!this.isGuiAvailable()) {
+			return; // Check necessary with JUnit 4.x
+		}
 
 		// Create the shell to display the dialog
 		Display display = new Display();
@@ -49,20 +54,20 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 		MockBean bean = new MockBean();
 
 		// Populate the bean
-		final BeanDialog dialog = new BeanDialog(shell, bean,
-				this.getClass().getClassLoader());
+		final BeanDialog dialog = new BeanDialog(shell, bean, this.getClass()
+				.getClassLoader());
 		dialog.setBlockOnOpen(false);
 		dialog.open();
 
 		// Specify property values
 		Composite dialogArea = (Composite) dialog.getDialogArea();
 		Control[] children = dialogArea.getChildren();
-		
+
 		// Name
-		((Text)children[1]).setText("name");
-		((Text)children[4]).setText("1");
-		((Text)children[7]).setText(MockBean.class.getName());
-		
+		((Text) children[1]).setText("name");
+		((Text) children[4]).setText("1");
+		((Text) children[7]).setText(MockBean.class.getName());
+
 		// Flag close
 		dialog.okPressed();
 
