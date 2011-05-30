@@ -21,10 +21,13 @@
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof</artifactId>
 		</dependency>
+		<!-- START SNIPPET: GwtDependency -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
+			<scope>provided</scope>
 		</dependency>
+		<!-- END SNIPPET: GwtDependency -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -33,6 +36,7 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- START SNIPPET: GwtPlugin -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
@@ -42,12 +46,12 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<!-- Allow running stand alone -->
 							<webappDirectory>${project.build.outputDirectory}/PUBLIC</webappDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- END SNIPPET: GwtPlugin -->
 		</plugins>
 	</build>
 	<profiles>

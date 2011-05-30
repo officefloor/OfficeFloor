@@ -16,6 +16,8 @@
 
 %{toc|fromDepth=2}
 
+
+
 *WoOF (Web on OfficeFloor)
 
   The following tutorials cover the basics of using WoOF (Web on OfficeFloor) for building web applications.
@@ -37,6 +39,26 @@
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./StaticHttpServer/index.html}Running WoOF stand alone}}  | Running WoOF outside a JEE Servlet Container.              | mvn woof:run
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+
+*GWT integration with WoOF to provide Rich Internet Applications
+
+  The following tutorials cover the integration of {{{http://gwt.google.com}GWT}} with WoOF to provide Rich Internet Applications (RIA).
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GwtApp/index.html}Generation of client side JavaScript}} | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+
+*AJAX push (reverse AJAX, Comet)
+
+  OfficeFloor is a multi-threaded container allowing methods to be executed by different Threads and is not limited by the Thread-per-Request architecture, which makes implementing AJAX push applications significantly easier.  The following tutorials show the ease in which events can be pushed out to the web clients.
+  
+  The functionality and tutorials will be available in release 1.4 of OfficeFloor (as the current focus has been on GWT integration for release 1.3).  Watch this space!
 
 
 

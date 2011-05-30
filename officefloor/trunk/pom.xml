@@ -1210,7 +1210,7 @@
 					<url>http://download.java.net/maven/glassfish/</url>
 				</repository>
 				<repository>
-					<!-- Doxia additional macros (code-snippet) -->
+					<!-- Doxia additional macros (code-snippet) --> 
 					<id>com.anasoft.os.repository.releases</id>
 					<name>ANASOFT OpenSource releases</name>
 					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>

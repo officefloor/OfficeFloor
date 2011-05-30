@@ -22,9 +22,11 @@ package net.officefloor.tutorial.gwtapp;
  *
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class TemplateLogic {
 	
 	public void necessary() {
 	}
 
 }
+// END SNIPPET: example
