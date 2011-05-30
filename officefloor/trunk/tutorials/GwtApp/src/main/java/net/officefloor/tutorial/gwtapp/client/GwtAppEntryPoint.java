@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class GwtAppEntryPoint implements EntryPoint {
 
 	@Override
@@ -50,3 +51,4 @@ public class GwtAppEntryPoint implements EntryPoint {
 	}
 
 }
+// END SNIPPET: example
