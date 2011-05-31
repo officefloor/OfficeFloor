@@ -165,6 +165,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public <S extends SectionSource, A extends AutoWireSection> A addSection(
+			String sectionName, Class<S> sectionSourceClass,
+			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
+		return this.officeSource.addSection(sectionName, sectionSourceClass,
+				sectionLocation, sectionFactory);
+	}
+
+	@Override
 	public void link(AutoWireSection sourceSection, String sourceOutputName,
 			AutoWireSection targetSection, String targetInputName) {
 		this.officeSource.link(sourceSection, sourceOutputName, targetSection,

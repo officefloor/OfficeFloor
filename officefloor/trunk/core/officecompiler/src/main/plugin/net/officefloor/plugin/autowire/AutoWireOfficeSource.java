@@ -110,11 +110,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link SectionSource} class.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
+	 * @param sectionFactory
+	 *            {@link AutoWireSectionFactory}.
 	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
-	public <S extends SectionSource> AutoWireSection addSection(
+	@SuppressWarnings("unchecked")
+	public <S extends SectionSource, A extends AutoWireSection> A addSection(
 			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation) {
+			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
@@ -122,10 +125,40 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		// Create and add the section
 		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
 				sectionName, sectionSourceClass, sectionLocation, properties);
+
+		// Determine if override the section
+		if (sectionFactory != null) {
+			A overridden = sectionFactory.createAutoWireSection(section);
+			if (overridden != null) {
+				// Override the section
+				section = overridden;
+			}
+		}
+
+		// Register the section
 		this.sections.add(section);
 
 		// Return the section
-		return section;
+		return (A) section;
+	}
+
+	/**
+	 * Adds an {@link OfficeSection} allowing to override the
+	 * {@link AutoWireSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClass
+	 *            {@link SectionSource} class.
+	 * @param sectionLocation
+	 *            {@link OfficeSection} location.
+	 * @return {@link AutoWireSection} to configure properties and link flows.
+	 */
+	public <S extends SectionSource> AutoWireSection addSection(
+			String sectionName, Class<S> sectionSourceClass,
+			String sectionLocation) {
+		return this.addSection(sectionName, sectionSourceClass,
+				sectionLocation, null);
 	}
 
 	/**
