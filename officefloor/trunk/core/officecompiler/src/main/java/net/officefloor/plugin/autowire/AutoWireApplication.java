@@ -63,6 +63,26 @@ public interface AutoWireApplication {
 			Class<S> sectionSourceClass, String sectionLocation);
 
 	/**
+	 * Adds an {@link AutoWireSection} with the ability to override the
+	 * {@link AutoWireSection} used.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClass
+	 *            {@link SectionSource} class.
+	 * @param sectionLocation
+	 *            {@link OfficeSection} location.
+	 * @param sectionFactory
+	 *            {@link AutoWireSectionFactory} to allow overriding the
+	 *            {@link AutoWireSection} utilised.
+	 * @return Overridden {@link AutoWireSection} to configure properties and
+	 *         link flows.
+	 */
+	<S extends SectionSource, A extends AutoWireSection> AutoWireSection addSection(
+			String sectionName, Class<S> sectionSourceClass,
+			String sectionLocation, AutoWireSectionFactory<A> sectionFactory);
+
+	/**
 	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
 	 * 
 	 * @param sourceSection

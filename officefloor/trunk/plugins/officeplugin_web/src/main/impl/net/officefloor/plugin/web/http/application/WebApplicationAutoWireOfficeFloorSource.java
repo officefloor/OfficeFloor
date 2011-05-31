@@ -33,6 +33,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.autowire.AutoWireSectionFactory;
 import net.officefloor.plugin.web.http.parameters.source.HttpParametersObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.ClasspathHttpFileSenderWorkSource;
 import net.officefloor.plugin.web.http.session.clazz.source.HttpSessionClassManagedObjectSource;
@@ -103,7 +104,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 	@Override
 	public HttpTemplateAutoWireSection addHttpTemplate(String templatePath,
-			Class<?> templateLogicClass, String templateUri) {
+			final Class<?> templateLogicClass, final String templateUri) {
 
 		// Determine section name
 		String sectionName;
@@ -127,16 +128,24 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Add the HTTP template section
-		AutoWireSection section = this.addSection(sectionName,
-				HttpTemplateSectionSource.class, templatePath);
-		section.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
+		HttpTemplateAutoWireSection template = this.addSection(sectionName,
+				HttpTemplateSectionSource.class, templatePath,
+				new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
+					@Override
+					public HttpTemplateAutoWireSection createAutoWireSection(
+							AutoWireSection seed) {
+						// Create and return the template
+						return new HttpTemplateAutoWireSectionImpl(
+								WebApplicationAutoWireOfficeFloorSource.this
+										.getOfficeFloorCompiler(), seed,
+								templateLogicClass, templateUri);
+					}
+				});
+		template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				templateLogicClass.getName());
 
-		// Create and register the HTTP template
-		HttpTemplateAutoWireSection wirer = new HttpTemplateAutoWireSectionImpl(
-				this.getOfficeFloorCompiler(), section, templateLogicClass,
-				templateUri);
-		this.httpTemplates.add(wirer);
+		// Register the HTTP template
+		this.httpTemplates.add(template);
 
 		// Add the annotated parameters
 		for (Method method : templateLogicClass.getMethods()) {
@@ -173,8 +182,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			}
 		}
 
-		// Return the wirer
-		return wirer;
+		// Return the template
+		return template;
 	}
 
 	@Override

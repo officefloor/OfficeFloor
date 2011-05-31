@@ -99,6 +99,67 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can override the {@link AutoWireSection}.
+	 */
+	public void testOverrideSection() throws Exception {
+
+		final String SECTION = "Section";
+		final PropertyList properties = this.createMock(PropertyList.class);
+		final String SECTION_LOCATION = "SectionLocation";
+		final OfficeSection officeSection = this
+				.createMock(OfficeSection.class);
+
+		// Factory to override section
+		final AutoWireSection overridden = this
+				.createMock(AutoWireSection.class);
+		final AutoWireSection[] seedSection = new AutoWireSection[1];
+		final AutoWireSectionFactory<AutoWireSection> factory = new AutoWireSectionFactory<AutoWireSection>() {
+			@Override
+			public AutoWireSection createAutoWireSection(AutoWireSection seed) {
+				seedSection[0] = seed;
+				return overridden;
+			}
+		};
+
+		// Record creating the overridden section
+		this.recordReturn(overridden, overridden.getProperties(), properties);
+		this.recordReturn(overridden, overridden.getSectionName(), SECTION);
+		this.recordReturn(overridden, overridden.getSectionSourceClass(),
+				SectionSource.class);
+		this.recordTeam();
+		this.recordReturn(overridden, overridden.getSectionLocation(),
+				SECTION_LOCATION);
+		this.recordReturn(overridden, overridden.getProperties(), properties);
+		this.recordReturn(this.architect, this.architect.addOfficeSection(
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSection);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionObjects(),
+				new OfficeSectionObject[0]);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionInputs(),
+				new OfficeSectionInput[0]);
+		this.recordReturn(officeSection,
+				officeSection.getOfficeSectionOutputs(),
+				new OfficeSectionOutput[0]);
+		this.recordReturn(officeSection, officeSection.getOfficeTasks(),
+				new OfficeTask[0]);
+		this.recordReturn(officeSection, officeSection.getOfficeSubSections(),
+				new OfficeSubSection[0]);
+
+		// Test
+		this.replayMockObjects();
+
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION, factory);
+
+		// Source the Office
+		source.sourceOffice(this.architect, context);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure sub sections.
 	 */
 	public void testSubSections() throws Exception {
@@ -591,16 +652,26 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 *            {@link AutoWireOfficeSource}.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
+	 * @param factory
+	 *            {@link AutoWireSectionFactory}.
 	 * @param propertyNameValues
 	 *            Property name value pairs.
 	 * @return {@link AutoWireSection}.
 	 */
-	private AutoWireSection addSection(AutoWireOfficeSource source,
-			String sectionName, String... propertyNameValues) {
+	private <A extends AutoWireSection> AutoWireSection addSection(
+			AutoWireOfficeSource source, String sectionName,
+			AutoWireSectionFactory<A> factory, String... propertyNameValues) {
 
 		// Add the section
-		AutoWireSection section = source.addSection(sectionName,
-				SectionSource.class, sectionName + "Location");
+		AutoWireSection section;
+		final String sectionLocation = sectionName + "Location";
+		if (factory == null) {
+			section = source.addSection(sectionName, SectionSource.class,
+					sectionLocation);
+		} else {
+			section = source.addSection(sectionName, SectionSource.class,
+					sectionLocation, factory);
+		}
 
 		// Load the properties
 		PropertyList properties = section.getProperties();
@@ -613,6 +684,22 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Return the section
 		return section;
+	}
+
+	/**
+	 * Adds an {@link OfficeSection}.
+	 * 
+	 * @param source
+	 *            {@link AutoWireOfficeSource}.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param propertyNameValues
+	 *            Property name value pairs.
+	 * @return {@link AutoWireSection}.
+	 */
+	private AutoWireSection addSection(AutoWireOfficeSource source,
+			String sectionName, String... propertyNameValues) {
+		return this.addSection(source, sectionName, null, propertyNameValues);
 	}
 
 	/**
