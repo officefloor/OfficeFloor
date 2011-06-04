@@ -37,7 +37,7 @@ import net.officefloor.plugin.stream.squirtfactory.NotCreateBufferSquirtFactory;
 
 /**
  * Parser for a HTTP request.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRequestParserImpl implements HttpRequestParser {
@@ -90,7 +90,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Determines if character is a letter of the alphabet.
-	 *
+	 * 
 	 * @param character
 	 *            ASCII character.
 	 * @return <code>true</code> if letter of alphabet.
@@ -102,7 +102,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Determines if character is a control.
-	 *
+	 * 
 	 * @param character
 	 *            ASCII character.
 	 * @return <code>true</code> if letter is control.
@@ -113,7 +113,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Determines if character is a white space (space or tab).
-	 *
+	 * 
 	 * @param character
 	 *            ASCII character.
 	 * @return <code>true</code> if {@link #SP} or {@link #HT}.
@@ -124,7 +124,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Translates the escaped character to its non-escaped character value.
-	 *
+	 * 
 	 * @param highBitsCharacter
 	 *            High bits of the escaped character.
 	 * @param lowBitsCharacter
@@ -148,7 +148,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 	/**
 	 * Translates the escaped character to its corresponding its corresponding
 	 * hexidecimal bit value.
-	 *
+	 * 
 	 * @param character
 	 *            Hexidecimal character value to translate to bits.
 	 * @return Bits for the hexidecimal character.
@@ -252,7 +252,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param maxHeaderCount
 	 *            Maximum number of {@link HttpHeader} instances for a
 	 *            {@link HttpRequest}.
@@ -270,7 +270,7 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 	/**
 	 * Transforms the content to a {@link String}.
-	 *
+	 * 
 	 * @param inputBufferStream
 	 *            {@link InputBufferStream} containing the content.
 	 * @param tempBuffer
@@ -291,7 +291,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 
 		// Ensure text is too long
 		if (this.textLength > tempBuffer.length) {
-			throw new HttpRequestParseException(httpErrorStatus, httpErrorMessage);
+			throw new HttpRequestParseException(httpErrorStatus,
+					httpErrorMessage);
 		}
 
 		// Load the character values into the temporary buffer
@@ -435,7 +436,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.METHOD_PATH_SEPARATION;
 					} else {
 						// Unexpected character
-						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(
+								HttpStatus.SC_BAD_REQUEST,
 								"Unexpected character in method '" + character
 										+ "'");
 					}
@@ -466,7 +468,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.textLength++;
 					} else {
 						// Unexpected character
-						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(
+								HttpStatus.SC_BAD_REQUEST,
 								"Unexpected character in path '" + character
 										+ "'");
 					}
@@ -506,7 +509,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.parseState = ParseState.HEADER_CR_NAME_SEPARATION;
 						break;
 					}
-					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+					throw new HttpRequestParseException(
+							HttpStatus.SC_BAD_REQUEST,
 							"Should expect LF after a CR for status line");
 
 				case HEADER_CR_NAME_SEPARATION:
@@ -522,7 +526,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 					} else {
 						// New header, determine if too many headers
 						if (this.headers.size() >= this.maxHeaderCount) {
-							throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+							throw new HttpRequestParseException(
+									HttpStatus.SC_BAD_REQUEST,
 									"Too Many Headers");
 						}
 						this.parseState = ParseState.HEADER_NAME;
@@ -539,12 +544,25 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						// Skip colon and move to name value separation
 						inputBufferStream.skip(1);
 						this.parseState = ParseState.HEADER_NAME_VALUE_SEPARATION;
+					} else if (character == CR) {
+						// No value for header, so provide blank value
+						this.text_headerName = this.transformToString(
+								inputBufferStream, tempBuffer,
+								HttpStatus.SC_BAD_REQUEST,
+								"Header name too long");
+						this.headers.add(new HttpHeaderImpl(
+								this.text_headerName.trim(), ""));
+
+						// Skip CR and move to next header
+						inputBufferStream.skip(1);
+						this.parseState = ParseState.HEADER_CR;
 					} else if (!isCtl(character)) {
 						// Append the header name character
 						this.textLength++;
 					} else {
 						// Unknown header name character
-						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(
+								HttpStatus.SC_BAD_REQUEST,
 								"Unknown header name character '" + character
 										+ "'");
 					}
@@ -578,7 +596,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 						this.textLength++;
 					} else {
 						// Unknown header value character
-						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(
+								HttpStatus.SC_BAD_REQUEST,
 								"Unknown header value character '" + character
 										+ "'");
 					}
@@ -587,7 +606,8 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 				case BODY_CR:
 					// Must have LF after CR for body
 					if (character != LF) {
-						throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
+						throw new HttpRequestParseException(
+								HttpStatus.SC_BAD_REQUEST,
 								"Should expect LR after a CR after header");
 					} else {
 						// Skip the LF
@@ -652,21 +672,21 @@ public class HttpRequestParserImpl implements HttpRequestParser {
 			if (this.textLength > tempBuffer.length) {
 				switch (this.parseState) {
 				case METHOD:
-					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-							"Method too long");
+					throw new HttpRequestParseException(
+							HttpStatus.SC_BAD_REQUEST, "Method too long");
 				case PATH:
 					throw new HttpRequestParseException(
 							HttpStatus.SC_REQUEST_URI_TOO_LARGE,
 							"Request-URI Too Long");
 				case VERSION:
-					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-							"Version too long");
+					throw new HttpRequestParseException(
+							HttpStatus.SC_BAD_REQUEST, "Version too long");
 				case HEADER_NAME:
-					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-							"Header name too long");
+					throw new HttpRequestParseException(
+							HttpStatus.SC_BAD_REQUEST, "Header name too long");
 				case HEADER_VALUE:
-					throw new HttpRequestParseException(HttpStatus.SC_BAD_REQUEST,
-							"Header value too long");
+					throw new HttpRequestParseException(
+							HttpStatus.SC_BAD_REQUEST, "Header value too long");
 				}
 			}
 

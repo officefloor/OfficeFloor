@@ -32,7 +32,7 @@ import net.officefloor.plugin.stream.squirtfactory.HeapByteBufferSquirtFactory;
 
 /**
  * Tests the {@link HttpRequestParser}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpRequestParserTest extends OfficeFrameTestCase {
@@ -62,16 +62,16 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 * Ensure correct initial state.
 	 */
 	public void testInitialState() {
-		assertEquals("Incorrect initial method", "", this.httpRequestParser
-				.getMethod());
+		assertEquals("Incorrect initial method", "",
+				this.httpRequestParser.getMethod());
 		assertEquals("Incorrect initial request URI", "",
 				this.httpRequestParser.getRequestURI());
 		assertEquals("Incorrect initial HTTP version", "",
 				this.httpRequestParser.getHttpVersion());
 		assertEquals("Incorrect initial HTTP headers", 0,
 				this.httpRequestParser.getHeaders().size());
-		assertNull("Initially should be no body", this.httpRequestParser
-				.getBody());
+		assertNull("Initially should be no body",
+				this.httpRequestParser.getBody());
 	}
 
 	/**
@@ -171,9 +171,9 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validate GET with headers.
+	 * Validate headers.
 	 */
-	public void testGetWithHeaders() {
+	public void testHeaders_WithValue() {
 		this.doMethodTest(
 				"GET /path HTTP/1.1\nHeader1: Value1\nHeader2: Value2\n\n",
 				true, "GET", "/path", "HTTP/1.1", "", "Header1", "Value1",
@@ -181,13 +181,27 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to have blank value for header.
+	 */
+	public void testHeaders_BlankValue() {
+		this.doMethodTest("GET /path HTTP/1.1\nHeader1:\nHeader2: \n\n", true,
+				"GET", "/path", "HTTP/1.1", "", "Header1", "", "Header2", "");
+	}
+
+	/**
+	 * Ensure able to have no value for header.
+	 */
+	public void testHeaders_NoValue() {
+		this.doMethodTest("GET /path HTTP/1.1\nHeader1\nHeader2 \n\n", true,
+				"GET", "/path", "HTTP/1.1", "", "Header1", "", "Header2", "");
+	}
+
+	/**
 	 * Validate GET with entity.
 	 */
 	public void testGetWithEntity() {
-		this
-				.doMethodTest("GET /path HTTP/1.1\nContent-Length: 4\n\nTEST",
-						true, "GET", "/path", "HTTP/1.1", "TEST",
-						"Content-Length", "4");
+		this.doMethodTest("GET /path HTTP/1.1\nContent-Length: 4\n\nTEST",
+				true, "GET", "/path", "HTTP/1.1", "TEST", "Content-Length", "4");
 	}
 
 	/**
@@ -379,19 +393,17 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	 */
 	public void testReset() {
 		// Parse first request
-		this
-				.doMethodTest(
-						"POST /one HTTP/1.1\nContent-Length: 4\nHeaderOne: ValueOne\n\nTEST",
-						true, "POST", "/one", "HTTP/1.1", "TEST",
-						"Content-Length", "4", "HeaderOne", "ValueOne");
+		this.doMethodTest(
+				"POST /one HTTP/1.1\nContent-Length: 4\nHeaderOne: ValueOne\n\nTEST",
+				true, "POST", "/one", "HTTP/1.1", "TEST", "Content-Length",
+				"4", "HeaderOne", "ValueOne");
 
 		// Reset and parse second request
 		this.httpRequestParser.reset();
-		this
-				.doMethodTest(
-						"PUT /two HTTP/1.0\nContent-Length: 7\nHeaderTwo: ValueTwo\n\nANOTHER",
-						true, "PUT", "/two", "HTTP/1.0", "ANOTHER",
-						"Content-Length", "7", "HeaderTwo", "ValueTwo");
+		this.doMethodTest(
+				"PUT /two HTTP/1.0\nContent-Length: 7\nHeaderTwo: ValueTwo\n\nANOTHER",
+				true, "PUT", "/two", "HTTP/1.0", "ANOTHER", "Content-Length",
+				"7", "HeaderTwo", "ValueTwo");
 	}
 
 	/**
@@ -417,8 +429,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testAllPercentageValues() {
 
 		// Validate transforms
-		assertEquals("Ensure transform to HTTP", " ", this.getCharacterValue(
-				(byte) 2, (byte) 0));
+		assertEquals("Ensure transform to HTTP", " ",
+				this.getCharacterValue((byte) 2, (byte) 0));
 		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
 		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
 
@@ -448,7 +460,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Transforms the high and low bits to the corresponding character value.
-	 *
+	 * 
 	 * @param highBits
 	 *            High bits.
 	 * @param lowBits
@@ -462,7 +474,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Obtains the character value for the hexidecimal value.
-	 *
+	 * 
 	 * @param hexidecimal
 	 *            Hexidecimal value.
 	 * @return Character value.
@@ -482,7 +494,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does a valid HTTP request test.
-	 *
+	 * 
 	 * @param httpRequest
 	 *            HTTP request content.
 	 * @param expectedMethod
@@ -546,10 +558,10 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				// Should not have a body
 				if (bodyStream != null) {
 					// Body being parsed so ensure no content yet
-					assertEquals("Should not have a body", 0, bodyStream
-							.available());
-					assertEquals("Should not be end of stream", 0, bodyStream
-							.read(new byte[10]));
+					assertEquals("Should not have a body", 0,
+							bodyStream.available());
+					assertEquals("Should not be end of stream", 0,
+							bodyStream.read(new byte[10]));
 				}
 
 			} else {
@@ -578,7 +590,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Does an invalid HTTP request test.
-	 *
+	 * 
 	 * @param invalidHttpRequest
 	 *            Invalid HTTP request content.
 	 * @param expectedHttpStatus
@@ -613,8 +625,8 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 
 		} catch (HttpRequestParseException ex) {
 			// Validate details of parse failure
-			assertEquals("Incorrect http status", expectedHttpStatus, ex
-					.getHttpStatus());
+			assertEquals("Incorrect http status", expectedHttpStatus,
+					ex.getHttpStatus());
 			assertEquals("Incorrect parse failure reason",
 					expectedParseFailureReason, ex.getMessage());
 
