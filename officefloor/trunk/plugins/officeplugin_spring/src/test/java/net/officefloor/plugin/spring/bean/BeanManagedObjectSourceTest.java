@@ -28,7 +28,7 @@ import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.spring.bean.BeanManagedObjectSource;
 import net.officefloor.plugin.spring.bean.BeanManagedObjectSource.BeanDependency;
-import net.officefloor.plugin.spring.beans.TestBean;
+import net.officefloor.plugin.spring.beans.MockBean;
 
 import org.springframework.beans.factory.BeanFactory;
 
@@ -58,7 +58,7 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
-		type.setObjectClass(TestBean.class);
+		type.setObjectClass(MockBean.class);
 		type.addDependency("BeanFactory", BeanFactory.class, 0,
 				BeanDependency.BEAN_FACTORY);
 
@@ -86,7 +86,7 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry
 				.getObject(BeanDependency.BEAN_FACTORY), beanFactory);
 		this.recordReturn(beanFactory, beanFactory.getBean(BEAN_NAME,
-				TestBean.class), BEAN);
+				MockBean.class), BEAN);
 
 		// Ensure able to obtain the bean factory
 		this.replayMockObjects();
@@ -113,7 +113,7 @@ public class BeanManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {
-		return this.getFileLocation(TestBean.class, "Test.beans.xml");
+		return this.getFileLocation(MockBean.class, "Test.beans.xml");
 	}
 
 }
