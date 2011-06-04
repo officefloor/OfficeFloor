@@ -23,7 +23,7 @@ package net.officefloor.plugin.spring.beans;
  * 
  * @author Daniel Sagenschneider
  */
-public class TestBean {
+public class MockBean {
 
 	private DependencyBean dependency;
 

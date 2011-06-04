@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.spring.beans.TestBean;
+import net.officefloor.plugin.spring.beans.MockBean;
 
 import org.springframework.beans.factory.BeanFactory;
 
@@ -91,7 +91,7 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Ensure correct bean factory
 		BeanFactory beanFactory = (BeanFactory) object;
-		TestBean bean = (TestBean) beanFactory.getBean("test", TestBean.class);
+		MockBean bean = (MockBean) beanFactory.getBean("test", MockBean.class);
 		assertNotNull("Incorrect bean factory", bean);
 	}
 
@@ -146,6 +146,6 @@ public class BeanFactoryManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * @return Path to the configuration for the {@link BeanFactory}.
 	 */
 	private String getBeanFactoryConfigurationPath() {
-		return this.getFileLocation(TestBean.class, "Test.beans.xml");
+		return this.getFileLocation(MockBean.class, "Test.beans.xml");
 	}
 }
