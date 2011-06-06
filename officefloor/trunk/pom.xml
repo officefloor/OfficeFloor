@@ -72,7 +72,8 @@
 		<aether-version>1.8</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<jetty-version>7.1.5.v20100705</jetty-version>
-		<gwt-version>2.2.0</gwt-version>
+		<gwt-version>2.1.0</gwt-version>
+		<syncrpc-version>0.2</syncrpc-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -459,6 +460,11 @@
 				<groupId>com.google.gwt</groupId>
 				<artifactId>gwt-user</artifactId>
 				<version>${gwt-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.gdevelop.gwt</groupId>
+				<artifactId>syncrpc</artifactId>
+				<version>${syncrpc-version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -1198,6 +1204,12 @@
 			</activation>
 			<repositories>
 				<repository>
+					<!-- OfficeFloor -->
+					<id>maven2-repository.officefloor.net</id>
+					<name>OfficeFloor Repository for Maven</name>
+					<url>http://www.officefloor.net/maven2/</url>
+				</repository>
+				<repository>
 					<!-- Access JEE APIs -->
 					<id>maven2-repository.dev.java.net</id>
 					<name>Java.net Repository for Maven</name>
@@ -1210,7 +1222,7 @@
 					<url>http://download.java.net/maven/glassfish/</url>
 				</repository>
 				<repository>
-					<!-- Doxia additional macros (code-snippet) --> 
+					<!-- Doxia additional macros (code-snippet) -->
 					<id>com.anasoft.os.repository.releases</id>
 					<name>ANASOFT OpenSource releases</name>
 					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>

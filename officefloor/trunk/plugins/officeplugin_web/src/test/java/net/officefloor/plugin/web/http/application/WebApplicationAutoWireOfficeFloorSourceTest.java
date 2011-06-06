@@ -241,7 +241,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add HTTP template
 		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				this.getClassPath("Extension.ofp"), Object.class, "template");
+				this.getClassPath("Extension.ofp"),
+				MockExtensionTemplateLogic.class, "template");
 
 		// Add template extension
 		HttpTemplateAutoWireSectionExtension extension = template
@@ -264,7 +265,6 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		public void extendTemplate(HttpTemplateSectionExtensionContext context)
 				throws Exception {
 			context.setTemplateContent("${extend}");
-			context.setTemplateClass(MockExtensionTemplateLogic.class);
 		}
 	}
 

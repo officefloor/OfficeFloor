@@ -249,8 +249,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		MockHttpTemplateSectionExtension.reset();
 
 		// Start the server (with extension)
-		this.startHttpServer("ExtensionTemplate.ofp", Object.class,
-				"extension.1",
+		this.startHttpServer("ExtensionTemplate.ofp",
+				MockExtensionTemplateLogic.class, "extension.1",
 				MockHttpTemplateSectionExtension.class.getName(),
 				"extension.1.name", "value", "extension.2",
 				MockHttpTemplateSectionExtension.class.getName(),
@@ -287,23 +287,18 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				throws Exception {
 
 			final String TEMPLATE_CONTENT = "Overridden template with ${property}";
-			final Class<?> TEMPLATE_CLASS = MockExtensionTemplateLogic.class;
 
 			// Validate overriding details
 			switch (extensionIndex) {
 			case 1:
-				// Ensure original template details
+				// Ensure original template content
 				assertEquals("Incorrect original template content",
 						"extension", context.getTemplateContent());
-				assertEquals("Incorrect original template class", Object.class,
-						context.getTemplateClass());
 				break;
 			case 2:
-				// Ensure overridden template details
+				// Ensure overridden template content
 				assertEquals("Template content should be overridden",
 						TEMPLATE_CONTENT, context.getTemplateContent());
-				assertEquals("Template class should be overridden",
-						TEMPLATE_CLASS, context.getTemplateClass());
 				break;
 			default:
 				fail("Should only be two extensions");
@@ -339,7 +334,6 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 			// Extend the template (via overriding)
 			context.setTemplateContent(TEMPLATE_CONTENT);
-			context.setTemplateClass(TEMPLATE_CLASS);
 
 			// Increment for next extension use
 			extensionIndex++;

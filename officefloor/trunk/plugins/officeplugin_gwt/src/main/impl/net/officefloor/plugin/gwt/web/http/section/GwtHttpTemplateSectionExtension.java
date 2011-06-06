@@ -17,6 +17,23 @@
  */
 package net.officefloor.plugin.gwt.web.http.section;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
+import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformation;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformationContext;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
@@ -25,6 +42,8 @@ import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
+
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * {@link HttpTemplateSectionExtension} to include GWT.
@@ -38,6 +57,11 @@ public class GwtHttpTemplateSectionExtension implements
 	 * Name of property specifying the URI for the template.
 	 */
 	public static final String PROPERTY_TEMPLATE_URI = "template.uri";
+
+	/**
+	 * Name of property specifying the GWT Async service interfaces.
+	 */
+	public static final String PROPERTY_GWT_ASYNC_SERVICE_INTERFACES = "gwt.async.service.interfaces";
 
 	/**
 	 * Id for the GWT History IFrame.
@@ -113,6 +137,92 @@ public class GwtHttpTemplateSectionExtension implements
 
 			// Write back the template
 			context.setTemplateContent(template);
+		}
+
+		// Obtain the GWT Service Interfaces
+		String gwtServiceInterfaces = context.getProperty(
+				PROPERTY_GWT_ASYNC_SERVICE_INTERFACES, null);
+		if ((gwtServiceInterfaces != null)
+				&& (gwtServiceInterfaces.trim().length() > 0)) {
+
+			// Obtain the Class Loader
+			SectionSourceContext sectionContext = context
+					.getSectionSourceContext();
+			ClassLoader classLoader = sectionContext.getClassLoader();
+
+			// Obtain the Section Designer
+			SectionDesigner designer = context.getSectionDesigner();
+
+			// Configure the GWT Service Interfaces
+			for (String gwtServiceInterfaceName : gwtServiceInterfaces
+					.split(",")) {
+
+				// Load the GWT Service Async interface
+				gwtServiceInterfaceName = gwtServiceInterfaceName.trim();
+				Class<?> gwtServiceInterface = classLoader
+						.loadClass(gwtServiceInterfaceName);
+
+				// Obtain the GWT Service Relative Path
+				RemoteServiceRelativePath relativePathAnnotation = gwtServiceInterface
+						.getAnnotation(RemoteServiceRelativePath.class);
+				if (relativePathAnnotation == null) {
+					// Obtain from GWT definition Interface
+					String gwtDefinitionInterfaceName = gwtServiceInterfaceName
+							.substring(0,
+									(gwtServiceInterfaceName.length() - "Async"
+											.length()));
+					Class<?> gwtDefinitionInterface = classLoader
+							.loadClass(gwtDefinitionInterfaceName);
+					relativePathAnnotation = gwtDefinitionInterface
+							.getAnnotation(RemoteServiceRelativePath.class);
+				}
+				String relativePath = relativePathAnnotation.value();
+
+				// Create properties for the GWT Service Work
+				PropertyList properties = sectionContext.createPropertyList();
+				properties
+						.addProperty(
+								GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE)
+						.setValue(gwtServiceInterfaceName);
+
+				// Add the GWT Service task
+				String gwtServiceName = "GWT_" + relativePath;
+				SectionWork work = designer.addSectionWork(gwtServiceName,
+						GwtServiceWorkSource.class.getName());
+				for (Property property : properties) {
+					work.addProperty(property.getName(), property.getValue());
+				}
+				SectionTask task = work.addSectionTask(gwtServiceName,
+						GwtServiceWorkSource.SERVICE_TASK_NAME);
+
+				// Add GWT RPC connection dependency
+				TaskObject connectionDependency = task
+						.getTaskObject(Dependencies.SERVER_GWT_RPC_CONNECTION
+								.name());
+				SectionObject connectionObject = context
+						.getOrCreateSectionObject(ServerGwtRpcConnection.class
+								.getName());
+				designer.link(connectionDependency, connectionObject);
+
+				// Link input for task
+				SectionInput serviceInput = designer.addSectionInput(
+						gwtServiceName, null);
+				designer.link(serviceInput, task);
+
+				// Link flows
+				WorkType<?> workType = sectionContext.loadWorkType(
+						GwtServiceWorkSource.class.getName(), properties);
+				if (workType != null) {
+					TaskType<?, ?, ?> taskType = workType.getTaskTypes()[0];
+					for (TaskFlowType<?> flowType : taskType.getFlowTypes()) {
+						String methodName = flowType.getFlowName();
+						TaskFlow flow = task.getTaskFlow(methodName);
+						SectionTask flowTask = context.getTask(methodName);
+						designer.link(flow, flowTask,
+								FlowInstigationStrategyEnum.SEQUENTIAL);
+					}
+				}
+			}
 		}
 	}
 

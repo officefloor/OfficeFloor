@@ -18,6 +18,10 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
@@ -56,18 +60,6 @@ public interface HttpTemplateSectionExtensionContext extends SourceProperties {
 
 	/**
 	 * <p>
-	 * Enables overriding the class of the template.
-	 * <p>
-	 * This need not be called, however is available should the extension wish
-	 * to change (enhance) the template logic class.
-	 * 
-	 * @param templateClass
-	 *            Template logic class.
-	 */
-	void setTemplateClass(Class<?> templateClass);
-
-	/**
-	 * <p>
 	 * Obtains the {@link SectionSourceContext} for the
 	 * {@link HttpTemplateSectionSource} to be extended.
 	 * <p>
@@ -88,5 +80,45 @@ public interface HttpTemplateSectionExtensionContext extends SourceProperties {
 	 *         being extended.
 	 */
 	SectionDesigner getSectionDesigner();
+
+	/**
+	 * Obtains the {@link SectionManagedObject} for the template logic object.
+	 * 
+	 * @return {@link SectionManagedObject}.
+	 */
+	SectionManagedObject getTemplateLogicObject();
+
+	/**
+	 * Obtains the {@link SectionTask} by the name.
+	 * 
+	 * @param taskName
+	 *            {@link SectionTask} name.
+	 * @return {@link SectionTask} or <code>null</code> if no
+	 *         {@link SectionTask} by name.
+	 */
+	SectionTask getTask(String taskName);
+
+	/**
+	 * Obtains or creates the {@link SectionObject} for the type name.
+	 * 
+	 * @param typeName
+	 *            Type name.
+	 * @return {@link SectionObject}.
+	 */
+	SectionObject getOrCreateSectionObject(String typeName);
+
+	/**
+	 * Obtains or creates the {@link SectionOutput}.
+	 * 
+	 * @param name
+	 *            {@link SectionOutput} name.
+	 * @param argumentType
+	 *            Argument type. May be <code>null</code> if no argument.
+	 * @param isEscalationOnly
+	 *            <code>true</code> if escalation only.
+	 * @return {@link SectionOutput}.
+	 */
+	SectionOutput getOrCreateSectionOutput(String name, String argumentType,
+			boolean isEscalationOnly);
 
 }

@@ -17,35 +17,30 @@
  */
 package net.officefloor.plugin.woof;
 
-import java.util.ServiceLoader;
-
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
 /**
- * {@link ServiceLoader} service that allows overriding default behaviour of
- * adding a {@link HttpTemplateAutoWireSectionExtension}.
+ * Context for the {@link WoofTemplateExtensionService}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WoofTemplateExtensionService {
+public interface WoofTemplateExtensionServiceContext extends SourceProperties {
 
 	/**
-	 * Obtains the alias for this {@link HttpTemplateAutoWireSectionExtension}.
+	 * Obtains the {@link HttpTemplateAutoWireSection} being extended.
 	 * 
-	 * @return Alias for this {@link HttpTemplateAutoWireSectionExtension}.
+	 * @return {@link HttpTemplateAutoWireSection} being extended.
 	 */
-	String getTemplateExtensionAlias();
+	HttpTemplateAutoWireSection getTemplate();
 
 	/**
-	 * Extends the {@link HttpTemplateAutoWireSection}.
+	 * Obtains the {@link WebAutoWireApplication} that the
+	 * {@link HttpTemplateAutoWireSection} has been added.
 	 * 
-	 * @param context
-	 *            {@link WoofTemplateExtensionServiceContext}.
-	 * @throws Exception
-	 *             If fails to extend the {@link HttpTemplateAutoWireSection}.
+	 * @return {@link WebAutoWireApplication}.
 	 */
-	void extendTemplate(WoofTemplateExtensionServiceContext context)
-			throws Exception;
+	WebAutoWireApplication getWebApplication();
 
 }
