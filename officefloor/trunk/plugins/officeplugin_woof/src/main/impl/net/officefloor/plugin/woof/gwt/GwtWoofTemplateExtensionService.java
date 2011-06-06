@@ -46,7 +46,8 @@ public class GwtWoofTemplateExtensionService implements
 	@Override
 	public void extendTemplate(WoofTemplateExtensionServiceContext context)
 			throws Exception {
-		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate());
+		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate(),
+				context.getWebApplication(), context, context.getClassLoader());
 	}
 
 }
