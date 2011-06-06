@@ -19,15 +19,16 @@ package net.officefloor.plugin.gwt.web.http.section;
 
 import java.io.ByteArrayOutputStream;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Test integration of GWT.
@@ -57,7 +58,9 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 
 		try {
 			// Add the GWT Extension
-			GwtHttpTemplateSectionExtension.extendTemplate(section);
+			GwtHttpTemplateSectionExtension.extendTemplate(section,
+					this.source, new SourcePropertiesImpl(), Thread
+							.currentThread().getContextClassLoader());
 			fail("Should not be successful without Template URI");
 
 		} catch (IllegalStateException ex) {
@@ -80,7 +83,9 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 				templatePath, TemplateLogic.class, "template");
 
 		// Add the GWT Extension
-		GwtHttpTemplateSectionExtension.extendTemplate(section);
+		GwtHttpTemplateSectionExtension.extendTemplate(section, this.source,
+				new SourcePropertiesImpl(), Thread.currentThread()
+						.getContextClassLoader());
 
 		// Start Server
 		this.source.openOfficeFloor();

@@ -31,6 +31,7 @@ import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -40,6 +41,7 @@ import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
 import net.officefloor.plugin.gwt.template.transform.HtmlTemplateTransformerImpl;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
+import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 
@@ -80,11 +82,23 @@ public class GwtHttpTemplateSectionExtension implements
 	 * 
 	 * @param template
 	 *            {@link HttpTemplateAutoWireSection}.
+	 * @param application
+	 *            {@link WebAutoWireApplication}.
+	 * @param properties
+	 *            {@link SourceProperties}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @throws Exception
+	 *             If fails to extend the template configuration.
 	 */
-	public static void extendTemplate(HttpTemplateAutoWireSection template) {
+	public static void extendTemplate(
+			final HttpTemplateAutoWireSection template,
+			final WebAutoWireApplication application,
+			SourceProperties properties, ClassLoader classLoader)
+			throws Exception {
 
 		// Obtain the template URI
-		String templateUri = template.getTemplateUri();
+		final String templateUri = template.getTemplateUri();
 		if ((templateUri == null) || (templateUri.trim().length() == 0)) {
 			throw new IllegalStateException(
 					"Template must have a URI for extending with GWT (Template="
@@ -95,6 +109,105 @@ public class GwtHttpTemplateSectionExtension implements
 		HttpTemplateAutoWireSectionExtension extension = template
 				.addTemplateExtension(GwtHttpTemplateSectionExtension.class);
 		extension.addProperty(PROPERTY_TEMPLATE_URI, templateUri);
+
+		// Determine if GWT Services
+		String gwtServiceInterfaceNames = properties.getProperty(
+				PROPERTY_GWT_ASYNC_SERVICE_INTERFACES, null);
+		if (gwtServiceInterfaceNames != null) {
+
+			// Include GWT Services for configuring servicing
+			extension.addProperty(PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+					gwtServiceInterfaceNames);
+
+			// Configure the GWT Services
+			configureGwtServiceInterfaces(gwtServiceInterfaceNames,
+					classLoader, new GwtServiceConfigurer() {
+						@Override
+						public void configure(Class<?> gwtServiceInterface,
+								String relativePath, String gwtServiceName) {
+							// Route GWT Service
+							String uri = templateUri + "/" + relativePath;
+							application.linkUri(uri, template, gwtServiceName);
+						}
+					});
+		}
+	}
+
+	/**
+	 * Configures the GWT services.
+	 * 
+	 * @param gwtServiceInterfaceNames
+	 *            GWT Service interface names.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param configurer
+	 *            {@link GwtServiceConfigurer}.
+	 * @throws Exception
+	 *             If fails to configure the GWT services.
+	 */
+	private static void configureGwtServiceInterfaces(
+			String gwtServiceInterfaceNames, ClassLoader classLoader,
+			GwtServiceConfigurer configurer) throws Exception {
+
+		// Configure the GWT Service Interfaces
+		for (String gwtServiceInterfaceName : gwtServiceInterfaceNames
+				.split(",")) {
+
+			// Load the GWT Service Async interface
+			gwtServiceInterfaceName = gwtServiceInterfaceName.trim();
+			Class<?> gwtServiceInterface = classLoader
+					.loadClass(gwtServiceInterfaceName);
+
+			// Obtain the definition interface name
+			String gwtDefinitionInterfaceName = gwtServiceInterfaceName
+					.substring(0, (gwtServiceInterfaceName.length() - "Async"
+							.length()));
+
+			// Obtain the GWT Service Relative Path
+			RemoteServiceRelativePath relativePathAnnotation = gwtServiceInterface
+					.getAnnotation(RemoteServiceRelativePath.class);
+			if (relativePathAnnotation == null) {
+				// Obtain from GWT definition Interface
+				Class<?> gwtDefinitionInterface = classLoader
+						.loadClass(gwtDefinitionInterfaceName);
+				relativePathAnnotation = gwtDefinitionInterface
+						.getAnnotation(RemoteServiceRelativePath.class);
+			}
+			String relativePath = (relativePathAnnotation == null ? null
+					: relativePathAnnotation.value());
+			if ((relativePath == null) || (relativePath.trim().length() == 0)) {
+				throw new IllegalStateException("GWT Service Interface "
+						+ gwtDefinitionInterfaceName
+						+ " is not annotated with "
+						+ RemoteServiceRelativePath.class.getSimpleName());
+			}
+
+			// Obtain the GWT Service name
+			String gwtServiceName = "GWT_" + relativePath;
+
+			// Configure the GWT Service
+			configurer.configure(gwtServiceInterface, relativePath,
+					gwtServiceName);
+		}
+	}
+
+	/**
+	 * Configures the GWT Service.
+	 */
+	private static interface GwtServiceConfigurer {
+
+		/**
+		 * Configures the GWT Service.
+		 * 
+		 * @param gwtServiceInterface
+		 *            GWT Service interface.
+		 * @param relativePath
+		 *            GWT relative path.
+		 * @param gwtServiceName
+		 *            GWT service name.
+		 */
+		void configure(Class<?> gwtServiceInterface, String relativePath,
+				String gwtServiceName);
 	}
 
 	/*
@@ -102,7 +215,7 @@ public class GwtHttpTemplateSectionExtension implements
 	 */
 
 	@Override
-	public void extendTemplate(HttpTemplateSectionExtensionContext context)
+	public void extendTemplate(final HttpTemplateSectionExtensionContext context)
 			throws Exception {
 
 		// Obtain the template
@@ -140,89 +253,83 @@ public class GwtHttpTemplateSectionExtension implements
 		}
 
 		// Obtain the GWT Service Interfaces
-		String gwtServiceInterfaces = context.getProperty(
+		String gwtServiceInterfaceNames = context.getProperty(
 				PROPERTY_GWT_ASYNC_SERVICE_INTERFACES, null);
-		if ((gwtServiceInterfaces != null)
-				&& (gwtServiceInterfaces.trim().length() > 0)) {
+		if ((gwtServiceInterfaceNames != null)
+				&& (gwtServiceInterfaceNames.trim().length() > 0)) {
 
 			// Obtain the Class Loader
-			SectionSourceContext sectionContext = context
+			final SectionSourceContext sectionContext = context
 					.getSectionSourceContext();
 			ClassLoader classLoader = sectionContext.getClassLoader();
 
 			// Obtain the Section Designer
-			SectionDesigner designer = context.getSectionDesigner();
+			final SectionDesigner designer = context.getSectionDesigner();
 
-			// Configure the GWT Service Interfaces
-			for (String gwtServiceInterfaceName : gwtServiceInterfaces
-					.split(",")) {
+			// Configure the GWT Services
+			configureGwtServiceInterfaces(gwtServiceInterfaceNames,
+					classLoader, new GwtServiceConfigurer() {
+						@Override
+						public void configure(Class<?> gwtServiceInterface,
+								String relativePath, String gwtServiceName) {
 
-				// Load the GWT Service Async interface
-				gwtServiceInterfaceName = gwtServiceInterfaceName.trim();
-				Class<?> gwtServiceInterface = classLoader
-						.loadClass(gwtServiceInterfaceName);
+							// Create properties for the GWT Service Work
+							PropertyList properties = sectionContext
+									.createPropertyList();
+							properties
+									.addProperty(
+											GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE)
+									.setValue(gwtServiceInterface.getName());
 
-				// Obtain the GWT Service Relative Path
-				RemoteServiceRelativePath relativePathAnnotation = gwtServiceInterface
-						.getAnnotation(RemoteServiceRelativePath.class);
-				if (relativePathAnnotation == null) {
-					// Obtain from GWT definition Interface
-					String gwtDefinitionInterfaceName = gwtServiceInterfaceName
-							.substring(0,
-									(gwtServiceInterfaceName.length() - "Async"
-											.length()));
-					Class<?> gwtDefinitionInterface = classLoader
-							.loadClass(gwtDefinitionInterfaceName);
-					relativePathAnnotation = gwtDefinitionInterface
-							.getAnnotation(RemoteServiceRelativePath.class);
-				}
-				String relativePath = relativePathAnnotation.value();
+							// Add the GWT Service task
+							SectionWork work = designer.addSectionWork(
+									gwtServiceName,
+									GwtServiceWorkSource.class.getName());
+							for (Property property : properties) {
+								work.addProperty(property.getName(),
+										property.getValue());
+							}
+							SectionTask task = work.addSectionTask(
+									gwtServiceName,
+									GwtServiceWorkSource.SERVICE_TASK_NAME);
 
-				// Create properties for the GWT Service Work
-				PropertyList properties = sectionContext.createPropertyList();
-				properties
-						.addProperty(
-								GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE)
-						.setValue(gwtServiceInterfaceName);
+							// Add GWT RPC connection dependency
+							TaskObject connectionDependency = task
+									.getTaskObject(Dependencies.SERVER_GWT_RPC_CONNECTION
+											.name());
+							SectionObject connectionObject = context
+									.getOrCreateSectionObject(ServerGwtRpcConnection.class
+											.getName());
+							designer.link(connectionDependency,
+									connectionObject);
 
-				// Add the GWT Service task
-				String gwtServiceName = "GWT_" + relativePath;
-				SectionWork work = designer.addSectionWork(gwtServiceName,
-						GwtServiceWorkSource.class.getName());
-				for (Property property : properties) {
-					work.addProperty(property.getName(), property.getValue());
-				}
-				SectionTask task = work.addSectionTask(gwtServiceName,
-						GwtServiceWorkSource.SERVICE_TASK_NAME);
+							// Link input for task
+							SectionInput serviceInput = designer
+									.addSectionInput(gwtServiceName, null);
+							designer.link(serviceInput, task);
 
-				// Add GWT RPC connection dependency
-				TaskObject connectionDependency = task
-						.getTaskObject(Dependencies.SERVER_GWT_RPC_CONNECTION
-								.name());
-				SectionObject connectionObject = context
-						.getOrCreateSectionObject(ServerGwtRpcConnection.class
-								.getName());
-				designer.link(connectionDependency, connectionObject);
-
-				// Link input for task
-				SectionInput serviceInput = designer.addSectionInput(
-						gwtServiceName, null);
-				designer.link(serviceInput, task);
-
-				// Link flows
-				WorkType<?> workType = sectionContext.loadWorkType(
-						GwtServiceWorkSource.class.getName(), properties);
-				if (workType != null) {
-					TaskType<?, ?, ?> taskType = workType.getTaskTypes()[0];
-					for (TaskFlowType<?> flowType : taskType.getFlowTypes()) {
-						String methodName = flowType.getFlowName();
-						TaskFlow flow = task.getTaskFlow(methodName);
-						SectionTask flowTask = context.getTask(methodName);
-						designer.link(flow, flowTask,
-								FlowInstigationStrategyEnum.SEQUENTIAL);
-					}
-				}
-			}
+							// Link flows
+							WorkType<?> workType = sectionContext.loadWorkType(
+									GwtServiceWorkSource.class.getName(),
+									properties);
+							if (workType != null) {
+								TaskType<?, ?, ?> taskType = workType
+										.getTaskTypes()[0];
+								for (TaskFlowType<?> flowType : taskType
+										.getFlowTypes()) {
+									String methodName = flowType.getFlowName();
+									TaskFlow flow = task
+											.getTaskFlow(methodName);
+									SectionTask flowTask = context
+											.getTask(methodName);
+									designer.link(
+											flow,
+											flowTask,
+											FlowInstigationStrategyEnum.SEQUENTIAL);
+								}
+							}
+						}
+					});
 		}
 	}
 
