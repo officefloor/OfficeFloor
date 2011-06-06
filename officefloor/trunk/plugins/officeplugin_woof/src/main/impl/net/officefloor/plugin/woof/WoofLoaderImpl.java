@@ -27,7 +27,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;
@@ -185,7 +187,9 @@ public class WoofLoaderImpl implements WoofLoader {
 							properties.addProperty(property.getName())
 									.setValue(property.getValue());
 						}
-						extensionService.extendTemplate(template, properties);
+						extensionService
+								.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
+										template, application, properties));
 
 					} else {
 						// Load via extension class name
@@ -203,7 +207,8 @@ public class WoofLoaderImpl implements WoofLoader {
 					// Indicate failure to extend template
 					throw new WoofTemplateExtensionException(
 							"Failed loading Template Extension "
-									+ extensionClassName, ex);
+									+ extensionClassName + ". "
+									+ ex.getMessage(), ex);
 				}
 			}
 		}
@@ -439,6 +444,51 @@ public class WoofLoaderImpl implements WoofLoader {
 			}
 		}
 
+	}
+
+	/**
+	 * {@link WoofTemplateExtensionServiceContext} implementation.
+	 */
+	private static class WoofTemplateExtensionServiceContextImpl extends
+			SourcePropertiesImpl implements WoofTemplateExtensionServiceContext {
+
+		/**
+		 * {@link HttpTemplateAutoWireSection}.
+		 */
+		private final HttpTemplateAutoWireSection template;
+
+		/**
+		 * {@link WebAutoWireApplication}.
+		 */
+		private final WebAutoWireApplication application;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param template
+		 *            {@link HttpTemplateAutoWireSection}.
+		 * @param application
+		 *            {@link WebAutoWireApplication}.
+		 * @param properties
+		 *            {@link PropertyList}.
+		 */
+		public WoofTemplateExtensionServiceContextImpl(
+				HttpTemplateAutoWireSection template,
+				WebAutoWireApplication application, PropertyList properties) {
+			super(new PropertyListSourceProperties(properties));
+			this.template = template;
+			this.application = application;
+		}
+
+		@Override
+		public HttpTemplateAutoWireSection getTemplate() {
+			return this.template;
+		}
+
+		@Override
+		public WebAutoWireApplication getWebApplication() {
+			return this.application;
+		}
 	}
 
 }

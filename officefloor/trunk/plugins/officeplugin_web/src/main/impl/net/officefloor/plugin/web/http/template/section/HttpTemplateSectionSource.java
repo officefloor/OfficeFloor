@@ -199,6 +199,14 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
 		Class<?> sectionClass = classLoader.loadClass(sectionClassName);
 
+		// Create the HTTP Template Class Section Source
+		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource(
+				sectionClass, designer, context);
+
+		// Obtain the Section Managed Object
+		SectionManagedObject sectionClassObject = classSource
+				.getClassManagedObject();
+
 		// Extend the template as necessary
 		final String EXTENSION_PREFIX = "extension.";
 		int extensionIndex = 1;
@@ -215,7 +223,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 					+ ".";
 			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
 					templateContent, sectionClass, extensionPropertyPrefix,
-					designer, context);
+					designer, context, sectionClassObject, classSource);
 			extension.extendTemplate(extensionContext);
 
 			// Override template details
@@ -262,8 +270,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 				templateContent);
 
 		// Create the template tasks and ensure registered for logic flows
-		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource(
-				sectionClass);
 		Map<String, SectionTask> templateTasks = new HashMap<String, SectionTask>();
 		for (HttpTemplateSection templateSection : template.getSections()) {
 
@@ -552,7 +558,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		/**
 		 * {@link HttpTemplate} logic class.
 		 */
-		private Class<?> templateClass;
+		private final Class<?> templateClass;
 
 		/**
 		 * Prefix for a property of this extension.
@@ -570,6 +576,16 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		private final SectionSourceContext sectionSourceContext;
 
 		/**
+		 * {@link SectionManagedObject} for the template logic object.
+		 */
+		private final SectionManagedObject templateLogicObject;
+
+		/**
+		 * {@link HttpTemplateClassSectionSource}.
+		 */
+		private final HttpTemplateClassSectionSource classSectionSource;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param templateContent
@@ -583,16 +599,25 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		 *            {@link SectionDesigner}.
 		 * @param sectionSourceContext
 		 *            {@link SectionSourceContext}.
+		 * @param templateLogicObject
+		 *            {@link SectionManagedObject} for the template logic
+		 *            object.
+		 * @param classSectionSource
+		 *            {@link HttpTemplateClassSectionSource}.
 		 */
 		public HttpTemplateSectionExtensionContextImpl(String templateContent,
 				Class<?> templateClass, String extensionPropertyPrefix,
 				SectionDesigner sectionDesigner,
-				SectionSourceContext sectionSourceContext) {
+				SectionSourceContext sectionSourceContext,
+				SectionManagedObject templateLogicObject,
+				HttpTemplateClassSectionSource classSectionSource) {
 			this.templateContent = templateContent;
 			this.templateClass = templateClass;
 			this.extensionPropertyPrefix = extensionPropertyPrefix;
 			this.sectionDesigner = sectionDesigner;
 			this.sectionSourceContext = sectionSourceContext;
+			this.templateLogicObject = templateLogicObject;
+			this.classSectionSource = classSectionSource;
 		}
 
 		/*
@@ -612,11 +637,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		@Override
 		public Class<?> getTemplateClass() {
 			return this.templateClass;
-		}
-
-		@Override
-		public void setTemplateClass(Class<?> templateClass) {
-			this.templateClass = templateClass;
 		}
 
 		@Override
@@ -688,6 +708,28 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		public SectionDesigner getSectionDesigner() {
 			return this.sectionDesigner;
 		}
+
+		@Override
+		public SectionManagedObject getTemplateLogicObject() {
+			return this.templateLogicObject;
+		}
+
+		@Override
+		public SectionTask getTask(String taskName) {
+			return this.classSectionSource.getTaskByName(taskName);
+		}
+
+		@Override
+		public SectionObject getOrCreateSectionObject(String typeName) {
+			return this.classSectionSource.getOrCreateObject(typeName);
+		}
+
+		@Override
+		public SectionOutput getOrCreateSectionOutput(String name,
+				String argumentType, boolean isEscalationOnly) {
+			return this.classSectionSource.getOrCreateOutput(name,
+					argumentType, isEscalationOnly);
+		}
 	}
 
 	/**
@@ -702,23 +744,47 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		private final Class<?> sectionClass;
 
 		/**
-		 * <p>
-		 * Default constructor necessary for sources.
-		 * <p>
-		 * Provided just in case.
+		 * {@link SectionDesigner}.
 		 */
-		public HttpTemplateClassSectionSource() {
-			this(null);
-		}
+		private final SectionDesigner designer;
+
+		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext sourceContext;
+
+		/**
+		 * {@link SectionManagedObject} for the section object.
+		 */
+		private SectionManagedObject sectionClassManagedObject = null;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param sectionClass
 		 *            Section class.
+		 * @param designer
+		 *            {@link SectionDesigner}.
+		 * @param sourceContext
+		 *            {@link SectionSourceContext}.
 		 */
-		public HttpTemplateClassSectionSource(Class<?> sectionClass) {
+		public HttpTemplateClassSectionSource(Class<?> sectionClass,
+				SectionDesigner designer, SectionSourceContext sourceContext) {
 			this.sectionClass = sectionClass;
+			this.designer = designer;
+			this.sourceContext = sourceContext;
+		}
+
+		/**
+		 * Obtains the {@link SectionManagedObject} for the section class.
+		 * 
+		 * @return {@link SectionManagedObject} for the section class.
+		 * @throws Exception
+		 *             If fails to obtain the {@link SectionManagedObject}.
+		 */
+		public SectionManagedObject getClassManagedObject() throws Exception {
+			return this.createClassManagedObject(CLASS_OBJECT_NAME,
+					this.getSectionClass(this.getSectionClassName()));
 		}
 
 		/**
@@ -744,67 +810,75 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		 */
 
 		@Override
+		protected SectionDesigner getDesigner() {
+			return this.designer;
+		}
+
+		@Override
+		protected SectionSourceContext getContext() {
+			return this.sourceContext;
+		}
+
+		@Override
 		protected String getSectionClassName() {
-
-			// Determine if overridden
-			if (this.sectionClass != null) {
-				return this.sectionClass.getName(); // overridden
-			}
-
-			// Obtain class name from property as location is for template
-			return this.getContext().getProperty(PROPERTY_CLASS_NAME);
+			return this.sectionClass.getName();
 		}
 
 		@Override
 		protected Class<?> getSectionClass(String sectionClassName)
 				throws Exception {
-
-			// Determine if overridden
-			if (this.sectionClass != null) {
-				return this.sectionClass;
-			}
-
-			// Defer to super class to obtain
-			return super.getSectionClass(sectionClassName);
+			return this.sectionClass;
 		}
 
 		@Override
 		protected SectionManagedObject createClassManagedObject(
 				String objectName, Class<?> sectionClass) {
 
+			// Determine if already loaded the Section Managed Object
+			if (this.sectionClassManagedObject != null) {
+				return this.sectionClassManagedObject; // instance
+			}
+
 			// Determine if stateful
 			boolean isStateful = this.isHttpSessionStateful(sectionClass);
 
 			// Default behaviour if not stateful
 			if (!isStateful) {
-				return super.createClassManagedObject(objectName, sectionClass);
+				// Defer to default behaviour
+				this.sectionClassManagedObject = super
+						.createClassManagedObject(objectName, sectionClass);
+
+			} else {
+				// As stateful, the class must be serialisable
+				if (!(Serializable.class.isAssignableFrom(sectionClass))) {
+					this.getDesigner().addIssue(
+							"Template logic class " + sectionClass.getName()
+									+ " is annotated with "
+									+ HttpSessionStateful.class.getSimpleName()
+									+ " but is not "
+									+ Serializable.class.getSimpleName(),
+							AssetType.MANAGED_OBJECT, objectName);
+				}
+
+				// Create the managed object for the stateful template logic
+				SectionManagedObjectSource managedObjectSource = this
+						.getDesigner().addSectionManagedObjectSource(
+								objectName,
+								HttpSessionClassManagedObjectSource.class
+										.getName());
+				managedObjectSource
+						.addProperty(
+								HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+								sectionClass.getName());
+
+				// Create the managed object
+				this.sectionClassManagedObject = managedObjectSource
+						.addSectionManagedObject(objectName,
+								ManagedObjectScope.PROCESS);
 			}
 
-			// If stateful, the class must be serialisable
-			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-				this.getDesigner().addIssue(
-						"Template logic class " + sectionClass.getName()
-								+ " is annotated with "
-								+ HttpSessionStateful.class.getSimpleName()
-								+ " but is not "
-								+ Serializable.class.getSimpleName(),
-						AssetType.MANAGED_OBJECT, objectName);
-			}
-
-			// Create the managed object for the stateful template logic
-			SectionManagedObjectSource managedObjectSource = this
-					.getDesigner()
-					.addSectionManagedObjectSource(objectName,
-							HttpSessionClassManagedObjectSource.class.getName());
-			managedObjectSource.addProperty(
-					HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
-					sectionClass.getName());
-
-			// Create the managed object
-			SectionManagedObject managedObject = managedObjectSource
-					.addSectionManagedObject(objectName,
-							ManagedObjectScope.PROCESS);
-			return managedObject;
+			// Return the managed object
+			return this.sectionClassManagedObject;
 		}
 
 		@Override

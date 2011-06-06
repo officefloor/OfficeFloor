@@ -77,6 +77,16 @@ import net.officefloor.plugin.work.clazz.ParameterFactory;
 public class ClassSectionSource extends AbstractSectionSource {
 
 	/**
+	 * Name of the {@link SectionManagedObject} for the section class.
+	 */
+	public static final String CLASS_OBJECT_NAME = "OBJECT";
+	
+	/**
+	 * Flag indicating if sourced.
+	 */
+	private boolean isSourced = false;
+
+	/**
 	 * {@link SectionDesigner}.
 	 */
 	private SectionDesigner _designer;
@@ -86,7 +96,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 	 * 
 	 * @return {@link SectionDesigner};
 	 */
-	protected final SectionDesigner getDesigner() {
+	protected SectionDesigner getDesigner() {
 		return this._designer;
 	}
 
@@ -100,10 +110,10 @@ public class ClassSectionSource extends AbstractSectionSource {
 	 * 
 	 * @return {@link SectionSourceContext}.
 	 */
-	protected final SectionSourceContext getContext() {
+	protected SectionSourceContext getContext() {
 		return this._context;
 	}
-
+	
 	/**
 	 * {@link SectionTask} instances by name.
 	 */
@@ -627,10 +637,11 @@ public class ClassSectionSource extends AbstractSectionSource {
 			SectionSourceContext context) throws Exception {
 
 		// Ensure only use once
-		if (this._designer != null) {
+		if (this.isSourced) {
 			throw new IllegalStateException("May only use "
 					+ this.getClass().getName() + " once per instance");
 		}
+		this.isSourced = true;
 
 		// Initiate state
 		this._designer = designer;
@@ -648,8 +659,6 @@ public class ClassSectionSource extends AbstractSectionSource {
 
 		// Obtain the class
 		Class<?> sectionClass = this.getSectionClass(sectionClassName);
-
-		final String CLASS_OBJECT_NAME = "OBJECT";
 
 		// Add the managed object for the section class
 		SectionManagedObject managedObject = this.createClassManagedObject(

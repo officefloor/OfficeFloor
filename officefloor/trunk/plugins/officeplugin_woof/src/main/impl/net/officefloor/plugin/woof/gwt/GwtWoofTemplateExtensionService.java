@@ -17,10 +17,9 @@
  */
 package net.officefloor.plugin.woof.gwt;
 
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
-import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.woof.WoofTemplateExtensionService;
+import net.officefloor.plugin.woof.WoofTemplateExtensionServiceContext;
 
 /**
  * {@link WoofTemplateExtensionService} for GWT.
@@ -45,9 +44,9 @@ public class GwtWoofTemplateExtensionService implements
 	}
 
 	@Override
-	public void extendTemplate(HttpTemplateAutoWireSection template,
-			PropertyList properties) throws Exception {
-		GwtHttpTemplateSectionExtension.extendTemplate(template);
+	public void extendTemplate(WoofTemplateExtensionServiceContext context)
+			throws Exception {
+		GwtHttpTemplateSectionExtension.extendTemplate(context.getTemplate());
 	}
 
 }

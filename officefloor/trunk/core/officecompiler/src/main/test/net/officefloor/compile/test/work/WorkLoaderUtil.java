@@ -58,8 +58,8 @@ public class WorkLoaderUtil {
 			Class<WS> workSourceClass, String... propertyNameLabels) {
 
 		// Load the specification
-		PropertyList propertyList = getOfficeFloorCompiler().getWorkLoader()
-				.loadSpecification(workSourceClass);
+		PropertyList propertyList = getOfficeFloorCompiler(null)
+				.getWorkLoader().loadSpecification(workSourceClass);
 
 		// Verify the properties
 		PropertyListUtil.validatePropertyNameLabels(propertyList,
@@ -99,28 +99,53 @@ public class WorkLoaderUtil {
 	 *            the {@link WorkSource}.
 	 * @return Loaded {@link WorkType}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> validateWorkType(
 			WorkTypeBuilder<?> expectedWorkType, Class<WS> workSourceClass,
 			String... propertyNameValues) {
+		return validateWorkType(expectedWorkType, workSourceClass, null,
+				propertyNameValues);
+	}
+
+	/**
+	 * Convenience method that validates the {@link WorkType} loaded from the
+	 * input {@link WorkSource} against the expected {@link WorkType} from the
+	 * {@link WorkTypeBuilder}.
+	 * 
+	 * @param expectedWorkType
+	 *            {@link WorkTypeBuilder} that has had the expected
+	 *            {@link WorkType} built against it.
+	 * @param workSourceClass
+	 *            {@link WorkSource} class.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}. May be <code>null</code>.
+	 * @param propertyNameValues
+	 *            Listing of name/value pairs that comprise the properties for
+	 *            the {@link WorkSource}.
+	 * @return Loaded {@link WorkType}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> validateWorkType(
+			WorkTypeBuilder<?> expectedWorkType, Class<WS> workSourceClass,
+			OfficeFloorCompiler compiler, String... propertyNameValues) {
 
 		// Cast to obtain expected work type
 		if (!(expectedWorkType instanceof WorkType)) {
-			TestCase
-					.fail("expectedWorkType must be created from createWorkTypeBuilder");
+			TestCase.fail("expectedWorkType must be created from createWorkTypeBuilder");
 		}
 		WorkType<W> expectedWork = (WorkType<W>) expectedWorkType;
 
 		// Load the actual work type
-		WorkType<W> actualWork = loadWorkType(workSourceClass,
+		WorkType<W> actualWork = loadWorkType(workSourceClass, compiler,
 				propertyNameValues);
+		TestCase.assertNotNull("Failed to load WorkType", actualWork);
 
 		// Verify the work type
 		TestCase.assertEquals("Incorrect work factory", expectedWork
 				.getWorkFactory().getClass(), actualWork.getWorkFactory()
 				.getClass());
-		TestCase.assertEquals("Incorrect number of tasks", expectedWork
-				.getTaskTypes().length, actualWork.getTaskTypes().length);
+		TestCase.assertEquals("Incorrect number of tasks",
+				expectedWork.getTaskTypes().length,
+				actualWork.getTaskTypes().length);
 		for (int i = 0; i < expectedWork.getTaskTypes().length; i++) {
 			TaskType<W, ?, ?> expectedTask = expectedWork.getTaskTypes()[i];
 			TaskType<W, ?, ?> actualTask = actualWork.getTaskTypes()[i];
@@ -131,11 +156,13 @@ public class WorkLoaderUtil {
 			TestCase.assertEquals("Incorrect return type (task=" + i + ")",
 					expectedTask.getReturnType(), actualTask.getReturnType());
 			TestCase.assertEquals("Incorrect dependency keys (task="
-					+ expectedTask.getTaskName() + ")", expectedTask
-					.getObjectKeyClass(), actualTask.getObjectKeyClass());
-			TestCase.assertEquals("Incorrect flow keys (task="
-					+ expectedTask.getTaskName() + ")", expectedTask
-					.getFlowKeyClass(), actualTask.getFlowKeyClass());
+					+ expectedTask.getTaskName() + ")",
+					expectedTask.getObjectKeyClass(),
+					actualTask.getObjectKeyClass());
+			TestCase.assertEquals(
+					"Incorrect flow keys (task=" + expectedTask.getTaskName()
+							+ ")", expectedTask.getFlowKeyClass(),
+					actualTask.getFlowKeyClass());
 
 			// Verify differentiator
 			Object expectedDifferentiator = expectedTask.getDifferentiator();
@@ -155,17 +182,16 @@ public class WorkLoaderUtil {
 
 			// If work factory and task factory match then should be so
 			if (expectedWork.getWorkFactory() == expectedTask.getTaskFactory()) {
-				TestCase
-						.assertTrue(
-								"WorkFactory and TaskFactoryManufacturer should be the same",
-								(actualWork.getWorkFactory() == actualTask
-										.getTaskFactory()));
+				TestCase.assertTrue(
+						"WorkFactory and TaskFactoryManufacturer should be the same",
+						(actualWork.getWorkFactory() == actualTask
+								.getTaskFactory()));
 			}
 
 			// Verify the dependencies
 			TestCase.assertEquals("Incorrect number of dependences (task="
-					+ expectedTask.getTaskName() + ")", expectedTask
-					.getObjectTypes().length,
+					+ expectedTask.getTaskName() + ")",
+					expectedTask.getObjectTypes().length,
 					actualTask.getObjectTypes().length);
 			for (int d = 0; d < expectedTask.getObjectTypes().length; d++) {
 				TaskObjectType<?> expectedDependency = expectedTask
@@ -176,16 +202,16 @@ public class WorkLoaderUtil {
 				// Verify the dependency
 				TestCase.assertEquals("Incorrect dependency key (task="
 						+ expectedTask.getTaskName() + ", dependency=" + d
-						+ ")", expectedDependency.getKey(), actualDependency
-						.getKey());
+						+ ")", expectedDependency.getKey(),
+						actualDependency.getKey());
 				TestCase.assertEquals("Incorrect dependency type (task="
 						+ expectedTask.getTaskName() + ", dependency=" + d
 						+ ")", expectedDependency.getObjectType(),
 						actualDependency.getObjectType());
 				TestCase.assertEquals("Incorrect dependency index (task="
 						+ expectedTask.getTaskName() + ", dependency=" + d
-						+ ")", expectedDependency.getIndex(), actualDependency
-						.getIndex());
+						+ ")", expectedDependency.getIndex(),
+						actualDependency.getIndex());
 				TestCase.assertEquals("Incorrect dependency name (task="
 						+ expectedTask.getTaskName() + ", dependency=" + d
 						+ ")", expectedDependency.getObjectName(),
@@ -194,8 +220,9 @@ public class WorkLoaderUtil {
 
 			// Verify the flows
 			TestCase.assertEquals("Incorrect number of flows (task="
-					+ expectedTask.getTaskName() + ")", expectedTask
-					.getFlowTypes().length, actualTask.getFlowTypes().length);
+					+ expectedTask.getTaskName() + ")",
+					expectedTask.getFlowTypes().length,
+					actualTask.getFlowTypes().length);
 			for (int f = 0; f < expectedTask.getFlowTypes().length; f++) {
 				TaskFlowType<?> expectedFlow = expectedTask.getFlowTypes()[f];
 				TaskFlowType<?> actualFlow = actualTask.getFlowTypes()[f];
@@ -206,8 +233,8 @@ public class WorkLoaderUtil {
 						expectedFlow.getKey(), actualFlow.getKey());
 				TestCase.assertEquals("Incorrect flow argument type (task="
 						+ expectedTask.getTaskName() + ", flow=" + f + ")",
-						expectedFlow.getArgumentType(), actualFlow
-								.getArgumentType());
+						expectedFlow.getArgumentType(),
+						actualFlow.getArgumentType());
 				TestCase.assertEquals("Incorrect flow index (task="
 						+ expectedTask.getTaskName() + ", flow=" + f + ")",
 						expectedFlow.getIndex(), actualFlow.getIndex());
@@ -218,8 +245,8 @@ public class WorkLoaderUtil {
 
 			// Verify the escalations
 			TestCase.assertEquals("Incorrect number of escalations (task=" + i
-					+ ")", expectedTask.getEscalationTypes().length, actualTask
-					.getEscalationTypes().length);
+					+ ")", expectedTask.getEscalationTypes().length,
+					actualTask.getEscalationTypes().length);
 			for (int e = 0; e < expectedTask.getEscalationTypes().length; e++) {
 				TaskEscalationType expectedEscalation = expectedTask
 						.getEscalationTypes()[e];
@@ -255,28 +282,25 @@ public class WorkLoaderUtil {
 	 */
 	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
 			Class<WS> workSourceClass, String... propertyNameValues) {
-
-		// Obtain the class loader
-		ClassLoader classLoader = workSourceClass.getClassLoader();
-
 		// Return the loaded work
-		return loadWorkType(workSourceClass, classLoader, propertyNameValues);
+		return loadWorkType(workSourceClass, null, propertyNameValues);
 	}
 
 	/**
-	 * Convenience method that loads the {@link WorkType}.
+	 * Convenience method that loads the {@link WorkType} with the provided
+	 * {@link OfficeFloorCompiler}.
 	 * 
 	 * @param workSourceClass
 	 *            {@link WorkSource} class.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
 	 *            the {@link WorkSource}.
 	 * @return Loaded {@link WorkType}.
 	 */
 	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
-			Class<WS> workSourceClass, ClassLoader classLoader,
+			Class<WS> workSourceClass, OfficeFloorCompiler compiler,
 			String... propertyNameValues) {
 
 		// Create the property list
@@ -288,20 +312,24 @@ public class WorkLoaderUtil {
 		}
 
 		// Return the loaded work
-		return getOfficeFloorCompiler().getWorkLoader().loadWorkType(
+		return getOfficeFloorCompiler(compiler).getWorkLoader().loadWorkType(
 				workSourceClass, propertyList);
 	}
 
 	/**
 	 * Obtains the {@link OfficeFloorCompiler} setup for use.
 	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}. May be <code>null</code>.
 	 * @return {@link OfficeFloorCompiler}.
 	 */
-	private static OfficeFloorCompiler getOfficeFloorCompiler() {
-		// Create the office floor compiler that fails on first issue
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setCompilerIssues(new FailTestCompilerIssues());
+	private static OfficeFloorCompiler getOfficeFloorCompiler(
+			OfficeFloorCompiler compiler) {
+		if (compiler == null) {
+			// Create the office floor compiler that fails on first issue
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
+			compiler.setCompilerIssues(new FailTestCompilerIssues());
+		}
 		return compiler;
 	}
 

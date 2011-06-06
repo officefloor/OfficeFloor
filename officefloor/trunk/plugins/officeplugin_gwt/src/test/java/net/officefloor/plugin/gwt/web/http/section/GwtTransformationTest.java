@@ -124,6 +124,12 @@ public class GwtTransformationTest extends OfficeFrameTestCase {
 						.getProperty(GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI),
 				"template");
 		this.context.setTemplateContent(transformedHtml);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getProperty(
+								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+								null), null);
 
 		// Test
 		this.replayMockObjects();

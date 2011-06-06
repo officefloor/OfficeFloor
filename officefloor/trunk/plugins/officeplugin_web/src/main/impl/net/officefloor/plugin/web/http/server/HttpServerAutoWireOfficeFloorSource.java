@@ -64,9 +64,27 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	private final AutoWireObject httpSession;
 
 	/**
+	 * Default port.
+	 */
+	private final int defaultPort;
+
+	/**
 	 * Initiate.
 	 */
 	public HttpServerAutoWireOfficeFloorSource() {
+		this(7878);
+	}
+
+	/**
+	 * Initiate to use the specified port (unless overridden by another HTTP
+	 * socket).
+	 * 
+	 * @param defaultPort
+	 *            Default port (unless overridden).
+	 */
+	public HttpServerAutoWireOfficeFloorSource(int defaultPort) {
+		this.defaultPort = defaultPort;
+
 		// Use active team by default - done early so allow further overriding
 		this.assignDefaultTeam(OnePersonTeamSource.class);
 
@@ -119,8 +137,8 @@ public class HttpServerAutoWireOfficeFloorSource extends
 		// Add the HTTP Socket
 		if (this.httpSockets.size() == 0) {
 			// Add the default HTTP Socket
-			HttpServerSocketManagedObjectSource.autoWire(application, 7878,
-					HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+			HttpServerSocketManagedObjectSource.autoWire(application,
+					this.defaultPort, HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
 		} else {
 			// Override the HTTP Socket
 			for (HttpSocket socket : this.httpSockets) {
