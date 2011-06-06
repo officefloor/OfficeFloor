@@ -43,4 +43,11 @@ public interface WoofTemplateExtensionServiceContext extends SourceProperties {
 	 */
 	WebAutoWireApplication getWebApplication();
 
+	/**
+	 * Obtains the {@link ClassLoader}.
+	 * 
+	 * @return {@link ClassLoader}.
+	 */
+	ClassLoader getClassLoader();
+
 }

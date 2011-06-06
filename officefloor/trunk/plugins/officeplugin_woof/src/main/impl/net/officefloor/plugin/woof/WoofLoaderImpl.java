@@ -189,7 +189,8 @@ public class WoofLoaderImpl implements WoofLoader {
 						}
 						extensionService
 								.extendTemplate(new WoofTemplateExtensionServiceContextImpl(
-										template, application, properties));
+										template, application, properties,
+										this.classLoader));
 
 					} else {
 						// Load via extension class name
@@ -463,6 +464,11 @@ public class WoofLoaderImpl implements WoofLoader {
 		private final WebAutoWireApplication application;
 
 		/**
+		 * {@link ClassLoader}.
+		 */
+		private final ClassLoader classLoader;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param template
@@ -471,13 +477,17 @@ public class WoofLoaderImpl implements WoofLoader {
 		 *            {@link WebAutoWireApplication}.
 		 * @param properties
 		 *            {@link PropertyList}.
+		 * @param classLoader
+		 *            {@link ClassLoader}.
 		 */
 		public WoofTemplateExtensionServiceContextImpl(
 				HttpTemplateAutoWireSection template,
-				WebAutoWireApplication application, PropertyList properties) {
+				WebAutoWireApplication application, PropertyList properties,
+				ClassLoader classLoader) {
 			super(new PropertyListSourceProperties(properties));
 			this.template = template;
 			this.application = application;
+			this.classLoader = classLoader;
 		}
 
 		@Override
@@ -488,6 +498,11 @@ public class WoofLoaderImpl implements WoofLoader {
 		@Override
 		public WebAutoWireApplication getWebApplication() {
 			return this.application;
+		}
+
+		@Override
+		public ClassLoader getClassLoader() {
+			return this.classLoader;
 		}
 	}
 
