@@ -51,51 +51,60 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 			.createMock(SourceProperties.class);
 
 	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader = Thread.currentThread()
+			.getContextClassLoader();
+
+	/**
 	 * Ensure no extension of configuration if no GWT services.
 	 */
-	public void testNoGwtService() {
+	public void testNoGwtService() throws Exception {
 
 		// No GWT Services
 		this.recordInit("template", null);
 
 		// Test configuration
 		this.replayMockObjects();
-		GwtHttpTemplateSectionExtension.extendTemplate(this.template);
+		GwtHttpTemplateSectionExtension.extendTemplate(this.template,
+				this.application, this.properties, this.classLoader);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure extend configuration to route GWT service request.
 	 */
-	public void testGwtService() {
+	public void testGwtService() throws Exception {
 
 		// Record configuring a GWT Service
-		this.recordInit("template", GwtServiceInterface.class.getName());
+		this.recordInit("template", GwtServiceInterfaceAsync.class.getName());
 		this.application.linkUri("template/GwtServicePath", this.template,
 				"GWT_GwtServicePath");
 
 		// Test configuration
 		this.replayMockObjects();
-		GwtHttpTemplateSectionExtension.extendTemplate(this.template);
+		GwtHttpTemplateSectionExtension.extendTemplate(this.template,
+				this.application, this.properties, this.classLoader);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure extend configuration to route multiple GWT services.
 	 */
-	public void testMultipleGwtServices() {
+	public void testMultipleGwtServices() throws Exception {
 
 		// Record configuring multiple GWT services
-		this.recordInit("template", GwtServiceInterface.class.getName() + ","
-				+ GwtServiceAnother.class.getName());
+		this.recordInit("template", GwtServiceInterfaceAsync.class.getName()
+				+ "," + GwtServiceAnotherAsync.class.getName());
 		this.application.linkUri("template/GwtServicePath", this.template,
-				"GWT_Another");
+				"GWT_GwtServicePath");
 		this.application.linkUri("template/Another", this.template,
 				"GWT_Another");
 
 		// Test configuration
 		this.replayMockObjects();
-		GwtHttpTemplateSectionExtension.extendTemplate(this.template);
+		GwtHttpTemplateSectionExtension.extendTemplate(this.template,
+				this.application, this.properties, this.classLoader);
 		this.verifyMockObjects();
 	}
 
@@ -103,20 +112,21 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 	 * Ensure issue if GWT service is not annotated with
 	 * {@link RemoteServiceRelativePath}.
 	 */
-	public void testNonAnnotatedGwtService() {
+	public void testNonAnnotatedGwtService() throws Exception {
 
 		// Record configuring non-annotated GWT service
-		this.recordInit("template", Object.class.getName());
+		this.recordInit("template", GwtNoRelativePathAsync.class.getName());
 
 		// Test configuration
 		this.replayMockObjects();
 		try {
-			GwtHttpTemplateSectionExtension.extendTemplate(this.template);
+			GwtHttpTemplateSectionExtension.extendTemplate(this.template,
+					this.application, this.properties, this.classLoader);
 			fail("Should not be successful");
 		} catch (IllegalStateException ex) {
-			assertEquals(
-					"Incorrect cause",
-					"GWT Service Interface java.lang.Object is not annotated with RemoteServiceRelativePath",
+			assertEquals("Incorrect cause", "GWT Service Interface "
+					+ GwtNoRelativePath.class.getName()
+					+ " is not annotated with RemoteServiceRelativePath",
 					ex.getMessage());
 		}
 		this.verifyMockObjects();
@@ -161,6 +171,12 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * GWT Async Service interface.
+	 */
+	public static interface GwtServiceInterfaceAsync {
+	}
+
+	/**
 	 * GWT Service interface.
 	 */
 	@RemoteServiceRelativePath("GwtServicePath")
@@ -168,10 +184,22 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Another GWT Service interface.
+	 * Another GWT Async Service interface.
 	 */
 	@RemoteServiceRelativePath("Another")
-	public static interface GwtServiceAnother {
+	public static interface GwtServiceAnotherAsync {
+	}
+
+	/**
+	 * No relative path GWT Async Service.
+	 */
+	public static interface GwtNoRelativePathAsync {
+	}
+
+	/**
+	 * No relative path GWT Service.
+	 */
+	public static interface GwtNoRelativePath {
 	}
 
 }
