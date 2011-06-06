@@ -257,9 +257,11 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 					this.app);
 			fail("Should not load successfully");
 		} catch (WoofTemplateExtensionException ex) {
-			assertEquals("Incorrect exception",
-					"Failed loading Template Extension UNKNOWN",
-					ex.getMessage());
+			assertEquals(
+					"Incorrect exception",
+					"Failed loading Template Extension UNKNOWN. "
+							+ new ClassNotFoundException("UNKNOWN")
+									.getMessage(), ex.getMessage());
 			assertTrue("Incorrect cause",
 					ex.getCause() instanceof ClassNotFoundException);
 		}
