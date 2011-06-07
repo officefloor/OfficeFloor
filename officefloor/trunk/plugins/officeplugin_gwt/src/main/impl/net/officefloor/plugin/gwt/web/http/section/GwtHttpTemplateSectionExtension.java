@@ -205,9 +205,11 @@ public class GwtHttpTemplateSectionExtension implements
 		 *            GWT relative path.
 		 * @param gwtServiceName
 		 *            GWT service name.
+		 * @throws Exception
+		 *             If fails to configure the GWT Service.
 		 */
 		void configure(Class<?> gwtServiceInterface, String relativePath,
-				String gwtServiceName);
+				String gwtServiceName) throws Exception;
 	}
 
 	/*
@@ -271,7 +273,8 @@ public class GwtHttpTemplateSectionExtension implements
 					classLoader, new GwtServiceConfigurer() {
 						@Override
 						public void configure(Class<?> gwtServiceInterface,
-								String relativePath, String gwtServiceName) {
+								String relativePath, String gwtServiceName)
+								throws Exception {
 
 							// Create properties for the GWT Service Work
 							PropertyList properties = sectionContext
@@ -317,11 +320,29 @@ public class GwtHttpTemplateSectionExtension implements
 										.getTaskTypes()[0];
 								for (TaskFlowType<?> flowType : taskType
 										.getFlowTypes()) {
+
+									// Should always have flow
 									String methodName = flowType.getFlowName();
 									TaskFlow flow = task
 											.getTaskFlow(methodName);
+
+									// Obtain the task for flow
 									SectionTask flowTask = context
 											.getTask(methodName);
+									if (flowTask == null) {
+										throw new IllegalStateException(
+												"No service implementation for GWT service method '"
+														+ gwtServiceInterface
+																.getSimpleName()
+														+ "."
+														+ methodName
+														+ "(...)' on template logic class "
+														+ context
+																.getTemplateClass()
+																.getName());
+									}
+
+									// Link handling of GWT method
 									designer.link(
 											flow,
 											flowTask,

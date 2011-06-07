@@ -36,6 +36,8 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
@@ -101,6 +103,67 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 	 */
 	public void testGwtService() throws Exception {
 
+		// Record successfully configure GWT Services
+		this.recordGwtService("one", "one", "two", "two");
+
+		// Test
+		this.replayMockObjects();
+		this.extension.extendTemplate(this.context);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure provide error if missing GWT service method.
+	 */
+	public void testGwtMissingServiceMethod() throws Exception {
+
+		// Record no service implementation for second method
+		this.recordGwtService("one", "one", "two", null);
+
+		// Test
+		this.replayMockObjects();
+		try {
+			this.extension.extendTemplate(this.context);
+			fail("Should not successfully extend template");
+		} catch (IllegalStateException ex) {
+			assertEquals(
+					"Incorrect cause",
+					"No service implementation for GWT service method 'GwtServiceInterfaceAsync.two(...)' on template logic class "
+							+ Object.class.getName(), ex.getMessage());
+		}
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Initiate recording.
+	 * 
+	 * @param gwtServiceInterfaces
+	 *            GWT Service Interfaces.
+	 */
+	private void recordInit(String gwtServiceInterfaces) {
+		this.recordReturn(this.context, this.context.getTemplateContent(),
+				this.templateContent);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getProperty(GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI),
+				TEMPLATE_URI);
+		this.recordReturn(
+				this.context,
+				this.context
+						.getProperty(
+								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+								null), gwtServiceInterfaces);
+	}
+
+	/**
+	 * Record configuring the GWT Service.
+	 * 
+	 * @param flowToTaskPairs
+	 *            {@link Flow} to {@link Task} names.
+	 */
+	private void recordGwtService(String... flowToTaskPairs) {
+
 		final SectionSourceContext sectionContext = this
 				.createMock(SectionSourceContext.class);
 		final SectionWork work = this.createMock(SectionWork.class);
@@ -108,10 +171,6 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 		final TaskObject taskObject = this.createMock(TaskObject.class);
 		final SectionObject rpcObject = this.createMock(SectionObject.class);
 		final SectionInput gwtInput = this.createMock(SectionInput.class);
-		final TaskFlow flowOne = this.createMock(TaskFlow.class);
-		final SectionTask taskOne = this.createMock(SectionTask.class);
-		final TaskFlow flowTwo = this.createMock(TaskFlow.class);
-		final SectionTask taskTwo = this.createMock(SectionTask.class);
 
 		final PropertyList properties = OfficeFloorCompiler.newPropertyList();
 
@@ -163,44 +222,40 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 						GwtServiceWorkSource.class.getName(), properties),
 				workType);
 
-		// Record flow 'one' for GWT service
-		this.recordReturn(task, task.getTaskFlow("one"), flowOne);
-		this.recordReturn(this.context, this.context.getTask("one"), taskOne);
-		this.designer.link(flowOne, taskOne,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		// Configure the flows
+		for (int i = 0; i < flowToTaskPairs.length; i += 2) {
+			String flowName = flowToTaskPairs[i];
+			String taskName = flowToTaskPairs[i + 1];
 
-		// Record flow 'two' for GWT service
-		this.recordReturn(task, task.getTaskFlow("two"), flowTwo);
-		this.recordReturn(this.context, this.context.getTask("two"), taskTwo);
-		this.designer.link(flowTwo, taskTwo,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+			final TaskFlow flow = this.createMock(TaskFlow.class);
+			final SectionTask flowTask = this.createMock(SectionTask.class);
 
-		// Test
-		this.replayMockObjects();
-		this.extension.extendTemplate(this.context);
-		this.verifyMockObjects();
+			// Record the flow
+			this.recordReturn(task, task.getTaskFlow(flowName), flow);
+			if (taskName == null) {
+				// Record no task
+				this.recordReturn(this.context, this.context.getTask(flowName),
+						null);
+				this.recordReturn(this.context,
+						this.context.getTemplateClass(), Object.class);
+			} else {
+				// Record the task
+				this.recordReturn(this.context, this.context.getTask(taskName),
+						flowTask);
+				this.designer.link(flow, flowTask,
+						FlowInstigationStrategyEnum.SEQUENTIAL);
+			}
+		}
 	}
 
 	/**
-	 * Initiate recording.
-	 * 
-	 * @param gwtServiceInterfaces
-	 *            GWT Service Interfaces.
+	 * GWT Async Service interface.
 	 */
-	private void recordInit(String gwtServiceInterfaces) {
-		this.recordReturn(this.context, this.context.getTemplateContent(),
-				this.templateContent);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getProperty(GwtHttpTemplateSectionExtension.PROPERTY_TEMPLATE_URI),
-				TEMPLATE_URI);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getProperty(
-								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-								null), gwtServiceInterfaces);
+	public static interface GwtServiceInterfaceAsync {
+
+		void one(AsyncCallback<String> callback);
+
+		void two(DataSource dataSource, AsyncCallback<List<String>> callback);
 	}
 
 	/**
@@ -212,16 +267,6 @@ public class GwtServiceHandleConfigurationTest extends OfficeFrameTestCase {
 		String one();
 
 		List<String> two(DataSource dataSource);
-	}
-
-	/**
-	 * GWT Async Service interface.
-	 */
-	public static interface GwtServiceInterfaceAsync {
-
-		void one(AsyncCallback<String> callback);
-
-		void two(DataSource dataSource, AsyncCallback<List<String>> callback);
 	}
 
 }
