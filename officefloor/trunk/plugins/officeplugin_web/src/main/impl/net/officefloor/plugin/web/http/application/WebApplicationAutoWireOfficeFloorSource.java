@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.plugin.autowire.AutoWireObject;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.autowire.AutoWireSection;
@@ -46,6 +47,11 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  */
 public class WebApplicationAutoWireOfficeFloorSource extends
 		AutoWireOfficeFloorSource implements WebAutoWireApplication {
+
+	/**
+	 * Prefix for the link service {@link Task} name.
+	 */
+	private static final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
 
 	/**
 	 * {@link HttpTemplateAutoWireSection} instances.
@@ -143,6 +149,9 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				});
 		template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				templateLogicClass.getName());
+		template.addProperty(
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				LINK_SERVICE_TASK_NAME_PREFIX);
 
 		// Register the HTTP template
 		this.httpTemplates.add(template);
@@ -387,6 +396,10 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
 				WebApplicationSectionSource.class, null);
+		httpSection
+				.addProperty(
+						WebApplicationSectionSource.PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
+						LINK_SERVICE_TASK_NAME_PREFIX);
 
 		// Provide the non-handled servicer
 		if (this.nonHandledServicer != null) {

@@ -437,10 +437,16 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		source.addManagedObject(HttpSessionManagedObjectSource.class, null,
 				HttpSession.class).setTimeout(10 * 1000);
 
+		// Link service Task name prefix
+		final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
+
 		// Provide HTTP template router for testing
 		AutoWireSection routeSection = source.addSection("ROUTE",
 				WorkSectionSource.class,
 				HttpTemplateRouteWorkSource.class.getName());
+		routeSection.addProperty(
+				HttpTemplateRouteWorkSource.PROPERTY_TASK_NAME_PREFIX,
+				LINK_SERVICE_TASK_NAME_PREFIX);
 
 		// Load the template section
 		final String templateLocation = this.getClass().getPackage().getName()
@@ -451,6 +457,9 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		templateSection.addProperty(
 				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
 				logicClass.getName());
+		templateSection.addProperty(
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				LINK_SERVICE_TASK_NAME_PREFIX);
 		for (int i = 0; i < templatePropertyPairs.length; i += 2) {
 			String name = templatePropertyPairs[i];
 			String value = templatePropertyPairs[i + 1];

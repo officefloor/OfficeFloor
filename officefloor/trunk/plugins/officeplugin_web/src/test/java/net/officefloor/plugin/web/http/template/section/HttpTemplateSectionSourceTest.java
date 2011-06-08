@@ -28,12 +28,11 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource.HttpTemplateClassSectionSource;
 import net.officefloor.plugin.web.http.template.section.TemplateLogic.RowBean;
 
 /**
@@ -49,7 +48,9 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 	public void testSpecification() {
 		SectionLoaderUtil.validateSpecification(
 				HttpTemplateSectionSource.class,
-				HttpTemplateSectionSource.PROPERTY_CLASS_NAME, "Class");
+				HttpTemplateSectionSource.PROPERTY_CLASS_NAME, "Class",
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				"Link service Task name prefix");
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionWork templateWork = expected.addSectionWork("TEMPLATE",
 				HttpTemplateWorkSource.class.getName());
 		SectionWork classWork = expected.addSectionWork("WORK",
-				HttpTemplateClassSectionSource.class.getName());
+				ClassSectionSource.class.getName());
 
 		// Template
 		SectionTask getTemplate = classWork.addSectionTask("getTemplate",
@@ -117,20 +118,19 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		templateName.getTaskObject("OBJECT");
 
 		// Route nextTask link
-		templateWork.addSectionTask("nextTask", "nextTask");
+		templateWork.addSectionTask("LINK_nextTask", "nextTask");
 
 		// Handle nextTask task
-		SectionTask nextTaskMethod = classWork.addSectionTask(
-				"ServiceLink_nextTask", "nextTask");
+		SectionTask nextTaskMethod = classWork.addSectionTask("nextTask",
+				"nextTask");
 		nextTaskMethod.getTaskObject("OBJECT");
 		nextTaskMethod.getTaskObject("ServerHttpConnection");
 
 		// Route submit link
-		templateWork.addSectionTask("submit", "submit");
+		templateWork.addSectionTask("LINK_submit", "submit");
 
 		// Handle submit task
-		SectionTask submitMethod = classWork.addSectionTask(
-				"ServiceLink_submit", "submit");
+		SectionTask submitMethod = classWork.addSectionTask("submit", "submit");
 		submitMethod.getTaskObject("OBJECT");
 		submitMethod.getTaskObject("ServerHttpConnection");
 
@@ -156,7 +156,9 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionLoaderUtil.validateSection(expected,
 				HttpTemplateSectionSource.class, this.getClass(),
 				"Template.ofp", HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-				TemplateLogic.class.getName());
+				TemplateLogic.class.getName(),
+				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
+				"LINK_");
 	}
 
 }

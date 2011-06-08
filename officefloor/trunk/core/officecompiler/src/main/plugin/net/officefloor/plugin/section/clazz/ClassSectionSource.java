@@ -80,7 +80,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 	 * Name of the {@link SectionManagedObject} for the section class.
 	 */
 	public static final String CLASS_OBJECT_NAME = "OBJECT";
-	
+
 	/**
 	 * Flag indicating if sourced.
 	 */
@@ -113,7 +113,7 @@ public class ClassSectionSource extends AbstractSectionSource {
 	protected SectionSourceContext getContext() {
 		return this._context;
 	}
-	
+
 	/**
 	 * {@link SectionTask} instances by name.
 	 */
@@ -513,10 +513,6 @@ public class ClassSectionSource extends AbstractSectionSource {
 		// Obtain the task flow
 		TaskFlow taskFlow = task.getTaskFlow(flowName);
 
-		// Obtain the flow argument name
-		String flowArgumentTypeName = (flowArgumentType == null ? null
-				: flowArgumentType.getName());
-
 		// Determine if section interface (or flow interface)
 		SectionInterface sectionAnnotation = flowInterfaceType
 				.getAnnotation(SectionInterface.class);
@@ -532,20 +528,51 @@ public class ClassSectionSource extends AbstractSectionSource {
 					FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		} else {
-			// Flow interface so attempt to obtain the task internally
-			SectionTask linkTask = this.getTaskByTypeName(flowName);
-			if (linkTask != null) {
-				// Link flow internally
-				this.getDesigner().link(taskFlow, linkTask,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
+			// Link the task flow
+			this.linkTaskFlow(taskFlow, taskType, flowInterfaceType,
+					flowMethod, flowArgumentType);
+		}
+	}
 
-			} else {
-				// Not internal task, so link externally
-				SectionOutput sectionOutput = this.getOrCreateOutput(flowName,
-						flowArgumentTypeName, false);
-				this.getDesigner().link(taskFlow, sectionOutput,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
-			}
+	/**
+	 * Links the {@link TaskFlow}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow}.
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @param flowInterfaceType
+	 *            Interface type specifying the flows.
+	 * @param flowMethod
+	 *            Method on the interface for the flow to be linked.
+	 * @param flowArgumentType
+	 *            {@link TaskFlow} argument type. May be <code>null</code> if no
+	 *            argument.
+	 */
+	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType,
+			Class<?> flowInterfaceType, Method flowMethod,
+			Class<?> flowArgumentType) {
+
+		// Obtain the flow name
+		String flowName = taskFlow.getTaskFlowName();
+
+		// Obtain the flow argument name
+		String flowArgumentTypeName = (flowArgumentType == null ? null
+				: flowArgumentType.getName());
+
+		// Flow interface so attempt to obtain the task internally
+		SectionTask linkTask = this.getTaskByTypeName(flowName);
+		if (linkTask != null) {
+			// Link flow internally
+			this.getDesigner().link(taskFlow, linkTask,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		} else {
+			// Not internal task, so link externally
+			SectionOutput sectionOutput = this.getOrCreateOutput(flowName,
+					flowArgumentTypeName, false);
+			this.getDesigner().link(taskFlow, sectionOutput,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 	}
 

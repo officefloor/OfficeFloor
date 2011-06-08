@@ -73,7 +73,24 @@ public class HttpTemplateRouteTask
 	 * Cache of {@link Work} name and subsequent listing of the
 	 * {@link HttpTemplate} handling {@link Task} names.
 	 */
-	private Map<String, String[]> templateHandlerTasks = new HashMap<String, String[]>();
+	private final Map<String, String[]> templateHandlerTasks = new HashMap<String, String[]>();
+
+	/**
+	 * Prefix for the {@link Task} name to allow isolating the name away from
+	 * other {@link Task} instances.
+	 */
+	private final String taskNamePrefix;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param taskNamePrefix
+	 *            Prefix for the {@link Task} name to allow isolating the name
+	 *            away from other {@link Task} instances.
+	 */
+	public HttpTemplateRouteTask(String taskNamePrefix) {
+		this.taskNamePrefix = taskNamePrefix;
+	}
 
 	/*
 	 * ================ OfficeAwareWorkFactory =======================
@@ -136,6 +153,11 @@ public class HttpTemplateRouteTask
 				// Work and Task name within URL
 				String workName = path.substring(0, workTaskPos);
 				String taskName = path.substring(workTaskPos + "-".length());
+
+				// Prefix task name (if required)
+				if (this.taskNamePrefix != null) {
+					taskName = this.taskNamePrefix + taskName;
+				}
 
 				// Determine if handler task
 				String[] taskNames = this.templateHandlerTasks.get(workName);

@@ -17,12 +17,18 @@
  */
 package net.officefloor.plugin.gwt.web.http.section;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireObject;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSectionExtension;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
@@ -142,8 +148,34 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 	 */
 	private void recordInit(String templateUri, String gwtServiceInterfaces) {
 
+		final AutoWireObject serverGwtRpcConnection = this
+				.createMock(AutoWireObject.class);
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record adding Server GWT RPC Connection
+		this.recordReturn(this.application, this.application
+				.isObjectAvailable(ServerGwtRpcConnection.class), false);
+		this.recordReturn(this.application, this.application.addManagedObject(
+				ServerGwtRpcConnectionManagedObjectSource.class, null,
+				ServerGwtRpcConnection.class, AsyncCallback.class),
+				serverGwtRpcConnection, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect managed object source",
+								expected[0], actual[0]);
+						assertNull("Should not be a wirer", actual[1]);
+						Class<?>[] expectedTypes = (Class<?>[]) expected[2];
+						Class<?>[] actualTypes = (Class<?>[]) actual[2];
+						assertEquals("Incorrect number of types",
+								expectedTypes.length, actualTypes.length);
+						for (int i = 0; i < expectedTypes.length; i++) {
+							assertEquals("Incorrect type " + i,
+									expectedTypes[i], actualTypes[i]);
+						}
+						return true;
+					}
+				});
 
 		// Record configuring a GWT Service
 		this.recordReturn(this.template, this.template.getTemplateUri(),

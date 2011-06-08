@@ -40,11 +40,6 @@ import net.officefloor.plugin.web.http.template.route.HttpTemplateRouteTask.Http
 public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpTemplateRouteTask} to test.
-	 */
-	private final HttpTemplateRouteTask task = new HttpTemplateRouteTask();
-
-	/**
 	 * Mock {@link Office}.
 	 */
 	private final Office office = this.createMock(Office.class);
@@ -68,6 +63,11 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
+	 * {@link Task} name prefix to use for testing.
+	 */
+	private String taskNamePrefix = null;
+
+	/**
 	 * Ensure can route to {@link Task}.
 	 */
 	public void testRoute() throws Throwable {
@@ -76,6 +76,24 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 				new HttpTemplateRequestHandlerDifferentiator());
 		this.record_requestURI("/WORK-TASK.task");
 		this.taskContext.doFlow("WORK", "TASK", null);
+
+		// Test
+		this.doTest();
+	}
+
+	/**
+	 * Ensure can route to {@link Task} that has a {@link Task} name prefix.
+	 */
+	public void testRouteWithTaskNamePrefix() throws Throwable {
+
+		// Use task name prefix
+		this.taskNamePrefix = "PREFIX_";
+
+		// Record
+		this.record_cacheOfficeMetaData("WORK", "TASK",
+				new HttpTemplateRequestHandlerDifferentiator());
+		this.record_requestURI("/WORK-TASK.task");
+		this.taskContext.doFlow("WORK", "PREFIX_TASK", null);
 
 		// Test
 		this.doTest();
@@ -145,11 +163,15 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		// Replay
 		this.replayMockObjects();
 
+		// Create the task
+		HttpTemplateRouteTask task = new HttpTemplateRouteTask(
+				this.taskNamePrefix);
+
 		// Ensure Office aware
-		this.task.setOffice(this.office);
+		task.setOffice(this.office);
 
 		// Route to task
-		this.task.doTask(this.taskContext);
+		task.doTask(this.taskContext);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -179,7 +201,9 @@ public class HttpTemplateRouteTaskTest extends OfficeFrameTestCase {
 		String[] taskNames = new String[taskNameAndDifferentiatorPairs.length / 2];
 		Object[] differentiators = new Object[taskNameAndDifferentiatorPairs.length / 2];
 		for (int i = 0; i < taskNameAndDifferentiatorPairs.length; i += 2) {
-			taskNames[i / 2] = (String) taskNameAndDifferentiatorPairs[i];
+			taskNames[i / 2] = (this.taskNamePrefix == null ? ""
+					: this.taskNamePrefix)
+					+ ((String) taskNameAndDifferentiatorPairs[i]);
 			differentiators[i / 2] = taskNameAndDifferentiatorPairs[i + 1];
 		}
 

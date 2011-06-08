@@ -35,6 +35,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.gwt.service.GwtServiceWorkSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformation;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformationContext;
 import net.officefloor.plugin.gwt.template.tranform.HtmlTemplateTransformer;
@@ -45,6 +46,7 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
@@ -103,6 +105,13 @@ public class GwtHttpTemplateSectionExtension implements
 			throw new IllegalStateException(
 					"Template must have a URI for extending with GWT (Template="
 							+ template.getTemplatePath() + ")");
+		}
+
+		// Configure the Server GWT RPC Connection (only once)
+		if (!(application.isObjectAvailable(ServerGwtRpcConnection.class))) {
+			application.addManagedObject(
+					ServerGwtRpcConnectionManagedObjectSource.class, null,
+					ServerGwtRpcConnection.class, AsyncCallback.class);
 		}
 
 		// Configure this extension

@@ -52,7 +52,7 @@ public class HttpTemplateRouteWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the type
-		HttpTemplateRouteTask taskFactory = new HttpTemplateRouteTask();
+		HttpTemplateRouteTask taskFactory = new HttpTemplateRouteTask(null);
 		WorkTypeBuilder<HttpTemplateRouteTask> work = WorkLoaderUtil
 				.createWorkTypeBuilder(taskFactory);
 		TaskTypeBuilder<HttpTemplateRouteDependencies, HttpTemplateRouteTaskFlows> task = work
