@@ -44,6 +44,11 @@ public class HttpTemplateRouteWorkSource extends
 		AbstractWorkSource<HttpTemplateRouteTask> implements
 		WorkSourceService<HttpTemplateRouteTask, HttpTemplateRouteWorkSource> {
 
+	/**
+	 * Name of property providing the {@link Task} name prefix.
+	 */
+	public static final String PROPERTY_TASK_NAME_PREFIX = "task.name.prefix";
+
 	/*
 	 * ===================== WorkSourceService =========================
 	 */
@@ -72,8 +77,13 @@ public class HttpTemplateRouteWorkSource extends
 			WorkTypeBuilder<HttpTemplateRouteTask> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
+		// Obtain the task name prefix
+		String taskNamePrefix = context.getProperty(PROPERTY_TASK_NAME_PREFIX,
+				null);
+
 		// Create the task
-		HttpTemplateRouteTask taskFactory = new HttpTemplateRouteTask();
+		HttpTemplateRouteTask taskFactory = new HttpTemplateRouteTask(
+				taskNamePrefix);
 
 		// Construct the work
 		workTypeBuilder.setWorkFactory(taskFactory);

@@ -539,6 +539,41 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure the added object is available.
+	 */
+	public void testObjectAvailable() throws Exception {
+
+		// Add the Object
+		this.source.addObject("TEST", String.class);
+
+		// Test
+		this.replayMockObjects();
+		assertTrue("Added type should be available",
+				this.source.isObjectAvailable(String.class));
+		assertFalse("Type not added should not be available",
+				this.source.isObjectAvailable(Integer.class));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure the added {@link ManagedObject} is available.
+	 */
+	public void testManagedObjectAvailable() throws Exception {
+
+		// Add the Managed Object
+		this.source.addManagedObject(ClassManagedObjectSource.class, null,
+				String.class);
+
+		// Test
+		this.replayMockObjects();
+		assertTrue("Added type should be available",
+				this.source.isObjectAvailable(String.class));
+		assertFalse("Type not added should not be available",
+				this.source.isObjectAvailable(Integer.class));
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure able to assign a {@link Team}.
 	 */
 	public void testAssignTeam() throws Exception {

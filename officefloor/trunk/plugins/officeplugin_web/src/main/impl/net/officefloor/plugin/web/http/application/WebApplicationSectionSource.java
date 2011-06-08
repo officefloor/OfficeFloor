@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
@@ -75,6 +76,11 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 	 * {@link HttpTemplateAutoWireSection} to allow linking flow.
 	 */
 	public static final String ROUTE_TO_HTTP_TEMPLATE_OUTPUT_URI_PREFIX = "Template_";
+
+	/**
+	 * Prefix on the {@link Task} name to service links.
+	 */
+	public static final String PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX = "link.service.task.name.prefix";
 
 	/**
 	 * Name of property to indicating if routing is required.
@@ -268,6 +274,10 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		// Add the Link route task
 		SectionWork routeLinkWork = designer.addSectionWork("LINK_ROUTE",
 				HttpTemplateRouteWorkSource.class.getName());
+		routeLinkWork.addProperty(
+				HttpTemplateRouteWorkSource.PROPERTY_TASK_NAME_PREFIX, context
+						.getProperty(PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
+								null));
 		SectionTask routeLinkTask = routeLinkWork.addSectionTask("LINK_ROUTE",
 				"route");
 		linkObject(routeLinkTask,

@@ -31,6 +31,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
@@ -220,6 +221,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				"WOOF/Template.html", Template.class, "example"), template);
 
 		// Record extending with GWT
+		this.recordReturn(this.app,
+				this.app.isObjectAvailable(ServerGwtRpcConnection.class), true);
 		this.recordReturn(template, template.getTemplateUri(), "example");
 		this.recordReturn(template, template
 				.addTemplateExtension(GwtHttpTemplateSectionExtension.class),

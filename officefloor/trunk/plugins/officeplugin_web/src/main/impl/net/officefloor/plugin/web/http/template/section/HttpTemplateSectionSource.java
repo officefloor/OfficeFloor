@@ -24,7 +24,6 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,16 +41,15 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.PrivateSource;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
@@ -71,7 +69,7 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplateSection;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateSectionSource extends AbstractSectionSource {
+public class HttpTemplateSectionSource extends ClassSectionSource {
 
 	/**
 	 * Registers the {@link RawHttpTemplateLoader}.
@@ -103,6 +101,12 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public static final String PROPERTY_CLASS_NAME = ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME;
 
 	/**
+	 * Name of property for the prefix on the {@link HttpTemplateWorkSource}
+	 * link {@link Task} instances.
+	 */
+	public static final String PROPERTY_LINK_TASK_NAME_PREFIX = "link.task.name.prefix";
+
+	/**
 	 * Name of the {@link SectionInput} for rendering this {@link HttpTemplate}.
 	 */
 	public static final String RENDER_TEMPLATE_INPUT_NAME = "renderTemplate";
@@ -114,52 +118,26 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	public static final String ON_COMPLETION_OUTPUT_NAME = "output";
 
 	/**
-	 * Prefix on the {@link Task} name of the class {@link Method} handling the
-	 * link.
+	 * {@link Class} providing the logic for the HTTP template - also the
+	 * {@link Class} for the {@link ClassSectionSource}.
 	 */
-	private static final String LINK_METHOD_TASK_NAME_PREFIX = "ServiceLink_";
+	private Class<?> sectionClass = null;
 
 	/**
-	 * {@link TemplateBeanTask} instances by the template bean
-	 * {@link SectionTask} name.
+	 * {@link SectionManagedObject} for the section object.
 	 */
-	private final Map<String, TemplateBeanTask> templateBeanTasksByName = new HashMap<String, TemplateBeanTask>();
+	private SectionManagedObject sectionClassManagedObject = null;
 
 	/**
-	 * {@link Boolean} by template {@link SectionTask} name indicating if
-	 * requires bean.
+	 * {@link TemplateBeanTask} for the section {@link Class} method by its
+	 * name.
 	 */
-	private final Map<String, Boolean> isRequireBeanTemplates = new HashMap<String, Boolean>();
+	private final Map<String, TemplateClassTask> sectionClassMethodTasksByName = new HashMap<String, TemplateClassTask>();
 
 	/**
-	 * {@link Task} link names.
+	 * Listing of the {@link TemplateFlowLink} instances.
 	 */
-	private final Set<String> taskLinkNames = new HashSet<String>();
-
-	/**
-	 * Indicates if the {@link SectionTask} by the name is to provide a template
-	 * bean.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link SectionTask}.
-	 * @return <code>true</code> if is a template bean {@link SectionTask}.
-	 */
-	private boolean isTemplateBeanTask(String taskName) {
-
-		// Determine if template bean method
-		if (taskName.startsWith("get")) {
-			String templateName = taskName.substring("get".length());
-			Boolean isRequireBean = this.isRequireBeanTemplates
-					.get(templateName.toUpperCase());
-			if (isRequireBean != null) {
-				// Is template bean method if require bean
-				return isRequireBean.booleanValue();
-			}
-		}
-
-		// As here, not a template bean task
-		return false;
-	}
+	private final List<TemplateFlowLink> flowLinks = new LinkedList<TemplateFlowLink>();
 
 	/*
 	 * ===================== SectionSource =========================
@@ -168,6 +146,8 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_CLASS_NAME, "Class");
+		context.addProperty(PROPERTY_LINK_TASK_NAME_PREFIX,
+				"Link service Task name prefix");
 	}
 
 	@Override
@@ -177,10 +157,13 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		// Obtain the class loader
 		ClassLoader classLoader = context.getClassLoader();
 
-		// Obtain the template location
-		String templateLocation = context.getSectionLocation();
+		// Load the section class work and tasks
+		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
+		this.sectionClass = classLoader.loadClass(sectionClassName);
+		super.sourceSection(designer, context);
 
 		// Obtain the HTTP template content
+		String templateLocation = context.getSectionLocation();
 		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(
 				context);
 		templateProperties
@@ -195,19 +178,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		}
 		String templateContent = templateContentBuffer.toString();
 
-		// Obtain the section class
-		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
-		Class<?> sectionClass = classLoader.loadClass(sectionClassName);
-
-		// Create the HTTP Template Class Section Source
-		HttpTemplateClassSectionSource classSource = new HttpTemplateClassSectionSource(
-				sectionClass, designer, context);
-
-		// Obtain the Section Managed Object
-		SectionManagedObject sectionClassObject = classSource
-				.getClassManagedObject();
-
-		// Extend the template as necessary
+		// Extend the template content as necessary
 		final String EXTENSION_PREFIX = "extension.";
 		int extensionIndex = 1;
 		String extensionClassName = context.getProperty(EXTENSION_PREFIX
@@ -222,8 +193,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex
 					+ ".";
 			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
-					templateContent, sectionClass, extensionPropertyPrefix,
-					designer, context, sectionClassObject, classSource);
+					templateContent, extensionPropertyPrefix);
 			extension.extendTemplate(extensionContext);
 
 			// Override template details
@@ -239,20 +209,6 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		// Obtain the HTTP template
 		HttpTemplate template = HttpTemplateWorkSource
 				.getHttpTemplate(new StringReader(templateContent));
-
-		// Obtain the listing of task link names
-		String[] linkNames = HttpTemplateWorkSource
-				.getHttpTemplateLinkNames(template);
-		this.taskLinkNames.addAll(Arrays.asList(linkNames));
-
-		// Register the HTTP template sections requiring a bean
-		for (HttpTemplateSection templateSection : template.getSections()) {
-			String templateSectionName = templateSection.getSectionName();
-			boolean isRequireBean = HttpTemplateWorkSource
-					.isHttpTemplateSectionRequireBean(templateSection);
-			this.isRequireBeanTemplates.put(templateSectionName.toUpperCase(),
-					new Boolean(isRequireBean));
-		}
 
 		// Create the input to the section
 		SectionInput sectionInput = designer.addSectionInput(
@@ -282,18 +238,13 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 			// Register the template task
 			templateTasks.put(templateTaskName, templateTask);
-
-			// Make template task available to logic flow
-			classSource.registerTaskByTypeName(templateTaskName, templateTask);
 		}
-
-		// Load the section class (with ability to link in template tasks)
-		classSource.sourceSection(designer, context);
 
 		// Keep track of template bean task keys
 		Set<String> templateBeanTaskKeys = new HashSet<String>();
 
 		// Load the HTTP template tasks
+		Map<String, SectionTask> contentTasksByName = new HashMap<String, SectionTask>();
 		SectionTask firstTemplateTask = null;
 		SectionTask previousTemplateTask = null;
 		for (HttpTemplateSection templateSection : template.getSections()) {
@@ -302,12 +253,16 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			String templateTaskName = templateSection.getSectionName();
 			SectionTask templateTask = templateTasks.get(templateTaskName);
 
+			// Keep track of task for later flow linking
+			contentTasksByName
+					.put(templateTaskName.toUpperCase(), templateTask);
+
 			// Determine if template section requires a bean
 			boolean isRequireBean = HttpTemplateWorkSource
 					.isHttpTemplateSectionRequireBean(templateSection);
 
 			// Link the Server HTTP Connection dependency
-			SectionObject connectionObject = classSource
+			SectionObject connectionObject = this
 					.getOrCreateObject(ServerHttpConnection.class.getName());
 			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
 					connectionObject);
@@ -318,7 +273,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			}
 
 			// Link the I/O escalation
-			SectionOutput ioEscalation = classSource.getOrCreateOutput(
+			SectionOutput ioEscalation = this.getOrCreateOutput(
 					IOException.class.getName(), IOException.class.getName(),
 					true);
 			designer.link(
@@ -328,7 +283,7 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			// Obtain the bean task method
 			String beanTaskName = "get" + templateTaskName;
 			String beanTaskKey = beanTaskName.toUpperCase();
-			TemplateBeanTask beanTask = this.templateBeanTasksByName
+			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
 					.get(beanTaskKey);
 
 			// Keep track of bean task keys
@@ -445,18 +400,46 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			previousTemplateTask = templateTask;
 		}
 
+		// Link flows to template content tasks
+		for (TemplateFlowLink flowLink : this.flowLinks) {
+
+			// Obtain the task flow and its name
+			TaskFlow taskFlow = flowLink.taskFlow;
+			String flowName = taskFlow.getTaskFlowName();
+
+			// Determine if linking to content task
+			SectionTask contentTask = contentTasksByName.get(flowName
+					.toUpperCase());
+			if (contentTask != null) {
+				// Link to content task
+				designer.link(taskFlow, contentTask,
+						FlowInstigationStrategyEnum.SEQUENTIAL);
+
+			} else {
+				// Not linked to content task, so use default behaviour
+				super.linkTaskFlow(flowLink.taskFlow, flowLink.taskType,
+						flowLink.flowInterfaceType, flowLink.flowMethod,
+						flowLink.flowArgumentType);
+			}
+		}
+
+		// Obtain the link task name prefix
+		String linkTaskNamePrefix = context
+				.getProperty(PROPERTY_LINK_TASK_NAME_PREFIX);
+
 		// Register the #{link} tasks
+		String[] linkNames = HttpTemplateWorkSource
+				.getHttpTemplateLinkNames(template);
 		for (String linkTaskName : linkNames) {
 
 			// Add the task for handling the link
-			SectionTask linkTask = templateWork.addSectionTask(linkTaskName,
-					linkTaskName);
+			String linkServiceTaskName = linkTaskNamePrefix + linkTaskName;
+			SectionTask linkTask = templateWork.addSectionTask(
+					linkServiceTaskName, linkTaskName);
 
 			// Obtain the link method task
-			String linkMethodTaskName = LINK_METHOD_TASK_NAME_PREFIX
-					+ linkTaskName;
-			String linkMethodTaskKey = linkMethodTaskName.toUpperCase();
-			TemplateBeanTask methodTask = this.templateBeanTasksByName
+			String linkMethodTaskKey = linkTaskName.toUpperCase();
+			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
 					.get(linkMethodTaskKey);
 			if (methodTask == null) {
 				designer.addIssue("No backing method for link '" + linkTaskName
@@ -469,37 +452,46 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		}
 
 		// Link bean tasks to re-render template by default
-		List<String> beanTaskNames = new ArrayList<String>(
-				this.templateBeanTasksByName.keySet());
-		Collections.sort(beanTaskNames);
-		for (String beanTaskKey : this.templateBeanTasksByName.keySet()) {
+		List<String> sectionClassMethodTaskNames = new ArrayList<String>(
+				this.sectionClassMethodTasksByName.keySet());
+		Collections.sort(sectionClassMethodTaskNames);
+		for (String beanTaskKey : sectionClassMethodTaskNames) {
 
-			// Ignore template bean methods
-			if (templateBeanTaskKeys.contains(beanTaskKey)) {
-				continue;
-			}
-
-			// Obtain the bean method
-			TemplateBeanTask methodTask = this.templateBeanTasksByName
+			// Obtain the class method
+			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
 					.get(beanTaskKey);
+			Method method = methodTask.method;
 
-			// Determine if method already indicating next task
-			if (!(methodTask.method.isAnnotationPresent(NextTask.class))) {
-				// Next task not linked, so link to render template
-				designer.link(methodTask.task, firstTemplateTask);
+			// Determine if method providing bean to template
+			if (templateBeanTaskKeys.contains(beanTaskKey)) {
+				// Method providing bean, so ensure no next task
+				if (method.isAnnotationPresent(NextTask.class)) {
+					designer.addIssue(
+							"Template bean method '" + method.getName()
+									+ "' must not be annotated with "
+									+ NextTask.class.getSimpleName(),
+							AssetType.TASK, beanTaskKey);
+				}
+
+			} else {
+				// Determine if method already indicating next task
+				if (!(methodTask.method.isAnnotationPresent(NextTask.class))) {
+					// Next task not linked, so link to render template
+					designer.link(methodTask.task, firstTemplateTask);
+				}
 			}
 		}
 
 		// Link last template task to output
-		SectionOutput output = classSource.getOrCreateOutput(
+		SectionOutput output = this.getOrCreateOutput(
 				ON_COMPLETION_OUTPUT_NAME, null, false);
 		designer.link(previousTemplateTask, output);
 	}
 
 	/**
-	 * {@link SectionTask} for the template bean.
+	 * {@link SectionTask} for the template class.
 	 */
-	private static class TemplateBeanTask {
+	private static class TemplateClassTask {
 
 		/**
 		 * {@link SectionTask}.
@@ -535,12 +527,68 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		 *            Type of parameter for {@link SectionTask}.
 		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateBeanTask(SectionTask task, TaskType<?, ?, ?> type,
+		public TemplateClassTask(SectionTask task, TaskType<?, ?, ?> type,
 				Method method, Class<?> parameter) {
 			this.task = task;
 			this.type = type;
 			this.method = method;
 			this.parameter = parameter;
+		}
+	}
+
+	/**
+	 * Template {@link TaskFlow} instances to be linked.
+	 */
+	private static class TemplateFlowLink {
+
+		/**
+		 * {@link TaskFlow} to be linked.
+		 */
+		public final TaskFlow taskFlow;
+
+		/**
+		 * {@link TaskType} of the {@link Task} for the {@link TaskFlow}.
+		 */
+		public final TaskType<?, ?, ?> taskType;
+
+		/**
+		 * Flow interface type.
+		 */
+		public final Class<?> flowInterfaceType;
+
+		/**
+		 * Flow interface method.
+		 */
+		public final Method flowMethod;
+
+		/**
+		 * Flow interface method argument type.
+		 */
+		public final Class<?> flowArgumentType;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param taskFlow
+		 *            {@link TaskFlow} to be linked.
+		 * @param taskType
+		 *            {@link TaskType} of the {@link Task} for the
+		 *            {@link TaskFlow}.
+		 * @param flowInterfaceType
+		 *            Flow interface type.
+		 * @param flowMethod
+		 *            Flow interface method.
+		 * @param flowArgumentType
+		 *            Flow interface method argument type.
+		 */
+		public TemplateFlowLink(TaskFlow taskFlow, TaskType<?, ?, ?> taskType,
+				Class<?> flowInterfaceType, Method flowMethod,
+				Class<?> flowArgumentType) {
+			this.taskFlow = taskFlow;
+			this.taskType = taskType;
+			this.flowInterfaceType = flowInterfaceType;
+			this.flowMethod = flowMethod;
+			this.flowArgumentType = flowArgumentType;
 		}
 	}
 
@@ -556,43 +604,15 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		private String templateContent;
 
 		/**
-		 * {@link HttpTemplate} logic class.
-		 */
-		private final Class<?> templateClass;
-
-		/**
 		 * Prefix for a property of this extension.
 		 */
 		private final String extensionPropertyPrefix;
-
-		/**
-		 * {@link SectionDesigner}.
-		 */
-		private final SectionDesigner sectionDesigner;
-
-		/**
-		 * {@link SectionSourceContext}.
-		 */
-		private final SectionSourceContext sectionSourceContext;
-
-		/**
-		 * {@link SectionManagedObject} for the template logic object.
-		 */
-		private final SectionManagedObject templateLogicObject;
-
-		/**
-		 * {@link HttpTemplateClassSectionSource}.
-		 */
-		private final HttpTemplateClassSectionSource classSectionSource;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param templateContent
 		 *            Raw {@link HttpTemplate} content.
-		 * @param templateClass
-		 *            {@link HttpTemplate} logic class. May be <code>null</code>
-		 *            if not overridden.
 		 * @param extensionPropertyPrefix
 		 *            Prefix for a property of this extension.
 		 * @param sectionDesigner
@@ -602,22 +622,11 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		 * @param templateLogicObject
 		 *            {@link SectionManagedObject} for the template logic
 		 *            object.
-		 * @param classSectionSource
-		 *            {@link HttpTemplateClassSectionSource}.
 		 */
 		public HttpTemplateSectionExtensionContextImpl(String templateContent,
-				Class<?> templateClass, String extensionPropertyPrefix,
-				SectionDesigner sectionDesigner,
-				SectionSourceContext sectionSourceContext,
-				SectionManagedObject templateLogicObject,
-				HttpTemplateClassSectionSource classSectionSource) {
+				String extensionPropertyPrefix) {
 			this.templateContent = templateContent;
-			this.templateClass = templateClass;
 			this.extensionPropertyPrefix = extensionPropertyPrefix;
-			this.sectionDesigner = sectionDesigner;
-			this.sectionSourceContext = sectionSourceContext;
-			this.templateLogicObject = templateLogicObject;
-			this.classSectionSource = classSectionSource;
 		}
 
 		/*
@@ -636,14 +645,14 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 		@Override
 		public Class<?> getTemplateClass() {
-			return this.templateClass;
+			return HttpTemplateSectionSource.this.sectionClass;
 		}
 
 		@Override
 		public String[] getPropertyNames() {
 
 			// Obtain all the property names
-			String[] contextNames = this.sectionSourceContext
+			String[] contextNames = HttpTemplateSectionSource.this.getContext()
 					.getPropertyNames();
 
 			// Filter to just this extension's properties
@@ -664,14 +673,14 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 		@Override
 		public String getProperty(String name) throws UnknownPropertyError {
 			// Obtain the extension property value
-			return this.sectionSourceContext
-					.getProperty(this.extensionPropertyPrefix + name);
+			return HttpTemplateSectionSource.this.getContext().getProperty(
+					this.extensionPropertyPrefix + name);
 		}
 
 		@Override
 		public String getProperty(String name, String defaultValue) {
 			// Obtain the extension property value
-			return this.sectionSourceContext.getProperty(
+			return HttpTemplateSectionSource.this.getContext().getProperty(
 					this.extensionPropertyPrefix + name, defaultValue);
 		}
 
@@ -682,14 +691,14 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 			Properties properties = new Properties();
 
 			// Filter to just this extension's properties
-			String[] contextNames = this.sectionSourceContext
+			String[] contextNames = HttpTemplateSectionSource.this.getContext()
 					.getPropertyNames();
 			for (String contextName : contextNames) {
 				if (contextName.startsWith(this.extensionPropertyPrefix)) {
 					// Add the extension property name
 					String extensionName = contextName
 							.substring(this.extensionPropertyPrefix.length());
-					String value = this.sectionSourceContext
+					String value = HttpTemplateSectionSource.this.getContext()
 							.getProperty(contextName);
 					properties.setProperty(extensionName, value);
 				}
@@ -701,269 +710,171 @@ public class HttpTemplateSectionSource extends AbstractSectionSource {
 
 		@Override
 		public SectionSourceContext getSectionSourceContext() {
-			return this.sectionSourceContext;
+			return HttpTemplateSectionSource.this.getContext();
 		}
 
 		@Override
 		public SectionDesigner getSectionDesigner() {
-			return this.sectionDesigner;
+			return HttpTemplateSectionSource.this.getDesigner();
 		}
 
 		@Override
 		public SectionManagedObject getTemplateLogicObject() {
-			return this.templateLogicObject;
+			return HttpTemplateSectionSource.this.sectionClassManagedObject;
 		}
 
 		@Override
 		public SectionTask getTask(String taskName) {
-			return this.classSectionSource.getTaskByName(taskName);
+			return HttpTemplateSectionSource.this.getTaskByName(taskName);
 		}
 
 		@Override
 		public SectionObject getOrCreateSectionObject(String typeName) {
-			return this.classSectionSource.getOrCreateObject(typeName);
+			return HttpTemplateSectionSource.this.getOrCreateObject(typeName);
 		}
 
 		@Override
 		public SectionOutput getOrCreateSectionOutput(String name,
 				String argumentType, boolean isEscalationOnly) {
-			return this.classSectionSource.getOrCreateOutput(name,
+			return HttpTemplateSectionSource.this.getOrCreateOutput(name,
 					argumentType, isEscalationOnly);
 		}
 	}
 
 	/**
-	 * {@link ClassSectionSource} specific to the HTTP template.
+	 * Determine if the section class is stateful - annotated with
+	 * {@link HttpSessionStateful}.
+	 * 
+	 * @param sectionClass
+	 *            Section class.
+	 * @return <code>true</code> if stateful.
 	 */
-	@PrivateSource
-	public class HttpTemplateClassSectionSource extends ClassSectionSource {
+	private boolean isHttpSessionStateful(Class<?> sectionClass) {
 
-		/**
-		 * Section class.
-		 */
-		private final Class<?> sectionClass;
+		// Determine if stateful
+		boolean isStateful = sectionClass
+				.isAnnotationPresent(HttpSessionStateful.class);
 
-		/**
-		 * {@link SectionDesigner}.
-		 */
-		private final SectionDesigner designer;
+		// Return indicating if stateful
+		return isStateful;
+	}
 
-		/**
-		 * {@link SectionSourceContext}.
-		 */
-		private final SectionSourceContext sourceContext;
+	/*
+	 * =================== ClassSectionSource ==========================
+	 */
 
-		/**
-		 * {@link SectionManagedObject} for the section object.
-		 */
-		private SectionManagedObject sectionClassManagedObject = null;
+	@Override
+	protected String getSectionClassName() {
+		return this.sectionClass.getName();
+	}
 
-		/**
-		 * Initiate.
-		 * 
-		 * @param sectionClass
-		 *            Section class.
-		 * @param designer
-		 *            {@link SectionDesigner}.
-		 * @param sourceContext
-		 *            {@link SectionSourceContext}.
-		 */
-		public HttpTemplateClassSectionSource(Class<?> sectionClass,
-				SectionDesigner designer, SectionSourceContext sourceContext) {
-			this.sectionClass = sectionClass;
-			this.designer = designer;
-			this.sourceContext = sourceContext;
+	@Override
+	protected Class<?> getSectionClass(String sectionClassName)
+			throws Exception {
+		return this.sectionClass;
+	}
+
+	@Override
+	protected SectionManagedObject createClassManagedObject(String objectName,
+			Class<?> sectionClass) {
+
+		// Determine if already loaded the Section Managed Object
+		if (this.sectionClassManagedObject != null) {
+			return this.sectionClassManagedObject; // instance
 		}
 
-		/**
-		 * Obtains the {@link SectionManagedObject} for the section class.
-		 * 
-		 * @return {@link SectionManagedObject} for the section class.
-		 * @throws Exception
-		 *             If fails to obtain the {@link SectionManagedObject}.
-		 */
-		public SectionManagedObject getClassManagedObject() throws Exception {
-			return this.createClassManagedObject(CLASS_OBJECT_NAME,
-					this.getSectionClass(this.getSectionClassName()));
-		}
+		// Determine if stateful
+		boolean isStateful = this.isHttpSessionStateful(sectionClass);
 
-		/**
-		 * Determine if the section class is stateful - annotated with
-		 * {@link HttpSessionStateful}.
-		 * 
-		 * @param sectionClass
-		 *            Section class.
-		 * @return <code>true</code> if stateful.
-		 */
-		private boolean isHttpSessionStateful(Class<?> sectionClass) {
+		// Default behaviour if not stateful
+		if (!isStateful) {
+			// Defer to default behaviour
+			this.sectionClassManagedObject = super.createClassManagedObject(
+					objectName, sectionClass);
 
-			// Determine if stateful
-			boolean isStateful = sectionClass
-					.isAnnotationPresent(HttpSessionStateful.class);
-
-			// Return indicating if stateful
-			return isStateful;
-		}
-
-		/*
-		 * =================== ClassSectionSource ==========================
-		 */
-
-		@Override
-		protected SectionDesigner getDesigner() {
-			return this.designer;
-		}
-
-		@Override
-		protected SectionSourceContext getContext() {
-			return this.sourceContext;
-		}
-
-		@Override
-		protected String getSectionClassName() {
-			return this.sectionClass.getName();
-		}
-
-		@Override
-		protected Class<?> getSectionClass(String sectionClassName)
-				throws Exception {
-			return this.sectionClass;
-		}
-
-		@Override
-		protected SectionManagedObject createClassManagedObject(
-				String objectName, Class<?> sectionClass) {
-
-			// Determine if already loaded the Section Managed Object
-			if (this.sectionClassManagedObject != null) {
-				return this.sectionClassManagedObject; // instance
+		} else {
+			// As stateful, the class must be serialisable
+			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
+				this.getDesigner().addIssue(
+						"Template logic class " + sectionClass.getName()
+								+ " is annotated with "
+								+ HttpSessionStateful.class.getSimpleName()
+								+ " but is not "
+								+ Serializable.class.getSimpleName(),
+						AssetType.MANAGED_OBJECT, objectName);
 			}
 
-			// Determine if stateful
-			boolean isStateful = this.isHttpSessionStateful(sectionClass);
+			// Create the managed object for the stateful template logic
+			SectionManagedObjectSource managedObjectSource = this
+					.getDesigner()
+					.addSectionManagedObjectSource(objectName,
+							HttpSessionClassManagedObjectSource.class.getName());
+			managedObjectSource.addProperty(
+					HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
+					sectionClass.getName());
 
-			// Default behaviour if not stateful
-			if (!isStateful) {
-				// Defer to default behaviour
-				this.sectionClassManagedObject = super
-						.createClassManagedObject(objectName, sectionClass);
+			// Create the managed object
+			this.sectionClassManagedObject = managedObjectSource
+					.addSectionManagedObject(objectName,
+							ManagedObjectScope.PROCESS);
+		}
 
-			} else {
-				// As stateful, the class must be serialisable
-				if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-					this.getDesigner().addIssue(
-							"Template logic class " + sectionClass.getName()
+		// Return the managed object
+		return this.sectionClassManagedObject;
+	}
+
+	@Override
+	protected DependencyMetaData[] extractClassManagedObjectDependencies(
+			String objectName, Class<?> sectionClass) throws Exception {
+
+		// Extract the dependency meta-data for default behaviour
+		DependencyMetaData[] metaData = super
+				.extractClassManagedObjectDependencies(objectName, sectionClass);
+
+		// Determine if stateful
+		boolean isStateful = this.isHttpSessionStateful(sectionClass);
+
+		// If not stateful, return meta-data for default behaviour
+		if (!isStateful) {
+			return metaData;
+		}
+
+		// As stateful, must not have any dependencies into object
+		if (metaData.length > 0) {
+			this.getDesigner()
+					.addIssue(
+							"Template logic class "
+									+ sectionClass.getName()
 									+ " is annotated with "
 									+ HttpSessionStateful.class.getSimpleName()
-									+ " but is not "
-									+ Serializable.class.getSimpleName(),
+									+ " and therefore can not have dependencies injected into the object (only its methods)",
 							AssetType.MANAGED_OBJECT, objectName);
-				}
-
-				// Create the managed object for the stateful template logic
-				SectionManagedObjectSource managedObjectSource = this
-						.getDesigner().addSectionManagedObjectSource(
-								objectName,
-								HttpSessionClassManagedObjectSource.class
-										.getName());
-				managedObjectSource
-						.addProperty(
-								HttpSessionClassManagedObjectSource.PROPERTY_CLASS_NAME,
-								sectionClass.getName());
-
-				// Create the managed object
-				this.sectionClassManagedObject = managedObjectSource
-						.addSectionManagedObject(objectName,
-								ManagedObjectScope.PROCESS);
-			}
-
-			// Return the managed object
-			return this.sectionClassManagedObject;
 		}
 
-		@Override
-		protected DependencyMetaData[] extractClassManagedObjectDependencies(
-				String objectName, Class<?> sectionClass) throws Exception {
+		// Return the dependency meta-data for stateful template logic
+		return new DependencyMetaData[] { new StatefulDependencyMetaData() };
+	}
 
-			// Extract the dependency meta-data for default behaviour
-			DependencyMetaData[] metaData = super
-					.extractClassManagedObjectDependencies(objectName,
-							sectionClass);
+	@Override
+	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
+			Method method, Class<?> parameterType) {
 
-			// Determine if stateful
-			boolean isStateful = this.isHttpSessionStateful(sectionClass);
+		// Override to not provide input for task
 
-			// If not stateful, return meta-data for default behaviour
-			if (!isStateful) {
-				return metaData;
-			}
+		// Keep track of the tasks to allow linking by case-insensitive names
+		String taskKey = task.getSectionTaskName().toUpperCase();
+		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(
+				task, taskType, method, parameterType));
+	}
 
-			// As stateful, must not have any dependencies into object
-			if (metaData.length > 0) {
-				this.getDesigner()
-						.addIssue(
-								"Template logic class "
-										+ sectionClass.getName()
-										+ " is annotated with "
-										+ HttpSessionStateful.class
-												.getSimpleName()
-										+ " and therefore can not have dependencies injected into the object (only its methods)",
-								AssetType.MANAGED_OBJECT, objectName);
-			}
-
-			// Return the dependency meta-data for stateful template logic
-			return new DependencyMetaData[] { new StatefulDependencyMetaData() };
-		}
-
-		@Override
-		protected String getTaskName(TaskType<?, ?, ?> taskType) {
-
-			// Obtain the task type name
-			String taskTypeName = taskType.getTaskName();
-
-			// Determine if backing method to link task
-			boolean isLinkMethod = HttpTemplateSectionSource.this.taskLinkNames
-					.contains(taskTypeName);
-
-			// Return prefix on link method task
-			return (isLinkMethod ? LINK_METHOD_TASK_NAME_PREFIX + taskTypeName
-					: taskTypeName);
-		}
-
-		@Override
-		protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
-				Method method, Class<?> parameterType) {
-
-			// Determine name of task
-			String taskName = task.getSectionTaskName();
-
-			// Register the template bean task (case insensitive)
-			HttpTemplateSectionSource.this.templateBeanTasksByName.put(taskName
-					.toUpperCase(), new TemplateBeanTask(task, taskType,
-					method, parameterType));
-		}
-
-		@Override
-		protected void linkNextTask(SectionTask task,
-				TaskType<?, ?, ?> taskType, Method taskMethod,
-				Class<?> argumentType, NextTask nextTaskAnnotation) {
-
-			// Determine if template bean task
-			String taskName = taskType.getTaskName();
-			if (HttpTemplateSectionSource.this.isTemplateBeanTask(taskName)) {
-				// Can not have next task annotation for template bean task
-				this.getDesigner().addIssue(
-						"Template bean method '" + taskName
-								+ "' must not be annotated with "
-								+ NextTask.class.getSimpleName(),
-						AssetType.TASK, taskName);
-				return; // do not link next task
-			}
-
-			// Not template bean task, so link next task
-			super.linkNextTask(task, taskType, taskMethod, argumentType,
-					nextTaskAnnotation);
-		}
+	@Override
+	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType,
+			Class<?> flowInterfaceType, Method flowMethod,
+			Class<?> flowArgumentType) {
+		// At this stage, the template content tasks are not available.
+		// Therefore just keep track of flows for later linking.
+		this.flowLinks.add(new TemplateFlowLink(taskFlow, taskType,
+				flowInterfaceType, flowMethod, flowArgumentType));
 	}
 
 }

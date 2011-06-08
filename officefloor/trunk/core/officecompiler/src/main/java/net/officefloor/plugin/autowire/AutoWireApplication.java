@@ -159,6 +159,17 @@ public interface AutoWireApplication {
 			Class<?>... objectTypes);
 
 	/**
+	 * Indicates if the {@link AutoWireObject} is already configured for the
+	 * type.
+	 * 
+	 * @param objectType
+	 *            Type of object to determine if available (configured).
+	 * @return <code>true</code> if an {@link AutoWireObject} has been
+	 *         configured for the type.
+	 */
+	boolean isObjectAvailable(Class<?> objectType);
+
+	/**
 	 * Assigns a {@link Team} responsible for {@link Task} dependent on the
 	 * specified object types.
 	 * 

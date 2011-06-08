@@ -229,6 +229,23 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public boolean isObjectAvailable(Class<?> objectType) {
+
+		// Determine if the object type is available
+		for (AutoWireContext objectContext : this.objectContexts) {
+			for (Class<?> availableType : objectContext.autoWireObject
+					.getObjectTypes()) {
+				if (objectType.equals(availableType)) {
+					return true; // object type is available
+				}
+			}
+		}
+
+		// As here, object type not available
+		return false;
+	}
+
+	@Override
 	public <T extends TeamSource> AutoWireTeam assignTeam(
 			Class<T> teamSourceClass, Class<?>... objectTypes) {
 
