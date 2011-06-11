@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -25,8 +28,11 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.csv.InputFactory;
+import net.officefloor.eclipse.common.dialog.input.csv.ListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
@@ -97,6 +103,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private String gwtEntryPointClassName;
 
 	/**
+	 * GWT Service Async Interfaces.
+	 */
+	private String[] gwtServiceAsyncInterfaces;
+
+	/**
 	 * {@link HttpTemplateInstance}.
 	 */
 	private HttpTemplateInstance instance = null;
@@ -151,7 +162,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	public void createControl(Composite parent) {
 
 		// Initiate the page
-		Composite page = new Composite(parent, SWT.NONE);
+		final Composite page = new Composite(parent, SWT.NONE);
 		page.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		page.setLayout(new GridLayout(2, false));
 
@@ -234,6 +245,33 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		gwtEntryPoint.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
+		// Provide means to specify GWT Service Async Interfaces
+		new Label(page, SWT.NONE).setText("GWT Service Async Interfaces: ");
+		InputHandler<String[]> gwtAsyncServices = new InputHandler<String[]>(
+				page, new ListInput<Composite>(String.class, page,
+						new InputFactory<Composite>() {
+							@Override
+							public Input<Composite> createInput() {
+								return new ClasspathClassInput(
+										HttpTemplateWizardPage.this.project,
+										"", page.getShell());
+							}
+						}), new InputListener() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Specify GWT Async Interfaces and indicate changed
+						HttpTemplateWizardPage.this.gwtServiceAsyncInterfaces = (String[]) value;
+						HttpTemplateWizardPage.this.handleChange();
+					}
+
+					@Override
+					public void notifyValueInvalid(String message) {
+						HttpTemplateWizardPage.this.setErrorMessage(message);
+					}
+				});
+		gwtAsyncServices.getControl().setLayoutData(
+				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
 		// Indicate initial state
 		this.handleChange();
 
@@ -299,9 +337,31 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String gwtEntryPoint = (EclipseUtil
 				.isBlank(this.gwtEntryPointClassName) ? null
 				: this.gwtEntryPointClassName);
-		if ((this.gwtEntryPointClassName != null) && (uriValue == null)) {
+		if ((gwtEntryPoint != null) && (uriValue == null)) {
 			// Must have URI if using GWT
 			this.setErrorMessage("Must provide URI if using GWT");
+			this.setPageComplete(false);
+			return;
+		}
+
+		// Obtain the GWT Service Async Interfaces
+		List<String> gwtAsyncList = new LinkedList<String>();
+		if (this.gwtServiceAsyncInterfaces != null) {
+			for (Object asyncInterface : this.gwtServiceAsyncInterfaces) {
+				String asyncInterfaceName = (asyncInterface == null ? null
+						: asyncInterface.toString());
+				if (!(EclipseUtil.isBlank(asyncInterfaceName))) {
+					gwtAsyncList.add(asyncInterfaceName);
+				}
+			}
+		}
+		String[] gwtAsyncInterfaces = gwtAsyncList
+				.toArray(new String[gwtAsyncList.size()]);
+
+		// Ensure have GWT Entry Point Class if have GWT Services
+		if ((gwtAsyncInterfaces.length > 0) && (gwtEntryPoint == null)) {
+			// Must have GWT Entry Point Class
+			this.setErrorMessage("Must GWT Entry Point if using GWT Services");
 			this.setPageComplete(false);
 			return;
 		}
