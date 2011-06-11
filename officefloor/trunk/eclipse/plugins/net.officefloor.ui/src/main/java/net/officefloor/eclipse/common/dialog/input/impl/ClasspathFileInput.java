@@ -21,6 +21,7 @@ package net.officefloor.eclipse.common.dialog.input.impl;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.common.dialog.layout.NoMarginGridLayout;
 import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.eclipse.util.LogUtil;
 
@@ -40,7 +41,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -128,7 +128,7 @@ public class ClasspathFileInput implements Input<Composite> {
 
 		// Create composite to contain text and completion button
 		final Composite container = new Composite(context.getParent(), SWT.NONE);
-		container.setLayout(new GridLayout(2, false));
+		container.setLayout(NoMarginGridLayout.create(2, false));
 
 		// Create text box to contain file name
 		this.fileName = new Text(container, SWT.BORDER);
