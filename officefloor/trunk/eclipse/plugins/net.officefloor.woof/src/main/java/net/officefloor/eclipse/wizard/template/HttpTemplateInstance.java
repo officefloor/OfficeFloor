@@ -53,6 +53,11 @@ public class HttpTemplateInstance {
 	private final String gwtEntryPointClassName;
 
 	/**
+	 * GWT Service Async Interface names.
+	 */
+	private final String[] gwtServerAsyncInterfaceNames;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templatePath
@@ -65,14 +70,18 @@ public class HttpTemplateInstance {
 	 *            URI.
 	 * @param gwtEntryPointClassName
 	 *            GWT EntryPoint class name.
+	 * @param gwtServerAsyncInterfaceNames
+	 *            GWT Service Async Interface names.
 	 */
 	public HttpTemplateInstance(String templatePath, String logicClassName,
-			SectionType sectionType, String uri, String gwtEntryPointClassName) {
+			SectionType sectionType, String uri, String gwtEntryPointClassName,
+			String[] gwtServerAsyncInterfaceNames) {
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
 		this.uri = uri;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
+		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
 	}
 
 	/**
@@ -118,6 +127,15 @@ public class HttpTemplateInstance {
 	 */
 	public String getGwtEntryPointClassName() {
 		return this.gwtEntryPointClassName;
+	}
+
+	/**
+	 * Obtains the GWT Service Async Interface names.
+	 * 
+	 * @return GWT Service Async Interface names.
+	 */
+	public String[] getGwtServerAsyncInterfaceNames() {
+		return this.gwtServerAsyncInterfaceNames;
 	}
 
 }

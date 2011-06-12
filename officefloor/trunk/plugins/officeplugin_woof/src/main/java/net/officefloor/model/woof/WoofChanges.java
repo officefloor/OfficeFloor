@@ -44,12 +44,17 @@ public interface WoofChanges {
 	 *            URI to the {@link WoofTemplateModel}. May be <code>null</code>
 	 *            if private {@link WoofTemplateModel}.
 	 * @param gwtEntryPointClassName
-	 *            GWT EntryPoint class name.
+	 *            GWT EntryPoint class name. May be <code>null</code> only if no
+	 *            GWT functionality is required.
+	 * @param gwtServiceAsyncInterfaceNames
+	 *            GWT Service Async Interface names. May be <code>null</code> if
+	 *            no GWT services required.
 	 * @return {@link Change} to add the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> addTemplate(String templatePath,
 			String templateLogicClass, SectionType sectionType, String uri,
-			String gwtEntryPointClassName);
+			String gwtEntryPointClassName,
+			String[] gwtServiceAsyncInterfaceNames);
 
 	/**
 	 * Changes the URI for the {@link WoofTemplateModel}.

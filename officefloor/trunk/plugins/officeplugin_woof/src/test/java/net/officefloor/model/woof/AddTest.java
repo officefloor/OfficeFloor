@@ -60,7 +60,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"example/Template.ofp", "net.example.LogicClass", section,
-				"uri", null);
+				"uri", null, null);
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -88,13 +88,13 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the templates
 		this.operations.addTemplate("example/Template.ofp", "Class1", section,
-				"Template", null).apply();
+				"Template", null, null).apply();
 		this.operations.addTemplate("example/Template.ofp", "Class2", section,
-				"Template", null).apply(); // add twice
+				"Template", null, null).apply(); // add twice
 		this.operations.addTemplate("example/Template.ofp", "Class3", section,
-				null, null).apply(); // add with same name by template path
+				null, null, null).apply(); // add same name by template path
 		this.operations.addTemplate("Template.html", "Class4", section, null,
-				null).apply(); // add with template path resulting in same name
+				null, null).apply(); // add template path resulting same name
 
 		// Ensure appropriately added templates
 		this.validateModel();
@@ -107,6 +107,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		final String TEMPLATE_URI = "uri";
 		final String ENTRY_POINT_CLASS_NAME = "net.example.client.ExampleGwtEntryPoint";
+		final String[] SERVICE_ASYNC_INTERFACE_NAMES = new String[] {
+				"net.example.GwtServiceAsync", "net.example.GwtAnotherAsync" };
 
 		// Record GWT changes
 		this.recordGwtModulePath("net/example/uri.gwt.xml");
@@ -128,7 +130,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template with GWT
 		this.operations.addTemplate("example/Template.ofp",
 				"net.example.LogicClass", section, TEMPLATE_URI,
-				ENTRY_POINT_CLASS_NAME).apply();
+				ENTRY_POINT_CLASS_NAME, SERVICE_ASYNC_INTERFACE_NAMES).apply();
 
 		// Verify
 		this.verifyMockObjects();
