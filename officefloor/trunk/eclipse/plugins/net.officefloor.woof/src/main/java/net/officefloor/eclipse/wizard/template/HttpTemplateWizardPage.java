@@ -369,7 +369,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Create the HTTP Template Instance
 		String logicClassName = propertyLogicClass.getValue();
 		this.instance = new HttpTemplateInstance(this.templatePath,
-				logicClassName, sectionType, uriValue, gwtEntryPoint);
+				logicClassName, sectionType, uriValue, gwtEntryPoint,
+				gwtAsyncInterfaces);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);

@@ -64,10 +64,13 @@ public class AddTemplateOperation extends
 		SectionType type = instance.getTemplateSectionType();
 		String uri = instance.getUri();
 		String entryPointClassName = instance.getGwtEntryPointClassName();
+		String[] serviceAsyncInterfaces = instance
+				.getGwtServerAsyncInterfaceNames();
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(path,
-				logicClassName, type, uri, entryPointClassName);
+				logicClassName, type, uri, entryPointClassName,
+				serviceAsyncInterfaces);
 
 		// Position template
 		context.positionModel(change.getTarget());

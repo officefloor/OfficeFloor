@@ -38,6 +38,7 @@ import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
 import net.officefloor.plugin.gwt.module.GwtChanges;
+import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
 /**
@@ -361,7 +362,8 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateModel> addTemplate(String templatePath,
 			String templateLogicClass, SectionType section, String uri,
-			String gwtEntryPointClassName) {
+			String gwtEntryPointClassName,
+			String[] gwtServiceAsyncInterfaceNames) {
 
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
@@ -425,6 +427,28 @@ public class WoofChangesImpl implements WoofChanges {
 			// Create aggregate change to include GWT changes
 			change = new AggregateChange<WoofTemplateModel>(change.getTarget(),
 					change.getChangeDescription(), change, gwtChange);
+
+			// Determine if have GWT Services
+			if ((gwtServiceAsyncInterfaceNames != null)
+					&& (gwtServiceAsyncInterfaceNames.length > 0)) {
+
+				// Obtain the property value for the GWT Services
+				StringBuilder propertyValue = new StringBuilder();
+				boolean isFirst = true;
+				for (String gstServiceAsyncInterfaceName : gwtServiceAsyncInterfaceNames) {
+					if (!isFirst) {
+						propertyValue.append(",");
+					}
+					isFirst = false;
+					propertyValue.append(gstServiceAsyncInterfaceName);
+				}
+
+				// Add the property
+				gwtExtension
+						.addProperty(new PropertyModel(
+								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+								propertyValue.toString()));
+			}
 		}
 
 		// Return the change
