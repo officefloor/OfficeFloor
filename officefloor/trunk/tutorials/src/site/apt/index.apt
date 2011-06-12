@@ -51,6 +51,8 @@
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GwtApp/index.html}Generation of client side JavaScript}} | Easy configuration of GWT to generate JavaScript within the page | EntryPoint
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GwtService/index.html}AJAX via GWT RPC}} | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 
