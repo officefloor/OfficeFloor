@@ -18,6 +18,10 @@
 
 package net.officefloor.frame.impl.execute.job;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -55,6 +59,12 @@ import net.officefloor.frame.spi.team.Team;
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
 		extends AbstractLinkedListSetEntry<JobNode, Flow> implements Job,
 		JobNode, JobExecuteContext {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(OfficeFrame.class
+			.getName());
 
 	/**
 	 * {@link Flow}.
@@ -543,9 +553,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 					} catch (Throwable ex) {
 						// Should not receive failure here.
 						// If so likely something has corrupted - eg OOM.
-						System.err
-								.println("FAILURE: please restart OfficeFloor as likely become corrupt");
-						ex.printStackTrace();
+						if (LOGGER.isLoggable(Level.SEVERE)) {
+							LOGGER.log(
+									Level.SEVERE,
+									"FAILURE: please restart OfficeFloor as likely become corrupt",
+									ex);
+						}
 					}
 
 					// Now complete

@@ -29,6 +29,11 @@
 		</dependency>
 		<!-- END SNIPPET: GwtDependency -->
 		<dependency>
+			<groupId>com.gdevelop.gwt</groupId>
+			<artifactId>syncrpc</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<scope>test</scope>

@@ -20,12 +20,15 @@ package net.officefloor.plugin.socket.server.impl;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
@@ -48,6 +51,12 @@ public class SocketListener<CH extends ConnectionHandler>
 		implements
 		Task<ConnectionManager<CH>, SocketListener.SocketListenerDependencies, Indexed>,
 		ReadContext, WriteContext, IdleContext {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(SocketListener.class
+			.getName());
 
 	/**
 	 * Keys for the dependencies for the {@link SocketListener}.
@@ -334,12 +343,18 @@ public class SocketListener<CH extends ConnectionHandler>
 						this.terminateConnection(key, connection);
 
 						// Indicate failure details
-						if (ex instanceof IOException) {
-							// I/O exception (likely peer closing connection)
-							System.err.println("WARNING: " + ex.getMessage());
+						if (ex instanceof ClosedChannelException) {
+							// Peer closed connection
+							if (LOGGER.isLoggable(Level.FINE)) {
+								LOGGER.log(Level.FINE,
+										"Peer closed connection", ex);
+							}
 						} else {
 							// Another error so provide full details
-							ex.printStackTrace();
+							if (LOGGER.isLoggable(Level.WARNING)) {
+								LOGGER.log(Level.WARNING,
+										"Failure with connection", ex);
+							}
 						}
 					}
 				}
