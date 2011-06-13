@@ -20,6 +20,9 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedChannelException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -36,6 +39,12 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
  */
 public class HttpManagedObjectImpl implements HttpManagedObject,
 		ServerHttpConnection, EscalationHandler {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger
+			.getLogger(HttpManagedObjectImpl.class.getName());
 
 	/**
 	 * {@link Connection}.
@@ -164,8 +173,18 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
-		// Send failure on handling request
-		this.response.sendFailure(escalation);
+		try {
+
+			// Send failure on handling request
+			this.response.sendFailure(escalation);
+
+		} catch (ClosedChannelException ex) {
+			// Can not send failure, as connection closed
+			if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.log(Level.FINE,
+						"Failed sending escalation over closed connection", ex);
+			}
+		}
 	}
 
 }
