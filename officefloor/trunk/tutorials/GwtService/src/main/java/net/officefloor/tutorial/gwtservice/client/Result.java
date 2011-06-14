@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class Result implements IsSerializable {
 
 	public static enum Answer implements IsSerializable {
@@ -51,3 +52,4 @@ public class Result implements IsSerializable {
 	}
 
 }
+// END SNIPPET: example

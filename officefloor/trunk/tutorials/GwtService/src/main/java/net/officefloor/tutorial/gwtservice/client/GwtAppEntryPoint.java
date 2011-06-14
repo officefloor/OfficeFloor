@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class GwtAppEntryPoint implements EntryPoint {
 
 	private final HighLowGameAsync service = GWT.create(HighLowGame.class);
@@ -43,7 +44,7 @@ public class GwtAppEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
-		// Obtain root panel
+		// Obtain panel to load game
 		Panel panel = RootPanel.get("HighLowGame");
 
 		// Add Game widgets
@@ -59,16 +60,15 @@ public class GwtAppEntryPoint implements EntryPoint {
 		final Label message = new Label();
 		gamePanel.add(message);
 
-		// Handle try
+		// Handle try button click
 		button.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 
 				// Obtain the value to try
-				String valueText = text.getText();
 				Integer value;
 				try {
-					value = Integer.valueOf(valueText);
+					value = Integer.valueOf(text.getText());
 				} catch (NumberFormatException ex) {
 					Window.alert("Please enter a valid number");
 					return;
@@ -113,3 +113,4 @@ public class GwtAppEntryPoint implements EntryPoint {
 	}
 
 }
+// END SNIPPET: example
