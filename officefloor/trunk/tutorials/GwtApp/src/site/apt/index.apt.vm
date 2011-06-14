@@ -76,5 +76,5 @@ application.woof
 
 Next
 
-  See the {{{../index.html}other tutorials}} for further functionality.
+  The {{{../GwtService/index.html}next tutorial}} looks at the simplified support WoOF provides for GWT RPC calls (AJAX) on the Server.
 
