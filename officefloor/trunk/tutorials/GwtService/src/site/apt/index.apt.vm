@@ -86,7 +86,7 @@ Server side logic
 
 application.woof
 
-  The following demonstrates the configuration for adding the template for this tutorial:
+  The following demonstrates the configuration for adding the template for this tutorial (via the {{{../../eclipse/index.html}WoOF Eclipse Plug-in}}):
   
 [./images/GwtService-add-template-dialog.png] GwtService Add template dialog screenshot.
 
