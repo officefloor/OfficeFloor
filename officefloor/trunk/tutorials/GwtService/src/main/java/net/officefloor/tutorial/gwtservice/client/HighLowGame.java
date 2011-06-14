@@ -25,8 +25,10 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @RemoteServiceRelativePath("highlow")
 public interface HighLowGame extends RemoteService {
 
 	Result attempt(Integer guess);
 }
+// END SNIPPET: example

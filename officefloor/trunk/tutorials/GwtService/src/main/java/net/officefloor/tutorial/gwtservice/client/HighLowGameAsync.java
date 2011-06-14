@@ -24,7 +24,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public interface HighLowGameAsync {
 
 	void attempt(Integer guess, AsyncCallback<Result> callback);
 }
+// END SNIPPET: example

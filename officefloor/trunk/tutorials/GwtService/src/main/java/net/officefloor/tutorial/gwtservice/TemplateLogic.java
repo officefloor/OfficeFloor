@@ -17,8 +17,12 @@
  */
 package net.officefloor.tutorial.gwtservice;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.tutorial.gwtservice.client.Result;
+import net.officefloor.tutorial.gwtservice.client.Result.Answer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -27,16 +31,42 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * 
  * @author Daniel Sagenschneider
  */
-public class TemplateLogic {
+// START SNIPPET: example
+@HttpSessionStateful
+public class TemplateLogic implements Serializable {
 
-	public void newGame(GameState game) {
-		game.startNewGame();
+	private Integer number;
+
+	private int tryCount;
+
+	public TemplateLogic() {
+		this.newGame(); // assigns number for first game
 	}
 
-	public void attempt(GameState game, @Parameter Integer value,
-			AsyncCallback<Result> callback) {
-		Result result = game.attempt(value.intValue());
+	public void newGame() {
+		this.number = Integer.valueOf((int) (Math.random() * 100));
+		this.tryCount = 0;
+	}
+
+	public void attempt(@Parameter Integer value, AsyncCallback<Result> callback) {
+		Answer answer;
+		Integer returnNumber = null;
+		
+		if (value.equals(this.number)) {
+			answer = Answer.CORRECT;
+			
+		} else if (this.tryCount >= 10) {
+			answer = Answer.NO_FURTHER_ATTEMPTS;
+			returnNumber = this.number;
+			
+		} else {
+			this.tryCount++;
+			answer = (this.number < value ? Answer.LOWER : Answer.HIGHER);
+		}
+		
+		Result result = new Result(answer, returnNumber);
 		callback.onSuccess(result);
 	}
 
 }
+// END SNIPPET: example

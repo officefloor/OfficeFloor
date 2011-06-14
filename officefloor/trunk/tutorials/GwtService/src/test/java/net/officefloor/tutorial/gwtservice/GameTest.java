@@ -40,6 +40,7 @@ public class GameTest extends TestCase {
 	/**
 	 * Ensure GWT Service available.
 	 */
+	// START SNIPPET: test
 	public void testCallGwtService() throws Exception {
 
 		// Start Server
@@ -53,5 +54,6 @@ public class GameTest extends TestCase {
 		// Ensure provide result from attempt
 		assertNotNull("Should be successful", result);
 	}
+	// END SNIPPET: test
 
 }
