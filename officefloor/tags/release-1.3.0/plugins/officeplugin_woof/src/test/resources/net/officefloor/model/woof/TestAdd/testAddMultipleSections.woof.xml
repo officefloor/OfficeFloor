@@ -1,0 +1,8 @@
+<woof>
+
+	<sections>
+		<section name="SECTION" source="Section1" location="Location1" />
+		<section name="SECTION-2" source="Section2" location="Location2" />
+	</sections>
+
+</woof>

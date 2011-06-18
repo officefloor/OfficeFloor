@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall xmlns="net.officefloor.plugin.xml.unmarshal"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	class="net.officefloor.plugin.xml.unmarshall.tree.objects.RecursiveObject"
+	node="recursive-xml-message">
+	<object method="setPerson" node="person"
+		class="net.officefloor.plugin.xml.unmarshall.tree.objects.Person" id="PERSON">
+		<value method="setPosition" node="person@position" />
+		<reference id="PERSON" method="setPerson" />
+	</object>
+	<object method="setComplexParent" node="complex-parent"
+		class="net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexParent"
+		id="ComplexParent">
+		<value method="setInfo" node="complex-parent@info" />
+		<object method="setComplexChild" node="complex-child"
+			class="net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexChild">
+			<value method="setInfo" node="complex-child@info" />
+			<reference id="ComplexParent" method="setComplexParent" />
+		</object>
+	</object>
+	<object method="setManyChildren" node="many-children"
+		class="net.officefloor.plugin.xml.unmarshall.tree.objects.ManyChildren"
+		id="ManyChildren">
+		<value method="setName" node="many-children@name" />
+		<reference id="ManyChildren" method="addChild" />
+	</object>
+</unmarshall>

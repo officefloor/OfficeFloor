@@ -1,0 +1,12 @@
+<woof>
+
+	<templates>
+		<template name="change" uri="change" path="example/Template.ofp"
+			class="net.example.LogicClass">
+			<extension class="GWT">
+				<property name="gwt.module.path" value="net/example/change.gwt.xml" />
+			</extension>
+		</template>
+	</templates>
+
+</woof>
