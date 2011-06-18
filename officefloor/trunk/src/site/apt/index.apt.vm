@@ -8,7 +8,7 @@
 
   OfficeFloor is an Inversion of Control 2.0 implementation that focuses on multi-threaded dependency injection into methods rather than into objects and improves on existing dependency injection frameworks by letting you specify the Thread to execute the method - thereby really adhering to the "Hollywood Principle" (don't call us, we "really" will call you).
   
-  OfficeFloor is freely distributed under GPL and the source is available {{{./source-repository.html}here}}.
+  OfficeFloor is freely distributed under GPL (LGPL also available on request) and the source is available {{{./source-repository.html}here}}.
   
 Features
 
@@ -19,6 +19,8 @@ Features
   * WoOF (Web on OfficeFloor - {{{http://webfloor.org}http://webfloor.org}}) provides simplified web application development that allows easy integration with WSYWIG web design tools.
   
   * JEE Servlet Filter that enables introducing OfficeFloor functionality to your existing applications without change.
+  
+  * Integration with frameworks such as Spring, Hibernate and GWT to simplify integrating OfficeFloor functionality into your existing applications.
 
 
 Example Capabilities
