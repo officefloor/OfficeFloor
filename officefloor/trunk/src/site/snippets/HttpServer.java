@@ -1,9 +1,9 @@
-// OfficeFloor source to create an inline HTTP Server (useful for testing a single web page).
-// Note that applications would be configured using the WoOF graphical configuration.
+// OfficeFloor source to create an in process HTTP Server (useful for testing).
+// Note that applications are normally configured using the WoOF graphical configuration.
 HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource();
 
-// Add a dynamic web page (ExampleBean provides the page logic and is just a POJO)
-server.addHttpTemplate("example.html", ExampleBean.class);
+// Add a dynamic web page (PageLogic is just a POJO)
+server.addHttpTemplate("page.html", PageLogic.class);
 
 // Add configured DataSource for dependency injection
 server.addManagedObject(DataSourceManagedObjectSource.class, null, DataSource.class).loadProperties("datasource.properties");
