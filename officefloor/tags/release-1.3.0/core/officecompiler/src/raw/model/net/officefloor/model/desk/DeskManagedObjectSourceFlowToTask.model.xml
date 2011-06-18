@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="task name" />
+	<field type="DeskManagedObjectSourceFlowModel" name="desk managed object source flow"
+		end-field="task" />
+	<field type="TaskModel" name="task" end-list="desk managed object source flow" />
+</model>
