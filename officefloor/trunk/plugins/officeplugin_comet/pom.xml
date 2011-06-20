@@ -16,11 +16,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeplugin_web</artifactId>
+			<artifactId>officeplugin_gwt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -49,6 +54,7 @@
 						</goals>
 						<configuration>
 							<sources>
+								<source>src/main/gwt</source>
 								<source>src/main/impl</source>
 							</sources>
 						</configuration>
@@ -57,4 +63,72 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>gwt</id>
+			<dependencies>
+				<dependency>
+					<!-- Make available for compile -->
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+					<scope>compile</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Include test GWT code -->
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>gwt-add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/test/java</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>gwt-add-resources</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-resource</goal>
+								</goals>
+								<configuration>
+									<resources>
+										<resource>
+											<directory>src/test/resources</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Compile GWT -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+								<configuration>
+									<module>net.officefloor.plugin.comet.OfficeFloorCometTest</module>
+									<draftCompile>true</draftCompile>
+									<logLevel>TRACE</logLevel>
+									<webappDirectory>${project.build.outputDirectory}/PUBLIC</webappDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
