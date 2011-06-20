@@ -467,6 +467,11 @@
 				<version>${gwt-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.google.gwt</groupId>
+				<artifactId>gwt-dev</artifactId>
+				<version>${gwt-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.gdevelop.gwt</groupId>
 				<artifactId>syncrpc</artifactId>
 				<version>${syncrpc-version}</version>
