@@ -21,8 +21,14 @@ import java.util.Map;
 
 import net.officefloor.plugin.comet.internal.CometListenerAdapter;
 import net.officefloor.plugin.comet.internal.CometListenerMap;
+import net.officefloor.plugin.comet.internal.CometListenerService;
+import net.officefloor.plugin.comet.internal.CometListenerServiceAsync;
+import net.officefloor.plugin.comet.internal.CometRequest;
+import net.officefloor.plugin.comet.internal.CometResponse;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Provides means to register an event listener.
@@ -51,17 +57,33 @@ public class OfficeFloorComet {
 	 *            used to match event meta-data to determine filtering. This may
 	 *            be <code>null</code> to receive all events.
 	 */
-	public static <I extends CometListener> void registerListener(
-			Class<I> listenerType, I handler, Object filterKey) {
-		
-		// TODO obtain the event
-		final Object event = "EVENT";
+	public static <L extends CometListener> void registerListener(
+			Class<L> listenerType, final L handler, Object filterKey) {
 
 		// Obtain the adapter
-		CometListenerAdapter adapter = adapters.get(listenerType);
+		final CometListenerAdapter adapter = adapters.get(listenerType);
 
-		// Handle the event
-		adapter.handleEvent(handler, event);
+		// Start listening
+		CometListenerServiceAsync service = GWT
+				.create(CometListenerService.class);
+		service.listen(new CometRequest(), new AsyncCallback<CometResponse>() {
+
+			@Override
+			public void onSuccess(CometResponse result) {
+
+				// TODO obtain the event
+				final Object event = "EVENT";
+
+				// Handle the event
+				adapter.handleEvent(handler, event);
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert("COMET FAILURE: " + caught.getMessage() + " ["
+						+ caught.getClass().getName() + "]");
+			}
+		});
 	}
 
 	/**
