@@ -17,10 +17,16 @@
  */
 package net.officefloor.plugin.comet;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
+import net.officefloor.plugin.comet.internal.CometListenerServiceAsync;
+import net.officefloor.plugin.comet.internal.CometRequest;
+import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -31,10 +37,14 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  */
 public class OfficeFloorCometTest extends OfficeFrameTestCase {
 
-	public void test() {
-		// TODO provide testing of OfficeFrameComet servicing
+	/**
+	 * Ensure able to &quot;long poll&quot; for an event.
+	 */
+	public void testLongPoll() {
+		// TODO provide long poll request
+		fail("TODO implement");
 	}
-	
+
 	/**
 	 * Main method to manually test with a browser.
 	 * 
@@ -42,7 +52,7 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	 *            Command line arguments.
 	 */
 	public static void main(String... args) throws Exception {
-		
+
 		// Indicate running manually
 		System.out.println("Manually running Comet test application");
 
@@ -55,18 +65,26 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
 		HttpTemplateAutoWireSection template = source.addHttpTemplate(
 				templatePath, TemplateLogic.class, "template");
-		GwtHttpTemplateSectionExtension.extendTemplate(template, source,
-				new SourcePropertiesImpl(), Thread.currentThread()
-						.getContextClassLoader());
-		source.openOfficeFloor();
 
+		// Extend the template
+		SourcePropertiesImpl properties = new SourcePropertiesImpl();
+		properties
+				.addProperty(
+						GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
+						CometListenerServiceAsync.class.getName());
+		GwtHttpTemplateSectionExtension.extendTemplate(template, source,
+				properties, Thread.currentThread().getContextClassLoader());
+
+		source.openOfficeFloor();
 	}
 
 	/**
 	 * Template logic class.
 	 */
 	public static class TemplateLogic {
-		public void submit() {
+		public void listen(@Parameter CometRequest request,
+				AsyncCallback<CometResponse> callback) {
+			callback.onSuccess(new CometResponse());
 		}
 	}
 
