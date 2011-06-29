@@ -25,6 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
@@ -67,7 +68,8 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		final ServerGwtRpcConnection<?> connection = this
 				.createMock(ServerGwtRpcConnection.class);
-		final RPCRequest request = new RPCRequest(null, null, null, 0);
+		final RPCRequest request = new RPCRequest(null,
+				new Object[] { new CometRequest() }, null, 0);
 
 		// Record sourcing
 		this.recordReturn(connection, connection.getRpcRequest(), request);

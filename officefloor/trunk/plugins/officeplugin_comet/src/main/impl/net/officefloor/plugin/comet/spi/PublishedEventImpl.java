@@ -40,6 +40,11 @@ public class PublishedEventImpl implements PublishedEvent {
 	private final Object matchKey;
 
 	/**
+	 * Publish time stamp.
+	 */
+	private final long publishTimestamp;
+
+	/**
 	 * Next {@link PublishedEvent}.
 	 */
 	private PublishedEvent nextEvent = null;
@@ -53,12 +58,15 @@ public class PublishedEventImpl implements PublishedEvent {
 	 *            Event parameter.
 	 * @param matchKey
 	 *            Match key.
+	 * @param publishTimestamp
+	 *            Publish time stamp.
 	 */
 	public PublishedEventImpl(Class<?> listenerType, Object eventParameter,
-			Object matchKey) {
+			Object matchKey, long publishTimestamp) {
 		this.listenerType = listenerType;
 		this.eventParameter = eventParameter;
 		this.matchKey = matchKey;
+		this.publishTimestamp = publishTimestamp;
 	}
 
 	/**
@@ -84,9 +92,7 @@ public class PublishedEventImpl implements PublishedEvent {
 
 	@Override
 	public long getPublishTimestamp() {
-		// TODO implement CometEvent.getPublishTimestamp
-		throw new UnsupportedOperationException(
-				"TODO implement CometEvent.getPublishTimestamp");
+		return this.publishTimestamp;
 	}
 
 	@Override

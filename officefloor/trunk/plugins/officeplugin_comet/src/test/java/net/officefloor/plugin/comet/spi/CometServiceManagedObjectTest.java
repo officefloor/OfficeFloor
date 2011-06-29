@@ -85,11 +85,21 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	private final List<MockEvent> published = new LinkedList<MockEvent>();
 
 	/**
+	 * Flag indicating whether to expire before servicing.
+	 */
+	private boolean isExpireBeforeServicing = false;
+
+	/**
+	 * Flag indicating whether to expire after servicing.
+	 */
+	private boolean isExpireAfterServicing = false;
+
+	/**
 	 * Ensure able to service finding an event already available.
 	 */
 	public void testNoEventAvailable() {
 		this.recordInit();
-		this.async.notifyStarted();
+		this.recordWait(10);
 		this.doTest();
 	}
 
@@ -99,7 +109,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	public void testNoMatchingEventByListenerType() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
 		this.recordInit(new CometInterest(MockTwoListener.class, null));
-		this.async.notifyStarted();
+		this.recordWait(10);
 		this.doTest();
 	}
 
@@ -151,7 +161,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	public void testFiltered() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "NOT_MATCH");
 		this.recordInit(new CometInterest(MockOneListener.class, "MATCH"));
-		this.async.notifyStarted();
+		this.recordWait(10);
 		this.doTest();
 	}
 
@@ -191,11 +201,56 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testPublishTriggerEvent() {
 		this.recordInit(new CometInterest(MockOneListener.class, null));
-		this.async.notifyStarted();
+		this.recordWait(10);
 		this.recordPublishEvent(MockOneListener.class, "EVENT", null);
 		this.async.notifyComplete();
 		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT", null));
 		this.doTest();
+	}
+
+	/**
+	 * Ensure timeout events.
+	 */
+	public void testTimeoutEvent() {
+
+		// Setup an event (that will be expired)
+		this.recordEvent(1, MockOneListener.class, "EVENT", null);
+
+		this.recordInit(new CometInterest(MockOneListener.class, null));
+
+		// Expire event
+		this.recordExpireBeforeServicing(CometServiceManagedObjectSource.DEFAULT_EVENT_TIMEOUT * 2);
+
+		// Should wait because no event (as expired)
+		this.recordWait((CometServiceManagedObjectSource.DEFAULT_EVENT_TIMEOUT * 2) + 10);
+
+		this.doTest();
+	}
+
+	/**
+	 * Ensure timeout requests.
+	 */
+	public void testTimeoutRequests() {
+		// Setup waiting on event
+		this.recordInit(new CometInterest(MockOneListener.class, null));
+		this.recordWait(1);
+
+		// Expire as no event within request timeout
+		this.recordExpireAfterServicing(CometServiceManagedObjectSource.DEFAULT_REQUEST_TIMEOUT * 2);
+		this.async.notifyComplete();
+		this.recordResponse();
+
+		// Publishing event should not be sent to request
+		this.recordPublishEvent(MockOneListener.class, "EVENT", null);
+
+		this.doTest();
+	}
+
+	/**
+	 * Ensure not resend same {@link CometEvent}.
+	 */
+	public void testNotResendEvent() {
+		fail("TODO implement");
 	}
 
 	/**
@@ -215,8 +270,18 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 					event.matchKey);
 		}
 
+		// Undertake expiry before servicing
+		if (this.isExpireBeforeServicing) {
+			service.expire();
+		}
+
 		// Service
 		service.service();
+
+		// Undertake expiry after servicing
+		if (this.isExpireAfterServicing) {
+			service.expire();
+		}
 
 		// Publish the after servicing events
 		for (MockEvent event : this.published) {
@@ -270,6 +335,50 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 
 		// Register the event
 		this.published.add(new MockEvent(listenerType, event, matchKey));
+	}
+
+	/**
+	 * Records expiring before servicing.
+	 * 
+	 * @param currentTime
+	 *            Time to determine expire.
+	 */
+	private void recordExpireBeforeServicing(long currentTime) {
+
+		// Record obtaining time for expiring
+		this.recordReturn(this.clock, this.clock.currentTimestamp(),
+				currentTime);
+
+		// Flag to expire
+		this.isExpireBeforeServicing = true;
+	}
+
+	/**
+	 * Records expiring after servicing.
+	 * 
+	 * @param currentTime
+	 *            Time to determine expire.
+	 */
+	private void recordExpireAfterServicing(long currentTime) {
+
+		// Record obtaining time for expiring
+		this.recordReturn(this.clock, this.clock.currentTimestamp(),
+				currentTime);
+
+		// Flag to expire
+		this.isExpireAfterServicing = true;
+	}
+
+	/**
+	 * Records {@link CometRequest} waiting.
+	 * 
+	 * @param currentTime
+	 *            Current time to determine waiting registration time.
+	 */
+	private void recordWait(long currentTime) {
+		this.recordReturn(this.clock, this.clock.currentTimestamp(),
+				currentTime);
+		this.async.notifyStarted();
 	}
 
 	/**

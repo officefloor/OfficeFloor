@@ -22,7 +22,6 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.plugin.comet.api.CometListener;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
@@ -82,14 +81,19 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 
 	@Override
 	public void service() {
-		this.source.receiveOrWaitOnEvents(interests, this.connection,
+		this.source.receiveOrWaitOnEvents(this.interests, this.connection,
 				this.async);
 	}
 
 	@Override
-	public void publishEvent(Class<?> listenerType,
-			Object event, Object matchKey) {
+	public void publishEvent(Class<?> listenerType, Object event,
+			Object matchKey) {
 		this.source.publishEvent(listenerType, event, matchKey);
+	}
+
+	@Override
+	public void expire() {
+		this.source.expire();
 	}
 
 	/*
