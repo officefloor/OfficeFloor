@@ -17,6 +17,7 @@
  */
 package net.officefloor.plugin.comet.spi;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.comet.internal.CometRequest;
 
 /**
@@ -42,5 +43,15 @@ public interface CometService {
 	 *            Match key. May be <code>null</code> to indicate to not filter.
 	 */
 	void publishEvent(Class<?> listenerType, Object event, Object matchKey);
+
+	/**
+	 * <p>
+	 * Expires waiting {@link CometRequest} instances and old
+	 * {@link PublishedEvent} instances.
+	 * <p>
+	 * This is typically invoked by the {@link ManagedObjectSource} however is
+	 * available to manually trigger.
+	 */
+	void expire();
 
 }
