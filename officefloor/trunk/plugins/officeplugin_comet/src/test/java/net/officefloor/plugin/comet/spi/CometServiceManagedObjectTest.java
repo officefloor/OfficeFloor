@@ -250,7 +250,14 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 * Ensure not resend same {@link CometEvent}.
 	 */
 	public void testNotResendEvent() {
-		fail("TODO implement");
+		this.recordEvent(10, MockOneListener.class, "EVENT_ONE", null);
+		this.recordEvent(20, MockOneListener.class, "EVENT_TWO", null);
+		this.recordEvent(30, MockOneListener.class, "EVENT_THREE", null);
+		this.recordInit(1, new CometInterest(MockOneListener.class, null));
+		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT_TWO",
+				null), new CometEvent(MockOneListener.class, "EVENT_THREE",
+				null));
+		this.doTest();
 	}
 
 	/**
@@ -382,12 +389,27 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records loading the {@link CometServiceManagedObject}.
+	 * Records initialising the {@link CometRequest} and
+	 * {@link CometServiceManagedObject}.
 	 * 
 	 * @param interests
 	 *            Listing of {@link CometInterest}.
 	 */
 	private void recordInit(CometInterest... interests) {
+		// First request (no previous event id)
+		this.recordInit(CometRequest.FIRST_REQUEST_EVENT_ID, interests);
+	}
+
+	/**
+	 * Records initialising the {@link CometRequest} and
+	 * {@link CometServiceManagedObject}.
+	 * 
+	 * @param lastEventId
+	 *            {@link CometEvent} Id of recently received {@link CometEvent}.
+	 * @param interests
+	 *            Listing of {@link CometInterest}.
+	 */
+	private void recordInit(long lastEventId, CometInterest... interests) {
 		try {
 
 			// Ensure have at least one interest
@@ -397,7 +419,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 			}
 
 			// Create the Comet Request
-			CometRequest cometRequest = new CometRequest(interests);
+			CometRequest cometRequest = new CometRequest(lastEventId, interests);
 
 			// Create the RPC Request
 			Method method = CometService.class.getMethod("service");

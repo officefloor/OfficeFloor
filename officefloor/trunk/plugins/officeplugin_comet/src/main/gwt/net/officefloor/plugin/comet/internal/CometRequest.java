@@ -27,6 +27,17 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class CometRequest implements IsSerializable {
 
 	/**
+	 * {@link CometEvent} Id to use should no {@link CometEvent} instances been
+	 * previously provided to the client.
+	 */
+	public static final long FIRST_REQUEST_EVENT_ID = -1;
+
+	/**
+	 * Last {@link CometEvent} Id received by the client.
+	 */
+	private long lastEventId = -1;
+
+	/**
 	 * Listing of {@link CometInterest}.
 	 */
 	private CometInterest[] interests;
@@ -34,10 +45,13 @@ public class CometRequest implements IsSerializable {
 	/**
 	 * Initiate.
 	 * 
+	 * @param lastEventId
+	 *            Last {@link CometEvent} Id received by the client.
 	 * @param interests
 	 *            Listing of {@link CometInterest}.
 	 */
-	public CometRequest(CometInterest[] interests) {
+	public CometRequest(long lastEventId, CometInterest[] interests) {
+		this.lastEventId = lastEventId;
 		this.interests = interests;
 	}
 
@@ -45,6 +59,15 @@ public class CometRequest implements IsSerializable {
 	 * Default constructor required as per {@link IsSerializable}.
 	 */
 	public CometRequest() {
+	}
+
+	/**
+	 * Obtains the last {@link CometEvent} Id received by the client.
+	 * 
+	 * @return Last {@link CometEvent} Id received by the client.
+	 */
+	public long getLastEventId() {
+		return this.lastEventId;
 	}
 
 	/**

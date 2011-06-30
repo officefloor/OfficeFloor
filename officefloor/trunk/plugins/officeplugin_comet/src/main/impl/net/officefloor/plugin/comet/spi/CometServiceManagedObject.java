@@ -22,7 +22,6 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -61,9 +60,9 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	private ServerGwtRpcConnection<CometResponse> connection;
 
 	/**
-	 * Listing of {@link CometInterest} instances
+	 * {@link CometRequest}.
 	 */
-	private CometInterest[] interests;
+	private CometRequest cometRequest;
 
 	/**
 	 * Initiate.
@@ -81,8 +80,10 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 
 	@Override
 	public void service() {
-		this.source.receiveOrWaitOnEvents(this.interests, this.connection,
-				this.async);
+		this.source
+				.receiveOrWaitOnEvents(this.cometRequest.getInterests(),
+						this.connection, this.async,
+						this.cometRequest.getLastEventId());
 	}
 
 	@Override
@@ -116,8 +117,7 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 
 		// Obtain the Comet Interests
 		RPCRequest rpcRequest = this.connection.getRpcRequest();
-		CometRequest cometRequest = (CometRequest) rpcRequest.getParameters()[0];
-		this.interests = cometRequest.getInterests();
+		this.cometRequest = (CometRequest) rpcRequest.getParameters()[0];
 	}
 
 	@Override

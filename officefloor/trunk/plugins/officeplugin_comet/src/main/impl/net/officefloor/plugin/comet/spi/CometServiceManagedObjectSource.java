@@ -105,6 +105,11 @@ public class CometServiceManagedObjectSource extends
 	private final Set<WaitingCometRequest> waitingRequests = new HashSet<WaitingCometRequest>();
 
 	/**
+	 * Next {@link PublishedEvent} Id.
+	 */
+	private long nextEventId = 1;
+
+	/**
 	 * Default constructor as per {@link ManagedObjectSource} requirements.
 	 */
 	public CometServiceManagedObjectSource() {
@@ -146,8 +151,9 @@ public class CometServiceManagedObjectSource extends
 		long publishTimestamp = this.clock.currentTimestamp();
 
 		// Create the event
-		PublishedEventImpl newEvent = new PublishedEventImpl(listenerType,
-				event, matchKey, publishTimestamp);
+		long eventId = this.nextEventId++;
+		PublishedEventImpl newEvent = new PublishedEventImpl(eventId,
+				listenerType, event, matchKey, publishTimestamp);
 
 		// Add the event to head of list
 		if (this.head == null) {
@@ -205,20 +211,36 @@ public class CometServiceManagedObjectSource extends
 	 * @param asynchronousListener
 	 *            {@link AsynchronousListener} for the
 	 *            {@link CometServiceManagedObject}.
+	 * @param lastEventId
+	 *            Id of last {@link CometEvent} provided to the client.
 	 */
 	public synchronized void receiveOrWaitOnEvents(CometInterest[] interests,
 			ServerGwtRpcConnection<CometResponse> connection,
-			AsynchronousListener asynchronousListener) {
+			AsynchronousListener asynchronousListener, long lastEventId) {
+
+		PublishedEvent node = this.tail;
+
+		// Ignore already published events to client
+		if (lastEventId != CometRequest.FIRST_REQUEST_EVENT_ID) {
+			while ((node != null) && (node.getEventId() <= lastEventId)) {
+				// Ignore event as already published to client
+				node = node.getNextEvent();
+			}
+		}
 
 		// Determine if event available
-		PublishedEvent node = this.tail;
-		List<CometEvent> events = new LinkedList<CometEvent>();
+		List<CometEvent> events = null;
 		while (node != null) {
 
 			// Determine if match
 			for (int i = 0; i < interests.length; i++) {
 				CometInterest interest = interests[i];
 				if (this.isMatch(interest, node)) {
+
+					// Ensure have list
+					if (events == null) {
+						events = new LinkedList<CometEvent>();
+					}
 
 					// Add the event for the interest
 					events.add(new CometEvent(interest.getListenerType(), node
@@ -231,8 +253,7 @@ public class CometServiceManagedObjectSource extends
 		}
 
 		// Determine if events of interest
-		if (events.size() > 0) {
-
+		if (events != null) {
 			// Send events of interest
 			CometResponse response = new CometResponse(
 					events.toArray(new CometEvent[events.size()]));
