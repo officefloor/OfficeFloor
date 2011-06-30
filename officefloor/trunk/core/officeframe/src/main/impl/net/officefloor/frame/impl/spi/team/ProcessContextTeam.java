@@ -239,7 +239,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 			// Invoke the process
 			ProcessFuture future = executeContext.invokeProcess(flowIndex,
-					parameter, managedObject, escalationHandler);
+					parameter, managedObject, 0, escalationHandler);
 
 			// Blocking call to execute the Jobs
 			executor.executeJobs(future);

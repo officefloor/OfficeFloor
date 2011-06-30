@@ -271,7 +271,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 	@Override
 	public void beginTask(Runnable task) {
 		// Invoke process to execute the task
-		this.executeContext.invokeProcess(this.sslTaskFlowIndex, task, null);
+		this.executeContext.invokeProcess(this.sslTaskFlowIndex, task, null, 0);
 	}
 
 	/*

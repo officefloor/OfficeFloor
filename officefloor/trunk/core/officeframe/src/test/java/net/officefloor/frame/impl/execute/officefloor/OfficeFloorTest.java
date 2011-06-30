@@ -182,9 +182,9 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 		this.recordReturn(mosInstance,
 				mosInstance.getManagedObjectExecuteContextFactory(),
 				executeContextFactory);
-		this.recordReturn(executeContextFactory,
-				executeContextFactory.createManagedObjectExecuteContext(null),
-				executeContext, new AlwaysMatcher());
+		this.recordReturn(executeContextFactory, executeContextFactory
+				.createManagedObjectExecuteContext(null, null), executeContext,
+				new AlwaysMatcher());
 		mos.start(executeContext);
 		this.recordReturn(mosInstance, mosInstance.getManagedObjectPool(),
 				managedObjectPool);

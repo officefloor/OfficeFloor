@@ -20,7 +20,10 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
@@ -49,6 +52,12 @@ import net.officefloor.frame.spi.team.Team;
 public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorImpl.class
+			.getName());
+
+	/**
 	 * {@link OfficeFloorMetaData} for this {@link OfficeFloor}.
 	 */
 	private final OfficeFloorMetaData officeFloorMetaData;
@@ -62,6 +71,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * {@link ProcessTicker}.
 	 */
 	private ProcessTicker processTicker = null;
+
+	/**
+	 * {@link Timer}.
+	 */
+	private Timer timer = null;
 
 	/**
 	 * Initiate.
@@ -106,6 +120,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 				ticker.decrementAndGet();
 			}
 		};
+
+		// Create the timer
+		this.timer = new Timer(true);
 
 		// Create the offices to open floor for work
 		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData
@@ -192,7 +209,8 @@ public class OfficeFloorImpl implements OfficeFloor {
 		// Start the managed object source
 		ManagedObjectExecuteContext<F> executeContext = mosInstance
 				.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext(this.processTicker);
+				.createManagedObjectExecuteContext(this.processTicker,
+						this.timer);
 		mos.start(executeContext);
 
 		// Determine if pooled
@@ -232,11 +250,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Provide warning that timed out waiting for completion
 			if (this.processTicker.activeProcessCount() > 0) {
-				System.err
-						.println("Timed out waiting for processes to complete ("
-								+ this.processTicker.activeProcessCount()
-								+ " remaining).  Forcing close of OfficeFloor.");
+				if (LOGGER.isLoggable(Level.WARNING)) {
+					LOGGER.warning("Timed out waiting for processes to complete ("
+							+ this.processTicker.activeProcessCount()
+							+ " remaining).  Forcing close of OfficeFloor.");
+				}
 			}
+
+			// Stop the timer
+			this.timer.cancel();
 
 			// Stop the teams working as closing
 			for (Team team : this.officeFloorMetaData.getTeams()) {
@@ -253,6 +275,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Flag that no longer open
 			this.offices = null;
 			this.processTicker = null;
+			this.timer = null;
 		}
 	}
 

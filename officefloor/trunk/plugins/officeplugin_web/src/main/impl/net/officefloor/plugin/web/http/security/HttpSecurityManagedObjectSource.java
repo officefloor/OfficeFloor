@@ -89,7 +89,7 @@ public class HttpSecurityManagedObjectSource
 	public void triggerAuthentication(HttpSecurityManagedObject managedObject) {
 		// Must provide new managed object to not override asynchronous listener
 		this.executeContext.invokeProcess(FlowKeys.AUTHENTICATE, managedObject,
-				new HttpSecurityManagedObject(this));
+				new HttpSecurityManagedObject(this), 0);
 	}
 
 	/*

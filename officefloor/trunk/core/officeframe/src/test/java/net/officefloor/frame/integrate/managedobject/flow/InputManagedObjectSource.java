@@ -56,11 +56,16 @@ public class InputManagedObjectSource extends
 	 * 
 	 * @param parameter
 	 *            Parameter to input into the Office.
+	 * @param managedObject
+	 *            {@link ManagedObject}.
+	 * @param delay
+	 *            Delay to invoke process.
 	 */
-	public static void input(Object parameter, ManagedObject managedObject) {
+	public static void input(Object parameter, ManagedObject managedObject,
+			long delay) {
 		// Input the parameter
 		INSTANCE.executeContext.invokeProcess(Flows.INPUT, parameter,
-				managedObject);
+				managedObject, delay);
 	}
 
 	/**

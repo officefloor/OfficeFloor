@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.Timer;
+
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -86,10 +88,10 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 
 	@Override
 	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(
-			ProcessTicker ticker) {
+			ProcessTicker ticker, Timer timer) {
 		return new ManagedObjectExecuteContextImpl<F>(
 				this.managedObjectMetaData, this.processMoIndex,
-				this.processLinks, this.officeMetaData, ticker);
+				this.processLinks, this.officeMetaData, ticker, timer);
 	}
 
 }

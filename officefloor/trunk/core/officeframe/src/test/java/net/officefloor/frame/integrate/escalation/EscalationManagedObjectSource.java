@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 
 /**
  * Invokes flow with an {@link EscalationHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 @TestSource
@@ -49,7 +49,7 @@ public class EscalationManagedObjectSource extends
 
 	/**
 	 * Resets for use.
-	 *
+	 * 
 	 * @param escalationHandlerFailure
 	 *            Failure to be thrown from {@link EscalationHandler} of this
 	 *            {@link ManagedObjectSource}.
@@ -60,20 +60,20 @@ public class EscalationManagedObjectSource extends
 
 	/**
 	 * Invokes processing.
-	 *
+	 * 
 	 * @param argument
 	 *            Argument passed by {@link ManagedObjectSource}.
 	 */
 	public static void invokeProcessing(String argument) {
 		// Invoke processing
 		INSTANCE.executeContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument,
-				INSTANCE, INSTANCE);
+				INSTANCE, 0, INSTANCE);
 	}
 
 	/**
 	 * Throws the escalation if handled by the {@link ManagedObjectSource}
 	 * {@link EscalationHandler}.
-	 *
+	 * 
 	 * @throws Throwable
 	 *             Escalation.
 	 */

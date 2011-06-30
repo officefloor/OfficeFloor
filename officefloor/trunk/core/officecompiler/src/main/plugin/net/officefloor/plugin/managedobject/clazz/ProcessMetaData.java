@@ -148,7 +148,7 @@ public class ProcessMetaData {
 
 			// Invoke the process
 			ProcessMetaData.this.executeContext.invokeProcess(index, parameter,
-					this.managedObject);
+					this.managedObject, 0);
 
 			// Never returns a value
 			return null;

@@ -324,7 +324,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 			this.transitionState = nextState;
 
 			// Run process for asynchronous operation
-			this.executeContext.invokeProcess(0, this, this);
+			this.executeContext.invokeProcess(0, this, this, 0);
 		}
 
 		/**
