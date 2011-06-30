@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.internal.structure;
 
+import java.util.Timer;
+
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 
 /**
@@ -33,9 +35,12 @@ public interface ManagedObjectExecuteContextFactory<F extends Enum<F>> {
 	 * @param ticker
 	 *            {@link ProcessTicker} to keep track of the active
 	 *            {@link ProcessState} instances.
+	 * @param timer
+	 *            {@link Timer} to enable delay of {@link ProcessState}
+	 *            invocation.
 	 * @return {@link ManagedObjectExecuteContext}.
 	 */
 	ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(
-			ProcessTicker ticker);
+			ProcessTicker ticker, Timer timer);
 
 }

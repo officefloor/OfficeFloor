@@ -36,7 +36,7 @@ import net.officefloor.plugin.stream.OutputBufferStream;
 
 /**
  * TCP {@link ConnectionHandler}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class TcpConnectionHandler implements ConnectionHandler,
@@ -75,7 +75,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param connection
 	 *            {@link Connection}.
 	 * @param maxIdleTime
@@ -93,7 +93,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * {@link Connection} of this {@link ConnectionHandler}.
 	 * <p>
 	 * Called within the lock on the {@link Connection}.
-	 *
+	 * 
 	 * @param newConnectionFlowIndex
 	 *            {@link Flow} index to handle a new connection.
 	 * @param executeContext
@@ -106,7 +106,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		if (!this.isProcessStarted) {
 
 			// Invokes the process
-			executeContext.invokeProcess(newConnectionFlowIndex, this, this);
+			executeContext.invokeProcess(newConnectionFlowIndex, this, this, 0);
 
 			// Indicate process started
 			this.isProcessStarted = true;
@@ -116,7 +116,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	/*
 	 * ==================================================================
 	 * ConnectionHandler
-	 *
+	 * 
 	 * Thread-safe by the lock taken in SockerListener.
 	 * ==================================================================
 	 */

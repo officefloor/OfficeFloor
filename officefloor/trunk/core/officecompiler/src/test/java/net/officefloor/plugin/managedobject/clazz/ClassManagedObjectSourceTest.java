@@ -176,7 +176,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can inject the {@link ProcessInterface} instances into the
+	 * Ensures can inject the {@link FlowInterface} instances into the
 	 * object.
 	 */
 	@SuppressWarnings("unchecked")
@@ -199,7 +199,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Record invoking the processes
 		this.recordReturn(executeContext,
-				executeContext.invokeProcess(0, null, null), future,
+				executeContext.invokeProcess(0, null, null, 0), future,
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
@@ -216,12 +216,15 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 						assertTrue("Incorrect managed object type",
 								actual[2] instanceof ClassManagedObject);
 
+						// Ensure delay matches
+						isMatch &= (expected[3].equals(actual[3]));
+
 						// Return whether matched
 						return isMatch;
 					}
 				});
 		this.recordReturn(executeContext,
-				executeContext.invokeProcess(1, PROCESS_PARAMETER, null),
+				executeContext.invokeProcess(1, PROCESS_PARAMETER, null, 0),
 				future);
 
 		// Replay mocks
@@ -292,7 +295,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link ProcessInterface}.
+	 * Mock {@link FlowInterface}.
 	 */
 	@FlowInterface
 	public static interface MockProcessInterface {

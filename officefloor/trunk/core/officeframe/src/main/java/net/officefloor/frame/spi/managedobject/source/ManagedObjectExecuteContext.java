@@ -60,12 +60,15 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @param delay
+	 *            Delay in milliseconds before the {@link Flow} is invoked. A 0
+	 *            or negative value invokes the {@link Flow} immediately.
 	 * @return {@link ProcessFuture}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
 	ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject);
+			ManagedObject managedObject, long delay);
 
 	/**
 	 * Instigates a {@link Flow}.
@@ -77,12 +80,15 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @param delay
+	 *            Delay in milliseconds before the {@link Flow} is invoked. A 0
+	 *            or negative value invokes the {@link Flow} immediately.
 	 * @return {@link ProcessFuture}
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
 	ProcessFuture invokeProcess(int flowIndex, Object parameter,
-			ManagedObject managedObject);
+			ManagedObject managedObject, long delay);
 
 	/**
 	 * <p>
@@ -99,6 +105,9 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @param delay
+	 *            Delay in milliseconds before the {@link Flow} is invoked. A 0
+	 *            or negative value invokes the {@link Flow} immediately.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @return {@link ProcessFuture}.
@@ -106,7 +115,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @see ManagedObjectExecuteContext
 	 */
 	ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler);
+			ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler);
 
 	/**
 	 * <p>
@@ -123,6 +133,9 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
+	 * @param delay
+	 *            Delay in milliseconds before the {@link Flow} is invoked. A 0
+	 *            or negative value invokes the {@link Flow} immediately.
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @return {@link ProcessFuture}.
@@ -130,6 +143,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @see ManagedObjectExecuteContext
 	 */
 	ProcessFuture invokeProcess(int flowIndex, Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler);
+			ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler);
 
 }

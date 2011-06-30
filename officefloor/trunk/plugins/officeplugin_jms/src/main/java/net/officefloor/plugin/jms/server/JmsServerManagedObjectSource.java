@@ -137,7 +137,7 @@ public class JmsServerManagedObjectSource
 	 */
 	public void runSession(JmsServerManagedObject managedObject) {
 		// Invoke on message to run the session and process message
-		this.executeContext.invokeProcess(0, managedObject, managedObject);
+		this.executeContext.invokeProcess(0, managedObject, managedObject, 0);
 	}
 
 	/*
@@ -174,9 +174,7 @@ public class JmsServerManagedObjectSource
 				null);
 
 		// Link the on message task
-		context
-				.addFlow(JmsServerFlows.ON_MESSAGE,
-						JmsServerManagedObject.class);
+		context.addFlow(JmsServerFlows.ON_MESSAGE, JmsServerManagedObject.class);
 		mosContext
 				.linkProcess(JmsServerFlows.ON_MESSAGE, "server", "onmessage");
 		OnMessageTask onMessageTask = new OnMessageTask();
@@ -191,8 +189,8 @@ public class JmsServerManagedObjectSource
 		taskBuilder.setTeam("team");
 
 		// Register the recycle task
-		new RecycleJmsServerTask(this).registerAsRecycleTask(context
-				.getManagedObjectSourceContext(), "team");
+		new RecycleJmsServerTask(this).registerAsRecycleTask(
+				context.getManagedObjectSourceContext(), "team");
 
 		// Specify extension interfaces
 		context.addManagedObjectExtensionInterface(Transaction.class,
@@ -268,8 +266,9 @@ public class JmsServerManagedObjectSource
 
 				} else {
 					// Create the server session (transacted)
-					session = new JmsServerManagedObject(this, this.connection
-							.createSession(true, Session.SESSION_TRANSACTED));
+					session = new JmsServerManagedObject(this,
+							this.connection.createSession(true,
+									Session.SESSION_TRANSACTED));
 
 					// Increment the number of sessions
 					this.numberOfSessions++;

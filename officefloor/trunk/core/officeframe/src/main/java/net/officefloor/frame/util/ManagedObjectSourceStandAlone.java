@@ -230,10 +230,20 @@ public class ManagedObjectSourceStandAlone {
 		 *            Index of the {@link ProcessState} to invoke.
 		 * @param escalationHandler
 		 *            {@link EscalationHandler}. May be <code>null</code>.
+		 * @param delay
+		 *            Delay to invoke {@link ProcessState}.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private ProcessFuture process(int processIndex,
-				EscalationHandler escalationHandler) {
+				EscalationHandler escalationHandler, long delay) {
+
+			// Stand alone not support delaying invocation
+			if (delay > 0) {
+				throw new UnsupportedOperationException(
+						"Unable to delay invocation of Process from "
+								+ ManagedObjectSourceStandAlone.class
+										.getSimpleName());
+			}
 
 			// Obtain the details for invoking process
 			InvokeProcessTaskStruct struct = ManagedObjectSourceStandAlone.this.processes
@@ -279,26 +289,28 @@ public class ManagedObjectSourceStandAlone {
 
 		@Override
 		public ProcessFuture invokeProcess(F key, Object parameter,
-				ManagedObject managedObject) {
-			return this.process(key.ordinal(), null);
+				ManagedObject managedObject, long delay) {
+			return this.process(key.ordinal(), null, delay);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-				ManagedObject managedObject) {
-			return this.process(flowIndex, null);
+				ManagedObject managedObject, long delay) {
+			return this.process(flowIndex, null, delay);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(F key, Object parameter,
-				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			return this.process(key.ordinal(), escalationHandler);
+				ManagedObject managedObject, long delay,
+				EscalationHandler escalationHandler) {
+			return this.process(key.ordinal(), escalationHandler, delay);
 		}
 
 		@Override
 		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-				ManagedObject managedObject, EscalationHandler escalationHandler) {
-			return this.process(flowIndex, escalationHandler);
+				ManagedObject managedObject, long delay,
+				EscalationHandler escalationHandler) {
+			return this.process(flowIndex, escalationHandler, delay);
 		}
 
 		/*

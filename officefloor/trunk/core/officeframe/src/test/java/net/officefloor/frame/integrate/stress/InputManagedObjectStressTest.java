@@ -45,7 +45,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests using Input {@link ManagedObject} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class InputManagedObjectStressTest extends
@@ -82,7 +82,7 @@ public class InputManagedObjectStressTest extends
 
 	/**
 	 * Does the asynchronous operation stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -113,8 +113,8 @@ public class InputManagedObjectStressTest extends
 		taskBuilder.buildObject("INPUT_MO");
 
 		// Create the task for running the test
-		this.constructWork(new RunWork(work), "RUN_TEST", "run").buildTask(
-				"run", "TEAM").buildTaskContext();
+		this.constructWork(new RunWork(work), "RUN_TEST", "run")
+				.buildTask("run", "TEAM").buildTaskContext();
 
 		// Create and register the dependency
 		this.constructManagedObject(dependency, "DEPENDENCY_MOS", officeName);
@@ -163,7 +163,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param inputWork
 		 *            {@link InputWork}.
 		 */
@@ -173,7 +173,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Runs.
-		 *
+		 * 
 		 * @param context
 		 *            {@link TaskContext}.
 		 */
@@ -214,7 +214,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param expectedDependency
 		 *            Expected dependency on the {@link InputManagedObject}.
 		 */
@@ -224,7 +224,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Task for processing.
-		 *
+		 * 
 		 * @param mo
 		 *            {@link InputManagedObject}.
 		 */
@@ -283,7 +283,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param source
 		 *            {@link InputManagedObjectSource}.
 		 * @param invocationCount
@@ -370,7 +370,7 @@ public class InputManagedObjectStressTest extends
 
 		/**
 		 * Runs the next process.
-		 *
+		 * 
 		 * @param invocationCount
 		 *            Invocation count including the process to invoke.
 		 */
@@ -392,7 +392,7 @@ public class InputManagedObjectStressTest extends
 			// Trigger the next process from next input managed object
 			instance.executeContext.invokeProcess(FlowKey.TRIGGER_PROCESS,
 					new Integer(instanceIndex), new InputManagedObject(
-							instance, invocationCount));
+							instance, invocationCount), 0);
 		}
 
 		/*

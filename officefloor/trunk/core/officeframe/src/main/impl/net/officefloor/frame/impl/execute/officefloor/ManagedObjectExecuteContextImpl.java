@@ -18,6 +18,9 @@
 
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -64,6 +67,11 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	private final ProcessTicker processTicker;
 
 	/**
+	 * {@link Timer}.
+	 */
+	private final Timer timer;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
@@ -79,16 +87,19 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 *            instances.
 	 * @param processTicker
 	 *            {@link ProcessTicker}.
+	 * @param timer
+	 *            {@link Timer}.
 	 */
 	public ManagedObjectExecuteContextImpl(
 			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData,
-			ProcessTicker processTicker) {
+			ProcessTicker processTicker, Timer timer) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
 		this.processTicker = processTicker;
+		this.timer = timer;
 	}
 
 	/*
@@ -97,27 +108,30 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 
 	@Override
 	public ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject) {
-		return this
-				.invokeProcess(key.ordinal(), parameter, managedObject, null);
+			ManagedObject managedObject, long delay) {
+		return this.invokeProcess(key.ordinal(), parameter, managedObject,
+				delay, null);
 	}
 
 	@Override
 	public ProcessFuture invokeProcess(int processIndex, Object parameter,
-			ManagedObject managedObject) {
-		return this.invokeProcess(processIndex, parameter, managedObject, null);
+			ManagedObject managedObject, long delay) {
+		return this.invokeProcess(processIndex, parameter, managedObject,
+				delay, null);
 	}
 
 	@Override
 	public ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
+			ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler) {
 		return this.invokeProcess(key.ordinal(), parameter, managedObject,
-				escalationHandler);
+				delay, escalationHandler);
 	}
 
 	@Override
 	public ProcessFuture invokeProcess(int processIndex, Object parameter,
-			ManagedObject managedObject, EscalationHandler escalationHandler) {
+			ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler) {
 
 		// Obtain the flow meta-data
 		if ((processIndex < 0) || (processIndex >= this.processLinks.length)) {
@@ -130,7 +144,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the job in a new process
-		JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
+		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
 				parameter, managedObject, this.managedObjectMetaData,
 				this.processMoIndex, escalationHandler);
 
@@ -146,7 +160,19 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 
 		// Activate the Job
 		// Must register before activating job to have trigger on completion.
-		jobNode.activateJob();
+		if (delay > 0) {
+			// Delay activation of Job
+			this.timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					jobNode.activateJob();
+				}
+			}, delay);
+
+		} else {
+			// Activate Job immediately
+			jobNode.activateJob();
+		}
 
 		// Return the Process Future
 		return processState.getProcessFuture();

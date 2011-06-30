@@ -29,7 +29,7 @@ import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 
 /**
  * HTTP {@link Server}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class HttpServer implements Server<HttpConnectionHandler> {
@@ -46,7 +46,7 @@ public class HttpServer implements Server<HttpConnectionHandler> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param requestHandlingFlowIndex
 	 *            {@link Flow} index to handle processing {@link HttpRequest}.
 	 */
@@ -73,7 +73,7 @@ public class HttpServer implements Server<HttpConnectionHandler> {
 
 		// Invoke processing of the HTTP managed object
 		this.executeContext.invokeProcess(this.requestHandlingFlowIndex,
-				managedObject.getServerHttpConnection(), managedObject,
+				managedObject.getServerHttpConnection(), managedObject, 0,
 				managedObject.getEscalationHandler());
 	}
 

@@ -747,8 +747,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				null, processBoundMetaData, flowMetaData);
 		ProcessFuture actualFuture = rawOffice
 				.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext(null)
-				.invokeProcess(0, parameter, managedObject);
+				.createManagedObjectExecuteContext(null, null)
+				.invokeProcess(0, parameter, managedObject, 0);
 		this.verifyMockObjects();
 
 		// Ensure correct future
@@ -863,8 +863,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				null, processBoundMetaData, flowMetaData);
 		ProcessFuture actualFuture = rawOffice
 				.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext(processTicker)
-				.invokeProcess(0, parameter, managedObject);
+				.createManagedObjectExecuteContext(processTicker, null)
+				.invokeProcess(0, parameter, managedObject, 0);
 		this.verifyMockObjects();
 
 		// Ensure correct future
