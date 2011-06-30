@@ -25,6 +25,11 @@ package net.officefloor.plugin.comet.spi;
 public class PublishedEventImpl implements PublishedEvent {
 
 	/**
+	 * Id of this event.
+	 */
+	private final long eventId;
+
+	/**
 	 * Listener type.
 	 */
 	private final Class<?> listenerType;
@@ -52,6 +57,8 @@ public class PublishedEventImpl implements PublishedEvent {
 	/**
 	 * Initiate.
 	 * 
+	 * @param eventId
+	 *            Id of this event.
 	 * @param listenerType
 	 *            Listener type.
 	 * @param eventParameter
@@ -61,8 +68,9 @@ public class PublishedEventImpl implements PublishedEvent {
 	 * @param publishTimestamp
 	 *            Publish time stamp.
 	 */
-	public PublishedEventImpl(Class<?> listenerType, Object eventParameter,
-			Object matchKey, long publishTimestamp) {
+	public PublishedEventImpl(long eventId, Class<?> listenerType,
+			Object eventParameter, Object matchKey, long publishTimestamp) {
+		this.eventId = eventId;
 		this.listenerType = listenerType;
 		this.eventParameter = eventParameter;
 		this.matchKey = matchKey;
@@ -85,9 +93,7 @@ public class PublishedEventImpl implements PublishedEvent {
 
 	@Override
 	public long getEventId() {
-		// TODO implement CometEvent.getEventId
-		throw new UnsupportedOperationException(
-				"TODO implement CometEvent.getEventId");
+		return this.eventId;
 	}
 
 	@Override
