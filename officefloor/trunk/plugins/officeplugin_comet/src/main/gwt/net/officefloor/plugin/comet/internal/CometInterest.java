@@ -19,8 +19,6 @@ package net.officefloor.plugin.comet.internal;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import net.officefloor.plugin.comet.api.CometListener;
-
 /**
  * A particular interest in certain types of {@link CometEvent} instances.
  * 
@@ -29,9 +27,9 @@ import net.officefloor.plugin.comet.api.CometListener;
 public class CometInterest implements IsSerializable {
 
 	/**
-	 * Listener type.
+	 * Listener type name.
 	 */
-	private Class<? extends CometListener> listenerType;
+	private String listenerTypeName;
 
 	/**
 	 * Filter key. May be <code>null</code> to receive all {@link CometEvent}
@@ -42,15 +40,14 @@ public class CometInterest implements IsSerializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param listenerType
-	 *            Listener type.
+	 * @param listenerTypeName
+	 *            Listener type name.
 	 * @param filterKey
 	 *            Filter key. May be <code>null</code> to receive all
 	 *            {@link CometEvent} instances for the listener type.
 	 */
-	public CometInterest(Class<? extends CometListener> listenerType,
-			Object filterKey) {
-		this.listenerType = listenerType;
+	public CometInterest(String listenerTypeName, Object filterKey) {
+		this.listenerTypeName = listenerTypeName;
 		this.filterKey = filterKey;
 	}
 
@@ -61,12 +58,12 @@ public class CometInterest implements IsSerializable {
 	}
 
 	/**
-	 * Obtains the listener type.
+	 * Obtains the listener type name.
 	 * 
-	 * @return Listener type.
+	 * @return Listener type name.
 	 */
-	public Class<? extends CometListener> getListenerType() {
-		return this.listenerType;
+	public String getListenerTypeName() {
+		return this.listenerTypeName;
 	}
 
 	/**

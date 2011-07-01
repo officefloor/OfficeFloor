@@ -19,19 +19,22 @@ package net.officefloor.plugin.comet.internal;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import net.officefloor.plugin.comet.api.CometListener;
-
 /**
  * Comet event.
  * 
  * @author Daniel Sagenschneider
  */
-public class CometEvent {
+public class CometEvent implements IsSerializable {
 
 	/**
-	 * Listener type.
+	 * Identifier for this {@link CometEvent}.
 	 */
-	private Class<? extends CometListener> listenerType;
+	private long eventId;
+
+	/**
+	 * Listener type name.
+	 */
+	private String listenerTypeName;
 
 	/**
 	 * Event.
@@ -46,17 +49,20 @@ public class CometEvent {
 	/**
 	 * Initiate.
 	 * 
-	 * @param listenerType
-	 *            Listener type.
+	 * @param eventId
+	 *            Identifier for this {@link CometEvent}.
+	 * @param listenerTypeName
+	 *            Listener type name.
 	 * @param event
 	 *            Event.
 	 * @param filterKey
 	 *            Filter key used on the {@link CometInterest}. May be
 	 *            <code>null</code>.
 	 */
-	public CometEvent(Class<? extends CometListener> listenerType,
-			Object event, Object filterKey) {
-		this.listenerType = listenerType;
+	public CometEvent(long eventId, String listenerTypeName, Object event,
+			Object filterKey) {
+		this.eventId = eventId;
+		this.listenerTypeName = listenerTypeName;
 		this.event = event;
 		this.filterKey = filterKey;
 	}
@@ -68,12 +74,21 @@ public class CometEvent {
 	}
 
 	/**
-	 * Obtains the listener type.
+	 * Obtains the identifier for this {@link CometEvent}.
 	 * 
-	 * @return Listener type.
+	 * @return Identifier for this {@link CometEvent}.
 	 */
-	public Class<? extends CometListener> getListenerType() {
-		return this.listenerType;
+	public long getEventId() {
+		return this.eventId;
+	}
+
+	/**
+	 * Obtains the listener type name.
+	 * 
+	 * @return Listener type name.
+	 */
+	public String getListenerTypeName() {
+		return this.listenerTypeName;
 	}
 
 	/**

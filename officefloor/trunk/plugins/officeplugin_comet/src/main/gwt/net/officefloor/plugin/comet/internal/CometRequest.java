@@ -50,7 +50,7 @@ public class CometRequest implements IsSerializable {
 	 * @param interests
 	 *            Listing of {@link CometInterest}.
 	 */
-	public CometRequest(long lastEventId, CometInterest[] interests) {
+	public CometRequest(long lastEventId, CometInterest... interests) {
 		this.lastEventId = lastEventId;
 		this.interests = interests;
 	}
