@@ -108,7 +108,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testNoMatchingEventByListenerType() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
-		this.recordInit(new CometInterest(MockTwoListener.class, null));
+		this.recordInit(new CometInterest(MockTwoListener.class.getName(), null));
 		this.recordWait(10);
 		this.doTest();
 	}
@@ -118,8 +118,9 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchByListenerType() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
-		this.recordInit(new CometInterest(MockOneListener.class, null));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT", null));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", null));
 		this.doTest();
 	}
 
@@ -128,8 +129,9 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchByNoFilterKey() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "MATCH_KEY");
-		this.recordInit(new CometInterest(MockOneListener.class, null));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT", null));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", null));
 		this.doTest();
 	}
 
@@ -138,9 +140,10 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchByNoMatchKey() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
-		this.recordInit(new CometInterest(MockOneListener.class, "FILTER_KEY"));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT",
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
 				"FILTER_KEY"));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", "FILTER_KEY"));
 		this.doTest();
 	}
 
@@ -149,9 +152,10 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchWithFiltering() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "MATCH");
-		this.recordInit(new CometInterest(MockOneListener.class, "MATCH"));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT",
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
 				"MATCH"));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", "MATCH"));
 		this.doTest();
 	}
 
@@ -160,7 +164,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testFiltered() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "NOT_MATCH");
-		this.recordInit(new CometInterest(MockOneListener.class, "MATCH"));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
+				"MATCH"));
 		this.recordWait(10);
 		this.doTest();
 	}
@@ -171,12 +176,14 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchMultipleInterests() {
 		this.recordEvent(1, MockOneListener.class, "EVENT", "MATCH");
-		this.recordInit(new CometInterest(MockOneListener.class, "MATCH"),
-				new CometInterest(MockOneListener.class, "MATCH"),
-				new CometInterest(MockTwoListener.class, "NOT_MATCH"));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT",
-				"MATCH"), new CometEvent(MockOneListener.class, "EVENT",
-				"MATCH"));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
+				"MATCH"), new CometInterest(MockOneListener.class.getName(),
+				"MATCH"), new CometInterest(MockTwoListener.class.getName(),
+				"NOT_MATCH"));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", "MATCH"),
+				new CometEvent(1, MockOneListener.class.getName(), "EVENT",
+						"MATCH"));
 		this.doTest();
 	}
 
@@ -188,10 +195,12 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		this.recordEvent(1, MockOneListener.class, "EVENT_ONE", "MATCH");
 		this.recordEvent(2, MockOneListener.class, "EVENT_TWO", "MATCH");
 		this.recordEvent(3, MockTwoListener.class, "EVENT_THREE", "NOT_MATCH");
-		this.recordInit(new CometInterest(MockOneListener.class, "MATCH"));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT_ONE",
-				"MATCH"), new CometEvent(MockOneListener.class, "EVENT_TWO",
+		this.recordInit(new CometInterest(MockOneListener.class.getName(),
 				"MATCH"));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT_ONE", "MATCH"),
+				new CometEvent(2, MockOneListener.class.getName(), "EVENT_TWO",
+						"MATCH"));
 		this.doTest();
 	}
 
@@ -200,11 +209,12 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 * {@link CometEvent} of {@link CometInterest} is available.
 	 */
 	public void testPublishTriggerEvent() {
-		this.recordInit(new CometInterest(MockOneListener.class, null));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
 		this.recordWait(10);
 		this.recordPublishEvent(MockOneListener.class, "EVENT", null);
 		this.async.notifyComplete();
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT", null));
+		this.recordResponse(new CometEvent(1, MockOneListener.class.getName(),
+				"EVENT", null));
 		this.doTest();
 	}
 
@@ -216,7 +226,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		// Setup an event (that will be expired)
 		this.recordEvent(1, MockOneListener.class, "EVENT", null);
 
-		this.recordInit(new CometInterest(MockOneListener.class, null));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
 
 		// Expire event
 		this.recordExpireBeforeServicing(CometServiceManagedObjectSource.DEFAULT_EVENT_TIMEOUT * 2);
@@ -232,7 +242,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 */
 	public void testTimeoutRequests() {
 		// Setup waiting on event
-		this.recordInit(new CometInterest(MockOneListener.class, null));
+		this.recordInit(new CometInterest(MockOneListener.class.getName(), null));
 		this.recordWait(1);
 
 		// Expire as no event within request timeout
@@ -253,10 +263,12 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		this.recordEvent(10, MockOneListener.class, "EVENT_ONE", null);
 		this.recordEvent(20, MockOneListener.class, "EVENT_TWO", null);
 		this.recordEvent(30, MockOneListener.class, "EVENT_THREE", null);
-		this.recordInit(1, new CometInterest(MockOneListener.class, null));
-		this.recordResponse(new CometEvent(MockOneListener.class, "EVENT_TWO",
-				null), new CometEvent(MockOneListener.class, "EVENT_THREE",
+		this.recordInit(1, new CometInterest(MockOneListener.class.getName(),
 				null));
+		this.recordResponse(new CometEvent(2, MockOneListener.class.getName(),
+				"EVENT_TWO", null),
+				new CometEvent(3, MockOneListener.class.getName(),
+						"EVENT_THREE", null));
 		this.doTest();
 	}
 
@@ -415,7 +427,7 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 			// Ensure have at least one interest
 			if (interests.length == 0) {
 				interests = new CometInterest[] { new CometInterest(
-						MockOneListener.class, null) };
+						MockOneListener.class.getName(), null) };
 			}
 
 			// Create the Comet Request
@@ -467,9 +479,12 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 				for (int i = 0; i < expectedEvents.length; i++) {
 					CometEvent expectedEvent = expectedEvents[i];
 					CometEvent actualEvent = actualEvents[i];
+					assertEquals("Incorrect event Id for event " + i,
+							expectedEvent.getEventId(),
+							actualEvent.getEventId());
 					assertEquals("Incorrect listener type for event " + i,
-							expectedEvent.getListenerType(),
-							actualEvent.getListenerType());
+							expectedEvent.getListenerTypeName(),
+							actualEvent.getListenerTypeName());
 					assertEquals("Incorrect event payload for event " + i,
 							expectedEvent.getEvent(), actualEvent.getEvent());
 					assertEquals("Incorrect filter key for event " + i,

@@ -24,11 +24,17 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
@@ -43,22 +49,28 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  * 
  * @author Daniel Sagenschneider
  */
-public class CometServiceManagedObjectSource extends
-		AbstractManagedObjectSource<Dependencies, None> {
+public class CometServiceManagedObjectSource
+		extends
+		AbstractManagedObjectSource<Dependencies, CometServiceManagedObjectSource.Flows> {
 
 	/**
-	 * <p>
-	 * Property name to obtain the {@link CometRequest} timeout.
-	 * <p>
-	 * This is the time in milli-seconds that the {@link CometRequest} will
-	 * &quot;long poll&quot; wait.
+	 * {@link Flow} keys.
 	 */
-	public static final String PROPERTY_REQUEST_TIMEOUT = "request.timeout";
+	public static enum Flows {
+		EXPIRE
+	}
 
 	/**
-	 * Default {@link CometRequest} timeout.
+	 * Interval in milliseconds for checking for expired {@link PublishedEvent}
+	 * instances and expired {@link CometRequest} instances.
 	 */
-	public static final long DEFAULT_REQUEST_TIMEOUT = 60 * 1000;
+	public static final String PROPERTY_EXPIRE_CHECK_INTERVAL = "expire.check.interval";
+
+	/**
+	 * Default expire check interval for expired {@link PublishedEvent}
+	 * instances and expired {@link CometRequest} instances.
+	 */
+	public static final long DEFAULT_EXPIRE_CHECK_INTERVAL = 5000; // 5 seconds
 
 	/**
 	 * <p>
@@ -72,12 +84,36 @@ public class CometServiceManagedObjectSource extends
 	/**
 	 * Default {@link PublishedEvent} timeout.
 	 */
-	public static final long DEFAULT_EVENT_TIMEOUT = 30 * 1000;
+	public static final long DEFAULT_EVENT_TIMEOUT = 30 * 1000; // 30 seconds
+
+	/**
+	 * <p>
+	 * Property name to obtain the {@link CometRequest} timeout.
+	 * <p>
+	 * This is the time in milli-seconds that the {@link CometRequest} will
+	 * &quot;long poll&quot; wait.
+	 */
+	public static final String PROPERTY_REQUEST_TIMEOUT = "request.timeout";
+
+	/**
+	 * Default {@link CometRequest} timeout.
+	 */
+	public static final long DEFAULT_REQUEST_TIMEOUT = 60 * 1000; // 60 seconds
 
 	/**
 	 * Provides the publish event timestamp.
 	 */
 	private final PublishClock clock;
+
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private ManagedObjectExecuteContext<Flows> executeContext;
+
+	/**
+	 * Interval in milliseconds to check for expiring.
+	 */
+	private long expireCheckInterval;
 
 	/**
 	 * Time to timeout waiting {@link CometRequest}.
@@ -185,9 +221,9 @@ public class CometServiceManagedObjectSource extends
 					}
 
 					// Add the event for the interest
-					events.add(new CometEvent(interest.getListenerType(),
-							newEvent.getEventParameter(), interest
-									.getFilterKey()));
+					events.add(new CometEvent(newEvent.getEventId(), interest
+							.getListenerTypeName(), newEvent
+							.getEventParameter(), interest.getFilterKey()));
 				}
 			}
 			if (events != null) {
@@ -243,8 +279,9 @@ public class CometServiceManagedObjectSource extends
 					}
 
 					// Add the event for the interest
-					events.add(new CometEvent(interest.getListenerType(), node
-							.getEventParameter(), interest.getFilterKey()));
+					events.add(new CometEvent(node.getEventId(), interest
+							.getListenerTypeName(), node.getEventParameter(),
+							interest.getFilterKey()));
 				}
 			}
 
@@ -338,7 +375,8 @@ public class CometServiceManagedObjectSource extends
 	private boolean isMatch(CometInterest interest, PublishedEvent event) {
 
 		// Determine if same listener type
-		if (!(interest.getListenerType().equals(event.getListenerType()))) {
+		if (!(interest.getListenerTypeName().equals(event.getListenerType()
+				.getName()))) {
 			return false; // not same listener type
 		}
 
@@ -355,6 +393,24 @@ public class CometServiceManagedObjectSource extends
 		return true;
 	}
 
+	/**
+	 * Runs the loop for checking for expiring.
+	 */
+	private synchronized void expireCheckLoop() {
+
+		// Undertake an expire
+		this.expire();
+
+		// Determine if continue checking
+		if (this.executeContext == null) {
+			return; // stopping, so no further checking
+		}
+
+		// Setup for next expire check
+		this.executeContext.invokeProcess(Flows.EXPIRE, null,
+				new CometServiceManagedObject(this), this.expireCheckInterval);
+	}
+
 	/*
 	 * ================== ManagedObjectSource ==========================
 	 */
@@ -365,30 +421,70 @@ public class CometServiceManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context)
+	protected void loadMetaData(MetaDataContext<Dependencies, Flows> context)
 			throws Exception {
-		ManagedObjectSourceContext<None> mosContext = context
+		ManagedObjectSourceContext<Flows> mosContext = context
 				.getManagedObjectSourceContext();
+
+		// Obtain the expire check interval
+		this.expireCheckInterval = Long.parseLong(mosContext.getProperty(
+				PROPERTY_EXPIRE_CHECK_INTERVAL,
+				String.valueOf(DEFAULT_EXPIRE_CHECK_INTERVAL)));
+
+		// Obtain the event timeout
+		this.eventTimeout = Long.parseLong(mosContext.getProperty(
+				PROPERTY_EVENT_TIMEOUT, String.valueOf(DEFAULT_EVENT_TIMEOUT)));
 
 		// Obtain the request timeout
 		this.requestTimeout = Long.parseLong(mosContext.getProperty(
 				PROPERTY_REQUEST_TIMEOUT,
 				String.valueOf(DEFAULT_REQUEST_TIMEOUT)));
 
-		// Obtain the event timeout
-		this.eventTimeout = Long.parseLong(mosContext.getProperty(
-				PROPERTY_EVENT_TIMEOUT, String.valueOf(DEFAULT_EVENT_TIMEOUT)));
-
 		// Specify meta-data
 		context.setObjectClass(CometService.class);
 		context.setManagedObjectClass(CometServiceManagedObject.class);
 		context.addDependency(Dependencies.SERVER_GWT_RPC_CONNECTION,
 				ServerGwtRpcConnection.class);
+
+		// Provide task to trigger expire
+		ExpireTask factory = new ExpireTask();
+		ManagedObjectTaskBuilder<None, None> task = mosContext.addWork(
+				"EXPIRE", factory).addTask("TASK", factory);
+		task.setTeam("TEAM");
+		context.addFlow(Flows.EXPIRE, null);
+		mosContext.linkProcess(Flows.EXPIRE, "EXPIRE", "TASK");
+	}
+
+	@Override
+	public synchronized void start(ManagedObjectExecuteContext<Flows> context)
+			throws Exception {
+		this.executeContext = context;
+
+		// Initiate the expire check loop
+		this.expireCheckLoop();
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		return new CometServiceManagedObject(this);
+	}
+
+	@Override
+	public synchronized void stop() {
+		// Stop expire check loop
+		this.executeContext = null;
+	}
+
+	/**
+	 * Expire {@link Task}.
+	 */
+	private class ExpireTask extends AbstractSingleTask<ExpireTask, None, None> {
+		@Override
+		public Object doTask(TaskContext<ExpireTask, None, None> context)
+				throws Throwable {
+			CometServiceManagedObjectSource.this.expireCheckLoop();
+			return null;
+		}
 	}
 
 	/**
