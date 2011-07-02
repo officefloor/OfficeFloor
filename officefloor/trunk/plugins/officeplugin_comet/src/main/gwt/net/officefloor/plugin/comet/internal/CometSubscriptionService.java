@@ -17,28 +17,27 @@
  */
 package net.officefloor.plugin.comet.internal;
 
-import java.util.Map;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
- * <p>
- * Provides the mapping of {@link CometSubscriber} interface type to its
- * {@link CometListenerAdapter}.
- * <p>
- * This interface is used for GWT generation and should not be implemented.
+ * RPC Service for the {@link CometSubscriber}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometListenerMap {
+@RemoteServiceRelativePath("comet")
+public interface CometSubscriptionService extends RemoteService {
 
 	/**
-	 * Creates the mapping of {@link CometSubscriber} interface type to its
-	 * {@link CometListenerAdapter}.
+	 * Listens by sending a {@link CometRequest} and when an event is available,
+	 * responds with {@link CometResponse} containing details of the event(s).
 	 * 
-	 * @return Mapping of {@link CometSubscriber} interface type to its
-	 *         {@link CometListenerAdapter}.
+	 * @param request
+	 *            {@link CometRequest}.
+	 * @return {@link CometResponse} containing the event.
 	 */
-	Map<Class<?>, CometListenerAdapter> getMap();
+	CometResponse listen(CometRequest request);
 
 }

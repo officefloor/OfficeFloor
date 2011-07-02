@@ -3,19 +3,18 @@
 
 	<!-- Enable use of RPC to call on the Server -->
 	<inherits name="com.google.gwt.user.RemoteService" />
-	
-	<!-- Generate adapters for the CometListener interfaces -->
+
+	<!-- Generate adapters for the CometSubscriber interfaces -->
 	<generate-with
-		class="net.officefloor.plugin.comet.generate.CometListenerAdapaterGenerator">
+		class="net.officefloor.plugin.comet.generate.CometAdapaterGenerator">
 		<when-type-assignable
-			class="net.officefloor.plugin.comet.api.CometListener" />
+			class="net.officefloor.plugin.comet.api.CometSubscriber" />
 	</generate-with>
 
 	<!-- Generate map of adapters -->
 	<generate-with
-		class="net.officefloor.plugin.comet.generate.CometListenerMapGenerator">
-		<when-type-is
-			class="net.officefloor.plugin.comet.internal.CometListenerMap" />
+		class="net.officefloor.plugin.comet.generate.CometAdapaterMapGenerator">
+		<when-type-is class="net.officefloor.plugin.comet.internal.CometAdapaterMap" />
 	</generate-with>
 
 	<!-- Code -->

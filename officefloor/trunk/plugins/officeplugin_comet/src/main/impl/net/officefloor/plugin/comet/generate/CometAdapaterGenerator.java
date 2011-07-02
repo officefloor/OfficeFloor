@@ -20,7 +20,7 @@ package net.officefloor.plugin.comet.generate;
 import java.io.PrintWriter;
 
 import net.officefloor.plugin.comet.api.CometSubscriber;
-import net.officefloor.plugin.comet.internal.CometListenerAdapter;
+import net.officefloor.plugin.comet.internal.CometAdapter;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -35,11 +35,11 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
 /**
- * Generates the {@link CometListenerAdapter}.
+ * Generates the {@link CometAdapter}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CometListenerAdapaterGenerator extends Generator {
+public class CometAdapaterGenerator extends Generator {
 
 	@Override
 	public String generate(TreeLogger logger, GeneratorContext context,
@@ -118,8 +118,8 @@ public class CometListenerAdapaterGenerator extends Generator {
 		// Generate the adapter
 		ClassSourceFileComposerFactory adapter = new ClassSourceFileComposerFactory(
 				packageName, simpleName);
-		adapter.addImplementedInterface(CometListenerAdapter.class.getName());
-		adapter.addImport(CometListenerAdapter.class.getName());
+		adapter.addImplementedInterface(CometAdapter.class.getName());
+		adapter.addImport(CometAdapter.class.getName());
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
 			logger.log(Type.ERROR, "Unable to generate " + qualifiedName

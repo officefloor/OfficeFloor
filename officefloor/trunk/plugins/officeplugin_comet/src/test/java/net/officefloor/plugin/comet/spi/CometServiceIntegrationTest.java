@@ -27,7 +27,7 @@ import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
-import net.officefloor.plugin.comet.internal.CometListenerService;
+import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -374,8 +374,8 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 			CometResponse response = null;
 			Throwable failure = null;
 			try {
-				CometListenerService caller = (CometListenerService) SyncProxy
-						.newProxyInstance(CometListenerService.class,
+				CometSubscriptionService caller = (CometSubscriptionService) SyncProxy
+						.newProxyInstance(CometSubscriptionService.class,
 								"http://localhost:" + this.port + "/comet/",
 								this.serviceName);
 				response = caller.listen(new CometRequest(

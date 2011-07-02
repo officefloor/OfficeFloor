@@ -17,27 +17,28 @@
  */
 package net.officefloor.plugin.comet.internal;
 
+import java.util.Map;
+
 import net.officefloor.plugin.comet.api.CometSubscriber;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 /**
- * Async RPC Service for the {@link CometSubscriber}.
+ * <p>
+ * Provides the mapping of {@link CometSubscriber} interface type to its
+ * {@link CometAdapter}.
+ * <p>
+ * This interface is used for GWT generation and should not be implemented.
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometListenerServiceAsync {
+public interface CometAdapterMap {
 
 	/**
-	 * Listens by sending a {@link CometRequest} and when an event is available,
-	 * responds with {@link CometResponse} containing details of the event(s).
+	 * Creates the mapping of {@link CometSubscriber} interface type to its
+	 * {@link CometAdapter}.
 	 * 
-	 * @param request
-	 *            {@link CometRequest}.
-	 * @param callback
-	 *            Invoked with the {@link CometResponse} when event(s) are
-	 *            available.
+	 * @return Mapping of {@link CometSubscriber} interface type to its
+	 *         {@link CometAdapter}.
 	 */
-	void listen(CometRequest request, AsyncCallback<CometResponse> callback);
+	Map<Class<?>, CometAdapter> getMap();
 
 }

@@ -20,7 +20,7 @@ package net.officefloor.plugin.comet.internal;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Request for the {@link CometListenerService}.
+ * Request for the {@link CometSubscriptionService}.
  * 
  * @author Daniel Sagenschneider
  */

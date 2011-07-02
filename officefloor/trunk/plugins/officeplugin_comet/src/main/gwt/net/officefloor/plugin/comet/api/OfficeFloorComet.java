@@ -19,10 +19,10 @@ package net.officefloor.plugin.comet.api;
 
 import java.util.Map;
 
-import net.officefloor.plugin.comet.internal.CometListenerAdapter;
-import net.officefloor.plugin.comet.internal.CometListenerMap;
-import net.officefloor.plugin.comet.internal.CometListenerService;
-import net.officefloor.plugin.comet.internal.CometListenerServiceAsync;
+import net.officefloor.plugin.comet.internal.CometAdapter;
+import net.officefloor.plugin.comet.internal.CometAdapterMap;
+import net.officefloor.plugin.comet.internal.CometSubscriptionService;
+import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 
@@ -39,10 +39,10 @@ public class OfficeFloorComet {
 
 	/**
 	 * Obtain the mapping of {@link CometSubscriber} interface type to its
-	 * {@link CometListenerAdapter}.
+	 * {@link CometAdapter}.
 	 */
-	private static final Map<Class<?>, CometListenerAdapter> adapters = ((CometListenerMap) GWT
-			.create(CometListenerMap.class)).getMap();
+	private static final Map<Class<?>, CometAdapter> adapters = ((CometAdapterMap) GWT
+			.create(CometAdapterMap.class)).getMap();
 
 	/**
 	 * Subscribes for asynchronous events.
@@ -54,18 +54,18 @@ public class OfficeFloorComet {
 	 *            Handles the event.
 	 * @param filterKey
 	 *            Key to filter events. The {@link Object#equals(Object)} is
-	 *            used to match event meta-data to determine filtering. This may
-	 *            be <code>null</code> to receive all events.
+	 *            used to match the event match key to determine filtering. This
+	 *            may be <code>null</code> to receive all events.
 	 */
 	public static <L extends CometSubscriber> void subscribe(
 			Class<L> listenerType, final L handler, Object filterKey) {
 
 		// Obtain the adapter
-		final CometListenerAdapter adapter = adapters.get(listenerType);
+		final CometAdapter adapter = adapters.get(listenerType);
 
 		// Start listening
-		CometListenerServiceAsync service = GWT
-				.create(CometListenerService.class);
+		CometSubscriptionServiceAsync service = GWT
+				.create(CometSubscriptionService.class);
 		service.listen(new CometRequest(), new AsyncCallback<CometResponse>() {
 			@Override
 			public void onSuccess(CometResponse result) {
@@ -83,6 +83,40 @@ public class OfficeFloorComet {
 						+ caught.getClass().getName() + "]");
 			}
 		});
+	}
+
+	/**
+	 * Publishes an event.
+	 * 
+	 * @param listenerType
+	 *            Listener interface type that should be marked by extending
+	 *            {@link CometSubscriber}.
+	 * @param data
+	 *            Data of event.
+	 * @param matchKey
+	 *            Match key to enable filtering. May be <code>null</code> to not
+	 *            have the event filtered.
+	 */
+	public static <L extends CometSubscriber> void publish(
+			Class<L> listenerType, Object data, Object matchKey) {
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	/**
+	 * Creates a publisher to allow using type safe publishing of events.
+	 * 
+	 * @param listenerType
+	 *            Listener interface type that should be marked by extending
+	 *            {@link CometSubscriber}.
+	 * @param matchKey
+	 *            Match key to enable filtering. May be <code>null</code> to not
+	 *            have the event filtered.
+	 * @return Implementation of {@link CometSubscriber} to enable invoking its
+	 *         method to publish an event.
+	 */
+	public static <L extends CometSubscriber> L createPublisher(
+			Class<L> listenerType, Object matchKey) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/**
