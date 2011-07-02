@@ -26,15 +26,20 @@ public interface PublishedEvent {
 
 	/**
 	 * <p>
-	 * Obtains the unique identifier for this {@link PublishedEvent}.
+	 * Obtains the unique sequence number for this {@link PublishedEvent}.
 	 * <p>
-	 * Identifier is unique per a single {@link CometServiceManagedObjectSource}
-	 * . Identifiers may overlap if using multiple
-	 * {@link CometServiceManagedObjectSource} instances.
+	 * Sequence numbers are used to not send the same {@link PublishedEvent} to
+	 * the client again. In other words, the client provides the last sequence
+	 * number received and only {@link PublishedEvent} instances after this
+	 * sequence number are sent.
+	 * <p>
+	 * Sequence numbers are unique per a single
+	 * {@link CometServiceManagedObjectSource}. Sequence numbers may overlap if
+	 * using multiple {@link CometServiceManagedObjectSource} instances.
 	 * 
-	 * @return Unique identifier for this {@link PublishedEvent}.
+	 * @return Unique sequence number for this {@link PublishedEvent}.
 	 */
-	long getEventId();
+	long getEventSequenceNumber();
 
 	/**
 	 * Obtains the time this {@link PublishedEvent} was published.
@@ -61,11 +66,11 @@ public interface PublishedEvent {
 	Class<?> getListenerType();
 
 	/**
-	 * Obtains the published event parameter.
+	 * Obtains the data of the event.
 	 * 
-	 * @return Published event parameter. May be <code>null</code>.
+	 * @return Published event data. May be <code>null</code>.
 	 */
-	Object getEventParameter();
+	Object getData();
 
 	/**
 	 * Obtains the match key.

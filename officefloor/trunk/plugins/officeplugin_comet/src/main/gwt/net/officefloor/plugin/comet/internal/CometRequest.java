@@ -27,15 +27,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class CometRequest implements IsSerializable {
 
 	/**
-	 * {@link CometEvent} Id to use should no {@link CometEvent} instances been
-	 * previously provided to the client.
+	 * {@link CometEvent} sequence number to use should no {@link CometEvent}
+	 * instances been previously provided to the client.
 	 */
-	public static final long FIRST_REQUEST_EVENT_ID = -1;
+	public static final long FIRST_REQUEST_SEQUENCE_NUMBER = -1;
 
 	/**
-	 * Last {@link CometEvent} Id received by the client.
+	 * Last {@link CometEvent} sequence number received by the client.
 	 */
-	private long lastEventId = -1;
+	private long lastSequenceNumber = -1;
 
 	/**
 	 * Listing of {@link CometInterest}.
@@ -45,13 +45,14 @@ public class CometRequest implements IsSerializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param lastEventId
-	 *            Last {@link CometEvent} Id received by the client.
+	 * @param lastSequenceNumber
+	 *            Last {@link CometEvent} sequence number received by the
+	 *            client.
 	 * @param interests
 	 *            Listing of {@link CometInterest}.
 	 */
-	public CometRequest(long lastEventId, CometInterest... interests) {
-		this.lastEventId = lastEventId;
+	public CometRequest(long lastSequenceNumber, CometInterest... interests) {
+		this.lastSequenceNumber = lastSequenceNumber;
 		this.interests = interests;
 	}
 
@@ -62,12 +63,13 @@ public class CometRequest implements IsSerializable {
 	}
 
 	/**
-	 * Obtains the last {@link CometEvent} Id received by the client.
+	 * Obtains the last {@link CometEvent} sequence number received by the
+	 * client.
 	 * 
-	 * @return Last {@link CometEvent} Id received by the client.
+	 * @return Last {@link CometEvent} sequence number received by the client.
 	 */
-	public long getLastEventId() {
-		return this.lastEventId;
+	public long getLastSequenceNumber() {
+		return this.lastSequenceNumber;
 	}
 
 	/**

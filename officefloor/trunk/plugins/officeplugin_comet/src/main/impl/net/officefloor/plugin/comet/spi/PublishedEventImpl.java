@@ -25,9 +25,9 @@ package net.officefloor.plugin.comet.spi;
 public class PublishedEventImpl implements PublishedEvent {
 
 	/**
-	 * Id of this event.
+	 * Sequence number of this event.
 	 */
-	private final long eventId;
+	private final long sequenceNumber;
 
 	/**
 	 * Listener type.
@@ -35,9 +35,9 @@ public class PublishedEventImpl implements PublishedEvent {
 	private final Class<?> listenerType;
 
 	/**
-	 * Event parameter.
+	 * Event data.
 	 */
-	private final Object eventParameter;
+	private final Object data;
 
 	/**
 	 * Match key to be checked against the filter key.
@@ -57,22 +57,22 @@ public class PublishedEventImpl implements PublishedEvent {
 	/**
 	 * Initiate.
 	 * 
-	 * @param eventId
-	 *            Id of this event.
+	 * @param sequenceNumber
+	 *            Sequence number of this event.
 	 * @param listenerType
 	 *            Listener type.
-	 * @param eventParameter
-	 *            Event parameter.
+	 * @param data
+	 *            Event data.
 	 * @param matchKey
 	 *            Match key.
 	 * @param publishTimestamp
 	 *            Publish time stamp.
 	 */
-	public PublishedEventImpl(long eventId, Class<?> listenerType,
-			Object eventParameter, Object matchKey, long publishTimestamp) {
-		this.eventId = eventId;
+	public PublishedEventImpl(long sequenceNumber, Class<?> listenerType,
+			Object data, Object matchKey, long publishTimestamp) {
+		this.sequenceNumber = sequenceNumber;
 		this.listenerType = listenerType;
-		this.eventParameter = eventParameter;
+		this.data = data;
 		this.matchKey = matchKey;
 		this.publishTimestamp = publishTimestamp;
 	}
@@ -92,8 +92,8 @@ public class PublishedEventImpl implements PublishedEvent {
 	 */
 
 	@Override
-	public long getEventId() {
-		return this.eventId;
+	public long getEventSequenceNumber() {
+		return this.sequenceNumber;
 	}
 
 	@Override
@@ -112,8 +112,8 @@ public class PublishedEventImpl implements PublishedEvent {
 	}
 
 	@Override
-	public Object getEventParameter() {
-		return this.eventParameter;
+	public Object getData() {
+		return this.data;
 	}
 
 	@Override

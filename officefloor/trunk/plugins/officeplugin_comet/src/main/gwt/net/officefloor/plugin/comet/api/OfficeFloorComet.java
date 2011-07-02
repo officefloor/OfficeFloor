@@ -38,18 +38,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class OfficeFloorComet {
 
 	/**
-	 * Obtain the mapping of {@link CometListener} interface type to its
+	 * Obtain the mapping of {@link CometSubscriber} interface type to its
 	 * {@link CometListenerAdapter}.
 	 */
 	private static final Map<Class<?>, CometListenerAdapter> adapters = ((CometListenerMap) GWT
 			.create(CometListenerMap.class)).getMap();
 
 	/**
-	 * Registers a listener for asynchronous events.
+	 * Subscribes for asynchronous events.
 	 * 
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
-	 *            {@link CometListener}.
+	 *            {@link CometSubscriber}.
 	 * @param handler
 	 *            Handles the event.
 	 * @param filterKey
@@ -57,7 +57,7 @@ public class OfficeFloorComet {
 	 *            used to match event meta-data to determine filtering. This may
 	 *            be <code>null</code> to receive all events.
 	 */
-	public static <L extends CometListener> void registerListener(
+	public static <L extends CometSubscriber> void subscribe(
 			Class<L> listenerType, final L handler, Object filterKey) {
 
 		// Obtain the adapter
@@ -67,7 +67,6 @@ public class OfficeFloorComet {
 		CometListenerServiceAsync service = GWT
 				.create(CometListenerService.class);
 		service.listen(new CometRequest(), new AsyncCallback<CometResponse>() {
-
 			@Override
 			public void onSuccess(CometResponse result) {
 

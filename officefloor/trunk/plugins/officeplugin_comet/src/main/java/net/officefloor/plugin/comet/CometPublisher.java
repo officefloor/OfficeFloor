@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.comet;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
 
 /**
@@ -32,14 +32,14 @@ public interface CometPublisher {
 	 * 
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
-	 *            {@link CometListener}.
+	 *            {@link CometSubscriber}.
 	 * @param filterKey
 	 *            Key to filter events. The {@link Object#equals(Object)} is
 	 *            used to match event meta-data to determine filtering. This may
 	 *            be <code>null</code> to not be filtered.
-	 * @return {@link CometListener} to publish events.
+	 * @return {@link CometSubscriber} to publish events.
 	 */
-	<L extends CometListener> L createPublisher(Class<L> listenerType,
+	<L extends CometSubscriber> L createPublisher(Class<L> listenerType,
 			Object filterKey);
 
 }

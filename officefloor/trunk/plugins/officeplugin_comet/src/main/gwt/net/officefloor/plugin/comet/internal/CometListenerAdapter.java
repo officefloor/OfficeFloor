@@ -17,11 +17,11 @@
  */
 package net.officefloor.plugin.comet.internal;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
  * <p>
- * Adapter on the {@link CometListener} interface to allow invocation of the
+ * Adapter on the {@link CometSubscriber} interface to allow invocation of the
  * method for handling the event.
  * <p>
  * This interface is used for GWT generation and should not be implemented.

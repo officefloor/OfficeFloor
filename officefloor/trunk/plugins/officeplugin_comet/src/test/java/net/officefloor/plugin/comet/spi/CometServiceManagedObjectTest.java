@@ -24,7 +24,7 @@ import java.util.List;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
@@ -408,8 +408,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	 *            Listing of {@link CometInterest}.
 	 */
 	private void recordInit(CometInterest... interests) {
-		// First request (no previous event id)
-		this.recordInit(CometRequest.FIRST_REQUEST_EVENT_ID, interests);
+		// First request (no previous event)
+		this.recordInit(CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, interests);
 	}
 
 	/**
@@ -479,14 +479,14 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 				for (int i = 0; i < expectedEvents.length; i++) {
 					CometEvent expectedEvent = expectedEvents[i];
 					CometEvent actualEvent = actualEvents[i];
-					assertEquals("Incorrect event Id for event " + i,
-							expectedEvent.getEventId(),
-							actualEvent.getEventId());
+					assertEquals("Incorrect sequence number for event " + i,
+							expectedEvent.getSequenceNumber(),
+							actualEvent.getSequenceNumber());
 					assertEquals("Incorrect listener type for event " + i,
 							expectedEvent.getListenerTypeName(),
 							actualEvent.getListenerTypeName());
-					assertEquals("Incorrect event payload for event " + i,
-							expectedEvent.getEvent(), actualEvent.getEvent());
+					assertEquals("Incorrect data for event " + i,
+							expectedEvent.getData(), actualEvent.getData());
 					assertEquals("Incorrect filter key for event " + i,
 							expectedEvent.getFilterKey(),
 							actualEvent.getFilterKey());
@@ -567,17 +567,17 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link CometListener} interface.
+	 * Mock {@link CometSubscriber} interface.
 	 */
-	public static interface MockOneListener extends CometListener {
+	public static interface MockOneListener extends CometSubscriber {
 
 		void listenOne(String message);
 	}
 
 	/**
-	 * Mock {@link CometListener} interface.
+	 * Mock {@link CometSubscriber} interface.
 	 */
-	public static interface MockTwoListener extends CometListener {
+	public static interface MockTwoListener extends CometSubscriber {
 
 		void listenTwo(String message);
 	}

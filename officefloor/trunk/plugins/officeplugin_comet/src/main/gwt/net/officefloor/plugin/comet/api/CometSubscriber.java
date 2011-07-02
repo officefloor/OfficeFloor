@@ -19,7 +19,7 @@ package net.officefloor.plugin.comet.api;
 
 /**
  * <p>
- * Marker interface that all Comet Listener interfaces should extend.
+ * Marker interface that all {@link CometSubscriber} interfaces should extend.
  * <p>
  * The extending interface must having the following criteria:
  * <ol>
@@ -31,5 +31,5 @@ package net.officefloor.plugin.comet.api;
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometListener {
+public interface CometSubscriber {
 }

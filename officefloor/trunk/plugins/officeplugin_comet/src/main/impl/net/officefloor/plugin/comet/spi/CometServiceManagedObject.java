@@ -80,16 +80,22 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 
 	@Override
 	public void service() {
-		this.source
-				.receiveOrWaitOnEvents(this.cometRequest.getInterests(),
-						this.connection, this.async,
-						this.cometRequest.getLastEventId());
+		this.source.receiveOrWaitOnEvents(this.cometRequest.getInterests(),
+				this.connection, this.async,
+				this.cometRequest.getLastSequenceNumber());
 	}
 
 	@Override
 	public void publishEvent(Class<?> listenerType, Object event,
 			Object matchKey) {
-		this.source.publishEvent(listenerType, event, matchKey);
+		this.source.publishEvent(CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER,
+				listenerType, event, matchKey);
+	}
+
+	@Override
+	public void publishEvent(long sequenceNumber, Class<?> listenerType,
+			Object event, Object matchKey) {
+		this.source.publishEvent(sequenceNumber, listenerType, event, matchKey);
 	}
 
 	@Override

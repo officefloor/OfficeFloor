@@ -21,7 +21,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometListenerAdapter;
 import net.officefloor.plugin.comet.internal.CometListenerMap;
 
@@ -66,12 +66,12 @@ public class CometListenerMapGenerator extends Generator {
 						+ " implementation");
 
 		// Obtain the CometListener type
-		JClassType cometListenerType = oracle.findType(CometListener.class
+		JClassType cometListenerType = oracle.findType(CometSubscriber.class
 				.getName());
 		if (cometListenerType == null) {
 			logger.log(Type.ERROR,
 					"Can not find " + JClassType.class.getSimpleName()
-							+ " for " + CometListener.class.getName());
+							+ " for " + CometSubscriber.class.getName());
 			throw new UnableToCompleteException();
 		}
 

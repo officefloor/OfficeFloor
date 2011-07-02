@@ -17,14 +17,14 @@
  */
 package net.officefloor.plugin.comet.client;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
  * Comet listener for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MockCometListener extends CometListener {
+public interface MockCometListener extends CometSubscriber {
 
 	/**
 	 * Method to handle the event.

@@ -21,7 +21,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.comet.internal.CometRequest;
 
 /**
- * Services the Comet request.
+ * Services the {@link CometRequest}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,6 +43,28 @@ public interface CometService {
 	 *            Match key. May be <code>null</code> to indicate to not filter.
 	 */
 	void publishEvent(Class<?> listenerType, Object event, Object matchKey);
+
+	/**
+	 * <p>
+	 * Published an event allowing to provide the {@link PublishedEvent}
+	 * sequence number.
+	 * <p>
+	 * This is made available for clustered deployments. This allows events to
+	 * be published to a central queue with central sequence generation that all
+	 * instances in the cluster listen to and publish. This then allows load
+	 * balancing of {@link CometRequest} instances across the cluster.
+	 * 
+	 * @param eventSequenceNumber
+	 *            {@link PublishedEvent} sequence number.
+	 * @param listenerType
+	 *            Listener type.
+	 * @param event
+	 *            Event.
+	 * @param matchKey
+	 *            Match key. May be <code>null</code> to indicate to not filter.
+	 */
+	void publishEvent(long eventSequenceNumber, Class<?> listenerType,
+			Object event, Object matchKey);
 
 	/**
 	 * <p>
