@@ -47,7 +47,7 @@ public class OnePersonTeam implements Team {
 	/**
 	 * {@link JobQueue}.
 	 */
-	private JobQueue taskQueue;
+	private final JobQueue taskQueue = new JobQueue();
 
 	/**
 	 * Initiate.
@@ -72,9 +72,6 @@ public class OnePersonTeam implements Team {
 			throw new IllegalStateException("Team " + this.getClass().getName()
 					+ " has already started working");
 		}
-
-		// Create the queue of tasks
-		this.taskQueue = new JobQueue();
 
 		// Hire the person for the team
 		this.person = new OnePerson(this.taskQueue, this.waitTime);

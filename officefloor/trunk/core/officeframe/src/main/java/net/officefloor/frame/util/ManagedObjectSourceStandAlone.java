@@ -237,13 +237,7 @@ public class ManagedObjectSourceStandAlone {
 		private ProcessFuture process(int processIndex,
 				EscalationHandler escalationHandler, long delay) {
 
-			// Stand alone not support delaying invocation
-			if (delay > 0) {
-				throw new UnsupportedOperationException(
-						"Unable to delay invocation of Process from "
-								+ ManagedObjectSourceStandAlone.class
-										.getSimpleName());
-			}
+			// Ignore delay and execute immediately
 
 			// Obtain the details for invoking process
 			InvokeProcessTaskStruct struct = ManagedObjectSourceStandAlone.this.processes
