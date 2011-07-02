@@ -24,7 +24,7 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometListenerService;
@@ -168,10 +168,11 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		this.publishEvent();
 		CometResponse responseOne = this.longPoll().waitOnResponse();
 		assertEvents(responseOne, 1);
-		long lastEventId = responseOne.getEvents()[0].getEventId();
+		long lastSequenceNumber = responseOne.getEvents()[0]
+				.getSequenceNumber();
 
 		// Now wait on second event
-		ServiceInvoker service = this.longPoll(lastEventId);
+		ServiceInvoker service = this.longPoll(lastSequenceNumber);
 		this.publishEvent();
 		CometResponse responseTwo = service.waitOnResponse();
 		assertEvents(responseTwo, 2);
@@ -180,28 +181,31 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the event.
 	 * 
-	 * @param eventIds
-	 *            Event Ids of the expected {@link CometEvent} instances.
+	 * @param eventSequenceNumbers
+	 *            Event sequence numbers of the expected {@link CometEvent}
+	 *            instances.
 	 */
-	private static void assertEvents(CometResponse response, long... eventIds) {
+	private static void assertEvents(CometResponse response,
+			long... eventSequenceNumbers) {
 
 		// Ensure have correct number of events
-		assertEquals("Incorrect number of events", eventIds.length,
+		assertEquals("Incorrect number of events", eventSequenceNumbers.length,
 				response.getEvents().length);
 
 		// Ensure correct events
-		for (int i = 0; i < eventIds.length; i++) {
-			long expectedEventId = eventIds[i];
+		for (int i = 0; i < eventSequenceNumbers.length; i++) {
+			long expectedEventSequenceNumber = eventSequenceNumbers[i];
 			CometEvent actualEvent = response.getEvents()[i];
 
 			// Ensure event is correct
-			assertEquals("Incorrect event Id for event " + i, expectedEventId,
-					actualEvent.getEventId());
+			assertEquals("Incorrect event Id for event " + i,
+					expectedEventSequenceNumber,
+					actualEvent.getSequenceNumber());
 			assertEquals("Incorrect listener type for event " + i,
 					MockListener.class.getName(),
 					actualEvent.getListenerTypeName());
 			assertEquals("Incorrect payload for event " + i, "EVENT",
-					actualEvent.getEvent());
+					actualEvent.getData());
 			assertNull("Should not have filter key for event " + i,
 					actualEvent.getFilterKey());
 		}
@@ -213,18 +217,19 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	 * @return {@link ServiceInvoker}.
 	 */
 	public ServiceInvoker longPoll() {
-		return this.longPoll(CometRequest.FIRST_REQUEST_EVENT_ID);
+		return this.longPoll(CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER);
 	}
 
 	/**
 	 * Triggers the long poll.
 	 * 
-	 * @param lastEventId
-	 *            Last {@link CometEvent} Id.
+	 * @param lastSequenceNumber
+	 *            Last {@link CometEvent} sequence number.
 	 * @return {@link ServiceInvoker}.
 	 */
-	public ServiceInvoker longPoll(long lastEventId) {
-		return ServiceInvoker.invokeService(this.port, "service", lastEventId);
+	public ServiceInvoker longPoll(long lastSequenceNumber) {
+		return ServiceInvoker.invokeService(this.port, "service",
+				lastSequenceNumber);
 	}
 
 	/**
@@ -234,7 +239,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void publishEvent() {
 		ServiceInvoker.invokeService(this.port, "publishEvent",
-				CometRequest.FIRST_REQUEST_EVENT_ID).waitOnResponse();
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER).waitOnResponse();
 	}
 
 	/**
@@ -253,9 +258,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		private final String serviceName;
 
 		/**
-		 * Last {@link CometEvent} Id.
+		 * Last {@link CometEvent} sequence number.
 		 */
-		private final long lastEventId;
+		private final long lastSequenceNumber;
 
 		/**
 		 * {@link CometResponse} response.
@@ -274,13 +279,14 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		 *            Port service is running on.
 		 * @param serviceName
 		 *            Service name.
-		 * @param lastEventId
-		 *            Last {@link CometEvent} Id.
+		 * @param lastSequenceNumber
+		 *            Last {@link CometEvent} sequence number.
 		 */
-		private ServiceInvoker(int port, String serviceName, long lastEventId) {
+		private ServiceInvoker(int port, String serviceName,
+				long lastSequenceNumber) {
 			this.port = port;
 			this.serviceName = serviceName;
-			this.lastEventId = lastEventId;
+			this.lastSequenceNumber = lastSequenceNumber;
 		}
 
 		/**
@@ -290,15 +296,15 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		 *            Port the service is running.
 		 * @param serviceName
 		 *            Service name.
-		 * @param lastEventId
-		 *            Last {@link CometEvent} Id.
+		 * @param lastSequenceNumber
+		 *            Last {@link CometEvent} sequence number.
 		 * @return {@link ServiceInvoker}.
 		 */
 		public static ServiceInvoker invokeService(int port,
-				String serviceName, long lastEventId) {
+				String serviceName, long lastSequenceNumber) {
 			// Create the Serivce Invoker and trigger request
 			ServiceInvoker invoker = new ServiceInvoker(port, serviceName,
-					lastEventId);
+					lastSequenceNumber);
 			invoker.start();
 
 			// Return Service Invoker
@@ -372,8 +378,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 						.newProxyInstance(CometListenerService.class,
 								"http://localhost:" + this.port + "/comet/",
 								this.serviceName);
-				response = caller.listen(new CometRequest(this.lastEventId,
-						new CometInterest(MockListener.class.getName(), null)));
+				response = caller.listen(new CometRequest(
+						this.lastSequenceNumber, new CometInterest(
+								MockListener.class.getName(), null)));
 			} catch (Throwable ex) {
 				failure = ex;
 			}
@@ -412,9 +419,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link CometListener} interface.
+	 * Mock {@link CometSubscriber} interface.
 	 */
-	public static interface MockListener extends CometListener {
+	public static interface MockListener extends CometSubscriber {
 	}
 
 }

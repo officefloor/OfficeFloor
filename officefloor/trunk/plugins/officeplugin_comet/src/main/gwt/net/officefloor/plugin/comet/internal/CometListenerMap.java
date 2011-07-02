@@ -19,11 +19,11 @@ package net.officefloor.plugin.comet.internal;
 
 import java.util.Map;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
  * <p>
- * Provides the mapping of {@link CometListener} interface type to its
+ * Provides the mapping of {@link CometSubscriber} interface type to its
  * {@link CometListenerAdapter}.
  * <p>
  * This interface is used for GWT generation and should not be implemented.
@@ -33,10 +33,10 @@ import net.officefloor.plugin.comet.api.CometListener;
 public interface CometListenerMap {
 
 	/**
-	 * Creates the mapping of {@link CometListener} interface type to its
+	 * Creates the mapping of {@link CometSubscriber} interface type to its
 	 * {@link CometListenerAdapter}.
 	 * 
-	 * @return Mapping of {@link CometListener} interface type to its
+	 * @return Mapping of {@link CometSubscriber} interface type to its
 	 *         {@link CometListenerAdapter}.
 	 */
 	Map<Class<?>, CometListenerAdapter> getMap();

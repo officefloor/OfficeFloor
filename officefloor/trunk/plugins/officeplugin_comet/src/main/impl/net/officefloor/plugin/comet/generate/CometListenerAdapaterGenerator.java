@@ -19,7 +19,7 @@ package net.officefloor.plugin.comet.generate;
 
 import java.io.PrintWriter;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.internal.CometListenerAdapter;
 
 import com.google.gwt.core.ext.Generator;
@@ -45,7 +45,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 	public String generate(TreeLogger logger, GeneratorContext context,
 			String typeName) throws UnableToCompleteException {
 
-		final String COMET_LISTENER_CLASS_NAME = CometListener.class.getName();
+		final String COMET_LISTENER_CLASS_NAME = CometSubscriber.class.getName();
 
 		// Determine if the CometListener
 		if (COMET_LISTENER_CLASS_NAME.equals(typeName)) {
@@ -71,7 +71,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 					"Interface "
 							+ type.getQualifiedSourceName()
 							+ " must only have one method declared as the interface is marked with "
-							+ CometListener.class.getSimpleName());
+							+ CometSubscriber.class.getSimpleName());
 			throw new UnableToCompleteException();
 		}
 		JMethod method = methods[0];
@@ -86,7 +86,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 							+ "."
 							+ method.getName()
 							+ " must only have one parameter as the interface is marked with "
-							+ CometListener.class.getSimpleName());
+							+ CometSubscriber.class.getSimpleName());
 			throw new UnableToCompleteException();
 		}
 		JParameter parameter = parameters[0];
@@ -100,7 +100,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 							+ "."
 							+ method.getName()
 							+ " must not throw exceptions as the interface is marked with "
-							+ CometListener.class.getSimpleName());
+							+ CometSubscriber.class.getSimpleName());
 			throw new UnableToCompleteException();
 		}
 
@@ -111,7 +111,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 		String methodName = method.getName();
 		String parameterType = parameter.getType().getQualifiedSourceName();
 		logger.log(Type.TRACE,
-				"Generating " + CometListener.class.getSimpleName()
+				"Generating " + CometSubscriber.class.getSimpleName()
 						+ " Adapter for " + typeName + " [resulting class "
 						+ qualifiedName + "]");
 
@@ -123,7 +123,7 @@ public class CometListenerAdapaterGenerator extends Generator {
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
 			logger.log(Type.ERROR, "Unable to generate " + qualifiedName
-					+ " for adapting " + CometListener.class.getSimpleName()
+					+ " for adapting " + CometSubscriber.class.getSimpleName()
 					+ " service. Likely cause is that class already exists.");
 			throw new UnableToCompleteException();
 		}

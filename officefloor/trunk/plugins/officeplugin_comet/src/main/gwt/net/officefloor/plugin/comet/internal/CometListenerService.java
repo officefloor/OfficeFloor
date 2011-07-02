@@ -20,10 +20,10 @@ package net.officefloor.plugin.comet.internal;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 /**
- * RPC Service for the {@link CometListener}.
+ * RPC Service for the {@link CometSubscriber}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -27,9 +27,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class CometEvent implements IsSerializable {
 
 	/**
-	 * Identifier for this {@link CometEvent}.
+	 * Sequence number for this {@link CometEvent}.
 	 */
-	private long eventId;
+	private long sequenceNumber;
 
 	/**
 	 * Listener type name.
@@ -37,9 +37,9 @@ public class CometEvent implements IsSerializable {
 	private String listenerTypeName;
 
 	/**
-	 * Event.
+	 * Data.
 	 */
-	private Object event;
+	private Object data;
 
 	/**
 	 * Filter key used on the {@link CometInterest}. May be <code>null</code>.
@@ -49,21 +49,21 @@ public class CometEvent implements IsSerializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param eventId
-	 *            Identifier for this {@link CometEvent}.
+	 * @param sequenceNumber
+	 *            Sequence number for this {@link CometEvent}.
 	 * @param listenerTypeName
 	 *            Listener type name.
-	 * @param event
-	 *            Event.
+	 * @param data
+	 *            Data.
 	 * @param filterKey
 	 *            Filter key used on the {@link CometInterest}. May be
 	 *            <code>null</code>.
 	 */
-	public CometEvent(long eventId, String listenerTypeName, Object event,
-			Object filterKey) {
-		this.eventId = eventId;
+	public CometEvent(long sequenceNumber, String listenerTypeName,
+			Object data, Object filterKey) {
+		this.sequenceNumber = sequenceNumber;
 		this.listenerTypeName = listenerTypeName;
-		this.event = event;
+		this.data = data;
 		this.filterKey = filterKey;
 	}
 
@@ -74,12 +74,12 @@ public class CometEvent implements IsSerializable {
 	}
 
 	/**
-	 * Obtains the identifier for this {@link CometEvent}.
+	 * Obtains the sequence number for this {@link CometEvent}.
 	 * 
-	 * @return Identifier for this {@link CometEvent}.
+	 * @return Sequence number for this {@link CometEvent}.
 	 */
-	public long getEventId() {
-		return this.eventId;
+	public long getSequenceNumber() {
+		return this.sequenceNumber;
 	}
 
 	/**
@@ -92,12 +92,12 @@ public class CometEvent implements IsSerializable {
 	}
 
 	/**
-	 * Obtains the event.
+	 * Obtains the data of this {@link CometEvent}.
 	 * 
-	 * @return Event.
+	 * @return Data.
 	 */
-	public Object getEvent() {
-		return this.event;
+	public Object getData() {
+		return this.data;
 	}
 
 	/**

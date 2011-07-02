@@ -17,12 +17,12 @@
  */
 package net.officefloor.plugin.comet.internal;
 
-import net.officefloor.plugin.comet.api.CometListener;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * Async RPC Service for the {@link CometListener}.
+ * Async RPC Service for the {@link CometSubscriber}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -64,8 +64,8 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 			@Override
 			public void onClick(ClickEvent event) {
 				// Register the listener
-				OfficeFloorComet.registerListener(MockCometListener.class,
-						listener, null);
+				OfficeFloorComet.subscribe(MockCometListener.class, listener,
+						null);
 			}
 		});
 	}

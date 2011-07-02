@@ -178,6 +178,8 @@ public class CometServiceManagedObjectSource
 	/**
 	 * Publishes a {@link PublishedEvent}.
 	 * 
+	 * @param sequenceNumber
+	 *            {@link PublishedEvent} sequence number.
 	 * @param listenerType
 	 *            Listener type.
 	 * @param event
@@ -185,14 +187,15 @@ public class CometServiceManagedObjectSource
 	 * @param matchKey
 	 *            Match key.
 	 */
-	public synchronized void publishEvent(Class<?> listenerType, Object event,
-			Object matchKey) {
+	public synchronized void publishEvent(long sequenceNumber,
+			Class<?> listenerType, Object event, Object matchKey) {
 
 		// Obtain the published time stamp
 		long publishTimestamp = this.clock.currentTimestamp();
 
 		// Create the event
-		long eventId = this.nextEventId++;
+		long eventId = (sequenceNumber == CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER) ? this.nextEventId++
+				: sequenceNumber;
 		PublishedEventImpl newEvent = new PublishedEventImpl(eventId,
 				listenerType, event, matchKey, publishTimestamp);
 
@@ -226,9 +229,10 @@ public class CometServiceManagedObjectSource
 					}
 
 					// Add the event for the interest
-					events.add(new CometEvent(newEvent.getEventId(), interest
-							.getListenerTypeName(), newEvent
-							.getEventParameter(), interest.getFilterKey()));
+					events.add(new CometEvent(
+							newEvent.getEventSequenceNumber(), interest
+									.getListenerTypeName(), newEvent.getData(),
+							interest.getFilterKey()));
 				}
 			}
 			if (events != null) {
@@ -252,18 +256,21 @@ public class CometServiceManagedObjectSource
 	 * @param asynchronousListener
 	 *            {@link AsynchronousListener} for the
 	 *            {@link CometServiceManagedObject}.
-	 * @param lastEventId
-	 *            Id of last {@link CometEvent} provided to the client.
+	 * @param lastEventSequenceNumber
+	 *            Sequence number of last {@link CometEvent} provided to the
+	 *            client.
 	 */
 	public synchronized void receiveOrWaitOnEvents(CometInterest[] interests,
 			ServerGwtRpcConnection<CometResponse> connection,
-			AsynchronousListener asynchronousListener, long lastEventId) {
+			AsynchronousListener asynchronousListener,
+			long lastEventSequenceNumber) {
 
 		PublishedEvent node = this.tail;
 
 		// Ignore already published events to client
-		if (lastEventId != CometRequest.FIRST_REQUEST_EVENT_ID) {
-			while ((node != null) && (node.getEventId() <= lastEventId)) {
+		if (lastEventSequenceNumber != CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER) {
+			while ((node != null)
+					&& (node.getEventSequenceNumber() <= lastEventSequenceNumber)) {
 				// Ignore event as already published to client
 				node = node.getNextEvent();
 			}
@@ -284,8 +291,8 @@ public class CometServiceManagedObjectSource
 					}
 
 					// Add the event for the interest
-					events.add(new CometEvent(node.getEventId(), interest
-							.getListenerTypeName(), node.getEventParameter(),
+					events.add(new CometEvent(node.getEventSequenceNumber(),
+							interest.getListenerTypeName(), node.getData(),
 							interest.getFilterKey()));
 				}
 			}
