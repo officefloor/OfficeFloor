@@ -32,8 +32,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
@@ -59,6 +59,11 @@ public class CometServiceManagedObjectSource
 	public static enum Flows {
 		EXPIRE
 	}
+
+	/**
+	 * Name of the {@link Team} responsible for expiring.
+	 */
+	public static final String EXPIRE_TEAM_NAME = "EXPIRE_TEAM";
 
 	/**
 	 * Interval in milliseconds for checking for expired {@link PublishedEvent}
@@ -448,9 +453,8 @@ public class CometServiceManagedObjectSource
 
 		// Provide task to trigger expire
 		ExpireTask factory = new ExpireTask();
-		ManagedObjectTaskBuilder<None, None> task = mosContext.addWork(
-				"EXPIRE", factory).addTask("TASK", factory);
-		task.setTeam("TEAM");
+		mosContext.addWork("EXPIRE", factory).addTask("TASK", factory)
+				.setTeam(EXPIRE_TEAM_NAME);
 		context.addFlow(Flows.EXPIRE, null);
 		mosContext.linkProcess(Flows.EXPIRE, "EXPIRE", "TASK");
 	}

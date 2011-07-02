@@ -74,7 +74,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {
 						context.setInput(true);
-						context.mapTeam("TEAM", OnePersonTeamSource.class);
+						context.mapTeam(
+								CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
+								OnePersonTeamSource.class);
 					}
 				}, CometService.class);
 		comet.addProperty(
