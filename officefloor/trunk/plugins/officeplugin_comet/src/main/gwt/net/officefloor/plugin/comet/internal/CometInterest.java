@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.comet.internal;
 
+import java.io.Serializable;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -32,10 +34,16 @@ public class CometInterest implements IsSerializable {
 	private String listenerTypeName;
 
 	/**
-	 * Filter key. May be <code>null</code> to receive all {@link CometEvent}
-	 * instances for the listener type.
+	 * {@link Serializable} filter key. May be <code>null</code> to receive all
+	 * {@link CometEvent} instances for the listener type.
 	 */
-	private Object filterKey;
+	private Serializable filterKey_Serializable;
+
+	/**
+	 * {@link IsSerializable} filter key. May be <code>null</code> to receive
+	 * all {@link CometEvent} instances for the listener type.
+	 */
+	private IsSerializable filterKey_IsSerializable;
 
 	/**
 	 * Initiate.
@@ -48,7 +56,19 @@ public class CometInterest implements IsSerializable {
 	 */
 	public CometInterest(String listenerTypeName, Object filterKey) {
 		this.listenerTypeName = listenerTypeName;
-		this.filterKey = filterKey;
+
+		// Specify the filter key
+		if (filterKey != null) {
+			if (filterKey instanceof IsSerializable) {
+				this.filterKey_IsSerializable = (IsSerializable) filterKey;
+			} else if (filterKey instanceof Serializable) {
+				this.filterKey_Serializable = (Serializable) filterKey;
+			} else {
+				throw new IllegalArgumentException("Type for filterKey ("
+						+ filterKey.getClass().getName()
+						+ ") is not serialisable");
+			}
+		}
 	}
 
 	/**
@@ -72,7 +92,8 @@ public class CometInterest implements IsSerializable {
 	 * @return Filter key. May be <code>null</code>.
 	 */
 	public Object getFilterKey() {
-		return this.filterKey;
+		return (this.filterKey_IsSerializable != null ? this.filterKey_IsSerializable
+				: this.filterKey_Serializable);
 	}
 
 }

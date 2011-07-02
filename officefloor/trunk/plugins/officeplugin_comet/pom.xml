@@ -67,11 +67,21 @@
 		<profile>
 			<id>gwt</id>
 			<dependencies>
+				<!-- Make available for compile -->
 				<dependency>
-					<!-- Make available for compile -->
 					<groupId>junit</groupId>
 					<artifactId>junit</artifactId>
-					<scope>compile</scope>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>easymock</groupId>
+					<artifactId>easymock</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.gdevelop.gwt</groupId>
+					<artifactId>syncrpc</artifactId>
+					<scope>provided</scope>
 				</dependency>
 			</dependencies>
 			<build>

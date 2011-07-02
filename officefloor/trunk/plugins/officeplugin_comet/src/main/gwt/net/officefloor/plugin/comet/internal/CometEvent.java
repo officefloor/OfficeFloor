@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.comet.internal;
 
+import java.io.Serializable;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -37,14 +39,26 @@ public class CometEvent implements IsSerializable {
 	private String listenerTypeName;
 
 	/**
-	 * Data.
+	 * {@link Serializable} data.
 	 */
-	private Object data;
+	private Serializable data_Serializable = null;
 
 	/**
-	 * Filter key used on the {@link CometInterest}. May be <code>null</code>.
+	 * {@link IsSerializable} data.
 	 */
-	private Object filterKey;
+	private IsSerializable data_IsSerializable = null;
+
+	/**
+	 * {@link Serializable} filter key used on the {@link CometInterest}. May be
+	 * <code>null</code>.
+	 */
+	private Serializable filterKey_Serializable = null;
+
+	/**
+	 * {@link IsSerializable} filter key used on the {@link CometInterest}. May
+	 * be <code>null</code>.
+	 */
+	private IsSerializable filterKey_IsSerializable = null;
 
 	/**
 	 * Initiate.
@@ -63,8 +77,31 @@ public class CometEvent implements IsSerializable {
 			Object data, Object filterKey) {
 		this.sequenceNumber = sequenceNumber;
 		this.listenerTypeName = listenerTypeName;
-		this.data = data;
-		this.filterKey = filterKey;
+
+		// Specify the data
+		if (data != null) {
+			if (data instanceof IsSerializable) {
+				this.data_IsSerializable = (IsSerializable) data;
+			} else if (data instanceof Serializable) {
+				this.data_Serializable = (Serializable) data;
+			} else {
+				throw new IllegalArgumentException("Type for data ("
+						+ data.getClass().getName() + ") is not serialisable");
+			}
+		}
+
+		// Specify the filter key
+		if (filterKey != null) {
+			if (filterKey instanceof IsSerializable) {
+				this.filterKey_IsSerializable = (IsSerializable) filterKey;
+			} else if (filterKey instanceof Serializable) {
+				this.filterKey_Serializable = (Serializable) filterKey;
+			} else {
+				throw new IllegalArgumentException("Type for filterKey ("
+						+ filterKey.getClass().getName()
+						+ ") is not serialisable");
+			}
+		}
 	}
 
 	/**
@@ -97,7 +134,8 @@ public class CometEvent implements IsSerializable {
 	 * @return Data.
 	 */
 	public Object getData() {
-		return this.data;
+		return (this.data_IsSerializable != null ? this.data_IsSerializable
+				: this.data_Serializable);
 	}
 
 	/**
@@ -107,7 +145,8 @@ public class CometEvent implements IsSerializable {
 	 *         <code>null</code>.
 	 */
 	public Object getFilterKey() {
-		return this.filterKey;
+		return (this.filterKey_IsSerializable != null ? this.filterKey_IsSerializable
+				: this.filterKey_Serializable);
 	}
 
 }

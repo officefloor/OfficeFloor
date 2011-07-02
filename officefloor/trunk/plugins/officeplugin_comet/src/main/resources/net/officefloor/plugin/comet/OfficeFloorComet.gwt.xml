@@ -6,15 +6,15 @@
 
 	<!-- Generate adapters for the CometSubscriber interfaces -->
 	<generate-with
-		class="net.officefloor.plugin.comet.generate.CometAdapaterGenerator">
+		class="net.officefloor.plugin.comet.generate.CometAdapterGenerator">
 		<when-type-assignable
 			class="net.officefloor.plugin.comet.api.CometSubscriber" />
 	</generate-with>
 
 	<!-- Generate map of adapters -->
 	<generate-with
-		class="net.officefloor.plugin.comet.generate.CometAdapaterMapGenerator">
-		<when-type-is class="net.officefloor.plugin.comet.internal.CometAdapaterMap" />
+		class="net.officefloor.plugin.comet.generate.CometAdapterMapGenerator">
+		<when-type-is class="net.officefloor.plugin.comet.internal.CometAdapterMap" />
 	</generate-with>
 
 	<!-- Code -->
