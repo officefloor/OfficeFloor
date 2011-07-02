@@ -19,8 +19,10 @@ package net.officefloor.plugin.comet.api;
 
 import java.util.Map;
 
+import net.officefloor.plugin.comet.client.MockCometListener;
 import net.officefloor.plugin.comet.internal.CometAdapter;
 import net.officefloor.plugin.comet.internal.CometAdapterMap;
+import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 import net.officefloor.plugin.comet.internal.CometRequest;
@@ -45,6 +47,12 @@ public class OfficeFloorComet {
 			.create(CometAdapterMap.class)).getMap();
 
 	/**
+	 * {@link CometSubscriptionServiceAsync}.
+	 */
+	private static final CometSubscriptionServiceAsync subscriptionService = GWT
+			.create(CometSubscriptionService.class);
+
+	/**
 	 * Subscribes for asynchronous events.
 	 * 
 	 * @param listenerType
@@ -63,15 +71,17 @@ public class OfficeFloorComet {
 		// Obtain the adapter
 		final CometAdapter adapter = adapters.get(listenerType);
 
+		// Create request
+		CometRequest request = new CometRequest(1, new CometInterest(
+				MockCometListener.class.getName(), "FILTER_KEY"));
+
 		// Start listening
-		CometSubscriptionServiceAsync service = GWT
-				.create(CometSubscriptionService.class);
-		service.listen(new CometRequest(), new AsyncCallback<CometResponse>() {
+		subscriptionService.listen(request, new AsyncCallback<CometResponse>() {
 			@Override
 			public void onSuccess(CometResponse result) {
 
-				// TODO obtain the event
-				final Object event = "EVENT";
+				// TODO handle multiple events
+				final Object event = result.getEvents()[0].getData();
 
 				// Handle the event
 				adapter.handleEvent(handler, event);

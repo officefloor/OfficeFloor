@@ -17,18 +17,20 @@
  */
 package net.officefloor.plugin.comet;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
-import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
+import net.officefloor.plugin.comet.client.MockCometListener;
+import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
+import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Tests the {@link OfficeFloorComet} functionality.
@@ -84,7 +86,8 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	public static class TemplateLogic {
 		public void listen(@Parameter CometRequest request,
 				AsyncCallback<CometResponse> callback) {
-			callback.onSuccess(new CometResponse());
+			callback.onSuccess(new CometResponse(new CometEvent(1,
+					MockCometListener.class.getName(), "EVENT", "FILTER_KEY")));
 		}
 	}
 

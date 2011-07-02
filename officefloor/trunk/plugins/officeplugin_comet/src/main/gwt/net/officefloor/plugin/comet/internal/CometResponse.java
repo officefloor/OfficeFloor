@@ -37,7 +37,7 @@ public class CometResponse implements IsSerializable {
 	 * @param events
 	 *            Listing of {@link CometEvent}.
 	 */
-	public CometResponse(CometEvent[] events) {
+	public CometResponse(CometEvent... events) {
 		this.events = events;
 	}
 

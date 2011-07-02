@@ -20,6 +20,7 @@ package net.officefloor.plugin.comet.generate;
 import java.io.PrintWriter;
 
 import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.comet.api.OfficeFloorComet;
 import net.officefloor.plugin.comet.internal.CometAdapter;
 
 import com.google.gwt.core.ext.Generator;
@@ -39,13 +40,14 @@ import com.google.gwt.user.rebind.SourceWriter;
  * 
  * @author Daniel Sagenschneider
  */
-public class CometAdapaterGenerator extends Generator {
+public class CometAdapterGenerator extends Generator {
 
 	@Override
 	public String generate(TreeLogger logger, GeneratorContext context,
 			String typeName) throws UnableToCompleteException {
 
-		final String COMET_LISTENER_CLASS_NAME = CometSubscriber.class.getName();
+		final String COMET_LISTENER_CLASS_NAME = CometSubscriber.class
+				.getName();
 
 		// Determine if the CometListener
 		if (COMET_LISTENER_CLASS_NAME.equals(typeName)) {
@@ -120,6 +122,7 @@ public class CometAdapaterGenerator extends Generator {
 				packageName, simpleName);
 		adapter.addImplementedInterface(CometAdapter.class.getName());
 		adapter.addImport(CometAdapter.class.getName());
+		adapter.addImport(OfficeFloorComet.class.getName());
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
 			logger.log(Type.ERROR, "Unable to generate " + qualifiedName
@@ -128,11 +131,28 @@ public class CometAdapaterGenerator extends Generator {
 			throw new UnableToCompleteException();
 		}
 		SourceWriter writer = adapter.createSourceWriter(context, src);
+
+		// Provide handleEvent method
 		writer.println("@Override");
 		writer.println("public void handleEvent(Object handler, Object event) {");
 		writer.println("    ((" + typeName + ") handler)." + methodName + "(("
 				+ parameterType + ") event);");
 		writer.println("}");
+		writer.println();
+
+		// Provide createPublisher method
+		writer.println("@Override");
+		writer.println("public Object createPublisher(final Object matchKey) {");
+		writer.println("    return new " + typeName + "() {");
+		writer.println("        @Override");
+		writer.println("        public void " + methodName + "("
+				+ parameterType + " data) {");
+		writer.println("            OfficeFloorComet.publish(" + typeName
+				+ ".class, data, matchKey);");
+		writer.println("        }");
+		writer.println("    };");
+		writer.println("}");
+
 		writer.commit(logger);
 
 		// Return adapter
