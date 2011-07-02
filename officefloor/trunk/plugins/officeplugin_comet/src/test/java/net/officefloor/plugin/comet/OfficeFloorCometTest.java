@@ -22,7 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
-import net.officefloor.plugin.comet.internal.CometListenerServiceAsync;
+import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
@@ -71,7 +71,7 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 		properties
 				.addProperty(
 						GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-						CometListenerServiceAsync.class.getName());
+						CometSubscriptionServiceAsync.class.getName());
 		GwtHttpTemplateSectionExtension.extendTemplate(template, source,
 				properties, Thread.currentThread().getContextClassLoader());
 

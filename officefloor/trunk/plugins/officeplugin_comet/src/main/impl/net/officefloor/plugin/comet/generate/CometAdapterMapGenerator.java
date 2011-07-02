@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.plugin.comet.api.CometSubscriber;
-import net.officefloor.plugin.comet.internal.CometListenerAdapter;
-import net.officefloor.plugin.comet.internal.CometListenerMap;
+import net.officefloor.plugin.comet.internal.CometAdapter;
+import net.officefloor.plugin.comet.internal.CometAdapterMap;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.Generator;
@@ -37,11 +37,11 @@ import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
 /**
- * Generates the {@link CometListenerMap}.
+ * Generates the {@link CometAdapterMap}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CometListenerMapGenerator extends Generator {
+public class CometAdapterMapGenerator extends Generator {
 
 	@Override
 	public String generate(TreeLogger logger, GeneratorContext context,
@@ -62,7 +62,7 @@ public class CometListenerMapGenerator extends Generator {
 		String simpleName = type.getSimpleSourceName() + "Impl";
 		String qualifiedName = packageName + "." + simpleName;
 		logger.log(Type.TRACE,
-				"Generating " + CometListenerMap.class.getSimpleName()
+				"Generating " + CometAdapterMap.class.getSimpleName()
 						+ " implementation");
 
 		// Obtain the CometListener type
@@ -78,27 +78,27 @@ public class CometListenerMapGenerator extends Generator {
 		// Generate the map
 		ClassSourceFileComposerFactory adapter = new ClassSourceFileComposerFactory(
 				packageName, simpleName);
-		adapter.addImplementedInterface(CometListenerMap.class.getName());
-		adapter.addImport(CometListenerMap.class.getName());
-		adapter.addImport(CometListenerAdapter.class.getName());
+		adapter.addImplementedInterface(CometAdapterMap.class.getName());
+		adapter.addImport(CometAdapterMap.class.getName());
+		adapter.addImport(CometAdapter.class.getName());
 		adapter.addImport(Map.class.getName());
 		adapter.addImport(HashMap.class.getName());
 		adapter.addImport(GWT.class.getName());
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
 			logger.log(Type.ERROR, "Unable to generate " + qualifiedName
-					+ " for " + CometListenerMap.class.getSimpleName()
+					+ " for " + CometAdapterMap.class.getSimpleName()
 					+ " implementation. Likely cause is class already exists.");
 			throw new UnableToCompleteException();
 		}
 		SourceWriter writer = adapter.createSourceWriter(context, src);
 		writer.println("@Override");
 		writer.println("public Map<Class<?>, "
-				+ CometListenerAdapter.class.getSimpleName() + "> getMap() {");
+				+ CometAdapter.class.getSimpleName() + "> getMap() {");
 		writer.println("    Map<Class<?>, "
-				+ CometListenerAdapter.class.getSimpleName()
+				+ CometAdapter.class.getSimpleName()
 				+ "> map = new HashMap<Class<?>, "
-				+ CometListenerAdapter.class.getSimpleName() + ">();");
+				+ CometAdapter.class.getSimpleName() + ">();");
 
 		// Add all CometListener types to the map
 		for (JClassType check : oracle.getTypes()) {
@@ -125,7 +125,7 @@ public class CometListenerMapGenerator extends Generator {
 			logger.log(Type.TRACE, "Including " + serviceTypeName
 					+ " in map for " + simpleName);
 			writer.println("    map.put(" + serviceTypeName + ".class, ("
-					+ CometListenerAdapter.class.getSimpleName()
+					+ CometAdapter.class.getSimpleName()
 					+ ") GWT.create(" + serviceTypeName + ".class));");
 		}
 

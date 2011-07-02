@@ -17,18 +17,16 @@
  */
 package net.officefloor.plugin.comet.internal;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 import net.officefloor.plugin.comet.api.CometSubscriber;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
 /**
- * RPC Service for the {@link CometSubscriber}.
+ * Async RPC Service for the {@link CometSubscriber}.
  * 
  * @author Daniel Sagenschneider
  */
-@RemoteServiceRelativePath("comet")
-public interface CometListenerService extends RemoteService {
+public interface CometSubscriptionServiceAsync {
 
 	/**
 	 * Listens by sending a {@link CometRequest} and when an event is available,
@@ -36,8 +34,10 @@ public interface CometListenerService extends RemoteService {
 	 * 
 	 * @param request
 	 *            {@link CometRequest}.
-	 * @return {@link CometResponse} containing the event.
+	 * @param callback
+	 *            Invoked with the {@link CometResponse} when event(s) are
+	 *            available.
 	 */
-	CometResponse listen(CometRequest request);
+	void listen(CometRequest request, AsyncCallback<CometResponse> callback);
 
 }

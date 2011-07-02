@@ -28,7 +28,7 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  * 
  * @author Daniel Sagenschneider
  */
-public interface CometListenerAdapter {
+public interface CometAdapter {
 
 	/**
 	 * <p>
@@ -42,5 +42,15 @@ public interface CometListenerAdapter {
 	 *            Event.
 	 */
 	void handleEvent(Object handler, Object event);
+
+	/**
+	 * Creates the type safe publisher.
+	 * 
+	 * @param matchKey
+	 *            Match key. May be <code>null</code>.
+	 * @return Type safe publisher that implements the {@link CometSubscriber}
+	 *         interface.
+	 */
+	Object createPublisher(Object matchKey);
 
 }
