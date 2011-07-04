@@ -49,12 +49,12 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ReadOnlyConfigurationException;
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.context.source.OfficeServletContextManagedObjectSource;
@@ -130,14 +130,14 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			xmlContext.addTag("web.xml.file.name", webXmlFileName);
 			xmlContext.addTag("password.file.location",
 					passwordFile.getAbsolutePath());
-			ConfigurationContext context = new MockConfigurationContext(
-					xmlContext, new ClassLoaderConfigurationContext(this
-							.getClass().getClassLoader()));
+			ResourceSource resourceSource = new MockResourceSource(xmlContext,
+					new ClassLoaderConfigurationContext(this.getClass()
+							.getClassLoader()));
 
 			// Create and configure the compiler
 			OfficeFloorCompiler compiler = OfficeFloorCompiler
 					.newOfficeFloorCompiler();
-			compiler.setConfigurationContext(context);
+			compiler.addResources(resourceSource);
 			compiler.setCompilerIssues(new FailTestCompilerIssues());
 
 			// Compiler the Office Floor
@@ -188,8 +188,6 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			// Mocks
 			final SectionSourceContext context = this
 					.createMock(SectionSourceContext.class);
-			final ConfigurationItem item = this
-					.createMock(ConfigurationItem.class);
 			final SectionDesigner designer = this
 					.createMock(SectionDesigner.class);
 
@@ -200,19 +198,18 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 			// Record obtaining the web.xml configuration
 			this.recordReturn(context, context.getSectionLocation(),
 					webXmlFileName);
-			this.recordReturn(context,
-					context.getConfiguration(webXmlFileName), item);
-			this.recordReturn(item, item.getConfiguration(),
+			this.recordReturn(context, context.getResource(webXmlFileName),
 					new FileInputStream(webXmlConfiguration));
 
 			// Record obtaining the meta-data for unmarshalling the web.xml
 			String unmarshallerLocation = WebAppModel.class.getPackage()
 					.getName().replace('.', '/')
 					+ "/UnmarshalWebXml.xml";
-			this.recordReturn(context,
-					context.getConfiguration(unmarshallerLocation), item);
-			this.recordReturn(item, item.getConfiguration(), this.getClass()
-					.getClassLoader().getResourceAsStream(unmarshallerLocation));
+			this.recordReturn(
+					context,
+					context.getResource(unmarshallerLocation),
+					this.getClass().getClassLoader()
+							.getResourceAsStream(unmarshallerLocation));
 
 			// Do further recording
 			if (recorder != null) {
@@ -580,7 +577,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ConfigurationContext} for testing.
 	 */
-	private class MockConfigurationContext implements ConfigurationContext {
+	private class MockResourceSource implements ResourceSource {
 
 		/**
 		 * Delegate {@link ConfigurationContext} instances.
@@ -593,55 +590,32 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 		 * @param delegates
 		 *            Delegate {@link ConfigurationContext} instances.
 		 */
-		public MockConfigurationContext(ConfigurationContext... delegates) {
+		public MockResourceSource(ConfigurationContext... delegates) {
 			this.delegates = delegates;
 		}
 
 		/*
-		 * ======================= ConfigurationContext =======================
+		 * ======================= ResourceSource =======================
 		 */
 
 		@Override
-		public ConfigurationItem getConfigurationItem(String relativeLocation)
-				throws Exception {
-
-			// Return first available item from a delegate
-			for (ConfigurationContext delegate : this.delegates) {
-				ConfigurationItem item = delegate
-						.getConfigurationItem(relativeLocation);
-				if (item != null) {
-					return item;
+		public InputStream sourceResource(String location) {
+			try {
+				// Return first available item from a delegate
+				for (ConfigurationContext delegate : this.delegates) {
+					ConfigurationItem item = delegate
+							.getConfigurationItem(location);
+					if (item != null) {
+						return item.getConfiguration();
+					}
 				}
+
+				// As here no item available from any delegate
+				return null;
+
+			} catch (Exception ex) {
+				return null;
 			}
-
-			// As here no item available from any delegate
-			return null;
-		}
-
-		@Override
-		public String getLocation() {
-			fail("Should not need location of configuration item");
-			return null;
-		}
-
-		@Override
-		public ConfigurationItem createConfigurationItem(
-				String relativeLocation, InputStream configuration)
-				throws Exception {
-			fail("Should not be creating configuration item in loading");
-			return null;
-		}
-
-		@Override
-		public boolean isReadOnly() {
-			fail("Should not need to check if read-only");
-			return true;
-		}
-
-		@Override
-		public void deleteConfigurationItem(String relativeLocation)
-				throws Exception, ReadOnlyConfigurationException {
-			fail("Should not be deleting configuration item in loading");
 		}
 	}
 

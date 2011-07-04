@@ -20,14 +20,12 @@ package net.officefloor.plugin.servlet.webxml.model;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests the {@link WebXmlLoader}.
@@ -37,39 +35,12 @@ import net.officefloor.model.repository.ConfigurationItem;
 public class WebXmlLoaderTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure can handle {@link ConfigurationItem} not being found.
-	 */
-	public void testNoConfigurationFound() throws Exception {
-
-		final SectionSourceContext context = this
-				.createMock(SectionSourceContext.class);
-
-		// Record not find configuration
-		this.recordReturn(context, context.getConfiguration("WEB-INF/web.xml"),
-				null);
-
-		// Ensure fail if no configuration
-		this.replayMockObjects();
-		WebXmlLoader loader = new WebXmlLoader();
-		try {
-			loader.loadConfiguration("WEB-INF/web.xml", context);
-			fail("Should not be successful if can not find configuration");
-		} catch (FileNotFoundException ex) {
-			assertEquals("Incorrect failure",
-					"Can not find configuration 'WEB-INF/web.xml'", ex
-							.getMessage());
-		}
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensure correct configuration loaded.
 	 */
 	public void testLoadConfiguration() throws Exception {
 
 		final SectionSourceContext context = this
 				.createMock(SectionSourceContext.class);
-		final ConfigurationItem item = this.createMock(ConfigurationItem.class);
 
 		// Obtain location of web.xml file
 		File webXmlFile = this.findFile(this.getClass(), "web.xml");
@@ -77,18 +48,12 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 				"UnmarshalWebXml.xml");
 
 		// Record loading configuration
-		this.recordReturn(context, context.getConfiguration("WEB-INF/web.xml"),
-				item);
-		this.recordReturn(item, item.getConfiguration(), new FileInputStream(
-				webXmlFile));
-		this
-				.recordReturn(
-						context,
-						context
-								.getConfiguration("net/officefloor/plugin/servlet/webxml/model/UnmarshalWebXml.xml"),
-						item);
-		this.recordReturn(item, item.getConfiguration(), new FileInputStream(
-				unmarshalFile));
+		this.recordReturn(context, context.getResource("WEB-INF/web.xml"),
+				new FileInputStream(webXmlFile));
+		this.recordReturn(
+				context,
+				context.getResource("net/officefloor/plugin/servlet/webxml/model/UnmarshalWebXml.xml"),
+				new FileInputStream(unmarshalFile));
 
 		// Load the configuration
 		this.replayMockObjects();
@@ -193,10 +158,10 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 	 */
 	private static void assertServlet(ServletModel servlet, String servletName,
 			String servletClass, String... initParamNameValues) {
-		assertEquals("Incorrect servlet-name", servletName, servlet
-				.getServletName());
-		assertEquals("Incorrect servlet-class", servletClass, servlet
-				.getServletClass());
+		assertEquals("Incorrect servlet-name", servletName,
+				servlet.getServletName());
+		assertEquals("Incorrect servlet-class", servletClass,
+				servlet.getServletClass());
 		assertEquals("Incorrect number of init-param's",
 				(initParamNameValues.length / 2), servlet.getInitParams()
 						.size());
@@ -224,8 +189,8 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 	 */
 	private static void assertServletMapping(ServletMappingModel mapping,
 			String servletName, String... urlPatterns) {
-		assertEquals("Incorrect servlet-name", servletName, mapping
-				.getServletName());
+		assertEquals("Incorrect servlet-name", servletName,
+				mapping.getServletName());
 		assertEquals("Incorrect number of url-pattern's", urlPatterns.length,
 				mapping.getUrlPatterns().size());
 		for (int i = 0; i < urlPatterns.length; i++) {
@@ -248,10 +213,10 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 	 */
 	private static void assertFilter(FilterModel filter, String filterName,
 			String filterClass, String... initParamNameValues) {
-		assertEquals("Incorrect filter-name", filterName, filter
-				.getFilterName());
-		assertEquals("Incorrect filter-class", filterClass, filter
-				.getFilterClass());
+		assertEquals("Incorrect filter-name", filterName,
+				filter.getFilterName());
+		assertEquals("Incorrect filter-class", filterClass,
+				filter.getFilterClass());
 		assertEquals("Incorrect number of init-param's",
 				(initParamNameValues.length / 2), filter.getInitParams().size());
 		for (int i = 0; i < initParamNameValues.length; i += 2) {
@@ -280,8 +245,8 @@ public class WebXmlLoaderTest extends OfficeFrameTestCase {
 	private static void assertFilterMapping(FilterMappingModel mapping,
 			String filterName, String[] urlPatterns, String[] servletNames,
 			String... dispatchers) {
-		assertEquals("Incorrect filter-name", filterName, mapping
-				.getFilterName());
+		assertEquals("Incorrect filter-name", filterName,
+				mapping.getFilterName());
 		if (urlPatterns == null) {
 			assertEquals("Expecting no url-pattern's", 0, mapping
 					.getUrlPatterns().size());
