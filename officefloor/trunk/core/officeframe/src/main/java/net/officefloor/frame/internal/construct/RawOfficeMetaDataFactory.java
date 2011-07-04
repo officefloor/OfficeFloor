@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory for creating the {@link RawOfficeMetaData}.
@@ -33,6 +34,8 @@ public interface RawOfficeMetaDataFactory {
 	 * 
 	 * @param configuration
 	 *            {@link OfficeConfiguration}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param officeManagingManagedObjects
@@ -50,7 +53,8 @@ public interface RawOfficeMetaDataFactory {
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	RawOfficeMetaData constructRawOfficeMetaData(
-			OfficeConfiguration configuration, OfficeFloorIssues issues,
+			OfficeConfiguration configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues,
 			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,

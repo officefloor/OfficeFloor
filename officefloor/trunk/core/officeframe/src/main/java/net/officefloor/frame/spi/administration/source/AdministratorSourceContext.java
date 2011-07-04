@@ -18,26 +18,12 @@
 
 package net.officefloor.frame.spi.administration.source;
 
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for initialising a {@link AdministratorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorSourceContext extends SourceProperties {
-
-	/**
-	 * <p>
-	 * Should this {@link AdministratorSource} require to obtain various
-	 * resources to initialise it should use the returned {@link ClassLoader} to
-	 * find them on the class path.
-	 * <p>
-	 * A possible example of a resource would be an XML configuration file
-	 * specific to the {@link AdministratorSource}.
-	 * 
-	 * @return {@link ClassLoader}.
-	 */
-	ClassLoader getClassLoader();
-
+public interface AdministratorSourceContext extends SourceContext {
 }

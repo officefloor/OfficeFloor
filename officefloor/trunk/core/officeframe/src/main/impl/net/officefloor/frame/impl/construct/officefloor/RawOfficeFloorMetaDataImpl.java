@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
@@ -57,6 +58,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -153,6 +155,18 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			officeFloorName = OfficeFloor.class.getSimpleName();
 		}
 
+		// Obtain the Source Context
+		SourceContext sourceContext = configuration.getSourceContext();
+		if (sourceContext == null) {
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "No "
+					+ SourceContext.class.getSimpleName()
+					+ " provided from configuration");
+
+			// Use default source context
+			sourceContext = new SourceContextImpl(Thread.currentThread()
+					.getContextClassLoader());
+		}
+
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<ProcessContextListener> processContextListeners = new LinkedList<ProcessContextListener>();
@@ -199,7 +213,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			// Construct the managed object source
 			RawManagedObjectMetaData<?, ?> mosMetaData = rawMosFactory
 					.constructRawManagedObjectMetaData(mosConfiguration,
-							issues, configuration);
+							sourceContext, issues, configuration);
 			if (mosMetaData == null) {
 				continue; // issue with managed object source
 			}
@@ -287,7 +301,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 			// Construct the raw office meta-data
 			RawOfficeMetaData rawOfficeMetaData = rawOfficeFactory
-					.constructRawOfficeMetaData(officeConfiguration, issues,
+					.constructRawOfficeMetaData(officeConfiguration,
+							sourceContext, issues,
 							officeManagingManagedObjects, rawMetaData,
 							rawBoundMoFactory, rawBoundAdminFactory,
 							rawWorkFactory, rawTaskFactory);

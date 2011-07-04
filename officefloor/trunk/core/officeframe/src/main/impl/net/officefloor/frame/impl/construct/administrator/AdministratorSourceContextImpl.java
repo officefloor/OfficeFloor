@@ -18,8 +18,9 @@
 
 package net.officefloor.frame.impl.construct.administrator;
 
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
@@ -27,35 +28,24 @@ import net.officefloor.frame.spi.source.SourceProperties;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorSourceContextImpl extends SourcePropertiesImpl
-		implements AdministratorSourceContext {
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
+public class AdministratorSourceContextImpl extends SourceContextImpl implements
+		AdministratorSourceContext {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param properties
 	 *            {@link SourceProperties}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param sourceContext
+	 *            Delegate {@link SourceContext}.
 	 */
 	public AdministratorSourceContextImpl(SourceProperties properties,
-			ClassLoader classLoader) {
-		super(properties);
-		this.classLoader = classLoader;
+			SourceContext sourceContext) {
+		super(sourceContext, properties);
 	}
 
 	/*
 	 * ================== AdministratorSourceContext ===========================
 	 */
-
-	@Override
-	public ClassLoader getClassLoader() {
-		return this.classLoader;
-	}
 
 }

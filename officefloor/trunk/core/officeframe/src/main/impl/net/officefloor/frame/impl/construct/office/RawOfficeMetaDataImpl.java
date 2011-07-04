@@ -77,6 +77,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
@@ -218,7 +219,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 	@Override
 	public RawOfficeMetaData constructRawOfficeMetaData(
-			OfficeConfiguration configuration, OfficeFloorIssues issues,
+			OfficeConfiguration configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues,
 			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
@@ -229,8 +231,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Obtain the name of the office
 		String officeName = configuration.getOfficeName();
 		if (ConstructUtil.isBlank(officeName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class
-					.getSimpleName(), "Office registered without name");
+			issues.addIssue(AssetType.OFFICE_FLOOR,
+					OfficeFloor.class.getSimpleName(),
+					"Office registered without name");
 			return null; // can not continue
 		}
 
@@ -396,9 +399,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		} else {
 			processBoundAdministrators = rawBoundAdministratorFactory
 					.constructRawBoundAdministratorMetaData(
-							processAdministratorConfiguration, issues,
-							AdministratorScope.PROCESS, AssetType.OFFICE,
-							officeName, officeTeams, scopeMo);
+							processAdministratorConfiguration, sourceContext,
+							issues, AdministratorScope.PROCESS,
+							AssetType.OFFICE, officeName, officeTeams, scopeMo);
 		}
 
 		// Create the map of process bound administrators by name
@@ -438,9 +441,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		} else {
 			threadBoundAdministrators = rawBoundAdministratorFactory
 					.constructRawBoundAdministratorMetaData(
-							threadAdministratorConfiguration, issues,
-							AdministratorScope.THREAD, AssetType.OFFICE,
-							officeName, officeTeams, scopeMo);
+							threadAdministratorConfiguration, sourceContext,
+							issues, AdministratorScope.THREAD,
+							AssetType.OFFICE, officeName, officeTeams, scopeMo);
 		}
 
 		// Load the thread bound administrators to scope administrators
@@ -463,8 +466,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 			// Construct the work
 			RawWorkMetaData<?> rawWorkMetaData = rawWorkFactory
-					.constructRawWorkMetaData(workConfiguration, issues,
-							rawOfficeMetaData, officeAssetManagerFactory,
+					.constructRawWorkMetaData(workConfiguration, sourceContext,
+							issues, rawOfficeMetaData,
+							officeAssetManagerFactory,
 							rawBoundManagedObjectFactory,
 							rawBoundAdministratorFactory, rawTaskFactory);
 			if (rawWorkMetaData == null) {
@@ -499,14 +503,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
-				this
-						.constructDefaultManagedObjectMetaData(threadBoundManagedObjects),
+				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects),
 				this.constructAdministratorMetaData(threadBoundAdministrators));
 
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
-				this
-						.constructDefaultManagedObjectMetaData(processBoundManagedObjects),
+				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects),
 				this.constructAdministratorMetaData(processBoundAdministrators),
 				threadMetaData);
 
@@ -558,10 +560,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			Class<? extends Throwable> typeOfCause = escalationConfiguration
 					.getTypeOfCause();
 			if (typeOfCause == null) {
-				issues
-						.addIssue(AssetType.OFFICE, officeName,
-								"Type of cause not provided for office escalation "
-										+ i);
+				issues.addIssue(AssetType.OFFICE, officeName,
+						"Type of cause not provided for office escalation " + i);
 				continue; // must type type of cause
 			}
 

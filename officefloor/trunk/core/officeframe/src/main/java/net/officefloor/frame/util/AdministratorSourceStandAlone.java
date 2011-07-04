@@ -19,12 +19,14 @@
 package net.officefloor.frame.util;
 
 import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
@@ -66,9 +68,13 @@ public class AdministratorSourceStandAlone {
 		// Create a new instance of the administrator source
 		AS administratorSource = administratorSourceClass.newInstance();
 
+		// Create the source context
+		SourceContext sourceContext = new SourceContextImpl(Thread
+				.currentThread().getContextClassLoader());
+
 		// Initialise the administrator source
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				this.properties, administratorSourceClass.getClassLoader());
+				this.properties, sourceContext);
 		administratorSource.init(context);
 
 		// Return the initialised administrator source

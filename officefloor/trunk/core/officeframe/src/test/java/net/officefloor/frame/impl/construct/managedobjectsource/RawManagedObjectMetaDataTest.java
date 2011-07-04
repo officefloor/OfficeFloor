@@ -18,7 +18,8 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -64,6 +65,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
+import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -84,6 +88,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("rawtypes")
 	private final ManagedObjectSourceConfiguration configuration = this
 			.createMock(ManagedObjectSourceConfiguration.class);
+
+	/**
+	 * {@link SourceContext}.
+	 */
+	private final SourceContext sourceContext = this
+			.createMock(SourceContext.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -339,6 +349,53 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		MockManagedObjectSource.requiredPropertyName = "required.property";
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if missing {@link Class}.
+	 */
+	public void testClassLoaderAndMissingClass() {
+
+		final ClassLoader classLoader = new URLClassLoader(new URL[0]);
+		final String CLASS_NAME = "UNKNOWN CLASS";
+
+		// Record fail instantiate due to missing class
+		this.record_initManagedObject();
+		this.recordReturn(this.sourceContext,
+				this.sourceContext.getClassLoader(), classLoader);
+		this.sourceContext.loadClass(CLASS_NAME);
+		this.control(this.sourceContext).setThrowable(
+				new UnknownClassError("TEST ERROR", CLASS_NAME));
+		this.record_issue("Can not load class '" + CLASS_NAME + "'");
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		MockManagedObjectSource.classLoader = classLoader;
+		MockManagedObjectSource.requiredClassName = CLASS_NAME;
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if missing a resource.
+	 */
+	public void testMissingResource() {
+
+		final String RESOURCE_LOCATION = "RESOURCE LOCATION";
+
+		// Record fail instantiate due to missing resource
+		this.record_initManagedObject();
+		this.sourceContext.getResource(RESOURCE_LOCATION);
+		this.control(this.sourceContext).setThrowable(
+				new UnknownResourceError("TEST ERROR", RESOURCE_LOCATION));
+		this.record_issue("Can not obtain resource at location '"
+				+ RESOURCE_LOCATION + "'");
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		MockManagedObjectSource.requiredResourceLocation = RESOURCE_LOCATION;
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
 	}
@@ -953,6 +1010,21 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static String requiredPropertyName = null;
 
 		/**
+		 * Name of required {@link Class}.
+		 */
+		public static String requiredClassName = null;
+
+		/**
+		 * Location of required resource.
+		 */
+		public static String requiredResourceLocation = null;
+
+		/**
+		 * {@link ClassLoader}.
+		 */
+		public static ClassLoader classLoader = null;
+
+		/**
 		 * Recycle {@link WorkFactory}.
 		 */
 		public static WorkFactory<?> recycleWorkFactory = null;
@@ -1025,6 +1097,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObjectSourceMetaData<Indexed, FlowKey> metaData) {
 			instantiateFailure = null;
 			requiredPropertyName = null;
+			requiredClassName = null;
+			requiredResourceLocation = null;
+			classLoader = null;
 			recycleWorkFactory = null;
 			addWorkName = null;
 			addTaskName = null;
@@ -1063,16 +1138,25 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		@Override
 		public void init(ManagedObjectSourceContext context) throws Exception {
 
-			// Ensure able to obtain resources
-			String objectPath = Object.class.getName().replace('.', '/')
-					+ ".class";
-			InputStream inputStream = context.getClassLoader()
-					.getResourceAsStream(objectPath);
-			assertNotNull("Must be able to obtain resources", inputStream);
-
 			// Obtain the required property
 			if (requiredPropertyName != null) {
 				context.getProperty(requiredPropertyName);
+			}
+
+			// Obtain class loader
+			if (classLoader != null) {
+				assertSame("Incorrect class loader", classLoader,
+						context.getClassLoader());
+			}
+
+			// Load the required class
+			if (requiredClassName != null) {
+				context.loadClass(requiredClassName);
+			}
+
+			// Obtain the required resource
+			if (requiredResourceLocation != null) {
+				context.getResource(requiredResourceLocation);
 			}
 
 			// Ensure can obtain defaulted property
@@ -1153,7 +1237,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct
 		RawManagedObjectMetaData metaData = RawManagedObjectMetaDataImpl
 				.getFactory().constructRawManagedObjectMetaData(
-						this.configuration, this.issues,
+						this.configuration, this.sourceContext, this.issues,
 						this.officeFloorConfiguration);
 
 		// Provide assertion on whether should be constructed

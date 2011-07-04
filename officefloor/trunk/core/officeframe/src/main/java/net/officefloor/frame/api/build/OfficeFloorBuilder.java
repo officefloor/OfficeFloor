@@ -23,6 +23,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -32,6 +34,23 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorBuilder {
+
+	/**
+	 * Allows overriding the {@link ClassLoader} provided to the sources by the
+	 * {@link SourceContext}.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 */
+	void setClassLoader(ClassLoader classLoader);
+
+	/**
+	 * Adds a {@link ResourceSource} to locate resources.
+	 * 
+	 * @param resourceSource
+	 *            {@link ResourceSource}.
+	 */
+	void addResources(ResourceSource resourceSource);
 
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.

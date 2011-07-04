@@ -55,10 +55,11 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * {@link RawWorkMetaData} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawWorkMetaDataImpl<W extends Work> implements
@@ -66,7 +67,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 	/**
 	 * Obtains the {@link RawWorkMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawWorkMetaDataFactory}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -120,7 +121,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param rawOfficeMetaData
@@ -158,8 +159,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 	@Override
 	public <w extends Work> RawWorkMetaData<w> constructRawWorkMetaData(
-			WorkConfiguration<w> configuration, OfficeFloorIssues issues,
-			RawOfficeMetaData rawOfficeMetaData,
+			WorkConfiguration<w> configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues, RawOfficeMetaData rawOfficeMetaData,
 			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
@@ -177,9 +178,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Obtain the work factory
 		WorkFactory<w> workFactory = configuration.getWorkFactory();
 		if (workFactory == null) {
-			issues.addIssue(AssetType.WORK, workName, WorkFactory.class
-					.getSimpleName()
-					+ " not provided");
+			issues.addIssue(AssetType.WORK, workName,
+					WorkFactory.class.getSimpleName() + " not provided");
 			return null; // no work factory
 		}
 
@@ -197,9 +197,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			workBoundMo = rawBoundManagedObjectFactory
 					.constructBoundManagedObjectMetaData(moConfiguration,
 							issues, ManagedObjectScope.WORK, AssetType.WORK,
-							workName, assetManagerFactory, rawOfficeMetaData
-									.getManagedObjectMetaData(), officeScopeMo,
-							null, null);
+							workName, assetManagerFactory,
+							rawOfficeMetaData.getManagedObjectMetaData(),
+							officeScopeMo, null, null);
 		}
 
 		// Create the work scope managed objects available to tasks
@@ -222,8 +222,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		} else {
 			workBoundAdmins = rawBoundAdministratorFactory
 					.constructRawBoundAdministratorMetaData(adminConfiguration,
-							issues, AdministratorScope.WORK, AssetType.WORK,
-							workName, rawOfficeMetaData.getTeams(), workScopeMo);
+							sourceContext, issues, AdministratorScope.WORK,
+							AssetType.WORK, workName,
+							rawOfficeMetaData.getTeams(), workScopeMo);
 		}
 
 		// Create the work scope administrators available to tasks
@@ -303,7 +304,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			managedObjectMetaData[i] = moInstanceMetaData
 					.getManagedObjectMetaData();
 			if (managedObjectMetaData[i] == null) {
-				issues.addIssue(AssetType.WORK, workName,
+				issues.addIssue(
+						AssetType.WORK,
+						workName,
 						"No managed object meta-data for work managed object "
 								+ rawWorkMetaData.workManagedObjects[i]
 										.getBoundManagedObjectName());
@@ -320,8 +323,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Create the work meta-data
 		rawWorkMetaData.workMetaData = new WorkMetaDataImpl<w>(
 				rawWorkMetaData.workName, workFactory, managedObjectMetaData,
-				administratorMetaData, initialFlowMetaData, ConstructUtil
-						.toArray(taskMetaDatas, new TaskMetaData[0]));
+				administratorMetaData, initialFlowMetaData,
+				ConstructUtil.toArray(taskMetaDatas, new TaskMetaData[0]));
 
 		// Return the raw work meta-data
 		return rawWorkMetaData;

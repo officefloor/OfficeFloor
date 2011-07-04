@@ -24,6 +24,7 @@ import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObject
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory for the creation of {@link RawManagedObjectMetaData}.
@@ -37,6 +38,8 @@ public interface RawManagedObjectMetaDataFactory {
 	 * 
 	 * @param configuration
 	 *            {@link ManagedObjectSourceConfiguration}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param officeFloorConfiguration
@@ -47,7 +50,7 @@ public interface RawManagedObjectMetaDataFactory {
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> RawManagedObjectMetaData<D, F> constructRawManagedObjectMetaData(
 			ManagedObjectSourceConfiguration<F, MS> configuration,
-			OfficeFloorIssues issues,
+			SourceContext sourceContext, OfficeFloorIssues issues,
 			OfficeFloorConfiguration officeFloorConfiguration);
 
 }

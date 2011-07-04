@@ -18,7 +18,6 @@
 
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -49,12 +48,15 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * Raw {@link ManagedObjectMetaData}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
@@ -63,7 +65,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawManagedObjectMetaDataFactory}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -130,7 +132,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceConfiguration
@@ -185,15 +187,16 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	@Override
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
 			ManagedObjectSourceConfiguration<h, MS> configuration,
-			OfficeFloorIssues issues,
+			SourceContext sourceContext, OfficeFloorIssues issues,
 			OfficeFloorConfiguration officeFloorConfiguration) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = configuration
 				.getManagedObjectSourceName();
 		if (ConstructUtil.isBlank(managedObjectSourceName)) {
-			issues.addIssue(AssetType.OFFICE_FLOOR, OfficeFloor.class
-					.getSimpleName(), "ManagedObject added without a name");
+			issues.addIssue(AssetType.OFFICE_FLOOR,
+					OfficeFloor.class.getSimpleName(),
+					"ManagedObject added without a name");
 			return null; // can not carry on
 		}
 
@@ -214,9 +217,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		if (managedObjectSource == null) {
 			return null; // can not carry on
 		}
-
-		// Obtain the class loader
-		ClassLoader classLoader = OfficeFrame.class.getClassLoader();
 
 		// Obtain the properties to initialise the managed object source
 		SourceProperties properties = configuration.getProperties();
@@ -254,7 +254,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(
-				managedObjectSourceName, properties, classLoader,
+				managedObjectSourceName, properties, sourceContext,
 				managingOfficeBuilder, officeBuilder);
 
 		try {
@@ -267,8 +267,23 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 							+ "' must be specified");
 			return null; // can not carry on
 
-		} catch (Throwable ex) {
+		} catch (UnknownClassError ex) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"Can not load class '" + ex.getUnknownClassName() + "'");
+			return null; // can not carry on
+
+		} catch (UnknownResourceError ex) {
+			issues.addIssue(
+					AssetType.MANAGED_OBJECT,
+					managedObjectSourceName,
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "'");
+			return null; // can not carry on
+
+		} catch (Throwable ex) {
+			issues.addIssue(
+					AssetType.MANAGED_OBJECT,
+					managedObjectSourceName,
 					"Failed to initialise "
 							+ managedObjectSourceClass.getName(), ex);
 			return null; // can not carry on
@@ -335,10 +350,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			inputConfiguration = managingOfficeConfiguration
 					.getInputManagedObjectConfiguration();
 			if (inputConfiguration == null) {
-				issues
-						.addIssue(AssetType.MANAGED_OBJECT,
-								managedObjectSourceName,
-								"Must provide Input configuration as Managed Object Source requires flows");
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						"Must provide Input configuration as Managed Object Source requires flows");
 				return null; // can not carry on
 			}
 		}
@@ -440,21 +454,21 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		/*
 		 * FIXME ensure all dependencies are required for coordination.
-		 *
+		 * 
 		 * DETAILS: As coordination uses the dependencyMappings array as the
 		 * required dependencies for coordination, the dependencyMappings should
 		 * be:
-		 *
+		 * 
 		 * - appended with any dependencies not used directly in coordination.
 		 * This then will allow coordination to not proceed until 'ALL'
 		 * dependencies are available (not just direct dependencies of
 		 * coordination).
-		 *
+		 * 
 		 * - index into dependencyMappings array identifying where direct
 		 * dependencies stop and indirect dependencies begin. This will allow
 		 * the ObjectRegistry to throw an exception if not requesting direct
 		 * dependency.
-		 *
+		 * 
 		 * MITIGATION: This is an edge case where a dependency has another
 		 * dependency that is Asynchronous and not usable unless current
 		 * asynchronous operation is not complete. Will fix once have 'real

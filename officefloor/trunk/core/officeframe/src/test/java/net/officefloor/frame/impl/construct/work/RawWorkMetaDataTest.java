@@ -54,6 +54,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -77,6 +78,12 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	private final WorkConfiguration<W> configuration = this
 			.createMock(WorkConfiguration.class);
+
+	/**
+	 * {@link SourceContext}.
+	 */
+	private final SourceContext sourceContext = this
+			.createMock(SourceContext.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -141,8 +148,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record no work name
 		this.recordReturn(this.configuration, this.configuration.getWorkName(),
 				null);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getOfficeName(), "OFFICE");
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getOfficeName(), "OFFICE");
 		this.issues.addIssue(AssetType.OFFICE, "OFFICE",
 				"Work added to office without name");
 
@@ -160,8 +167,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record no work factory
 		this.recordReturn(this.configuration, this.configuration.getWorkName(),
 				WORK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getWorkFactory(), null);
+		this.recordReturn(this.configuration,
+				this.configuration.getWorkFactory(), null);
 		this.record_workIssue("WorkFactory not provided");
 
 		// Attempt to construct work
@@ -192,8 +199,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Ensure no managed objects, administrators or tasks
 		assertEquals("Should not have managed object meta-data", 0,
 				workMetaData.getManagedObjectMetaData().length);
-		assertEquals("Should not have administrator meta-data", 0, workMetaData
-				.getAdministratorMetaData().length);
+		assertEquals("Should not have administrator meta-data", 0,
+				workMetaData.getAdministratorMetaData().length);
 		assertEquals("Should not have tasks", 0,
 				workMetaData.getTaskMetaData().length);
 	}
@@ -226,16 +233,14 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators();
-		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getDefaultInstanceIndex(), 0);
-		this
-				.recordReturn(
-						rawMoMetaData,
-						rawMoMetaData
-								.getRawBoundManagedObjectInstanceMetaData(),
-						new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
-		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
-				.getManagedObjectMetaData(), moMetaData);
+		this.recordReturn(rawMoMetaData,
+				rawMoMetaData.getDefaultInstanceIndex(), 0);
+		this.recordReturn(
+				rawMoMetaData,
+				rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData,
+				rawMoInstanceMetaData.getManagedObjectMetaData(), moMetaData);
 		this.record_tasks(task);
 
 		// Construct work with task managed object
@@ -310,18 +315,17 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators();
 		this.record_tasks();
-		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getDefaultInstanceIndex(), 2);
-		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getRawBoundManagedObjectInstanceMetaData(),
+		this.recordReturn(rawMoMetaData,
+				rawMoMetaData.getDefaultInstanceIndex(), 2);
+		this.recordReturn(rawMoMetaData,
+				rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
 				new RawBoundManagedObjectInstanceMetaData[] { null, null,
 						rawMoInstanceMetaData });
-		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
-				.getManagedObjectMetaData(), null);
-		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getBoundManagedObjectName(), "MO");
-		this
-				.record_workIssue("No managed object meta-data for work managed object MO");
+		this.recordReturn(rawMoInstanceMetaData,
+				rawMoInstanceMetaData.getManagedObjectMetaData(), null);
+		this.recordReturn(rawMoMetaData,
+				rawMoMetaData.getBoundManagedObjectName(), "MO");
+		this.record_workIssue("No managed object meta-data for work managed object MO");
 
 		// Construct work
 		this.replayMockObjects();
@@ -383,8 +387,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
 		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
-		this.recordReturn(rawAdminMetaData, rawAdminMetaData
-				.getAdministratorMetaData(), adminMetaData);
+		this.recordReturn(rawAdminMetaData,
+				rawAdminMetaData.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
 
 		// Construct work with task managed object
@@ -526,8 +530,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		assertEquals("Incorrect task of initial flow", task.taskMetaData,
 				flowMetaData.getInitialTaskMetaData());
 		assertEquals("Incorrect instigation strategy",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, flowMetaData
-						.getInstigationStrategy());
+				FlowInstigationStrategyEnum.ASYNCHRONOUS,
+				flowMetaData.getInstigationStrategy());
 		assertEquals("Incorrect asset manager", initialFlowAssetManager,
 				flowMetaData.getFlowManager());
 	}
@@ -556,18 +560,16 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
 		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
-		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getDefaultInstanceIndex(), 0);
-		this
-				.recordReturn(
-						rawMoMetaData,
-						rawMoMetaData
-								.getRawBoundManagedObjectInstanceMetaData(),
-						new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
-		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData
-				.getManagedObjectMetaData(), moMetaData);
-		this.recordReturn(rawAdminMetaData, rawAdminMetaData
-				.getAdministratorMetaData(), adminMetaData);
+		this.recordReturn(rawMoMetaData,
+				rawMoMetaData.getDefaultInstanceIndex(), 0);
+		this.recordReturn(
+				rawMoMetaData,
+				rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData,
+				rawMoInstanceMetaData.getManagedObjectMetaData(), moMetaData);
+		this.recordReturn(rawAdminMetaData,
+				rawAdminMetaData.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
 		rawAdminMetaData.linkTasks(taskLocator, this.assetManagerFactory,
 				this.issues);
@@ -600,8 +602,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	private void record_workNameFactory() {
 		this.recordReturn(this.configuration, this.configuration.getWorkName(),
 				WORK_NAME);
-		this.recordReturn(this.configuration, this.configuration
-				.getWorkFactory(), this.workFactory);
+		this.recordReturn(this.configuration,
+				this.configuration.getWorkFactory(), this.workFactory);
 	}
 
 	/**
@@ -623,34 +625,33 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		}
 
 		// Record bounding managed objects to work
-		this
-				.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-						.getOfficeScopeManagedObjects(),
-						this.officeScopeManagedObjects);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getOfficeScopeManagedObjects(),
+				this.officeScopeManagedObjects);
 		ManagedObjectConfiguration<?>[] moConfiguration = new ManagedObjectConfiguration[moCount];
-		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(), moConfiguration);
+		this.recordReturn(this.configuration,
+				this.configuration.getManagedObjectConfiguration(),
+				moConfiguration);
 		if (moConfiguration.length > 0) {
 			Map<String, RawManagedObjectMetaData<?, ?>> officeRegisteredManagedObjects = new HashMap<String, RawManagedObjectMetaData<?, ?>>(
 					0);
-			this
-					.recordReturn(this.rawOfficeMetaData,
-							this.rawOfficeMetaData.getManagedObjectMetaData(),
-							officeRegisteredManagedObjects);
-			this
-					.recordReturn(this.rawBoundManagedObjectFactory,
-							this.rawBoundManagedObjectFactory
-									.constructBoundManagedObjectMetaData(
-											moConfiguration, this.issues,
-											ManagedObjectScope.WORK,
-											AssetType.WORK, WORK_NAME,
-											this.assetManagerFactory,
-											officeRegisteredManagedObjects,
-											this.officeScopeManagedObjects,
-											null, null), workBoundMo);
+			this.recordReturn(this.rawOfficeMetaData,
+					this.rawOfficeMetaData.getManagedObjectMetaData(),
+					officeRegisteredManagedObjects);
+			this.recordReturn(
+					this.rawBoundManagedObjectFactory,
+					this.rawBoundManagedObjectFactory
+							.constructBoundManagedObjectMetaData(
+									moConfiguration, this.issues,
+									ManagedObjectScope.WORK, AssetType.WORK,
+									WORK_NAME, this.assetManagerFactory,
+									officeRegisteredManagedObjects,
+									this.officeScopeManagedObjects, null, null),
+					workBoundMo);
 			for (int i = 0; i < moCount; i++) {
-				this.recordReturn(workBoundMo[i], workBoundMo[i]
-						.getBoundManagedObjectName(), boundMoNames[i]);
+				this.recordReturn(workBoundMo[i],
+						workBoundMo[i].getBoundManagedObjectName(),
+						boundMoNames[i]);
 			}
 		}
 	}
@@ -674,24 +675,25 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		}
 
 		// Record bounding administrators to work
-		this
-				.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-						.getOfficeScopeAdministrators(),
-						this.officeScopeAdministrators);
+		this.recordReturn(this.rawOfficeMetaData,
+				this.rawOfficeMetaData.getOfficeScopeAdministrators(),
+				this.officeScopeAdministrators);
 		AdministratorSourceConfiguration<?, ?>[] adminConfiguration = new AdministratorSourceConfiguration[adminCount];
-		this.recordReturn(this.configuration, this.configuration
-				.getAdministratorConfiguration(), adminConfiguration);
+		this.recordReturn(this.configuration,
+				this.configuration.getAdministratorConfiguration(),
+				adminConfiguration);
 		if (adminConfiguration.length > 0) {
 			Map<String, Team> officeTeams = new HashMap<String, Team>(0);
-			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-					.getTeams(), officeTeams);
+			this.recordReturn(this.rawOfficeMetaData,
+					this.rawOfficeMetaData.getTeams(), officeTeams);
 			this.recordReturn(this.rawBoundAdministratorFactory,
 					this.rawBoundAdministratorFactory
 							.constructRawBoundAdministratorMetaData(
-									adminConfiguration, this.issues,
-									AdministratorScope.WORK, AssetType.WORK,
-									WORK_NAME, officeTeams, null),
-					workBoundAdmins, new AbstractMatcher() {
+									adminConfiguration, this.sourceContext,
+									this.issues, AdministratorScope.WORK,
+									AssetType.WORK, WORK_NAME, officeTeams,
+									null), workBoundAdmins,
+					new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] expected,
 								Object[] actual) {
@@ -706,8 +708,9 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 						}
 					});
 			for (int i = 0; i < adminCount; i++) {
-				this.recordReturn(workBoundAdmins[i], workBoundAdmins[i]
-						.getBoundAdministratorName(), boundAdminNames[i]);
+				this.recordReturn(workBoundAdmins[i],
+						workBoundAdmins[i].getBoundAdministratorName(),
+						boundAdminNames[i]);
 			}
 		}
 	}
@@ -739,8 +742,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			RawWorkMetaDataTest<W>.RecordedTask... tasks) {
 
 		// Record obtaining the initial task name
-		this.recordReturn(this.configuration, this.configuration
-				.getInitialTaskName(), initialTaskName);
+		this.recordReturn(this.configuration,
+				this.configuration.getInitialTaskName(), initialTaskName);
 
 		// Create a task configuration for each task
 		TaskConfiguration<?, ?, ?>[] taskConfigurations = new TaskConfiguration[tasks.length];
@@ -749,8 +752,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		}
 
 		// Record obtaining the task configuration
-		this.recordReturn(this.configuration, this.configuration
-				.getTaskConfiguration(), taskConfigurations);
+		this.recordReturn(this.configuration,
+				this.configuration.getTaskConfiguration(), taskConfigurations);
 		for (int i = 0; i < taskConfigurations.length; i++) {
 
 			// Make available to use in matcher
@@ -789,13 +792,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 					});
 
 			// Record obtaining the task meta-data
-			this.recordReturn(task.rawTaskMetaData, task.rawTaskMetaData
-					.getTaskMetaData(), task.taskMetaData);
+			this.recordReturn(task.rawTaskMetaData,
+					task.rawTaskMetaData.getTaskMetaData(), task.taskMetaData);
 
 			// Record obtaining task name only if searching for initial task
 			if (initialTaskName != null) {
-				this.recordReturn(task.rawTaskMetaData, task.rawTaskMetaData
-						.getTaskName(), task.taskName);
+				this.recordReturn(task.rawTaskMetaData,
+						task.rawTaskMetaData.getTaskName(), task.taskName);
 			}
 		}
 
@@ -898,7 +901,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 		// Construct the raw work meta-data
 		RawWorkMetaData<W> metaData = RawWorkMetaDataImpl.getFactory()
-				.constructRawWorkMetaData(this.configuration, this.issues,
+				.constructRawWorkMetaData(this.configuration,
+						this.sourceContext, this.issues,
 						this.rawOfficeMetaData, this.assetManagerFactory,
 						this.rawBoundManagedObjectFactory,
 						this.rawBoundAdministratorFactory,
