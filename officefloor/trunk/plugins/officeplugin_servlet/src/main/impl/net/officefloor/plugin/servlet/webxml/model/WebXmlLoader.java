@@ -18,12 +18,10 @@
 
 package net.officefloor.plugin.servlet.webxml.model;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
@@ -49,25 +47,17 @@ public class WebXmlLoader {
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the web.xml configuration
-		ConfigurationItem webXmlConfigurationItem = context
-				.getConfiguration(webXmlLocation);
-		if (webXmlConfigurationItem == null) {
-			throw new FileNotFoundException("Can not find configuration '"
-					+ webXmlLocation + "'");
-		}
-		InputStream webXmlConfiguration = webXmlConfigurationItem
-				.getConfiguration();
+		InputStream webXmlConfiguration = context.getResource(webXmlLocation);
 
 		// Obtain the unmarshaller for the web.xml configuration
 		WebAppModel webApp = new WebAppModel();
 		String unmarshallerLocation = webApp.getClass().getPackage().getName()
 				.replace('.', '/')
 				+ "/UnmarshalWebXml.xml";
-		ConfigurationItem unmarshallerConfiguration = context
-				.getConfiguration(unmarshallerLocation);
+		InputStream unmarshallerConfiguration = context
+				.getResource(unmarshallerLocation);
 		XmlUnmarshaller unmarshaller = TreeXmlUnmarshallerFactory.getInstance()
-				.createUnmarshaller(
-						unmarshallerConfiguration.getConfiguration());
+				.createUnmarshaller(unmarshallerConfiguration);
 
 		// Unmarshal the web.xml configuration
 		unmarshaller.unmarshall(webXmlConfiguration, webApp);
