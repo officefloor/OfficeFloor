@@ -75,11 +75,6 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	private final TaskFactory<Work, Indexed, Indexed> taskFactory = this
 			.createMock(TaskFactory.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockWorkSource.reset();
@@ -156,6 +151,44 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				work.addTaskType("IGNORE", taskFactory, null, null);
 			}
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure issue if missing {@link Class}.
+	 */
+	public void testMissingClass() {
+
+		// Record missing class
+		this.record_issue("Can not load class 'missing' for WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				context.loadClass("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testMissingResource() {
+
+		// Record missing resource
+		this.record_issue("Can not obtain resource at location 'missing' for WorkSource "
+				+ MockWorkSource.class.getName());
+
+		// Attempt to load work type
+		this.loadWorkType(false, new Loader() {
+			@Override
+			public void sourceWork(WorkTypeBuilder<Work> work,
+					WorkSourceContext context) throws Exception {
+				context.getResource("missing");
+			}
+		});
 	}
 
 	/**

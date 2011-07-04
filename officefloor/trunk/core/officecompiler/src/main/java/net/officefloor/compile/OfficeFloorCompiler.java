@@ -29,6 +29,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
@@ -43,8 +44,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * <p>
@@ -108,9 +110,9 @@ public abstract class OfficeFloorCompiler {
 
 		// Ensure not already specified
 		if (FACTORY != null) {
-			throw new IllegalStateException(OfficeFloorCompilerFactory.class
-					.getSimpleName()
-					+ " has already been specified");
+			throw new IllegalStateException(
+					OfficeFloorCompilerFactory.class.getSimpleName()
+							+ " has already been specified");
 		}
 
 		// Specify office floor compiler factory
@@ -244,45 +246,45 @@ public abstract class OfficeFloorCompiler {
 		// Add the office source aliases from the class path
 		for (OfficeSourceService<?> service : ServiceLoader.load(
 				OfficeSourceService.class, this.getClassLoader())) {
-			this.addOfficeSourceAlias(service.getOfficeSourceAlias(), service
-					.getOfficeSourceClass());
+			this.addOfficeSourceAlias(service.getOfficeSourceAlias(),
+					service.getOfficeSourceClass());
 		}
 
 		// Add the section source aliases from the class path
 		for (SectionSourceService<?> service : ServiceLoader.load(
 				SectionSourceService.class, this.getClassLoader())) {
-			this.addSectionSourceAlias(service.getSectionSourceAlias(), service
-					.getSectionSourceClass());
+			this.addSectionSourceAlias(service.getSectionSourceAlias(),
+					service.getSectionSourceClass());
 		}
 
 		// Add the work source aliases from the class path
 		for (WorkSourceService<?, ?> service : ServiceLoader.load(
 				WorkSourceService.class, this.getClassLoader())) {
-			this.addWorkSourceAlias(service.getWorkSourceAlias(), service
-					.getWorkSourceClass());
+			this.addWorkSourceAlias(service.getWorkSourceAlias(),
+					service.getWorkSourceClass());
 		}
 
 		// Add the managed object source aliases from the class path
 		for (ManagedObjectSourceService<?, ?, ?> service : ServiceLoader.load(
 				ManagedObjectSourceService.class, this.getClassLoader())) {
-			this.addManagedObjectSourceAlias(service
-					.getManagedObjectSourceAlias(), service
-					.getManagedObjectSourceClass());
+			this.addManagedObjectSourceAlias(
+					service.getManagedObjectSourceAlias(),
+					service.getManagedObjectSourceClass());
 		}
 
 		// Add the administrator source aliases from the class path
 		for (AdministratorSourceService<?, ?, ?> service : ServiceLoader.load(
 				AdministratorSourceService.class, this.getClassLoader())) {
-			this.addAdministratorSourceAlias(service
-					.getAdministratorSourceAlias(), service
-					.getAdministratorSourceClass());
+			this.addAdministratorSourceAlias(
+					service.getAdministratorSourceAlias(),
+					service.getAdministratorSourceClass());
 		}
 
 		// Add the team source aliases from the class path
 		for (TeamSourceService<?> service : ServiceLoader.load(
 				TeamSourceService.class, this.getClassLoader())) {
-			this.addTeamSourceAlias(service.getTeamSourceAlias(), service
-					.getTeamSourceClass());
+			this.addTeamSourceAlias(service.getTeamSourceAlias(),
+					service.getTeamSourceClass());
 		}
 	}
 
@@ -292,17 +294,16 @@ public abstract class OfficeFloorCompiler {
 
 	/**
 	 * <p>
-	 * Overrides the default {@link ConfigurationContext} to use in compiling
-	 * the {@link OfficeFloor}.
+	 * Adds a {@link ResourceSource}.
 	 * <p>
-	 * Implementations of {@link OfficeFloorCompiler} must provide a default
-	 * {@link ConfigurationContext}.
+	 * This will be added to the {@link OfficeFrame} before compiling the
+	 * {@link OfficeFloor} and will be available in the {@link SourceContext}
+	 * for loading the various sources.
 	 * 
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param resourceSource
+	 *            {@link ResourceSource}.
 	 */
-	public abstract void setConfigurationContext(
-			ConfigurationContext configurationContext);
+	public abstract void addResources(ResourceSource resourceSource);
 
 	/**
 	 * <p>
@@ -534,6 +535,13 @@ public abstract class OfficeFloorCompiler {
 	 * @return {@link ManagedObjectLoader}.
 	 */
 	public abstract ManagedObjectLoader getManagedObjectLoader();
+
+	/**
+	 * Obtains the {@link ManagedObjectPoolLoader}.
+	 * 
+	 * @return {@link ManagedObjectPoolLoader}.
+	 */
+	public abstract ManagedObjectPoolLoader getManagedObjectPoolLoader();
 
 	/**
 	 * Obtains the {@link AdministratorLoader}.

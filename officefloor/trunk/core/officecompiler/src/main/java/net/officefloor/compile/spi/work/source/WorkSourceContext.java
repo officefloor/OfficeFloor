@@ -19,20 +19,12 @@
 package net.officefloor.compile.spi.work.source;
 
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for loading a {@link WorkType}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WorkSourceContext extends SourceProperties {
-
-	/**
-	 * Obtains the {@link ClassLoader} for loading the {@link WorkTypeBuilder}.
-	 * 
-	 * @return {@link ClassLoader} for loading the {@link WorkTypeBuilder}.
-	 */
-	ClassLoader getClassLoader();
-
+public interface WorkSourceContext extends SourceContext {
 }

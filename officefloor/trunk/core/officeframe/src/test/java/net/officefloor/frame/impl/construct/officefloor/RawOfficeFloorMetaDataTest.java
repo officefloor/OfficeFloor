@@ -196,7 +196,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-				.constructRawTeamMetaData(teamConfiguration, this.issues), null);
+				.constructRawTeamMetaData(teamConfiguration,
+						this.sourceContext, this.issues), null);
 		this.record_constructManagedObjectSources("OFFICE");
 		this.record_constructEscalation();
 		this.record_constructOffices();
@@ -232,16 +233,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new TeamConfiguration[] { teamConfigurationOne,
 						teamConfigurationTwo });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-				.constructRawTeamMetaData(teamConfigurationOne, this.issues),
-				rawTeamOne);
+				.constructRawTeamMetaData(teamConfigurationOne,
+						this.sourceContext, this.issues), rawTeamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeamName(),
 				DUPLICATE_TEAM_NAME);
 		this.recordReturn(rawTeamOne, rawTeamOne.getTeam(), teamOne);
 		this.recordReturn(rawTeamOne, rawTeamOne.getProcessContextListeners(),
 				new ProcessContextListener[0]);
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-				.constructRawTeamMetaData(teamConfigurationTwo, this.issues),
-				rawTeamTwo);
+				.constructRawTeamMetaData(teamConfigurationTwo,
+						this.sourceContext, this.issues), rawTeamTwo);
 		this.recordReturn(rawTeamTwo, rawTeamTwo.getTeamName(),
 				DUPLICATE_TEAM_NAME);
 		this.record_issue("Teams registered with the same name '"
@@ -320,8 +321,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getTeamConfiguration(),
 				new TeamConfiguration[] { teamConfiguration });
 		this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-				.constructRawTeamMetaData(teamConfiguration, this.issues),
-				rawTeamMetaData);
+				.constructRawTeamMetaData(teamConfiguration,
+						this.sourceContext, this.issues), rawTeamMetaData);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 				TEAM_NAME);
 		this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);
@@ -707,8 +708,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 			// Record constructing the team
 			this.recordReturn(this.rawTeamFactory, this.rawTeamFactory
-					.constructRawTeamMetaData(teamConfiguration, this.issues),
-					rawTeamMetaData);
+					.constructRawTeamMetaData(teamConfiguration,
+							this.sourceContext, this.issues), rawTeamMetaData);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeamName(),
 					teamName);
 			this.recordReturn(rawTeamMetaData, rawTeamMetaData.getTeam(), team);

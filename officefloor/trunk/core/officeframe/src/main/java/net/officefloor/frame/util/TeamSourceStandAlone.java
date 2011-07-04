@@ -18,8 +18,10 @@
 
 package net.officefloor.frame.util;
 
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -64,9 +66,13 @@ public class TeamSourceStandAlone {
 
 		TS teamSource = teamSourceClass.newInstance();
 
+		// Create default source context
+		SourceContext sourceContext = new SourceContextImpl(Thread
+				.currentThread().getContextClassLoader());
+
 		// Initialise the team source
 		TeamSourceContext context = new TeamSourceContextImpl(
-				teamSourceClass.getSimpleName(), this.properties);
+				teamSourceClass.getSimpleName(), this.properties, sourceContext);
 		teamSource.init(context);
 
 		// Return the initialised team source

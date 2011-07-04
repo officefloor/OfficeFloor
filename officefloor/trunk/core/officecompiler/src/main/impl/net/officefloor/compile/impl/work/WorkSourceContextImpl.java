@@ -19,44 +19,30 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
  * {@link WorkSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkSourceContextImpl extends SourcePropertiesImpl implements
+public class WorkSourceContextImpl extends SourceContextImpl implements
 		WorkSourceContext {
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param propertyList
 	 *            {@link PropertyList}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public WorkSourceContextImpl(PropertyList propertyList,
-			ClassLoader classLoader) {
-		super(new PropertyListSourceProperties(propertyList));
-		this.classLoader = classLoader;
-	}
-
-	/*
-	 * ==================== WorkLoaderContext ================================
-	 */
-
-	@Override
-	public ClassLoader getClassLoader() {
-		return this.classLoader;
+	public WorkSourceContextImpl(PropertyList propertyList, NodeContext context) {
+		super(context.getSourceContext(), new PropertyListSourceProperties(
+				propertyList));
 	}
 
 }

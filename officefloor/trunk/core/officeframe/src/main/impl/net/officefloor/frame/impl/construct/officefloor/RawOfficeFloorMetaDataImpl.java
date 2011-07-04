@@ -176,7 +176,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 			// Construct the raw team meta-data
 			RawTeamMetaData rawTeamMetaData = rawTeamFactory
-					.constructRawTeamMetaData(teamConfiguration, issues);
+					.constructRawTeamMetaData(teamConfiguration, sourceContext,
+							issues);
 			if (rawTeamMetaData == null) {
 				continue; // issue with team
 			}

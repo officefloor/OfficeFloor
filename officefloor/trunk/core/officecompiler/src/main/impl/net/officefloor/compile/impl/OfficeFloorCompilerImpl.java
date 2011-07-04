@@ -19,6 +19,8 @@
 package net.officefloor.compile.impl;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -28,6 +30,7 @@ import net.officefloor.compile.impl.issues.StderrCompilerIssues;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
+import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
@@ -39,6 +42,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -48,15 +52,17 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * <p>
@@ -71,9 +77,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		NodeContext {
 
 	/**
-	 * {@link ConfigurationContext}.
+	 * {@link ResourceSource} instances.
 	 */
-	private ConfigurationContext configurationContext = null;
+	private final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
+
+	/**
+	 * {@link SourceContext}.
+	 */
+	private SourceContext sourceContext = null;
 
 	/**
 	 * {@link CompilerIssues}.
@@ -184,9 +195,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 */
 
 	@Override
-	public void setConfigurationContext(
-			ConfigurationContext configurationContext) {
-		this.configurationContext = configurationContext;
+	public void addResources(ResourceSource resourceSource) {
+		this.resourceSources.add(resourceSource);
 	}
 
 	@Override
@@ -283,6 +293,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public ManagedObjectPoolLoader getManagedObjectPoolLoader() {
+		return new ManagedObjectPoolLoaderImpl(this);
+	}
+
+	@Override
 	public AdministratorLoader getAdministratorLoader() {
 		return new AdministratorLoaderImpl(this);
 	}
@@ -298,11 +313,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		// Ensure aliases are added
 		this.ensureSourceAliasesAdded();
 
-		// Obtain the office floor source
+		// Obtain the OfficeFloor source
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null ? this.officeFloorSourceClass
 				: OfficeFloorModelOfficeFloorSource.class);
 
-		// Create the office floor loader
+		// Create the OfficeFloor loader
 		OfficeFloorLoader officeFloorLoader = this.getOfficeFloorLoader();
 
 		// Compile, build and return the office floor
@@ -315,10 +330,17 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 */
 
 	@Override
-	public ConfigurationContext getConfigurationContext() {
-		// Provide default configuration context if none specified
-		return (this.configurationContext != null ? this.configurationContext
-				: new ClassLoaderConfigurationContext(this.getClassLoader()));
+	public SourceContext getSourceContext() {
+		// Ensure have source context
+		if (this.sourceContext == null) {
+			this.sourceContext = new SourceContextImpl(this.getClassLoader(),
+					this.resourceSources
+							.toArray(new ResourceSource[this.resourceSources
+									.size()]));
+		}
+
+		// Return the source context
+		return this.sourceContext;
 	}
 
 	@Override
@@ -334,9 +356,17 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public OfficeFrame getOfficeFrame() {
-		// Provide default office frame if none specified
+		// Return the OfficeFrame (default if none specified)
 		return (this.officeFrame != null ? this.officeFrame : OfficeFrame
 				.getInstance());
+	}
+
+	@Override
+	public void initiateOfficeFloorBuilder(OfficeFloorBuilder builder) {
+		builder.setClassLoader(this.getClassLoader());
+		for (ResourceSource resourceSource : this.resourceSources) {
+			builder.addResources(resourceSource);
+		}
 	}
 
 	@Override
@@ -344,8 +374,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public <S extends OfficeSource> Class<S> getOfficeSourceClass(
 			String officeSourceName, String officeLocation, String officeName) {
 		return (Class<S>) CompileUtil.obtainClass(officeSourceName,
-				OfficeSource.class, this.officeSourceAliases, this
-						.getClassLoader(), LocationType.OFFICE, officeLocation,
+				OfficeSource.class, this.officeSourceAliases,
+				this.getSourceContext(), LocationType.OFFICE, officeLocation,
 				AssetType.OFFICE, officeName, this.getCompilerIssues());
 	}
 
@@ -354,9 +384,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public <S extends SectionSource> Class<S> getSectionSourceClass(
 			String sectionSourceName, String sectionLocation, String sectionName) {
 		return (Class<S>) CompileUtil.obtainClass(sectionSourceName,
-				SectionSource.class, this.sectionSourceAliases, this
-						.getClassLoader(), LocationType.SECTION,
-				sectionLocation, null, null, this.getCompilerIssues());
+				SectionSource.class, this.sectionSourceAliases,
+				this.getSourceContext(), LocationType.SECTION, sectionLocation,
+				null, null, this.getCompilerIssues());
 	}
 
 	@Override
@@ -365,7 +395,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String workSourceName, String sectionLocation, String workName) {
 		return (Class<S>) CompileUtil.obtainClass(workSourceName,
 				WorkSource.class, this.workSourceAliases,
-				this.getClassLoader(), LocationType.SECTION, sectionLocation,
+				this.getSourceContext(), LocationType.SECTION, sectionLocation,
 				AssetType.WORK, workName, this.getCompilerIssues());
 	}
 
@@ -381,9 +411,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String location, String managedObjectName) {
 		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName,
 				ManagedObjectSource.class, this.managedObjectSourceAliases,
-				this.getClassLoader(), locationType, location,
-				AssetType.MANAGED_OBJECT, managedObjectName, this
-						.getCompilerIssues());
+				this.getSourceContext(), locationType, location,
+				AssetType.MANAGED_OBJECT, managedObjectName,
+				this.getCompilerIssues());
 	}
 
 	@Override
@@ -394,15 +424,23 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public ManagedObjectPoolLoader getManagedObjectPoolLoader(
+			LocationType locationType, String location,
+			String managedObjectPoolName) {
+		return new ManagedObjectPoolLoaderImpl(locationType, location,
+				managedObjectPoolName, this);
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends AdministratorSource<?, ?>> Class<S> getAdministratorSourceClass(
 			String administratorSourceName, String officeLocation,
 			String administratorName) {
 		return (Class<S>) CompileUtil.obtainClass(administratorSourceName,
 				AdministratorSource.class, this.administratorSourceAliases,
-				this.getClassLoader(), LocationType.OFFICE, officeLocation,
-				AssetType.ADMINISTRATOR, administratorName, this
-						.getCompilerIssues());
+				this.getSourceContext(), LocationType.OFFICE, officeLocation,
+				AssetType.ADMINISTRATOR, administratorName,
+				this.getCompilerIssues());
 	}
 
 	@Override
@@ -418,9 +456,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String teamSourceName, String officeFloorLocation, String teamName) {
 		return (Class<S>) CompileUtil.obtainClass(teamSourceName,
 				TeamSource.class, this.teamSourceAliases,
-				this.getClassLoader(), LocationType.OFFICE_FLOOR,
-				officeFloorLocation, AssetType.TEAM, teamName, this
-						.getCompilerIssues());
+				this.getSourceContext(), LocationType.OFFICE_FLOOR,
+				officeFloorLocation, AssetType.TEAM, teamName,
+				this.getCompilerIssues());
 	}
 
 }

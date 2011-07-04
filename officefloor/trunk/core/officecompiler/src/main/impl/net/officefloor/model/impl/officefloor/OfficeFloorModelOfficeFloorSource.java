@@ -51,6 +51,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -112,7 +113,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 			OfficeFloorSourceContext context) throws Exception {
 
 		// Obtain the configuration to the section
-		ConfigurationItem configuration = context.getConfiguration(context
+		InputStream configuration = context.getResource(context
 				.getOfficeFloorLocation());
 		if (configuration == null) {
 			// Must have configuration
@@ -121,7 +122,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 		}
 
 		// Read in the configuration
-		Reader reader = new InputStreamReader(configuration.getConfiguration());
+		Reader reader = new InputStreamReader(configuration);
 		StringWriter configurationBuffer = new StringWriter();
 		for (int value = reader.read(); value != -1; value = reader.read()) {
 			configurationBuffer.write(value);
@@ -169,12 +170,13 @@ public class OfficeFloorModelOfficeFloorSource extends
 		} while ((tagStart >= 0) && (tagEnd >= 0));
 
 		// Utilised the tag replaced configuration
-		configuration = new TagReplacedOfficeFloorConfigurationItem(config,
-				configuration);
+		ConfigurationItem configurationItem = new TagReplacedOfficeFloorConfigurationItem(
+				config, new InputStreamConfigurationItem(configuration));
 
 		// Retrieve the office floor model
 		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
-				new ModelRepositoryImpl()).retrieveOfficeFloor(configuration);
+				new ModelRepositoryImpl())
+				.retrieveOfficeFloor(configurationItem);
 
 		// Add the office floor managed object sources, keeping registry of them
 		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
@@ -190,8 +192,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 									.getManagedObjectSourceClassName());
 			for (PropertyModel property : managedObjectSourceModel
 					.getProperties()) {
-				managedObjectSource.addProperty(property.getName(), property
-						.getValue());
+				managedObjectSource.addProperty(property.getName(),
+						property.getValue());
 			}
 
 			// Provide timeout
@@ -388,8 +390,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 
 			// Add the office floor team
 			String teamName = teamModel.getOfficeFloorTeamName();
-			OfficeFloorTeam team = deployer.addTeam(teamName, teamModel
-					.getTeamSourceClassName());
+			OfficeFloorTeam team = deployer.addTeam(teamName,
+					teamModel.getTeamSourceClassName());
 			for (PropertyModel property : teamModel.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
 			}
@@ -406,8 +408,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 			// Add the office, registering them
 			String officeName = officeModel.getDeployedOfficeName();
 			DeployedOffice office = deployer.addDeployedOffice(officeName,
-					officeModel.getOfficeSourceClassName(), officeModel
-							.getOfficeLocation());
+					officeModel.getOfficeSourceClassName(),
+					officeModel.getOfficeLocation());
 			offices.put(officeName, office);
 			for (PropertyModel property : officeModel.getProperties()) {
 				office.addProperty(property.getName(), property.getValue());
@@ -572,10 +574,10 @@ public class OfficeFloorModelOfficeFloorSource extends
 						DeployedOfficeModel officeModel = this
 								.getOfficeForInput(officeInputModel,
 										officeFloor);
-						officeInput = officeInputs.get(officeModel
-								.getDeployedOfficeName(), officeInputModel
-								.getSectionName(), officeInputModel
-								.getSectionInputName());
+						officeInput = officeInputs.get(
+								officeModel.getDeployedOfficeName(),
+								officeInputModel.getSectionName(),
+								officeInputModel.getSectionInputName());
 					}
 				}
 				if (officeInput != null) {

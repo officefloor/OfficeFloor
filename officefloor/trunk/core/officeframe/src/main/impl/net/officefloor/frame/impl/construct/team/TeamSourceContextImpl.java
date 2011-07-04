@@ -21,7 +21,8 @@ package net.officefloor.frame.impl.construct.team;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -33,7 +34,7 @@ import net.officefloor.frame.spi.team.source.TeamSourceContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamSourceContextImpl extends SourcePropertiesImpl implements
+public class TeamSourceContextImpl extends SourceContextImpl implements
 		TeamSourceContext {
 
 	/**
@@ -58,9 +59,12 @@ public class TeamSourceContextImpl extends SourcePropertiesImpl implements
 	 *            {@link TeamSource}.
 	 * @param properties
 	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
 	 */
-	public TeamSourceContextImpl(String teamName, SourceProperties properties) {
-		super(properties);
+	public TeamSourceContextImpl(String teamName, SourceProperties properties,
+			SourceContext sourceContext) {
+		super(sourceContext, properties);
 		this.teamName = teamName;
 	}
 

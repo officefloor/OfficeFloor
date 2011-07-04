@@ -93,11 +93,6 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	private final TaskFactory<Work, ?, ?> taskFactory = this
 			.createMock(TaskFactory.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockManagedObjectSource.reset(this.metaData, new InitUtil());
@@ -170,9 +165,45 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to get the {@link ResourceLocator}.
+	 * Ensure issue if missing {@link Class}.
 	 */
-	public void testGetResourceLocator() {
+	public void testMissingClass() {
+
+		// Record missing class
+		this.record_issue("Can not load class 'missing'");
+
+		// Attempt to load
+		this.loadManagedObjectType(false, new Init<None>() {
+			@Override
+			public void init(ManagedObjectSourceContext<None> context,
+					InitUtil util) {
+				context.loadClass("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testMissingResource() {
+
+		// Record missing resource
+		this.record_issue("Can not obtain resource at location 'missing'");
+
+		// Attempt to load
+		this.loadManagedObjectType(false, new Init<None>() {
+			@Override
+			public void init(ManagedObjectSourceContext<None> context,
+					InitUtil util) {
+				context.getResource("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to get resource.
+	 */
+	public void testGetResource() {
 
 		// Record basic meta-data
 		this.record_basicMetaData();

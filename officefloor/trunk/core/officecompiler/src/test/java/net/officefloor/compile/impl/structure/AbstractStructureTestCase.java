@@ -86,14 +86,14 @@ import net.officefloor.frame.spi.administration.source.impl.AbstractAdministrato
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Abstract functionality for testing loading the {@link OfficeSection}.
@@ -108,10 +108,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static final String SECTION_LOCATION = "SECTION_LOCATION";
 
 	/**
-	 * {@link ConfigurationContext}.
+	 * {@link ResourceSource}.
 	 */
-	protected final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
+	protected final ResourceSource resourceSource = this
+			.createMock(ResourceSource.class);
 
 	/**
 	 * {@link ClassLoader}.
@@ -137,15 +137,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.issues);
 		compiler.setClassLoader(this.classLoader);
-		compiler.setConfigurationContext(this.configurationContext);
+		compiler.addResources(this.resourceSource);
 		this.nodeContext = (NodeContext) compiler;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MakerSectionSource.reset();
@@ -322,7 +317,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.issues);
 		compiler.setClassLoader(this.classLoader);
-		compiler.setConfigurationContext(this.configurationContext);
+		compiler.addResources(this.resourceSource);
 		SectionLoader loader = compiler.getSectionLoader();
 		OfficeSection section = loader.loadOfficeSection(sectionName,
 				MakerSectionSource.class, SECTION_LOCATION, propertyList);

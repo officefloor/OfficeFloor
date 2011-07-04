@@ -39,17 +39,13 @@ public interface ManagedObjectPoolLoader {
 	 * 
 	 * @param managedObjectPoolSourceClass
 	 *            Class of the {@link ManagedObjectPoolSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link ManagedObjectPoolSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the
 	 *         {@link ManagedObjectPoolSourceProperty} instances of the
 	 *         {@link ManagedObjectPoolSpecification} or <code>null</code> if
 	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<PS extends ManagedObjectPoolSource> PropertyList loadSpecification(
-			Class<PS> managedObjectPoolSourceClass, CompilerIssues issues);
+			Class<PS> managedObjectPoolSourceClass);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectPoolType} sourced from the
@@ -60,17 +56,10 @@ public interface ManagedObjectPoolLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link ManagedObjectPoolType}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link ManagedObjectPoolSource}
-	 *            may use in obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link ManagedObjectPoolType}.
 	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issues,
 	 *         which is reported to the {@link CompilerIssues}.
 	 */
-	<PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPool(
-			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues);
+	<PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPoolType(
+			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList);
 
 }

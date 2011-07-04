@@ -63,11 +63,6 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	private final AdministratorSourceMetaData<?, ?> metaData = this
 			.createMock(AdministratorSourceMetaData.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockAdministratorSource.reset(this.metaData);
@@ -135,6 +130,40 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure issue if missing {@link Class}.
+	 */
+	public void testMissingClass() {
+
+		// Record missing class
+		this.record_issue("Can not load class 'missing'");
+
+		// Attempt to load
+		this.loadAdministratorType(false, new Init() {
+			@Override
+			public void init(AdministratorSourceContext context) {
+				context.loadClass("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testMissingResource() {
+
+		// Record missing class
+		this.record_issue("Can not obtain resource at location 'missing'");
+
+		// Attempt to load
+		this.loadAdministratorType(false, new Init() {
+			@Override
+			public void init(AdministratorSourceContext context) {
+				context.getResource("missing");
+			}
+		});
 	}
 
 	/**

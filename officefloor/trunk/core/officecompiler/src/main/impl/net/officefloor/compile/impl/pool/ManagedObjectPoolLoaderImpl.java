@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.pool;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
@@ -54,6 +55,21 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	private final String managedObjectPoolName;
 
 	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public ManagedObjectPoolLoaderImpl(NodeContext context) {
+		this(null, null, null, context);
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param locationType
@@ -62,12 +78,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	 *            Location.
 	 * @param managedObjectPoolName
 	 *            Name of the {@link ManagedObjectPool}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectPoolLoaderImpl(LocationType locationType,
-			String location, String managedObjectPoolName) {
+			String location, String managedObjectPoolName, NodeContext context) {
 		this.locationType = locationType;
 		this.location = location;
 		this.managedObjectPoolName = managedObjectPoolName;
+		this.issues = context.getCompilerIssues();
 	}
 
 	/*
@@ -76,14 +95,14 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 	@Override
 	public <PS extends ManagedObjectPoolSource> PropertyList loadSpecification(
-			Class<PS> managedObjectPoolSourceClass, CompilerIssues issues) {
+			Class<PS> managedObjectPoolSourceClass) {
 
 		// Instantiate the managed object pool source
 		ManagedObjectPoolSource managedObjectPoolSource = CompileUtil
 				.newInstance(managedObjectPoolSourceClass,
 						ManagedObjectPoolSource.class, this.locationType,
 						this.location, AssetType.MANAGED_OBJECT_POOL,
-						this.managedObjectPoolName, issues);
+						this.managedObjectPoolName, this.issues);
 		if (managedObjectPoolSource == null) {
 			return null; // failed to instantiate
 		}
@@ -93,19 +112,22 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		try {
 			specification = managedObjectPoolSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ ManagedObjectPoolSourceSpecification.class
-							.getSimpleName() + " from "
-					+ managedObjectPoolSourceClass.getName(), ex, issues);
+			this.addIssue(
+					"Failed to obtain "
+							+ ManagedObjectPoolSourceSpecification.class
+									.getSimpleName() + " from "
+							+ managedObjectPoolSourceClass.getName(), ex,
+					this.issues);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No "
-					+ ManagedObjectPoolSourceSpecification.class
-							.getSimpleName() + " returned from "
-					+ managedObjectPoolSourceClass.getName(), issues);
+			this.addIssue(
+					"No "
+							+ ManagedObjectPoolSourceSpecification.class
+									.getSimpleName() + " returned from "
+							+ managedObjectPoolSourceClass.getName(), issues);
 			return null; // no specification obtained
 		}
 
@@ -114,12 +136,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		try {
 			managedObjectPoolSourceProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ ManagedObjectPoolSourceProperty.class.getSimpleName()
-					+ " instances from "
-					+ ManagedObjectPoolSourceSpecification.class
-							.getSimpleName() + " for "
-					+ managedObjectPoolSourceClass.getName(), ex, issues);
+			this.addIssue(
+					"Failed to obtain "
+							+ ManagedObjectPoolSourceProperty.class
+									.getSimpleName()
+							+ " instances from "
+							+ ManagedObjectPoolSourceSpecification.class
+									.getSimpleName() + " for "
+							+ managedObjectPoolSourceClass.getName(), ex,
+					this.issues);
 			return null; // failed to obtain properties
 		}
 
@@ -131,15 +156,17 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 				// Ensure have the managed object pool source property
 				if (mopProperty == null) {
-					this.addIssue(ManagedObjectPoolSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " is null from "
-							+ ManagedObjectPoolSourceSpecification.class
+					this.addIssue(
+							ManagedObjectPoolSourceProperty.class
 									.getSimpleName()
-							+ " for "
-							+ managedObjectPoolSourceClass.getName(), issues);
+									+ " "
+									+ i
+									+ " is null from "
+									+ ManagedObjectPoolSourceSpecification.class
+											.getSimpleName()
+									+ " for "
+									+ managedObjectPoolSourceClass.getName(),
+							this.issues);
 					return null; // must have complete property details
 				}
 
@@ -148,28 +175,31 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 				try {
 					name = mopProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ ManagedObjectPoolSourceProperty.class
-									.getSimpleName()
-							+ " "
-							+ i
-							+ " from "
-							+ ManagedObjectPoolSourceSpecification.class
-									.getSimpleName() + " for "
-							+ managedObjectPoolSourceClass.getName(), ex,
-							issues);
+					this.addIssue(
+							"Failed to get name for "
+									+ ManagedObjectPoolSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ ManagedObjectPoolSourceSpecification.class
+											.getSimpleName() + " for "
+									+ managedObjectPoolSourceClass.getName(),
+							ex, this.issues);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(ManagedObjectPoolSourceProperty.class
-							.getSimpleName()
-							+ " "
-							+ i
-							+ " provided blank name from "
-							+ ManagedObjectPoolSourceSpecification.class
+					this.addIssue(
+							ManagedObjectPoolSourceProperty.class
 									.getSimpleName()
-							+ " for "
-							+ managedObjectPoolSourceClass.getName(), issues);
+									+ " "
+									+ i
+									+ " provided blank name from "
+									+ ManagedObjectPoolSourceSpecification.class
+											.getSimpleName()
+									+ " for "
+									+ managedObjectPoolSourceClass.getName(),
+							this.issues);
 					return null; // must have complete property details
 				}
 
@@ -178,18 +208,19 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 				try {
 					label = mopProperty.getLabel();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get label for "
-							+ ManagedObjectPoolSourceProperty.class
-									.getSimpleName()
-							+ " "
-							+ i
-							+ " ("
-							+ name
-							+ ") from "
-							+ ManagedObjectPoolSourceSpecification.class
-									.getSimpleName() + " for "
-							+ managedObjectPoolSourceClass.getName(), ex,
-							issues);
+					this.addIssue(
+							"Failed to get label for "
+									+ ManagedObjectPoolSourceProperty.class
+											.getSimpleName()
+									+ " "
+									+ i
+									+ " ("
+									+ name
+									+ ") from "
+									+ ManagedObjectPoolSourceSpecification.class
+											.getSimpleName() + " for "
+									+ managedObjectPoolSourceClass.getName(),
+							ex, this.issues);
 					return null; // must have complete property details
 				}
 
@@ -203,9 +234,8 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	}
 
 	@Override
-	public <PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPool(
-			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues) {
+	public <PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPoolType(
+			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement ManagedObjectPoolLoader.loadManagedObjectPool");

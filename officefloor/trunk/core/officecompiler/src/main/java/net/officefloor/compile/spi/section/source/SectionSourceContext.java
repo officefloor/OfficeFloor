@@ -28,44 +28,24 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for loading a {@link SectionType}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionSourceContext extends SourceProperties {
+public interface SectionSourceContext extends SourceContext {
 
 	/**
 	 * <p>
 	 * Obtains the location of the {@link OfficeSection}.
 	 * <p>
-	 * How &quot;location&quot; is interpreted is for the {@link SectionSource},
-	 * however passing it to {@link #getConfiguration(String)} should return a
-	 * {@link ConfigurationItem}.
+	 * How &quot;location&quot; is interpreted is for the {@link SectionSource}.
 	 * 
 	 * @return Location of the {@link OfficeSection}.
 	 */
 	String getSectionLocation();
-
-	/**
-	 * Obtains the {@link ConfigurationItem}.
-	 * 
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @return {@link ConfigurationItem} or <code>null</code> if can not find
-	 *         the {@link ConfigurationItem}.
-	 */
-	ConfigurationItem getConfiguration(String location);
-
-	/**
-	 * Obtains the {@link ClassLoader} for loading the {@link SectionType}.
-	 * 
-	 * @return {@link ClassLoader} for loading the {@link SectionType}.
-	 */
-	ClassLoader getClassLoader();
 
 	/**
 	 * Creates a {@link PropertyList} for loading types.

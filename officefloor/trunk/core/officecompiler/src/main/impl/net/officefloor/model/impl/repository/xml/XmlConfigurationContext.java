@@ -34,6 +34,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ReadOnlyConfigurationException;
@@ -52,7 +53,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * 
  * @author Daniel Sagenschneider
  */
-public class XmlConfigurationContext implements ConfigurationContext {
+public class XmlConfigurationContext implements ConfigurationContext,
+		ResourceSource {
 
 	/**
 	 * Location of this {@link XmlConfigurationContext}.
@@ -150,6 +152,20 @@ public class XmlConfigurationContext implements ConfigurationContext {
 
 		// Flag that now parsed
 		this.xmlText = null;
+	}
+
+	/*
+	 * ====================== ResourceSource =============================
+	 */
+
+	@Override
+	public InputStream sourceResource(String location) {
+		try {
+			ConfigurationItem item = this.getConfigurationItem(location);
+			return (item == null ? null : item.getConfiguration());
+		} catch (Exception ex) {
+			return null; // failed to obtain resource
+		}
 	}
 
 	/*

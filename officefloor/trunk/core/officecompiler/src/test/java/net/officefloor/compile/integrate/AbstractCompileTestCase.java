@@ -53,12 +53,12 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 
 import org.easymock.AbstractMatcher;
 
@@ -83,10 +83,23 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			.enhanceIssues(this.issues);
 
 	/**
+	 * {@link XmlConfigurationContext} for testing.
+	 */
+	private XmlConfigurationContext configurationContext = null;
+
+	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this
 			.createMock(OfficeFloorBuilder.class);
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Record initialising for deploying
+		this.record_init();
+	}
 
 	/**
 	 * <p>
@@ -101,6 +114,21 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
 		return this.issues;
+	}
+
+	/**
+	 * Records initialising the {@link OfficeFloorBuilder}.
+	 * 
+	 * @param resourceSources
+	 *            {@link ResourceSource} instances.
+	 */
+	protected void record_init(ResourceSource... resourceSources) {
+		this.officeFloorBuilder.setClassLoader(Thread.currentThread()
+				.getContextClassLoader());
+		for (ResourceSource resourceSource : resourceSources) {
+			this.officeFloorBuilder.addResources(resourceSource);
+		}
+		this.officeFloorBuilder.addResources(this.getResourceSource());
 	}
 
 	/**
@@ -506,11 +534,16 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Obtains the {@link ConfigurationContext} for test being run.
+	 * Obtains the {@link ResourceSource} for test being run.
 	 * 
-	 * @return {@link ConfigurationContext} for test being run.
+	 * @return {@link ResourceSource} for test being run.
 	 */
-	protected ConfigurationContext getConfigurationContext() {
+	protected ResourceSource getResourceSource() {
+
+		// Determine if already available
+		if (this.configurationContext != null) {
+			return this.configurationContext;
+		}
 
 		// Move the 'Test' to start of test case name
 		String testCaseName = this.getClass().getSimpleName();
@@ -524,13 +557,13 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Create the configuration context
 		String configFileName = testCaseName + "/" + testName + ".xml";
-		XmlConfigurationContext configurationContext;
 		try {
-			configurationContext = new XmlConfigurationContext(this,
+			this.configurationContext = new XmlConfigurationContext(this,
 					configFileName);
 
 			// Add the tag replacements
-			configurationContext.addTag("testcase", this.getClass().getName());
+			this.configurationContext.addTag("testcase", this.getClass()
+					.getName());
 
 		} catch (Exception ex) {
 			// Wrap failure to not require tests to have to handle
@@ -542,7 +575,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		}
 
 		// Return the configuration context
-		return configurationContext;
+		return this.configurationContext;
 	}
 
 	/**
@@ -583,16 +616,15 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			}
 		};
 
-		// Obtain the configuration context
-		ConfigurationContext configurationContext = this
-				.getConfigurationContext();
+		// Obtain the resource source
+		ResourceSource resourceSource = this.getResourceSource();
 
 		// Create the compiler (overriding values to allow testing)
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.setOfficeFrame(officeFrame);
-		compiler.setConfigurationContext(configurationContext);
+		compiler.addResources(resourceSource);
 
 		// Add the properties
 		for (int i = 0; i < propertyNameValues.length; i += 2) {

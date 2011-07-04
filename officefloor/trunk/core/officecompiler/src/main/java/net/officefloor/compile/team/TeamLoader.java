@@ -56,8 +56,7 @@ public interface TeamLoader {
 	 * @return {@link TeamType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	// TODO rename to loadTeamType
-	<TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
+	<TS extends TeamSource> TeamType loadTeamType(Class<TS> teamSourceClass,
 			PropertyList propertyList);
 
 }

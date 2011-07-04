@@ -25,8 +25,11 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -86,7 +89,8 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 
 	@Override
 	public <TS extends TeamSource> RawTeamMetaDataImpl constructRawTeamMetaData(
-			TeamConfiguration<TS> configuration, OfficeFloorIssues issues) {
+			TeamConfiguration<TS> configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues) {
 
 		// Obtain the team name
 		String teamName = configuration.getTeamName();
@@ -118,7 +122,7 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			// Initialise the team source
 			SourceProperties properties = configuration.getProperties();
 			TeamSourceContextImpl context = new TeamSourceContextImpl(teamName,
-					properties);
+					properties, sourceContext);
 			teamSource.init(context);
 
 			// Obtain the Process Context Listeners
@@ -129,6 +133,21 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 			// Indicate an unknown property
 			issues.addIssue(AssetType.TEAM, teamName, "Must specify property '"
 					+ ex.getUnknownPropertyName() + "'");
+			return null; // can not carry on
+
+		} catch (UnknownClassError ex) {
+			// Indicate an unknown class
+			issues.addIssue(AssetType.TEAM, teamName, "Can not load class '"
+					+ ex.getUnknownClassName() + "'");
+			return null; // can not carry on
+
+		} catch (UnknownResourceError ex) {
+			// Indicate an unknown resource
+			issues.addIssue(
+					AssetType.TEAM,
+					teamName,
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "'");
 			return null; // can not carry on
 
 		} catch (Throwable ex) {

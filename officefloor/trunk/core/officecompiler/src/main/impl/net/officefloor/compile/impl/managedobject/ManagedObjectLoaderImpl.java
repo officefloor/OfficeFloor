@@ -63,7 +63,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link ManagedObjectLoader} implementation.
@@ -273,8 +275,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
 				namespaceName, new PropertyListSourceProperties(propertyList),
-				this.nodeContext.getClassLoader(), managingOffice.getBuilder(),
-				office.getBuilder());
+				this.nodeContext.getSourceContext(),
+				managingOffice.getBuilder(), office.getBuilder());
 
 		try {
 			// Initialise the managed object source
@@ -284,6 +286,16 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "'");
 			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "'");
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "'");
+			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to init", ex);

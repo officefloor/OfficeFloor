@@ -19,6 +19,7 @@
 package net.officefloor.model.impl.desk;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.section.SectionManagedObjectModel;
 
 /**
@@ -113,7 +114,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the desk
-		ConfigurationItem configuration = context.getConfiguration(context
+		InputStream configuration = context.getResource(context
 				.getSectionLocation());
 		if (configuration == null) {
 			// Must have configuration
@@ -123,7 +124,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 
 		// Retrieve the desk model
 		DeskModel desk = new DeskRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveDesk(configuration);
+				.retrieveDesk(new InputStreamConfigurationItem(configuration));
 
 		// Add the external flows as outputs, keeping registry of the outputs
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
@@ -160,8 +161,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			// Add the managed object source
 			String mosName = mosModel.getDeskManagedObjectSourceName();
 			SectionManagedObjectSource mos = designer
-					.addSectionManagedObjectSource(mosName, mosModel
-							.getManagedObjectSourceClassName());
+					.addSectionManagedObjectSource(mosName,
+							mosModel.getManagedObjectSourceClassName());
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
@@ -396,9 +397,9 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 						// Obtain the linked task and instigation strategy
 						linkedTask = tasks.get(linkedTaskModel.getTaskName());
 						instigationStrategy = this
-								.getFlowInstatigationStrategy(flowToTask
-										.getLinkType(), designer, taskName,
-										flowName);
+								.getFlowInstatigationStrategy(
+										flowToTask.getLinkType(), designer,
+										taskName, flowName);
 					}
 				}
 				if (linkedTask != null) {
@@ -418,9 +419,9 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 						linkedSectionOutput = sectionOutputs.get(linkedExtFlow
 								.getExternalFlowName());
 						instigationStrategy = this
-								.getFlowInstatigationStrategy(flowToExtFlow
-										.getLinkType(), designer, taskName,
-										flowName);
+								.getFlowInstatigationStrategy(
+										flowToExtFlow.getLinkType(), designer,
+										taskName, flowName);
 					}
 				}
 				if (linkedSectionOutput != null) {

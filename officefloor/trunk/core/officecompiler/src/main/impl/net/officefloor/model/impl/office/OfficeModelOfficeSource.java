@@ -19,6 +19,7 @@
 package net.officefloor.model.impl.office;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,6 +58,7 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
@@ -95,7 +97,6 @@ import net.officefloor.model.office.OfficeTaskToPostDutyModel;
 import net.officefloor.model.office.OfficeTaskToPreDutyModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeModel} {@link OfficeSource}.
@@ -133,7 +134,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeSourceContext context) throws Exception {
 
 		// Obtain the configuration to the section
-		ConfigurationItem configuration = context.getConfiguration(context
+		InputStream configuration = context.getResource(context
 				.getOfficeLocation());
 		if (configuration == null) {
 			// Must have configuration
@@ -143,7 +144,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		// Retrieve the office model
 		OfficeModel office = new OfficeRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOffice(configuration);
+				.retrieveOffice(new InputStreamConfigurationItem(configuration));
 
 		// Add the external managed objects, keeping registry of them
 		Map<String, OfficeObject> officeObjects = new HashMap<String, OfficeObject>();

@@ -18,7 +18,7 @@
 
 package net.officefloor.frame.spi.team.source;
 
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TeamSourceContext extends SourceProperties {
+public interface TeamSourceContext extends SourceContext {
 
 	/**
 	 * Obtains the name of the {@link Team} to be created from the
