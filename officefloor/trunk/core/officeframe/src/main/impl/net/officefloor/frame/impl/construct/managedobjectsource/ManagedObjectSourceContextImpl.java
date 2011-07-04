@@ -27,13 +27,14 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
@@ -42,7 +43,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
-		SourcePropertiesImpl implements ManagedObjectSourceContext<F> {
+		SourceContextImpl implements ManagedObjectSourceContext<F> {
 
 	/**
 	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
@@ -53,11 +54,6 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 * Name of the {@link ManagedObject}.
 	 */
 	private final String managedObjectName;
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
 
 	/**
 	 * {@link ManagingOfficeBuilder}.
@@ -82,8 +78,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 *            Name of the {@link ManagedObject}.
 	 * @param properties
 	 *            Properties.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param sourceContext
+	 *            Delegate {@link SourceContext}.
 	 * @param managingOfficeBuilder
 	 *            {@link ManagingOfficeBuilder}.
 	 * @param officeBuilder
@@ -91,12 +87,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 *            {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectName,
-			SourceProperties properties, ClassLoader classLoader,
+			SourceProperties properties, SourceContext sourceContext,
 			ManagingOfficeBuilder<F> managingOfficeBuilder,
 			OfficeBuilder officeBuilder) {
-		super(properties);
+		super(sourceContext, properties);
 		this.managedObjectName = managedObjectName;
-		this.classLoader = classLoader;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
 	}
@@ -126,11 +121,6 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	/*
 	 * =============== ManagedObjectSourceContext =====================
 	 */
-
-	@Override
-	public ClassLoader getClassLoader() {
-		return this.classLoader;
-	}
 
 	@Override
 	public <W extends Work> ManagedObjectWorkBuilder<W> addWork(

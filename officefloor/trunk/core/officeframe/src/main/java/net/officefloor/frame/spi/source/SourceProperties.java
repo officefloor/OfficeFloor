@@ -46,8 +46,8 @@ public interface SourceProperties {
 	 *            Name of the property.
 	 * @return Value of the property.
 	 * @throws UnknownPropertyError
-	 *             If property was not configured. Let this propagate as the
-	 *             framework will handle it.
+	 *             If property was not configured. Let this propagate as
+	 *             OfficeFloor will handle it.
 	 */
 	String getProperty(String name) throws UnknownPropertyError;
 

@@ -26,27 +26,14 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for a {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceProperties {
-
-	/**
-	 * <p>
-	 * Should this {@link ManagedObjectSource} require to obtain various
-	 * resources to initialise it should use the returned {@link ClassLoader} to
-	 * find them on the class path.
-	 * <p>
-	 * A possible example of a resource would be an XML configuration file
-	 * specific to the {@link ManagedObjectSource}.
-	 * 
-	 * @return {@link ClassLoader}.
-	 */
-	ClassLoader getClassLoader();
+public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceContext {
 
 	/**
 	 * <p>

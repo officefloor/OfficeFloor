@@ -22,6 +22,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -37,6 +38,13 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link OfficeFloor}.
 	 */
 	String getOfficeFloorName();
+
+	/**
+	 * Obtains the {@link SourceContext}.
+	 * 
+	 * @return {@link SourceContext}.
+	 */
+	SourceContext getSourceContext();
 
 	/**
 	 * Obtains the configuration of the {@link ManagedObjectSource} instances.

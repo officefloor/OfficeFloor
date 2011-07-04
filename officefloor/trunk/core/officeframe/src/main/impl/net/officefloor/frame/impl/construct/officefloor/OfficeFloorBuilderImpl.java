@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBui
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataImpl;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.task.RawTaskMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
@@ -48,6 +49,8 @@ import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
@@ -79,6 +82,16 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	private final List<OfficeConfiguration> offices = new LinkedList<OfficeConfiguration>();
 
 	/**
+	 * {@link ClassLoader}.
+	 */
+	private ClassLoader classLoader = null;
+
+	/**
+	 * {@link ResourceSource} instances.
+	 */
+	private final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
+
+	/**
 	 * {@link EscalationProcedure}.
 	 */
 	private EscalationHandler escalationHandler = null;
@@ -96,6 +109,16 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	/*
 	 * ================ OfficeFloorBuilder ================================
 	 */
+
+	@Override
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+	@Override
+	public void addResources(ResourceSource resourceSource) {
+		this.resourceSources.add(resourceSource);
+	}
 
 	@Override
 	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> addManagedObject(
@@ -161,6 +184,22 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	@Override
 	public String getOfficeFloorName() {
 		return this.officeFloorName;
+	}
+
+	@Override
+	public SourceContext getSourceContext() {
+
+		// Obtain the class loader
+		ClassLoader classLoader = this.classLoader;
+		if (classLoader == null) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+		}
+
+		// Create and return the source context
+		return new SourceContextImpl(
+				classLoader,
+				this.resourceSources
+						.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
 	@Override

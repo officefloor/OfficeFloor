@@ -20,40 +20,40 @@ package net.officefloor.frame.spi.source;
 
 /**
  * <p>
- * Indicates a property was not configured within the {@link SourceProperties}.
+ * Indicates a resource was not available from the {@link SourceContext}.
  * <p>
- * This is a critical error as the source is requiring this property to
+ * This is a critical error as the source is requiring the resource to
  * initialise and subsequently start.
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownPropertyError extends Error {
+public class UnknownResourceError extends Error {
 
 	/**
-	 * Name of the unknown property.
+	 * Location of the unknown resource.
 	 */
-	private final String unknownPropertyName;
+	private final String unknownResourceLocation;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param message
 	 *            Message.
-	 * @param unknownPropertyName
-	 *            Name of the unknown property.
+	 * @param unknownResourceLocation
+	 *            Location of the unknown resource.
 	 */
-	public UnknownPropertyError(String message, String unknownPropertyName) {
+	public UnknownResourceError(String message, String unknownResourceLocation) {
 		super(message);
-		this.unknownPropertyName = unknownPropertyName;
+		this.unknownResourceLocation = unknownResourceLocation;
 	}
 
 	/**
-	 * Obtains the name of the unknown property.
+	 * Obtains the location of the unknown resource.
 	 * 
-	 * @return Name of the unknown property.
+	 * @return Location of the unknown resource.
 	 */
-	public String getUnknownPropertyName() {
-		return this.unknownPropertyName;
+	public String getUnknownResourceLocation() {
+		return this.unknownResourceLocation;
 	}
 
 }
