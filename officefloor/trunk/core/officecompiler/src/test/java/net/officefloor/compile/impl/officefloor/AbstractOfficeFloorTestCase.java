@@ -126,6 +126,16 @@ public abstract class AbstractOfficeFloorTestCase extends
 	}
 
 	/**
+	 * Records initiating the {@link OfficeFloorBuilder}.
+	 */
+	protected void record_initiateOfficeFloorBuilder() {
+		// Record initiate OfficeFloor builder
+		this.officeFloorBuilder.setClassLoader(Thread.currentThread()
+				.getContextClassLoader());
+		this.officeFloorBuilder.addResources(this.resourceSource);
+	}
+
+	/**
 	 * {@link MakerTeamSource} identifier.
 	 */
 	private int makerTeamSourceIdentifier = 0;
@@ -292,8 +302,9 @@ public abstract class AbstractOfficeFloorTestCase extends
 		// Office floor potentially built
 		OfficeFloor officeFloor = null;
 
-		// Record building if expected to build office floor
+		// Record building if expected to build OfficeFloor
 		if (isExpectBuild) {
+
 			// Create the mock office floor built
 			officeFloor = this.createMock(OfficeFloor.class);
 
@@ -333,7 +344,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.enhancedIssues);
-		compiler.setConfigurationContext(this.configurationContext);
+		compiler.addResources(this.resourceSource);
 		compiler.setOfficeFrame(officeFrame);
 		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(

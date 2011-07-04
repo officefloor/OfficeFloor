@@ -45,7 +45,9 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link WorkLoader} implementation.
@@ -223,7 +225,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Create the work source context
 		WorkSourceContext context = new WorkSourceContextImpl(propertyList,
-				this.nodeContext.getClassLoader());
+				this.nodeContext);
 
 		// Create the work type builder
 		WorkTypeImpl<W> workType = new WorkTypeImpl<W>();
@@ -237,6 +239,19 @@ public class WorkLoaderImpl implements WorkLoader {
 					+ "' for " + WorkSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + WorkSource.class.getSimpleName() + " "
+					+ workSourceClass.getName());
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ WorkSource.class.getSimpleName() + " "
+					+ workSourceClass.getName());
+			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source " + WorkType.class.getSimpleName()

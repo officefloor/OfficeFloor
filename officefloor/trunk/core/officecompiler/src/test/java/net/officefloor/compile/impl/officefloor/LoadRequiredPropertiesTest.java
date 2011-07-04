@@ -18,7 +18,8 @@
 
 package net.officefloor.compile.impl.officefloor;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -35,8 +36,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecifica
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests loading the required {@link PropertyList}.
@@ -50,17 +49,6 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	 */
 	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
-	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockOfficeFloorSource.reset();
@@ -99,56 +87,6 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link ConfigurationItem}.
-	 */
-	public void testFailGetConfigurationItem() throws Exception {
-
-		final String location = "LOCATION";
-		final IOException failure = new IOException(
-				"Configuration Item failure");
-
-		// Record failing to obtain the configuration item
-		this.control(this.configurationContext).expectAndThrow(
-				this.configurationContext.getConfigurationItem(location),
-				failure);
-		this
-				.record_issue("Failure obtaining configuration 'LOCATION'",
-						failure);
-
-		// Attempt to obtain the configuration item
-		this.loadRequiredProperties(false, new Loader() {
-			@Override
-			public void loadRequiredProperties(RequiredProperties properties,
-					OfficeFloorSourceContext context) throws Exception {
-				context.getConfiguration(location);
-			}
-		});
-	}
-
-	/**
-	 * Ensure able to obtain a {@link ConfigurationItem}.
-	 */
-	public void testGetConfigurationItem() throws Exception {
-
-		final String location = "LOCATION";
-		final ConfigurationItem item = this.createMock(ConfigurationItem.class);
-
-		// Record obtaining the configuration item
-		this.recordReturn(this.configurationContext, this.configurationContext
-				.getConfigurationItem(location), item);
-
-		// Obtain the configuration item
-		this.loadRequiredProperties(true, new Loader() {
-			@Override
-			public void loadRequiredProperties(RequiredProperties properties,
-					OfficeFloorSourceContext context) throws Exception {
-				assertEquals("Incorrect configuation item", item, context
-						.getConfiguration(location));
-			}
-		});
-	}
-
-	/**
 	 * Ensure issue if missing {@link Property}.
 	 */
 	public void testMissingProperty() {
@@ -180,24 +118,87 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 					OfficeFloorSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context
-						.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context
-						.getProperty("TWO"));
+				assertEquals("Ensure get property ONE", "1",
+						context.getProperty("ONE"));
+				assertEquals("Ensure get property TWO", "2",
+						context.getProperty("TWO"));
 				String[] names = context.getPropertyNames();
 				assertEquals("Incorrect number of property names", 2,
 						names.length);
 				assertEquals("Incorrect property name 0", "ONE", names[0]);
 				assertEquals("Incorrect property name 1", "TWO", names[1]);
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
-						.size());
-				assertEquals("Incorrect property ONE", "1", properties
-						.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties
-						.get("TWO"));
+				assertEquals("Incorrect number of properties", 2,
+						properties.size());
+				assertEquals("Incorrect property ONE", "1",
+						properties.get("ONE"));
+				assertEquals("Incorrect property TWO", "2",
+						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure issue if missing {@link Class}.
+	 */
+	public void testMissingClass() {
+
+		// Record missing property
+		this.record_issue("Can not load class 'missing' for OfficeFloorSource "
+				+ MockOfficeFloorSource.class.getName());
+
+		// Attempt to load required properties
+		this.loadRequiredProperties(false, new Loader() {
+			@Override
+			public void loadRequiredProperties(RequiredProperties properties,
+					OfficeFloorSourceContext context) throws Exception {
+				context.loadClass("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testMissingResource() {
+
+		// Record missing resource
+		this.recordReturn(this.resourceSource,
+				this.resourceSource.sourceResource("missing"), null);
+		this.record_issue("Can not obtain resource at location 'missing' for OfficeFloorSource "
+				+ MockOfficeFloorSource.class.getName());
+
+		// Attempt to load required properties
+		this.loadRequiredProperties(false, new Loader() {
+			@Override
+			public void loadRequiredProperties(RequiredProperties properties,
+					OfficeFloorSourceContext context) throws Exception {
+				context.getResource("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain resource.
+	 */
+	public void testGetResource() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream(new byte[0]);
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.resourceSource,
+				this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadRequiredProperties(true, new Loader() {
+			@Override
+			public void loadRequiredProperties(RequiredProperties properties,
+					OfficeFloorSourceContext context) throws Exception {
+				assertSame("Incorrect resource", resource,
+						context.getResource(location));
+			}
+		});
 	}
 
 	/**
@@ -247,8 +248,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testNullPropertyName() {
 
 		// Record null property name
-		this
-				.record_issue("Required property specified with null name (label=null)");
+		this.record_issue("Required property specified with null name (label=null)");
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {
@@ -267,8 +267,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testNullPropertyNameButWithLabel() {
 
 		// Record null property name
-		this
-				.record_issue("Required property specified with null name (label=LABEL)");
+		this.record_issue("Required property specified with null name (label=LABEL)");
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {
@@ -457,7 +456,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.issues);
-		compiler.setConfigurationContext(this.configurationContext);
+		compiler.addResources(this.resourceSource);
 		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
 		MockOfficeFloorSource.loader = loader;
 		PropertyList requiredProperties = officeFloorLoader

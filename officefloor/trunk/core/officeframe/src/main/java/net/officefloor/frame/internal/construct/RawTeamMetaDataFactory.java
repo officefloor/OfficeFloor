@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
@@ -34,12 +35,15 @@ public interface RawTeamMetaDataFactory {
 	 * 
 	 * @param configuration
 	 *            {@link TeamConfiguration}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
 	 *         construct.
 	 */
 	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
-			TeamConfiguration<TS> configuration, OfficeFloorIssues issues);
+			TeamConfiguration<TS> configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues);
 
 }

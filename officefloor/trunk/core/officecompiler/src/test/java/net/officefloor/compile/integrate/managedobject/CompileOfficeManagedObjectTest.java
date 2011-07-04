@@ -60,7 +60,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleManagedObjectSource() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,

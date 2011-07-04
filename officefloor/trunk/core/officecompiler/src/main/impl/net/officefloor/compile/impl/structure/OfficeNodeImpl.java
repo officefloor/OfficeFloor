@@ -31,7 +31,6 @@ import java.util.Set;
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.impl.util.StringExtractor;
@@ -80,7 +79,9 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -306,11 +307,18 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					+ officeSource.getClass().getName());
 			return false; // must have property
 
-		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue(
-					"Failure obtaining configuration '" + ex.getLocation()
-							+ "'", ex.getCause());
-			return false; // must not fail in getting configurations
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + OfficeSource.class.getSimpleName() + " "
+					+ officeSource.getClass().getName());
+			return false; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ OfficeSource.class.getSimpleName() + " "
+					+ officeSource.getClass().getName());
+			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
 			this.addIssue("Failure loading " + ex.getType().getSimpleName()
@@ -495,7 +503,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String escalationTypeName = node.getOfficeEscalationType();
 			Class<? extends Throwable> type = CompileUtil.obtainClass(
 					escalationTypeName, Throwable.class, null,
-					this.context.getClassLoader(), LocationType.OFFICE,
+					this.context.getSourceContext(), LocationType.OFFICE,
 					this.officeLocation, null, null,
 					this.context.getCompilerIssues());
 			if (type == null) {

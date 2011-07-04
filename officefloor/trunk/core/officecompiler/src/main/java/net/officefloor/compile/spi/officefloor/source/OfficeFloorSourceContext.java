@@ -26,45 +26,25 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for the {@link OfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorSourceContext extends SourceProperties {
+public interface OfficeFloorSourceContext extends SourceContext {
 
 	/**
 	 * <p>
 	 * Obtains the location of the {@link OfficeFloor}.
 	 * <p>
 	 * How &quot;location&quot; is interpreted is for the
-	 * {@link OfficeFloorSource}, however passing it to
-	 * {@link #getConfiguration(String)} should return a
-	 * {@link ConfigurationItem}.
+	 * {@link OfficeFloorSource}.
 	 * 
 	 * @return Location of the {@link OfficeFloor}.
 	 */
 	String getOfficeFloorLocation();
-
-	/**
-	 * Obtains the {@link ConfigurationItem}.
-	 * 
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @return {@link ConfigurationItem} or <code>null</code> if can not find
-	 *         the {@link ConfigurationItem}.
-	 */
-	ConfigurationItem getConfiguration(String location);
-
-	/**
-	 * Obtains the {@link ClassLoader} for the {@link OfficeFloorSource}.
-	 * 
-	 * @return {@link ClassLoader} for the {@link OfficeFloorSource}.
-	 */
-	ClassLoader getClassLoader();
 
 	/**
 	 * Creates a new {@link PropertyList}.

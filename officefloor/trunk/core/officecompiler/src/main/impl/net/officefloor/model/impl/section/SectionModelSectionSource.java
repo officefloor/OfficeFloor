@@ -19,6 +19,7 @@
 package net.officefloor.model.impl.section;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
@@ -103,7 +104,7 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the section
-		ConfigurationItem configuration = context.getConfiguration(context
+		InputStream configuration = context.getResource(context
 				.getSectionLocation());
 		if (configuration == null) {
 			// Must have configuration
@@ -113,7 +114,8 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 
 		// Retrieve the section model
 		SectionModel section = new SectionRepositoryImpl(
-				new ModelRepositoryImpl()).retrieveSection(configuration);
+				new ModelRepositoryImpl())
+				.retrieveSection(new InputStreamConfigurationItem(configuration));
 
 		// Add the external flows as outputs from the section, keeping registry
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
@@ -161,8 +163,8 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 			// Add the managed object source
 			String mosName = mosModel.getSectionManagedObjectSourceName();
 			SectionManagedObjectSource mos = designer
-					.addSectionManagedObjectSource(mosName, mosModel
-							.getManagedObjectSourceClassName());
+					.addSectionManagedObjectSource(mosName,
+							mosModel.getManagedObjectSourceClassName());
 			for (PropertyModel property : mosModel.getProperties()) {
 				mos.addProperty(property.getName(), property.getValue());
 			}
@@ -338,9 +340,9 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 					if (inputModel != null) {
 						SubSectionModel linkedSubSection = this
 								.getSubSectionForInput(section, inputModel);
-						linkedInput = subSectionInputs.get(linkedSubSection
-								.getSubSectionName(), inputModel
-								.getSubSectionInputName());
+						linkedInput = subSectionInputs.get(
+								linkedSubSection.getSubSectionName(),
+								inputModel.getSubSectionInputName());
 					}
 				}
 				if (linkedInput != null) {
@@ -442,9 +444,9 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 						SubSectionModel sectionModel = this
 								.getSubSectionForInput(section, inputModel);
 						if (sectionModel != null) {
-							linkedInput = subSectionInputs.get(sectionModel
-									.getSubSectionName(), inputModel
-									.getSubSectionInputName());
+							linkedInput = subSectionInputs.get(
+									sectionModel.getSubSectionName(),
+									inputModel.getSubSectionInputName());
 						}
 					}
 				}

@@ -52,7 +52,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeFloorNode} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorNodeImpl extends AbstractNode implements
@@ -98,7 +98,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 * @param context
@@ -278,9 +278,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	@Override
 	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame) {
 
-		// Obtain the office floor builder
+		// Obtain the OfficeFloor builder
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
+
+		// Initiate the OfficeFloor builder with compiler details
+		this.context.initiateOfficeFloorBuilder(builder);
 
 		// Load the offices (in deterministic order)
 		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),

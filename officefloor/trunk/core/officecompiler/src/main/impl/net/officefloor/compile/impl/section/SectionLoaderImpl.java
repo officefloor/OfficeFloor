@@ -21,7 +21,6 @@ package net.officefloor.compile.impl.section;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -37,7 +36,9 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link SectionLoader} implementation.
@@ -206,11 +207,19 @@ public class SectionLoaderImpl implements SectionLoader {
 					+ sectionSourceClass.getName(), sectionLocation);
 			return null; // must have property
 
-		} catch (ConfigurationContextPropagateError ex) {
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + SectionSource.class.getSimpleName() + " "
+					+ sectionSourceClass.getName(), sectionLocation);
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
 			this.addIssue(
-					"Failure obtaining configuration '" + ex.getLocation()
-							+ "'", ex.getCause(), sectionLocation);
-			return null; // must not fail in getting configurations
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "' for "
+							+ SectionSource.class.getSimpleName() + " "
+							+ sectionSourceClass.getName(), sectionLocation);
+			return null; // must have resource
 
 		} catch (LoadTypeError ex) {
 			this.addIssue("Failure loading " + ex.getType().getSimpleName()

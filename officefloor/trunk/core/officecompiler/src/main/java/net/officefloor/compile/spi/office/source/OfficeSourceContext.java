@@ -20,51 +20,30 @@ package net.officefloor.compile.spi.office.source;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for the {@link OfficeSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSourceContext extends SourceProperties {
+public interface OfficeSourceContext extends SourceContext {
 
 	/**
 	 * <p>
 	 * Obtains the location of the {@link Office}.
 	 * <p>
-	 * How &quot;location&quot; is interpreted is for the {@link OfficeSource},
-	 * however passing it to {@link #getConfiguration(String)} should return a
-	 * {@link ConfigurationItem}.
+	 * How &quot;location&quot; is interpreted is for the {@link OfficeSource}.
 	 * 
 	 * @return Location of the {@link Office}.
 	 */
 	String getOfficeLocation();
-
-	/**
-	 * Obtains the {@link ConfigurationItem}.
-	 * 
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @return {@link ConfigurationItem} or <code>null</code> if can not find
-	 *         the {@link ConfigurationItem}.
-	 */
-	ConfigurationItem getConfiguration(String location);
-
-	/**
-	 * Obtains the {@link ClassLoader} for loading the {@link OfficeType}.
-	 * 
-	 * @return {@link ClassLoader} for loading the {@link OfficeType}.
-	 */
-	ClassLoader getClassLoader();
 
 	/**
 	 * Creates a new {@link PropertyList}.

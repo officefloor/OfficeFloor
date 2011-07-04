@@ -18,11 +18,13 @@
 
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
+import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -31,16 +33,18 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Context for a node.
@@ -50,18 +54,11 @@ import net.officefloor.model.repository.ConfigurationContext;
 public interface NodeContext {
 
 	/**
-	 * Obtains the {@link ConfigurationContext}.
+	 * Obtains the {@link SourceContext}.
 	 * 
-	 * @return {@link ConfigurationContext}.
+	 * @return {@link SourceContext}.
 	 */
-	ConfigurationContext getConfigurationContext();
-
-	/**
-	 * Obtains the {@link ClassLoader}.
-	 * 
-	 * @return {@link ClassLoader}.
-	 */
-	ClassLoader getClassLoader();
+	SourceContext getSourceContext();
 
 	/**
 	 * Obtains the {@link CompilerIssues}.
@@ -76,6 +73,15 @@ public interface NodeContext {
 	 * @return {@link OfficeFrame}.
 	 */
 	OfficeFrame getOfficeFrame();
+
+	/**
+	 * Initiates the {@link OfficeFloorBuilder} with the
+	 * {@link OfficeFloorCompiler} details.
+	 * 
+	 * @param builder
+	 *            {@link OfficeFloorBuilder}.
+	 */
+	void initiateOfficeFloorBuilder(OfficeFloorBuilder builder);
 
 	/**
 	 * Creates a new {@link PropertyList}.
@@ -196,6 +202,21 @@ public interface NodeContext {
 	 */
 	ManagedObjectLoader getManagedObjectLoader(LocationType locationType,
 			String location, String managedObjectName);
+
+	/**
+	 * Obtains the {@link ManagedObjectPoolLoader}.
+	 * 
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param managedObjectPoolName
+	 *            Name of the {@link ManagedObjectPool}.
+	 * @return {@link ManagedObjectPoolLoader}.
+	 */
+	ManagedObjectPoolLoader getManagedObjectPoolLoader(
+			LocationType locationType, String location,
+			String managedObjectPoolName);
 
 	/**
 	 * Obtains the {@link AdministratorSource} class.

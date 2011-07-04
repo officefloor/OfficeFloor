@@ -53,6 +53,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 	public void testLoadSimpleTask() {
 
 		// Record loading the task
+		this.record_initiateOfficeFloorBuilder();
 		this.record_officefloor_addTeam("OFFICE_FLOOR_TEAM");
 		OfficeBuilder officeBuilder = this
 				.record_officefloor_addOffice("OFFICE");
@@ -62,7 +63,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 				this.taskFactory);
 		taskBuilder.setTeam("OFFICE_TEAM");
 
-		// Loads the office floor with a simple task
+		// Loads the OfficeFloor with a simple task
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
 			public void make(OfficeFloorMakerContext context) throws Exception {

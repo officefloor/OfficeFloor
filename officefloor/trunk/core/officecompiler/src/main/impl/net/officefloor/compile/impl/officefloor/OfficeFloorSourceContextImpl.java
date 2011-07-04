@@ -19,7 +19,6 @@
 package net.officefloor.compile.impl.officefloor;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -30,16 +29,15 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
  * {@link OfficeFloorSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorSourceContextImpl extends SourcePropertiesImpl
-		implements OfficeFloorSourceContext {
+public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
+		OfficeFloorSourceContext {
 
 	/**
 	 * Location of the {@link OfficeFloor}.
@@ -63,7 +61,8 @@ public class OfficeFloorSourceContextImpl extends SourcePropertiesImpl
 	 */
 	public OfficeFloorSourceContextImpl(String officeFloorLocation,
 			PropertyList propertyList, NodeContext nodeContext) {
-		super(new PropertyListSourceProperties(propertyList));
+		super(nodeContext.getSourceContext(), new PropertyListSourceProperties(
+				propertyList));
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = nodeContext;
 	}
@@ -75,22 +74,6 @@ public class OfficeFloorSourceContextImpl extends SourcePropertiesImpl
 	@Override
 	public String getOfficeFloorLocation() {
 		return this.officeFloorLocation;
-	}
-
-	@Override
-	public ConfigurationItem getConfiguration(String location) {
-		try {
-			return this.context.getConfigurationContext().getConfigurationItem(
-					location);
-		} catch (Throwable ex) {
-			// Propagate failure to office floor loader
-			throw new ConfigurationContextPropagateError(location, ex);
-		}
-	}
-
-	@Override
-	public ClassLoader getClassLoader() {
-		return this.context.getClassLoader();
 	}
 
 	@Override

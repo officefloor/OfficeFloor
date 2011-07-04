@@ -18,44 +18,12 @@
 
 package net.officefloor.compile.spi.pool.source;
 
-import java.util.Properties;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
- * Context for the {@link TeamSource}.
+ * Context for the {@link ManagedObjectPoolSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectPoolSourceContext {
-
-	/**
-	 * Obtains a required property value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @return Value of the property.
-	 * @throws ManagedObjectPoolSourceUnknownPropertyError
-	 *             If property was not configured. Let this propagate as the
-	 *             framework will handle it.
-	 */
-	String getProperty(String name)
-			throws ManagedObjectPoolSourceUnknownPropertyError;
-
-	/**
-	 * Obtains the property value or subsequently the default value.
-	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param defaultValue
-	 *            Default value if property not specified.
-	 * @return Value of the property or the the default value if not specified.
-	 */
-	String getProperty(String name, String defaultValue);
-
-	/**
-	 * Properties to configure the {@link TeamSource}.
-	 * 
-	 * @return Properties specific for the {@link TeamSource}.
-	 */
-	Properties getProperties();
-
+public interface ManagedObjectPoolSourceContext extends SourceContext {
 }

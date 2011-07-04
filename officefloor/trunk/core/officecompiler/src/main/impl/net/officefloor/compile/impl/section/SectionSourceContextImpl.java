@@ -19,7 +19,6 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -31,15 +30,14 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
  * {@link SectionSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceContextImpl extends SourcePropertiesImpl implements
+public class SectionSourceContextImpl extends SourceContextImpl implements
 		SectionSourceContext {
 
 	/**
@@ -62,7 +60,8 @@ public class SectionSourceContextImpl extends SourcePropertiesImpl implements
 	 */
 	public SectionSourceContextImpl(String sectionLocation,
 			PropertyList propertyList, NodeContext context) {
-		super(new PropertyListSourceProperties(propertyList));
+		super(context.getSourceContext(), new PropertyListSourceProperties(
+				propertyList));
 		this.sectionLocation = sectionLocation;
 		this.context = context;
 	}
@@ -74,22 +73,6 @@ public class SectionSourceContextImpl extends SourcePropertiesImpl implements
 	@Override
 	public String getSectionLocation() {
 		return this.sectionLocation;
-	}
-
-	@Override
-	public ConfigurationItem getConfiguration(String location) {
-		try {
-			return this.context.getConfigurationContext().getConfigurationItem(
-					location);
-		} catch (Throwable ex) {
-			// Propagate failure to section loader
-			throw new ConfigurationContextPropagateError(location, ex);
-		}
-	}
-
-	@Override
-	public ClassLoader getClassLoader() {
-		return this.context.getClassLoader();
 	}
 
 	@Override

@@ -18,7 +18,8 @@
 
 package net.officefloor.compile.impl.office;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -48,7 +49,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.TestSource;
-import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -64,11 +64,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 */
 	private final String OFFICE_LOCATION = "OFFICE_LOCATION";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -103,54 +98,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 					OfficeSourceContext context) throws Exception {
 				assertEquals("Incorrect office location", OFFICE_LOCATION,
 						context.getOfficeLocation());
-			}
-		});
-	}
-
-	/**
-	 * Ensures issue if fails to obtain the {@link ConfigurationItem}.
-	 */
-	public void testFailGetConfigurationItem() throws Exception {
-
-		final String location = "LOCATION";
-		final IOException failure = new IOException(
-				"Configuration Item failure");
-
-		// Record failing to obtain the configuration item
-		this.control(this.configurationContext).expectAndThrow(
-				this.configurationContext.getConfigurationItem(location),
-				failure);
-		this.record_issue("Failure obtaining configuration 'LOCATION'", failure);
-
-		// Attempt to obtain the configuration item
-		this.loadOfficeType(false, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office,
-					OfficeSourceContext context) throws Exception {
-				context.getConfiguration(location);
-			}
-		});
-	}
-
-	/**
-	 * Ensure able to obtain a {@link ConfigurationItem}.
-	 */
-	public void testGetConfigurationItem() throws Exception {
-
-		final String location = "LOCATION";
-		final ConfigurationItem item = this.createMock(ConfigurationItem.class);
-
-		// Record obtaining the configuration item
-		this.recordReturn(this.configurationContext,
-				this.configurationContext.getConfigurationItem(location), item);
-
-		// Obtain the configuration item
-		this.loadOfficeType(true, new Loader() {
-			@Override
-			public void sourceOffice(OfficeArchitect office,
-					OfficeSourceContext context) throws Exception {
-				assertEquals("Incorrect configuation item", item,
-						context.getConfiguration(location));
 			}
 		});
 	}
@@ -204,6 +151,69 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						properties.get("TWO"));
 			}
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure issue if missing {@link Class}.
+	 */
+	public void testMissingClass() {
+
+		// Record missing class
+		this.record_issue("Can not load class 'missing' for OfficeSource "
+				+ MockOfficeSource.class.getName());
+
+		// Attempt to load office type
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				context.loadClass("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if missing resource.
+	 */
+	public void testMissingResource() {
+
+		// Record missing resource
+		this.recordReturn(this.resourceSource,
+				this.resourceSource.sourceResource("missing"), null);
+		this.record_issue("Can not obtain resource at location 'missing' for OfficeSource "
+				+ MockOfficeSource.class.getName());
+
+		// Attempt to load office type
+		this.loadOfficeType(false, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				context.getResource("missing");
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain a resource.
+	 */
+	public void testGetResource() throws Exception {
+
+		final String location = "LOCATION";
+		final InputStream resource = new ByteArrayInputStream(new byte[0]);
+
+		// Record obtaining the resource
+		this.recordReturn(this.resourceSource,
+				this.resourceSource.sourceResource(location), resource);
+
+		// Obtain the configuration item
+		this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				assertSame("Incorrect resource", resource,
+						context.getResource(location));
+			}
+		});
 	}
 
 	/**
@@ -598,7 +608,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 		compiler.setCompilerIssues(this.issues);
-		compiler.setConfigurationContext(this.configurationContext);
+		compiler.addResources(this.resourceSource);
 		OfficeLoader officeLoader = compiler.getOfficeLoader();
 		MockOfficeSource.loader = loader;
 		OfficeType officeType = officeLoader.loadOfficeType(

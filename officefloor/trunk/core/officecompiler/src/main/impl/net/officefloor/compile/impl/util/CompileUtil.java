@@ -24,10 +24,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Utility methods to aid in compiling.
@@ -109,8 +109,8 @@ public class CompileUtil {
 	 *            Expected type of the {@link Class} to return.
 	 * @param aliases
 	 *            Map of alias name to {@link Class}. May be <code>null</code>.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param context
+	 *            {@link SourceContext}.
 	 * @param locationType
 	 *            {@link LocationType}.
 	 * @param location
@@ -126,16 +126,15 @@ public class CompileUtil {
 	@SuppressWarnings("unchecked")
 	public static <T> Class<? extends T> obtainClass(String className,
 			Class<T> expectedType, Map<String, Class<?>> aliases,
-			ClassLoader classLoader, LocationType locationType,
-			String location, AssetType assetType, String assetName,
-			CompilerIssues issues) {
+			SourceContext context, LocationType locationType, String location,
+			AssetType assetType, String assetName, CompilerIssues issues) {
 		try {
 
 			// Obtain the class (first checking for an alias)
 			Class<?> clazz = (aliases != null ? aliases.get(className) : null);
 			if (clazz == null) {
 				// Not alias, so load the class
-				clazz = classLoader.loadClass(className);
+				clazz = context.loadClass(className);
 			}
 
 			// Ensure class of expected type
@@ -217,8 +216,8 @@ public class CompileUtil {
 	 *            Expected type that {@link Class} instance must be assignable.
 	 * @param aliases
 	 *            Map of alias name to {@link Class}. May be <code>null</code>.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param context
+	 *            {@link SourceContext}.
 	 * @param locationType
 	 *            {@link LocationType}.
 	 * @param location
@@ -232,14 +231,14 @@ public class CompileUtil {
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T> T newInstance(String className, Class<T> expectedType,
-			Map<String, Class<?>> aliases, ClassLoader classLoader,
+			Map<String, Class<?>> aliases, SourceContext context,
 			LocationType locationType, String location, AssetType assetType,
 			String assetName, CompilerIssues issues) {
 
 		// Obtain the class
 		Class<? extends T> clazz = obtainClass(className, expectedType,
-				aliases, classLoader, locationType, location, assetType,
-				assetName, issues);
+				aliases, context, locationType, location, assetType, assetName,
+				issues);
 		if (clazz == null) {
 			return null; // must have class
 		}
@@ -253,38 +252,6 @@ public class CompileUtil {
 
 		// Return the instance
 		return instance;
-	}
-
-	/**
-	 * Convenience method to instantiate and instance of a {@link Class} from
-	 * its fully qualified name utilising a {@link NodeContext}.
-	 * 
-	 * @param className
-	 *            Fully qualified name of the {@link Class}.
-	 * @param expectedType
-	 *            Expected type that {@link Class} instance must be assignable.
-	 * @param aliases
-	 *            Map of alias name to {@link Class}. May be <code>null</code>.
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
-	 * @param context
-	 *            {@link NodeContext}.
-	 * @return New instance or <code>null</code> if not able to instantiate.
-	 */
-	public static <T> T newInstance(String className, Class<T> expectedType,
-			Map<String, Class<?>> aliases, LocationType locationType,
-			String location, AssetType assetType, String assetName,
-			NodeContext context) {
-		// Return new instance
-		return newInstance(className, expectedType, aliases, context
-				.getClassLoader(), locationType, location, assetType,
-				assetName, context.getCompilerIssues());
 	}
 
 	/**

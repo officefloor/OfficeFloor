@@ -21,7 +21,6 @@ package net.officefloor.compile.impl.officefloor;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -34,7 +33,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link OfficeFloorLoader} implementation.
@@ -253,11 +254,20 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 					+ officeFloorSourceClass.getName(), officeFloorLocation);
 			return null; // must have property
 
-		} catch (ConfigurationContextPropagateError ex) {
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ officeFloorSourceClass.getName(), officeFloorLocation);
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
 			this.addIssue(
-					"Failure obtaining configuration '" + ex.getLocation()
-							+ "'", ex.getCause(), officeFloorLocation);
-			return null; // must not fail in getting configurations
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "' for "
+							+ OfficeFloorSource.class.getSimpleName() + " "
+							+ officeFloorSourceClass.getName(),
+					officeFloorLocation);
+			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source required properties from "
@@ -281,7 +291,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			Class<OF> officeFloorSourceClass, String officeFloorLocation,
 			PropertyList propertyList) {
 
-		// Instantiate the office floor source
+		// Instantiate the OfficeFloor source
 		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
 				officeFloorSourceClass, OfficeFloorSource.class,
 				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
@@ -290,16 +300,16 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // failed to instantiate
 		}
 
-		// Create the office floor source context
+		// Create the OfficeFloor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
 				officeFloorLocation, propertyList, this.nodeContext);
 
-		// Create the office floor deployer
+		// Create the OfficeFloor deployer
 		OfficeFloorNode deployer = new OfficeFloorNodeImpl(officeFloorLocation,
 				this.nodeContext);
 
 		try {
-			// Source the office floor
+			// Source the OfficeFloor
 			officeFloorSource.sourceOfficeFloor(deployer, sourceContext);
 
 		} catch (UnknownPropertyError ex) {
@@ -308,11 +318,20 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 					+ officeFloorSourceClass.getName(), officeFloorLocation);
 			return null; // must have property
 
-		} catch (ConfigurationContextPropagateError ex) {
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ officeFloorSourceClass.getName(), officeFloorLocation);
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
 			this.addIssue(
-					"Failure obtaining configuration '" + ex.getLocation()
-							+ "'", ex.getCause(), officeFloorLocation);
-			return null; // must not fail in getting configurations
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "' for "
+							+ OfficeFloorSource.class.getSimpleName() + " "
+							+ officeFloorSourceClass.getName(),
+					officeFloorLocation);
+			return null; // must have resource
 
 		} catch (LoadTypeError ex) {
 			this.addIssue("Failure loading " + ex.getType().getSimpleName()
@@ -331,7 +350,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // must be successful
 		}
 
-		// Deploy and return the office floor
+		// Deploy and return the OfficeFloor
 		return deployer.deployOfficeFloor(this.nodeContext.getOfficeFrame());
 	}
 

@@ -28,8 +28,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 
-	public void test_TODO_Implement() {
+	public void testLoadManagedObjectPoolType() {
 		// TODO test loading ManagedObjectPoolType via ManagedObjectPoolLoader
+		System.err.println("TODO test loading ManagedObjectPoolType");
 	}
 
 }

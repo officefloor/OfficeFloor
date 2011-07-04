@@ -45,8 +45,11 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceContex
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link AdministratorLoader} implementation.
@@ -241,23 +244,33 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			return null; // failed to instantiate
 		}
 
-		// Obtain the class loader
-		ClassLoader classLoader = this.nodeContext.getClassLoader();
+		// Obtain the source context
+		SourceContext sourceContext = this.nodeContext.getSourceContext();
 
 		// Create the administrator source context
 		SourceProperties properties = new PropertyListSourceProperties(
 				propertyList);
-		AdministratorSourceContext sourceContext = new AdministratorSourceContextImpl(
-				properties, classLoader);
+		AdministratorSourceContext context = new AdministratorSourceContextImpl(
+				properties, sourceContext);
 
 		try {
 			// Initialise the administrator source
-			administratorSource.init(sourceContext);
+			administratorSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "'");
 			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "'");
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "'");
+			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to init", ex);

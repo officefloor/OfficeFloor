@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.team;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -27,6 +28,10 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceProperty;
@@ -103,9 +108,10 @@ public class TeamLoaderImpl implements TeamLoader {
 		try {
 			specification = teamSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ TeamSourceSpecification.class.getSimpleName() + " from "
-					+ teamSourceClass.getName(), ex);
+			this.addIssue(
+					"Failed to obtain "
+							+ TeamSourceSpecification.class.getSimpleName()
+							+ " from " + teamSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -121,11 +127,12 @@ public class TeamLoaderImpl implements TeamLoader {
 		try {
 			teamSourceProperties = specification.getProperties();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ TeamSourceProperty.class.getSimpleName()
-					+ " instances from "
-					+ TeamSourceSpecification.class.getSimpleName() + " for "
-					+ teamSourceClass.getName(), ex);
+			this.addIssue(
+					"Failed to obtain "
+							+ TeamSourceProperty.class.getSimpleName()
+							+ " instances from "
+							+ TeamSourceSpecification.class.getSimpleName()
+							+ " for " + teamSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -149,11 +156,15 @@ public class TeamLoaderImpl implements TeamLoader {
 				try {
 					name = teamProperty.getName();
 				} catch (Throwable ex) {
-					this.addIssue("Failed to get name for "
-							+ TeamSourceProperty.class.getSimpleName() + " "
-							+ i + " from "
-							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), ex);
+					this.addIssue(
+							"Failed to get name for "
+									+ TeamSourceProperty.class.getSimpleName()
+									+ " "
+									+ i
+									+ " from "
+									+ TeamSourceSpecification.class
+											.getSimpleName() + " for "
+									+ teamSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -187,10 +198,55 @@ public class TeamLoaderImpl implements TeamLoader {
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
-			PropertyList propertyList) {
+	public <TS extends TeamSource> TeamType loadTeamType(
+			Class<TS> teamSourceClass, PropertyList propertyList) {
 
-		// TODO test this method (loadTeam)
+		// Instantiate the team source
+		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
+				TeamSource.class, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, AssetType.TEAM, this.teamName,
+				this.nodeContext.getCompilerIssues());
+		if (teamSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Attempt to initialise the team
+		try {
+			teamSource.init(new TeamSourceContextImpl(this.teamName,
+					new PropertyListSourceProperties(propertyList),
+					this.nodeContext.getSourceContext()));
+
+		} catch (UnknownPropertyError ex) {
+			this.nodeContext.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+					AssetType.TEAM, this.teamName,
+					"Missing property '" + ex.getUnknownPropertyName() + "'");
+			return null; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.nodeContext.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+					AssetType.TEAM, this.teamName,
+					"Can not load class '" + ex.getUnknownClassName() + "'");
+			return null; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.nodeContext.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation,
+					AssetType.TEAM,
+					this.teamName,
+					"Can not obtain resource at location '"
+							+ ex.getUnknownResourceLocation() + "'");
+			return null; // must have resource
+
+		} catch (Throwable ex) {
+			this.nodeContext.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+					AssetType.TEAM, this.teamName,
+					"Failed to initialise " + teamSourceClass.getName(), ex);
+			return null; // failed loading team
+		}
 
 		return new TeamTypeImpl();
 	}
