@@ -163,7 +163,7 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 		}
 
 		// Attempt to load the team type
-		this.teamType = this.teamLoader.loadTeam(this.teamSourceClass,
+		this.teamType = this.teamLoader.loadTeamType(this.teamSourceClass,
 				this.properties);
 	}
 
