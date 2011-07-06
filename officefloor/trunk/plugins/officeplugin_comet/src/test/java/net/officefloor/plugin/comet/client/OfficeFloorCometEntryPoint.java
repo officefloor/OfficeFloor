@@ -23,9 +23,11 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -42,32 +44,47 @@ public class OfficeFloorCometEntryPoint implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
+		// Create publisher
+		final MockCometListener publisher = OfficeFloorComet.createPublisher(
+				MockCometListener.class, null);
+
 		// Provide the widgets
 		Panel root = RootPanel.get("comet");
 		VerticalPanel panel = new VerticalPanel();
 		root.add(panel);
-		final Label label = new Label("Press button");
-		panel.add(label);
-		Button button = new Button("Comet");
-		panel.add(button);
 
-		// Create the listener
-		final MockCometListener listener = new MockCometListener() {
+		// Provide widgets to publish event
+		HorizontalPanel publishPanel = new HorizontalPanel();
+		panel.add(publishPanel);
+		final TextBox eventText = new TextBox();
+		eventText.setText("TEST");
+		publishPanel.add(eventText);
+		Button publishButton = new Button("Publish");
+		publishPanel.add(publishButton);
+		publishButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				// Publish event
+				publisher.handleEvent(eventText.getText());
+			}
+		});
+
+		// Provide the widgets to subscribe to event
+		HorizontalPanel subscribePanel = new HorizontalPanel();
+		panel.add(subscribePanel);
+		final Label label = new Label("Subscribed events:");
+		subscribePanel.add(label);
+
+		// Create handler for handling events
+		final MockCometListener handler = new MockCometListener() {
 			@Override
 			public void handleEvent(String event) {
-				label.setText(event);
+				label.setText(label.getText() + " " + event);
 			}
 		};
 
-		// Register listener on button press
-		button.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				// Register the listener
-				OfficeFloorComet.subscribe(MockCometListener.class, listener,
-						null);
-			}
-		});
+		// Subscribe to events
+		OfficeFloorComet.subscribe(MockCometListener.class, handler, null);
 	}
 
 }

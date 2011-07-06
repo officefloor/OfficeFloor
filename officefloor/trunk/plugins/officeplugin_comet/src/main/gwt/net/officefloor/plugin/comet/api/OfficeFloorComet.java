@@ -17,16 +17,21 @@
  */
 package net.officefloor.plugin.comet.api;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
-import net.officefloor.plugin.comet.client.MockCometListener;
 import net.officefloor.plugin.comet.internal.CometAdapter;
 import net.officefloor.plugin.comet.internal.CometAdapterMap;
+import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
-import net.officefloor.plugin.comet.internal.CometSubscriptionService;
-import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
+import net.officefloor.plugin.comet.internal.CometPublicationService;
+import net.officefloor.plugin.comet.internal.CometPublicationServiceAsync;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
+import net.officefloor.plugin.comet.internal.CometSubscriptionService;
+import net.officefloor.plugin.comet.internal.CometSubscriptionServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -53,6 +58,27 @@ public class OfficeFloorComet {
 			.create(CometSubscriptionService.class);
 
 	/**
+	 * {@link CometPublicationServiceAsync}.
+	 */
+	private static final CometPublicationServiceAsync publicationService = GWT
+			.create(CometPublicationService.class);
+
+	/**
+	 * Last {@link CometEvent} sequence number.
+	 */
+	private static long lastEventSequenceNumber = CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER;
+
+	/**
+	 * {@link CometSubscription} instances.
+	 */
+	private static List<CometSubscription> subscriptions = new LinkedList<CometSubscription>();
+
+	/**
+	 * Indicates if started subscribing.
+	 */
+	private static boolean isStartedSubscribing = false;
+
+	/**
 	 * Subscribes for asynchronous events.
 	 * 
 	 * @param listenerType
@@ -71,26 +97,90 @@ public class OfficeFloorComet {
 		// Obtain the adapter
 		final CometAdapter adapter = adapters.get(listenerType);
 
-		// Create request
-		CometRequest request = new CometRequest(1, new CometInterest(
-				MockCometListener.class.getName(), "FILTER_KEY"));
+		// Add the subscription
+		subscriptions.add(new CometSubscription(new CometInterest(listenerType
+				.getName(), filterKey), handler, adapter));
 
-		// Start listening
+		// Determine if start subscription
+		if (!isStartedSubscribing) {
+			// Start subscribing
+			isStartedSubscribing = true;
+			subscribe();
+		}
+	}
+
+	/**
+	 * Undertakes subscribing for {@link CometEvent} instances.
+	 */
+	private static void subscribe() {
+
+		// Create the list of interests
+		List<CometInterest> interests = new ArrayList<CometInterest>(
+				subscriptions.size());
+		for (CometSubscription subscription : subscriptions) {
+			interests.add(subscription.interest);
+		}
+
+		// Create request
+		CometRequest request = new CometRequest(lastEventSequenceNumber,
+				interests.toArray(new CometInterest[interests.size()]));
+
+		// Subscribe for the next event
 		subscriptionService.listen(request, new AsyncCallback<CometResponse>() {
 			@Override
 			public void onSuccess(CometResponse result) {
 
-				// TODO handle multiple events
-				final Object event = result.getEvents()[0].getData();
+				// Obtain the events
+				CometEvent[] events = result.getEvents();
 
-				// Handle the event
-				adapter.handleEvent(handler, event);
+				// Update the last event sequence number
+				if (events.length > 0) {
+					lastEventSequenceNumber = events[events.length - 1]
+							.getSequenceNumber();
+				}
+
+				// Handle events
+				for (CometEvent event : events) {
+					for (CometSubscription subscription : subscriptions) {
+
+						// Determine if match on listener type
+						if (!(event.getListenerTypeName()
+								.equals(subscription.interest
+										.getListenerTypeName()))) {
+							continue; // not event for this interest
+						}
+
+						// Determine if filtering
+						Object interestFilterKey = subscription.interest
+								.getFilterKey();
+						if (interestFilterKey != null) {
+							if (!(interestFilterKey.equals(event.getFilterKey()))) {
+								continue; // mis-match on filter key
+							}
+						} else if (event.getFilterKey() != null) {
+							continue; // only match if no filter key
+						}
+
+						// Handle event
+						try {
+							subscription.adapter.handleEvent(
+									subscription.handler, event.getData());
+						} catch (Throwable ex) {
+							Window.alert("COMET HANDLE EVENT FAILURE: "
+									+ ex.getMessage() + " ["
+									+ ex.getClass().getName() + "]");
+						}
+					}
+				}
+
+				// Subscribe to the next event
+				subscribe();
 			}
 
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("COMET FAILURE: " + caught.getMessage() + " ["
-						+ caught.getClass().getName() + "]");
+				Window.alert("COMET SUBSCRIBE FAILURE: " + caught.getMessage()
+						+ " [" + caught.getClass().getName() + "]");
 			}
 		});
 	}
@@ -109,7 +199,38 @@ public class OfficeFloorComet {
 	 */
 	public static <L extends CometSubscriber> void publish(
 			Class<L> listenerType, Object data, Object matchKey) {
-		throw new UnsupportedOperationException("TODO implement");
+		// Publish event
+		publicationService.publish(new CometEvent(listenerType.getName(), data,
+				matchKey), new AsyncCallback<Long>() {
+			@Override
+			public void onSuccess(Long result) {
+				// Do nothing as assume to be published
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// Provide details of error
+				StringBuilder message = new StringBuilder();
+				message.append("COMET PUBLISH FAILURE: ");
+				message.append(caught.getMessage());
+				message.append(" [");
+				message.append(caught.getClass().getName());
+				message.append("]");
+
+				// Determine if provide details of cause
+				Throwable cause = caught.getCause();
+				if (cause != null) {
+					message.append(" CAUSE: ");
+					message.append(cause.getMessage());
+					message.append(" [");
+					message.append(cause.getClass().getName());
+					message.append("]");
+				}
+
+				// Alert regarding error
+				Window.alert(message.toString());
+			}
+		});
 	}
 
 	/**
@@ -124,15 +245,62 @@ public class OfficeFloorComet {
 	 * @return Implementation of {@link CometSubscriber} to enable invoking its
 	 *         method to publish an event.
 	 */
+	@SuppressWarnings("unchecked")
 	public static <L extends CometSubscriber> L createPublisher(
 			Class<L> listenerType, Object matchKey) {
-		throw new UnsupportedOperationException("TODO implement");
+
+		// Obtain the adapter
+		final CometAdapter adapter = adapters.get(listenerType);
+
+		// Create the publisher
+		L publisher = (L) adapter.createPublisher(matchKey);
+
+		// Return the publisher
+		return publisher;
 	}
 
 	/**
 	 * All access via static methods.
 	 */
 	private OfficeFloorComet() {
+	}
+
+	/**
+	 * Subscription for {@link CometEvent} instances.
+	 */
+	private static class CometSubscription {
+
+		/**
+		 * {@link CometInterest}.
+		 */
+		public final CometInterest interest;
+
+		/**
+		 * Handler.
+		 */
+		public final Object handler;
+
+		/**
+		 * {@link CometAdapter}.
+		 */
+		public final CometAdapter adapter;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param interest
+		 *            {@link CometInterest}.
+		 * @param handler
+		 *            Handler.
+		 * @param adapter
+		 *            {@link CometAdapter}.
+		 */
+		public CometSubscription(CometInterest interest, Object handler,
+				CometAdapter adapter) {
+			this.interest = interest;
+			this.handler = handler;
+			this.adapter = adapter;
+		}
 	}
 
 }

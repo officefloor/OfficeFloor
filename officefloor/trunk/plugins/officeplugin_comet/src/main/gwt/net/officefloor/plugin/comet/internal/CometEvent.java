@@ -29,6 +29,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class CometEvent implements IsSerializable {
 
 	/**
+	 * Value indicating no sequence number.
+	 */
+	public static final long NO_SEQUENCE_NUMBER = CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER;
+
+	/**
 	 * Sequence number for this {@link CometEvent}.
 	 */
 	private long sequenceNumber;
@@ -61,7 +66,24 @@ public class CometEvent implements IsSerializable {
 	private IsSerializable filterKey_IsSerializable = null;
 
 	/**
-	 * Initiate.
+	 * Initiate for publishing without a sequence number. Sequence number to be
+	 * assigned.
+	 * 
+	 * @param listenerTypeName
+	 *            Listener type name.
+	 * @param data
+	 *            Data.
+	 * @param matchKey
+	 *            Match key used on the {@link CometInterest}. May be
+	 *            <code>null</code> to match all {@link CometInterest} instances
+	 *            of appropriate type.
+	 */
+	public CometEvent(String listenerTypeName, Object data, Object matchKey) {
+		this(NO_SEQUENCE_NUMBER, listenerTypeName, data, matchKey);
+	}
+
+	/**
+	 * Initiate for specifying the sequence number.
 	 * 
 	 * @param sequenceNumber
 	 *            Sequence number for this {@link CometEvent}.

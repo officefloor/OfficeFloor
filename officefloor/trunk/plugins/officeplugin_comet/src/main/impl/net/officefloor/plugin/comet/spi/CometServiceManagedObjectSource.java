@@ -186,18 +186,20 @@ public class CometServiceManagedObjectSource
 	 *            Event.
 	 * @param matchKey
 	 *            Match key.
+	 * @return Sequence number for the {@link PublishedEvent}.
 	 */
-	public synchronized void publishEvent(long sequenceNumber,
+	public synchronized long publishEvent(long sequenceNumber,
 			Class<?> listenerType, Object event, Object matchKey) {
 
 		// Obtain the published time stamp
 		long publishTimestamp = this.clock.currentTimestamp();
 
 		// Create the event
-		long eventId = (sequenceNumber == CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER) ? this.nextEventId++
+		long eventSequenceNumber = (sequenceNumber == CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER) ? this.nextEventId++
 				: sequenceNumber;
-		PublishedEventImpl newEvent = new PublishedEventImpl(eventId,
-				listenerType, event, matchKey, publishTimestamp);
+		PublishedEventImpl newEvent = new PublishedEventImpl(
+				eventSequenceNumber, listenerType, event, matchKey,
+				publishTimestamp);
 
 		// Add the event to head of list
 		if (this.head == null) {
@@ -243,6 +245,9 @@ public class CometServiceManagedObjectSource
 				request.sendResponse(events.toArray(new CometEvent[0]));
 			}
 		}
+
+		// Return the event sequence number
+		return eventSequenceNumber;
 	}
 
 	/**
