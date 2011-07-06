@@ -60,11 +60,6 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	private ServerGwtRpcConnection<CometResponse> connection;
 
 	/**
-	 * {@link CometRequest}.
-	 */
-	private CometRequest cometRequest;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param source
@@ -80,16 +75,23 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 
 	@Override
 	public void service() {
-		this.source.receiveOrWaitOnEvents(this.cometRequest.getInterests(),
+
+		// Obtain the Comet Request
+		RPCRequest rpcRequest = this.connection.getRpcRequest();
+		CometRequest cometRequest = (CometRequest) rpcRequest.getParameters()[0];
+
+		// Retrieve or wait on events for Comet Request
+		this.source.receiveOrWaitOnEvents(cometRequest.getInterests(),
 				this.connection, this.async,
-				this.cometRequest.getLastSequenceNumber());
+				cometRequest.getLastSequenceNumber());
 	}
 
 	@Override
-	public void publishEvent(Class<?> listenerType, Object event,
+	public long publishEvent(Class<?> listenerType, Object event,
 			Object matchKey) {
-		this.source.publishEvent(CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER,
-				listenerType, event, matchKey);
+		return this.source.publishEvent(
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, listenerType,
+				event, matchKey);
 	}
 
 	@Override
@@ -120,10 +122,6 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 		// Obtain the Server GWT RPC connection
 		this.connection = (ServerGwtRpcConnection<CometResponse>) registry
 				.getObject(Dependencies.SERVER_GWT_RPC_CONNECTION);
-
-		// Obtain the Comet Interests
-		RPCRequest rpcRequest = this.connection.getRpcRequest();
-		this.cometRequest = (CometRequest) rpcRequest.getParameters()[0];
 	}
 
 	@Override

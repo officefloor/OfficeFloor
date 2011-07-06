@@ -29,6 +29,7 @@ import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
+import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 
@@ -283,10 +284,14 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 		// Create the service
 		CometService service = this.createCometService();
 
+		long expectedEventSequenceNumber = 1;
+
 		// Publish before servicing events
 		for (MockEvent event : this.events) {
-			service.publishEvent(event.listenerType, event.event,
-					event.matchKey);
+			long eventSequenceNumber = service.publishEvent(event.listenerType,
+					event.event, event.matchKey);
+			assertEquals("Incorrect event sequence number",
+					expectedEventSequenceNumber++, eventSequenceNumber);
 		}
 
 		// Undertake expiry before servicing
@@ -304,8 +309,10 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 
 		// Publish the after servicing events
 		for (MockEvent event : this.published) {
-			service.publishEvent(event.listenerType, event.event,
-					event.matchKey);
+			long eventSequenceNumber = service.publishEvent(event.listenerType,
+					event.event, event.matchKey);
+			assertEquals("Incorrect event sequence number",
+					expectedEventSequenceNumber++, eventSequenceNumber);
 		}
 
 		// Verify functionality
@@ -434,7 +441,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 			CometRequest cometRequest = new CometRequest(lastEventId, interests);
 
 			// Create the RPC Request
-			Method method = CometService.class.getMethod("service");
+			Method method = CometSubscriptionService.class.getMethod("listen",
+					CometRequest.class);
 			RPCRequest rpcRequest = new RPCRequest(method,
 					new Object[] { cometRequest }, null, 0);
 

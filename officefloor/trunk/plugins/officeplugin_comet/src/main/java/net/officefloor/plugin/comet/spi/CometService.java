@@ -18,6 +18,7 @@
 package net.officefloor.plugin.comet.spi;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometRequest;
 
 /**
@@ -41,8 +42,9 @@ public interface CometService {
 	 *            Event.
 	 * @param matchKey
 	 *            Match key. May be <code>null</code> to indicate to not filter.
+	 * @return Sequence number for the {@link CometEvent}.
 	 */
-	void publishEvent(Class<?> listenerType, Object event, Object matchKey);
+	long publishEvent(Class<?> listenerType, Object event, Object matchKey);
 
 	/**
 	 * <p>
