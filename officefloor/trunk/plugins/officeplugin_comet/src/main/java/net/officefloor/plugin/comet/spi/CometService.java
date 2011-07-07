@@ -53,7 +53,7 @@ public interface CometService {
 	 * <p>
 	 * This is made available for clustered deployments. This allows events to
 	 * be published to a central queue with central sequence generation that all
-	 * instances in the cluster listen to and publish. This then allows load
+	 * instances in the cluster subscribe to and publish. This then allows load
 	 * balancing of {@link CometRequest} instances across the cluster.
 	 * 
 	 * @param eventSequenceNumber
@@ -64,8 +64,11 @@ public interface CometService {
 	 *            Event.
 	 * @param matchKey
 	 *            Match key. May be <code>null</code> to indicate to not filter.
+	 * @return Sequence number for the {@link CometEvent}. Typically this should
+	 *         be the supplied sequence number but there may be occasions for
+	 *         the {@link CometService} to assign its own sequence number.
 	 */
-	void publishEvent(long eventSequenceNumber, Class<?> listenerType,
+	long publishEvent(long eventSequenceNumber, Class<?> listenerType,
 			Object event, Object matchKey);
 
 	/**

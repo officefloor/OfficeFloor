@@ -74,9 +74,31 @@ public class OfficeFloorComet {
 	private static List<CometSubscription> subscriptions = new LinkedList<CometSubscription>();
 
 	/**
-	 * Indicates if started subscribing.
+	 * Indicates if subscribed.
 	 */
-	private static boolean isStartedSubscribing = false;
+	private static boolean isSubscribed = false;
+
+	/**
+	 * Flag indicating if multiple subscriptions.
+	 */
+	private static boolean isMultipleSubscriptions = false;
+
+	/**
+	 * <p>
+	 * Allows specifying if initiating multiple subscriptions.
+	 * <p>
+	 * By default {@link OfficeFloorComet} will subscribe immediately.
+	 * Specifying to have multiple subscriptions means that connecting to server
+	 * for subscription of {@link CometEvent} instances is deferred and
+	 * {@link #subscribe()} must be invoked to connect to server to start
+	 * subscription.
+	 * 
+	 * @param isMultiple
+	 *            Provide <code>true</code> for multiple subscriptions.
+	 */
+	public static void setMultipleSubscriptions(boolean isMultiple) {
+		isMultipleSubscriptions = isMultiple;
+	}
 
 	/**
 	 * Subscribes for asynchronous events.
@@ -101,10 +123,9 @@ public class OfficeFloorComet {
 		subscriptions.add(new CometSubscription(new CometInterest(listenerType
 				.getName(), filterKey), handler, adapter));
 
-		// Determine if start subscription
-		if (!isStartedSubscribing) {
-			// Start subscribing
-			isStartedSubscribing = true;
+		// Determine if multiple subscriptions
+		if (!isMultipleSubscriptions) {
+			// Not multiple subscriptions so subscribe immediately
 			subscribe();
 		}
 	}
@@ -112,7 +133,13 @@ public class OfficeFloorComet {
 	/**
 	 * Undertakes subscribing for {@link CometEvent} instances.
 	 */
-	private static void subscribe() {
+	public static void subscribe() {
+
+		// Do not subscribe if already subscribed
+		if (isSubscribed) {
+			return; // already subscribed
+		}
+		isSubscribed = true; // subscribing
 
 		// Create the list of interests
 		List<CometInterest> interests = new ArrayList<CometInterest>(
@@ -126,63 +153,75 @@ public class OfficeFloorComet {
 				interests.toArray(new CometInterest[interests.size()]));
 
 		// Subscribe for the next event
-		subscriptionService.listen(request, new AsyncCallback<CometResponse>() {
-			@Override
-			public void onSuccess(CometResponse result) {
+		subscriptionService.subscribe(request,
+				new AsyncCallback<CometResponse>() {
+					@Override
+					public void onSuccess(CometResponse result) {
 
-				// Obtain the events
-				CometEvent[] events = result.getEvents();
+						// No long subscribed
+						isSubscribed = false;
 
-				// Update the last event sequence number
-				if (events.length > 0) {
-					lastEventSequenceNumber = events[events.length - 1]
-							.getSequenceNumber();
-				}
+						// Obtain the events
+						CometEvent[] events = result.getEvents();
 
-				// Handle events
-				for (CometEvent event : events) {
-					for (CometSubscription subscription : subscriptions) {
-
-						// Determine if match on listener type
-						if (!(event.getListenerTypeName()
-								.equals(subscription.interest
-										.getListenerTypeName()))) {
-							continue; // not event for this interest
+						// Update the last event sequence number
+						if (events.length > 0) {
+							lastEventSequenceNumber = events[events.length - 1]
+									.getSequenceNumber();
 						}
 
-						// Determine if filtering
-						Object interestFilterKey = subscription.interest
-								.getFilterKey();
-						if (interestFilterKey != null) {
-							if (!(interestFilterKey.equals(event.getFilterKey()))) {
-								continue; // mis-match on filter key
+						// Handle events
+						for (CometEvent event : events) {
+							for (CometSubscription subscription : subscriptions) {
+
+								// Determine if match on listener type
+								if (!(event.getListenerTypeName()
+										.equals(subscription.interest
+												.getListenerTypeName()))) {
+									continue; // not event for this interest
+								}
+
+								// Determine if filtering
+								Object interestFilterKey = subscription.interest
+										.getFilterKey();
+								if (interestFilterKey != null) {
+									if (!(interestFilterKey.equals(event
+											.getFilterKey()))) {
+										continue; // mis-match on filter key
+									}
+								} else if (event.getFilterKey() != null) {
+									continue; // only match if no filter key
+								}
+
+								// Handle event
+								try {
+									subscription.adapter.handleEvent(
+											subscription.handler,
+											event.getData());
+								} catch (Throwable ex) {
+									Window.alert("COMET HANDLE EVENT FAILURE: "
+											+ ex.getMessage() + " ["
+											+ ex.getClass().getName() + "]");
+								}
 							}
-						} else if (event.getFilterKey() != null) {
-							continue; // only match if no filter key
 						}
 
-						// Handle event
-						try {
-							subscription.adapter.handleEvent(
-									subscription.handler, event.getData());
-						} catch (Throwable ex) {
-							Window.alert("COMET HANDLE EVENT FAILURE: "
-									+ ex.getMessage() + " ["
-									+ ex.getClass().getName() + "]");
-						}
+						// Subscribe to the next event
+						subscribe();
 					}
-				}
 
-				// Subscribe to the next event
-				subscribe();
-			}
+					@Override
+					public void onFailure(Throwable caught) {
 
-			@Override
-			public void onFailure(Throwable caught) {
-				Window.alert("COMET SUBSCRIBE FAILURE: " + caught.getMessage()
-						+ " [" + caught.getClass().getName() + "]");
-			}
-		});
+						// No longer subscribed
+						isSubscribed = false;
+
+						// Alert error
+						Window.alert("COMET SUBSCRIBE FAILURE: "
+								+ caught.getMessage() + " ["
+								+ caught.getClass().getName() + "]");
+					}
+				});
 	}
 
 	/**

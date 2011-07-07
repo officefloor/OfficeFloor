@@ -27,17 +27,18 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  * 
  * @author Daniel Sagenschneider
  */
-@RemoteServiceRelativePath("comet")
+@RemoteServiceRelativePath("comet-subscribe")
 public interface CometSubscriptionService extends RemoteService {
 
 	/**
-	 * Listens by sending a {@link CometRequest} and when an event is available,
-	 * responds with {@link CometResponse} containing details of the event(s).
+	 * Subscribes by sending a {@link CometRequest} and when an event is
+	 * available, responds with {@link CometResponse} containing details of the
+	 * event(s).
 	 * 
 	 * @param request
 	 *            {@link CometRequest}.
 	 * @return {@link CometResponse} containing the event.
 	 */
-	CometResponse listen(CometRequest request);
+	CometResponse subscribe(CometRequest request);
 
 }

@@ -24,10 +24,11 @@ import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.plugin.comet.CometServiceInvoker;
 import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.comet.client.MockCometListener;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
-import net.officefloor.plugin.comet.internal.CometSubscriptionService;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -36,8 +37,6 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
-
-import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 /**
  * Tests integration of the {@link CometServiceManagedObjectSource}.
@@ -91,8 +90,8 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		comet.setTimeout(eventTimeout * 4);
 		AutoWireSection service = server.addSection("SERVICE",
 				ClassSectionSource.class, Service.class.getName());
-		server.linkUri("/comet/service", service, "service");
-		server.linkUri("/comet/publishEvent", service, "publishEvent");
+		server.linkUri("/service", service, "service");
+		server.linkUri("/publishEvent", service, "publishEvent");
 		this.autoWireOfficefloor = server.openOfficeFloor();
 	}
 
@@ -122,7 +121,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	 * Ensure can receive a {@link CometEvent} on waiting for one.
 	 */
 	public void testReceiveEventOnWaiting() throws Exception {
-		ServiceInvoker service = this.longPoll();
+		CometServiceInvoker service = this.longPoll();
 		Thread.sleep(100); // ensure some time to process response
 		assertNull("Should be waiting on response", service.checkForResponse());
 		this.publishEvent();
@@ -172,7 +171,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 				.getSequenceNumber();
 
 		// Now wait on second event
-		ServiceInvoker service = this.longPoll(lastSequenceNumber);
+		CometServiceInvoker service = this.longPoll(lastSequenceNumber);
 		this.publishEvent();
 		CometResponse responseTwo = service.waitOnResponse();
 		assertEvents(responseTwo, 2);
@@ -214,9 +213,9 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * Triggers the long poll for the first {@link CometRequest}.
 	 * 
-	 * @return {@link ServiceInvoker}.
+	 * @return {@link CometServiceInvoker}.
 	 */
-	public ServiceInvoker longPoll() {
+	public CometServiceInvoker longPoll() {
 		return this.longPoll(CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER);
 	}
 
@@ -225,173 +224,22 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 	 * 
 	 * @param lastSequenceNumber
 	 *            Last {@link CometEvent} sequence number.
-	 * @return {@link ServiceInvoker}.
+	 * @return {@link CometServiceInvoker}.
 	 */
-	public ServiceInvoker longPoll(long lastSequenceNumber) {
-		return ServiceInvoker.invokeService(this.port, "service",
-				lastSequenceNumber);
+	public CometServiceInvoker longPoll(long lastSequenceNumber) {
+		return CometServiceInvoker.subscribe(this.port, "service",
+				lastSequenceNumber,
+				new CometInterest(MockListener.class.getName(), null));
 	}
 
 	/**
 	 * Publishes an event.
 	 * 
-	 * @return {@link ServiceInvoker}.
+	 * @return {@link CometServiceInvoker}.
 	 */
 	public void publishEvent() {
-		ServiceInvoker.invokeService(this.port, "publishEvent",
-				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER).waitOnResponse();
-	}
-
-	/**
-	 * Invokes the appropriate service.
-	 */
-	private static class ServiceInvoker extends Thread {
-
-		/**
-		 * Port service is running on.
-		 */
-		private final int port;
-
-		/**
-		 * Service name.
-		 */
-		private final String serviceName;
-
-		/**
-		 * Last {@link CometEvent} sequence number.
-		 */
-		private final long lastSequenceNumber;
-
-		/**
-		 * {@link CometResponse} response.
-		 */
-		private CometResponse response = null;
-
-		/**
-		 * Failure.
-		 */
-		private Throwable failure = null;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param port
-		 *            Port service is running on.
-		 * @param serviceName
-		 *            Service name.
-		 * @param lastSequenceNumber
-		 *            Last {@link CometEvent} sequence number.
-		 */
-		private ServiceInvoker(int port, String serviceName,
-				long lastSequenceNumber) {
-			this.port = port;
-			this.serviceName = serviceName;
-			this.lastSequenceNumber = lastSequenceNumber;
-		}
-
-		/**
-		 * Invokes the service.
-		 * 
-		 * @param port
-		 *            Port the service is running.
-		 * @param serviceName
-		 *            Service name.
-		 * @param lastSequenceNumber
-		 *            Last {@link CometEvent} sequence number.
-		 * @return {@link ServiceInvoker}.
-		 */
-		public static ServiceInvoker invokeService(int port,
-				String serviceName, long lastSequenceNumber) {
-			// Create the Serivce Invoker and trigger request
-			ServiceInvoker invoker = new ServiceInvoker(port, serviceName,
-					lastSequenceNumber);
-			invoker.start();
-
-			// Return Service Invoker
-			return invoker;
-		}
-
-		/**
-		 * Checks for a {@link CometResponse}.
-		 * 
-		 * @return {@link CometResponse}. <code>null</code> if not available.
-		 */
-		public synchronized CometResponse checkForResponse() {
-
-			// Determine if failure
-			if (this.failure != null) {
-				throw fail(this.failure);
-			}
-
-			// Return current value for response
-			return this.response;
-		}
-
-		/**
-		 * Waits on the {@link CometResponse}.
-		 * 
-		 * @return {@link CometResponse}.
-		 */
-		public synchronized CometResponse waitOnResponse() {
-			try {
-				long startTime = System.currentTimeMillis();
-				synchronized (this) {
-					for (;;) {
-
-						// Determine if complete
-						if (this.response != null) {
-							return this.response;
-						}
-
-						// Determine if failure
-						if (this.failure != null) {
-							throw fail(this.failure);
-						}
-
-						// Determine if time out
-						if (System.currentTimeMillis() > (startTime + 500000)) {
-							fail("Timed out waiting on response from service "
-									+ this.serviceName);
-						}
-
-						// Wait on response
-						this.wait(500);
-					}
-				}
-			} catch (Throwable ex) {
-				throw fail(ex);
-			}
-		}
-
-		/*
-		 * ====================== Thread =======================
-		 */
-
-		@Override
-		public void run() {
-
-			// Call the service
-			CometResponse response = null;
-			Throwable failure = null;
-			try {
-				CometSubscriptionService caller = (CometSubscriptionService) SyncProxy
-						.newProxyInstance(CometSubscriptionService.class,
-								"http://localhost:" + this.port + "/comet/",
-								this.serviceName);
-				response = caller.listen(new CometRequest(
-						this.lastSequenceNumber, new CometInterest(
-								MockListener.class.getName(), null)));
-			} catch (Throwable ex) {
-				failure = ex;
-			}
-
-			// Provide response and notify complete
-			synchronized (this) {
-				this.response = response;
-				this.failure = failure;
-				this.notify();
-			}
-		}
+		CometServiceInvoker.publish(this.port, "publishEvent", new CometEvent(
+				MockCometListener.class.getName(), "EVENT", null));
 	}
 
 	/**
@@ -409,12 +257,12 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		public void publishEvent(CometService service,
-				ServerGwtRpcConnection<CometResponse> connection) {
+				ServerGwtRpcConnection<Long> connection) {
 			// Publish event
 			service.publishEvent(MockListener.class, "EVENT", null);
 
 			// Send response to allow trigger to complete
-			connection.onSuccess(new CometResponse());
+			connection.onSuccess(Long.valueOf(1));
 		}
 	}
 

@@ -95,9 +95,10 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	}
 
 	@Override
-	public void publishEvent(long sequenceNumber, Class<?> listenerType,
+	public long publishEvent(long sequenceNumber, Class<?> listenerType,
 			Object event, Object matchKey) {
-		this.source.publishEvent(sequenceNumber, listenerType, event, matchKey);
+		return this.source.publishEvent(sequenceNumber, listenerType, event,
+				matchKey);
 	}
 
 	@Override

@@ -17,8 +17,6 @@
  */
 package net.officefloor.plugin.comet.spi;
 
-import com.google.gwt.user.server.rpc.RPCRequest;
-
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -27,7 +25,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource.Flows;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -73,14 +70,11 @@ public class CometServiceManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		final ServerGwtRpcConnection<?> connection = this
 				.createMock(ServerGwtRpcConnection.class);
-		final RPCRequest request = new RPCRequest(null,
-				new Object[] { new CometRequest() }, null, 0);
 		final Task task = this.createMock(Task.class);
 		final TaskContext taskContext = this.createMock(TaskContext.class);
 
 		// Record sourcing
 		this.recordReturn(task, task.doTask(taskContext), null);
-		this.recordReturn(connection, connection.getRpcRequest(), request);
 
 		// Test
 		this.replayMockObjects();
