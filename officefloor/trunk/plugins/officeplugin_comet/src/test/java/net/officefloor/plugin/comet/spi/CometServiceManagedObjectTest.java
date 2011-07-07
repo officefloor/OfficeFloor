@@ -441,8 +441,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 			CometRequest cometRequest = new CometRequest(lastEventId, interests);
 
 			// Create the RPC Request
-			Method method = CometSubscriptionService.class.getMethod("listen",
-					CometRequest.class);
+			Method method = CometSubscriptionService.class.getMethod(
+					"subscribe", CometRequest.class);
 			RPCRequest rpcRequest = new RPCRequest(method,
 					new Object[] { cometRequest }, null, 0);
 

@@ -20,25 +20,28 @@ package net.officefloor.plugin.comet;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
-import net.officefloor.plugin.comet.client.MockCometListener;
 import net.officefloor.plugin.comet.internal.CometEvent;
-import net.officefloor.plugin.comet.internal.CometPublicationServiceAsync;
+import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
-import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.server.rpc.RPCRequest;
 
 /**
  * Tests the {@link OfficeFloorComet} functionality.
@@ -47,12 +50,42 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class OfficeFloorCometTest extends OfficeFrameTestCase {
 
+	@Override
+	protected void tearDown() throws Exception {
+		AutoWireAdministration.closeAllOfficeFloors();
+	}
+
 	/**
 	 * Ensure able to &quot;long poll&quot; for an event.
 	 */
 	public void testLongPoll() {
-		// TODO provide long poll request
-		fail("TODO implement");
+
+		// Start the server
+		int port = MockHttpServer.getAvailablePort();
+		startServer(port);
+
+		// Subscribe for event
+		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
+				"/template/comet-subscribe",
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
+						MockCometSubscriber.class.getName(), null));
+		assertNull("Should not have a response",
+				subscription.checkForResponse());
+
+		// Publish an event
+		long sequenceNumber = CometServiceInvoker.publish(port,
+				"/template/comet-publish", new CometEvent(
+						MockCometSubscriber.class.getName(), "EVENT", null));
+
+		// Obtain the subscribed event
+		CometResponse response = subscription.waitOnResponse();
+		assertEquals("Incorrect number of events", 1,
+				response.getEvents().length);
+
+		// Ensure appropriate sequence number
+		CometEvent event = response.getEvents()[0];
+		assertEquals("Incorrect event sequence number", sequenceNumber,
+				event.getSequenceNumber());
 	}
 
 	/**
@@ -66,43 +99,56 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 		// Indicate running manually
 		System.out.println("Manually running Comet test application");
 
-		// Obtain the path to the template
-		String templatePath = OfficeFloorCometTest.class.getPackage().getName()
-				.replace('.', '/')
-				+ "/Template.html";
+		// Start the server
+		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT);
+	}
 
-		// Start server with GWT extension
-		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource();
-		HttpTemplateAutoWireSection template = source.addHttpTemplate(
-				templatePath, TemplateLogic.class, "template");
+	/**
+	 * Starts the server.
+	 * 
+	 * @param port
+	 *            Port server is to listen on.
+	 */
+	private static void startServer(int port) {
+		try {
+			// Obtain the path to the template
+			String templatePath = OfficeFloorCometTest.class.getPackage()
+					.getName().replace('.', '/')
+					+ "/Template.html";
 
-		// TODO remove but for now include
-		source.addManagedObject(CometServiceManagedObjectSource.class,
-				new ManagedObjectSourceWirer() {
-					@Override
-					public void wire(ManagedObjectSourceWirerContext context) {
-						context.setInput(true);
-						context.mapTeam(
-								CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
-								OnePersonTeamSource.class);
-					}
-				}, CometService.class).setTimeout(600 * 1000);
-		AutoWireSection section = source.addSection("SECTION",
-				ClassSectionSource.class, TemplateLogic.class.getName());
-		source.linkUri("/template/comet", section, "listen");
+			// Start server with GWT extension
+			HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
+					port);
+			HttpTemplateAutoWireSection template = source.addHttpTemplate(
+					templatePath, TemplateLogic.class, "template");
 
-		// CometSubscriptionServiceAsync.class.getName() + ","
+			// TODO replace with HTTP Template Extension
+			source.addManagedObject(CometServiceManagedObjectSource.class,
+					new ManagedObjectSourceWirer() {
+						@Override
+						public void wire(ManagedObjectSourceWirerContext context) {
+							context.setInput(true);
+							context.mapTeam(
+									CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
+									OnePersonTeamSource.class);
+						}
+					}, CometService.class).setTimeout(600 * 1000);
+			AutoWireSection section = source.addSection("SECTION",
+					ClassSectionSource.class, TemplateLogic.class.getName());
+			source.linkUri("/template/comet-subscribe", section, "service");
+			source.linkUri("/template/comet-publish", section, "service");
 
-		// Extend the template
-		SourcePropertiesImpl properties = new SourcePropertiesImpl();
-		properties
-				.addProperty(
-						GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
-						CometPublicationServiceAsync.class.getName());
-		GwtHttpTemplateSectionExtension.extendTemplate(template, source,
-				properties, Thread.currentThread().getContextClassLoader());
+			// Extend the template
+			SourcePropertiesImpl properties = new SourcePropertiesImpl();
+			GwtHttpTemplateSectionExtension.extendTemplate(template, source,
+					properties, Thread.currentThread().getContextClassLoader());
 
-		source.openOfficeFloor();
+			// Start server
+			source.openOfficeFloor();
+
+		} catch (Exception ex) {
+			throw fail(ex);
+		}
 	}
 
 	/**
@@ -110,20 +156,27 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	 */
 	public static class TemplateLogic {
 
-		@NextTask("finished")
-		public void listen_NOT(@Parameter CometRequest request,
-				AsyncCallback<CometResponse> callback) {
+		@FlowInterface
+		public static interface Flows {
+			void subscribe();
 
-			callback.onSuccess(new CometResponse(new CometEvent(1,
-					MockCometListener.class.getName(), "EVENT", "FILTER_KEY")));
+			void publish();
+		}
 
-			// TODO remove
-			System.out.println("  SUBSCRIBE - REQUEST");
+		public void service(ServerGwtRpcConnection<Long> connection, Flows flows) {
+			RPCRequest request = connection.getRpcRequest();
+			Object parameter = request.getParameters()[0];
+			if (parameter instanceof CometRequest) {
+				flows.subscribe();
+			} else {
+				flows.publish();
+			}
 		}
 
 		@NextTask("finished")
-		public void listen(CometService service) {
+		public void subscribe(CometService service) {
 
+			// Service subscription
 			service.service();
 
 			// TODO remove
@@ -135,23 +188,30 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 			System.out.println("  SUBSCRIBE - COMET - COMPLETE");
 		}
 
-		public void publish(@Parameter CometEvent event,
-				AsyncCallback<Long> callback, CometService service) {
-			// callback.onSuccess(Long.valueOf(1));
-
+		public void publish(ServerGwtRpcConnection<Long> connection,
+				CometService service) {
 			try {
+				RPCRequest request = connection.getRpcRequest();
+				CometEvent event = (CometEvent) request.getParameters()[0];
 				Class<?> listenerType = Class.forName(event
 						.getListenerTypeName());
-				long sequenceNumber = service.publishEvent(listenerType,
+				long sequenceNumber = service.publishEvent(
+						event.getSequenceNumber(), listenerType,
 						event.getData(), event.getFilterKey());
-				callback.onSuccess(Long.valueOf(sequenceNumber));
+				connection.onSuccess(Long.valueOf(sequenceNumber));
 			} catch (Exception ex) {
-				callback.onFailure(ex);
+				connection.onFailure(ex);
 			}
 
 			// TODO remove
 			System.out.println("  PUBLISHED");
 		}
+	}
+
+	/**
+	 * Mock {@link CometSubscriber} interface for testing.
+	 */
+	private static interface MockCometSubscriber extends CometSubscriber {
 	}
 
 }

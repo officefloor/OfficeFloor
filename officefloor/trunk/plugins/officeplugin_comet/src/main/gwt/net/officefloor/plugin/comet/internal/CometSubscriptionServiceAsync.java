@@ -29,8 +29,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface CometSubscriptionServiceAsync {
 
 	/**
-	 * Listens by sending a {@link CometRequest} and when an event is available,
-	 * responds with {@link CometResponse} containing details of the event(s).
+	 * Subscribes by sending a {@link CometRequest} and when an event is
+	 * available, responds with {@link CometResponse} containing details of the
+	 * event(s).
 	 * 
 	 * @param request
 	 *            {@link CometRequest}.
@@ -38,6 +39,6 @@ public interface CometSubscriptionServiceAsync {
 	 *            Invoked with the {@link CometResponse} when event(s) are
 	 *            available.
 	 */
-	void listen(CometRequest request, AsyncCallback<CometResponse> callback);
+	void subscribe(CometRequest request, AsyncCallback<CometResponse> callback);
 
 }
