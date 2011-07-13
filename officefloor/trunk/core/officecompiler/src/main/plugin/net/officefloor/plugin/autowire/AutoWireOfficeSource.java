@@ -162,6 +162,26 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
+	 * Obtains the {@link AutoWireSection} by its name.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link AutoWireSection}.
+	 * @return {@link AutoWireSection} or <code>null</code> if no
+	 *         {@link AutoWireSection} by the name.
+	 */
+	public AutoWireSection getSection(String sectionName) {
+		// Find first section by the name
+		for (AutoWireSection section : this.sections) {
+			if (sectionName.equals(section.getSectionName())) {
+				return section; // found
+			}
+		}
+
+		// As here, did not find section
+		return null;
+	}
+
+	/**
 	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
 	 * 
 	 * @param sourceSection

@@ -173,6 +173,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	@Override
+	public AutoWireSection getSection(String sectionName) {
+		return this.officeSource.getSection(sectionName);
+	}
+
+	@Override
 	public void link(AutoWireSection sourceSection, String sourceOutputName,
 			AutoWireSection targetSection, String targetInputName) {
 		this.officeSource.link(sourceSection, sourceOutputName, targetSection,
