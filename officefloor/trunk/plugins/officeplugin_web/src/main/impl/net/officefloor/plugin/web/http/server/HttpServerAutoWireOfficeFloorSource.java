@@ -52,6 +52,11 @@ import net.officefloor.plugin.web.http.session.source.HttpSessionManagedObjectSo
 public class HttpServerAutoWireOfficeFloorSource extends
 		WebApplicationAutoWireOfficeFloorSource implements
 		HttpServerAutoWireApplication {
+	
+	/**
+	 * Default HTTP port to listen for connections.
+	 */
+	public static final int DEFAULT_HTTP_PORT = 7878;
 
 	/**
 	 * {@link HttpSocket} instances.
@@ -72,7 +77,7 @@ public class HttpServerAutoWireOfficeFloorSource extends
 	 * Initiate.
 	 */
 	public HttpServerAutoWireOfficeFloorSource() {
-		this(7878);
+		this(DEFAULT_HTTP_PORT);
 	}
 
 	/**

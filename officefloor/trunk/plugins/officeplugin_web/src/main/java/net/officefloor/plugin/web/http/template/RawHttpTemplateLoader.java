@@ -28,6 +28,8 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
+// TODO use ResourceSource
 public interface RawHttpTemplateLoader {
 
 	/**
