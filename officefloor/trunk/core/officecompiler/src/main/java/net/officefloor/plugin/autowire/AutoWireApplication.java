@@ -83,6 +83,19 @@ public interface AutoWireApplication {
 			String sectionLocation, AutoWireSectionFactory<A> sectionFactory);
 
 	/**
+	 * <p>
+	 * Obtains the {@link AutoWireSection} by its name.
+	 * <p>
+	 * This is useful to obtain an existing {@link AutoWireSection} to link to.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link AutoWireSection}.
+	 * @return {@link AutoWireSection} or <code>null</code> if not
+	 *         {@link AutoWireSection} by the name.
+	 */
+	AutoWireSection getSection(String sectionName);
+
+	/**
 	 * Links the source {@link SectionOutput} to a target {@link SectionInput}.
 	 * 
 	 * @param sourceSection

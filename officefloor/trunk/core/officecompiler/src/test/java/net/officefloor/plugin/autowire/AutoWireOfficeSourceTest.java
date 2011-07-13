@@ -252,6 +252,27 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to obtain {@link AutoWireSection} after adding it.
+	 */
+	public void testGetSection() throws Exception {
+
+		// Create source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+
+		// Ensure no section before added
+		assertNull("Should not obtain section before added",
+				source.getSection("SECTION"));
+
+		// Add the section
+		AutoWireSection section = source.addSection("SECTION",
+				ClassSectionSource.class, Object.class.getName());
+
+		// Ensure able to obtain section
+		assertSame("Should be able to obtain section by name", section,
+				source.getSection("SECTION"));
+	}
+
+	/**
 	 * Ensure issue if unknown output.
 	 */
 	public void testUnknownOutput() throws Exception {
