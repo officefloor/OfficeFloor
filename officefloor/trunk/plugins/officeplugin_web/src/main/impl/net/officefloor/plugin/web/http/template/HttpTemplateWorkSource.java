@@ -101,6 +101,8 @@ public class HttpTemplateWorkSource extends
 	 * @param rawHttpTemplateLoader
 	 *            {@link RawHttpTemplateLoader}.
 	 */
+	@Deprecated
+	// TODO use ResourceSource
 	public static void registerRawHttpTemplateLoader(
 			RawHttpTemplateLoader rawHttpTemplateLoader) {
 		synchronized (loaders) {
