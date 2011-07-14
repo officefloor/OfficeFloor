@@ -23,8 +23,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.comet.spi.CometServiceManagedObject.Dependencies;
-import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
+import net.officefloor.plugin.comet.CometPublisherManagedObjectSource.Dependencies;
+import net.officefloor.plugin.comet.api.CometSubscriber;
+import net.officefloor.plugin.comet.spi.CometService;
 
 /**
  * Tests the {@link CometPublisherManagedObjectSource}.
@@ -50,8 +51,7 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
 				.createManagedObjectTypeBuilder();
 		type.setObjectClass(CometPublisher.class);
-		type.addDependency(Dependencies.SERVER_GWT_RPC_CONNECTION,
-				ServerGwtRpcConnection.class);
+		type.addDependency(Dependencies.COMET_SERVICE, CometService.class);
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type,
@@ -63,8 +63,11 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLoad() throws Throwable {
 
-		final ServerGwtRpcConnection<?> connection = this
-				.createMock(ServerGwtRpcConnection.class);
+		final CometService service = this.createMock(CometService.class);
+
+		// Record publishing an event
+		this.recordReturn(service, service.publishEvent(
+				MockCometPublisher.class, "TEST", "MATCH_KEY"), Long.valueOf(1));
 
 		// Test
 		this.replayMockObjects();
@@ -76,16 +79,29 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
-		user.mapDependency(Dependencies.SERVER_GWT_RPC_CONNECTION, connection);
+		user.mapDependency(Dependencies.COMET_SERVICE, service);
 		ManagedObject mo = user.sourceManagedObject(source);
 		assertNotNull("Should have managed object", mo);
 
 		// Ensure correct type
 		Object object = mo.getObject();
 		assertTrue("Incorrect object type", object instanceof CometPublisher);
+		CometPublisher factory = (CometPublisher) object;
+
+		// Create the publisher
+		MockCometPublisher publisher = factory.createPublisher(
+				MockCometPublisher.class, "MATCH_KEY");
+		publisher.send("TEST");
 
 		// Verify
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Mock interface for {@link CometPublisher}.
+	 */
+	public static interface MockCometPublisher extends CometSubscriber {
+		void send(String event);
 	}
 
 }
