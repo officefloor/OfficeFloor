@@ -30,6 +30,7 @@ import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource.Dependencies;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -346,13 +347,18 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 		// Ensure call back and connection are the same
 		assertSame("Callback should be the connection", connection, callback);
 
-		// Obtain and verify the request
-		RPCRequest request = connection.getRpcRequest();
-		assertEquals("Incorrect method", method, request.getMethod());
+		// Obtain and verify the RPC request
+		RPCRequest rpcRequest = connection.getRpcRequest();
+		assertEquals("Incorrect method", method, rpcRequest.getMethod());
 		assertEquals("Incorrect number of parameters", 1,
-				request.getParameters().length);
+				rpcRequest.getParameters().length);
 		assertEquals("Incorrect parameter value", new Integer(1),
-				request.getParameters()[0]);
+				rpcRequest.getParameters()[0]);
+
+		// Obtain and verify the HTTP request
+		HttpRequest httpRequest = connection.getHttpRequest();
+		assertTrue("Incorrect request URI", httpRequest.getRequestURI()
+				.startsWith("/test/"));
 	}
 
 	/**

@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.gwt.service;
 
+import net.officefloor.plugin.socket.server.http.HttpRequest;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.server.rpc.RPCRequest;
 
@@ -50,5 +52,15 @@ public interface ServerGwtRpcConnection<T> extends AsyncCallback<T> {
 	 * @return {@link RPCRequest}.
 	 */
 	RPCRequest getRpcRequest();
+
+	/**
+	 * <p>
+	 * Obtains the underlying {@link HttpRequest}.
+	 * <p>
+	 * The body of the {@link HttpRequest} will have already been consumed.
+	 * 
+	 * @return Underlying {@link HttpRequest}.
+	 */
+	HttpRequest getHttpRequest();
 
 }
