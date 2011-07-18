@@ -196,13 +196,18 @@ public class ServerGwtRpcConnectionManagedObjectSource
 		}
 
 		@Override
+		public HttpRequest getHttpRequest() {
+			return this.connection.getHttpRequest();
+		}
+
+		@Override
 		public synchronized RPCRequest getRpcRequest() {
 
 			// Lazy load the RPC request
 			if (this.request == null) {
 
 				// Obtain the request
-				HttpRequest request = this.connection.getHttpRequest();
+				HttpRequest request = this.getHttpRequest();
 
 				// Obtain the payload
 				StringBuilder payload = new StringBuilder();
