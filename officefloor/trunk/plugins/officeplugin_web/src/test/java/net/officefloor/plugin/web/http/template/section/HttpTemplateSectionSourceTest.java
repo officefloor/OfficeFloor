@@ -62,8 +62,16 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 		SectionDesigner expected = SectionLoaderUtil
 				.createSectionDesigner(HttpTemplateSectionSource.class);
 
-		// Inputs
+		// Inputs (for HTTP Template rending)
 		expected.addSectionInput("renderTemplate", null);
+
+		// Inputs (for Template Logic methods - enables reuse of class)
+		expected.addSectionInput("getTemplate", null);
+		expected.addSectionInput("getTemplateName", null);
+		expected.addSectionInput("getList", null);
+		expected.addSectionInput("nextTask", null);
+		expected.addSectionInput("submit", null);
+		expected.addSectionInput("doInternalFlow", Integer.class.getName());
 
 		// Outputs
 		expected.addSectionOutput("doExternalFlow", String.class.getName(),
@@ -160,5 +168,4 @@ public class HttpTemplateSectionSourceTest extends OfficeFrameTestCase {
 				HttpTemplateSectionSource.PROPERTY_LINK_TASK_NAME_PREFIX,
 				"LINK_");
 	}
-
 }

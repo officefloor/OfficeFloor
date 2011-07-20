@@ -59,11 +59,11 @@ public interface PublishedEvent {
 	PublishedEvent getNextEvent();
 
 	/**
-	 * Obtains the listener type.
+	 * Obtains the listener type name.
 	 * 
-	 * @return Listener type.
+	 * @return Listener type name.
 	 */
-	Class<?> getListenerType();
+	String getListenerTypeName();
 
 	/**
 	 * Obtains the data of the event.

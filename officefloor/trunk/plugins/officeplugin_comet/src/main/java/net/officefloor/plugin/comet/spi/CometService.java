@@ -37,14 +37,14 @@ public interface CometService {
 	 * Publishes an event.
 	 * 
 	 * @param listenerType
-	 *            Listener type.
+	 *            Listener type name.
 	 * @param event
 	 *            Event.
 	 * @param matchKey
 	 *            Match key. May be <code>null</code> to indicate to not filter.
 	 * @return Sequence number for the {@link CometEvent}.
 	 */
-	long publishEvent(Class<?> listenerType, Object event, Object matchKey);
+	long publishEvent(String listenerTypeName, Object event, Object matchKey);
 
 	/**
 	 * <p>
@@ -59,7 +59,7 @@ public interface CometService {
 	 * @param eventSequenceNumber
 	 *            {@link PublishedEvent} sequence number.
 	 * @param listenerType
-	 *            Listener type.
+	 *            Listener type name.
 	 * @param event
 	 *            Event.
 	 * @param matchKey
@@ -68,7 +68,7 @@ public interface CometService {
 	 *         be the supplied sequence number but there may be occasions for
 	 *         the {@link CometService} to assign its own sequence number.
 	 */
-	long publishEvent(long eventSequenceNumber, Class<?> listenerType,
+	long publishEvent(long eventSequenceNumber, String listenerTypeName,
 			Object event, Object matchKey);
 
 	/**

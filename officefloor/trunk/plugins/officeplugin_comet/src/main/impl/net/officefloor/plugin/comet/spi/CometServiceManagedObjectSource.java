@@ -189,7 +189,7 @@ public class CometServiceManagedObjectSource
 	 * @return Sequence number for the {@link PublishedEvent}.
 	 */
 	public synchronized long publishEvent(long sequenceNumber,
-			Class<?> listenerType, Object event, Object matchKey) {
+			String listenerType, Object event, Object matchKey) {
 
 		// Obtain the published time stamp
 		long publishTimestamp = this.clock.currentTimestamp();
@@ -392,8 +392,8 @@ public class CometServiceManagedObjectSource
 	private boolean isMatch(CometInterest interest, PublishedEvent event) {
 
 		// Determine if same listener type
-		if (!(interest.getListenerTypeName().equals(event.getListenerType()
-				.getName()))) {
+		if (!(interest.getListenerTypeName()
+				.equals(event.getListenerTypeName()))) {
 			return false; // not same listener type
 		}
 

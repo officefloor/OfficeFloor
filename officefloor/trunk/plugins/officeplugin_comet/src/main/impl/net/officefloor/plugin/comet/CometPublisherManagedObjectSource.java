@@ -180,7 +180,8 @@ public class CometPublisherManagedObjectSource
 			Object data = (args.length > 0 ? args[0] : null);
 
 			// Publish the event
-			this.service.publishEvent(this.listenerType, data, this.matchKey);
+			this.service.publishEvent(this.listenerType.getName(), data,
+					this.matchKey);
 
 			// Nothing to return as should be void method
 			return null;

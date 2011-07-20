@@ -87,15 +87,14 @@ public class CometServiceManagedObject implements AsynchronousManagedObject,
 	}
 
 	@Override
-	public long publishEvent(Class<?> listenerType, Object event,
-			Object matchKey) {
+	public long publishEvent(String listenerType, Object event, Object matchKey) {
 		return this.source.publishEvent(
 				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, listenerType,
 				event, matchKey);
 	}
 
 	@Override
-	public long publishEvent(long sequenceNumber, Class<?> listenerType,
+	public long publishEvent(long sequenceNumber, String listenerType,
 			Object event, Object matchKey) {
 		return this.source.publishEvent(sequenceNumber, listenerType, event,
 				matchKey);

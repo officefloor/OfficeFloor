@@ -25,15 +25,20 @@ import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
+import net.officefloor.plugin.comet.section.CometSectionSource;
 import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.comet.spi.CometServiceManagedObjectSource;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
+import com.google.gwt.dev.asm.commons.Method;
 import com.google.gwt.user.server.rpc.RPCRequest;
 
 /**
@@ -42,6 +47,23 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  * @author Daniel Sagenschneider
  */
 public class CometHttpTemplateSectionExtension {
+
+	/**
+	 * <p>
+	 * Name of the {@link Method} on the {@link HttpTemplate} logic class to
+	 * handle the published {@link CometEvent}.
+	 * <p>
+	 * Specifying this method allows manually handling a published
+	 * {@link CometEvent} which is necessary in a clustered environment (i.e.
+	 * putting the {@link CometEvent} on a queue for all instances within the
+	 * cluster to publish the {@link CometEvent});
+	 * <P>
+	 * The result of the specified {@link Method} should send a {@link Long}
+	 * value to {@link ServerGwtRpcConnection#onSuccess(Object)} to indicate
+	 * published (otherwise a no data response is sent which typically will
+	 * cause the client to consider the publish as failed).
+	 */
+	public static final String PROPERTY_MANUAL_PUBLISH_METHOD_NAME = "manual.publish.method.name";
 
 	/**
 	 * Name of the {@link AutoWireSection} to service the
@@ -88,8 +110,8 @@ public class CometHttpTemplateSectionExtension {
 		AutoWireSection section = application.getSection("COMET");
 		if (section == null) {
 			// Add the section
-			section = application.addSection("COMET", ClassSectionSource.class,
-					CometServiceLogic.class.getName());
+			section = application.addSection("COMET", CometSectionSource.class,
+					"COMET");
 		}
 
 		// Obtain the template URI
@@ -100,10 +122,46 @@ public class CometHttpTemplateSectionExtension {
 					+ " must have a URI as being extended by Comet services");
 		}
 
+		// Determine if manually publishing
+		String manualPublishMethodName = properties.getProperty(
+				PROPERTY_MANUAL_PUBLISH_METHOD_NAME, null);
+		if (manualPublishMethodName != null) {
+
+			// Manually handle publishing, strip template URI to flow name
+			String flowName = templateUri.replace("/", "");
+
+			// Configure work for manualling handling publish
+			String propertyName = CometSectionSource.PROPERTY_MANUAL_PUBLISH_URI_PREFIX
+					+ flowName;
+			section.addProperty(propertyName, templateUri);
+
+			// Link manual publish handling to template logic method
+			String outputFlowName = CometSectionSource.PUBLISH_OUTPUT_PREFIX
+					+ flowName;
+			application.link(section, outputFlowName, template,
+					manualPublishMethodName);
+		}
+
 		// Configure the Comet handling for the template
 		application.linkUri(templateUri + "/comet-subscribe", section,
-				"subscribe");
-		application.linkUri(templateUri + "/comet-publish", section, "publish");
+				CometSectionSource.SUBSCRIBE_INPUT_NAME);
+		application.linkUri(templateUri + "/comet-publish", section,
+				CometSectionSource.PUBLISH_INPUT_NAME);
+	}
+
+	/**
+	 * Flow interface to publish the {@link CometEvent}.
+	 */
+	@FlowInterface
+	public static interface PublishFlow {
+
+		/**
+		 * Triggers publishing the {@link CometEvent}.
+		 * 
+		 * @param event
+		 *            {@link CometEvent}.
+		 */
+		void publish(CometEvent event);
 	}
 
 	/**
@@ -143,22 +201,38 @@ public class CometHttpTemplateSectionExtension {
 		 *            published.
 		 * @param service
 		 *            {@link CometService}.
+		 * @param flow
+		 *            {@link PublishFlow}.
 		 */
 		public void publish(ServerGwtRpcConnection<Long> connection,
-				CometService service) {
+				PublishFlow flow) {
 
+			// Obtain the published event
+			RPCRequest request = connection.getRpcRequest();
+			CometEvent event = (CometEvent) request.getParameters()[0];
+
+			// Publish the event
+			flow.publish(event);
+		}
+
+		/**
+		 * Automatically publishes the {@link CometEvent}.
+		 * 
+		 * @param event
+		 *            {@link CometEvent}.
+		 * @param service
+		 *            {@link CometService}.
+		 * @param connection
+		 *            {@link ServerGwtRpcConnection}.
+		 */
+		public void automaticallyPublish(@Parameter CometEvent event,
+				CometService service, ServerGwtRpcConnection<Long> connection) {
 			long sequenceNumber = -1;
 			try {
 
-				// Obtain the published event
-				RPCRequest request = connection.getRpcRequest();
-				CometEvent event = (CometEvent) request.getParameters()[0];
-				Class<?> listenerType = Class.forName(event
-						.getListenerTypeName());
-
 				// Publish the event
 				sequenceNumber = service.publishEvent(
-						event.getSequenceNumber(), listenerType,
+						event.getSequenceNumber(), event.getListenerTypeName(),
 						event.getData(), event.getFilterKey());
 
 			} catch (Exception ex) {

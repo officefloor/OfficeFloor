@@ -859,12 +859,13 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
 			Method method, Class<?> parameterType) {
 
-		// Override to not provide input for task
-
 		// Keep track of the tasks to allow linking by case-insensitive names
 		String taskKey = task.getSectionTaskName().toUpperCase();
 		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(
 				task, taskType, method, parameterType));
+
+		// Enrich the task
+		super.enrichTask(task, taskType, method, parameterType);
 	}
 
 	@Override
