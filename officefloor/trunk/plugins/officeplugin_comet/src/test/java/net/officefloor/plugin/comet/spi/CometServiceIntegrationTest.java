@@ -259,7 +259,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		public void publishEvent(CometService service,
 				ServerGwtRpcConnection<Long> connection) {
 			// Publish event
-			service.publishEvent(MockListener.class, "EVENT", null);
+			service.publishEvent(MockListener.class.getName(), "EVENT", null);
 
 			// Send response to allow trigger to complete
 			connection.onSuccess(Long.valueOf(1));

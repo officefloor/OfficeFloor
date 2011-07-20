@@ -15,19 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.comet;
+package net.officefloor.plugin.comet.web.http.section;
 
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
+import net.officefloor.plugin.comet.CometServiceInvoker;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometInterest;
 import net.officefloor.plugin.comet.internal.CometRequest;
 import net.officefloor.plugin.comet.internal.CometResponse;
-import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
+import net.officefloor.plugin.comet.spi.CometService;
+import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
@@ -37,7 +40,34 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorCometTest extends OfficeFrameTestCase {
+public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
+
+	/**
+	 * Main method to manually test with a browser to test
+	 * {@link OfficeFloorComet} interaction.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 */
+	public static void main(String... args) throws Exception {
+
+		// Indicate running manually
+		System.out.println("Manually running Comet test application");
+
+		// Start the server
+		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT);
+	}
+
+	/**
+	 * Flag indicating if manually published.
+	 */
+	private static boolean isManualPublish = false;
+
+	@Override
+	protected void setUp() throws Exception {
+		// Reset for testing
+		isManualPublish = false;
+	}
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -45,9 +75,10 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to &quot;long poll&quot; for an event.
+	 * Ensure automatic publishing of {@link CometEvent} to the others on the
+	 * server.
 	 */
-	public void testLongPoll() {
+	public void testAutomaticPublish() {
 
 		// Start the server
 		int port = MockHttpServer.getAvailablePort();
@@ -75,21 +106,48 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 		CometEvent event = response.getEvents()[0];
 		assertEquals("Incorrect event sequence number", sequenceNumber,
 				event.getSequenceNumber());
+
+		// Ensure not manually published
+		assertFalse("Should be automatically published", isManualPublish);
 	}
 
 	/**
-	 * Main method to manually test with a browser.
-	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * Ensure able to manually publish the {@link CometEvent}.
 	 */
-	public static void main(String... args) throws Exception {
+	public void testManuallyPublish() {
 
-		// Indicate running manually
-		System.out.println("Manually running Comet test application");
+		// Start the server (with manual handling of publishing)
+		int port = MockHttpServer.getAvailablePort();
+		startServer(
+				port,
+				CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
+				"manualPublish");
 
-		// Start the server
-		startServer(HttpServerAutoWireOfficeFloorSource.DEFAULT_HTTP_PORT);
+		// Subscribe for event
+		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
+				"/template/comet-subscribe",
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
+						MockCometSubscriber.class.getName(), null));
+		assertNull("Should not have a response",
+				subscription.checkForResponse());
+
+		// Publish an event
+		long sequenceNumber = CometServiceInvoker.publish(port,
+				"/template/comet-publish", new CometEvent(
+						MockCometSubscriber.class.getName(), "EVENT", null));
+
+		// Obtain the subscribed event
+		CometResponse response = subscription.waitOnResponse();
+		assertEquals("Incorrect number of events", 1,
+				response.getEvents().length);
+
+		// Ensure appropriate sequence number
+		CometEvent event = response.getEvents()[0];
+		assertEquals("Incorrect event sequence number", sequenceNumber,
+				event.getSequenceNumber());
+
+		// Ensure manually published
+		assertTrue("Should be manually published", isManualPublish);
 	}
 
 	/**
@@ -97,12 +155,16 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	 * 
 	 * @param port
 	 *            Port server is to listen on.
+	 * @param propertyNameValuePairs
+	 *            Property name value pairs for the
+	 *            {@link CometHttpTemplateSectionExtension}.
 	 */
-	private static void startServer(int port) {
+	private static void startServer(int port, String... propertyNameValuePairs) {
 		try {
+
 			// Obtain the path to the template
-			String templatePath = OfficeFloorCometTest.class.getPackage()
-					.getName().replace('.', '/')
+			String templatePath = CometHttpTemplateSectionExtensionTest.class
+					.getPackage().getName().replace('.', '/')
 					+ "/Template.html";
 
 			// Start server with GWT extension
@@ -116,10 +178,15 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 					new SourcePropertiesImpl(), Thread.currentThread()
 							.getContextClassLoader());
 
-			// Extend the template for Comet
+			// Extend the template for Comet (including specifying properties)
+			SourcePropertiesImpl properties = new SourcePropertiesImpl();
+			for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+				String name = propertyNameValuePairs[i];
+				String value = propertyNameValuePairs[i = 1];
+				properties.addProperty(name, value);
+			}
 			CometHttpTemplateSectionExtension.extendTemplate(template, source,
-					new SourcePropertiesImpl(), Thread.currentThread()
-							.getContextClassLoader());
+					properties, Thread.currentThread().getContextClassLoader());
 
 			// Start server
 			source.openOfficeFloor();
@@ -133,7 +200,20 @@ public class OfficeFloorCometTest extends OfficeFrameTestCase {
 	 * Template logic class.
 	 */
 	public static class TemplateLogic {
-		public void required() {
+		public void manualPublish(@Parameter CometEvent event,
+				CometService service, ServerGwtRpcConnection<Long> connection)
+				throws ClassNotFoundException {
+
+			// Publish the event
+			long sequenceNumber = service.publishEvent(
+					event.getListenerTypeName(), event.getData(),
+					event.getFilterKey());
+
+			// Flag manually published
+			CometHttpTemplateSectionExtensionTest.isManualPublish = true;
+
+			// Provide response
+			connection.onSuccess(Long.valueOf(sequenceNumber));
 		}
 	}
 

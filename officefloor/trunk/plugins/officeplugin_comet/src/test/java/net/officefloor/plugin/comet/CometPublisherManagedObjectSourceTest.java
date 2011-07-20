@@ -67,7 +67,8 @@ public class CometPublisherManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Record publishing an event
 		this.recordReturn(service, service.publishEvent(
-				MockCometPublisher.class, "TEST", "MATCH_KEY"), Long.valueOf(1));
+				MockCometPublisher.class.getName(), "TEST", "MATCH_KEY"), Long
+				.valueOf(1));
 
 		// Test
 		this.replayMockObjects();

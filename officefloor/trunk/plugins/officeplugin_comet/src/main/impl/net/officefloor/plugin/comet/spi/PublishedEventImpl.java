@@ -30,9 +30,9 @@ public class PublishedEventImpl implements PublishedEvent {
 	private final long sequenceNumber;
 
 	/**
-	 * Listener type.
+	 * Listener type name.
 	 */
-	private final Class<?> listenerType;
+	private final String listenerTypeName;
 
 	/**
 	 * Event data.
@@ -59,8 +59,8 @@ public class PublishedEventImpl implements PublishedEvent {
 	 * 
 	 * @param sequenceNumber
 	 *            Sequence number of this event.
-	 * @param listenerType
-	 *            Listener type.
+	 * @param listenerTypeName
+	 *            Listener type name.
 	 * @param data
 	 *            Event data.
 	 * @param matchKey
@@ -68,10 +68,10 @@ public class PublishedEventImpl implements PublishedEvent {
 	 * @param publishTimestamp
 	 *            Publish time stamp.
 	 */
-	public PublishedEventImpl(long sequenceNumber, Class<?> listenerType,
+	public PublishedEventImpl(long sequenceNumber, String listenerTypeName,
 			Object data, Object matchKey, long publishTimestamp) {
 		this.sequenceNumber = sequenceNumber;
-		this.listenerType = listenerType;
+		this.listenerTypeName = listenerTypeName;
 		this.data = data;
 		this.matchKey = matchKey;
 		this.publishTimestamp = publishTimestamp;
@@ -88,7 +88,7 @@ public class PublishedEventImpl implements PublishedEvent {
 	}
 
 	/*
-	 * ================= CometEvent ========================
+	 * ================= PublishedEvent ========================
 	 */
 
 	@Override
@@ -107,8 +107,8 @@ public class PublishedEventImpl implements PublishedEvent {
 	}
 
 	@Override
-	public Class<?> getListenerType() {
-		return this.listenerType;
+	public String getListenerTypeName() {
+		return this.listenerTypeName;
 	}
 
 	@Override

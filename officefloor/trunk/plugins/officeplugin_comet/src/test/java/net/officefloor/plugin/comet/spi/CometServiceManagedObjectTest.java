@@ -288,8 +288,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 
 		// Publish before servicing events
 		for (MockEvent event : this.events) {
-			long eventSequenceNumber = service.publishEvent(event.listenerType,
-					event.event, event.matchKey);
+			long eventSequenceNumber = service.publishEvent(
+					event.listenerType.getName(), event.event, event.matchKey);
 			assertEquals("Incorrect event sequence number",
 					expectedEventSequenceNumber++, eventSequenceNumber);
 		}
@@ -309,8 +309,8 @@ public class CometServiceManagedObjectTest extends OfficeFrameTestCase {
 
 		// Publish the after servicing events
 		for (MockEvent event : this.published) {
-			long eventSequenceNumber = service.publishEvent(event.listenerType,
-					event.event, event.matchKey);
+			long eventSequenceNumber = service.publishEvent(
+					event.listenerType.getName(), event.event, event.matchKey);
 			assertEquals("Incorrect event sequence number",
 					expectedEventSequenceNumber++, eventSequenceNumber);
 		}
