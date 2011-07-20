@@ -17,11 +17,19 @@
  */
 package net.officefloor.plugin.comet.web.http.section;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.plugin.comet.CometProxyPublisherManagedObjectSource;
+import net.officefloor.plugin.comet.CometPublisher;
+import net.officefloor.plugin.comet.CometPublisherInterface;
+import net.officefloor.plugin.comet.CometPublisherManagedObjectSource;
+import net.officefloor.plugin.comet.api.OfficeFloorComet;
 import net.officefloor.plugin.comet.internal.CometEvent;
 import net.officefloor.plugin.comet.internal.CometPublicationService;
 import net.officefloor.plugin.comet.internal.CometSubscriptionService;
@@ -38,11 +46,18 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
-import com.google.gwt.dev.asm.commons.Method;
 import com.google.gwt.user.server.rpc.RPCRequest;
 
 /**
+ * <p>
  * {@link HttpTemplateSectionExtension} to include Comet.
+ * <p>
+ * Parameters on the {@link HttpTemplate} logic class that have their parameter
+ * type be an interface an annotated with {@link CometPublisherInterface} will
+ * have a dependency via a {@link Proxy} from the {@link CometPublisher}
+ * injected. This will enable easier code for the server to publish
+ * {@link CometEvent} instances to their respective {@link OfficeFloorComet}
+ * clients.
  * 
  * @author Daniel Sagenschneider
  */
@@ -91,9 +106,9 @@ public class CometHttpTemplateSectionExtension {
 			SourceProperties properties, ClassLoader classLoader)
 			throws Exception {
 
-		// Determine if already configured Comet Logic
+		// Determine if already configured Comet Service
 		if (!application.isObjectAvailable(CometService.class)) {
-			// Configure the Comet Logic
+			// Configure the Comet Service
 			application.addManagedObject(CometServiceManagedObjectSource.class,
 					new ManagedObjectSourceWirer() {
 						@Override
@@ -104,6 +119,14 @@ public class CometHttpTemplateSectionExtension {
 									OnePersonTeamSource.class);
 						}
 					}, CometService.class).setTimeout(600 * 1000);
+		}
+
+		// Determine if already configured CometPublisher
+		if (!application.isObjectAvailable(CometPublisher.class)) {
+			// Configure the Comet Publisher
+			application.addManagedObject(
+					CometPublisherManagedObjectSource.class, null,
+					CometPublisher.class);
 		}
 
 		// Obtain the section to service Comet requests
@@ -147,6 +170,25 @@ public class CometHttpTemplateSectionExtension {
 				CometSectionSource.SUBSCRIBE_INPUT_NAME);
 		application.linkUri(templateUri + "/comet-publish", section,
 				CometSectionSource.PUBLISH_INPUT_NAME);
+
+		// Provide any CometPublisherInterface proxies as necessary
+		for (Method method : template.getTemplateLogicClass().getMethods()) {
+			for (Class<?> parameterType : method.getParameterTypes()) {
+				if (parameterType
+						.isAnnotationPresent(CometPublisherInterface.class)) {
+					// CometPublisherInterface, so register once
+					if (!application.isObjectAvailable(parameterType)) {
+						application
+								.addManagedObject(
+										CometProxyPublisherManagedObjectSource.class,
+										null, parameterType)
+								.addProperty(
+										CometProxyPublisherManagedObjectSource.PROPERTY_PROXY_INTERFACE,
+										parameterType.getName());
+					}
+				}
+			}
+		}
 	}
 
 	/**
