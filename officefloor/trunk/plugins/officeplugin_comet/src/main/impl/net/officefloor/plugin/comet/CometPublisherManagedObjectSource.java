@@ -72,6 +72,7 @@ public class CometPublisherManagedObjectSource
 
 		// Provide meta-data
 		context.setObjectClass(CometPublisher.class);
+		context.setManagedObjectClass(CometPublisherManagedObject.class);
 		context.addDependency(Dependencies.COMET_SERVICE, CometService.class);
 	}
 

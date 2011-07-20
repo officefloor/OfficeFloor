@@ -17,9 +17,14 @@
  */
 package net.officefloor.plugin.comet.web.http.section;
 
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
+import net.officefloor.plugin.comet.CometPublisher;
+import net.officefloor.plugin.comet.CometPublisherInterface;
 import net.officefloor.plugin.comet.CometServiceInvoker;
 import net.officefloor.plugin.comet.api.CometSubscriber;
 import net.officefloor.plugin.comet.api.OfficeFloorComet;
@@ -31,9 +36,15 @@ import net.officefloor.plugin.comet.spi.CometService;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
  * Tests the {@link OfficeFloorComet} functionality.
@@ -151,6 +162,50 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure server able to publish a {@link CometEvent} via a
+	 * {@link CometPublisher} {@link Proxy}.
+	 */
+	public void testServerPublish() throws Exception {
+
+		// Start the server (with manual handling of publishing)
+		int port = MockHttpServer.getAvailablePort();
+		startServer(port);
+
+		// Subscribe for event
+		CometServiceInvoker subscription = CometServiceInvoker.subscribe(port,
+				"/template/comet-subscribe",
+				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
+						MockCometSubscriber.class.getName(), null));
+		assertNull("Should not have a response",
+				subscription.checkForResponse());
+
+		// Trigger server to publish an event
+		HttpClient client = new DefaultHttpClient();
+		HttpResponse httpResponse = client.execute(new HttpGet(
+				"http://localhost:" + port
+						+ "/template.links-triggerServerEvent.task"));
+		assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
+				.getStatusCode());
+		assertTrue("Should have a response entity", httpResponse.getEntity()
+				.getContentLength() > 0);
+		assertEquals("Ensure success flag", 1, httpResponse.getEntity()
+				.getContent().read());
+		client.getConnectionManager().shutdown();
+
+		// Obtain the subscribed event
+		CometResponse response = subscription.waitOnResponse();
+		assertEquals("Incorrect number of events", 1,
+				response.getEvents().length);
+
+		// Ensure appropriate event
+		CometEvent event = response.getEvents()[0];
+		assertEquals("Incorrect server event", "SERVER", event.getData());
+
+		// Ensure not manually published
+		assertFalse("Should not be manually published", isManualPublish);
+	}
+
+	/**
 	 * Starts the server.
 	 * 
 	 * @param port
@@ -200,6 +255,17 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 	 * Template logic class.
 	 */
 	public static class TemplateLogic {
+
+		/**
+		 * Handles manually publishing the {@link CometEvent}.
+		 * 
+		 * @param event
+		 *            {@link CometEvent}.
+		 * @param service
+		 *            {@link CometService}.
+		 * @param connection
+		 *            {@link ServerGwtRpcConnection}.
+		 */
 		public void manualPublish(@Parameter CometEvent event,
 				CometService service, ServerGwtRpcConnection<Long> connection)
 				throws ClassNotFoundException {
@@ -215,12 +281,32 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			// Provide response
 			connection.onSuccess(Long.valueOf(sequenceNumber));
 		}
+
+		/**
+		 * Triggers server to provide event.
+		 * 
+		 * @param publisher
+		 *            {@link MockCometSubscriber}.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 */
+		public void triggerServerEvent(MockCometSubscriber publisher,
+				ServerHttpConnection connection) throws IOException {
+
+			// Trigger the comet event
+			publisher.sendEvent("SERVER");
+
+			// Provide response
+			connection.getHttpResponse().getBody().getOutputStream().write(1);
+		}
 	}
 
 	/**
 	 * Mock {@link CometSubscriber} interface for testing.
 	 */
+	@CometPublisherInterface
 	private static interface MockCometSubscriber extends CometSubscriber {
+		void sendEvent(String event);
 	}
 
 }
