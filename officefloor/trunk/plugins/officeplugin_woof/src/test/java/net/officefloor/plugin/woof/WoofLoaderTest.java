@@ -31,6 +31,10 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.woof.WoofRepository;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.autowire.AutoWireSection;
+import net.officefloor.plugin.comet.CometPublisher;
+import net.officefloor.plugin.comet.section.CometSectionSource;
+import net.officefloor.plugin.comet.spi.CometService;
+import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -235,6 +239,46 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loader.loadWoofConfiguration(
 				this.getFileLocation(this.getClass(), "gwt.woof"), this.app);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load Comet extension.
+	 */
+	public void testComet() throws Exception {
+
+		final AutoWireSection cometSection = this
+				.createMock(AutoWireSection.class);
+		final HttpTemplateAutoWireSection template = this
+				.createMock(HttpTemplateAutoWireSection.class);
+		final HttpTemplateAutoWireSectionExtension extension = this
+				.createMock(HttpTemplateAutoWireSectionExtension.class);
+
+		// Record loading template
+		this.recordReturn(this.app, this.app.addHttpTemplate(
+				"WOOF/Template.html", Template.class, "example"), template);
+
+		// Record extending with GWT
+		this.recordReturn(this.app,
+				this.app.isObjectAvailable(CometService.class), true);
+		this.recordReturn(this.app,
+				this.app.isObjectAvailable(CometPublisher.class), true);
+		this.recordReturn(this.app, this.app.getSection("COMET"), cometSection);
+		this.recordReturn(template, template.getTemplateUri(), "example");
+		this.app.linkUri("example/comet-subscribe", cometSection,
+				CometSectionSource.SUBSCRIBE_INPUT_NAME);
+		this.app.linkUri("example/comet-publish", cometSection,
+				CometSectionSource.PUBLISH_INPUT_NAME);
+		this.recordReturn(template, template.getTemplateLogicClass(),
+				Template.class);
+		this.recordReturn(template, template
+				.addTemplateExtension(CometHttpTemplateSectionExtension.class),
+				extension);
+
+		// Test
+		this.replayMockObjects();
+		this.loader.loadWoofConfiguration(
+				this.getFileLocation(this.getClass(), "comet.woof"), this.app);
 		this.verifyMockObjects();
 	}
 

@@ -44,6 +44,7 @@ import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtension;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExtensionContext;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import com.google.gwt.user.server.rpc.RPCRequest;
@@ -61,7 +62,8 @@ import com.google.gwt.user.server.rpc.RPCRequest;
  * 
  * @author Daniel Sagenschneider
  */
-public class CometHttpTemplateSectionExtension {
+public class CometHttpTemplateSectionExtension implements
+		HttpTemplateSectionExtension {
 
 	/**
 	 * <p>
@@ -286,6 +288,16 @@ public class CometHttpTemplateSectionExtension {
 			// Notify successfully published
 			connection.onSuccess(Long.valueOf(sequenceNumber));
 		}
+	}
+
+	/*
+	 * ================== HttpTemplateSectionExtension =======================
+	 */
+
+	@Override
+	public void extendTemplate(HttpTemplateSectionExtensionContext context)
+			throws Exception {
+		// No need to change template
 	}
 
 }
