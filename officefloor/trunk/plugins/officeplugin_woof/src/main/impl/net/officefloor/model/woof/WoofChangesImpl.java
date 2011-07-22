@@ -37,8 +37,10 @@ import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.AggregateChange;
 import net.officefloor.model.impl.change.NoChange;
+import net.officefloor.plugin.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.module.GwtChanges;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
+import net.officefloor.plugin.woof.comet.CometWoofTemplateExtensionService;
 import net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService;
 
 /**
@@ -363,7 +365,8 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateModel> addTemplate(String templatePath,
 			String templateLogicClass, SectionType section, String uri,
 			String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames) {
+			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName) {
 
 		// Obtain the template name
 		String templateName = getTemplateName(templatePath, uri, null,
@@ -448,6 +451,23 @@ public class WoofChangesImpl implements WoofChanges {
 						.addProperty(new PropertyModel(
 								GwtHttpTemplateSectionExtension.PROPERTY_GWT_ASYNC_SERVICE_INTERFACES,
 								propertyValue.toString()));
+			}
+		}
+
+		// Determine if extend with Comet functionality
+		if (isEnableComet) {
+
+			// Add the Comet Extension
+			WoofTemplateExtensionModel cometExtension = new WoofTemplateExtensionModel(
+					CometWoofTemplateExtensionService.EXTENSION_ALIAS);
+			template.addExtension(cometExtension);
+
+			// Determine if specify the manual publish method
+			if (cometManualPublishMethodName != null) {
+				cometExtension
+						.addProperty(new PropertyModel(
+								CometHttpTemplateSectionExtension.PROPERTY_MANUAL_PUBLISH_METHOD_NAME,
+								cometManualPublishMethodName));
 			}
 		}
 

@@ -23,6 +23,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
+import net.officefloor.plugin.comet.internal.CometEvent;
 
 /**
  * Changes that can be made to a {@link WoofModel}.
@@ -49,12 +50,18 @@ public interface WoofChanges {
 	 * @param gwtServiceAsyncInterfaceNames
 	 *            GWT Service Async Interface names. May be <code>null</code> if
 	 *            no GWT services required.
+	 * @param isEnableComet
+	 *            Flag to enable Comet functionality for the template.
+	 * @param cometManualPublishMethodName
+	 *            Name of the method on the template logic {@link Class} to
+	 *            handle publishing {@link CometEvent} instances.
 	 * @return {@link Change} to add the {@link WoofTemplateModel}.
 	 */
 	Change<WoofTemplateModel> addTemplate(String templatePath,
 			String templateLogicClass, SectionType sectionType, String uri,
 			String gwtEntryPointClassName,
-			String[] gwtServiceAsyncInterfaceNames);
+			String[] gwtServiceAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName);
 
 	/**
 	 * Changes the URI for the {@link WoofTemplateModel}.
