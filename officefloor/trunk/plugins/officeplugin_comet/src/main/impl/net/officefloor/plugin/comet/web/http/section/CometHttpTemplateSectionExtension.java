@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.plugin.autowire.AutoWireSection;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirer;
 import net.officefloor.plugin.autowire.ManagedObjectSourceWirerContext;
@@ -87,6 +88,17 @@ public class CometHttpTemplateSectionExtension implements
 	 * {@link CometSubscriptionService} and {@link CometPublicationService}.
 	 */
 	public static final String COMET_SECTION_NAME = "COMET";
+
+	/**
+	 * Extends the {@link GwtModuleModel} for using {@link OfficeFloorComet}.
+	 * 
+	 * @param module
+	 *            {@link GwtModuleModel}.
+	 */
+	public static void extendGwtModule(GwtModuleModel module) {
+		// Inherit the GWT Comet functionality for the client
+		module.addInherit(OfficeFloorComet.INHERIT_MODULE_NAME);
+	}
 
 	/**
 	 * Initiates the extending of the template with Comet.

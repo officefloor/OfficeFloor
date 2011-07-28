@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module rename-to="${rename.to}">
+<module>
 	<!-- You are free to edit this file for further GWT functionality. -->
 	<!-- Please note that WoOF will maintain the following: -->
 	<!-- * Module.gwt.xml being named as the template URI -->
@@ -7,6 +7,4 @@
 	<!-- * entry-point should it be changed in the WoOF editor -->
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.google.gwt.user.theme.standard.Standard" />
-	<entry-point class="${entry.point.class.name}" />
-	<source path="client" />
 </module>

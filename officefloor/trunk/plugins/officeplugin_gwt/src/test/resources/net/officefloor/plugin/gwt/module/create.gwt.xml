@@ -5,8 +5,9 @@
 	<!-- * Module.gwt.xml being named as the template URI -->
 	<!-- * rename-to value being the template URI -->
 	<!-- * entry-point should it be changed in the WoOF editor -->
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="com.google.gwt.user.theme.standard.Standard" />
-	<entry-point class="net.officefloor.plugin.gwt.client.Example" />
-	<source path="client" />
+	<inherits name="com.google.gwt.user.User"/>
+	<inherits name="com.google.gwt.user.theme.standard.Standard"/>
+	<inherits name="net.officefloor.plugin.gwt.ExampleModule"/>
+	<entry-point class="net.officefloor.plugin.gwt.client.Example"/>
+	<source path="client"/>
 </module>
