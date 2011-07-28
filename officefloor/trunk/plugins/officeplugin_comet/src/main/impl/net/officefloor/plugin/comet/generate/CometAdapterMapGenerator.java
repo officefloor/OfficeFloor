@@ -86,10 +86,10 @@ public class CometAdapterMapGenerator extends Generator {
 		adapter.addImport(GWT.class.getName());
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
-			logger.log(Type.ERROR, "Unable to generate " + qualifiedName
-					+ " for " + CometAdapterMap.class.getSimpleName()
-					+ " implementation. Likely cause is class already exists.");
-			throw new UnableToCompleteException();
+			logger.log(Type.WARN, qualifiedName + " for "
+					+ CometAdapterMap.class.getSimpleName()
+					+ " implementation already generated.");
+			return qualifiedName; // should already exist
 		}
 		SourceWriter writer = adapter.createSourceWriter(context, src);
 		writer.println("@Override");
@@ -125,13 +125,20 @@ public class CometAdapterMapGenerator extends Generator {
 			logger.log(Type.TRACE, "Including " + serviceTypeName
 					+ " in map for " + simpleName);
 			writer.println("    map.put(" + serviceTypeName + ".class, ("
-					+ CometAdapter.class.getSimpleName()
-					+ ") GWT.create(" + serviceTypeName + ".class));");
+					+ CometAdapter.class.getSimpleName() + ") GWT.create("
+					+ serviceTypeName + ".class));");
 		}
 
 		writer.println("    return map;");
 		writer.println("}");
+
+		// Committing
+		logger.log(Type.TRACE,
+				"Committing " + CometAdapterMap.class.getSimpleName()
+						+ " implementation to have type created");
 		writer.commit(logger);
+		logger.log(Type.TRACE, CometAdapterMap.class.getSimpleName()
+				+ " created");
 
 		// Return adapter
 		return qualifiedName;
