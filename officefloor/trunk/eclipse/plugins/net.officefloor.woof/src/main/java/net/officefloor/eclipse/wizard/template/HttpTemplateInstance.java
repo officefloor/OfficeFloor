@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import java.lang.reflect.Method;
+
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -58,6 +60,18 @@ public class HttpTemplateInstance {
 	private final String[] gwtServerAsyncInterfaceNames;
 
 	/**
+	 * Flag indicating if to enable Comet for the template.
+	 */
+	private final boolean isEnableComet;
+
+	/**
+	 * {@link Method} name on the template logic {@link Class} to handle
+	 * manually publishing a Comet event. May be <code>null</code> to
+	 * automatically handle.
+	 */
+	private final String cometManualPublishMethodName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templatePath
@@ -72,16 +86,25 @@ public class HttpTemplateInstance {
 	 *            GWT EntryPoint class name.
 	 * @param gwtServerAsyncInterfaceNames
 	 *            GWT Service Async Interface names.
+	 * @param isEnableComet
+	 *            Flag indicating if to enable Comet for the template.
+	 * @param cometManualPublishMethodName
+	 *            {@link Method} name on the template logic {@link Class} to
+	 *            handle manually publishing a Comet event. May be
+	 *            <code>null</code> to automatically handle.
 	 */
 	public HttpTemplateInstance(String templatePath, String logicClassName,
 			SectionType sectionType, String uri, String gwtEntryPointClassName,
-			String[] gwtServerAsyncInterfaceNames) {
+			String[] gwtServerAsyncInterfaceNames, boolean isEnableComet,
+			String cometManualPublishMethodName) {
 		this.templatePath = templatePath;
 		this.logicClassName = logicClassName;
 		this.sectionType = sectionType;
 		this.uri = uri;
 		this.gwtEntryPointClassName = gwtEntryPointClassName;
 		this.gwtServerAsyncInterfaceNames = gwtServerAsyncInterfaceNames;
+		this.isEnableComet = isEnableComet;
+		this.cometManualPublishMethodName = cometManualPublishMethodName;
 	}
 
 	/**
@@ -136,6 +159,26 @@ public class HttpTemplateInstance {
 	 */
 	public String[] getGwtServerAsyncInterfaceNames() {
 		return this.gwtServerAsyncInterfaceNames;
+	}
+
+	/**
+	 * Obtains flag indicating if to enable Comet for the template.
+	 * 
+	 * @return <code>true</code> to enable Comet for the template.
+	 */
+	public boolean isEnableComet() {
+		return this.isEnableComet;
+	}
+
+	/**
+	 * Obtains the {@link Method} name on the template logic {@link Class} to
+	 * handle manually publishing a Comet event. May be <code>null</code> to
+	 * automatically handle.
+	 * 
+	 * @return Manual publish {@link Method} name.
+	 */
+	public String getCometManualPublishMethodName() {
+		return this.cometManualPublishMethodName;
 	}
 
 }
