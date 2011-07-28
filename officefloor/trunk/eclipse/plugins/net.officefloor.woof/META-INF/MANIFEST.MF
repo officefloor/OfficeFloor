@@ -44,4 +44,5 @@ Bundle-ClassPath: .,
  officeplugin_servlet-1.4.0.jar,
  officeplugin_socket-1.4.0.jar,
  officeplugin_web-1.4.0.jar,
- officeplugin_woof-1.4.0.jar
+ officeplugin_woof-1.4.0.jar,
+ officeplugin_comet-1.4.0.jar

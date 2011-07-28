@@ -66,11 +66,15 @@ public class AddTemplateOperation extends
 		String entryPointClassName = instance.getGwtEntryPointClassName();
 		String[] serviceAsyncInterfaces = instance
 				.getGwtServerAsyncInterfaceNames();
+		boolean isEnableComet = instance.isEnableComet();
+		String cometManualPublishMethodName = instance
+				.getCometManualPublishMethodName();
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(path,
 				logicClassName, type, uri, entryPointClassName,
-				serviceAsyncInterfaces);
+				serviceAsyncInterfaces, isEnableComet,
+				cometManualPublishMethodName);
 
 		// Position template
 		context.positionModel(change.getTarget());

@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.wizard.template;
 
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +34,8 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.csv.InputFactory;
 import net.officefloor.eclipse.common.dialog.input.csv.ListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.BooleanInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClassMethodInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
 import net.officefloor.eclipse.extension.ExtensionUtil;
@@ -106,6 +109,22 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 * GWT Service Async Interfaces.
 	 */
 	private String[] gwtServiceAsyncInterfaces;
+
+	/**
+	 * {@link InputHandler} to enable Comet.
+	 */
+	private InputHandler<Boolean> enableComet;
+
+	/**
+	 * {@link ClassMethodInput} for the Comet Manual Publish {@link Method}
+	 * name.
+	 */
+	private ClassMethodInput cometManualPublishMethodInput;
+
+	/**
+	 * {@link InputHandler} for the Comet Manual Publish {@link Method} name.
+	 */
+	private InputHandler<String> cometManualPublishMethodName;
 
 	/**
 	 * {@link HttpTemplateInstance}.
@@ -272,6 +291,29 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		gwtAsyncServices.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
+		// Provide means to enable Comet
+		new Label(page, SWT.NONE).setText("Enable Comet: ");
+		this.enableComet = new InputHandler<Boolean>(page, new BooleanInput(),
+				new InputListener() {
+					@Override
+					public void notifyValueInvalid(String message) {
+						// Should never be invalid
+					}
+
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Handle change
+						HttpTemplateWizardPage.this.handleChange();
+					}
+				});
+
+		// Provide means to specify manual publish handle method name
+		new Label(page, SWT.NONE).setText("Comet Manual Publish Method: ");
+		this.cometManualPublishMethodInput = new ClassMethodInput(
+				this.classLoader);
+		this.cometManualPublishMethodName = new InputHandler<String>(page,
+				this.cometManualPublishMethodInput);
+
 		// Indicate initial state
 		this.handleChange();
 
@@ -287,6 +329,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Clear error message (as change may have corrected it)
 		this.setErrorMessage(null);
+
+		// Enable/Disable Comet Method Name based on whether using Comet
+		Boolean isEnabled = this.enableComet.getTrySafeValue();
+		this.cometManualPublishMethodName.getControl().setEnabled(
+				isEnabled.booleanValue());
 
 		// Ensure have template extension
 		if (this.templateExtension == null) {
@@ -363,6 +410,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String[] gwtAsyncInterfaces = gwtAsyncList
 				.toArray(new String[gwtAsyncList.size()]);
 
+		// Determine if enable Comet
+		boolean isEnableComet = this.enableComet.getTrySafeValue()
+				.booleanValue();
+
+		// Determine manual publish method name
+		String cometMethodName = null;
+		if (isEnableComet) {
+			// Obtain method name as enabled comet
+			cometMethodName = this.cometManualPublishMethodName
+					.getTrySafeValue();
+		}
+
 		// Ensure have GWT Entry Point Class if have GWT Services
 		if ((gwtAsyncInterfaces.length > 0) && (gwtEntryPoint == null)) {
 			// Must have GWT Entry Point Class
@@ -375,7 +434,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String logicClassName = propertyLogicClass.getValue();
 		this.instance = new HttpTemplateInstance(this.templatePath,
 				logicClassName, sectionType, uriValue, gwtEntryPoint,
-				gwtAsyncInterfaces);
+				gwtAsyncInterfaces, isEnableComet, cometMethodName);
 
 		// Specification of template details complete
 		this.setErrorMessage(null);
@@ -420,6 +479,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	@Override
 	public void notifyPropertiesChanged() {
 		this.handleChange();
+
+		// Notify potential change to Template Logic class name
+		String templateLogicClassName = this.properties.getPropertyValue(
+				HttpTemplateSectionSource.PROPERTY_CLASS_NAME, null);
+		this.cometManualPublishMethodInput.setClassName(templateLogicClassName);
 	}
 
 }
