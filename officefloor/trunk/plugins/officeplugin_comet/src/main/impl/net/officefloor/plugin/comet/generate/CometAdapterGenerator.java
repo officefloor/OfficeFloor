@@ -125,10 +125,10 @@ public class CometAdapterGenerator extends Generator {
 		adapter.addImport(OfficeFloorComet.class.getName());
 		PrintWriter src = context.tryCreate(logger, packageName, simpleName);
 		if (src == null) {
-			logger.log(Type.ERROR, "Unable to generate " + qualifiedName
-					+ " for adapting " + CometSubscriber.class.getSimpleName()
-					+ " service. Likely cause is that class already exists.");
-			throw new UnableToCompleteException();
+			logger.log(Type.TRACE, qualifiedName + " for adapting "
+					+ CometSubscriber.class.getSimpleName()
+					+ " already generated.");
+			return qualifiedName; // should already exist
 		}
 		SourceWriter writer = adapter.createSourceWriter(context, src);
 
