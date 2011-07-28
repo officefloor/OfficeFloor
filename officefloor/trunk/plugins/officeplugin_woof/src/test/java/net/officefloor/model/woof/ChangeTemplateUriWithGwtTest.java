@@ -51,7 +51,7 @@ public class ChangeTemplateUriWithGwtTest extends AbstractWoofChangesTestCase {
 		final String CHANGE_URI = "change";
 		final String ENTRY_POINT_CLASS = "net.example.client.ExampleEntryPoint";
 		final GwtModuleModel module = new GwtModuleModel("uri",
-				ENTRY_POINT_CLASS);
+				ENTRY_POINT_CLASS, null);
 
 		// Record updating template URI for GWT
 		GwtChanges changes = this.getGwtChanges();

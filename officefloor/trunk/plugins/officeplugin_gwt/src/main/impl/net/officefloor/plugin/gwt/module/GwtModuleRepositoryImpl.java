@@ -21,8 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 
@@ -42,6 +40,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.google.gwt.core.client.EntryPoint;
 
 /**
  * {@link GwtModuleRepository} implementation.
@@ -205,21 +205,9 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 			throw new FileNotFoundException("Can not find GWT Module template "
 					+ templateLocation);
 		}
-		StringWriter buffer = new StringWriter();
-		Reader templateReader = new InputStreamReader(moduleTemplate);
-		for (int character = templateReader.read(); character != -1; character = templateReader
-				.read()) {
-			buffer.write(character);
-		}
-		String template = buffer.toString();
 
-		// Fill out the template
-		template = template.replace("${rename.to}", module.getRenameTo());
-		template = template.replace("${entry.point.class.name}",
-				module.getEntryPointClassName());
-
-		// Return configuration for creating module
-		return this.createConfiguration(template);
+		// Return the template with updated details
+		return this.updateGwtModule(module, moduleTemplate);
 	}
 
 	@Override
@@ -248,18 +236,68 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		// Ensure rename-to attribute is updated
 		moduleNode.setAttribute("rename-to", module.getRenameTo());
 
-		// Ensure entry-point class is updated
+		// Element names
 		final String ENTRY_POINT = "entry-point";
+		final String SOURCE = "source";
+		final String PATH = "path";
+		final String INHERITS = "inherits";
+		final String NAME = "name";
+
+		// Ensure entry-point class is updated
+		String entryPointClassName = module.getEntryPointClassName();
 		Element entryPointNode = (Element) this.getFirstDirectChild(moduleNode,
 				ENTRY_POINT);
 		if (entryPointNode == null) {
 			// No entry-point element, so add one before source nodes
 			entryPointNode = document.createElement(ENTRY_POINT);
 			Element sourceNode = (Element) this.getFirstDirectChild(moduleNode,
-					"source");
+					SOURCE);
 			moduleNode.insertBefore(entryPointNode, sourceNode);
 		}
-		entryPointNode.setAttribute("class", module.getEntryPointClassName());
+		entryPointNode.setAttribute("class", entryPointClassName);
+
+		// Ensure source path is included
+		String sourcePath = this.getSourcePath(entryPointClassName);
+		boolean isSourcePathIncluded = false;
+		NodeList children = moduleNode.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			if (SOURCE.equals(child.getNodeName())) {
+				Element sourceNode = (Element) child;
+				if (sourcePath.equals(sourceNode.getAttribute(PATH))) {
+					isSourcePathIncluded = true;
+				}
+			}
+		}
+		if (!isSourcePathIncluded) {
+			// Source path not included so add
+			Element sourceNode = document.createElement(SOURCE);
+			sourceNode.setAttribute(PATH, sourcePath);
+			moduleNode.appendChild(sourceNode);
+		}
+
+		// Add any necessary inherits
+		for (String inherit : module.getInherits()) {
+
+			// Determine if inherits already included
+			boolean isInheritIncluded = false;
+			children = moduleNode.getChildNodes();
+			for (int i = 0; i < children.getLength(); i++) {
+				Node child = children.item(i);
+				if (INHERITS.equals(child.getNodeName())) {
+					Element sourceNode = (Element) child;
+					if (inherit.equals(sourceNode.getAttribute(NAME))) {
+						isInheritIncluded = true;
+					}
+				}
+			}
+			if (!isInheritIncluded) {
+				// Inherit not included so add
+				Element inheritNode = document.createElement(INHERITS);
+				inheritNode.setAttribute(NAME, inherit);
+				moduleNode.insertBefore(inheritNode, entryPointNode);
+			}
+		}
 
 		// Obtain the changed module configuration
 		TransformerFactory transformFactory = TransformerFactory.newInstance();
@@ -273,6 +311,16 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 		return this.createConfiguration(buffer.toString());
 	}
 
+	/**
+	 * Obtains the first direct child {@link Node} by the tag name.
+	 * 
+	 * @param parent
+	 *            Parent to find the first direct child {@link Node}.
+	 * @param tagName
+	 *            Tag name of the child {@link Node}.
+	 * @return First direct child {@link Node} or <code>null</code> if no direct
+	 *         child {@link Node} by the tag name.
+	 */
 	private Node getFirstDirectChild(Node parent, String tagName) {
 
 		// Search for the first direct child with Tag Name
@@ -286,6 +334,25 @@ public class GwtModuleRepositoryImpl implements GwtModuleRepository {
 
 		// As here, did not find child
 		return null;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the source path from the {@link EntryPoint} class name.
+	 * <p>
+	 * The source path is the last package segment name before the
+	 * {@link EntryPoint} class name.
+	 * 
+	 * @param entryPointClassName
+	 *            {@link EntryPoint} class name.
+	 * @return Source path.
+	 */
+	private String getSourcePath(String entryPointClassName) {
+		int separator = entryPointClassName.lastIndexOf('.');
+		String sourcePath = entryPointClassName.substring(0, separator);
+		separator = sourcePath.lastIndexOf('.');
+		sourcePath = sourcePath.substring(separator + ".".length());
+		return sourcePath;
 	}
 
 	/**

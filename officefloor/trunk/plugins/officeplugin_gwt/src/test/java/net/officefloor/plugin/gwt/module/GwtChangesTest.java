@@ -61,7 +61,7 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 	 */
 	public void testGwtModulePath() {
 		GwtModuleModel module = new GwtModuleModel("template",
-				"net.example.client.ExampleEntryPoint");
+				"net.example.client.ExampleEntryPoint", null);
 		String gwtModulePath = this.changes.createGwtModulePath(module);
 		assertEquals("Incorrect GWT Module path",
 				"net/example/template.gwt.xml", gwtModulePath);
@@ -74,7 +74,7 @@ public class GwtChangesTest extends OfficeFrameTestCase {
 
 		// Create the GWT Module to retrieve
 		GwtModuleModel module = new GwtModuleModel("uri",
-				"net.officefloor.client.ExampleEntryPoint");
+				"net.officefloor.client.ExampleEntryPoint", null);
 		this.repository.storeGwtModule(module, this.context, null);
 
 		// Retrieve the module

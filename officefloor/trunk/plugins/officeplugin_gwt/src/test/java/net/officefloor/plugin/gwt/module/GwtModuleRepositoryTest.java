@@ -50,7 +50,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 	 */
 	public void testGwtModulePath() throws Exception {
 		GwtModuleModel module = new GwtModuleModel("template",
-				"net.example.client.ExampleEntryPoint");
+				"net.example.client.ExampleEntryPoint", null);
 		String gwtModulePath = this.repository.createGwtModulePath(module);
 		assertEquals("Incorrect GWT Module path",
 				"net/example/template.gwt.xml", gwtModulePath);
@@ -112,6 +112,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("example");
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Example");
+		module.addInherit("net.officefloor.plugin.gwt.ExampleModule");
 
 		// Create the GWT Module
 		InputStream content = this.repository.createGwtModule(module);
@@ -120,7 +121,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"create.gwt.xml"));
 		String actual = this.getText(content);
-		assertEquals("Incorrect created module", expected, actual);
+		assertXml("Incorrect created module", expected, actual);
 	}
 
 	/**
@@ -135,7 +136,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("update");
-		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.update.Updated");
 
 		// Update the GWT Module
 		InputStream updated = this.repository.updateGwtModule(module, initial);
@@ -144,7 +145,32 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
 		String actual = this.getText(updated);
-		assertEquals("Incorrect updated module", expected, actual);
+		assertXml("Incorrect updated module", expected, actual);
+	}
+
+	/**
+	 * Ensure able to update {@link GwtModuleModel} with additional inheritance.
+	 */
+	public void testUpdateGwtModuleWithInherits() throws Exception {
+		
+		// Create the configuration item
+		InputStream initial = this.findInputStream(this.getClass(),
+				"change.gwt.xml");
+
+		// Configure to update the GWT Module
+		GwtModuleModel module = new GwtModuleModel();
+		module.setRenameTo("update");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.update.Updated");
+		module.addInherit("net.officefloor.plugin.gwt.ExampleModule");
+
+		// Update the GWT Module
+		InputStream updated = this.repository.updateGwtModule(module, initial);
+
+		// Validate content as expected
+		String expected = this.getText(this.findInputStream(this.getClass(),
+				"updated_inherits.gwt.xml"));
+		String actual = this.getText(updated);
+		assertXml("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -160,19 +186,18 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("update");
-		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.update.Updated");
 
 		// Update the GWT Module
 		InputStream updated = this.repository.updateGwtModule(module, initial);
 
 		// Obtain the file content (touch up due to not adding white-space)
 		String actual = this.getText(updated);
-		actual = actual.replace("<source", "\t<source");
 
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertEquals("Incorrect updated module", expected, actual);
+		assertXml("Incorrect updated module", expected, actual);
 	}
 
 	/**
@@ -184,6 +209,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("example");
 		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Example");
+		module.addInherit("net.officefloor.plugin.gwt.ExampleModule");
 
 		// Configure context
 		ConfigurationContext context = new MemoryConfigurationContext();
@@ -203,7 +229,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Ensure appropriate content
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"create.gwt.xml"));
-		assertEquals("Incorrect stored (created) module", expected, actual);
+		assertXml("Incorrect stored (created) module", expected, actual);
 	}
 
 	/**
@@ -216,7 +242,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("update");
-		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.update.Updated");
 
 		// Create the configuration context
 		ConfigurationContext context = new MemoryConfigurationContext();
@@ -238,7 +264,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertEquals("Incorrect stored (updated) module", expected, actual);
+		assertXml("Incorrect stored (updated) module", expected, actual);
 	}
 
 	/**
@@ -251,7 +277,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Configure to update the GWT Module
 		GwtModuleModel module = new GwtModuleModel();
 		module.setRenameTo("update");
-		module.setEntryPointClassName("net.officefloor.plugin.gwt.client.Updated");
+		module.setEntryPointClassName("net.officefloor.plugin.gwt.update.Updated");
 
 		// Create the configuration context
 		ConfigurationContext context = new MemoryConfigurationContext();
@@ -273,7 +299,7 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 		// Validate content as expected
 		String expected = this.getText(this.findInputStream(this.getClass(),
 				"updated.gwt.xml"));
-		assertEquals("Incorrect stored (updated) module", expected, actual);
+		assertXml("Incorrect stored (updated) module", expected, actual);
 
 		// Ensure the previous GWT Module is removed
 		assertNull("Previous GWT Module should be removed",
@@ -337,6 +363,23 @@ public class GwtModuleRepositoryTest extends OfficeFrameTestCase {
 			writer.write(character);
 		}
 		return writer.toString();
+	}
+
+	/**
+	 * Asserts the XML text to match.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param expected
+	 *            Expected XML text.
+	 * @param actual
+	 *            Actual XML text.
+	 */
+	private static void assertXml(String message, String expected, String actual) {
+		// Remove tabs from xml (formatting discrepency)
+		expected = expected.replace("\t", "");
+		actual = actual.replace("\t", "");
+		assertEquals(message, expected, actual);
 	}
 
 }

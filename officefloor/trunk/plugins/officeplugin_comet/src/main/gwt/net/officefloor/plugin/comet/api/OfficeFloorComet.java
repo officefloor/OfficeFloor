@@ -45,6 +45,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class OfficeFloorComet {
 
 	/**
+	 * Name of the GWT Module to inherit to include the {@link OfficeFloorComet}
+	 * functionality within the client.
+	 */
+	public static final String INHERIT_MODULE_NAME = "net.officefloor.plugin.comet.OfficeFloorComet";
+
+	/**
 	 * Obtain the mapping of {@link CometSubscriber} interface type to its
 	 * {@link CometAdapter}.
 	 */

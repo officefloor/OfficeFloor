@@ -417,7 +417,13 @@ public class WoofChangesImpl implements WoofChanges {
 
 			// Create the GWT Module
 			GwtModuleModel module = new GwtModuleModel(uri,
-					gwtEntryPointClassName);
+					gwtEntryPointClassName, null);
+
+			// Include inherits for Comet (if using)
+			if (isEnableComet) {
+				// Extend GWT Module for Comet
+				CometHttpTemplateSectionExtension.extendGwtModule(module);
+			}
 
 			// Add property for the GWT Module path
 			String gwtModulePath = this.gwtChanges.createGwtModulePath(module);
