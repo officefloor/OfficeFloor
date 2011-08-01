@@ -24,14 +24,10 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public interface ConversationSubscription extends CometSubscriber {
 
-	/**
-	 * Sends a message.
-	 * 
-	 * @param message
-	 *            Message.
-	 */
 	void sendMessage(String message);
 
 }
+// END SNIPPET: example
