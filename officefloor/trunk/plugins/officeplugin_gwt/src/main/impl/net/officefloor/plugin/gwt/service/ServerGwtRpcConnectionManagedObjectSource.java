@@ -33,6 +33,7 @@ import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 
 import com.google.gwt.user.server.rpc.RPC;
 import com.google.gwt.user.server.rpc.RPCRequest;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
 
 /**
  * {@link ManagedObjectSource} for the {@link ServerGwtRpcConnection}.
@@ -274,14 +275,32 @@ public class ServerGwtRpcConnectionManagedObjectSource
 			// Ensure can send a response
 			this.ensureCanSendResponse();
 
-			// Obtain the request
-			RPCRequest rpc = this.getRpcRequest();
+			// Attempt to obtain RPC request
+			RPCRequest rpc = null;
+			try {
+				rpc = this.getRpcRequest();
+			} catch (Throwable ex) {
+				// send failure without specific RPC request details
+			}
+
+			// Obtain RPC request details
+			SerializationPolicy serializationPolicy;
+			int flags;
+			if (rpc != null) {
+				// Use details from request
+				serializationPolicy = rpc.getSerializationPolicy();
+				flags = rpc.getFlags();
+			} else {
+				// Use default details
+				serializationPolicy = RPC.getDefaultSerializationPolicy();
+				flags = 0;
+			}
 
 			// Obtain the response payload
 			String payload;
 			try {
 				payload = RPC.encodeResponseForFailure(null, caught,
-						rpc.getSerializationPolicy(), rpc.getFlags());
+						serializationPolicy, flags);
 			} catch (Exception ex) {
 				// Indicate failure encoding response
 				this.sendFailure(ex);
