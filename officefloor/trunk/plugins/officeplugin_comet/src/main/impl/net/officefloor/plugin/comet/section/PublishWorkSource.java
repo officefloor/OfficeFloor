@@ -158,10 +158,18 @@ public class PublishWorkSource extends
 		public Object doTask(
 				TaskContext<PublishTask, Dependencies, Indexed> context) {
 
-			// Obtain the Comet Event
+			// Obtain the RPC request
 			ServerGwtRpcConnection<Long> connection = (ServerGwtRpcConnection<Long>) context
 					.getObject(Dependencies.SERVER_GWT_RPC_CONNECTION);
-			RPCRequest rpcRequest = connection.getRpcRequest();
+			RPCRequest rpcRequest;
+			try {
+				rpcRequest = connection.getRpcRequest();
+			} catch (Exception ex) {
+				connection.onFailure(ex);
+				return null; // failed to obtain request to service
+			}
+
+			// Obtain the Comet Event
 			Object[] parameters = rpcRequest.getParameters();
 			CometEvent event = (CometEvent) parameters[0];
 

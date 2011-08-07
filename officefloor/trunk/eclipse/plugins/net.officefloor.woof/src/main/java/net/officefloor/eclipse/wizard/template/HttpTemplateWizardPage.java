@@ -312,7 +312,18 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.cometManualPublishMethodInput = new ClassMethodInput(
 				this.classLoader);
 		this.cometManualPublishMethodName = new InputHandler<String>(page,
-				this.cometManualPublishMethodInput);
+				this.cometManualPublishMethodInput, new InputListener() {
+					@Override
+					public void notifyValueInvalid(String message) {
+						// Should never be invalid
+					}
+
+					@Override
+					public void notifyValueChanged(Object value) {
+						// Handle change
+						HttpTemplateWizardPage.this.handleChange();
+					}
+				});
 
 		// Indicate initial state
 		this.handleChange();

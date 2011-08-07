@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Combo;
 
 import net.officefloor.eclipse.common.dialog.input.Input;
@@ -121,13 +123,22 @@ public class ClassMethodInput implements Input<Combo> {
 	 */
 
 	@Override
-	public Combo buildControl(InputContext context) {
+	public Combo buildControl(final InputContext context) {
 
 		// Create the combo
 		this.combo = new Combo(context.getParent(), SWT.NONE);
 
 		// Populate the combo
 		this.loadMethodsForSelection();
+
+		// Indicate change in value
+		this.combo.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				context.notifyValueChanged(ClassMethodInput.this.combo
+						.getText());
+			}
+		});
 
 		// Return the combo
 		return combo;
