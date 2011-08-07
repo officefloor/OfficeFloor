@@ -60,7 +60,13 @@
 
   OfficeFloor is a multi-threaded container allowing methods to be executed by different Threads and is not limited by the Thread-per-Request architecture, which makes implementing AJAX push applications significantly easier.  The following tutorials show the ease in which events can be pushed out to the web clients.
   
-  The functionality and tutorials will be available in release 1.4 of OfficeFloor (as the current focus has been on GWT integration for release 1.3).  Watch this space!
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./CometApp/index.html}Comet}} | Shows the ease of using Comet with WoOF | OfficeFloorComet
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./CometManualApp/index.html}Server events}} | Demonstrates the ease of publishing events | @Comet
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 
