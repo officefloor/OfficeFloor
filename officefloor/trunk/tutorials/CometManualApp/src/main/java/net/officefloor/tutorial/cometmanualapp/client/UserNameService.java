@@ -25,9 +25,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @RemoteServiceRelativePath("username")
 public interface UserNameService extends RemoteService {
 
 	void login(String userName);
 
 }
+// END SNIPPET: example

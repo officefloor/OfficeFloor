@@ -25,9 +25,11 @@ import net.officefloor.plugin.comet.api.CometSubscriber;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @CometPublisherInterface
 public interface ConversationSubscription extends CometSubscriber {
 
 	void message(ConversationMessage message);
 
 }
+// END SNIPPET: example

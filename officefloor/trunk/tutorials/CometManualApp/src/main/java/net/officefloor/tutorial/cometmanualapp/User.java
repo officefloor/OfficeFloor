@@ -24,6 +24,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 @HttpSessionStateful
 public class User {
 
@@ -38,3 +39,4 @@ public class User {
 	}
 
 }
+// END SNIPPET: example

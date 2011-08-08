@@ -75,13 +75,11 @@ public class CometManualAppEntryPoint implements EntryPoint {
 						userNameTextBox.getText(), new AsyncCallback<Void>() {
 							@Override
 							public void onSuccess(Void result) {
-								userNameTextBox.setText("SUCCESS");
 								dialogBox.hide();
 							}
 
 							@Override
 							public void onFailure(Throwable caught) {
-								userNameTextBox.setText("FAILURE");
 								Window.alert("Failed to specify user name");
 							}
 						});

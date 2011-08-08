@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class ConversationMessage implements IsSerializable {
 
 	private String name;
@@ -51,3 +52,4 @@ public class ConversationMessage implements IsSerializable {
 	}
 
 }
+// END SNIPPET: example

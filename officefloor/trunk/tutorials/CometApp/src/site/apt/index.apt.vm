@@ -11,6 +11,8 @@
   To demonstrate the ease of using Comet functionality within a WoOF application, the following simple chat application will be used for this tutorial:
   
 [./images/CometApp-screenshot.png] CometApp screenshot.
+
+  The application in this tutorial is deliberately simple to allow focus on the Comet functionality.
     
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometApp/${projectVersion}/CometApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
