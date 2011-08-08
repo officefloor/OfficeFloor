@@ -29,20 +29,23 @@ import net.officefloor.tutorial.cometmanualapp.client.ConversationSubscription;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: example
 public class TemplateLogic {
 
-	public void login(@Parameter String userName, AsyncCallback<Void> callback,
-			User user) {
+	public void login(@Parameter String userName, User user,
+			AsyncCallback<Void> callback) {
+
 		user.setName(userName);
 		callback.onSuccess(null);
 	}
 
 	public void message(@Parameter CometEvent event, User user,
 			ConversationSubscription publisher, AsyncCallback<Long> callback) {
+
 		ConversationMessage message = (ConversationMessage) event.getData();
 		publisher.message(new ConversationMessage(user.getName(), message
 				.getText()));
 		callback.onSuccess(Long.valueOf(1));
 	}
-
 }
+// END SNIPPET: example
