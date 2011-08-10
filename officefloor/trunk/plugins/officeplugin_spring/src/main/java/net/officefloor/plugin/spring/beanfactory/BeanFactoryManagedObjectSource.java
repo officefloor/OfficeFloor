@@ -38,9 +38,9 @@ import org.springframework.core.io.Resource;
 
 /**
  * {@link ManagedObjectSource} to obtain the {@link BeanFactory}.
- *
+ * 
  * @author Daniel Sagenschneider
- *
+ * 
  * @see DependencyFactoryBean
  */
 public class BeanFactoryManagedObjectSource extends
@@ -53,7 +53,7 @@ public class BeanFactoryManagedObjectSource extends
 
 	/**
 	 * Convenience method to obtain the {@link BeanFactory}.
-	 *
+	 * 
 	 * @param beanFactoryPath
 	 *            Path to the configuration of the {@link BeanFactory}.
 	 * @param classLoader
@@ -96,8 +96,8 @@ public class BeanFactoryManagedObjectSource extends
 				.getProperty(BEAN_FACTORY_PATH_PROPERTY_NAME);
 
 		// Obtain the bean factory
-		this.beanFactory = getXmlBeanFactory(configurationPath, mosContext
-				.getClassLoader());
+		this.beanFactory = getXmlBeanFactory(configurationPath,
+				mosContext.getClassLoader());
 
 		// Ensure 'Required' properties are configured.
 		// This is not totally necessary but putting in to ensure configured.
@@ -109,14 +109,13 @@ public class BeanFactoryManagedObjectSource extends
 		context.setObjectClass(BeanFactory.class);
 
 		// Load the dependencies
-		ClassLoader classLoader = mosContext.getClassLoader();
 		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDefinition = this.beanFactory
 					.getBeanDefinition(beanName);
 
 			// Obtain the bean class
 			String beanClassName = beanDefinition.getBeanClassName();
-			Class<?> beanClass = classLoader.loadClass(beanClassName);
+			Class<?> beanClass = mosContext.loadClass(beanClassName);
 
 			// Ignore non dependency factory beans
 			if (!(DependencyFactoryBean.class.isAssignableFrom(beanClass))) {
@@ -134,12 +133,12 @@ public class BeanFactoryManagedObjectSource extends
 			}
 			TypedStringValue requiredTypeName = (TypedStringValue) property
 					.getValue();
-			Class<?> requiredType = classLoader.loadClass(requiredTypeName
+			Class<?> requiredType = mosContext.loadClass(requiredTypeName
 					.getValue());
 
 			// Add the dependency
-			int dependencyIndex = context.addDependency(requiredType).setLabel(
-					beanName).getIndex();
+			int dependencyIndex = context.addDependency(requiredType)
+					.setLabel(beanName).getIndex();
 
 			// Provide the dependency index for bean
 			MutablePropertyValues propertyValues = beanDefinition

@@ -78,7 +78,7 @@ public class HttpTemplateArrayIteratorWorkSource
 
 		// Obtain the component type name
 		String componentTypeName = context.getProperty("component.type.name");
-		Class<?> componentType = context.getClassLoader().loadClass(
+		Class<?> componentType = context.loadClass(
 				componentTypeName);
 		Class<?> arrayType = Array.newInstance(componentType, 0).getClass();
 

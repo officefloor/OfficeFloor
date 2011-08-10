@@ -66,7 +66,7 @@ public class HttpSessionObjectRetrieverManagedObjectSource
 
 		// Obtain the type for being returned
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
-		Class<?> type = mosContext.getClassLoader().loadClass(typeName);
+		Class<?> type = mosContext.loadClass(typeName);
 
 		// Load the meta-data
 		context

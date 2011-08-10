@@ -86,7 +86,7 @@ public class HttpParametersLoaderWorkSource
 
 		// Obtain the type
 		String typeName = context.getProperty(PROPERTY_TYPE_NAME);
-		Class<?> type = context.getClassLoader().loadClass(typeName);
+		Class<?> type = context.loadClass(typeName);
 
 		// Obtain whether case insensitive (true by default)
 		boolean isCaseInsensitive = Boolean.parseBoolean(context.getProperty(

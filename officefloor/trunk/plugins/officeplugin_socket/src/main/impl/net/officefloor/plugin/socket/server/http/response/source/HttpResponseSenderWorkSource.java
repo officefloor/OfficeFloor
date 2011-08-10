@@ -71,8 +71,8 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 		byte[] httpResponseContent = null;
 		if (httpResponseFile != null) {
 			// Obtain the HTTP response content
-			InputStream httpResponseInputStream = context.getClassLoader()
-					.getResourceAsStream(httpResponseFile);
+			InputStream httpResponseInputStream = context
+					.getOptionalResource(httpResponseFile);
 			if (httpResponseInputStream == null) {
 				throw new FileNotFoundException(
 						"Can not find HTTP response file '" + httpResponseFile
@@ -96,5 +96,4 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 		// Load the send task type information
 		HttpResponseSendTask.addTaskType("SEND", task, workTypeBuilder);
 	}
-
 }

@@ -172,8 +172,7 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		} else {
 			// Instantiate specified
 			this.sslEngineConfigurator = (SslEngineConfigurator) mosContext
-					.getClassLoader().loadClass(sslEngineConfiguratorClassName)
-					.newInstance();
+					.loadClass(sslEngineConfiguratorClassName).newInstance();
 		}
 
 		// Initialise the SSL Engine Configurator
@@ -183,8 +182,8 @@ public class SslCommunicationProtocol<CH extends ConnectionHandler> implements
 		this.bufferSquirtFactory = bufferSquirtFactory;
 
 		// Create the flow to execute the SSL tasks
-		this.sslTaskFlowIndex = context.addFlow(Runnable.class).setLabel(
-				"SSL_TASKS").getIndex();
+		this.sslTaskFlowIndex = context.addFlow(Runnable.class)
+				.setLabel("SSL_TASKS").getIndex();
 		SslTaskWork sslTaskExecution = new SslTaskWork();
 		ManagedObjectWorkBuilder<SslTaskWork> work = mosContext.addWork(
 				"SSL_TASK_EXECUTOR", sslTaskExecution);

@@ -94,14 +94,14 @@ public class BeanManagedObjectSource
 		String configurationPath = mosContext
 				.getProperty(BEAN_FACTORY_PATH_PROPERTY_NAME);
 		XmlBeanFactory beanFactory = BeanFactoryManagedObjectSource
-				.getXmlBeanFactory(configurationPath, mosContext
-						.getClassLoader());
+				.getXmlBeanFactory(configurationPath,
+						mosContext.getClassLoader());
 
 		// Obtain the definition and subsequently bean type
 		BeanDefinition beanDefinition = beanFactory
 				.getBeanDefinition(this.beanName);
 		String beanClassName = beanDefinition.getBeanClassName();
-		this.beanClass = mosContext.getClassLoader().loadClass(beanClassName);
+		this.beanClass = mosContext.loadClass(beanClassName);
 
 		// Specify object type
 		context.setObjectClass(this.beanClass);
@@ -130,7 +130,7 @@ public class BeanManagedObjectSource
 		/*
 		 * =========== CoordinatingManagedObject =========================
 		 */
-		
+
 		@Override
 		public void loadObjects(ObjectRegistry<BeanDependency> registry)
 				throws Throwable {

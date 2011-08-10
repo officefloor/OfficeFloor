@@ -78,8 +78,8 @@ public class HttpServletWorkSource extends AbstractWorkSource<HttpServletTask> {
 		context.getProperty(PROPERTY_SERVLET_MAPPINGS);
 
 		// Create the HTTP Servlet instance
-		HttpServlet servlet = (HttpServlet) context.getClassLoader().loadClass(
-				servletClassName).newInstance();
+		HttpServlet servlet = (HttpServlet) context.loadClass(servletClassName)
+				.newInstance();
 
 		// Source the HTTP Servlet work
 		HttpServletTask.sourceWork(workTypeBuilder, context, servletName,

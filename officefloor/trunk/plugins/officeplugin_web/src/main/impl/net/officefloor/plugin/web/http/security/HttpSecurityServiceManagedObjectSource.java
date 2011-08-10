@@ -119,7 +119,7 @@ public class HttpSecurityServiceManagedObjectSource extends
 			// Custom authentication scheme
 			String httpSecuritySourceClassName = mosContext
 					.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_CLASS_NAME);
-			httpSecuritySourceClass = mosContext.getClassLoader().loadClass(
+			httpSecuritySourceClass = mosContext.loadClass(
 					httpSecuritySourceClassName);
 		}
 

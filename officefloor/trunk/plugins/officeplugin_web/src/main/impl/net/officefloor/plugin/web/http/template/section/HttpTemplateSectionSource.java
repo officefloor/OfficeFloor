@@ -159,7 +159,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Load the section class work and tasks
 		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME);
-		this.sectionClass = classLoader.loadClass(sectionClassName);
+		this.sectionClass = context.loadClass(sectionClassName);
 		super.sourceSection(designer, context);
 
 		// Obtain the HTTP template content

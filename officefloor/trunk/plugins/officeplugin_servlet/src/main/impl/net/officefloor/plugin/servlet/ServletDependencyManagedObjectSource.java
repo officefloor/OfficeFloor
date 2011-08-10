@@ -71,7 +71,7 @@ public class ServletDependencyManagedObjectSource
 
 		// Obtain the dependency type
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
-		this.type = mosContext.getClassLoader().loadClass(typeName);
+		this.type = mosContext.loadClass(typeName);
 
 		// Specify meta-data
 		context.setObjectClass(this.type);
