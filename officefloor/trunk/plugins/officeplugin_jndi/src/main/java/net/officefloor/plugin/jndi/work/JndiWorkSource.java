@@ -104,12 +104,9 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		// Obtain the JNDI name
 		String jndiName = context.getProperty(PROPERTY_JNDI_NAME);
 
-		// Obtain the class loader
-		ClassLoader classLoader = context.getClassLoader();
-
 		// Obtain the work type
 		String workTypeName = context.getProperty(PROPERTY_WORK_TYPE);
-		final Class<?> workType = classLoader.loadClass(workTypeName);
+		final Class<?> workType = context.loadClass(workTypeName);
 
 		// Keep track of the registered tasks
 		final Set<String> registeredTasks = new HashSet<String>();
@@ -122,7 +119,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		if ((facadeClassName != null) && (facadeClassName.trim().length() > 0)) {
 
 			// Have facade, so obtain its class
-			facadeClass = classLoader.loadClass(facadeClassName);
+			facadeClass = context.loadClass(facadeClassName);
 
 			// Obtain the listing of tasks from the methods of the facade class
 			for (Method method : facadeClass.getMethods()) {

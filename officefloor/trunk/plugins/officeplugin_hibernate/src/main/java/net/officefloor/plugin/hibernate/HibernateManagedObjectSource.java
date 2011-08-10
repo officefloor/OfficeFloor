@@ -26,6 +26,7 @@ import java.sql.Connection;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 import org.hibernate.Session;
@@ -64,6 +65,8 @@ public class HibernateManagedObjectSource
 	protected void loadMetaData(
 			MetaDataContext<HibernateDependenciesEnum, None> context)
 			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
 
 		// Specify types
 		context.setObjectClass(Session.class);
@@ -74,8 +77,8 @@ public class HibernateManagedObjectSource
 				.getProperty("configuration", "hibernate.cfg.xml");
 
 		// Create the dummy connection
-		this.dummyConnection = (Connection) Proxy.newProxyInstance(this
-				.getClass().getClassLoader(), new Class[] { Connection.class },
+		this.dummyConnection = (Connection) Proxy.newProxyInstance(
+				mosContext.getClassLoader(), new Class[] { Connection.class },
 				new InvocationHandler() {
 					public Object invoke(Object proxy, Method method,
 							Object[] args) throws Throwable {
@@ -91,8 +94,8 @@ public class HibernateManagedObjectSource
 
 		// Create the Session Factory
 		this.sessionFactory = new Configuration().configure(
-				context.getManagedObjectSourceContext().getClassLoader()
-						.getResource(configFilePath)).buildSessionFactory();
+				mosContext.getClassLoader().getResource(configFilePath))
+				.buildSessionFactory();
 	}
 
 	@Override

@@ -119,8 +119,7 @@ public class HttpTemplateTask extends
 							.getProperty(beanClassPropertyName);
 
 					// Obtain the class
-					beanClass = context.getClassLoader().loadClass(
-							beanClassName);
+					beanClass = context.loadClass(beanClassName);
 
 					// Obtain the value retriever
 					ValueRetrieverSource source = new ValueRetrieverSourceImpl();

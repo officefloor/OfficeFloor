@@ -100,8 +100,7 @@ public class JdbcManagedObjectSource extends
 				CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY, null);
 		if (factoryClassName != null) {
 			// Use the factory to obtain the connection pool data source
-			Class<?> clazz = this.getClass().getClassLoader().loadClass(
-					factoryClassName);
+			Class<?> clazz = context.loadClass(factoryClassName);
 			Object object = clazz.newInstance();
 			ConnectionPoolDataSourceFactory factory = (ConnectionPoolDataSourceFactory) object;
 			return factory.createConnectionPoolDataSource(context);
@@ -115,8 +114,9 @@ public class JdbcManagedObjectSource extends
 		Properties properties = context.getProperties();
 
 		// Create and return the connection pool data source
-		return ReflectionUtil.createInitialisedBean(className, context
-				.getClassLoader(), ConnectionPoolDataSource.class, properties);
+		return ReflectionUtil.createInitialisedBean(className,
+				context.getClassLoader(), ConnectionPoolDataSource.class,
+				properties);
 	}
 
 	/*
@@ -145,8 +145,8 @@ public class JdbcManagedObjectSource extends
 				DATA_SOURCE_INITIALISE_SCRIPT, null);
 		if (initialiseScript != null) {
 			// Obtain access to the initialise script contents
-			this.initialiseScriptInputStream = mosContext.getClassLoader()
-					.getResourceAsStream(initialiseScript);
+			this.initialiseScriptInputStream = mosContext
+					.getResource(initialiseScript);
 			if (this.initialiseScriptInputStream == null) {
 				throw new Exception("Can not find initialise script '"
 						+ initialiseScript + "'");
@@ -154,8 +154,8 @@ public class JdbcManagedObjectSource extends
 		}
 
 		// Create the recycle task
-		new RecycleJdbcTask().registerAsRecycleTask(context
-				.getManagedObjectSourceContext(), "jdbc.recycle");
+		new RecycleJdbcTask().registerAsRecycleTask(
+				context.getManagedObjectSourceContext(), "jdbc.recycle");
 
 		// Specify the meta-data
 		context.setObjectClass(Connection.class);

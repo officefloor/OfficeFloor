@@ -81,7 +81,7 @@ public class HttpApplicationClassManagedObjectSource
 
 		// Obtain the class
 		String className = mosContext.getProperty(PROPERTY_CLASS_NAME);
-		this.objectClass = mosContext.getClassLoader().loadClass(className);
+		this.objectClass = mosContext.loadClass(className);
 
 		// Obtain the overridden bind name
 		this.bindName = mosContext.getProperty(PROPERTY_BIND_NAME, null);

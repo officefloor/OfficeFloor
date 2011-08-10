@@ -84,7 +84,7 @@ public class HttpParametersLoaderManagedObjectSource extends
 
 		// Obtain the type
 		String typeName = mosContext.getProperty(PROPERTY_TYPE_NAME);
-		Class<?> type = mosContext.getClassLoader().loadClass(typeName);
+		Class<?> type = mosContext.loadClass(typeName);
 
 		// Obtain whether case insensitive (true by default)
 		boolean isCaseInsensitive = Boolean

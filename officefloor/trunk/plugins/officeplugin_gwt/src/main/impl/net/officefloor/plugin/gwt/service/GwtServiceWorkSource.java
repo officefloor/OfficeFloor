@@ -66,8 +66,8 @@ public class GwtServiceWorkSource extends AbstractWorkSource<GwtServiceTask> {
 		// Load the GWT async service interface
 		String gwtAsyncServiceInterfaceName = context
 				.getProperty(PROPERTY_GWT_ASYNC_SERVICE_INTERFACE);
-		Class<?> gwtAsyncServiceInterface = context.getClassLoader().loadClass(
-				gwtAsyncServiceInterfaceName);
+		Class<?> gwtAsyncServiceInterface = context
+				.loadClass(gwtAsyncServiceInterfaceName);
 
 		// Obtain the methods (sorted by name for consistency)
 		Method[] methods = gwtAsyncServiceInterface.getMethods();

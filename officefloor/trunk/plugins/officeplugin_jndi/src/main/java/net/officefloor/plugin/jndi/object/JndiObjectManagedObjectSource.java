@@ -85,8 +85,7 @@ public class JndiObjectManagedObjectSource
 
 		// Obtain the Object Type
 		String objectTypeName = mosContext.getProperty(PROPERTY_OBJECT_TYPE);
-		Class<?> objectType = mosContext.getClassLoader().loadClass(
-				objectTypeName);
+		Class<?> objectType = mosContext.loadClass(objectTypeName);
 
 		// Load the meta-data
 		context.setManagedObjectClass(JndiObjectManagedObject.class);
