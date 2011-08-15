@@ -254,7 +254,7 @@ public class ManagedObjectLoaderUtil {
 			nextOfficeFloorCompiler = null; // clear for further operations
 		} else {
 			// Create the office floor compiler that fails on first issue
-			compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 			compiler.setCompilerIssues(new FailTestCompilerIssues());
 		}
 

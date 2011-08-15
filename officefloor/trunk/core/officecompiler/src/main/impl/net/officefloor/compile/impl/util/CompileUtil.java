@@ -139,6 +139,7 @@ public class CompileUtil {
 
 			// Ensure class of expected type
 			if (!expectedType.isAssignableFrom(clazz)) {
+				// Not of expected type
 				issues.addIssue(locationType, location, assetType, assetName,
 						"Must implement " + expectedType.getSimpleName()
 								+ " (class=" + clazz.getName() + ")");

@@ -134,9 +134,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 */
 	public AbstractStructureTestCase() {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this.issues);
-		compiler.setClassLoader(this.classLoader);
 		compiler.addResources(this.resourceSource);
 		this.nodeContext = (NodeContext) compiler;
 	}
@@ -314,9 +313,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		// Load the section
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this.issues);
-		compiler.setClassLoader(this.classLoader);
 		compiler.addResources(this.resourceSource);
 		SectionLoader loader = compiler.getSectionLoader();
 		OfficeSection section = loader.loadOfficeSection(sectionName,

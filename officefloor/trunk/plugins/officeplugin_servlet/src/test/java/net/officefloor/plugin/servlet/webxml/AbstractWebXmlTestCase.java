@@ -136,7 +136,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 			// Create and configure the compiler
 			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler();
+					.newOfficeFloorCompiler(null);
 			compiler.addResources(resourceSource);
 			compiler.setCompilerIssues(new FailTestCompilerIssues());
 

@@ -168,7 +168,7 @@ public class OfficeBuildingManagerTest extends TestCase {
 	 */
 	public void testEnsureOfficeFloorOpens() throws Exception {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.addSourceAliases();
 		OfficeFloor officeFloor = compiler.compile(this
 				.getOfficeFloorLocation());

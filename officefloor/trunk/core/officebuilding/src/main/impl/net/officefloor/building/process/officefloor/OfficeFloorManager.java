@@ -217,7 +217,7 @@ public class OfficeFloorManager implements ManagedProcess,
 
 		// Create the OfficeFloor compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 
 		// Add properties for the compiler
 		for (String name : this.officeFloorProperties.stringPropertyNames()) {

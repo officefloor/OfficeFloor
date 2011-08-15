@@ -454,7 +454,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 
 		// Create the office loader and load the required properties
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
 		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();

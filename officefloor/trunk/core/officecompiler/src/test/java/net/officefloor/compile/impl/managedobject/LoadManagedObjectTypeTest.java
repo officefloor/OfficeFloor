@@ -1605,7 +1605,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Create the managed object loader and load the managed object type
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
 		MockManagedObjectSource.init = init;

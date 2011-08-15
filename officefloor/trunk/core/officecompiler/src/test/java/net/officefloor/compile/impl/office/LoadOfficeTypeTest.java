@@ -606,7 +606,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 		// Create the office loader and load the office
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
 		OfficeLoader officeLoader = compiler.getOfficeLoader();

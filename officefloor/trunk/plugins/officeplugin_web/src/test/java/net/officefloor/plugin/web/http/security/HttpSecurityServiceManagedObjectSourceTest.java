@@ -105,11 +105,10 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 
 		// Create the expected type
 		ManagedObjectTypeBuilder type = this.createCoreType();
-		type
-				.addDependency(
-						"Dependency-"
-								+ net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource.Dependencies.CREDENTIAL_STORE
-										.name(), CredentialStore.class, 2, null);
+		type.addDependency(
+				"Dependency-"
+						+ net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource.Dependencies.CREDENTIAL_STORE
+								.name(), CredentialStore.class, 2, null);
 
 		// Validate type
 		ManagedObjectLoaderUtil
@@ -207,7 +206,7 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 
 		// Specify operation
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 		ManagedObjectLoaderUtil.setNextOfficeFloorCompiler(compiler);
 
@@ -271,7 +270,7 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 
 		// Specify operation
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 		ManagedObjectLoaderUtil.setNextOfficeFloorCompiler(compiler);
 
@@ -429,16 +428,14 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		String base64UsernamePassword = new String(encoded, US_ASCII);
 
 		// Record
-		this
-				.recordReturn(session, session.getAttribute("#HttpSecurity#"),
-						null);
+		this.recordReturn(session, session.getAttribute("#HttpSecurity#"), null);
 		this.recordReturn(connection, connection.getHttpRequest(), request);
 		this.recordReturn(request, request.getHeaders(), Arrays.asList(header));
 		this.recordReturn(header, header.getName(), "Authorization");
 		this.recordReturn(header, header.getValue(), "Basic "
 				+ base64UsernamePassword);
-		this.recordReturn(store, store.retrieveCredentialEntry(username,
-				"TestRealm"), entry);
+		this.recordReturn(store,
+				store.retrieveCredentialEntry(username, "TestRealm"), entry);
 		this.recordReturn(entry, entry.retrieveCredentials(), passwordBytes);
 		this.recordReturn(store, store.getAlgorithm(), null);
 		this.recordReturn(entry, entry.retrieveRoles(), Collections.EMPTY_SET);
@@ -450,10 +447,9 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader
-				.addProperty(
-						HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
-						HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
+		loader.addProperty(
+				HttpSecurityServiceManagedObjectSource.PROPERTY_AUTHENTICATION_SCHEME,
+				HttpSecurityServiceManagedObjectSource.BASIC_AUTHENTICATION_SCHEME);
 		loader.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "TestRealm");
 		HttpSecurityServiceManagedObjectSource source = loader
 				.loadManagedObjectSource(HttpSecurityServiceManagedObjectSource.class);
@@ -480,8 +476,8 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		this.verifyMockObjects();
 
 		// Ensure correct security
-		assertEquals("Incorrect authentication", username, security
-				.getRemoteUser());
+		assertEquals("Incorrect authentication", username,
+				security.getRemoteUser());
 	}
 
 	/**
@@ -515,8 +511,8 @@ public class HttpSecurityServiceManagedObjectSourceTest extends
 		public String getAuthenticationScheme() {
 			// Obtain the name based on class name
 			String className = this.getClass().getSimpleName();
-			String authenticationScheme = className.substring(0, (className
-					.length() - "Source".length()));
+			String authenticationScheme = className.substring(0,
+					(className.length() - "Source".length()));
 			return authenticationScheme;
 		}
 

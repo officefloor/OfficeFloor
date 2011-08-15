@@ -133,11 +133,9 @@ public class LoadAdministratorSourceSpecificationTest extends
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this
-				.record_issue(
-						"Failed to obtain AdministratorSourceProperty instances from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to obtain AdministratorSourceProperty instances from AdministratorSourceSpecification for "
+						+ MockAdministratorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -152,8 +150,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 	public void testNullAdministratorSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), null);
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -168,11 +166,11 @@ public class LoadAdministratorSourceSpecificationTest extends
 	public void testNullAdministratorSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new AdministratorSourceProperty[] { null });
-		this
-				.record_issue("AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName());
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new AdministratorSourceProperty[] { null });
+		this.record_issue("AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
+				+ MockAdministratorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -190,13 +188,12 @@ public class LoadAdministratorSourceSpecificationTest extends
 				.createMock(AdministratorSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(),
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this
-				.record_issue("AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName());
+		this.record_issue("AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
+				+ MockAdministratorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -216,15 +213,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 				.createMock(AdministratorSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(),
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this
-				.record_issue(
-						"Failed to get name for AdministratorSourceProperty 0 from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to get name for AdministratorSourceProperty 0 from AdministratorSourceSpecification for "
+						+ MockAdministratorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -244,16 +239,14 @@ public class LoadAdministratorSourceSpecificationTest extends
 				.createMock(AdministratorSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(),
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this
-				.record_issue(
-						"Failed to get label for AdministratorSourceProperty 0 (NAME) from AdministratorSourceSpecification for "
-								+ MockAdministratorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to get label for AdministratorSourceProperty 0 (NAME) from AdministratorSourceSpecification for "
+						+ MockAdministratorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -272,9 +265,10 @@ public class LoadAdministratorSourceSpecificationTest extends
 				.createMock(AdministratorSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new AdministratorSourceProperty[] {
-				propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new AdministratorSourceProperty[] { propertyWithLabel,
+						propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
@@ -328,7 +322,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 
 		// Load the managed object specification specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		AdministratorLoader administratorLoader = compiler
 				.getAdministratorLoader();

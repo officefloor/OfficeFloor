@@ -621,7 +621,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Create the compiler (overriding values to allow testing)
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.setOfficeFrame(officeFrame);
 		compiler.addResources(resourceSource);

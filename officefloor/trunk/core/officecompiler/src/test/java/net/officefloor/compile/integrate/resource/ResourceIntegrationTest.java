@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
@@ -81,7 +82,8 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Configure OfficeFloor
-		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource();
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
+				OfficeFloorCompiler.newOfficeFloorCompiler(classLoader));
 		source.addManagedObject(ClassLoaderManagedObjectSource.class, null,
 				ClassLoader.class);
 		source.addManagedObject(ResourceManagedObjectSource.class, null,
@@ -91,7 +93,6 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		source.assignDefaultTeam(PassiveTeamSource.class);
 
 		// Configure for the OfficeFrame
-		source.getOfficeFloorCompiler().setClassLoader(classLoader);
 		source.getOfficeFloorCompiler().addResources(resourceSource);
 
 		// Start the OfficeFloor

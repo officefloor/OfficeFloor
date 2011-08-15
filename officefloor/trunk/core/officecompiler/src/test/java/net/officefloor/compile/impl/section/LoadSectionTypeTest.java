@@ -750,7 +750,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 
 		// Create the property list
 		PropertyList propertyList = compiler.createPropertyList();

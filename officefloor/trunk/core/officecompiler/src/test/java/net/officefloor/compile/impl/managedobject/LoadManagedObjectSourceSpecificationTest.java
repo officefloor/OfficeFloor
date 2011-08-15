@@ -322,7 +322,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 
 		// Load the managed object specification specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader managedObjectLoader = compiler
 				.getManagedObjectLoader();

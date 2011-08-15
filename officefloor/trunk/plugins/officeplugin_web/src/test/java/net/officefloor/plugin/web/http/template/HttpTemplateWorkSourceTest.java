@@ -173,7 +173,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create and initiate the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 
 		// Do not provide bean for template section
@@ -219,7 +219,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create and initiate the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 
 		// Provide bean that does not have the required property

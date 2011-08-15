@@ -261,7 +261,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		if (expectedErrorMessage != null) {
 			// Error, therefore allow play back
 			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler();
+					.newOfficeFloorCompiler(null);
 			compiler.setCompilerIssues(this.issues);
 
 			// Load work type as expecting it not to be loaded

@@ -135,7 +135,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 
 		// Create the team loader and load the team
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
 		MockTeamSource.loader = loader;

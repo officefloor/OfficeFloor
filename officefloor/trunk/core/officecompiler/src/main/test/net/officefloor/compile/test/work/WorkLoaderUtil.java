@@ -327,7 +327,7 @@ public class WorkLoaderUtil {
 			OfficeFloorCompiler compiler) {
 		if (compiler == null) {
 			// Create the office floor compiler that fails on first issue
-			compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 			compiler.setCompilerIssues(new FailTestCompilerIssues());
 		}
 		return compiler;
