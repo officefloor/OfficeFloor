@@ -155,8 +155,7 @@ public class OfficeLoaderUtil {
 
 		// Cast to obtain expected office type
 		if (!(architect instanceof OfficeType)) {
-			TestCase
-					.fail("architect must be created from createOfficeArchitect");
+			TestCase.fail("architect must be created from createOfficeArchitect");
 		}
 		OfficeType expectedOffice = (OfficeType) architect;
 
@@ -172,11 +171,12 @@ public class OfficeLoaderUtil {
 		for (int i = 0; i < eInputs.length; i++) {
 			OfficeInputType eInput = eInputs[i];
 			OfficeInputType aInput = aInputs[i];
-			TestCase.assertEquals("Incorrect name for input " + i, eInput
-					.getOfficeSectionInputName(), aInput
-					.getOfficeSectionInputName());
-			TestCase.assertEquals("Incorrect section for input " + i, eInput
-					.getOfficeSectionName(), aInput.getOfficeSectionName());
+			TestCase.assertEquals("Incorrect name for input " + i,
+					eInput.getOfficeSectionInputName(),
+					aInput.getOfficeSectionInputName());
+			TestCase.assertEquals("Incorrect section for input " + i,
+					eInput.getOfficeSectionName(),
+					aInput.getOfficeSectionName());
 			TestCase.assertEquals("Incorrect parameter type for input " + i,
 					eInput.getParameterType(), aInput.getParameterType());
 		}
@@ -192,11 +192,11 @@ public class OfficeLoaderUtil {
 			OfficeManagedObjectType eManagedObject = eManagedObjects[i];
 			OfficeManagedObjectType aManagedObject = aManagedObjects[i];
 			TestCase.assertEquals("Incorrect name for managed object " + i,
-					eManagedObject.getOfficeManagedObjectName(), aManagedObject
-							.getOfficeManagedObjectName());
+					eManagedObject.getOfficeManagedObjectName(),
+					aManagedObject.getOfficeManagedObjectName());
 			TestCase.assertEquals("Incorrect object type for managed object "
-					+ i, eManagedObject.getObjectType(), aManagedObject
-					.getObjectType());
+					+ i, eManagedObject.getObjectType(),
+					aManagedObject.getObjectType());
 
 			// Validate the supported extension interfaces
 			String[] eEis = eManagedObject.getExtensionInterfaces();
@@ -218,8 +218,8 @@ public class OfficeLoaderUtil {
 		for (int i = 0; i < eTeams.length; i++) {
 			OfficeTeamType eTeam = eTeams[i];
 			OfficeTeamType aTeam = aTeams[i];
-			TestCase.assertEquals("Incorrect team " + i, eTeam
-					.getOfficeTeamName(), aTeam.getOfficeTeamName());
+			TestCase.assertEquals("Incorrect team " + i,
+					eTeam.getOfficeTeamName(), aTeam.getOfficeTeamName());
 		}
 
 		// Return the actual office type
@@ -287,7 +287,7 @@ public class OfficeLoaderUtil {
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}

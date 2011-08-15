@@ -142,7 +142,7 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 
 			// Create the OfficeFloor compiler
 			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler();
+					.newOfficeFloorCompiler(classLoader);
 			final StringBuilder issues = new StringBuilder();
 			compiler.setCompilerIssues(new CompilerIssues() {
 				@Override

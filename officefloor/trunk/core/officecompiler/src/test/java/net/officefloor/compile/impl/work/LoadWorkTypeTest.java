@@ -954,7 +954,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Create the work loader and load the work
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		WorkLoader workLoader = compiler.getWorkLoader();
 		MockWorkSource.loader = loader;

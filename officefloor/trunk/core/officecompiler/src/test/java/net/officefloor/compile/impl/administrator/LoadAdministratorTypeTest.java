@@ -566,7 +566,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Create the administrator loader and load the administrator type
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		AdministratorLoader adminLoader = compiler.getAdministratorLoader();
 		MockAdministratorSource.init = init;

@@ -342,7 +342,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 		// Create the office loader and load the office floor
 		this.replayMockObjects();
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.addResources(this.resourceSource);
 		compiler.setOfficeFrame(officeFrame);

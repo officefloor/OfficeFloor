@@ -315,7 +315,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 
 		// Load the managed object pool specification specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectPoolLoader managedObjectPoolLoader = compiler
 				.getManagedObjectPoolLoader();

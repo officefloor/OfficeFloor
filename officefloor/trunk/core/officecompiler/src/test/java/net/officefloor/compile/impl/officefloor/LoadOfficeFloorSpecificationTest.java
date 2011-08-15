@@ -51,11 +51,6 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	private final OfficeFloorSourceSpecification specification = this
 			.createMock(OfficeFloorSourceSpecification.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockOfficeFloorSource.reset(this.specification);
@@ -129,11 +124,9 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		// Record null office floor properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this
-				.record_issue(
-						"Failed to obtain OfficeFloorSourceProperty instances from OfficeFloorSourceSpecification for "
-								+ MockOfficeFloorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to obtain OfficeFloorSourceProperty instances from OfficeFloorSourceSpecification for "
+						+ MockOfficeFloorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -148,8 +141,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	public void testNullOfficeFloorPropertiesArray() {
 
 		// Record null office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), null);
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -164,11 +157,11 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	public void testNullOfficeFloorPropertyElement() {
 
 		// Record null office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeFloorSourceProperty[] { null });
-		this
-				.record_issue("OfficeFloorSourceProperty 0 is null from OfficeFloorSourceSpecification for "
-						+ MockOfficeFloorSource.class.getName());
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeFloorSourceProperty[] { null });
+		this.record_issue("OfficeFloorSourceProperty 0 is null from OfficeFloorSourceSpecification for "
+				+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -186,12 +179,12 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeFloorSourceProperty.class);
 
 		// Record obtaining office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeFloorSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeFloorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this
-				.record_issue("OfficeFloorSourceProperty 0 provided blank name from OfficeFloorSourceSpecification for "
-						+ MockOfficeFloorSource.class.getName());
+		this.record_issue("OfficeFloorSourceProperty 0 provided blank name from OfficeFloorSourceSpecification for "
+				+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -210,14 +203,13 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeFloorSourceProperty.class);
 
 		// Record obtaining office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeFloorSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeFloorSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this
-				.record_issue(
-						"Failed to get name for OfficeFloorSourceProperty 0 from OfficeFloorSourceSpecification for "
-								+ MockOfficeFloorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to get name for OfficeFloorSourceProperty 0 from OfficeFloorSourceSpecification for "
+						+ MockOfficeFloorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -237,15 +229,14 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeFloorSourceProperty.class);
 
 		// Record obtaining office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeFloorSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeFloorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this
-				.record_issue(
-						"Failed to get label for OfficeFloorSourceProperty 0 (NAME) from OfficeFloorSourceSpecification for "
-								+ MockOfficeFloorSource.class.getName(),
-						failure);
+		this.record_issue(
+				"Failed to get label for OfficeFloorSourceProperty 0 (NAME) from OfficeFloorSourceSpecification for "
+						+ MockOfficeFloorSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -264,9 +255,10 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeFloorSourceProperty.class);
 
 		// Record obtaining office floor properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeFloorSourceProperty[] {
-				propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeFloorSourceProperty[] { propertyWithLabel,
+						propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
@@ -320,7 +312,7 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 
 		// Load the office floor specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
 		PropertyList propertyList = officeFloorLoader

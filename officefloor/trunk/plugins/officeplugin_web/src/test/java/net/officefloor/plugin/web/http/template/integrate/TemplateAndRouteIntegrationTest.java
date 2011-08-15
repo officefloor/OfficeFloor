@@ -57,7 +57,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 		// Compile the OfficeFloor
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.addSourceAliases();
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		this.officeFloor = compiler.compile(officeFloorConfiguration);
@@ -85,20 +85,20 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 		// Request the initial page (PageOne)
 		Properties initialPage = this.doRequest(
 				"/PageTwo.HttpTemplate-PageTwo.ofp-link.task", client);
-		assertEquals("Incorrect initial page", "One", initialPage
-				.getProperty("page"));
+		assertEquals("Incorrect initial page", "One",
+				initialPage.getProperty("page"));
 
 		// Follow link to get second page
 		String secondPageLink = initialPage.getProperty("link");
 		Properties secondPage = this.doRequest(secondPageLink, client);
-		assertEquals("Incorrect second page", "Two", secondPage
-				.getProperty("page"));
+		assertEquals("Incorrect second page", "Two",
+				secondPage.getProperty("page"));
 
 		// Follow link to get first page
 		String firstPageLink = secondPage.getProperty("link");
 		Properties firstPage = this.doRequest(firstPageLink, client);
-		assertEquals("Incorrect first page", "One", firstPage
-				.getProperty("page"));
+		assertEquals("Incorrect first page", "One",
+				firstPage.getProperty("page"));
 	}
 
 	/**

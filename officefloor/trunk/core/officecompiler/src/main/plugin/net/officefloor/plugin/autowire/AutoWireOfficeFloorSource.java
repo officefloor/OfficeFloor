@@ -128,7 +128,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	 * Default constructor.
 	 */
 	public AutoWireOfficeFloorSource() {
-		this(OfficeFloorCompiler.newOfficeFloorCompiler());
+		this(OfficeFloorCompiler.newOfficeFloorCompiler(null));
 	}
 
 	/**

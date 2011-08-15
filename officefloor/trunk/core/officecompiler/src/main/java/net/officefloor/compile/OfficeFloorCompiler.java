@@ -84,9 +84,11 @@ public abstract class OfficeFloorCompiler {
 		/**
 		 * Creates the {@link OfficeFloorCompiler}.
 		 * 
+		 * @param classLoader
+		 *            {@link ClassLoader}.
 		 * @return {@link OfficeFloorCompiler}.
 		 */
-		OfficeFloorCompiler createOfficeFloorCompiler();
+		OfficeFloorCompiler createOfficeFloorCompiler(ClassLoader classLoader);
 	}
 
 	/**
@@ -122,14 +124,24 @@ public abstract class OfficeFloorCompiler {
 	/**
 	 * Creates a new instance of a {@link OfficeFloorCompiler}.
 	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader} to use for the {@link OfficeFloor}. May be
+	 *            <code>null</code> which will default to use the current
+	 *            {@link Thread#getContextClassLoader()}.
 	 * @return New {@link OfficeFloorCompiler}.
 	 */
-	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler() {
+	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(
+			ClassLoader classLoader) {
+
+		// Ensure have class loader
+		if (classLoader == null) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+		}
 
 		// Determine if use factory
 		if (FACTORY != null) {
 			// Factory to create the office floor compiler
-			return FACTORY.createOfficeFloorCompiler();
+			return FACTORY.createOfficeFloorCompiler(classLoader);
 		}
 
 		// Obtain the office floor compiler
@@ -138,24 +150,24 @@ public abstract class OfficeFloorCompiler {
 		// Determine if overriding the implementation
 		String implementationClassName = System
 				.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
-		if (!CompileUtil.isBlank(implementationClassName)) {
-			// Have override implementation, so use
-			try {
-				compiler = (OfficeFloorCompiler) Class.forName(
-						implementationClassName).newInstance();
-			} catch (Throwable ex) {
-				throw new IllegalArgumentException(
-						"Can not create instance of " + implementationClassName
-								+ " from default constructor", ex);
-			}
+		if (CompileUtil.isBlank(implementationClassName)) {
+			// Use default implementation as no override
+			implementationClassName = OfficeFloorCompilerImpl.class.getName();
 		}
 
-		// Use default implementation if no override
-		if (compiler == null) {
-			compiler = new OfficeFloorCompilerImpl();
+		// Load implementation
+		try {
+			compiler = (OfficeFloorCompiler) classLoader.loadClass(
+					implementationClassName).newInstance();
+		} catch (Throwable ex) {
+			throw new IllegalArgumentException("Can not create instance of "
+					+ implementationClassName + " from default constructor", ex);
 		}
 
-		// Return the office floor compiler
+		// Specify the class loader on the implementation
+		compiler.classLoader = classLoader;
+
+		// Return the office floor compiler implementation
 		return compiler;
 	}
 
@@ -167,7 +179,8 @@ public abstract class OfficeFloorCompiler {
 	public static final PropertyList newPropertyList() {
 
 		// Create the office floor compiler
-		OfficeFloorCompiler compiler = newOfficeFloorCompiler();
+		OfficeFloorCompiler compiler = newOfficeFloorCompiler(Thread
+				.currentThread().getContextClassLoader());
 
 		// Use the compiler to return a new property list
 		return compiler.createPropertyList();
@@ -184,7 +197,7 @@ public abstract class OfficeFloorCompiler {
 	 * 
 	 * @return {@link ClassLoader} for this {@link OfficeFloorCompiler}.
 	 */
-	public ClassLoader getClassLoader() {
+	public final ClassLoader getClassLoader() {
 
 		// Ensure have a class loader
 		if (this.classLoader == null) {
@@ -193,17 +206,6 @@ public abstract class OfficeFloorCompiler {
 
 		// Return the class loader
 		return this.classLoader;
-	}
-
-	/**
-	 * Overrides the default {@link ClassLoader} to use in compiling the
-	 * {@link OfficeFloor}.
-	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 */
-	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
 	}
 
 	/**

@@ -182,7 +182,7 @@ public class AdministratorLoaderUtil {
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
 		// Create the office floor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}

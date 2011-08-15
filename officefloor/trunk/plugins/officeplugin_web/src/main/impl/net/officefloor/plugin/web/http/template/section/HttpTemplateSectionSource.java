@@ -186,7 +186,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		while (extensionClassName != null) {
 
 			// Create an instance of the extension class
-			HttpTemplateSectionExtension extension = (HttpTemplateSectionExtension) classLoader
+			HttpTemplateSectionExtension extension = (HttpTemplateSectionExtension) context
 					.loadClass(extensionClassName).newInstance();
 
 			// Extend the template
@@ -198,7 +198,6 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 			// Override template details
 			templateContent = extensionContext.getTemplateContent();
-			sectionClass = extensionContext.getTemplateClass();
 
 			// Initiate for next extension
 			extensionIndex++;

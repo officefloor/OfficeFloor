@@ -45,7 +45,7 @@ public class ThreadLocalDelegateOfficeFloorSourceTest extends
 
 		// Create the compiler
 		final OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 
 		// Create the delegate
 		MockOfficeFloorSource delegate = new MockOfficeFloorSource();

@@ -50,7 +50,7 @@ public class OfficeFloorManagerTest extends OfficeFrameTestCase {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		compiler.addSourceAliases();
 		compiler.addProperty("team.name", "TEAM");

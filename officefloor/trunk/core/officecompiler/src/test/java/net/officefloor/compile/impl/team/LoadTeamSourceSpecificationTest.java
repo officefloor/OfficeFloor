@@ -52,11 +52,6 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	private final TeamSourceSpecification specification = this
 			.createMock(TeamSourceSpecification.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockTeamSource.reset(this.specification);
@@ -71,9 +66,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockTeamSource.class.getName() + " by default constructor",
-				failure);
+		this.record_issue(
+				"Failed to instantiate " + MockTeamSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockTeamSource.instantiateFailure = failure;
@@ -129,10 +124,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this
-				.record_issue(
-						"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
-								+ MockTeamSource.class.getName(), failure);
+		this.record_issue(
+				"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
+						+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -146,8 +140,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNullTeamSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), null);
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -161,11 +155,11 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNullTeamSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new TeamSourceProperty[] { null });
-		this
-				.record_issue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
-						+ MockTeamSource.class.getName());
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new TeamSourceProperty[] { null });
+		this.record_issue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
+				+ MockTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -182,12 +176,12 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new TeamSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this
-				.record_issue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
-						+ MockTeamSource.class.getName());
+		this.record_issue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
+				+ MockTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -206,8 +200,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new TeamSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new TeamSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.record_issue(
 				"Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
@@ -230,14 +225,14 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new TeamSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this
-				.record_issue(
-						"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
-								+ MockTeamSource.class.getName(), failure);
+		this.record_issue(
+				"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
+						+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -256,9 +251,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				.createMock(TeamSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new TeamSourceProperty[] { propertyWithLabel,
-				propertyWithoutLabel });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), new TeamSourceProperty[] {
+						propertyWithLabel, propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
@@ -312,7 +307,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 
 		// Load the managed object specification specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
 		PropertyList propertyList = teamLoader

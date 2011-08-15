@@ -51,11 +51,6 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	private final OfficeSourceSpecification specification = this
 			.createMock(OfficeSourceSpecification.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		MockOfficeSource.reset(this.specification);
@@ -70,9 +65,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockOfficeSource.class.getName() + " by default constructor",
-				failure);
+		this.record_issue(
+				"Failed to instantiate " + MockOfficeSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockOfficeSource.instantiateFailure = failure;
@@ -128,10 +123,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 		// Record null office properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this
-				.record_issue(
-						"Failed to obtain OfficeSourceProperty instances from OfficeSourceSpecification for "
-								+ MockOfficeSource.class.getName(), failure);
+		this.record_issue(
+				"Failed to obtain OfficeSourceProperty instances from OfficeSourceSpecification for "
+						+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -146,8 +140,8 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	public void testNullOfficePropertiesArray() {
 
 		// Record null office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), null);
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -161,11 +155,11 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	public void testNullOfficePropertyElement() {
 
 		// Record null office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeSourceProperty[] { null });
-		this
-				.record_issue("OfficeSourceProperty 0 is null from OfficeSourceSpecification for "
-						+ MockOfficeSource.class.getName());
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeSourceProperty[] { null });
+		this.record_issue("OfficeSourceProperty 0 is null from OfficeSourceSpecification for "
+				+ MockOfficeSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -182,12 +176,12 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeSourceProperty.class);
 
 		// Record obtaining office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this
-				.record_issue("OfficeSourceProperty 0 provided blank name from OfficeSourceSpecification for "
-						+ MockOfficeSource.class.getName());
+		this.record_issue("OfficeSourceProperty 0 provided blank name from OfficeSourceSpecification for "
+				+ MockOfficeSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -206,13 +200,13 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeSourceProperty.class);
 
 		// Record obtaining office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this
-				.record_issue(
-						"Failed to get name for OfficeSourceProperty 0 from OfficeSourceSpecification for "
-								+ MockOfficeSource.class.getName(), failure);
+		this.record_issue(
+				"Failed to get name for OfficeSourceProperty 0 from OfficeSourceSpecification for "
+						+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -231,14 +225,14 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeSourceProperty.class);
 
 		// Record obtaining office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeSourceProperty[] { property });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(),
+				new OfficeSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this
-				.record_issue(
-						"Failed to get label for OfficeSourceProperty 0 (NAME) from OfficeSourceSpecification for "
-								+ MockOfficeSource.class.getName(), failure);
+		this.record_issue(
+				"Failed to get label for OfficeSourceProperty 0 (NAME) from OfficeSourceSpecification for "
+						+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -257,9 +251,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				.createMock(OfficeSourceProperty.class);
 
 		// Record obtaining office properties
-		this.recordReturn(this.specification, this.specification
-				.getProperties(), new OfficeSourceProperty[] {
-				propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(this.specification,
+				this.specification.getProperties(), new OfficeSourceProperty[] {
+						propertyWithLabel, propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
@@ -313,7 +307,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 
 		// Load the office specification
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
+				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		OfficeLoader officeLoader = compiler.getOfficeLoader();
 		PropertyList propertyList = officeLoader
