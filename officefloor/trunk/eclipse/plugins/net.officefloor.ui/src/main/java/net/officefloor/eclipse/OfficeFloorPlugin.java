@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The plug-in class.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorPlugin extends AbstractUIPlugin {
@@ -90,7 +90,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in
 	 * relative path.
-	 *
+	 * 
 	 * @param path
 	 *            the path
 	 * @return the image descriptor
@@ -102,7 +102,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Obtains the {@link OfficeFloorSkin}.
-	 *
+	 * 
 	 * @return {@link OfficeFloorSkin}.
 	 */
 	public static OfficeFloorSkin getSkin() {
@@ -112,7 +112,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	/**
 	 * Creates a new {@link OfficeFloorCompiler} for the input
 	 * {@link AbstractOfficeFloorEditPart}.
-	 *
+	 * 
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor}.
 	 * @return {@link OfficeFloorCompiler}.
@@ -120,13 +120,12 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	public OfficeFloorCompiler createCompiler(
 			final AbstractOfficeFloorEditor<?, ?> editor) {
 
-		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-
 		// Obtain the class loader for the project
 		ClassLoader classLoader = ProjectClassLoader.create(editor);
-		compiler.setClassLoader(classLoader);
+
+		// Create the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(classLoader);
 
 		// Provide error reporting
 		compiler.setCompilerIssues(new CompilerIssues() {

@@ -126,8 +126,7 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 
 		// Obtain the team loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setClassLoader(this.classLoader);
+				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.teamLoader = compiler.getTeamLoader();
 	}
