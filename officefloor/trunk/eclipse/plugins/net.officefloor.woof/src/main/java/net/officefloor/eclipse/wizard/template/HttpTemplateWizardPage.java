@@ -147,13 +147,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.project = project;
 
 		// Obtain the class loader for the project
-		ClassLoader parent = WoofPlugin.getDefault().getClass()
+		ClassLoader pluginClassLoader = WoofPlugin.getDefault().getClass()
 				.getClassLoader();
-		this.classLoader = ProjectClassLoader.create(project, parent);
+		this.classLoader = ProjectClassLoader
+				.create(project, pluginClassLoader);
 
 		// Obtain the section loader
-		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler();
-		this.compiler.setClassLoader(this.classLoader);
+		this.compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler(this.classLoader);
 		this.compiler.setCompilerIssues(this);
 		this.sectionLoader = this.compiler.getSectionLoader();
 
@@ -467,6 +468,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	public void addIssue(LocationType locationType, String location,
 			AssetType assetType, String assetName, String issueDescription,
 			Throwable cause) {
+
+		// TODO remove
+		System.err.println("ERROR");
+		cause.printStackTrace();
+
 		// Provide as error message
 		this.setErrorMessage(issueDescription + " ("
 				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()

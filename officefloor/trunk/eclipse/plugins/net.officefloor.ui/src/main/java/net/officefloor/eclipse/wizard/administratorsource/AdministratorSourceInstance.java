@@ -134,8 +134,7 @@ public class AdministratorSourceInstance implements
 
 		// Obtain the administrator loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setClassLoader(this.classLoader);
+				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.administratorLoader = compiler.getAdministratorLoader();
 	}

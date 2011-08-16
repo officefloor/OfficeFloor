@@ -430,8 +430,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 */
 	private SectionLoader createSectionLoader(CompilerIssues issues) {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler();
-		compiler.setClassLoader(this.classLoader);
+				.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(issues);
 		return compiler.getSectionLoader();
 	}

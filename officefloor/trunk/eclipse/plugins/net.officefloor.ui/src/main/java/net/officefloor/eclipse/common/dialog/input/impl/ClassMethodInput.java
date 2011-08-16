@@ -105,8 +105,12 @@ public class ClassMethodInput implements Input<Combo> {
 
 		// Obtain the method names
 		Set<String> methodNames = new HashSet<String>();
-		for (Method method : this.clazz.getMethods()) {
-			methodNames.add(method.getName());
+		try {
+			for (Method method : this.clazz.getMethods()) {
+				methodNames.add(method.getName());
+			}
+		} catch (Throwable ex) {
+			// Ignore failure and use available methods
 		}
 		String[] orderedMethodNames = methodNames
 				.toArray(new String[methodNames.size()]);
