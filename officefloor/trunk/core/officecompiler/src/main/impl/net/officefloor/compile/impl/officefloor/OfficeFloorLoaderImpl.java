@@ -300,9 +300,21 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the OfficeFloor
+		return this.loadOfficeFloor(officeFloorSource, officeFloorLocation,
+				propertyList);
+	}
+
+	@Override
+	public OfficeFloor loadOfficeFloor(OfficeFloorSource officeFloorSource,
+			String officeFloorLocation, PropertyList propertyList) {
+
 		// Create the OfficeFloor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
 				officeFloorLocation, propertyList, this.nodeContext);
+
+		// Obtain the OfficeFloor source class for logging
+		Class<?> officeFloorSourceClass = officeFloorSource.getClass();
 
 		// Create the OfficeFloor deployer
 		OfficeFloorNode deployer = new OfficeFloorNodeImpl(officeFloorLocation,

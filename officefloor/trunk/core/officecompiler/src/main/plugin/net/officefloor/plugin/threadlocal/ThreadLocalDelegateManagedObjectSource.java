@@ -38,6 +38,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * @author Daniel Sagenschneider
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
+@Deprecated
 public class ThreadLocalDelegateManagedObjectSource implements
 		ManagedObjectSource {
 

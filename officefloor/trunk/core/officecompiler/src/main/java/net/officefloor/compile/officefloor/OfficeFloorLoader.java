@@ -90,4 +90,19 @@ public interface OfficeFloorLoader {
 			Class<OF> officeFloorSourceClass, String officeFloorLocation,
 			PropertyList propertyList);
 
+	/**
+	 * Loads the {@link OfficeFloor}.
+	 * 
+	 * @param officeFloorSource
+	 *            {@link OfficeFloorSource}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}. {@link PropertyList}
+	 *            containing both the {@link OfficeFloorSourceProperty} and the
+	 *            required {@link Property} instances.
+	 * @return {@link OfficeFloor} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeFloor loadOfficeFloor(OfficeFloorSource officeFloorSource,
+			String officeFloorLocation, PropertyList propertyList);
+
 }

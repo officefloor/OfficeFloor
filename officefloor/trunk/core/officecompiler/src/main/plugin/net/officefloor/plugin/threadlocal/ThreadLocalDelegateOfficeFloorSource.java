@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSo
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class ThreadLocalDelegateOfficeFloorSource extends
 		AbstractOfficeFloorSource {
 

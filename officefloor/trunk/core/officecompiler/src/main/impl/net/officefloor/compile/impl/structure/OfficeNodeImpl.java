@@ -102,6 +102,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final String officeSourceClassName;
 
 	/**
+	 * {@link OfficeSource} instance to use rather than instantiating the
+	 * {@link OfficeSource} class.
+	 */
+	private final OfficeSource officeSource;
+
+	/**
 	 * {@link PropertyList} to source the {@link Office}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
@@ -175,6 +181,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public OfficeNodeImpl(String officeLocation, NodeContext context) {
 		this.officeName = null;
 		this.officeSourceClassName = null;
+		this.officeSource = null;
 		this.officeLocation = officeLocation;
 		this.context = context;
 	}
@@ -199,6 +206,32 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String officeLocation, NodeContext context) {
 		this.officeName = officeName;
 		this.officeSourceClassName = officeSourceClassName;
+		this.officeSource = null;
+		this.officeLocation = officeLocation;
+		this.context = context;
+	}
+
+	/**
+	 * Allow adding the {@link DeployedOffice}.
+	 * 
+	 * @param officeName
+	 *            Name of this {@link DeployedOffice}.
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public OfficeNodeImpl(String officeName, OfficeSource officeSource,
+			String officeLocation, NodeContext context) {
+		this.officeName = officeName;
+		this.officeSourceClassName = null;
+		this.officeSource = officeSource;
 		this.officeLocation = officeLocation;
 		this.context = context;
 	}
@@ -371,25 +404,30 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void loadOffice() {
 
-		// Obtain the office source class
-		Class<? extends OfficeSource> officeSourceClass = this.context
-				.getOfficeSourceClass(this.officeSourceClassName,
-						this.officeLocation, this.officeName);
-		if (officeSourceClass == null) {
-			return; // must have office source class
-		}
+		// Determine if must instantiate
+		OfficeSource source = this.officeSource;
+		if (source == null) {
 
-		// Obtain the office source
-		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
-				OfficeSource.class, LocationType.OFFICE, this.officeLocation,
-				AssetType.OFFICE, this.officeName,
-				this.context.getCompilerIssues());
-		if (officeSource == null) {
-			return; // must have office source
+			// Obtain the office source class
+			Class<? extends OfficeSource> officeSourceClass = this.context
+					.getOfficeSourceClass(this.officeSourceClassName,
+							this.officeLocation, this.officeName);
+			if (officeSourceClass == null) {
+				return; // must have office source class
+			}
+
+			// Obtain the office source
+			source = CompileUtil.newInstance(officeSourceClass,
+					OfficeSource.class, LocationType.OFFICE,
+					this.officeLocation, AssetType.OFFICE, this.officeName,
+					this.context.getCompilerIssues());
+			if (source == null) {
+				return; // must have office source
+			}
 		}
 
 		// Load this office (will also recursively load the office sections)
-		this.loadOffice(officeSource, this.properties);
+		this.loadOffice(source, this.properties);
 	}
 
 	@Override
