@@ -35,6 +35,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public class ThreadLocalDelegateOfficeSource extends AbstractOfficeSource {
 
 	/**

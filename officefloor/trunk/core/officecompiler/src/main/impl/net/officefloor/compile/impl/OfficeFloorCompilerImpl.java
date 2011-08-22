@@ -102,6 +102,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	private Class<? extends OfficeFloorSource> officeFloorSourceClass = null;
 
 	/**
+	 * {@link OfficeFloorSource}.
+	 */
+	private OfficeFloorSource officeFloorSource = null;
+
+	/**
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
@@ -216,6 +221,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public void setOfficeFloorSource(OfficeFloorSource officeFloorSource) {
+		this.officeFloorSource = officeFloorSource;
+	}
+
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name).setValue(value);
 	}
@@ -313,16 +323,24 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		// Ensure aliases are added
 		this.ensureSourceAliasesAdded();
 
-		// Obtain the OfficeFloor source
-		Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null ? this.officeFloorSourceClass
-				: OfficeFloorModelOfficeFloorSource.class);
-
 		// Create the OfficeFloor loader
 		OfficeFloorLoader officeFloorLoader = this.getOfficeFloorLoader();
 
 		// Compile, build and return the office floor
-		return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
-				officeFloorLocation, this.properties);
+		if (this.officeFloorSource != null) {
+			// Load from supplied instance
+			return officeFloorLoader.loadOfficeFloor(this.officeFloorSource,
+					officeFloorLocation, this.properties);
+
+		} else {
+			// Obtain the OfficeFloor source class
+			Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null ? this.officeFloorSourceClass
+					: OfficeFloorModelOfficeFloorSource.class);
+
+			// Load from class
+			return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
+					officeFloorLocation, this.properties);
+		}
 	}
 
 	/*

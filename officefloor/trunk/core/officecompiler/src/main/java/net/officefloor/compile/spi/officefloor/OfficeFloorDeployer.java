@@ -35,14 +35,14 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Deploys the {@link OfficeFloor}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorDeployer {
 
 	/**
 	 * Adds a {@link Team}.
-	 *
+	 * 
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param teamSourceClassName
@@ -53,7 +53,7 @@ public interface OfficeFloorDeployer {
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param managedObjectSourceClassName
@@ -65,7 +65,7 @@ public interface OfficeFloorDeployer {
 
 	/**
 	 * Adds an {@link OfficeFloorInputManagedObject}.
-	 *
+	 * 
 	 * @param inputManagedObjectName
 	 *            Name of the {@link OfficeFloorInputManagedObject}.
 	 * @return Added {@link OfficeFloorInputManagedObject}.
@@ -75,21 +75,35 @@ public interface OfficeFloorDeployer {
 
 	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
-	 *
+	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
 	 * @param officeSourceClassName
 	 *            Fully qualified class name of the {@link OfficeSource}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @return Deployed {@link DeployedOffice}.
+	 * @return {@link DeployedOffice}.
 	 */
 	DeployedOffice addDeployedOffice(String officeName,
 			String officeSourceClassName, String officeLocation);
 
 	/**
+	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @return {@link DeployedOffice}.
+	 */
+	DeployedOffice addDeployedOffice(String officeName,
+			OfficeSource officeSource, String officeLocation);
+
+	/**
 	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
-	 *
+	 * 
 	 * @param team
 	 *            {@link ManagedObjectTeam}.
 	 * @param officeFloorTeam
@@ -100,7 +114,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link OfficeFloorInputManagedObject} to be input by the
 	 * {@link OfficeFloorManagedObjectSource}.
-	 *
+	 * 
 	 * @param managedObjectSource
 	 *            {@link OfficeFloorManagedObjectSource}.
 	 * @param inputManagedObject
@@ -112,7 +126,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
 	 * {@link OfficeFloorManagedObject}.
-	 *
+	 * 
 	 * @param dependency
 	 *            {@link ManagedObjectDependency}.
 	 * @param managedObject
@@ -124,7 +138,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
 	 * {@link OfficeFloorInputManagedObject}.
-	 *
+	 * 
 	 * @param dependency
 	 *            {@link ManagedObjectDependency}.
 	 * @param inputManagedObject
@@ -136,7 +150,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
 	 * {@link DeployedOfficeInput}.
-	 *
+	 * 
 	 * @param flow
 	 *            {@link ManagedObjectFlow}.
 	 * @param input
@@ -147,7 +161,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link ManagingOffice} to be managed by the
 	 * {@link DeployedOffice}.
-	 *
+	 * 
 	 * @param managingOffice
 	 *            {@link ManagingOffice}.
 	 * @param office
@@ -157,7 +171,7 @@ public interface OfficeFloorDeployer {
 
 	/**
 	 * Links the {@link OfficeTeam} to be the {@link OfficeFloorTeam}.
-	 *
+	 * 
 	 * @param team
 	 *            {@link OfficeTeam}.
 	 * @param officeFloorTeam
@@ -168,7 +182,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link OfficeObject} to be the {@link OfficeFloorManagedObject}
 	 * .
-	 *
+	 * 
 	 * @param officeObject
 	 *            {@link OfficeObject}.
 	 * @param managedObject
@@ -179,7 +193,7 @@ public interface OfficeFloorDeployer {
 	/**
 	 * Links the {@link OfficeObject} to be the
 	 * {@link OfficeFloorInputManagedObject}.
-	 *
+	 * 
 	 * @param officeObject
 	 *            {@link OfficeObject}.
 	 * @param inputManagedObject
@@ -195,7 +209,7 @@ public interface OfficeFloorDeployer {
 	 * <p>
 	 * This is available to report invalid configuration but continue to deploy
 	 * the rest of the {@link OfficeFloor}.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param assetType
@@ -214,7 +228,7 @@ public interface OfficeFloorDeployer {
 	 * <p>
 	 * This is available to report invalid configuration but continue to deploy
 	 * the rest of the {@link OfficeFloor}.
-	 *
+	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause

@@ -30,6 +30,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -56,6 +57,8 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link AutoWireOfficeFloorSource}.
@@ -691,12 +694,19 @@ public class AutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		// Record the office
 		this.recordReturn(this.deployer, this.deployer.addDeployedOffice(
-				"OFFICE", ThreadLocalDelegateOfficeSource.class.getName(), ""),
-				this.office);
-		this.office
-				.addProperty(
-						ThreadLocalDelegateManagedObjectSource.PROPERTY_INSTANCE_IDENTIFIER,
-						"0");
+				"OFFICE", (OfficeSource) null, "auto-wire"), this.office,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect office name", expected[0],
+								actual[0]);
+						assertTrue("Incorrect Office",
+								actual[1] instanceof OfficeSource);
+						assertEquals("Incorrect location", expected[2],
+								actual[2]);
+						return true;
+					}
+				});
 
 		// Record binding office team to team
 		OfficeTeam officeTeam = this.createMock(OfficeTeam.class);

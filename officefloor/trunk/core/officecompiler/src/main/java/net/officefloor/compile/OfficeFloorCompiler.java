@@ -18,11 +18,13 @@
 
 package net.officefloor.compile;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -124,48 +126,96 @@ public abstract class OfficeFloorCompiler {
 	/**
 	 * Creates a new instance of a {@link OfficeFloorCompiler}.
 	 * 
-	 * @param classLoader
+	 * @param implClassLoader
 	 *            {@link ClassLoader} to use for the {@link OfficeFloor}. May be
 	 *            <code>null</code> which will default to use the current
 	 *            {@link Thread#getContextClassLoader()}.
 	 * @return New {@link OfficeFloorCompiler}.
 	 */
 	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(
-			ClassLoader classLoader) {
+			ClassLoader implClassLoader) {
 
-		// Ensure have class loader
-		if (classLoader == null) {
-			classLoader = Thread.currentThread().getContextClassLoader();
+		// Ensure have implementation class loader
+		if (implClassLoader == null) {
+			implClassLoader = Thread.currentThread().getContextClassLoader();
 		}
 
+		// Obtain the client class loader
+		ClassLoader clientClassLoader = OfficeFloorCompiler.class
+				.getClassLoader();
+
 		// Determine if use factory
+		Object implementation = null;
 		if (FACTORY != null) {
 			// Factory to create the office floor compiler
-			return FACTORY.createOfficeFloorCompiler(classLoader);
+			implementation = FACTORY.createOfficeFloorCompiler(implClassLoader);
+
+		} else {
+			// Determine if overriding the implementation
+			String implementationClassName = System
+					.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
+			if (CompileUtil.isBlank(implementationClassName)) {
+				// Use default implementation as no override
+				implementationClassName = OfficeFloorCompilerImpl.class
+						.getName();
+			}
+
+			// Load implementation
+			try {
+				implementation = implClassLoader.loadClass(
+						implementationClassName).newInstance();
+			} catch (Throwable ex) {
+				throw new IllegalArgumentException(
+						"Can not create instance of " + implementationClassName
+								+ " from default constructor", ex);
+			}
 		}
 
 		// Obtain the office floor compiler
 		OfficeFloorCompiler compiler = null;
+		if (implementation instanceof OfficeFloorCompiler) {
+			// Compatible by type (as likely same class loader)
+			compiler = (OfficeFloorCompiler) implementation;
 
-		// Determine if overriding the implementation
-		String implementationClassName = System
-				.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
-		if (CompileUtil.isBlank(implementationClassName)) {
-			// Use default implementation as no override
-			implementationClassName = OfficeFloorCompilerImpl.class.getName();
-		}
+		} else {
+			// Not compatible so must wrap to enable compatibility
+			compiler = new OfficeFloorCompilerAdapter(implementation,
+					clientClassLoader, implClassLoader);
 
-		// Load implementation
-		try {
-			compiler = (OfficeFloorCompiler) classLoader.loadClass(
-					implementationClassName).newInstance();
-		} catch (Throwable ex) {
-			throw new IllegalArgumentException("Can not create instance of "
-					+ implementationClassName + " from default constructor", ex);
+			// Specify class loader on the implementation
+			try {
+				// Find the classLoader field on the OfficeFloor Compiler
+				Field classLoaderField = null;
+				Class<?> implementationClass = implementation.getClass();
+				do {
+					// Determine if the OfficeFloor Compiler
+					if (OfficeFloorCompiler.class.getName().equals(
+							implementationClass.getName())) {
+						// Find the classLoader field on the compiler
+						for (Field field : implementationClass
+								.getDeclaredFields()) {
+							if ("classLoader".equals(field.getName())) {
+								classLoaderField = field; // found
+							}
+						}
+					}
+					implementationClass = implementationClass.getSuperclass();
+				} while (implementationClass != null);
+
+				// Specify the class loader
+				classLoaderField.setAccessible(true);
+				classLoaderField.set(implementation, implClassLoader);
+
+			} catch (Exception ex) {
+				throw new IllegalStateException(
+						"Unable to specify class loader on "
+								+ OfficeFloorCompiler.class.getSimpleName()
+								+ " implementation", ex);
+			}
 		}
 
 		// Specify the class loader on the implementation
-		compiler.classLoader = classLoader;
+		compiler.classLoader = implClassLoader;
 
 		// Return the office floor compiler implementation
 		return compiler;
@@ -352,6 +402,20 @@ public abstract class OfficeFloorCompiler {
 	 */
 	public abstract <S extends OfficeFloorSource> void setOfficeFloorSourceClass(
 			Class<S> officeFloorSourceClass);
+
+	/**
+	 * <p>
+	 * Specifies the {@link OfficeFloorSource} instance to use for compiling the
+	 * {@link OfficeFloor}.
+	 * <p>
+	 * This will take precedence over specifying the {@link OfficeFloorSource}
+	 * class.
+	 * 
+	 * @param officeFloorSource
+	 *            {@link OfficeFloorSource}.
+	 */
+	public abstract void setOfficeFloorSource(
+			OfficeFloorSource officeFloorSource);
 
 	/**
 	 * Adds a {@link Property} that is made available to the

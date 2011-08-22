@@ -34,6 +34,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -182,6 +183,26 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			this.addIssue("Office floor team " + teamName + " already added");
 		}
 		return team;
+	}
+
+	@Override
+	public DeployedOffice addDeployedOffice(String officeName,
+			OfficeSource officeSource, String officeLocation) {
+		// Obtain and return the office for the name
+		OfficeNode office = this.offices.get(officeName);
+		if (office == null) {
+			// Create the office within the office floor context
+			office = new OfficeNodeImpl(officeName, officeSource,
+					officeLocation, this.context);
+			office.addOfficeFloorContext(this.officeFloorLocation);
+
+			// Add the office
+			this.offices.put(officeName, office);
+		} else {
+			// Office already added
+			this.addIssue("Office " + officeName + " already deployed");
+		}
+		return office;
 	}
 
 	@Override

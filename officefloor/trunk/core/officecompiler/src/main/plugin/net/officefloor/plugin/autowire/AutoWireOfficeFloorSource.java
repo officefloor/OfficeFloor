@@ -60,8 +60,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
-import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeFloorSource;
-import net.officefloor.plugin.threadlocal.ThreadLocalDelegateOfficeSource;
 
 /**
  * <p>
@@ -118,10 +116,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 	 */
 	public AutoWireOfficeFloorSource(OfficeFloorCompiler compiler) {
 		this.compiler = compiler;
+		this.compiler.setOfficeFloorSource(this);
 		this.officeSource = new AutoWireOfficeSource(this.compiler);
-
-		// Override the OfficeFloorSource
-		ThreadLocalDelegateOfficeFloorSource.bindDelegate(this, this.compiler);
 	}
 
 	/**
@@ -355,8 +351,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the auto-wiring office
-		DeployedOffice office = ThreadLocalDelegateOfficeSource.bindDelegate(
-				OFFICE_NAME, this.officeSource, deployer);
+		DeployedOffice office = deployer.addDeployedOffice(OFFICE_NAME,
+				this.officeSource, "auto-wire");
 
 		// Link default team for office
 		OfficeTeam officeTeam = office.getDeployedOfficeTeam("team");
