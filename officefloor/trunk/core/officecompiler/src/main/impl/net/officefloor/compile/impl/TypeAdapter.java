@@ -91,6 +91,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws Throwable
 	 *             If fails to invoke the {@link Method}.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Object invokeMethod(Object implementation, String methodName,
 			Object[] arguments, Class<?>[] paramTypes,
 			ClassLoader clientClassLoader, ClassLoader implClassLoader)
@@ -103,7 +104,7 @@ public class TypeAdapter implements InvocationHandler {
 
 		// Transform the parameter types for implementation
 		for (int i = 0; i < paramTypes.length; i++) {
-			paramTypes[i] = implClassLoader.loadClass(paramTypes[i].getName());
+			paramTypes[i] = translateClass(paramTypes[i], implClassLoader);
 		}
 
 		// Obtain the implementation class
@@ -146,16 +147,22 @@ public class TypeAdapter implements InvocationHandler {
 			if (overridingArgument == null) {
 				if (methodParamType.isInterface()) {
 					// Adapt argument (need to be available for Class Loader)
-					overridingArgument = createProxy(methodParamType, argument,
-							implClassLoader, clientClassLoader);
+					overridingArgument = createProxy(argument, implClassLoader,
+							clientClassLoader, methodParamType);
 
 				} else if (argument != null) {
 					// Determine if can ignore argument
 					if (Class.class.getName().equals(methodParamType.getName())) {
 						// Translate class
 						Class<?> classArgument = (Class<?>) argument;
-						overridingArgument = implClassLoader
-								.loadClass(classArgument.getName());
+						overridingArgument = translateClass(classArgument,
+								implClassLoader);
+
+					} else if (methodParamType.isEnum()) {
+						// Transform enumeration
+						Enum<?> argumentEnum = (Enum<?>) argument;
+						overridingArgument = Enum.valueOf(
+								(Class) methodParamType, argumentEnum.name());
 
 					} else if ((String.class.getName().equals(methodParamType
 							.getName()))
@@ -198,8 +205,8 @@ public class TypeAdapter implements InvocationHandler {
 		if (returnType != null) {
 			if (returnType.isInterface()) {
 				// Adapt the return (need to be available for Class Loader)
-				returnValue = createProxy(returnType, returnValue,
-						clientClassLoader, implClassLoader);
+				returnValue = createProxy(returnValue, clientClassLoader,
+						implClassLoader, returnType);
 
 			} else if (returnType.isArray()) {
 				// Array return type, so must adapt each element
@@ -208,8 +215,8 @@ public class TypeAdapter implements InvocationHandler {
 					Object[] returnArray = (Object[]) returnValue;
 
 					// Array of interfaces requiring adapting
-					componentType = clientClassLoader.loadClass(componentType
-							.getName());
+					componentType = translateClass(componentType,
+							clientClassLoader);
 					Object[] array = (Object[]) Array.newInstance(
 							componentType, returnArray.length);
 
@@ -217,14 +224,26 @@ public class TypeAdapter implements InvocationHandler {
 					for (int i = 0; i < array.length; i++) {
 						Object returnElement = returnArray[i];
 						if (returnElement != null) {
-							array[i] = createProxy(componentType,
-									returnElement, clientClassLoader,
-									implClassLoader);
+							array[i] = createProxy(returnElement,
+									clientClassLoader, implClassLoader,
+									componentType);
 						}
 					}
 
 					// Override return value with adapted array
 					returnValue = array;
+				}
+
+			} else if (Object.class.getName().equals(returnType.getName())) {
+				// Non-specific return so use implementation interfaces
+				if (returnValue != null) {
+					Class<?>[] interfaces = returnValue.getClass()
+							.getInterfaces();
+					if (interfaces.length > 0) {
+						// Provide proxy for interfaces of implementation
+						returnValue = createProxy(returnValue,
+								clientClassLoader, implClassLoader, interfaces);
+					}
 				}
 			}
 		}
@@ -234,31 +253,57 @@ public class TypeAdapter implements InvocationHandler {
 	}
 
 	/**
+	 * Translates the {@link Class} for use with the {@link ClassLoader}.
+	 * 
+	 * @param clazz
+	 *            {@link Class}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @return Translated {@link Class}.
+	 * @throws ClassNotFoundException
+	 *             If fails to obtain translated {@link Class}.
+	 */
+	private static Class<?> translateClass(Class<?> clazz,
+			ClassLoader classLoader) throws ClassNotFoundException {
+
+		// Do not translate if primitive
+		if (clazz.isPrimitive()) {
+			return clazz;
+		}
+
+		// Translate class
+		return classLoader.loadClass(clazz.getName());
+	}
+
+	/**
 	 * Creates a {@link Proxy}.
 	 * 
-	 * @param interfaceType
-	 *            Interface for the {@link Proxy}.
 	 * @param implementation
 	 *            Implementation behind the {@link Proxy}.
 	 * @param clientClassLoader
 	 *            {@link ClassLoader} for the client.
 	 * @param implClassLoader
 	 *            {@link ClassLoader} for the implementation.
+	 * @param interfaceType
+	 *            Interfaces for the {@link Proxy}.
 	 * @return {@link Proxy}.
 	 * @throws ClassNotFoundException
 	 *             If fails to load interface type for {@link Proxy}.
 	 */
-	private static Object createProxy(Class<?> interfaceType,
-			Object implementation, ClassLoader clientClassLoader,
-			ClassLoader implClassLoader) throws ClassNotFoundException {
+	private static Object createProxy(Object implementation,
+			ClassLoader clientClassLoader, ClassLoader implClassLoader,
+			Class<?>... interfaceTypes) throws ClassNotFoundException {
 
-		// Ensure interface type can be loaded by client Class Loader
-		interfaceType = clientClassLoader.loadClass(interfaceType.getName());
+		// Ensure interface types can be loaded by client Class Loader
+		for (int i = 0; i < interfaceTypes.length; i++) {
+			interfaceTypes[i] = translateClass(interfaceTypes[i],
+					clientClassLoader);
+		}
 
 		// Create the proxy
 		Object proxy = Proxy.newProxyInstance(clientClassLoader,
-				new Class<?>[] { interfaceType }, new TypeAdapter(
-						implementation, clientClassLoader, implClassLoader));
+				interfaceTypes, new TypeAdapter(implementation,
+						clientClassLoader, implClassLoader));
 
 		// Return the proxy
 		return proxy;
