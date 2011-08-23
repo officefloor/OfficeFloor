@@ -27,9 +27,12 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -41,9 +44,13 @@ import net.officefloor.plugin.section.clazz.Parameter;
 public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 	/**
-	 * Test able to compile and run {@link OfficeFloor}.
+	 * {@link OfficeFloorCompiler} that is being adapted by
+	 * {@link OfficeFloorCompilerAdapter} for testing.
 	 */
-	public void testCompileAndRunOfficeFloor() throws Exception {
+	private OfficeFloorCompiler compiler;
+
+	@Override
+	protected void setUp() throws Exception {
 
 		// Create Class Loader for testing
 		String[] classPathEntries = System.getProperty("java.class.path")
@@ -61,17 +68,27 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		ClassLoader classLoader = new URLClassLoader(urls, null);
 
 		// Wrap with adapter to test adapter
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(classLoader);
+		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 		assertTrue("Ensure compiler is adapted",
-				compiler instanceof OfficeFloorCompilerAdapter);
+				this.compiler instanceof OfficeFloorCompilerAdapter);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		AutoWireAdministration.closeAllOfficeFloors();
+	}
+
+	/**
+	 * Test able to compile and run {@link OfficeFloor}.
+	 */
+	public void testCompileAndRunOfficeFloor() throws Exception {
 
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				compiler);
+				this.compiler);
 		source.assignDefaultTeam(PassiveTeamSource.class);
 		source.addSection("TEST", ClassSectionSource.class,
-				Functionality.class.getName());
+				AdaptWork.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Invoke the task
@@ -88,7 +105,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * Functionality for testing.
 	 */
-	public static class Functionality {
+	public static class AdaptWork {
 
 		/**
 		 * {@link Task}.
@@ -104,6 +121,78 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 			// Write invoked task to file
 			FileWriter writer = new FileWriter(fileLocation, false);
 			writer.write("TASK INVOKED");
+			writer.flush();
+			writer.close();
+		}
+	}
+
+	/**
+	 * Ensure able to use a {@link ManagedObject}.
+	 */
+	public void testManagedObject() throws Exception {
+
+		// Build OfficeFloor
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
+				this.compiler);
+		source.assignDefaultTeam(PassiveTeamSource.class);
+		source.addSection("TEST", ClassSectionSource.class,
+				AdaptManagedObjectWork.class.getName());
+		source.addManagedObject(ClassManagedObjectSource.class, null,
+				AdaptManagedObject.class).addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				AdaptManagedObject.class.getName());
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+
+		// Invoke the task
+		File checkFile = File.createTempFile(this.getClass().getSimpleName(),
+				"test");
+		officeFloor
+				.invokeTask("TEST.WORK", "task", checkFile.getAbsolutePath());
+
+		// Ensure the invoked task
+		String contents = this.getFileContents(checkFile);
+		assertEquals("Task should be invoked", "MANAGED OBJECT INVOKED",
+				contents);
+	}
+
+	/**
+	 * Functionality for testing.
+	 */
+	public static class AdaptManagedObjectWork {
+
+		/**
+		 * {@link Task}.
+		 * 
+		 * @param mo
+		 *            {@link AdaptManagedObject}.
+		 * @param fileLocation
+		 *            Location of the file.
+		 */
+		public void task(AdaptManagedObject mo, @Parameter String fileLocation)
+				throws IOException {
+			mo.useManagedObject(fileLocation);
+		}
+	}
+
+	/**
+	 * {@link ManagedObject} for testing.
+	 */
+	public static class AdaptManagedObject {
+
+		/**
+		 * Invoked to use the {@link ManagedObject}.
+		 * 
+		 * @param fileLocation
+		 *            Location of the {@link File} to notify run. Necessary as
+		 *            running in separate {@link ClassLoader} instances so can
+		 *            not use static check.
+		 * @throws IOException
+		 *             If fails to write {@link ManagedObject} invoked to file.
+		 */
+		public void useManagedObject(String fileLocation) throws IOException {
+			// Write invoked task to file
+			FileWriter writer = new FileWriter(fileLocation, false);
+			writer.write("MANAGED OBJECT INVOKED");
 			writer.flush();
 			writer.close();
 		}

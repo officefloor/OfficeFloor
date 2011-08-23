@@ -114,9 +114,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 
 	@Override
 	public void addResources(ResourceSource resourceSource) {
-		// TODO implement OfficeFloorCompiler.addResources
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addResources");
+		this.invokeMethod("addResources", new Object[] { resourceSource },
+				ResourceSource.class);
 	}
 
 	@Override
