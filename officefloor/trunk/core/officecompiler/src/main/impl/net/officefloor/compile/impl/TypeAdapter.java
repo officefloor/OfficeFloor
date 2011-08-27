@@ -203,7 +203,12 @@ public class TypeAdapter implements InvocationHandler {
 		// Determine if return is an interface
 		Class<?> returnType = method.getReturnType();
 		if (returnType != null) {
-			if (returnType.isInterface()) {
+			if (Class.class.getName().equals(returnType.getName())) {
+				// Transform class for return
+				returnValue = translateClass((Class<?>) returnValue,
+						clientClassLoader);
+
+			} else if (returnType.isInterface()) {
 				// Adapt the return (need to be available for Class Loader)
 				returnValue = createProxy(returnValue, clientClassLoader,
 						implClassLoader, returnType);
@@ -290,7 +295,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * @throws ClassNotFoundException
 	 *             If fails to load interface type for {@link Proxy}.
 	 */
-	private static Object createProxy(Object implementation,
+	public static Object createProxy(Object implementation,
 			ClassLoader clientClassLoader, ClassLoader implClassLoader,
 			Class<?>... interfaceTypes) throws ClassNotFoundException {
 

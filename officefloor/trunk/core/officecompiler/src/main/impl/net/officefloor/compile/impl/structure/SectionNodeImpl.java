@@ -73,11 +73,13 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SectionNode} implementation.
@@ -345,6 +347,24 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Initialise this section node
 		this.sectionSourceClassName = sectionSourceClassName;
+		this.sectionSource = null;
+		this.sectionLocation = sectionLocation;
+		for (Property property : properties) {
+			this.propertyList.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Flag that initialised
+		this.isInitialised = true;
+	}
+
+	@Override
+	public void initialise(SectionSource sectionSource, String sectionLocation,
+			PropertyList properties) {
+
+		// Initialise this section node
+		this.sectionSourceClassName = null;
+		this.sectionSource = sectionSource;
 		this.sectionLocation = sectionLocation;
 		for (Property property : properties) {
 			this.propertyList.addProperty(property.getName()).setValue(
@@ -716,6 +736,29 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public SectionManagedObjectSource addSectionManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		// Obtain and return the section managed object source for the name
+		ManagedObjectSourceNode managedObjectSourceNode = this.managedObjectSourceNodes
+				.get(managedObjectSourceName);
+		if (managedObjectSourceNode == null) {
+			// Add the section managed object source
+			managedObjectSourceNode = new ManagedObjectSourceNodeImpl(
+					managedObjectSourceName, managedObjectSource,
+					LocationType.SECTION, this.sectionLocation, this,
+					this.office, this.managedObjects, this.context);
+			this.managedObjectSourceNodes.put(managedObjectSourceName,
+					managedObjectSourceNode);
+		} else {
+			// Section managed object source already added
+			this.addIssue("Section managed object source "
+					+ managedObjectSourceName + " already added");
+		}
+		return managedObjectSourceNode;
+	}
+
+	@Override
 	public SectionWork addSectionWork(String workName,
 			String workSourceClassName) {
 		// Obtain and return the section work for the name
@@ -724,6 +767,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section work
 			work = new WorkNodeImpl(workName, workSourceClassName,
 					this.sectionLocation, this.taskNodes, this, this.context);
+			this.workNodes.put(workName, work);
+		} else {
+			// Section work already added
+			this.addIssue("Section work " + workName + " already added");
+		}
+		return work;
+	}
+
+	@Override
+	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
+		// Obtain and return the section work for the name
+		WorkNode work = this.workNodes.get(workName);
+		if (work == null) {
+			// Add the section work
+			work = new WorkNodeImpl(workName, workSource, this.sectionLocation,
+					this.taskNodes, this, this.context);
 			this.workNodes.put(workName, work);
 		} else {
 			// Section work already added

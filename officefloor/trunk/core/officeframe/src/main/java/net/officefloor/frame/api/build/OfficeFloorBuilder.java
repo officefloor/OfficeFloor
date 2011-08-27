@@ -64,6 +64,18 @@ public interface OfficeFloorBuilder {
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
 
 	/**
+	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 */
+	<D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
+			String managedObjectSourceName,
+			ManagedObjectSource<D, F> managedObjectSource);
+
+	/**
 	 * Adds a {@link Team} which will execute {@link JobNode} instances within
 	 * this {@link OfficeFloor}.
 	 * 

@@ -267,6 +267,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			return null; // failed to instantiate
 		}
 
+		// Load and return the managed object type
+		return this.loadManagedObjectType(managedObjectSource, propertyList);
+	}
+
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
+			ManagedObjectSource<D, F> managedObjectSource,
+			PropertyList propertyList) {
+
 		// Create the managed object source context to initialise
 		String officeName = null;
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(
@@ -367,8 +376,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			}
 
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Exception from " + managedObjectSourceClass.getName(), ex);
+			this.addIssue("Exception from "
+					+ managedObjectSource.getClass().getName(), ex);
 			return null; // must be successful with meta-data
 		}
 

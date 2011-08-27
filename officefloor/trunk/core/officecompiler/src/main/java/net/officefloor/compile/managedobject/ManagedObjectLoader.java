@@ -61,4 +61,20 @@ public interface ManagedObjectLoader {
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
 			Class<MS> managedObjectSourceClass, PropertyList propertyList);
 
+	/**
+	 * Loads and returns the {@link ManagedObjectType} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
+	 *         are reported to the {@link CompilerIssues}.
+	 */
+	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
+			ManagedObjectSource<D, F> managedObjectSource,
+			PropertyList propertyList);
+
 }

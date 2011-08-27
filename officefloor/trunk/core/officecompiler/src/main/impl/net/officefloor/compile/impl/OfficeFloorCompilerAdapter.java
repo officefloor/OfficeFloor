@@ -35,12 +35,14 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.plugin.autowire.SingletonManagedObjectSource;
 
 /**
  * <p>
@@ -57,6 +59,72 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
+
+	/**
+	 * Creates the {@link ManagedObjectSource} to provide the singleton
+	 * {@link Object}.
+	 * 
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
+	 * @param singleton
+	 *            Singleton.
+	 * @param interfaceTypes
+	 *            Interface types for the singleton.
+	 * @return {@link ManagedObjectSource} to provide the singleton.
+	 * @throws ClassNotFoundException
+	 *             If fails to obtain the adapted {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static ManagedObjectSource<None, None> createSingletonManagedObjectSource(
+			OfficeFloorCompiler compiler, Object singleton,
+			Class<?>[] interfaceTypes) throws ClassNotFoundException {
+
+		// Determine if must adapt for use
+		boolean isAdapt = (compiler instanceof OfficeFloorCompilerAdapter);
+		OfficeFloorCompilerAdapter adapter = null;
+
+		// Adapt the object (if necessary)
+		if (isAdapt) {
+			// Adapting so obtain the adapter
+			adapter = (OfficeFloorCompilerAdapter) compiler;
+
+			// Ensure all types are interfaces
+			for (Class<?> interfaceType : interfaceTypes) {
+				if (!interfaceType.isInterface()) {
+					throw new IllegalStateException("Adapting "
+							+ OfficeFloorCompiler.class.getSimpleName()
+							+ " so all object types must be an interface ["
+							+ interfaceType.getName() + "]");
+				}
+			}
+
+			// Adapt the object
+			singleton = TypeAdapter.createProxy(singleton,
+					adapter.implClassLoader, adapter.clientClassLoader,
+					interfaceTypes);
+		}
+
+		// Create the managed object source for the singleton
+		ManagedObjectSource<None, None> managedObjectSource = new SingletonManagedObjectSource(
+				singleton);
+
+		// Adapt managed object source for use
+		if (isAdapt) {
+			// Adapt for invoking implementation
+			Object implManagedObjectSource = TypeAdapter.createProxy(
+					managedObjectSource, adapter.implClassLoader,
+					adapter.clientClassLoader, ManagedObjectSource.class);
+
+			// Adapt implementation for client use
+			managedObjectSource = (ManagedObjectSource<None, None>) TypeAdapter
+					.createProxy(implManagedObjectSource,
+							adapter.clientClassLoader, adapter.implClassLoader,
+							ManagedObjectSource.class);
+		}
+
+		// Return the managed object source for the singleton
+		return managedObjectSource;
+	}
 
 	/**
 	 * {@link OfficeFloorCompiler} implementation.
@@ -126,9 +194,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 
 	@Override
 	public void setOfficeFrame(OfficeFrame officeFrame) {
-		// TODO implement OfficeFloorCompiler.setOfficeFrame
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.setOfficeFrame");
+		throw new IllegalStateException("Can not specify "
+				+ OfficeFrame.class.getSimpleName() + " when "
+				+ OfficeFloorCompiler.class.getSimpleName()
+				+ " is being adapted due to running within another "
+				+ ClassLoader.class.getSimpleName());
 	}
 
 	@Override
@@ -153,49 +223,43 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public <S extends OfficeSource> void addOfficeSourceAlias(String alias,
 			Class<S> officeSourceClass) {
-		// TODO implement OfficeFloorCompiler.addOfficeSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addOfficeSourceAlias");
+		this.invokeMethod("addOfficeSourceAlias", new Object[] { alias,
+				officeSourceClass }, String.class, Class.class);
 	}
 
 	@Override
 	public <S extends SectionSource> void addSectionSourceAlias(String alias,
 			Class<S> sectionSourceClass) {
-		// TODO implement OfficeFloorCompiler.addSectionSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addSectionSourceAlias");
+		this.invokeMethod("addSectionSourceAlias", new Object[] { alias,
+				sectionSourceClass }, String.class, Class.class);
 	}
 
 	@Override
 	public <W extends Work, S extends WorkSource<W>> void addWorkSourceAlias(
 			String alias, Class<S> workSourceClass) {
-		// TODO implement OfficeFloorCompiler.addWorkSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addWorkSourceAlias");
+		this.invokeMethod("addWorkSourceAlias", new Object[] { alias,
+				workSourceClass }, String.class, Class.class);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> void addManagedObjectSourceAlias(
 			String alias, Class<S> managedObjectSourceClass) {
-		// TODO implement OfficeFloorCompiler.addManagedObjectSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addManagedObjectSourceAlias");
+		this.invokeMethod("addManagedObjectSourceAlias", new Object[] { alias,
+				managedObjectSourceClass }, String.class, Class.class);
 	}
 
 	@Override
 	public <I, A extends Enum<A>, S extends AdministratorSource<I, A>> void addAdministratorSourceAlias(
 			String alias, Class<S> administratorSourceClass) {
-		// TODO implement OfficeFloorCompiler.addAdministratorSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addAdministratorSourceAlias");
+		this.invokeMethod("addAdministratorSourceAlias", new Object[] { alias,
+				administratorSourceClass }, String.class, Class.class);
 	}
 
 	@Override
 	public <S extends TeamSource> void addTeamSourceAlias(String alias,
 			Class<S> teamSourceClass) {
-		// TODO implement OfficeFloorCompiler.addTeamSourceAlias
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.addTeamSourceAlias");
+		this.invokeMethod("addTeamSourceAlias", new Object[] { alias,
+				teamSourceClass }, String.class, Class.class);
 	}
 
 	@Override
@@ -205,58 +269,46 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 
 	@Override
 	public OfficeFloorLoader getOfficeFloorLoader() {
-		// TODO implement OfficeFloorCompiler.getOfficeFloorLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getOfficeFloorLoader");
+		return (OfficeFloorLoader) this.invokeMethod("getOfficeFloorLoader",
+				null);
 	}
 
 	@Override
 	public OfficeLoader getOfficeLoader() {
-		// TODO implement OfficeFloorCompiler.getOfficeLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getOfficeLoader");
+		return (OfficeLoader) this.invokeMethod("getOfficeLoader", null);
 	}
 
 	@Override
 	public SectionLoader getSectionLoader() {
-		// TODO implement OfficeFloorCompiler.getSectionLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getSectionLoader");
+		return (SectionLoader) this.invokeMethod("getSectionLoader", null);
 	}
 
 	@Override
 	public WorkLoader getWorkLoader() {
-		// TODO implement OfficeFloorCompiler.getWorkLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getWorkLoader");
+		return (WorkLoader) this.invokeMethod("getWorkLoader", null);
 	}
 
 	@Override
 	public ManagedObjectLoader getManagedObjectLoader() {
-		// TODO implement OfficeFloorCompiler.getManagedObjectLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getManagedObjectLoader");
+		return (ManagedObjectLoader) this.invokeMethod(
+				"getManagedObjectLoader", null);
 	}
 
 	@Override
 	public ManagedObjectPoolLoader getManagedObjectPoolLoader() {
-		// TODO implement OfficeFloorCompiler.getManagedObjectPoolLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getManagedObjectPoolLoader");
+		return (ManagedObjectPoolLoader) this.invokeMethod(
+				"getManagedObjectPoolLoader", null);
 	}
 
 	@Override
 	public AdministratorLoader getAdministratorLoader() {
-		// TODO implement OfficeFloorCompiler.getAdministratorLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getAdministratorLoader");
+		return (AdministratorLoader) this.invokeMethod(
+				"getAdministratorLoader", null);
 	}
 
 	@Override
 	public TeamLoader getTeamLoader() {
-		// TODO implement OfficeFloorCompiler.getTeamLoader
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorCompiler.getTeamLoader");
+		return (TeamLoader) this.invokeMethod("getTeamLoader", null);
 	}
 
 	@Override

@@ -273,6 +273,48 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure can add a {@link SectionManagedObjectSource} instance.
+	 */
+	public void testAddSectionManagedObjectSourceInstance() {
+		// Add two different managed object sources verifying details
+		this.replayMockObjects();
+		SectionManagedObjectSource moSource = this.node
+				.addSectionManagedObjectSource("MO_SOURCE",
+						new NotUseManagedObjectSource());
+		assertNotNull("Must have section managed object source", moSource);
+		assertEquals("Incorrect section managed object source name",
+				"MO_SOURCE", moSource.getSectionManagedObjectSourceName());
+		assertNotSame("Should obtain another section managed object source",
+				moSource, this.node.addSectionManagedObjectSource("ANOTHER",
+						new NotUseManagedObjectSource()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add {@link SectionManagedObjectSource} instance by same
+	 * name twice.
+	 */
+	public void testAddSectionManagedObjectSourceInstanceTwice() {
+
+		// Record issue in adding the section managed object source twice
+		this.record_issue("Section managed object source MO already added");
+
+		// Add the section managed object source twice
+		this.replayMockObjects();
+		SectionManagedObjectSource moSourceFirst = this.node
+				.addSectionManagedObjectSource("MO",
+						new NotUseManagedObjectSource());
+		SectionManagedObjectSource moSourceSecond = this.node
+				.addSectionManagedObjectSource("MO",
+						new NotUseManagedObjectSource());
+		this.verifyMockObjects();
+
+		// Should be the same section managed source object
+		assertEquals("Should be same section managed object on adding twice",
+				moSourceFirst, moSourceSecond);
+	}
+
+	/**
 	 * Ensure can add a {@link SectionManagedObject}.
 	 */
 	public void testAddSectionManagedObject() {
@@ -425,6 +467,43 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				NotUseWorkSource.class.getName());
 		SectionWork workSecond = this.node.addSectionWork("WORK",
 				NotUseWorkSource.class.getName());
+		this.verifyMockObjects();
+
+		// Should be the same section work
+		assertEquals("Should be same section work on adding twice", workFirst,
+				workSecond);
+	}
+
+	/**
+	 * Ensure can add a {@link SectionWork} instance.
+	 */
+	public void testAddSectionWorkInstance() {
+		// Add two different section works verifying details
+		this.replayMockObjects();
+		SectionWork work = this.node.addSectionWork("WORK",
+				new NotUseWorkSource());
+		assertNotNull("Must have section work", work);
+		assertEquals("Incorrect section work name", "WORK",
+				work.getSectionWorkName());
+		assertNotSame("Should obtain another section work", work,
+				this.node.addSectionWork("ANOTHER", new NotUseWorkSource()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add {@link SectionWork} instance by same name twice.
+	 */
+	public void testAddSectionWorkInstanceTwice() {
+
+		// Record issue in adding the section work twice
+		this.record_issue("Section work WORK already added");
+
+		// Add the section work twice
+		this.replayMockObjects();
+		SectionWork workFirst = this.node.addSectionWork("WORK",
+				new NotUseWorkSource());
+		SectionWork workSecond = this.node.addSectionWork("WORK",
+				new NotUseWorkSource());
 		this.verifyMockObjects();
 
 		// Should be the same section work
@@ -1295,7 +1374,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE", null);
+				.addSectionManagedObjectSource("MO_SOURCE", (String) null);
 		ManagedObjectDependency dependency = moSource
 				.getInputManagedObjectDependency("DEPENDENCY");
 		SectionObject moTarget = this.node.addSectionObject("MO_TARGET",
@@ -1328,11 +1407,12 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionManagedObjectSource moSource = this.node
-				.addSectionManagedObjectSource("MO_SOURCE", null);
+				.addSectionManagedObjectSource("MO_SOURCE", (String) null);
 		ManagedObjectDependency dependency = moSource
 				.getInputManagedObjectDependency("DEPENDENCY");
 		SectionManagedObjectSource moSourceTarget = this.node
-				.addSectionManagedObjectSource("MO_SOURCE_TARGET", null);
+				.addSectionManagedObjectSource("MO_SOURCE_TARGET",
+						(String) null);
 		SectionManagedObject moTarget = moSourceTarget.addSectionManagedObject(
 				"MO_TARGET", ManagedObjectScope.PROCESS);
 		this.node.link(dependency, moTarget);

@@ -50,6 +50,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link OfficeFloorNode} implementation.
@@ -134,6 +135,31 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Create the managed object source and have in office floor context
 			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
 					managedObjectSourceClassName, LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation, null, null, this.managedObjects,
+					this.context);
+			mo.addOfficeFloorContext(this.officeFloorLocation);
+
+			// Add the managed object source
+			this.managedObjectSources.put(managedObjectSourceName, mo);
+		} else {
+			// Managed object source already added
+			this.addIssue("Office floor managed object source "
+					+ managedObjectSourceName + " already added");
+		}
+		return mo;
+	}
+
+	@Override
+	public OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		// Obtain and return the managed object source for the name
+		ManagedObjectSourceNode mo = this.managedObjectSources
+				.get(managedObjectSourceName);
+		if (mo == null) {
+			// Create the managed object source and have in office floor context
+			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
+					managedObjectSource, LocationType.OFFICE_FLOOR,
 					this.officeFloorLocation, null, null, this.managedObjects,
 					this.context);
 			mo.addOfficeFloorContext(this.officeFloorLocation);

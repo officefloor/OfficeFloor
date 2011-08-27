@@ -88,6 +88,17 @@ public interface SectionDesigner {
 	SectionWork addSectionWork(String workName, String workSourceClassName);
 
 	/**
+	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
+	 * 
+	 * @param workName
+	 *            Name of the {@link SectionWork}.
+	 * @param workSource
+	 *            {@link WorkSource} instance to use.
+	 * @return {@link SectionWork}.
+	 */
+	SectionWork addSectionWork(String workName, WorkSource<?> workSource);
+
+	/**
 	 * Adds a {@link SectionManagedObjectSource} to the {@link OfficeSection}
 	 * being built.
 	 * 
@@ -102,6 +113,20 @@ public interface SectionDesigner {
 	 */
 	SectionManagedObjectSource addSectionManagedObjectSource(
 			String managedObjectSourceName, String managedObjectSourceClassName);
+
+	/**
+	 * Adds a {@link SectionManagedObjectSource} to the {@link OfficeSection}
+	 * being built.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link SectionManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 * @return {@link SectionManagedObject}.
+	 */
+	SectionManagedObjectSource addSectionManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
 	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.

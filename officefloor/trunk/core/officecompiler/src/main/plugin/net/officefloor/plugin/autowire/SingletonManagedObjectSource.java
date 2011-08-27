@@ -61,7 +61,7 @@ public class SingletonManagedObjectSource extends
 	}
 
 	@Override
-	protected ManagedObject getManagedObject() throws Throwable {
+	protected ManagedObject getManagedObject() {
 		return this;
 	}
 
@@ -70,7 +70,7 @@ public class SingletonManagedObjectSource extends
 	 */
 
 	@Override
-	public Object getObject() throws Throwable {
+	public Object getObject() {
 		return this.object;
 	}
 
