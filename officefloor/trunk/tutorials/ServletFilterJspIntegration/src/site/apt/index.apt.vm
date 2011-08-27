@@ -76,7 +76,7 @@ Templates
     
 [./images/ServletFilterJspIntegration-woof.png] application.woof.
 
-  The reason for WoOF using this minimalistic instrumentation of the HTML is to allow Graphic Designers using tools, such as {{{http://dreamweaver.com}DreamWeaver}}, to create and change the web pages and Developers to use Java to provide the logic.  The programming knowledge necessary of Graphic Designers is little (if any) and therefore leaves them to their strength of creating highly presentable and useable web pages.  Developers can also focus on their strengths of programming the dynamic logic in Java and leave web page presentation to the Graphic Designers.
+  The reason for WoOF using this minimalistic instrumentation of the HTML is to allow Graphic Designers using tools, such as {{{http://www.dreamweaver.com}DreamWeaver}}, to create and change the web pages and Developers to use Java to provide the logic.  The programming knowledge necessary of Graphic Designers is little (if any) and therefore leaves them to their strength of creating highly presentable and useable web pages.  Developers can also focus on their strengths of programming the dynamic logic in Java and leave web page presentation to the Graphic Designers.
 
 Integration
 
