@@ -1,6 +1,6 @@
 <woof>
   <templates>
-    <template name="comet" uri="comet" path="Template.html" class="net.officefloor.tutorial.cometmanualapp.TemplateLogic" x="94" y="63">
+    <template name="comet" uri="comet" path="Template.html" class="net.officefloor.tutorial.cometmanualapp.TemplateLogic" x="189" y="104">
       <output name="output" argument-type="">
       </output>
       <extension class="GWT">
