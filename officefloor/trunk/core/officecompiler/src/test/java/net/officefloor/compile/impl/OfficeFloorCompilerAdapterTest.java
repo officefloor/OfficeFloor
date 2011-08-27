@@ -24,17 +24,31 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.office.OfficeLoader;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.team.TeamLoader;
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.office.OfficeModelOfficeSource;
+import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
+import net.officefloor.model.impl.section.SectionModelSectionSource;
+import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 import net.officefloor.plugin.autowire.AutoWireAdministration;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloor;
 import net.officefloor.plugin.autowire.AutoWireOfficeFloorSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests the {@link OfficeFloorCompilerAdapter}.
@@ -67,10 +81,14 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		}
 		ClassLoader classLoader = new URLClassLoader(urls, null);
 
-		// Wrap with adapter to test adapter
+		// Ensure adapted for testing
 		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 		assertTrue("Ensure compiler is adapted",
 				this.compiler instanceof OfficeFloorCompilerAdapter);
+
+		// Load the properties and aliases
+		this.compiler.addEnvProperties();
+		this.compiler.addSourceAliases();
 	}
 
 	@Override
@@ -140,7 +158,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		source.addManagedObject(ClassManagedObjectSource.class, null,
 				AdaptManagedObject.class).addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-				AdaptManagedObject.class.getName());
+				AdaptManagedObjectImpl.class.getName());
 		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
 
 		// Invoke the task
@@ -153,6 +171,36 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		String contents = this.getFileContents(checkFile);
 		assertEquals("Task should be invoked", "MANAGED OBJECT INVOKED",
 				contents);
+	}
+
+	/**
+	 * Ensure able to use a {@link Object}.
+	 */
+	public void testObject() throws Exception {
+
+		final AdaptManagedObjectImpl object = new AdaptManagedObjectImpl();
+
+		// Build OfficeFloor
+		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
+				this.compiler);
+		source.assignDefaultTeam(PassiveTeamSource.class);
+		source.addSection("TEST", ClassSectionSource.class,
+				AdaptManagedObjectWork.class.getName());
+		source.addObject(object, AdaptManagedObject.class);
+		AutoWireOfficeFloor officeFloor = source.openOfficeFloor();
+
+		// Invoke the task
+		File checkFile = File.createTempFile(this.getClass().getSimpleName(),
+				"test");
+		officeFloor
+				.invokeTask("TEST.WORK", "task", checkFile.getAbsolutePath());
+
+		// Ensure the invoked managed object
+		assertTrue("Managed Object should be flagged as invoked",
+				object.isInvoked);
+		String contents = this.getFileContents(checkFile);
+		assertEquals("Managed Object should be invoked",
+				"MANAGED OBJECT INVOKED", contents);
 	}
 
 	/**
@@ -177,7 +225,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObject} for testing.
 	 */
-	public static class AdaptManagedObject {
+	public static interface AdaptManagedObject {
 
 		/**
 		 * Invoked to use the {@link ManagedObject}.
@@ -189,13 +237,108 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		 * @throws IOException
 		 *             If fails to write {@link ManagedObject} invoked to file.
 		 */
+		void useManagedObject(String fileLocation) throws IOException;
+	}
+
+	/**
+	 * Implementation for testing.
+	 */
+	public static class AdaptManagedObjectImpl implements AdaptManagedObject {
+
+		/**
+		 * Flag indicating if invoked.
+		 */
+		public boolean isInvoked = false;
+
+		@Override
 		public void useManagedObject(String fileLocation) throws IOException {
+
+			// Indicate invoked
+			this.isInvoked = true;
+
 			// Write invoked task to file
 			FileWriter writer = new FileWriter(fileLocation, false);
 			writer.write("MANAGED OBJECT INVOKED");
 			writer.flush();
 			writer.close();
 		}
+	}
+
+	/**
+	 * Tests the {@link OfficeFloorLoader}.
+	 */
+	public void testOfficeFloorLoader() {
+		OfficeFloorLoader loader = this.compiler.getOfficeFloorLoader();
+		PropertyList specification = loader
+				.loadSpecification(OfficeFloorModelOfficeFloorSource.class);
+		assertEquals("Should be no properties", 0,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link OfficeLoader}.
+	 */
+	public void testOfficeLoader() {
+		OfficeLoader loader = this.compiler.getOfficeLoader();
+		PropertyList specification = loader
+				.loadSpecification(OfficeModelOfficeSource.class);
+		assertEquals("Should be no properties", 0,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link SectionLoader}.
+	 */
+	public void testSectionLoader() {
+		SectionLoader loader = this.compiler.getSectionLoader();
+		PropertyList specification = loader
+				.loadSpecification(SectionModelSectionSource.class);
+		assertEquals("Should be no properties", 0,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link WorkLoader}.
+	 */
+	public void testWorkLoader() {
+		WorkLoader loader = this.compiler.getWorkLoader();
+		PropertyList specification = loader
+				.loadSpecification(ClassWorkSource.class);
+		assertEquals("Should have a property", 1,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link ManagedObjectLoader}.
+	 */
+	public void testManagedObjectLoader() {
+		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
+		PropertyList specification = loader
+				.loadSpecification(ClassManagedObjectSource.class);
+		assertEquals("Should have a property", 1,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link AdministratorLoader}.
+	 */
+	public void testAdministratorLoader() {
+		AdministratorLoader loader = this.compiler.getAdministratorLoader();
+		PropertyList specification = loader
+				.loadSpecification(ClassAdministratorSource.class);
+		assertEquals("Should have a property", 1,
+				specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Tests the {@link Team}.
+	 */
+	public void testTeamLoader() {
+		TeamLoader loader = this.compiler.getTeamLoader();
+		PropertyList specification = loader
+				.loadSpecification(PassiveTeamSource.class);
+		assertEquals("Should be no properties", 0,
+				specification.getPropertyNames().length);
 	}
 
 }

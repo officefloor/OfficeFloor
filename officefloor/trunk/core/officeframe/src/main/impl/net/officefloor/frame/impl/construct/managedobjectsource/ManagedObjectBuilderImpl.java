@@ -44,6 +44,11 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	private final String managedObjectSourceName;
 
 	/**
+	 * {@link ManagedObjectSource} instance.
+	 */
+	private final MS managedObjectSourceInstance;
+
+	/**
 	 * {@link Class} of the {@link ManagedObjectSource}.
 	 */
 	private final Class<MS> managedObjectSourceClass;
@@ -79,7 +84,23 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	public ManagedObjectBuilderImpl(String managedObjectSourceName,
 			Class<MS> managedObjectSourceClass) {
 		this.managedObjectSourceName = managedObjectSourceName;
+		this.managedObjectSourceInstance = null;
 		this.managedObjectSourceClass = managedObjectSourceClass;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 */
+	public ManagedObjectBuilderImpl(String managedObjectSourceName,
+			MS managedObjectSource) {
+		this.managedObjectSourceName = managedObjectSourceName;
+		this.managedObjectSourceInstance = managedObjectSource;
+		this.managedObjectSourceClass = null;
 	}
 
 	/*
@@ -121,6 +142,11 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS e
 	@Override
 	public ManagingOfficeConfiguration<F> getManagingOfficeConfiguration() {
 		return this.managingOfficeConfiguration;
+	}
+
+	@Override
+	public MS getManagedObjectSource() {
+		return this.managedObjectSourceInstance;
 	}
 
 	@Override

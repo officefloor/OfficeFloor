@@ -200,22 +200,27 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			return null; // can not carry on
 		}
 
-		// Obtain the managed object source
-		Class<MS> managedObjectSourceClass = configuration
-				.getManagedObjectSourceClass();
-		if (managedObjectSourceClass == null) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"No ManagedObjectSource class provided");
-			return null; // can not carry on
-		}
-
-		// Instantiate the managed object source
-		MS managedObjectSource = ConstructUtil.newInstance(
-				managedObjectSourceClass, ManagedObjectSource.class,
-				"Managed Object Source '" + managedObjectSourceName + "'",
-				AssetType.MANAGED_OBJECT, managedObjectSourceName, issues);
+		// Attempt to obtain the managed object source
+		MS managedObjectSource = configuration.getManagedObjectSource();
 		if (managedObjectSource == null) {
-			return null; // can not carry on
+			// No instance, so by managed object source class
+			Class<MS> managedObjectSourceClass = configuration
+					.getManagedObjectSourceClass();
+			if (managedObjectSourceClass == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						managedObjectSourceName,
+						"No ManagedObjectSource class provided");
+				return null; // can not carry on
+			}
+
+			// Instantiate the managed object source
+			managedObjectSource = ConstructUtil.newInstance(
+					managedObjectSourceClass, ManagedObjectSource.class,
+					"Managed Object Source '" + managedObjectSourceName + "'",
+					AssetType.MANAGED_OBJECT, managedObjectSourceName, issues);
+			if (managedObjectSource == null) {
+				return null; // can not carry on
+			}
 		}
 
 		// Obtain the properties to initialise the managed object source
@@ -281,11 +286,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			return null; // can not carry on
 
 		} catch (Throwable ex) {
-			issues.addIssue(
-					AssetType.MANAGED_OBJECT,
-					managedObjectSourceName,
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					"Failed to initialise "
-							+ managedObjectSourceClass.getName(), ex);
+							+ managedObjectSource.getClass().getName(), ex);
 			return null; // can not carry on
 		}
 

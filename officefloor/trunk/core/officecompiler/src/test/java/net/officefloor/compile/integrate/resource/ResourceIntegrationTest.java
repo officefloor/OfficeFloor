@@ -19,8 +19,6 @@ package net.officefloor.compile.integrate.resource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
@@ -46,11 +44,6 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 public class ResourceIntegrationTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link ClassLoader}.
-	 */
-	private static ClassLoader workClassLoader;
-
-	/**
 	 * Resource.
 	 */
 	private static InputStream workResource;
@@ -61,14 +54,11 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public void testIntegrateSourceContext() throws Exception {
 
-		final ClassLoader classLoader = new URLClassLoader(new URL[0], Thread
-				.currentThread().getContextClassLoader());
 		final ResourceSource resourceSource = this
 				.createMock(ResourceSource.class);
 		final InputStream resource = new ByteArrayInputStream(new byte[0]);
 
 		// Reset test
-		workClassLoader = null;
 		workResource = null;
 
 		// Record (multiple times as loading managed object type)
@@ -83,7 +73,7 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 
 		// Configure OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
-				OfficeFloorCompiler.newOfficeFloorCompiler(classLoader));
+				OfficeFloorCompiler.newOfficeFloorCompiler(null));
 		source.addManagedObject(ClassLoaderManagedObjectSource.class, null,
 				ClassLoader.class);
 		source.addManagedObject(ResourceManagedObjectSource.class, null,
@@ -102,7 +92,6 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 		officeFloor.invokeTask("SECTION.WORK", "task", null);
 
 		// Ensure correct resources
-		assertSame("Incorrect class loader", classLoader, workClassLoader);
 		assertSame("Incorrect resource", resource, workResource);
 
 		// Close OfficeFloor
@@ -117,7 +106,6 @@ public class ResourceIntegrationTest extends OfficeFrameTestCase {
 	 */
 	public static class ResourceWork {
 		public void task(ClassLoader classLoader, InputStream resource) {
-			workClassLoader = classLoader;
 			workResource = resource;
 		}
 	}

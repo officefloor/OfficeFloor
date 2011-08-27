@@ -32,7 +32,7 @@ import net.officefloor.frame.api.manage.Office;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface SectionNode extends SectionDesigner, SectionType, SubSection,
@@ -40,14 +40,14 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 
 	/**
 	 * Indicates if this {@link OfficeSection} has been initialised.
-	 *
+	 * 
 	 * @return <code>true</code> if initialised.
 	 */
 	boolean isInitialised();
 
 	/**
 	 * Initialises this {@link OfficeSection}.
-	 *
+	 * 
 	 * @param sectionSourceClassName
 	 *            Class name of the {@link SectionSource}.
 	 * @param sectionLocation
@@ -59,16 +59,29 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 			PropertyList properties);
 
 	/**
+	 * Initialises this {@link OfficeSection}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource} instance.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 */
+	void initialise(SectionSource sectionSource, String sectionLocation,
+			PropertyList properties);
+
+	/**
 	 * Obtains the {@link OfficeInputType} instances for this
 	 * {@link OfficeSection}.
-	 *
+	 * 
 	 * @return {@link OfficeInputType} instances for this {@link OfficeSection}.
 	 */
 	OfficeInputType[] getOfficeInputTypes();
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
-	 *
+	 * 
 	 * @param inputName
 	 *            Input name as per the {@link OfficeInputType}.
 	 * @return {@link DeployedOfficeInput}.
@@ -78,7 +91,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	/**
 	 * Loads the {@link OfficeSection} of this {@link SectionNode} and all its
 	 * {@link SubSection} {@link SectionNode} instances.
-	 *
+	 * 
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this
 	 *            {@link OfficeSection}.
@@ -87,7 +100,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 
 	/**
 	 * Obtains the {@link OfficeNode} containing this {@link SectionNode}.
-	 *
+	 * 
 	 * @return {@link OfficeNode} containing this {@link SectionNode}.
 	 */
 	OfficeNode getOfficeNode();
@@ -95,7 +108,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	/**
 	 * Obtains the parent {@link SectionNode} containing this
 	 * {@link SectionNode}.
-	 *
+	 * 
 	 * @return Parent {@link SectionNode} or <code>null</code> if this
 	 *         {@link SectionNode} is the top level {@link SectionNode} (in
 	 *         other words a {@link OfficeSection}).
@@ -104,7 +117,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 
 	/**
 	 * Obtain the {@link OfficeSection} qualified name.
-	 *
+	 * 
 	 * @param simpleName
 	 *            Simple name to qualify with the {@link OfficeSection} name
 	 *            space.
@@ -114,7 +127,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
-	 *
+	 * 
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder}.
 	 * @param officeNode

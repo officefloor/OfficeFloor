@@ -73,12 +73,15 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
@@ -694,6 +697,34 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeSection addOfficeSection(String sectionName,
+			SectionSource sectionSource, String sectionLocation,
+			PropertyList properties) {
+		// Obtain and return the section for the name
+		SectionNode section = this.sections.get(sectionName);
+		if (section == null) {
+			// Create the section and have it loaded
+			section = new SectionNodeImpl(sectionName, sectionSource,
+					sectionLocation, properties, this, this.context);
+			section.loadOfficeSection(this.officeLocation);
+
+			// Add the section
+			this.sections.put(sectionName, section);
+		} else {
+			// Added but determine if initialised
+			if (!section.isInitialised()) {
+				// Initialise as not yet initialised
+				section.initialise(sectionSource, sectionLocation, properties);
+				section.loadOfficeSection(this.officeLocation);
+			} else {
+				// Section already added and initialised
+				this.addIssue("Section " + sectionName + " already added");
+			}
+		}
+		return section;
+	}
+
+	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(
 			String managedObjectSourceName, String managedObjectSourceClassName) {
 		// Obtain and return the section managed object source for the name
@@ -721,6 +752,34 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeManagedObjectSource addOfficeManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		// Obtain and return the section managed object source for the name
+		ManagedObjectSourceNode managedObjectSourceNode = this.managedObjectSources
+				.get(managedObjectSourceName);
+		if (managedObjectSourceNode == null) {
+
+			// Create the office managed object source (within office context)
+			managedObjectSourceNode = new ManagedObjectSourceNodeImpl(
+					managedObjectSourceName, managedObjectSource,
+					LocationType.OFFICE, this.officeLocation, null, this,
+					this.managedObjects, this.context);
+			managedObjectSourceNode.addOfficeContext(this.officeLocation);
+
+			// Add the office managed object source
+			this.managedObjectSources.put(managedObjectSourceName,
+					managedObjectSourceNode);
+
+		} else {
+			// Managed object source already added
+			this.addIssue("Managed object source " + managedObjectSourceName
+					+ " already added");
+		}
+		return managedObjectSourceNode;
+	}
+
+	@Override
 	public OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName) {
 		// Obtain and return the administrator for the name
@@ -731,6 +790,25 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			administrator = new AdministratorNodeImpl(administratorName,
 					administratorSourceClassName, this.officeLocation,
 					this.context);
+			this.administrators.put(administratorName, administrator);
+		} else {
+			// Administrator already added and initialised
+			this.addIssue("Administrator " + administratorName
+					+ " already added");
+		}
+		return administrator;
+	}
+
+	@Override
+	public OfficeAdministrator addOfficeAdministrator(String administratorName,
+			AdministratorSource<?, ?> administratorSource) {
+		// Obtain and return the administrator for the name
+		AdministratorNode administrator = this.administrators
+				.get(administratorName);
+		if (administrator == null) {
+			// Add the administrator
+			administrator = new AdministratorNodeImpl(administratorName,
+					administratorSource, this.officeLocation, this.context);
 			this.administrators.put(administratorName, administrator);
 		} else {
 			// Administrator already added and initialised

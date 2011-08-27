@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -59,7 +60,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
-import net.officefloor.plugin.threadlocal.ThreadLocalDelegateManagedObjectSource;
 
 /**
  * <p>
@@ -472,13 +472,15 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		 *            be loaded.
 		 * @param typeIndex
 		 *            Indexes for the type to ensure unique naming.
+		 * @throws ClassNotFoundException
+		 *             If fails to adapt loading {@link ManagedObjectSource}.
 		 */
 		public void loadManagedObject(
 				DeployedOffice office,
 				OfficeFloorDeployer deployer,
 				Map<Class<?>, OfficeFloorManagedObject> managedObjects,
 				Map<Class<?>, OfficeFloorInputManagedObject> inputManagedObjects,
-				Map<Class<?>, Integer> typeIndex) {
+				Map<Class<?>, Integer> typeIndex) throws ClassNotFoundException {
 
 			// Determine the details
 			Class<?> managedObjectSourceClass = this.autoWireObject
@@ -510,10 +512,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			// Determine if raw object
 			if (this.rawObject != null) {
 				// Bind the raw object
-				SingletonManagedObjectSource singleton = new SingletonManagedObjectSource(
-						this.rawObject);
-				this.managedObjectSource = ThreadLocalDelegateManagedObjectSource
-						.bindDelegate(managedObjectName, singleton, deployer);
+				ManagedObjectSource<?, ?> singleton = OfficeFloorCompilerAdapter
+						.createSingletonManagedObjectSource(
+								AutoWireOfficeFloorSource.this.compiler,
+								this.rawObject, objectTypes);
+				this.managedObjectSource = deployer.addManagedObjectSource(
+						this.managedObjectName, singleton);
 
 			} else {
 				// Bind the managed object source

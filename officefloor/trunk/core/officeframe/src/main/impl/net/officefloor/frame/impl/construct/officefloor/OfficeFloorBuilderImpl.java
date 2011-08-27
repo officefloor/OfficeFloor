@@ -121,11 +121,22 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> addManagedObject(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
 		// Create, register and return the builder
-		ManagedObjectBuilderImpl<D, H, MS> builder = new ManagedObjectBuilderImpl<D, H, MS>(
+		ManagedObjectBuilderImpl<D, F, MS> builder = new ManagedObjectBuilderImpl<D, F, MS>(
 				managedObjectSourceName, managedObjectSourceClass);
+		this.mangedObjects.add(builder);
+		return builder;
+	}
+
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
+			String managedObjectSourceName,
+			ManagedObjectSource<D, F> managedObjectSource) {
+		// Create, register and return the builder
+		ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>> builder = new ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>>(
+				managedObjectSourceName, managedObjectSource);
 		this.mangedObjects.add(builder);
 		return builder;
 	}

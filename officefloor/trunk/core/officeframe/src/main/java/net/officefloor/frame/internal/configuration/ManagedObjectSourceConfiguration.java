@@ -39,9 +39,21 @@ public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends 
 	String getManagedObjectSourceName();
 
 	/**
+	 * Obtains the {@link ManagedObjectSource} instance to use.
+	 * 
+	 * @return {@link ManagedObjectSource} instance to use. This may be
+	 *         <code>null</code> and therefore the
+	 *         {@link #getManagedObjectSourceClass()} should be used to obtain
+	 *         the {@link ManagedObjectSource}.
+	 */
+	MS getManagedObjectSource();
+
+	/**
 	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link Class} of the {@link ManagedObjectSource}.
+	 * @return {@link Class} of the {@link ManagedObjectSource}. Will be
+	 *         <code>null</code> if a {@link ManagedObjectSource} instance is
+	 *         configured.
 	 */
 	Class<MS> getManagedObjectSourceClass();
 

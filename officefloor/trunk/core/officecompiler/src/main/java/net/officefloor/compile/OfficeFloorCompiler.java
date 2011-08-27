@@ -214,8 +214,8 @@ public abstract class OfficeFloorCompiler {
 			}
 		}
 
-		// Specify the class loader on the implementation
-		compiler.classLoader = implClassLoader;
+		// Specify the class loader on the compiler
+		compiler.classLoader = clientClassLoader;
 
 		// Return the office floor compiler implementation
 		return compiler;

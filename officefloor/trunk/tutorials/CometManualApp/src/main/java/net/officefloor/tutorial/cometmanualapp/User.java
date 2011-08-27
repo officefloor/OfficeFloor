@@ -17,6 +17,8 @@
  */
 package net.officefloor.tutorial.cometmanualapp;
 
+import java.io.Serializable;
+
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 
 /**
@@ -26,7 +28,7 @@ import net.officefloor.plugin.web.http.application.HttpSessionStateful;
  */
 // START SNIPPET: example
 @HttpSessionStateful
-public class User {
+public class User implements Serializable {
 
 	private String name;
 

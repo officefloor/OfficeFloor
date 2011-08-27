@@ -68,6 +68,12 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private final String administratorSourceClassName;
 
 	/**
+	 * {@link AdministratorSource} instance to use. Should this be specified it
+	 * overrides the {@link Class}.
+	 */
+	private final AdministratorSource<?, ?> administratorSource;
+
+	/**
 	 * {@link PropertyList} to source the {@link Administrator}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
@@ -111,6 +117,30 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			NodeContext context) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
+		this.administratorSource = null;
+		this.officeLocation = officeLocation;
+		this.context = context;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param administratorName
+	 *            Name of this {@link OfficeAdministrator}.
+	 * @param administratorSourceClassName
+	 *            {@link AdministratorSource} instance to use.
+	 * @param officeLocation
+	 *            Location of the {@link Office} containing this
+	 *            {@link OfficeAdministrator}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public AdministratorNodeImpl(String administratorName,
+			AdministratorSource<?, ?> administratorSource,
+			String officeLocation, NodeContext context) {
+		this.administratorName = administratorName;
+		this.administratorSourceClassName = null;
+		this.administratorSource = administratorSource;
 		this.officeLocation = officeLocation;
 		this.context = context;
 	}
@@ -233,8 +263,10 @@ public class AdministratorNodeImpl implements AdministratorNode {
 				managedObject = (BoundManagedObjectNode) linkObject;
 			} else {
 				// Locate the managed object
-				managedObject = LinkUtil.retrieveTarget(linkObject,
-						BoundManagedObjectNode.class, "Managed Object "
+				managedObject = LinkUtil.retrieveTarget(
+						linkObject,
+						BoundManagedObjectNode.class,
+						"Managed Object "
 								+ administerableManagedObject
 										.getAdministerableManagedObjectName(),
 						LocationType.OFFICE, this.officeLocation,

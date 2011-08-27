@@ -64,6 +64,19 @@ public interface OfficeFloorDeployer {
 			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
+	 * Adds an {@link OfficeFloorManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 * @return Added {@link OfficeFloorManagedObjectSource}.
+	 */
+	OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
 	 * Adds an {@link OfficeFloorInputManagedObject}.
 	 * 
 	 * @param inputManagedObjectName

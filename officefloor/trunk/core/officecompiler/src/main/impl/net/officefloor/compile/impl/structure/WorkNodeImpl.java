@@ -89,6 +89,12 @@ public class WorkNodeImpl implements WorkNode {
 	private final String workSourceClassName;
 
 	/**
+	 * {@link WorkSource} instance to use. If this is specified it overrides
+	 * using the {@link Class} name.
+	 */
+	private final WorkSource<?> workSource;
+
+	/**
 	 * Initial {@link SectionTask} for this {@link SectionWork}.
 	 */
 	private SectionTask initialTask = null;
@@ -133,6 +139,38 @@ public class WorkNodeImpl implements WorkNode {
 			SectionNode section, NodeContext context) {
 		this.workName = workName;
 		this.workSourceClassName = workSourceClassName;
+		this.workSource = null;
+		this.sectionLocation = sectionLocation;
+		this.sectionTaskNodes = sectionTaskNodes;
+		this.section = section;
+		this.context = context;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param workName
+	 *            Name of this {@link SectionWork}.
+	 * @param workSource
+	 *            {@link WorkSource} instance to use.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link WorkNode}.
+	 * @param sectionTaskNodes
+	 *            Map of {@link TaskNode} instances for the
+	 *            {@link OfficeSection} containing this {@link SectionWork} by
+	 *            their {@link SectionTask} names.
+	 * @param section
+	 *            {@link OfficeSection} containing this {@link WorkNode}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public WorkNodeImpl(String workName, WorkSource<?> workSource,
+			String sectionLocation, Map<String, TaskNode> sectionTaskNodes,
+			SectionNode section, NodeContext context) {
+		this.workName = workName;
+		this.workSourceClassName = null;
+		this.workSource = workSource;
 		this.sectionLocation = sectionLocation;
 		this.sectionTaskNodes = sectionTaskNodes;
 		this.section = section;

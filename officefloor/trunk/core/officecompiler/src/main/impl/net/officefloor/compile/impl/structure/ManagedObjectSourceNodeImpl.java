@@ -90,6 +90,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final String managedObjectSourceClassName;
 
 	/**
+	 * {@link ManagedObjectSource} instance to use. If this is specified its use
+	 * overrides the {@link Class}.
+	 */
+	private final ManagedObjectSource<?, ?> managedObjectSource;
+
+	/**
 	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
 	 */
 	private final PropertyList propertyList = new PropertyListImpl();
@@ -236,6 +242,52 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
+		this.managedObjectSource = null;
+		this.locationType = locationType;
+		this.location = location;
+		this.containingSectionNode = containingSectionNode;
+		this.containingOfficeNode = containingOfficeNode;
+		this.locationManagedObjects = locationManagedObjects;
+		this.context = context;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of this {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 * @param locationType
+	 *            {@link LocationType} of the location containing this
+	 *            {@link ManagedObjectSource}.
+	 * @param location
+	 *            Location containing this {@link ManagedObjectSource}.
+	 * @param containingOfficeNode
+	 *            {@link OfficeNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link OfficeFloor}.
+	 * @param containingSectionNode
+	 *            {@link SectionNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link Office} or {@link OfficeFloor}.
+	 * @param locationManagedObjects
+	 *            Registry of all {@link ManagedObjectNode} instances within a
+	 *            location. This allows to check that no other
+	 *            {@link ManagedObjectNode} instances are added by other
+	 *            {@link ManagedObjectSourceNode} with the same name.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource,
+			LocationType locationType, String location,
+			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
+			Map<String, ManagedObjectNode> locationManagedObjects,
+			NodeContext context) {
+		this.managedObjectSourceName = managedObjectSourceName;
+		this.managedObjectSourceClassName = null;
+		this.managedObjectSource = managedObjectSource;
 		this.locationType = locationType;
 		this.location = location;
 		this.containingSectionNode = containingSectionNode;
@@ -310,22 +362,31 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 		this.isManagedObjectTypeLoaded = true;
 
-		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.context
-				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
-						this.locationType, this.location,
-						this.managedObjectSourceName);
-		if (managedObjectSourceClass == null) {
-			return; // must have managed object source class
-		}
-
 		// Create the loader to obtain the managed object type
 		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
 				this.locationType, this.location, this.managedObjectSourceName);
 
 		// Load the managed object type
-		this.managedObjectType = loader.loadManagedObjectType(
-				managedObjectSourceClass, this.propertyList);
+		if (this.managedObjectSource != null) {
+			// Load the managed object type from instance
+			this.managedObjectType = loader.loadManagedObjectType(
+					this.managedObjectSource, this.propertyList);
+
+		} else {
+			// Obtain the managed object source class
+			Class managedObjectSourceClass = this.context
+					.getManagedObjectSourceClass(
+							this.managedObjectSourceClassName,
+							this.locationType, this.location,
+							this.managedObjectSourceName);
+			if (managedObjectSourceClass == null) {
+				return; // must have managed object source class
+			}
+
+			// Load the managed object type from class
+			this.managedObjectType = loader.loadManagedObjectType(
+					managedObjectSourceClass, this.propertyList);
+		}
 
 		// Ensure all the teams are made available
 		if (this.managedObjectType != null) {
@@ -456,18 +517,30 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			return; // must have managed object type
 		}
 
-		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.context
-				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
-						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						managedObjectSourceName);
-		if (managedObjectSourceClass == null) {
-			return; // must have managed object source class
+		// Obtain the Managed Object Builder
+		ManagedObjectBuilder<?> moBuilder;
+		if (this.managedObjectSource != null) {
+			// Build the managed object source from instance
+			moBuilder = builder.addManagedObject(managedObjectSourceName,
+					this.managedObjectSource);
+
+		} else {
+			// No instance, so obtain by managed object source class
+			Class managedObjectSourceClass = this.context
+					.getManagedObjectSourceClass(
+							this.managedObjectSourceClassName,
+							LocationType.OFFICE_FLOOR,
+							this.officeFloorLocation, managedObjectSourceName);
+			if (managedObjectSourceClass == null) {
+				return; // must have managed object source class
+			}
+
+			// Build the managed object source from class
+			moBuilder = builder.addManagedObject(managedObjectSourceName,
+					managedObjectSourceClass);
 		}
 
-		// Build the managed object source
-		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(
-				managedObjectSourceName, managedObjectSourceClass);
+		// Add properties for Managed Object Source
 		for (Property property : this.propertyList) {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}

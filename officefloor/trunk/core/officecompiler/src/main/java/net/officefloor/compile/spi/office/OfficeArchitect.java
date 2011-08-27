@@ -75,6 +75,23 @@ public interface OfficeArchitect {
 			PropertyList properties);
 
 	/**
+	 * Adds an {@link OfficeSection}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionSource
+	 *            {@link SectionSource} instance to use.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param properties
+	 *            {@link PropertyList} to load the {@link OfficeSection}.
+	 * @return Added {@link OfficeSection}.
+	 */
+	OfficeSection addOfficeSection(String sectionName,
+			SectionSource sectionSource, String sectionLocation,
+			PropertyList properties);
+
+	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceName
@@ -87,6 +104,19 @@ public interface OfficeArchitect {
 			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
+	 * Adds a {@link OfficeManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance to use.
+	 * @return Added {@link OfficeManagedObjectSource}.
+	 */
+	OfficeManagedObjectSource addOfficeManagedObjectSource(
+			String managedObjectSourceName,
+			ManagedObjectSource<?, ?> managedObjectSource);
+
+	/**
 	 * Adds an {@link OfficeAdministrator}.
 	 * 
 	 * @param administratorName
@@ -97,6 +127,18 @@ public interface OfficeArchitect {
 	 */
 	OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName);
+
+	/**
+	 * Adds an {@link OfficeAdministrator}.
+	 * 
+	 * @param administratorName
+	 *            Name of the {@link OfficeAdministrator}.
+	 * @param administratorSource
+	 *            {@link AdministratorSource} instance to use.
+	 * @return Added {@link OfficeAdministrator}.
+	 */
+	OfficeAdministrator addOfficeAdministrator(String administratorName,
+			AdministratorSource<?, ?> administratorSource);
 
 	/**
 	 * Adds an {@link OfficeEscalation}.
