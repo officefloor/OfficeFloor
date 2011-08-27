@@ -27,7 +27,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.eclipse.WoofPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
@@ -147,10 +146,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.project = project;
 
 		// Obtain the class loader for the project
-		ClassLoader pluginClassLoader = WoofPlugin.getDefault().getClass()
-				.getClassLoader();
-		this.classLoader = ProjectClassLoader
-				.create(project, pluginClassLoader);
+		this.classLoader = ProjectClassLoader.create(project);
 
 		// Obtain the section loader
 		this.compiler = OfficeFloorCompiler
@@ -468,11 +464,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	public void addIssue(LocationType locationType, String location,
 			AssetType assetType, String assetName, String issueDescription,
 			Throwable cause) {
-
-		// TODO remove
-		System.err.println("ERROR");
-		cause.printStackTrace();
-
 		// Provide as error message
 		this.setErrorMessage(issueDescription + " ("
 				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()

@@ -200,9 +200,9 @@ public class TypeAdapter implements InvocationHandler {
 							methodName, paramTypes);
 		}
 
-		// Determine if return is an interface
+		// Adapt return value
 		Class<?> returnType = method.getReturnType();
-		if (returnType != null) {
+		if ((returnValue != null) && (returnType != null)) {
 			if (Class.class.getName().equals(returnType.getName())) {
 				// Transform class for return
 				returnValue = translateClass((Class<?>) returnValue,
