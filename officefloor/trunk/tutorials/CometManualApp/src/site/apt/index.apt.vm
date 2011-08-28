@@ -20,7 +20,7 @@
   
   The application in this tutorial is deliberately simple to allow focus on the Comet functionality.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometApp/${projectVersion}/CometApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CometManualApp/${projectVersion}/CometManualApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
   
 Template.html
 
