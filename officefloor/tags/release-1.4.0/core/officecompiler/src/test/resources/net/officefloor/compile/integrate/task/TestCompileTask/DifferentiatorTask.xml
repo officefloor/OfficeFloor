@@ -1,0 +1,36 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<sections>
+			<section name="SECTION" source="DESK" location="desk">
+				<responsibility name="RESPONSIBILITY">
+					<team name="OFFICE_TEAM" />
+				</responsibility>
+			</section>
+		</sections>
+	</office>
+	<desk>
+		<works>
+			<work name="WORK" source="${testcase}$DifferentiatorWorkSource">
+				<work-task name="task" />
+			</work>
+		</works>
+		<tasks>
+			<task name="TASK" work="WORK" task="task" />
+		</tasks>
+	</desk>
+</context>

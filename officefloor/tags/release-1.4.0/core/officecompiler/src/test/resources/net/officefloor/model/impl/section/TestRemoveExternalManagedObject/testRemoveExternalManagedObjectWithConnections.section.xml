@@ -1,0 +1,9 @@
+<section>
+	<external-managed-objects />
+	<sub-sections>
+		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<object name="OBJECT" object-type="java.lang.Object" />
+		</sub-section>
+	</sub-sections>
+</section>

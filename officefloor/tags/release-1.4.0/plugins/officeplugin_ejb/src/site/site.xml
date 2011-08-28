@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<bannerLeft>
+		<src>./images/OfficeFloorBannerImage.png
+		</src>
+		<href>http://www.officefloor.net/</href>
+	</bannerLeft>
+	<body>
+        <menu name="${project.name}">
+			<item name="Overview" href="./index.html" />
+			<item name="EJB Orchestration" href="./ejb-orchestration.html" />
+		</menu>
+		<menu ref="parent" />
+	</body>
+</project>
