@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>1.4.0</version>
+		<version>2.0.0</version>
 	</parent>
 	<artifactId>MyFirstWoofApp</artifactId>
 	<packaging>war</packaging>
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof</artifactId>
-			<version>1.4.0</version>
+			<version>2.0.0</version>
 		</dependency>
 		<!-- END SNIPPET: woof -->
 		<dependency>
