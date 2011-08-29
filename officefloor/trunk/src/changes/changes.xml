@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="release-1.4.0" date="In SVN"
+		<release version="release-2.0.0" date="In SVN"
 			description="Comet for Web on OfficeFloor">
 			<action type="add" dev="sagenschneider" issue="last_update_date_start=2011-05-19">Release</action>
 		</release>
