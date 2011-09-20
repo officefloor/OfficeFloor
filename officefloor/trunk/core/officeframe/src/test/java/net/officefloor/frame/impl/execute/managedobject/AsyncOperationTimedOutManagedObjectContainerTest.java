@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 /**
  * Tests {@link AsynchronousManagedObject} doing asynchronous operations that
  * times out.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AsyncOperationTimedOutManagedObjectContainerTest extends
@@ -38,7 +38,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 *
+	 * 
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -56,11 +56,6 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#runTest()
-	 */
 	@Override
 	protected void runTest() throws Throwable {
 
@@ -70,6 +65,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 		this.record_MoContainer_init(Connection.class);
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_governManagedObject();
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
@@ -78,8 +74,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 		this.record_AsynchronousListener_notifyStart();
 
 		// Record asynchronous operation timing out
-		this
-				.record_MoContainer_isManagedObjectReady(ReadyState.ASYNC_OPERATION_TIMED_OUT);
+		this.record_MoContainer_isManagedObjectReady(ReadyState.ASYNC_OPERATION_TIMED_OUT);
 
 		// Record continue to report asynchronous operation timed out
 		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
@@ -93,6 +88,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
 		this.loadManagedObject(mo);
+		this.governManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);

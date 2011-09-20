@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Duty<I, F extends Enum<F>> {
+public interface Duty<I, F extends Enum<F>, G extends Enum<G>> {
 
 	/**
 	 * Administers the {@link ManagedObject} instances.
@@ -36,6 +36,6 @@ public interface Duty<I, F extends Enum<F>> {
 	 * @throws Throwable
 	 *             If fails to do duty.
 	 */
-	void doDuty(DutyContext<I, F> context) throws Throwable;
+	void doDuty(DutyContext<I, F, G> context) throws Throwable;
 
 }

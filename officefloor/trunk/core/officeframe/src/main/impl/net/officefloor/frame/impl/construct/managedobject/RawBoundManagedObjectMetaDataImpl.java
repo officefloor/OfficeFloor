@@ -31,10 +31,12 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -43,7 +45,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Raw meta-data for a bound {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class RawBoundManagedObjectMetaDataImpl implements
@@ -51,7 +53,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 	/**
 	 * Obtains the {@link RawBoundManagedObjectMetaDataFactory}.
-	 *
+	 * 
 	 * @return {@link RawBoundManagedObjectMetaDataFactory}.
 	 */
 	public static RawBoundManagedObjectMetaDataFactory getFactory() {
@@ -86,7 +88,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param index
@@ -104,19 +106,26 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	/**
 	 * Adds a {@link RawBoundManagedObjectInstanceMetaData} to this
 	 * {@link RawBoundManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
+	 * @param rawGovernanceMetaData
+	 *            Listing of {@link RawGovernanceMetaData}.
 	 * @param dependenciesConfiguration
 	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
+	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param governanceConfiguration
+	 *            Listing of the {@link ManagedObjectGovernanceConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addInstance(String boundManagedObjectName,
 			RawManagedObjectMetaData rawMoMetaData,
-			ManagedObjectDependencyConfiguration[] dependenciesConfiguration) {
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaData,
+			ManagedObjectDependencyConfiguration[] dependenciesConfiguration,
+			ManagedObjectGovernanceConfiguration[] governanceConfiguration) {
 
 		// Obtain the index for the instance
 		int instanceIndex = this.instancesMetaData.size();
@@ -125,7 +134,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 		this.instancesMetaData
 				.add(new RawBoundManagedObjectInstanceMetaDataImpl(
 						boundManagedObjectName, this, instanceIndex,
-						rawMoMetaData, dependenciesConfiguration));
+						rawMoMetaData, rawGovernanceMetaData,
+						dependenciesConfiguration, governanceConfiguration));
 	}
 
 	/*
@@ -143,7 +153,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			RawManagingOfficeMetaData<?>[] inputManagedObjects,
-			Map<String, String> boundInputManagedObjects) {
+			Map<String, String> boundInputManagedObjects,
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaData) {
 
 		// Handle if null scope managed objects
 		if (scopeManagedObjects == null) {
@@ -202,11 +213,16 @@ public class RawBoundManagedObjectMetaDataImpl implements
 				ManagedObjectDependencyConfiguration<?>[] dependenciesConfiguration = mo
 						.getDependencyConfiguration();
 
+				// Obtain the governance configuration
+				ManagedObjectGovernanceConfiguration[] governanceConfiguration = mo
+						.getGovernanceConfiguration();
+
 				// Create the bound ManagedObject meta-data (with instance)
 				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
 						boundMoName, index, false);
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
-						dependenciesConfiguration);
+						rawGovernanceMetaData, dependenciesConfiguration,
+						governanceConfiguration);
 
 				// Register the bound managed object
 				boundMo.put(boundMoName, rawBoundMoMetaData);
@@ -253,6 +269,10 @@ public class RawBoundManagedObjectMetaDataImpl implements
 				ManagedObjectDependencyConfiguration<?>[] dependenciesConfiguration = inputConfiguration
 						.getDependencyConfiguration();
 
+				// Obtain the governance configuration
+				ManagedObjectGovernanceConfiguration[] governanceConfiguration = inputConfiguration
+						.getGovernanceConfiguration();
+
 				// Obtain the bound ManagedObject meta-data
 				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData;
 				if (possibleClash != null) {
@@ -272,7 +292,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Add the Input ManagedObject instance
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
-						dependenciesConfiguration);
+						rawGovernanceMetaData, dependenciesConfiguration,
+						governanceConfiguration);
 			}
 		}
 
@@ -317,15 +338,14 @@ public class RawBoundManagedObjectMetaDataImpl implements
 						}
 					}
 					if (moMetaData.defaultInstanceIndex < 0) {
-						issues
-								.addIssue(
-										AssetType.MANAGED_OBJECT,
-										boundMoName,
-										"Managed Object Source '"
-												+ defaultManagedObjectSourceName
-												+ "' not linked to Input Managed Object '"
-												+ boundMoName
-												+ "' for being the bound instance");
+						issues.addIssue(
+								AssetType.MANAGED_OBJECT,
+								boundMoName,
+								"Managed Object Source '"
+										+ defaultManagedObjectSourceName
+										+ "' not linked to Input Managed Object '"
+										+ boundMoName
+										+ "' for being the bound instance");
 						continue NEXT_MO; // must have bound instance index
 					}
 				}

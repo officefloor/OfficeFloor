@@ -220,8 +220,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_JobContainer_initialSteps(Job job,
 			Throwable threadFailure) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		this.recordReturn(this.jobMetaData, this.jobMetaData
-				.createJobActivableSet(), this.jobActivatableSet);
+		this.recordReturn(this.jobMetaData,
+				this.jobMetaData.createJobActivableSet(),
+				this.jobActivatableSet);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
@@ -237,8 +238,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			// No failure, so continue on to obtain managed object indexes
 			if (functionalityJob.requiredManagedObjectIndexes.length > 0) {
 				// Has managed objects, so lock on process to initiate them
-				this.recordReturn(this.processState, this.processState
-						.getProcessLock(), "Process Lock");
+				this.recordReturn(this.processState,
+						this.processState.getProcessLock(), "Process Lock");
 			}
 		}
 	}
@@ -272,6 +273,24 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						functionalityJob.requiredManagedObjectIndexes,
 						this.jobContext, functionalityJob,
 						this.jobActivatableSet), isReady);
+	}
+
+	/**
+	 * Records governing the {@link ManagedObject} instances.
+	 * 
+	 * @param job
+	 *            {@link Job}.
+	 * @param isGoverned
+	 *            Indicates if governed.
+	 */
+	protected void record_WorkContainer_governManagedObjects(Job job,
+			boolean isGoverned) {
+		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
+		this.recordReturn(this.workContainer, this.workContainer
+				.governManagedObjects(
+						functionalityJob.requiredManagedObjectIndexes,
+						this.jobContext, functionalityJob,
+						this.jobActivatableSet), isGoverned);
 	}
 
 	/**
@@ -345,16 +364,17 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_doParallelFlow(Job currentJob,
 			Object parallelFlowParameter) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
-		this
-				.recordReturn(this.parallelFlowMetaData,
-						this.parallelFlowMetaData.getInstigationStrategy(),
-						FlowInstigationStrategyEnum.PARALLEL);
-		this.recordReturn(this.parallelFlowMetaData, this.parallelFlowMetaData
-				.getInitialTaskMetaData(), this.parallelTaskMetaData);
+		this.recordReturn(this.parallelFlowMetaData,
+				this.parallelFlowMetaData.getInstigationStrategy(),
+				FlowInstigationStrategyEnum.PARALLEL);
+		this.recordReturn(this.parallelFlowMetaData,
+				this.parallelFlowMetaData.getInitialTaskMetaData(),
+				this.parallelTaskMetaData);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
-		this.recordReturn(this.threadState, this.threadState
-				.createFlow(this.parallelFlowMetaData), this.parallelFlow);
+		this.recordReturn(this.threadState,
+				this.threadState.createFlow(this.parallelFlowMetaData),
+				this.parallelFlow);
 		this.recordReturn(this.parallelFlow, this.parallelFlow.createJobNode(
 				this.parallelTaskMetaData, functionalityJob,
 				parallelFlowParameter), this.parallelJob);
@@ -372,8 +392,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		// Determine if next task
 		TaskMetaData<?, ?, ?> taskMetaData = (hasNextJob ? this.nextTaskMetaData
 				: null);
-		this.recordReturn(this.jobMetaData, this.jobMetaData
-				.getNextTaskInFlow(), taskMetaData);
+		this.recordReturn(this.jobMetaData,
+				this.jobMetaData.getNextTaskInFlow(), taskMetaData);
 	}
 
 	/**
@@ -417,8 +437,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		});
 		if (!isComplete) {
 			// Not complete, so will be still linked
-			this.recordReturn(this.parallelJob, this.parallelJob
-					.isJobNodeComplete(), isComplete);
+			this.recordReturn(this.parallelJob,
+					this.parallelJob.isJobNodeComplete(), isComplete);
 		}
 	}
 
@@ -442,15 +462,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
-		this.recordReturn(this.processState, this.processState
-				.createThread(this.asynchronousFlowMetaData),
+		this.recordReturn(this.processState,
+				this.processState.createThread(this.asynchronousFlowMetaData),
 				this.asynchronousFlow);
 		this.recordReturn(this.asynchronousFlow, this.asynchronousFlow
 				.createJobNode(this.asynchronousTaskMetaData, null,
 						asynchronousFlowParameter), this.asynchronousJob);
 		this.asynchronousJob.activateJob();
-		this.recordReturn(this.asynchronousFlow, this.asynchronousFlow
-				.getThreadState(), this.asynchronousThreadState);
+		this.recordReturn(this.asynchronousFlow,
+				this.asynchronousFlow.getThreadState(),
+				this.asynchronousThreadState);
 	}
 
 	/**
@@ -481,15 +502,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.threadState.escalationStart(functionalityJob,
 				this.jobActivatableSet);
 		this.record_completeJob(job);
-		this.recordReturn(this.jobMetaData, this.jobMetaData
-				.getEscalationProcedure(), this.escalationProcedure);
+		this.recordReturn(this.jobMetaData,
+				this.jobMetaData.getEscalationProcedure(),
+				this.escalationProcedure);
 		EscalationFlow escalation = (isHandled ? this.escalation : null);
 		if (functionalityJob.parallelOwnerJob == null) {
 			// No parallel owner, so handle by job
-			this
-					.recordReturn(this.escalationProcedure,
-							this.escalationProcedure.getEscalation(failure),
-							escalation);
+			this.recordReturn(this.escalationProcedure,
+					this.escalationProcedure.getEscalation(failure), escalation);
 		} else {
 			// Parallel owner, so handle by job
 			this.recordReturn(this.escalationProcedure,
@@ -497,10 +517,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			this.recordReturn(functionalityJob.parallelOwnerJob,
 					functionalityJob.parallelOwnerJob.getEscalationProcedure(),
 					this.escalationProcedure);
-			this
-					.recordReturn(this.escalationProcedure,
-							this.escalationProcedure.getEscalation(failure),
-							escalation);
+			this.recordReturn(this.escalationProcedure,
+					this.escalationProcedure.getEscalation(failure), escalation);
 			this.recordReturn(functionalityJob.parallelOwnerJob,
 					functionalityJob.parallelOwnerJob.getParallelOwner(), null);
 		}
@@ -527,12 +545,13 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_JobContainer_globalEscalation(Job job,
 			Throwable failure, EscalationLevel handledLevel) {
-		this.recordReturn(this.threadState, this.threadState
-				.getEscalationLevel(), EscalationLevel.FLOW);
+		this.recordReturn(this.threadState,
+				this.threadState.getEscalationLevel(), EscalationLevel.FLOW);
 
 		// Handled by the office escalation procedure
-		this.recordReturn(this.processState, this.processState
-				.getOfficeEscalationProcedure(), this.escalationProcedure);
+		this.recordReturn(this.processState,
+				this.processState.getOfficeEscalationProcedure(),
+				this.escalationProcedure);
 		if (handledLevel == EscalationLevel.OFFICE) {
 			this.recordReturn(this.escalationProcedure,
 					this.escalationProcedure.getEscalation(failure),
@@ -542,25 +561,26 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			this.escalationJob.activateJob();
 			return;
 		}
-		this.recordReturn(this.escalationProcedure, this.escalationProcedure
-				.getEscalation(failure), null);
+		this.recordReturn(this.escalationProcedure,
+				this.escalationProcedure.getEscalation(failure), null);
 
 		// Handled by the managed object source escalation handler
 		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
-			this.recordReturn(this.processState, this.processState
-					.getManagedObjectSourceEscalation(), this.escalation);
+			this.recordReturn(this.processState,
+					this.processState.getManagedObjectSourceEscalation(),
+					this.escalation);
 			this.threadState
 					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
 			this.record_JobContainer_createEscalationJob(failure, null);
 			this.escalationJob.activateJob();
 			return;
 		}
-		this.recordReturn(this.processState, this.processState
-				.getManagedObjectSourceEscalation(), null);
+		this.recordReturn(this.processState,
+				this.processState.getManagedObjectSourceEscalation(), null);
 
 		// Handled by the office floor escalation
-		this.recordReturn(this.processState, this.processState
-				.getOfficeFloorEscalation(), this.escalation);
+		this.recordReturn(this.processState,
+				this.processState.getOfficeFloorEscalation(), this.escalation);
 		this.threadState.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
 		this.record_JobContainer_createEscalationJob(failure, null);
 		this.escalationJob.activateJob();
@@ -583,8 +603,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.escalationTaskMetaData);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
-		this.recordReturn(this.threadState, this.threadState
-				.createFlow(this.escalationFlowMetaData), this.escalationFlow);
+		this.recordReturn(this.threadState,
+				this.threadState.createFlow(this.escalationFlowMetaData),
+				this.escalationFlow);
 		this.recordReturn(this.escalationFlow, this.escalationFlow
 				.createJobNode(this.escalationTaskMetaData, parallelOwner,
 						failure), this.escalationJob);

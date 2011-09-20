@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 
 /**
  * Tests {@link AsynchronousManagedObject} doing asynchronous operations.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AsyncOperationManagedObjectContainerTest extends
@@ -33,7 +33,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 *
+	 * 
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -43,20 +43,14 @@ public class AsyncOperationManagedObjectContainerTest extends
 				new MetaDataScenarioFilter() {
 					@Override
 					public boolean isFilter(boolean isNameAware,
-							boolean isAsynchronous,
-							boolean isCoordinating, boolean isPooled,
-							boolean isRecycled) {
+							boolean isAsynchronous, boolean isCoordinating,
+							boolean isPooled, boolean isRecycled) {
 						// Only asynchronous managed object
 						return !isAsynchronous;
 					}
 				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#runTest()
-	 */
 	@Override
 	protected void runTest() throws Throwable {
 
@@ -66,6 +60,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_governManagedObject();
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
@@ -74,8 +69,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 		this.record_AsynchronousListener_notifyStart();
 
 		// Record managed object not ready as in asynchronous operation
-		this
-				.record_MoContainer_isManagedObjectReady(ReadyState.IN_ASYNC_OPERATION);
+		this.record_MoContainer_isManagedObjectReady(ReadyState.IN_ASYNC_OPERATION);
 
 		// Record asynchronous operation completed
 		this.record_AsynchronousListener_notifyComplete();
@@ -92,6 +86,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
 		this.loadManagedObject(mo);
+		this.governManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);

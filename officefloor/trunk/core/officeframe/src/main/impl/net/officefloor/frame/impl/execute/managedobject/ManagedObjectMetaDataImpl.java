@@ -25,6 +25,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -46,7 +47,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Meta-data of the {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
@@ -124,6 +125,12 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final AssetManager operationsManager;
 
 	/**
+	 * {@link ManagedObjectGovernanceMetaData} instances applicable to this
+	 * {@link ManagedObject}.
+	 */
+	private final ManagedObjectGovernanceMetaData<?>[] governanceMetaData;
+
+	/**
 	 * {@link OfficeMetaData} containing this {@link ManagedObjectMetaData} to
 	 * create the {@link Job} instances.
 	 */
@@ -137,7 +144,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} bound within the
 	 *            {@link ManagedObjectScope}.
@@ -171,6 +178,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @param timeout
 	 *            Timeout of an asynchronous operation by the
 	 *            {@link ManagedObject} being managed.
+	 * @param governanceMetaData
+	 *            {@link ManagedObjectGovernanceMetaData} instances applicable
+	 *            to this {@link ManagedObject}.
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
 			Class<?> objectType, int instanceIndex,
@@ -179,7 +189,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
-			ManagedObjectIndex[] dependencyMapping, long timeout) {
+			ManagedObjectIndex[] dependencyMapping, long timeout,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
 		this.instanceIndex = instanceIndex;
@@ -192,11 +203,12 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		this.isManagedObjectAsynchronous = isManagedObjectAsynchronous;
 		this.sourcingManager = sourcingManager;
 		this.operationsManager = operationsManager;
+		this.governanceMetaData = governanceMetaData;
 	}
 
 	/**
 	 * Loads the remaining state of this {@link ManagedObjectMetaData}.
-	 *
+	 * 
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} of the {@link Office} containing this
 	 *            {@link ManagedObjectMetaData}.
@@ -291,6 +303,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
+	public ManagedObjectGovernanceMetaData<?>[] getGovernanceMetaData() {
+		return this.governanceMetaData;
+	}
+
+	@Override
 	public JobNode createRecycleJobNode(ManagedObject managedObject) {
 		if (this.recycleFlowMetaData == null) {
 			// No recycling for managed objects
@@ -332,7 +349,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param managedObject
 		 *            {@link ManagedObject} to recycle.
 		 */

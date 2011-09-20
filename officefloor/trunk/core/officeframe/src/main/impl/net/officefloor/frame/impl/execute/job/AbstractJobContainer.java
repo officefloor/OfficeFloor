@@ -45,6 +45,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
@@ -262,7 +263,26 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 													executionContext, this,
 													activateSet);
 
-									// Flag Managed Objects are being loaded
+									// Flag Managed Objects are now to be
+									// governed
+									this.jobState = JobState.GOVERN_MANAGED_OBJECTS;
+
+								case GOVERN_MANAGED_OBJECTS:
+									// Govern the managed objects.
+									// (Handles managed objects not ready)
+									boolean isGoverned = this.workContainer
+											.governManagedObjects(
+													this.requiredManagedObjects,
+													executionContext, this,
+													activateSet);
+
+									// Determine if managed objects governed
+									if (!isGoverned) {
+										// Woken when ready to govern again
+										return true;
+									}
+
+									// Flag Managed Objects are governed
 									this.jobState = JobState.COORDINATE_MANAGED_OBJECTS;
 
 								case COORDINATE_MANAGED_OBJECTS:
@@ -1106,6 +1126,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		 * loaded.
 		 */
 		LOAD_MANAGED_OBJECTS,
+
+		/**
+		 * Indicates the {@link ManagedObject} instances require
+		 * {@link Governance}.
+		 */
+		GOVERN_MANAGED_OBJECTS,
 
 		/**
 		 * Indicates the {@link ManagedObject} instances require coordinating.

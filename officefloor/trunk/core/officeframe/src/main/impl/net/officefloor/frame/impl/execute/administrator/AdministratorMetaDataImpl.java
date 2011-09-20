@@ -109,7 +109,7 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 
 	@Override
 	public AdministratorContainer<I, A> createAdministratorContainer() {
-		return new AdministratorContainerImpl<I, A, None>(this);
+		return new AdministratorContainerImpl<I, A, None, None>(this);
 	}
 
 	@Override

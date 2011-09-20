@@ -23,12 +23,16 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -65,10 +69,22 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	private final RawManagedObjectMetaData<D, ?> rawMoMetaData;
 
 	/**
+	 * {@link RawGovernanceMetaData} of the {@link Office} by its {@link Office}
+	 * registered name.
+	 */
+	private final Map<String, RawGovernanceMetaData> rawGovernanceMetaData;
+
+	/**
 	 * Listing of the {@link ManagedObjectDependencyConfiguration} for the
 	 * {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
 	private final ManagedObjectDependencyConfiguration<D>[] dependenciesConfiguration;
+
+	/**
+	 * Listing of the {@link ManagedObjectGovernanceConfiguration} for the
+	 * {@link RawBoundManagedObjectInstanceMetaData}.
+	 */
+	private final ManagedObjectGovernanceConfiguration[] governanceConfiguration;
 
 	/**
 	 * Dependencies.
@@ -93,20 +109,31 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 *            within its containing {@link RawBoundManagedObjectMetaData}.
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
+	 * @param rawGovernanceMetaData
+	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
+	 *            {@link Office} registered name.
 	 * @param dependenciesConfiguration
 	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
+	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param governanceConfiguration
+	 *            Listing of the {@link ManagedObjectGovernanceConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
 	public RawBoundManagedObjectInstanceMetaDataImpl(
 			String boundManagedObjectName,
-			RawBoundManagedObjectMetaData rawBoundMetaData, int instanceIndex,
+			RawBoundManagedObjectMetaData rawBoundMetaData,
+			int instanceIndex,
 			RawManagedObjectMetaData<D, ?> rawMoMetaData,
-			ManagedObjectDependencyConfiguration<D>[] dependenciesConfiguration) {
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaData,
+			ManagedObjectDependencyConfiguration<D>[] dependenciesConfiguration,
+			ManagedObjectGovernanceConfiguration[] governanceConfiguration) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.rawBoundMetaData = rawBoundMetaData;
 		this.instanceIndex = instanceIndex;
 		this.rawMoMetaData = rawMoMetaData;
+		this.rawGovernanceMetaData = rawGovernanceMetaData;
 		this.dependenciesConfiguration = dependenciesConfiguration;
+		this.governanceConfiguration = governanceConfiguration;
 	}
 
 	/**
@@ -289,11 +316,14 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 			}
 		}
 
+		// TODO Obtain the governance meta-data
+		ManagedObjectGovernanceMetaData<?>[] governanceMetaData = new ManagedObjectGovernanceMetaData[0];
+
 		// Create and specify the managed object meta-data
 		this.managedObjectMetaData = this.rawMoMetaData
 				.createManagedObjectMetaData(this.rawBoundMetaData,
 						this.instanceIndex, this, dependencyMappings,
-						assetManagerFactory, issues);
+						governanceMetaData, assetManagerFactory, issues);
 	}
 
 	/*

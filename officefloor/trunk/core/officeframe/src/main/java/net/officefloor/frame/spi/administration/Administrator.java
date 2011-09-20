@@ -35,6 +35,6 @@ public interface Administrator<I, A extends Enum<A>> {
 	 *            {@link DutyKey} identifying the {@link Duty}.
 	 * @return {@link Duty}.
 	 */
-	Duty<I, ?> getDuty(DutyKey<A> dutyKey);
+	Duty<I, ?, ?> getDuty(DutyKey<A> dutyKey);
 
 }

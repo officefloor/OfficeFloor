@@ -199,7 +199,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 							issues, ManagedObjectScope.WORK, AssetType.WORK,
 							workName, assetManagerFactory,
 							rawOfficeMetaData.getManagedObjectMetaData(),
-							officeScopeMo, null, null);
+							officeScopeMo, null, null,
+							rawOfficeMetaData.getGovernanceMetaData());
 		}
 
 		// Create the work scope managed objects available to tasks
@@ -362,12 +363,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
+	public void linkOfficeMetaData(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Link tasks of work bound administrators
 		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdminMetaData : this.workAdministrators) {
-			rawBoundAdminMetaData.linkTasks(taskMetaDataLocator,
+			rawBoundAdminMetaData.linkOfficeMetaData(taskMetaDataLocator,
 					assetManagerFactory, issues);
 		}
 

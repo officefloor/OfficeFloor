@@ -47,6 +47,7 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -701,6 +702,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
 				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
 						boundInstanceMetaData, new ManagedObjectIndex[0],
+						new ManagedObjectGovernanceMetaData[0],
 						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
@@ -784,6 +786,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
 				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
 						boundInstanceMetaData, new ManagedObjectIndex[0],
+						new ManagedObjectGovernanceMetaData[0],
 						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
@@ -864,6 +867,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
 				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
 						boundInstanceMetaData, new ManagedObjectIndex[0],
+						new ManagedObjectGovernanceMetaData[0],
 						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
@@ -919,6 +923,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
 				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
 						boundInstanceMetaData, new ManagedObjectIndex[0],
+						new ManagedObjectGovernanceMetaData[0],
 						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
@@ -973,6 +978,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectMetaData<?> moMetaData = rawMetaData
 				.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
 						boundInstanceMetaData, new ManagedObjectIndex[0],
+						new ManagedObjectGovernanceMetaData[0],
 						this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 

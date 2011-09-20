@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -38,6 +38,7 @@ import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFac
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
@@ -571,8 +572,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.recordReturn(rawAdminMetaData,
 				rawAdminMetaData.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
-		rawAdminMetaData.linkTasks(taskLocator, this.assetManagerFactory,
-				this.issues);
+		rawAdminMetaData.linkOfficeMetaData(taskLocator,
+				this.assetManagerFactory, this.issues);
 		task.rawTaskMetaData.linkTasks(taskLocator, null,
 				this.assetManagerFactory, this.issues);
 		this.control(task.rawTaskMetaData).setMatcher(new AbstractMatcher() {
@@ -592,7 +593,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Fully construct work
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.fullyConstructRawWorkMetaData();
-		metaData.linkTasks(taskLocator, this.assetManagerFactory, this.issues);
+		metaData.linkOfficeMetaData(taskLocator, this.assetManagerFactory,
+				this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -638,16 +640,19 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			this.recordReturn(this.rawOfficeMetaData,
 					this.rawOfficeMetaData.getManagedObjectMetaData(),
 					officeRegisteredManagedObjects);
-			this.recordReturn(
-					this.rawBoundManagedObjectFactory,
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData>();
+			this.recordReturn(this.rawOfficeMetaData,
+					this.rawOfficeMetaData.getGovernanceMetaData(),
+					rawGovernanceMetaData);
+			this.recordReturn(this.rawBoundManagedObjectFactory,
 					this.rawBoundManagedObjectFactory
 							.constructBoundManagedObjectMetaData(
 									moConfiguration, this.issues,
 									ManagedObjectScope.WORK, AssetType.WORK,
 									WORK_NAME, this.assetManagerFactory,
 									officeRegisteredManagedObjects,
-									this.officeScopeManagedObjects, null, null),
-					workBoundMo);
+									this.officeScopeManagedObjects, null, null,
+									rawGovernanceMetaData), workBoundMo);
 			for (int i = 0; i < moCount; i++) {
 				this.recordReturn(workBoundMo[i],
 						workBoundMo[i].getBoundManagedObjectName(),

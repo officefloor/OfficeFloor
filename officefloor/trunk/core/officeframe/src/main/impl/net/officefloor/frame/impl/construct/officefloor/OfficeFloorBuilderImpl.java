@@ -30,6 +30,7 @@ import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
+import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataImpl;
@@ -178,6 +179,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 						issuesListener, RawTeamMetaDataImpl.getFactory(),
 						RawManagedObjectMetaDataImpl.getFactory(),
 						RawBoundManagedObjectMetaDataImpl.getFactory(),
+						RawGovernanceMetaDataImpl.getFactory(),
 						RawBoundAdministratorMetaDataImpl.getFactory(),
 						RawOfficeMetaDataImpl.getFactory(),
 						RawWorkMetaDataImpl.getFactory(),

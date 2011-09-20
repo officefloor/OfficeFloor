@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -30,14 +31,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Factory for the creation of {@link RawBoundManagedObjectMetaData}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface RawBoundManagedObjectMetaDataFactory {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
-	 *
+	 * 
 	 * @param boundManagedObjectConfiguration
 	 *            {@link ManagedObjectConfiguration} of the
 	 *            {@link RawBoundManagedObjectMetaData} instances.
@@ -68,6 +69,9 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *            {@link ManagedObject} instances bound to the same name.
 	 *            Mapping is of input {@link ManagedObject} name to the default
 	 *            {@link ManagedObjectSource} name.
+	 * @param governanceMetaData
+	 *            {@link RawGovernanceMetaData} by its {@link Office} registered
+	 *            name.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
 	 */
@@ -81,6 +85,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			RawManagingOfficeMetaData<?>[] inputManagedObjects,
-			Map<String, String> boundInputManagedObjects);
+			Map<String, String> boundInputManagedObjects,
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaData);
 
 }

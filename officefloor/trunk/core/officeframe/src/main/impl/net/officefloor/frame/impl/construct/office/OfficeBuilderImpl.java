@@ -24,6 +24,7 @@ import java.util.List;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.WorkBuilder;
@@ -51,6 +52,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -205,6 +207,14 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 				processManagedObjectName, officeManagedObjectName);
 		this.processManagedObjects.add(builder);
 		return builder;
+	}
+
+	@Override
+	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
+			String governanceName, Class<GS> governanceSource) {
+		// TODO implement OfficeBuilder.addGovernance
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeBuilder.addGovernance");
 	}
 
 	@Override

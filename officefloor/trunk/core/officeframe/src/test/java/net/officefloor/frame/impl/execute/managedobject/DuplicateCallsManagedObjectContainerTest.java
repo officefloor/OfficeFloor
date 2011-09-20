@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 /**
  * Tests duplicate calls to the {@link ManagedObjectContainer} when re-used
  * across {@link ProcessState}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DuplicateCallsManagedObjectContainerTest extends
@@ -34,7 +34,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 
 	/**
 	 * Creates all combinations of meta-data for testing.
-	 *
+	 * 
 	 * @return {@link TestSuite} containing tests for all combinations of
 	 *         meta-data.
 	 */
@@ -42,11 +42,6 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		return createMetaDataCombinationTestSuite(DuplicateCallsManagedObjectContainerTest.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see junit.framework.TestCase#runTest()
-	 */
 	@Override
 	protected void runTest() throws Throwable {
 
@@ -56,6 +51,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_governManagedObject();
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
@@ -70,6 +66,10 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		// Attempt to load twice (with only first taking effect)
 		this.loadManagedObject(mo);
 		this.loadManagedObject(mo);
+
+		// Attempt to govern twice (with only first taking effect)
+		this.governManagedObject(mo, true);
+		this.governManagedObject(mo, true);
 
 		// Attempt to coordinate twice (with only first taking effect)
 		this.coordinateManagedObject(mo, true);

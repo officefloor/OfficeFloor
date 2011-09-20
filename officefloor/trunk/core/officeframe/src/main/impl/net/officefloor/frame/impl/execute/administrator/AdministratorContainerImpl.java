@@ -26,24 +26,26 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.spi.administration.GovernanceManager;
 
 /**
  * Implementation of an {@link AdministratorContainer}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F extends Enum<F>>
+public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F extends Enum<F>, G extends Enum<G>>
 		implements AdministratorContainer<I, A> {
 
 	/**
 	 * {@link DutyContext} that exposes only the required functionality.
 	 */
-	private final DutyContext<I, F> dutyContextToken = new DutyContextToken();
+	private final DutyContext<I, F, G> dutyContextToken = new DutyContextToken();
 
 	/**
 	 * {@link AdministratorMetaData}.
@@ -109,7 +111,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		DutyKey<A> key = taskDuty.getDutyKey();
 
 		// Obtain the duty
-		Duty<I, F> duty = (Duty<I, F>) this.administrator.getDuty(key);
+		Duty<I, F, G> duty = (Duty<I, F, G>) this.administrator.getDuty(key);
 
 		// Specify state
 		this.adminContext = context;
@@ -128,7 +130,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 * just the necessary functionality and prevents access to internals of the
 	 * framework.
 	 */
-	private final class DutyContextToken implements DutyContext<I, F> {
+	private final class DutyContextToken implements DutyContext<I, F, G> {
 
 		/*
 		 * ==================== DutyContext ===================================
@@ -154,6 +156,27 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 			// Do the flow
 			AdministratorContainerImpl.this.adminContext.doFlow(flowMetaData,
 					parameter);
+		}
+
+		@Override
+		public GovernanceManager getGovernance(G key) {
+			return this.getGovernance(key.ordinal());
+		}
+
+		@Override
+		public GovernanceManager getGovernance(int governanceIndex) {
+
+			// Obtain the process index for the governance
+			int processIndex = AdministratorContainerImpl.this.dutyMetaData
+					.translateGovernanceIndexToProcess(governanceIndex);
+
+			// Obtain the governance container
+			GovernanceContainer container = AdministratorContainerImpl.this.adminContext
+					.getThreadState().getProcessState()
+					.getGovernanceContainer(processIndex);
+
+			// Obtain and return the governance manager
+			return container.getGovernanceManager();
 		}
 	}
 

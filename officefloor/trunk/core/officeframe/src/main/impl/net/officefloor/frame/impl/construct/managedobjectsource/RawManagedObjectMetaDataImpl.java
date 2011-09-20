@@ -37,6 +37,7 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -430,6 +431,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
 			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData,
 			ManagedObjectIndex[] dependencyMappings,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Obtain the bound name and scope
@@ -484,7 +486,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 				this.managedObjectSource, this.managedObjectPool,
 				this.isNameAware, sourcingAssetManager, this.isAsynchronous,
 				operationsAssetManager, this.isCoordinating,
-				dependencyMappings, this.timeout);
+				dependencyMappings, this.timeout, governanceMetaData);
 
 		// Have the managed object managed by its managing office
 		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);

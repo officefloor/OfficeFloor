@@ -19,19 +19,20 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container managing the {@link Work}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface WorkContainer<W extends Work> {
 
 	/**
 	 * Obtains the {@link Work} being managed.
-	 *
+	 * 
 	 * @param threadState
 	 *            {@link ThreadState} requiring the {@link Work}.
 	 * @return {@link Work} being managed.
@@ -40,7 +41,7 @@ public interface WorkContainer<W extends Work> {
 
 	/**
 	 * Triggers for the particular {@link ManagedObject} instances to be loaded.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be loaded.
@@ -58,8 +59,31 @@ public interface WorkContainer<W extends Work> {
 			JobNodeActivateSet activateSet);
 
 	/**
+	 * Governs the {@link ManagedObject} instances.
+	 * 
+	 * @param managedObjectIndexes
+	 *            {@link ManagedObjectIndex} instances identifying the
+	 *            {@link ManagedObject} instances for {@link Governance}.
+	 * @param jobContext
+	 *            Context for executing the {@link JobNode}.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} instances
+	 *            for {@link Governance}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
+	 * @return <code>true</code> if the {@link ManagedObject} instances were
+	 *         under {@link Governance}. <code>false</code> indicates this
+	 *         method must be called again for {@link Governance} of the
+	 *         {@link ManagedObject} instances.
+	 */
+	boolean governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet);
+
+	/**
 	 * Coordinates the {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be coordinated.
@@ -83,7 +107,7 @@ public interface WorkContainer<W extends Work> {
 	 * Indicates if the particular {@link ManagedObject} is ready for use. In
 	 * other words it has finished any asynchronous operations and is ready for
 	 * further use.
-	 *
+	 * 
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to check if ready.
@@ -106,7 +130,7 @@ public interface WorkContainer<W extends Work> {
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input
 	 * {@link TaskDutyAssociation}.
-	 *
+	 * 
 	 * @param duty
 	 *            {@link TaskDutyAssociation} specifying the administration to
 	 *            be undertaken.
@@ -120,7 +144,7 @@ public interface WorkContainer<W extends Work> {
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.
-	 *
+	 * 
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} identifying the
 	 *            {@link ManagedObject}.
@@ -131,7 +155,7 @@ public interface WorkContainer<W extends Work> {
 
 	/**
 	 * Unloads the {@link Work}.
-	 *
+	 * 
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.

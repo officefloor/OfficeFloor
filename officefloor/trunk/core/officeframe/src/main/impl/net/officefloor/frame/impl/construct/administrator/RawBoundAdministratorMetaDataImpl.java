@@ -38,6 +38,7 @@ import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
+import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
@@ -54,6 +55,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -545,7 +547,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 */
 
 	@Override
-	public void linkTasks(OfficeMetaDataLocator taskLocator,
+	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the set of required duties to ensure they are configured
@@ -612,9 +614,45 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 								+ " Flow " + i, issues);
 			}
 
+			// Obtain the governance mapping for the duty
+			DutyGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
+					.getGovernanceConfiguration();
+			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
+			GovernanceMetaData[] governanceMetaDatas = taskLocator
+					.getOfficeMetaData().getProcessMetaData()
+					.getGovernanceMetaData();
+			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
+
+				// Index of governance for the duty
+				int dutyGovernanceIndex = dutyGovernanceConfiguration
+						.getIndex();
+
+				// Obtain the governance
+				String governanceName = dutyGovernanceConfiguration
+						.getGovernanceName();
+				int processGovernanceIndex = -1;
+				for (int i = 0; i < governanceMetaDatas.length; i++) {
+					GovernanceMetaData governanceMetaData = governanceMetaDatas[i];
+					if (governanceName.equals(governanceMetaData
+							.getGovernanceName())) {
+						processGovernanceIndex = i; // found governance
+					}
+				}
+				if (processGovernanceIndex < 0) {
+					// Did not find the process governance
+					issues.addIssue(AssetType.ADMINISTRATOR,
+							this.boundAdministratorName,
+							"Can not find governance " + governanceName
+									+ " for duty " + dutyName);
+				}
+
+				// Specify the governance mapping
+				governanceMapping[dutyGovernanceIndex] = processGovernanceIndex;
+			}
+
 			// Create and register the duty meta-data
 			dutyMetaData.put(new Integer(dutyKey.getIndex()),
-					new DutyMetaDataImpl(dutyFlows));
+					new DutyMetaDataImpl(dutyFlows, governanceMapping));
 		}
 
 		// Must have configuration for each required duty

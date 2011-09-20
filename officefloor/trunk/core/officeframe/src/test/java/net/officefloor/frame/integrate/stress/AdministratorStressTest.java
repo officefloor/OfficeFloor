@@ -48,7 +48,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Tests the {@link Administrator}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
@@ -73,7 +73,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the {@link Administrator} stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
@@ -177,7 +177,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param preTaskValue
 		 *            Pre task value.
 		 * @param postTaskValue
@@ -194,7 +194,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Setup task that runs the administered {@link Task}.
-		 *
+		 * 
 		 * @param flow
 		 *            {@link ReflectiveFlow}.
 		 * @param context
@@ -229,7 +229,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Administered {@link Task}.
-		 *
+		 * 
 		 * @param object
 		 *            {@link AdministeredObject}.
 		 */
@@ -251,7 +251,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Invoked to do the administration by the {@link Administrator}.
-		 *
+		 * 
 		 * @param administeredValue
 		 *            Administered value.
 		 */
@@ -330,7 +330,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 			extends
 			AbstractAdministratorSource<AdministeredExtensionInterface, Indexed>
 			implements Administrator<AdministeredExtensionInterface, Indexed>,
-			Duty<AdministeredExtensionInterface, None> {
+			Duty<AdministeredExtensionInterface, None, None> {
 
 		/**
 		 * Administration value property name.
@@ -375,7 +375,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Duty<AdministeredExtensionInterface, ?> getDuty(
+		public Duty<AdministeredExtensionInterface, ?, ?> getDuty(
 				DutyKey<Indexed> dutyKey) {
 			return this;
 		}
@@ -386,7 +386,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public void doDuty(
-				DutyContext<AdministeredExtensionInterface, None> context)
+				DutyContext<AdministeredExtensionInterface, None, None> context)
 				throws Throwable {
 			for (AdministeredExtensionInterface object : context
 					.getExtensionInterfaces()) {

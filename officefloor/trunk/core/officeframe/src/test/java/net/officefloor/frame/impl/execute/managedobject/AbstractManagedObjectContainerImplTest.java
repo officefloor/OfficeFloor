@@ -36,6 +36,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -123,8 +124,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 							String testNamePrefix = testCaseClass
 									.getSimpleName();
 							String testNameSuffix = ManagedObjectContainer.class
-									.getSimpleName()
-									+ "Test";
+									.getSimpleName() + "Test";
 							testNamePrefix = testNamePrefix.replace(
 									testNameSuffix, "");
 
@@ -418,6 +418,11 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 					this.operationsAssetMonitor, new TypeMatcher(
 							ManagedObjectContainerImpl.class));
 		}
+
+		// Obtain the governance meta-data
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.getGovernanceMetaData(),
+				new ManagedObjectGovernanceMetaData[0]);
 	}
 
 	/**
@@ -447,8 +452,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 				// Source managed object if specified
 				if (isSourced) {
-					user
-							.setManagedObject(AbstractManagedObjectContainerImplTest.this.managedObject);
+					user.setManagedObject(AbstractManagedObjectContainerImplTest.this.managedObject);
 				}
 
 				// Indicate if have failure and not runtime (as will be thrown)
@@ -571,9 +575,32 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
-	 * Records coordinating {@link ManagedObject} that is still loading.
+	 * Records governing the {@link ManagedObject}.
 	 */
-	protected void record_MoContainer_coordinateManagedObject_stillLoading() {
+	protected void record_MoContainer_governManagedObject() {
+
+		// Ensure Managed Object ready
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.isManagedObjectAsynchronous(),
+				this.isAsynchronous);
+
+		// Obtain the governance
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.getGovernanceMetaData(),
+				new ManagedObjectGovernanceMetaData[0]);
+
+		// Obtain the process state
+		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getProcessState(),
+				this.processState);
+	}
+
+	/**
+	 * Records governing {@link ManagedObject} that is still loading.
+	 */
+	protected void record_MoContainer_governManagedObject_stillLoading() {
 		this.recordReturn(this.sourcingAssetMonitor, this.sourcingAssetMonitor
 				.waitOnAsset(this.jobNode, this.jobActivateSet), true);
 	}
@@ -616,10 +643,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				// Never time out but not ready
 				this.recordReturn(this.jobContext, this.jobContext.getTime(),
 						System.currentTimeMillis());
-				this
-						.recordReturn(this.managedObjectMetaData,
-								this.managedObjectMetaData.getTimeout(),
-								Long.MAX_VALUE);
+				this.recordReturn(this.managedObjectMetaData,
+						this.managedObjectMetaData.getTimeout(), Long.MAX_VALUE);
 				this.recordReturn(this.operationsAssetMonitor,
 						this.operationsAssetMonitor.waitOnAsset(this.jobNode,
 								this.jobActivateSet), true);
@@ -652,8 +677,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Obtain the object
 		try {
-			this.recordReturn(this.managedObject, this.managedObject
-					.getObject(), object);
+			this.recordReturn(this.managedObject,
+					this.managedObject.getObject(), object);
 		} catch (Throwable ex) {
 			fail("Should not have exception: " + ex.getMessage());
 		}
@@ -757,11 +782,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			// Escalates if timed out
 			if (isTimedOut) {
 				// Record setting into a failed state
-				this
-						.record_setFailedState(
-								((!isSourced) ? SourceManagedObjectTimedOutEscalation.class
-										: ManagedObjectOperationTimedOutEscalation.class),
-								this.jobActivateSet);
+				this.record_setFailedState(
+						((!isSourced) ? SourceManagedObjectTimedOutEscalation.class
+								: ManagedObjectOperationTimedOutEscalation.class),
+						this.jobActivateSet);
 				return;
 			}
 		}
@@ -798,8 +822,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 					public boolean matches(Object[] expected, Object[] actual) {
 						assertEquals("Incorrect activate set", activateSet,
 								actual[0]);
-						assertTrue("Incorrect escalation type", escalationType
-								.isInstance(actual[1]));
+						assertTrue("Incorrect escalation type",
+								escalationType.isInstance(actual[1]));
 						assertEquals("Incorrect permanent flag", true,
 								actual[2]);
 						return true;
@@ -913,9 +937,23 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            {@link ManagedObjectContainer}.
 	 */
 	protected void loadManagedObject(ManagedObjectContainer mo) {
-		mo
-				.loadManagedObject(this.jobContext, this.jobNode,
-						this.jobActivateSet);
+		mo.loadManagedObject(this.jobContext, this.jobNode, this.jobActivateSet);
+	}
+
+	/**
+	 * Govern the {@link ManagedObject}.
+	 * 
+	 * @param mo
+	 *            {@link ManagedObjectContainer}.
+	 * @param isExpectedGoverning
+	 *            Indicates if should be governed.
+	 */
+	protected void governManagedObject(ManagedObjectContainer mo,
+			boolean isExpectedGoverning) {
+		boolean isGoverning = mo.governManagedObject(this.workContainer,
+				this.jobContext, this.jobNode, this.jobActivateSet);
+		assertEquals("Incorrect indicating if governed", isExpectedGoverning,
+				isGoverning);
 	}
 
 	/**
@@ -1070,8 +1108,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		// Obtain the escalation and ensure correct type
 		Throwable failure = propagate.getCause();
 		assertNotNull("No escalation for propagate", failure);
-		assertEquals("Incorrect escalation type", escalationType, failure
-				.getClass());
+		assertEquals("Incorrect escalation type", escalationType,
+				failure.getClass());
 
 		// Cast to escalation
 		E escalation = (E) failure;
@@ -1101,8 +1139,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		E escalation = this.assert_Escalation(propagate, escalationType);
 
 		// Asset the correct object type
-		assertEquals("Incorrect object type", objectType, escalation
-				.getObjectType());
+		assertEquals("Incorrect object type", objectType,
+				escalation.getObjectType());
 
 		// Return the cause of the escalation
 		return escalation.getCause();

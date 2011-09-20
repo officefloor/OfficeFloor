@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Proxy for the {@link WorkContainer}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
@@ -42,7 +42,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 
 	/**
 	 * Initiate.
-	 *
+	 * 
 	 * @param delegate
 	 *            Delegate {@link WorkContainer}.
 	 */
@@ -74,6 +74,14 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 			JobNodeActivateSet notifySet) {
 		this.delegate.loadManagedObjects(managedObjectIndexes,
 				executionContext, jobNode, notifySet);
+	}
+
+	@Override
+	public boolean governManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet) {
+		return this.delegate.governManagedObjects(managedObjectIndexes,
+				jobContext, jobNode, activateSet);
 	}
 
 	@Override

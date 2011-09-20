@@ -90,7 +90,7 @@ public class AdministratorSourceStandAlone {
 	 *            Key identifying the {@link Duty}.
 	 * @return {@link Duty} for the key.
 	 */
-	public <I, A extends Enum<A>> Duty<I, ?> getDuty(
+	public <I, A extends Enum<A>> Duty<I, ?, ?> getDuty(
 			Administrator<I, A> administrator, A dutyKey) {
 		return administrator.getDuty(new DutyKeyImpl<A>(dutyKey));
 	}
@@ -105,7 +105,7 @@ public class AdministratorSourceStandAlone {
 	 * @return {@link Duty} for the index.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <I> Duty<I, ?> getDuty(Administrator<I, ?> administrator,
+	public <I> Duty<I, ?, ?> getDuty(Administrator<I, ?> administrator,
 			int dutyIndex) {
 		return administrator.getDuty(new DutyKeyImpl(dutyIndex));
 	}

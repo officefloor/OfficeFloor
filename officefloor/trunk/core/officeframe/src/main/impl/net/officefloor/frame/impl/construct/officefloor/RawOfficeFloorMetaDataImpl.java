@@ -41,6 +41,7 @@ import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
@@ -140,6 +141,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
+			RawGovernanceMetaDataFactory rawGovernanceFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
 			RawOfficeMetaDataFactory rawOfficeFactory,
 			RawWorkMetaDataFactory rawWorkFactory,
@@ -305,8 +307,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 					.constructRawOfficeMetaData(officeConfiguration,
 							sourceContext, issues,
 							officeManagingManagedObjects, rawMetaData,
-							rawBoundMoFactory, rawBoundAdminFactory,
-							rawWorkFactory, rawTaskFactory);
+							rawBoundMoFactory, rawGovernanceFactory,
+							rawBoundAdminFactory, rawWorkFactory,
+							rawTaskFactory);
 			if (rawOfficeMetaData == null) {
 				continue; // issue with office
 			}
