@@ -38,7 +38,9 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -116,7 +118,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
 				"WORK_MO", Object.class, 0, this.workMoSource, null, false,
 				new AssetManagerImpl(null), false, new AssetManagerImpl(null),
-				false, null, 1000);
+				false, null, 1000, new ManagedObjectGovernanceMetaData[0]);
 		workMo.loadRemainingState(null, null);
 
 		// Create the Work meta-data
@@ -286,7 +288,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		ManagedObjectMetaDataImpl<?> threadMoMetaData = new ManagedObjectMetaDataImpl(
 				"THREAD_MO", Object.class, 0, this.threadMoSource, null, false,
 				new AssetManagerImpl(null), false, new AssetManagerImpl(null),
-				false, null, 1000);
+				false, null, 1000, new ManagedObjectGovernanceMetaData[0]);
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				new ManagedObjectMetaData[] { threadMoMetaData },
 				new AdministratorMetaData[0]);
@@ -295,11 +297,13 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
 				"PROCESS_MO", Object.class, 0, this.processMoSource, null,
 				false, new AssetManagerImpl(null), true, new AssetManagerImpl(
-						null), false, null, 1000);
+						null), false, null, 1000,
+				new ManagedObjectGovernanceMetaData[0]);
 		processMoMetaData.loadRemainingState(null, null);
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				new ManagedObjectMetaData[] { processMoMetaData },
-				new AdministratorMetaData[0], threadMetaData);
+				new GovernanceMetaData[0], new AdministratorMetaData[0],
+				threadMetaData);
 
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,

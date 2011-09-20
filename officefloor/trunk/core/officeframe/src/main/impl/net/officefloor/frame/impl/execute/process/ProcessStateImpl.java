@@ -39,6 +39,8 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -116,6 +118,11 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ManagedObjectContainer} instances for the {@link ProcessState}.
 	 */
 	private final ManagedObjectContainer[] managedObjectContainers;
+
+	/**
+	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
+	 */
+	private final GovernanceContainer[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
@@ -214,6 +221,11 @@ public class ProcessStateImpl implements ProcessState {
 			this.managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(
 					inputManagedObject, inputManagedObjectMetaData, this);
 		}
+
+		// Create the array to reference the governances
+		GovernanceMetaData[] governanceMetaData = this.processMetaData
+				.getGovernanceMetaData();
+		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
 
 		// Create array to reference the administrators
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData
@@ -318,6 +330,14 @@ public class ProcessStateImpl implements ProcessState {
 					}
 				}
 
+				// Disregard governance as not enforced and process complete
+				for (int i = 0; i < this.governanceContainers.length; i++) {
+					GovernanceContainer container = this.governanceContainers[i];
+					if (container != null) {
+						container.disregardGovernance();
+					}
+				}
+
 				// Notify process context complete
 				for (ProcessContextListener listener : this.processContextListeners) {
 					listener.processCompleted(this.processIdentifier);
@@ -347,6 +367,20 @@ public class ProcessStateImpl implements ProcessState {
 			container = this.processMetaData.getManagedObjectMetaData()[index]
 					.createManagedObjectContainer(this);
 			this.managedObjectContainers[index] = container;
+		}
+		return container;
+	}
+
+	@Override
+	public GovernanceContainer getGovernanceContainer(int index) {
+		// Lazy load the Governance Container
+		// (This should be thread safe as should always be called within the
+		// Process lock of the Thread before the Job uses it).
+		GovernanceContainer container = this.governanceContainers[index];
+		if (container == null) {
+			container = this.processMetaData.getGovernanceMetaData()[index]
+					.createGovernanceContainer();
+			this.governanceContainers[index] = container;
 		}
 		return container;
 	}

@@ -21,19 +21,24 @@ package net.officefloor.frame.impl.execute.managedobject;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
+import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -81,6 +86,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * {@link ManagedObject} instance.
 	 */
 	private final AssetMonitor operationsMonitor;
+
+	/**
+	 * Listing of potential {@link ActiveGovernance}.
+	 */
+	private final ActiveGovernance[] activeGovernances;
 
 	/**
 	 * State of this {@link ManagedObjectContainer}.
@@ -150,6 +160,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// No operations managing required
 			this.operationsMonitor = null;
 		}
+
+		// Create the active governances
+		this.activeGovernances = new ActiveGovernance[this.metaData
+				.getGovernanceMetaData().length];
 	}
 
 	/**
@@ -293,6 +307,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			return;
 
 		case LOADED:
+		case GOVERNING:
+		case GOVERNED:
 		case COORDINATING:
 		case OBJECT_AVAILABLE:
 			// Managed Object loaded
@@ -303,6 +319,127 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// (only unloaded when no interest in this managed object)
 			throw new IllegalStateException(
 					"Can not load an unloaded ManagedObject");
+
+		default:
+			throw new IllegalStateException("Unknown container state "
+					+ this.containerState);
+		}
+	}
+
+	@Override
+	public <W extends Work> boolean governManagedObject(
+			WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet) {
+
+		// Access Point: JobContainer via WorkContainer
+		// Locks: ThreadState -> ProcessState
+
+		// Always propagate any failure to the Job container to handle
+		if (this.failure != null) {
+			throw this.failure;
+		}
+
+		// Handle based on state
+		switch (this.containerState) {
+		case NOT_LOADED:
+			// Should never be called before loadManagedObject
+			throw new IllegalStateException(
+					"loadManagedObject must be called before governManagedObject");
+
+		case LOADING:
+			// Still loading managed object so wait until loaded
+			if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
+				throw new IllegalStateException(
+						"Must be able to wait until Managed Object loaded");
+			}
+			return false;
+
+		case LOADED:
+			// Flag now attempting to govern
+			this.containerState = ManagedObjectContainerState.GOVERNING;
+
+		case GOVERNING:
+			// Continue to setup governance
+
+			// Ensure this managed object is ready
+			if (!this.checkManagedObjectReady(jobContext, workContainer,
+					jobNode, activateSet, ManagedObjectContainerState.LOADED)) {
+				// This object must be ready before governing it
+				return false;
+			}
+
+			// Identify the applicable governance for this managed object
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaDatas = this.metaData
+					.getGovernanceMetaData();
+
+			// Iterate over governance and govern by active governance
+			ProcessState process = jobNode.getFlow().getThreadState()
+					.getProcessState();
+			NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
+				ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
+
+				// Determine if governance is active
+				int governanceIndex = governanceMetaData.getGovernanceIndex();
+				GovernanceContainer governance = process
+						.getGovernanceContainer(governanceIndex);
+				if (governance == null) {
+					continue NEXT_GOVERNANCE; // not active
+				}
+
+				// Determine if already governed by governance
+				ActiveGovernance activeGovernance = this.activeGovernances[i];
+				if (activeGovernance != null) {
+
+					// Determine if active
+					if (!activeGovernance.isActive()) {
+						// Still waiting on being active
+						if (!this.sourcingMonitor.waitOnAsset(jobNode,
+								activateSet)) {
+							throw new IllegalStateException(
+									"Must be able to wait until Managed Object governed");
+						}
+						return false;
+					}
+
+					continue NEXT_GOVERNANCE; // already active
+				}
+
+				// Obtain the extension interface
+				ExtensionInterfaceExtractor<?> extractor = governanceMetaData
+						.getExtensionInterfaceExtractor();
+				Object extensionInterface = this
+						.extractExtensionInterface(extractor);
+
+				// Register for governance
+				activeGovernance = governance.governManagedObject(
+						extensionInterface, this);
+				this.activeGovernances[i] = activeGovernance;
+
+				// Determine if governance activated
+				if (!activeGovernance.isActive()) {
+					// Still waitin on being active
+					if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
+						throw new IllegalStateException(
+								"Must be able to wait until Managed Object loaded");
+					}
+					return false;
+				}
+			}
+
+			// Now governed
+			this.containerState = ManagedObjectContainerState.GOVERNED;
+
+		case GOVERNED:
+		case COORDINATING:
+		case OBJECT_AVAILABLE:
+			// Successfully now governed, or governance ready
+			return true;
+
+		case UNLOADING:
+			// Should never be called in this state
+			// (only unloaded when no interest in this managed object)
+			throw new IllegalStateException(
+					"Can not coordinate an unloaded ManagedObject");
 
 		default:
 			throw new IllegalStateException("Unknown container state "
@@ -327,19 +464,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Handle based on state
 		switch (this.containerState) {
 		case NOT_LOADED:
-			// Should never be called before loadManagedObject
-			throw new IllegalStateException(
-					"loadManagedObject must be called before coordinateManagedObject");
-
 		case LOADING:
-			// Still loading managed object so wait until loaded
-			if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
-				throw new IllegalStateException(
-						"Must be able to wait until Managed Object loaded");
-			}
-			return false;
-
 		case LOADED:
+		case GOVERNING:
+			// Should never be called before governManagedObject
+			throw new IllegalStateException(
+					"governManagedObject must be called before coordinateManagedObject");
+
+		case GOVERNED:
 			// Determine if require coordinating Managed Object
 			if (this.metaData.isCoordinatingManagedObject()) {
 
@@ -353,7 +485,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Ensure this managed object is ready
 				if (!this.checkManagedObjectReady(executionContext,
 						workContainer, jobNode, activateSet,
-						ManagedObjectContainerState.LOADED)) {
+						ManagedObjectContainerState.GOVERNED)) {
 					// This object must be ready before coordinating it
 					return false;
 				}
@@ -457,7 +589,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *            to be in any other state other than this one.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready.
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private boolean checkManagedObjectReady(JobContext executionContext,
 			WorkContainer workContainer, JobNode jobNode,
 			JobNodeActivateSet activateSet,
@@ -472,6 +604,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		case LOADING:
 		case LOADED:
+		case GOVERNING:
+		case GOVERNED:
 		case COORDINATING:
 		case OBJECT_AVAILABLE:
 
@@ -531,11 +665,29 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 				// Chaining of coordination causes dependency to only be loaded
 				switch (this.containerState) {
+				case GOVERNING:
+					// Only ready if expected loaded for governing
+					return (expectedContainerState == ManagedObjectContainerState.LOADED);
+
 				case LOADED:
+					// Loaded, now need governing
+					boolean isGoverned = this.governManagedObject(
+							workContainer, executionContext, jobNode,
+							activateSet);
+					if (!isGoverned) {
+						return false; // Waiting on governance
+					}
+					// Governance in place, so continue on to coordinate
+
+				case GOVERNED:
 					// As this a dependency loaded but not coordinated.
 					// If coordination successful then ready.
 					return this.coordinateManagedObject(workContainer,
 							executionContext, jobNode, activateSet);
+
+				case OBJECT_AVAILABLE:
+					// Object available and ready
+					return true;
 				}
 
 				// Fail as not expected state
@@ -908,6 +1060,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		 * {@link ManagedObjectSource}.
 		 */
 		LOADED,
+
+		/**
+		 * Indicates the {@link ManagedObject} has been loaded and is not in the
+		 * process of being governed.
+		 */
+		GOVERNING,
+
+		/**
+		 * Indicates the {@link ManagedObject} now has appropriate
+		 * {@link Governance}.
+		 */
+		GOVERNED,
 
 		/**
 		 * Indicates coordinating the {@link ManagedObject}.

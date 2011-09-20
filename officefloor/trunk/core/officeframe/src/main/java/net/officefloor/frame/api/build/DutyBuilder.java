@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * <p>
@@ -68,5 +69,25 @@ public interface DutyBuilder {
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName,
 			Class<?> argumentType);
+
+	/**
+	 * Links a {@link Governance}.
+	 * 
+	 * @param key
+	 *            Key for the {@link Duty} to identify the {@link Governance}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 */
+	<G extends Enum<G>> void linkGovernance(G key, String governanceName);
+
+	/**
+	 * Links a {@link Governance}.
+	 * 
+	 * @param governanceIndex
+	 *            Index for the {@link Duty} to identify the {@link Governance}.
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 */
+	void linkGovernance(int governanceIndex, String governanceName);
 
 }

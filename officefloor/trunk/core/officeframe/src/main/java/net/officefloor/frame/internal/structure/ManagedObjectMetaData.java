@@ -32,7 +32,7 @@ import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Meta-data of a {@link ManagedObject}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectMetaData<D extends Enum<D>> {
@@ -40,7 +40,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Obtains the name of the {@link ManagedObject} bound within the
 	 * {@link ManagedObjectScope}.
-	 *
+	 * 
 	 * @return Name of the {@link ManagedObject} bound within the
 	 *         {@link ManagedObjectScope}.
 	 */
@@ -49,7 +49,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Obtains the type of the {@link Object} returned from the
 	 * {@link ManagedObject}.
-	 *
+	 * 
 	 * @return Type of the {@link Object} returned from the
 	 *         {@link ManagedObject}.
 	 */
@@ -64,7 +64,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * instances with the same type of Object may all be bound to the same
 	 * {@link ManagedObjectIndex}. Allows similar {@link Job} processing of the
 	 * {@link ManagedObject} instances.
-	 *
+	 * 
 	 * @return Instance index of the {@link ManagedObject} bound to the
 	 *         {@link ManagedObjectIndex}.
 	 */
@@ -72,7 +72,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Creates a new {@link ManagedObjectContainer}.
-	 *
+	 * 
 	 * @param processState
 	 *            {@link ProcessState} that the {@link ManagedObject} is bound
 	 *            within.
@@ -84,7 +84,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
 	 * {@link ManagedObject}.
-	 *
+	 * 
 	 * @return {@link AssetManager} that manages the sourcing of the
 	 *         {@link ManagedObject}.
 	 */
@@ -92,14 +92,14 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}.
 	 */
 	ManagedObjectSource<?, ?> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool} for the {@link ManagedObject}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectPool} for the {@link ManagedObject}.
 	 */
 	ManagedObjectPool getManagedObjectPool();
@@ -107,7 +107,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Obtains the time out in milliseconds for the asynchronous operation to
 	 * complete.
-	 *
+	 * 
 	 * @return Time out in milliseconds.
 	 */
 	long getTimeout();
@@ -115,7 +115,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Indicates if the {@link ManagedObject} implements
 	 * {@link NameAwareManagedObject}.
-	 *
+	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
 	 *         {@link NameAwareManagedObject}.
 	 */
@@ -128,7 +128,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * <p>
 	 * Should the {@link ManagedObject} implement
 	 * {@link AsynchronousManagedObject} then it will require checking if ready.
-	 *
+	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
 	 *         {@link AsynchronousManagedObject}.
 	 */
@@ -137,16 +137,25 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Obtains the {@link AssetManager} that manages asynchronous operations on
 	 * the {@link ManagedObject}.
-	 *
+	 * 
 	 * @return {@link AssetManager} that manages asynchronous operations on the
 	 *         {@link ManagedObject}.
 	 */
 	AssetManager getOperationsManager();
 
 	/**
+	 * Obtains the {@link ManagedObjectGovernanceMetaData} applicable to this
+	 * {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectGovernanceMetaData} applicable to this
+	 *         {@link ManagedObject}.
+	 */
+	ManagedObjectGovernanceMetaData<?>[] getGovernanceMetaData();
+
+	/**
 	 * Indicates if the {@link ManagedObject} implements
 	 * {@link CoordinatingManagedObject}.
-	 *
+	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
 	 *         {@link CoordinatingManagedObject}.
 	 */
@@ -154,7 +163,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Indicates if dependency {@link ManagedObject} instances are ready.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param jobContext
@@ -172,7 +181,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
-	 *
+	 * 
 	 * @param workContainer
 	 *            {@link WorkContainer} to obtain the coordinating
 	 *            {@link ManagedObject} instances.
@@ -187,7 +196,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Creates the {@link JobNode} for the recycling of the
 	 * {@link ManagedObject}.
-	 *
+	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
 	 *            {@link TaskContext#getParameter()} within the {@link JobNode}.

@@ -20,6 +20,9 @@ package net.officefloor.frame.impl.execute.duty;
 
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implementation of {@link DutyMetaData}.
@@ -34,13 +37,23 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	private final FlowMetaData<?>[] flows;
 
 	/**
+	 * Mapping of {@link Duty} {@link Governance} index to {@link ProcessState}
+	 * {@link Governance} index.
+	 */
+	private final int[] governanceMapping;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flows
 	 *            Listing of {@link FlowMetaData}.
+	 * @param governanceMapping
+	 *            Mapping of {@link Duty} {@link Governance} index to
+	 *            {@link ProcessState} {@link Governance} index.
 	 */
-	public DutyMetaDataImpl(FlowMetaData<?>[] flows) {
+	public DutyMetaDataImpl(FlowMetaData<?>[] flows, int[] governanceMapping) {
 		this.flows = flows;
+		this.governanceMapping = governanceMapping;
 	}
 
 	/*
@@ -50,6 +63,11 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	@Override
 	public FlowMetaData<?> getFlow(int flowIndex) {
 		return this.flows[flowIndex];
+	}
+
+	@Override
+	public int translateGovernanceIndexToProcess(int governanceIndex) {
+		return this.governanceMapping[governanceIndex];
 	}
 
 }

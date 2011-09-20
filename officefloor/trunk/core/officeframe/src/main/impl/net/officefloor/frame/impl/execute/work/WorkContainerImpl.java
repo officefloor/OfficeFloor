@@ -158,6 +158,56 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
+	public boolean governManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet) {
+
+		// Access Point: Job
+		// Locks: ThreadState -> ProcessState
+
+		// Obtain the states
+		ThreadState threadState = jobNode.getFlow().getThreadState();
+		ProcessState processState = threadState.getProcessState();
+
+		// Govern the managed objects
+		for (ManagedObjectIndex index : managedObjectIndexes) {
+
+			// Obtain the index of managed object within scope
+			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
+
+			// Obtain the managed object container
+			ManagedObjectContainer container;
+			switch (index.getManagedObjectScope()) {
+			case WORK:
+				// Always available by loadManagedObjects
+				container = this.managedObjects[scopeIndex];
+				break;
+
+			case THREAD:
+				container = threadState.getManagedObjectContainer(scopeIndex);
+				break;
+
+			case PROCESS:
+				container = processState.getManagedObjectContainer(scopeIndex);
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown managed object scope "
+						+ index.getManagedObjectScope());
+			}
+
+			// Do not continue onto next unless governed
+			if (!container.governManagedObject(this, jobContext, jobNode,
+					activateSet)) {
+				return false;
+			}
+		}
+
+		// As here, all managed objects are governed
+		return true;
+	}
+
+	@Override
 	public boolean coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
 			JobNode jobNode, JobNodeActivateSet notifySet) {

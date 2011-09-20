@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Configuration for a {@link Duty}.
@@ -45,5 +46,13 @@ public interface DutyConfiguration<A extends Enum<A>> {
 	 *         the linked {@link Flow}.
 	 */
 	TaskNodeReference[] getLinkedProcessConfiguration();
+
+	/**
+	 * Obtains the configuration for the linked {@link Governance}.
+	 * 
+	 * @return {@link DutyGovernanceConfiguration} specifying the linked
+	 *         {@link Governance}.
+	 */
+	DutyGovernanceConfiguration<?>[] getGovernanceConfiguration();
 
 }

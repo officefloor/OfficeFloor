@@ -34,6 +34,7 @@ import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
@@ -106,6 +107,12 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final RawBoundManagedObjectMetaDataFactory rawBoundMoFactory = this
 			.createMock(RawBoundManagedObjectMetaDataFactory.class);
+
+	/**
+	 * {@link RawGovernanceMetaDataFactory}.
+	 */
+	private final RawGovernanceMetaDataFactory rawGovernanceFactory = this
+			.createMock(RawGovernanceMetaDataFactory.class);
 
 	/**
 	 * {@link RawBoundAdministratorMetaDataFactory}.
@@ -624,8 +631,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.rawOfficeFactory, this.rawOfficeFactory
 				.constructRawOfficeMetaData(officeConfiguration,
 						this.sourceContext, this.issues, null, null,
-						this.rawBoundMoFactory, this.rawBoundAdminFactory,
-						this.rawWorkMetaDataFactory,
+						this.rawBoundMoFactory, null,
+						this.rawBoundAdminFactory, this.rawWorkMetaDataFactory,
 						this.rawTaskMetaDataFactory), null, new AlwaysMatcher());
 
 		// Attempt to construct office floor
@@ -842,7 +849,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 					.constructRawOfficeMetaData(officeConfiguration,
 							this.sourceContext, this.issues,
 							officeManagingManagedObjects, null,
-							this.rawBoundMoFactory, this.rawBoundAdminFactory,
+							this.rawBoundMoFactory, this.rawGovernanceFactory,
+							this.rawBoundAdminFactory,
 							this.rawWorkMetaDataFactory,
 							this.rawTaskMetaDataFactory), rawOfficeMetaData,
 					new AbstractMatcher() {
@@ -861,17 +869,21 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 									RawOfficeFloorMetaDataTest.this.rawBoundMoFactory,
 									a[5]);
 							assertEquals(
+									"Incorrect governance factory",
+									RawOfficeFloorMetaDataTest.this.rawGovernanceFactory,
+									a[6]);
+							assertEquals(
 									"Incorrect administrator factory",
 									RawOfficeFloorMetaDataTest.this.rawBoundAdminFactory,
-									a[6]);
+									a[7]);
 							assertEquals(
 									"Incorrect work factory",
 									RawOfficeFloorMetaDataTest.this.rawWorkMetaDataFactory,
-									a[7]);
+									a[8]);
 							assertEquals(
 									"Incorrect task factory",
 									RawOfficeFloorMetaDataTest.this.rawTaskMetaDataFactory,
-									a[8]);
+									a[9]);
 
 							// Validate the managed objects
 							assertEquals("Incorrect number of managed objects",
@@ -958,8 +970,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				.getFactory().constructRawOfficeFloorMetaData(
 						this.configuration, this.issues, this.rawTeamFactory,
 						this.rawMosFactory, this.rawBoundMoFactory,
-						this.rawBoundAdminFactory, this.rawOfficeFactory,
-						this.rawWorkMetaDataFactory,
+						this.rawGovernanceFactory, this.rawBoundAdminFactory,
+						this.rawOfficeFactory, this.rawWorkMetaDataFactory,
 						this.rawTaskMetaDataFactory);
 
 		// Meta-data should always be constructed

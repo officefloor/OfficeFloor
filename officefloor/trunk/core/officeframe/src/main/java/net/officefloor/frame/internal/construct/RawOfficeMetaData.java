@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data of the {@link Office}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface RawOfficeMetaData {
@@ -40,7 +40,7 @@ public interface RawOfficeMetaData {
 
 	/**
 	 * Obtains {@link RawOfficeFloorMetaData} containing this {@link Office}.
-	 *
+	 * 
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	RawOfficeFloorMetaData getRawOfficeFloorMetaData();
@@ -48,15 +48,24 @@ public interface RawOfficeMetaData {
 	/**
 	 * Obtains the {@link Team} instances by their {@link Office} registered
 	 * names.
-	 *
+	 * 
 	 * @return {@link Team} instances by their {@link Office} registered names.
 	 */
 	Map<String, Team> getTeams();
 
 	/**
+	 * Obtains the {@link RawGovernanceMetaData} by their {@link Office}
+	 * registered names.
+	 * 
+	 * @return {@link RawGovernanceMetaData} by their {@link Office} registered
+	 *         names.
+	 */
+	Map<String, RawGovernanceMetaData> getGovernanceMetaData();
+
+	/**
 	 * Obtains the {@link RawManagedObjectMetaData} by their {@link Office}
 	 * registered names.
-	 *
+	 * 
 	 * @return {@link RawManagedObjectMetaData} by their {@link Office}
 	 *         registered names.
 	 */
@@ -65,7 +74,7 @@ public interface RawOfficeMetaData {
 	/**
 	 * Obtains the {@link ProcessState} {@link RawBoundManagedObjectMetaData}
 	 * instances.
-	 *
+	 * 
 	 * @return {@link ProcessState} {@link RawBoundManagedObjectMetaData}
 	 *         instances.
 	 */
@@ -74,7 +83,7 @@ public interface RawOfficeMetaData {
 	/**
 	 * Obtains the {@link ThreadState} {@link RawBoundManagedObjectMetaData}
 	 * instances.
-	 *
+	 * 
 	 * @return {@link ThreadState} {@link RawBoundManagedObjectMetaData}
 	 *         instances.
 	 */
@@ -84,7 +93,7 @@ public interface RawOfficeMetaData {
 	 * Obtains the scope {@link RawBoundManagedObjectMetaData} instances of the
 	 * {@link Office} by the {@link ProcessState} and {@link ThreadState} bound
 	 * names.
-	 *
+	 * 
 	 * @return Scope {@link RawBoundManagedObjectMetaData} instances of the
 	 *         {@link Office} by the {@link ProcessState} and
 	 *         {@link ThreadState} bound names.
@@ -94,7 +103,7 @@ public interface RawOfficeMetaData {
 	/**
 	 * Obtains the {@link ProcessState} {@link RawBoundAdministratorMetaData}
 	 * instances.
-	 *
+	 * 
 	 * @return {@link ProcessState} {@link RawBoundAdministratorMetaData}
 	 *         instances.
 	 */
@@ -103,7 +112,7 @@ public interface RawOfficeMetaData {
 	/**
 	 * Obtains the {@link ThreadState} {@link RawBoundAdministratorMetaData}
 	 * instances.
-	 *
+	 * 
 	 * @return {@link ThreadState} {@link RawBoundAdministratorMetaData}
 	 *         instances.
 	 */
@@ -113,7 +122,7 @@ public interface RawOfficeMetaData {
 	 * Obtains the scope {@link RawBoundAdministratorMetaData} instances of the
 	 * {@link Office} by their {@link ProcessState} and {@link ThreadState}
 	 * bound names.
-	 *
+	 * 
 	 * @return Scope {@link RawBoundAdministratorMetaData} instances of the
 	 *         {@link Office} by the {@link ProcessState} and
 	 *         {@link ThreadState} bound names.
@@ -122,7 +131,7 @@ public interface RawOfficeMetaData {
 
 	/**
 	 * Obtains the {@link OfficeMetaData}.
-	 *
+	 * 
 	 * @return {@link OfficeMetaData}.
 	 */
 	OfficeMetaData getOfficeMetaData();

@@ -58,6 +58,7 @@ public class ChainCoordinateManagedObjectContainerTest extends
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
+		this.record_MoContainer_governManagedObject();
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object); // Triggered by isReady
 		this.record_MoContainer_unloadManagedObject(true);

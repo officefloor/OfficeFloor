@@ -19,6 +19,8 @@
 package net.officefloor.frame.impl.construct.managedobject;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
@@ -27,11 +29,13 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link DependencyMappingBuilder} implementation.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
@@ -54,8 +58,13 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	private final Map<Integer, ManagedObjectDependencyConfiguration<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyConfiguration<D>>();
 
 	/**
+	 * {@link ManagedObjectGovernanceConfiguration} instances.
+	 */
+	private final List<ManagedObjectGovernanceConfiguration> governances = new LinkedList<ManagedObjectGovernanceConfiguration>();
+
+	/**
 	 * Initiate as a {@link ManagedObjectConfiguration}.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} is being bound.
 	 * @param officeManagedObjectName
@@ -69,7 +78,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 
 	/**
 	 * Initiate as an {@link InputManagedObjectConfiguration}.
-	 *
+	 * 
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} is being bound.
 	 */
@@ -93,9 +102,20 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 		this.mapDependency(index, (D) null, scopeManagedObjectName);
 	}
 
+	@Override
+	public void mapGovernance(String governanceName) {
+
+		// Create the governance
+		ManagedObjectGovernanceConfigurationImpl governance = new ManagedObjectGovernanceConfigurationImpl(
+				governanceName);
+
+		// Add the governance
+		this.governances.add(governance);
+	}
+
 	/**
 	 * Maps in the dependency.
-	 *
+	 * 
 	 * @param index
 	 *            Index to map the dependency under.
 	 * @param key
@@ -138,8 +158,15 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 				new ManagedObjectDependencyConfiguration[0]);
 	}
 
+	@Override
+	public ManagedObjectGovernanceConfiguration[] getGovernanceConfiguration() {
+		return (ManagedObjectGovernanceConfiguration[]) this.governances
+				.toArray(new ManagedObjectGovernanceConfiguration[this.governances
+						.size()]);
+	}
+
 	/**
-	 * {@link ManagedObjectDependencyConfiguration} implementation .
+	 * {@link ManagedObjectDependencyConfiguration} implementation.
 	 */
 	private class ManagedObjectDependencyConfigurationImpl implements
 			ManagedObjectDependencyConfiguration<D> {
@@ -156,7 +183,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param dependencyKey
 		 *            Dependency key.
 		 * @param managedObjectName
@@ -180,6 +207,40 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 		@Override
 		public String getScopeManagedObjectName() {
 			return this.managedObjectName;
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectGovernanceConfiguration} implementation.
+	 */
+	private class ManagedObjectGovernanceConfigurationImpl implements
+			ManagedObjectGovernanceConfiguration {
+
+		/**
+		 * {@link Governance} name.
+		 */
+		private final String governanceName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param governanceName
+		 *            {@link Governance} name.
+		 */
+		public ManagedObjectGovernanceConfigurationImpl(String governanceName) {
+			this.governanceName = governanceName;
+		}
+
+		/*
+		 * ============= ManagedObjectGovernanceConfiguration ================
+		 */
+
+		@Override
+		public String getGovernanceName() {
+			// TODO implement
+			// ManagedObjectGovernanceConfiguration.getGovernanceName
+			throw new UnsupportedOperationException(
+					"TODO implement ManagedObjectGovernanceConfiguration.getGovernanceName");
 		}
 	}
 

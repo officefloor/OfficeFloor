@@ -30,13 +30,15 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
  * Builder of an {@link Office}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeBuilder {
@@ -44,7 +46,7 @@ public interface OfficeBuilder {
 	/**
 	 * Specifies the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.
-	 *
+	 * 
 	 * @param monitorOfficeInterval
 	 *            Interval in milli-seconds between each time the
 	 *            {@link OfficeManager} monitors the {@link Office}.
@@ -54,7 +56,7 @@ public interface OfficeBuilder {
 	/**
 	 * Registers a {@link Team} which will execute {@link JobNode} instances
 	 * within this {@link Office}.
-	 *
+	 * 
 	 * @param officeTeamName
 	 *            Name of the {@link Team} to be referenced locally by this
 	 *            {@link Office}.
@@ -65,7 +67,7 @@ public interface OfficeBuilder {
 
 	/**
 	 * Registers the {@link ManagedObject} within this {@link Office}.
-	 *
+	 * 
 	 * @param officeManagedObjectName
 	 *            Name of the {@link ManagedObject} to be referenced locally by
 	 *            this {@link Office}.
@@ -80,7 +82,7 @@ public interface OfficeBuilder {
 	 * Specifies the input {@link ManagedObject} to be bound to the
 	 * {@link ProcessState} should there be multiple instances and it was not
 	 * input.
-	 *
+	 * 
 	 * @param inputManagedObjectName
 	 *            Input {@link ManagedObject} name.
 	 * @param managedObjectSourceName
@@ -98,7 +100,7 @@ public interface OfficeBuilder {
 	 * <ol>
 	 * <li>Other {@link ManagedObject} instances added via this method.</li>
 	 * </ol>
-	 *
+	 * 
 	 * @param processManagedObjectName
 	 *            Name to link the {@link ManagedObject} into {@link Work}.
 	 * @param officeManagedObjectName
@@ -120,7 +122,7 @@ public interface OfficeBuilder {
 	 * <li>Other {@link ManagedObject} instances added via this method.</li>
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
-	 *
+	 * 
 	 * @param threadManagedObjectName
 	 *            Name to link the {@link ManagedObject} into {@link Work}.
 	 * @param officeManagedObjectName
@@ -133,6 +135,19 @@ public interface OfficeBuilder {
 			String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
+	 * Adds {@link Governance} within the {@link Office}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance} to be referenced locally by
+	 *            this {@link Office}.
+	 * @param governanceSource
+	 *            {@link GovernanceSource} class.
+	 * @return {@link GovernanceBuilder}.
+	 */
+	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
+			String governanceName, Class<GS> governanceSource);
+
+	/**
 	 * <p>
 	 * Adds a {@link ProcessState} bound {@link AdministratorSource} to this
 	 * {@link OfficeBuilder}.
@@ -141,7 +156,7 @@ public interface OfficeBuilder {
 	 * <ol>
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
-	 *
+	 * 
 	 * @param processAdministratorName
 	 *            Name to link the {@link Administrator} into {@link Work}.
 	 * @param adminsistratorSource
@@ -161,7 +176,7 @@ public interface OfficeBuilder {
 	 * <li>{@link ThreadState} bound {@link ManagedObject} instances.</li>
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
-	 *
+	 * 
 	 * @param threadAdministratorName
 	 *            Name to link the {@link Administrator} into {@link Work}.
 	 * @param adminsistratorSource
@@ -173,7 +188,7 @@ public interface OfficeBuilder {
 
 	/**
 	 * Adds {@link Work} to be done within this {@link Office}.
-	 *
+	 * 
 	 * @param workName
 	 *            Name identifying the {@link Work}.
 	 * @param workFactory
@@ -189,7 +204,7 @@ public interface OfficeBuilder {
 	 * <p>
 	 * This enables enhancing the {@link Office} after the
 	 * {@link ManagedObjectSource} instances are registered.
-	 *
+	 * 
 	 * @param officeEnhancer
 	 *            {@link OfficeEnhancer}.
 	 */
@@ -198,7 +213,7 @@ public interface OfficeBuilder {
 	/**
 	 * Adds an {@link EscalationFlow} for issues not handled by the {@link Flow}
 	 * of the {@link Office}.
-	 *
+	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
@@ -213,7 +228,7 @@ public interface OfficeBuilder {
 
 	/**
 	 * Adds a {@link Task} to invoke on start up of the {@link Office}.
-	 *
+	 * 
 	 * @param workName
 	 *            Name of {@link Work} containing the {@link Task}.
 	 * @param taskName

@@ -128,6 +128,16 @@ public interface ProcessState {
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
+	 * Obtains the {@link GovernanceContainer} for the input index.
+	 * 
+	 * @param index
+	 *            Index of the {@link GovernanceContainer} to be returned.
+	 * @return {@link GovernanceContainer} for the index only if active. If not
+	 *         active will return <code>null</code>.
+	 */
+	GovernanceContainer getGovernanceContainer(int index);
+
+	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.
 	 * 
 	 * @param index

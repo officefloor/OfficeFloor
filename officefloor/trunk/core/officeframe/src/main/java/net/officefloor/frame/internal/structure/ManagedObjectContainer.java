@@ -19,6 +19,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
@@ -44,6 +45,28 @@ public interface ManagedObjectContainer {
 	 */
 	void loadManagedObject(JobContext jobContext, JobNode jobNode,
 			JobNodeActivateSet activateSet);
+
+	/**
+	 * Provides any active {@link Governance} over the {@link ManagedObject}.
+	 * 
+	 * @param workContainer
+	 *            {@link WorkContainer} to possibly source the
+	 *            {@link Governance}.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode} requesting {@link Governance} for the
+	 *            {@link ManagedObject}.
+	 * @param activateSet
+	 *            {@link JobNodeActivatableSet} to add {@link JobNode} instances
+	 *            to activate.
+	 * @return <code>true</code> if the {@link ManagedObject} was governed.
+	 *         <code>false</code> indicates this method must be called again for
+	 *         the {@link ManagedObject} to be governed.
+	 */
+	<W extends Work> boolean governManagedObject(
+			WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
 	 * Allows this {@link ManagedObject} to coordinate with the other

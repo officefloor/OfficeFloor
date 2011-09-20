@@ -25,8 +25,10 @@ import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
+import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link DutyBuilder} implementation.
@@ -46,6 +48,12 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	 * {@link Duty}.
 	 */
 	private final Map<Integer, TaskNodeReference> flows = new HashMap<Integer, TaskNodeReference>();
+
+	/**
+	 * Registry of {@link Governance} instances that may be invoked from the
+	 * {@link Duty}.
+	 */
+	private final Map<Integer, DutyGovernanceConfiguration<?>> governances = new HashMap<Integer, DutyGovernanceConfiguration<?>>();
 
 	/**
 	 * Initiate.
@@ -72,6 +80,20 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 			Class<?> argumentType) {
 		this.flows.put(new Integer(flowIndex), new TaskNodeReferenceImpl(
 				workName, taskName, argumentType));
+	}
+
+	@Override
+	public <G extends Enum<G>> void linkGovernance(G key, String governanceName) {
+		// TODO implement DutyBuilder.linkGovernance
+		throw new UnsupportedOperationException(
+				"TODO implement DutyBuilder.linkGovernance");
+	}
+
+	@Override
+	public void linkGovernance(int governanceIndex, String governanceName) {
+		// TODO implement DutyBuilder.linkGovernance
+		throw new UnsupportedOperationException(
+				"TODO implement DutyBuilder.linkGovernance");
 	}
 
 	/*
@@ -105,6 +127,63 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 
 		// Return the listing
 		return taskNodes;
+	}
+
+	@Override
+	public DutyGovernanceConfiguration<?>[] getGovernanceConfiguration() {
+
+		// Obtain the array size from maximum index
+		int arraySize = -1;
+		for (Integer key : this.governances.keySet()) {
+			int index = key.intValue();
+			if (index > arraySize) {
+				arraySize = index;
+			}
+		}
+		arraySize += 1; // size is one up of max index
+
+		// Create the listing of governance
+		DutyGovernanceConfiguration<?>[] governanceList = new DutyGovernanceConfiguration[arraySize];
+		for (Integer key : this.governances.keySet()) {
+			DutyGovernanceConfiguration<?> governance = this.governances
+					.get(key);
+			governanceList[key.intValue()] = governance;
+		}
+
+		// Return the listing
+		return governanceList;
+	}
+
+	/**
+	 * {@link DutyGovernanceConfiguration} implementation.
+	 */
+	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>>
+			implements DutyGovernanceConfiguration<G> {
+
+		/*
+		 * ============= DutyGovernanceConfiguration ==========================
+		 */
+
+		@Override
+		public String getGovernanceName() {
+			// TODO implement DutyGovernanceConfiguration<G>.getGovernanceName
+			throw new UnsupportedOperationException(
+					"TODO implement DutyGovernanceConfiguration<G>.getGovernanceName");
+		}
+
+		@Override
+		public int getIndex() {
+			// TODO implement DutyGovernanceConfiguration<G>.getIndex
+			throw new UnsupportedOperationException(
+					"TODO implement DutyGovernanceConfiguration<G>.getIndex");
+		}
+
+		@Override
+		public G getKey() {
+			// TODO implement DutyGovernanceConfiguration<G>.getKey
+			throw new UnsupportedOperationException(
+					"TODO implement DutyGovernanceConfiguration<G>.getKey");
+		}
 	}
 
 }

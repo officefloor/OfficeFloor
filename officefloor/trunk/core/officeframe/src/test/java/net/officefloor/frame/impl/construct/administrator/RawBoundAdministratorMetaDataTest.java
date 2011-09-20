@@ -32,6 +32,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
+import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
@@ -47,8 +48,12 @@ import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -758,7 +763,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		this.constructRawAdministratorAndLinkTasks();
+		this.constructRawAdministratorAndLinkOfficeMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -793,7 +798,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		this.constructRawAdministratorAndLinkTasks();
+		this.constructRawAdministratorAndLinkOfficeMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -836,7 +841,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		this.constructRawAdministratorAndLinkTasks();
+		this.constructRawAdministratorAndLinkOfficeMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -872,8 +877,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		RawBoundAdministratorMetaData metaData = this
 				.constructRawAdministrator(1, this.configuration)[0];
 		metaData.getDutyKey(DutyKey.ONE); // flags linked to a task
-		metaData.linkTasks(this.taskMetaDataLocator, this.assetManagerFactory,
-				this.issues);
+		metaData.linkOfficeMetaData(this.taskMetaDataLocator,
+				this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -904,7 +909,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		this.constructRawAdministratorAndLinkTasks();
+		this.constructRawAdministratorAndLinkOfficeMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -949,7 +954,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		this.constructRawAdministratorAndLinkTasks();
+		this.constructRawAdministratorAndLinkOfficeMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -967,6 +972,11 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
+
+		final OfficeMetaData officeMetaData = this
+				.createMock(OfficeMetaData.class);
+		final ProcessMetaData processMetaData = this
+				.createMock(ProcessMetaData.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -1010,10 +1020,34 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.taskMetaDataLocator.getTaskMetaData("WORK", "TASK"),
 				taskMetaData);
 
+		// Record governance for first duty
+		this.recordReturn(this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getGovernanceConfiguration(),
+				new DutyGovernanceConfiguration[0]);
+		this.recordReturn(this.taskMetaDataLocator,
+				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
+		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
+				processMetaData);
+		this.recordReturn(processMetaData,
+				processMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData[0]);
+
+		// Record governance for second duty
+		this.recordReturn(this.dutyTwoConfiguration,
+				this.dutyTwoConfiguration.getGovernanceConfiguration(),
+				new DutyGovernanceConfiguration[0]);
+		this.recordReturn(this.taskMetaDataLocator,
+				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
+		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
+				processMetaData);
+		this.recordReturn(processMetaData,
+				processMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData[0]);
+
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
 		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
-				.constructRawAdministratorAndLinkTasks();
+				.constructRawAdministratorAndLinkOfficeMetaData();
 		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData
 				.getAdministratorMetaData();
 		this.verifyMockObjects();
@@ -1260,15 +1294,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private RawBoundAdministratorMetaData<?, DutyKey> constructRawAdministratorAndLinkTasks() {
+	private RawBoundAdministratorMetaData<?, DutyKey> constructRawAdministratorAndLinkOfficeMetaData() {
 
 		// Construct the raw administrator meta-data
 		RawBoundAdministratorMetaData metaData = this
 				.constructRawAdministrator(1, this.configuration)[0];
 
 		// Link the tasks
-		metaData.linkTasks(this.taskMetaDataLocator, this.assetManagerFactory,
-				this.issues);
+		metaData.linkOfficeMetaData(this.taskMetaDataLocator,
+				this.assetManagerFactory, this.issues);
 
 		// Return the raw bound administrator meta-data
 		return (RawBoundAdministratorMetaData<?, DutyKey>) metaData;

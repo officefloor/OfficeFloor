@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DutyContext<I extends Object, F extends Enum<F>> {
+public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum<G>> {
 
 	/**
 	 * Obtains the particular extension interfaces.
@@ -64,5 +64,23 @@ public interface DutyContext<I extends Object, F extends Enum<F>> {
 	 *            Parameter for the first {@link Task} of the {@link Flow}.
 	 */
 	void doFlow(int flowIndex, Object parameter);
+
+	/**
+	 * Obtains the {@link GovernanceManager} for the particular key.
+	 * 
+	 * @param key
+	 *            Key identifying the {@link GovernanceManager}.
+	 * @return {@link GovernanceManager}.
+	 */
+	GovernanceManager getGovernance(G key);
+
+	/**
+	 * Obtains the {@link GovernanceManager} for the index.
+	 * 
+	 * @param governanceIndex
+	 *            Index identifying the {@link GovernanceManager}.
+	 * @return {@link GovernanceManager}.
+	 */
+	GovernanceManager getGovernance(int governanceIndex);
 
 }

@@ -43,6 +43,8 @@ public interface RawOfficeFloorMetaDataFactory {
 	 *            {@link RawManagedObjectMetaDataFactory}.
 	 * @param rawBoundMoFactory
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
+	 * @param rawGovernanceFactory
+	 *            {@link RawGovernanceMetaDataFactory}.
 	 * @param rawBoundAdminFactory
 	 *            {@link RawBoundAdministratorMetaDataFactory}.
 	 * @param rawOfficeFactory
@@ -58,6 +60,7 @@ public interface RawOfficeFloorMetaDataFactory {
 			RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
+			RawGovernanceMetaDataFactory rawGovernanceFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
 			RawOfficeMetaDataFactory rawOfficeFactory,
 			RawWorkMetaDataFactory rawWorkFactory,

@@ -19,6 +19,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Meta-data for a {@link Duty}.
@@ -35,5 +36,15 @@ public interface DutyMetaData {
 	 * @return {@link FlowMetaData} of the specified {@link Flow}.
 	 */
 	FlowMetaData<?> getFlow(int flowIndex);
+
+	/**
+	 * Translates the {@link Duty} {@link Governance} index to the
+	 * {@link ProcessState} {@link Governance} index.
+	 * 
+	 * @param governanceIndex
+	 *            {@link Duty} {@link Governance} index.
+	 * @return {@link ProcessState} {@link Governance} index.
+	 */
+	int translateGovernanceIndexToProcess(int governanceIndex);
 
 }

@@ -18,6 +18,8 @@
 
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -54,5 +56,13 @@ public interface DependencyMappingBuilder {
 	 *            {@link DependencyMappingBuilder} was created.
 	 */
 	void mapDependency(int index, String scopeManagedObjectName);
+
+	/**
+	 * Specifies the {@link governance} for the {@link ManagedObject}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance} within the {@link Office}.
+	 */
+	void mapGovernance(String governanceName);
 
 }

@@ -55,6 +55,7 @@ public class NullObjectManagedObjectContainerTest extends
 		this.record_MoContainer_init(Object.class);
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
+		this.record_MoContainer_governManagedObject();
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				nullObject);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
@@ -66,6 +67,7 @@ public class NullObjectManagedObjectContainerTest extends
 		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
 		this.loadManagedObject(mo);
+		this.governManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, nullObject);
