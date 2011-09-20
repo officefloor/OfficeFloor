@@ -96,7 +96,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	private void doInvokeAdministrationTest(int dutyIndex, String methodName)
 			throws Throwable {
 
-		final DutyContext<Object, ?> dutyContext = this
+		final DutyContext<Object, ?, ?> dutyContext = this
 				.createMock(DutyContext.class);
 		final MockExtensionInterface extensionInterface = this
 				.createMock(MockExtensionInterface.class);
