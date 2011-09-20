@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.administration.DutyContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassDuty implements Duty<Object, None> {
+public class ClassDuty implements Duty<Object, None, None> {
 
 	/**
 	 * {@link Object} providing the administration {@link Method} instances.
@@ -76,7 +76,8 @@ public class ClassDuty implements Duty<Object, None> {
 	 */
 
 	@Override
-	public void doDuty(DutyContext<Object, None> context) throws Throwable {
+	public void doDuty(DutyContext<Object, None, None> context)
+			throws Throwable {
 
 		// Obtain the listing of extension interfaces
 		List<Object> extensionInterfaces = context.getExtensionInterfaces();

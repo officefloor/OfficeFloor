@@ -74,7 +74,7 @@ public class ClassAdministrator implements Administrator<Object, Indexed> {
 	 */
 
 	@Override
-	public Duty<Object, ?> getDuty(DutyKey<Indexed> dutyKey) {
+	public Duty<Object, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
 
 		// Obtain the method for the duty
 		Method dutyMethod = this.dutyMethods[dutyKey.getIndex()];
