@@ -18,6 +18,7 @@
 
 package net.officefloor.admin.transaction;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
@@ -65,7 +66,7 @@ public class TransactionAdministratorSource extends
 	 */
 
 	@Override
-	public Duty<Transaction, TransactionDutiesEnum> getDuty(
+	public Duty<Transaction, TransactionDutiesEnum, None> getDuty(
 			DutyKey<TransactionDutiesEnum> key) {
 		switch (key.getKey()) {
 		case BEGIN:
@@ -82,10 +83,11 @@ public class TransactionAdministratorSource extends
 	/**
 	 * {@link Duty} to begin the transaction.
 	 */
-	private class BeginDuty implements Duty<Transaction, TransactionDutiesEnum> {
+	private class BeginDuty implements
+			Duty<Transaction, TransactionDutiesEnum, None> {
 		@Override
 		public void doDuty(
-				DutyContext<Transaction, TransactionDutiesEnum> context)
+				DutyContext<Transaction, TransactionDutiesEnum, None> context)
 				throws Exception {
 			// Begin the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
@@ -98,10 +100,10 @@ public class TransactionAdministratorSource extends
 	 * {@link Duty} to commit the transaction.
 	 */
 	private class CommitDuty implements
-			Duty<Transaction, TransactionDutiesEnum> {
+			Duty<Transaction, TransactionDutiesEnum, None> {
 		@Override
 		public void doDuty(
-				DutyContext<Transaction, TransactionDutiesEnum> context)
+				DutyContext<Transaction, TransactionDutiesEnum, None> context)
 				throws Exception {
 			// Commit the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
@@ -114,10 +116,10 @@ public class TransactionAdministratorSource extends
 	 * {@link Duty} to roll back the transaction.
 	 */
 	private class RollbackDuty implements
-			Duty<Transaction, TransactionDutiesEnum> {
+			Duty<Transaction, TransactionDutiesEnum, None> {
 		@Override
 		public void doDuty(
-				DutyContext<Transaction, TransactionDutiesEnum> context)
+				DutyContext<Transaction, TransactionDutiesEnum, None> context)
 				throws Exception {
 			// Roll back the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
