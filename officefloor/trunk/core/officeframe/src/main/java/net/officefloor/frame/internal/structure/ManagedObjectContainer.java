@@ -141,6 +141,14 @@ public interface ManagedObjectContainer {
 			ExtensionInterfaceExtractor<I> extractor);
 
 	/**
+	 * Unregisters this {@link ManagedObject} from {@link Governance}.
+	 * 
+	 * @param governance
+	 *            {@link ActiveGovernance}.
+	 */
+	void unregisterManagedObjectFromGovernance(ActiveGovernance governance);
+
+	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
 	 * @param activateSet

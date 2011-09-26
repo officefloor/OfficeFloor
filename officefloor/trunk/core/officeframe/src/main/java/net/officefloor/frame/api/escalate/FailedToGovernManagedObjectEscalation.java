@@ -15,39 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Meta-data of the {@link Governance}.
+ * {@link Escalation} if failure of setting up {@link Governance} for the
+ * {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> {
+public class FailedToGovernManagedObjectEscalation extends
+		ManagedObjectEscalation {
 
 	/**
-	 * Obtains the name of the {@link Governance}.
+	 * Initiate.
 	 * 
-	 * @return Name of the {@link Governance}.
+	 * @param objectType
+	 *            {@link Class} of the {@link Object} returned from the
+	 *            {@link ManagedObject}.
+	 * @param cause
+	 *            Cause from the {@link ManagedObjectSource} on why
+	 *            {@link Governance} could not be set up for the
+	 *            {@link ManagedObject}.
 	 */
-	String getGovernanceName();
-
-	/**
-	 * Creates the {@link GovernanceContainer}.
-	 * 
-	 * @return {@link GovernanceContainer}.
-	 */
-	GovernanceContainer<I> createGovernanceContainer();
-
-	/**
-	 * Create the {@link Governance}.
-	 * 
-	 * @param context
-	 *            {@link GovernanceContext}.
-	 * @return {@link Governance}.
-	 */
-	Governance<I, F> createGovernance(GovernanceContext<F> context);
+	public FailedToGovernManagedObjectEscalation(Class<?> objectType,
+			Throwable cause) {
+		super(objectType, cause);
+	}
 
 }
