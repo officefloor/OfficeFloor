@@ -18,6 +18,7 @@
 
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.api.escalate.FailedToGovernManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
@@ -411,13 +412,20 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						.extractExtensionInterface(extractor);
 
 				// Register for governance
-				activeGovernance = governance.governManagedObject(
-						extensionInterface, this);
+				try {
+					activeGovernance = governance.governManagedObject(
+							extensionInterface, this);
+				} catch (Exception ex) {
+					this.setFailedState(
+							new FailedToGovernManagedObjectEscalation(
+									this.metaData.getObjectType(), ex),
+							activateSet);
+				}
 				this.activeGovernances[i] = activeGovernance;
 
 				// Determine if governance activated
 				if (!activeGovernance.isActive()) {
-					// Still waitin on being active
+					// Still waiting on being active
 					if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
 						throw new IllegalStateException(
 								"Must be able to wait until Managed Object loaded");
@@ -753,6 +761,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Return the extracted extension interface
 		return extractor.extractExtensionInterface(this.managedObject,
 				this.metaData);
+	}
+
+	@Override
+	public void unregisterManagedObjectFromGovernance(
+			ActiveGovernance governance) {
+		// TODO implement
+		// ManagedObjectContainer.unregisterManagedObjectFromGovernance
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectContainer.unregisterManagedObjectFromGovernance");
 	}
 
 	@Override

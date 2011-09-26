@@ -80,6 +80,6 @@ public interface Governance<I, F extends Enum<F>> {
 	/**
 	 * Stops {@link Governance} of the {@link ManagedObject} instances.
 	 */
-	void stopGoverning();
+	void stopGovernance();
 
 }

@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceContainer {
+public interface GovernanceContainer<I> {
 
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
@@ -38,9 +38,11 @@ public interface GovernanceContainer {
 	 *            {@link ManagedObjectContainer} of the {@link ManagedObject}.
 	 * @return {@link ActiveGovernance} indicate that state of
 	 *         {@link Governance} of the {@link ManagedObject}.
+	 * @throws Exception
+	 *             If fails to govern the {@link ManagedObject}.
 	 */
-	ActiveGovernance governManagedObject(Object extensionInterface,
-			ManagedObjectContainer managedobjectContainer);
+	ActiveGovernance governManagedObject(I extensionInterface,
+			ManagedObjectContainer managedobjectContainer) throws Exception;
 
 	/**
 	 * Disregards the {@link Governance}.
