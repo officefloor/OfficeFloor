@@ -48,6 +48,6 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 *            {@link GovernanceContext}.
 	 * @return {@link Governance}.
 	 */
-	Governance<I, F> createGovernance(GovernanceContext<F> context);
+	Governance<I> createGovernance(GovernanceContext<F> context);
 
 }

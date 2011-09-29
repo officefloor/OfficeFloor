@@ -28,33 +28,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Governance<I, F extends Enum<F>> {
+public interface Governance<I> {
 
 	/**
-	 * <p>
-	 * Initialises the {@link Governance}.
-	 * <p>
-	 * This enables identifying the start of {@link Governance} and allow batch
-	 * loading of {@link ManagedObject} instances to govern. In other words, the
-	 * following steps occur:
-	 * <ol>
-	 * <li>{@link #init(GovernanceContext)} is invoked and any setup work can be
-	 * accomplished.</li>
-	 * <li>{@link #governManagedObject(Object)} is invoked potentially multiple
-	 * times for the {@link ManagedObject} instances to be governed.</li>
-	 * <li>
-	 * <li>{@link #startGovernance()} is invoked to indicate to begin governing.
-	 * </li>
-	 * <li>Note that further {@link ManagedObject} instances may be added for
-	 * {@link Governance} after starting.</li>
-	 * </ol>
-	 * 
-	 * @param context
-	 *            {@link GovernanceContext}.
-	 * @throws Exception
-	 *             If fails to initialise the {@link Governance}.
+	 * Starts the {@link Governance} of the {@link ManagedObject} instances.
 	 */
-	void init(GovernanceContext<F> context) throws Exception;
+	void startGovernance();
 
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
@@ -65,11 +44,6 @@ public interface Governance<I, F extends Enum<F>> {
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
 	void governManagedObject(I extensionInterface) throws Exception;
-
-	/**
-	 * Starts the {@link Governance} of the {@link ManagedObject} instances.
-	 */
-	void startGovernance();
 
 	/**
 	 * Applies the {@link Governance} to the {@link ManagedObject} instances

@@ -56,7 +56,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	/**
 	 * {@link Governance}.
 	 */
-	private Governance<I, F> governance = null;
+	private Governance<I> governance = null;
 
 	/**
 	 * Initiate.

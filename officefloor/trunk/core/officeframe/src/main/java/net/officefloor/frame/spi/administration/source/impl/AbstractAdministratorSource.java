@@ -31,11 +31,10 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceContex
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 
 /**
  * Abstract {@link AdministratorSource}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
@@ -57,7 +56,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 	/**
 	 * Overridden to load specification.
-	 *
+	 * 
 	 * @param context
 	 *            Specifications.
 	 */
@@ -70,7 +69,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param name
 		 *            Name of property that is also used as the label.
 		 */
@@ -78,7 +77,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param name
 		 *            Name of property.
 		 * @param label
@@ -88,9 +87,9 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Adds a property.
-		 *
+		 * 
 		 * @param property
-		 *            {@link ManagedObjectSourceProperty}.
+		 *            {@link AdministratorSourceProperty}.
 		 */
 		void addProperty(AdministratorSourceProperty property);
 	}
@@ -151,7 +150,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 	/**
 	 * Overridden to load meta-data.
-	 *
+	 * 
 	 * @param context
 	 *            Meta-data.
 	 * @throws Exception
@@ -167,14 +166,14 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Obtains the {@link AdministratorSourceContext}.
-		 *
+		 * 
 		 * @return {@link AdministratorSourceContext}.
 		 */
 		AdministratorSourceContext getAdministratorSourceContext();
 
 		/**
 		 * Specifies the extension interface.
-		 *
+		 * 
 		 * @param extensionInterface
 		 *            Extension interface.
 		 */
@@ -183,7 +182,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * Adds meta-data for a {@link Duty} identifying by the key. The name of
 		 * the duty will be taken from the key.
-		 *
+		 * 
 		 * @param dutyKey
 		 *            Key identifying the {@link Duty}.
 		 * @return {@link DutyMetaDataContext} to provide meta-data for the
@@ -194,7 +193,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * Adds meta-data for a {@link Duty} identifying by the index into the
 		 * order the {@link Duty} instances were added.
-		 *
+		 * 
 		 * @param dutyName
 		 *            Name identifying the {@link Duty}.
 		 * @return {@link DutyMetaDataContext} to provide meta-data for the
@@ -210,7 +209,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Specifies the label.
-		 *
+		 * 
 		 * @param label
 		 *            Label.
 		 * @return <code>this</code> {@link Labeller} (allows simpler coding).
@@ -219,7 +218,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Obtains the index of the {@link Duty} or {@link Flow}.
-		 *
+		 * 
 		 * @return Index of the {@link Duty} or {@link Flow}.
 		 */
 		int getIndex();
@@ -232,7 +231,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Adds a required {@link Flow} identified by the key.
-		 *
+		 * 
 		 * @param key
 		 *            {@link Enum} to identify the {@link Flow}.
 		 * @param argumentType
@@ -244,7 +243,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * Adds a required {@link Flow} identified by an index into the order
 		 * the {@link Flow} was added.
-		 *
+		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
 		 * @return {@link Labeller} to possibly label the {@link Flow}.
@@ -275,7 +274,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param context
 		 *            {@link AdministratorSourceContext}.
 		 */
@@ -350,7 +349,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param dutyName
 		 *            Name for the {@link Duty}.
 		 */
@@ -361,7 +360,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param dutyKey
 		 *            Key to the {@link Duty}.
 		 */
@@ -439,7 +438,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param key
 		 *            Key identifying this {@link Flow}.
 		 * @param argumentType
