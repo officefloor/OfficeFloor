@@ -16,33 +16,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.officefloor.frame.spi.governance.source;
+package net.officefloor.frame.spi.governance.source.impl;
 
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.governance.source.GovernanceSourceProperty;
+
 
 /**
- * Meta-data of the {@link GovernanceSource}.
+ * {@link GoveranceSourceProperty} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceSourceMetaData<I, F extends Enum<F>> {
+public class GovernanceSourcePropertyImpl implements GovernanceSourceProperty {
 
 	/**
-	 * Obtains the {@link Class} that the {@link ManagedObject} must provide as
-	 * an extension interface to be governed.
-	 * 
-	 * @return Extension interface for the {@link ManagedObject}.
+	 * Label.
 	 */
-	Class<I> getExtensionInterface();
+	private final String label;
 
 	/**
-	 * Obtains the list of {@link GovernanceFlowMetaData} instances should this
-	 * {@link GovernanceSource} require instigating a {@link Flow}.
-	 * 
-	 * @return Meta-data of {@link Flow} instances instigated by this
-	 *         {@link GovernanceSource}.
+	 * Name.
 	 */
-	GovernanceFlowMetaData<F>[] getFlowMetaData();
+	private final String name;
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param label
+	 *            Label.
+	 */
+	public GovernanceSourcePropertyImpl(String name, String label) {
+		this.label = label;
+		this.name = name;
+	}
+
+	/*
+	 * ==================== GoveranceSourceProperty =======================
+	 */
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
 
 }

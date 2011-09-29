@@ -18,6 +18,7 @@
 package net.officefloor.frame.spi.governance.source;
 
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.GovernanceContext;
 
 /**
  * Source to obtain the {@link Governance}.
@@ -69,10 +70,13 @@ public interface GovernanceSource<I, F extends Enum<F>> {
 	 * <p>
 	 * Creates a new {@link Governance}.
 	 * 
+	 * @param context
+	 *            {@link GovernanceContext} for the new {@link Governance}.
 	 * @return New {@link Governance}.
 	 * @throws Throwable
 	 *             If fails to create the {@link Governance}.
 	 */
-	Governance<I, F> createGovernance() throws Throwable;
+	Governance<I> createGovernance(GovernanceContext<F> context)
+			throws Throwable;
 
 }

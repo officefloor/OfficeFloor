@@ -39,14 +39,15 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link GovernanceMetaData}.
 	 */
-	private final GovernanceMetaData metaData = this
+	@SuppressWarnings("unchecked")
+	private final GovernanceMetaData<MockExtensionInterface, Indexed> metaData = this
 			.createMock(GovernanceMetaData.class);
 
 	/**
 	 * {@link Governance}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final Governance<MockExtensionInterface, Indexed> governance = this
+	private final Governance<MockExtensionInterface> governance = this
 			.createMock(Governance.class);
 
 	/**
@@ -200,16 +201,85 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Ensure apply {@link Governance} across multiple {@link ManagedObject}
 	 * instances.
 	 */
-	public void _testGovernMultipleManagedObjects() {
-		fail("TODO implement");
+	public void testGovernMultipleManagedObjects() throws Exception {
+
+		final MockExtensionInterface anotherExtension = this
+				.createMock(MockExtensionInterface.class);
+		final ManagedObjectContainer anotherManagedObject = this
+				.createMock(ManagedObjectContainer.class);
+
+		// Record activating governance
+		this.recordReturn(this.metaData,
+				this.metaData.createGovernance(this.container), this.governance);
+		this.governance.startGovernance();
+
+		// Record governing multiple managed objects
+		this.governance.governManagedObject(this.extension);
+		this.governance.governManagedObject(anotherExtension);
+
+		// Record enforce governance
+		this.governance.applyGovernance();
+
+		// Record stopping governance
+		this.governance.stopGovernance();
+		this.managedObject.unregisterManagedObjectFromGovernance(null);
+		this.control(this.managedObject).setMatcher(
+				new TypeMatcher(ActiveGovernance.class));
+		anotherManagedObject.unregisterManagedObjectFromGovernance(null);
+		this.control(anotherManagedObject).setMatcher(
+				new TypeMatcher(ActiveGovernance.class));
+
+		// Test
+		this.replayMockObjects();
+
+		// Ensure governance is active
+		GovernanceManager manager = this.container.getGovernanceManager();
+		manager.activateGovernance();
+
+		// Govern managed object
+		ActiveGovernance active = this.container.governManagedObject(
+				this.extension, this.managedObject);
+		assertTrue("Ensure active", active.isActive());
+
+		// Govern another managed object
+		ActiveGovernance anotherActive = this.container.governManagedObject(
+				anotherExtension, anotherManagedObject);
+		assertTrue("Ensure another active", anotherActive.isActive());
+
+		// Enforce the governance
+		manager.enforceGovernance();
+		assertFalse("Ensure no longer active", active.isActive());
+		assertFalse("Ensure another no longer active", anotherActive.isActive());
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure apply {@link Governance} across no {@link ManagedObject}
 	 * instances.
 	 */
-	public void _testGovernNoManagedObjects() {
-		fail("TODO implement");
+	public void testGovernNoManagedObjects() throws Exception {
+
+		// Record activating governance
+		this.recordReturn(this.metaData,
+				this.metaData.createGovernance(this.container), this.governance);
+		this.governance.startGovernance();
+
+		// Record enforce governance
+		this.governance.applyGovernance();
+
+		// Record stopping governance
+		this.governance.stopGovernance();
+
+		// Test
+		this.replayMockObjects();
+
+		// Ensure governance is active
+		GovernanceManager manager = this.container.getGovernanceManager();
+		manager.activateGovernance();
+
+		// Enforce the governance
+		manager.enforceGovernance();
+		this.verifyMockObjects();
 	}
 
 	/**
