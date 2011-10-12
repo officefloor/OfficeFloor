@@ -17,31 +17,29 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Identifies active {@link Governance} of a {@link ManagedObject}.
+ * Context for the {@link WorkContainer} and {@link ManagedObjectContainer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ActiveGovernance {
+public interface ContainerContext {
 
 	/**
-	 * Indicates if the {@link Governance} is active.
-	 * 
-	 * @return <code>true</code> if the {@link Governance} is active.
+	 * Flags for the {@link Job} to wait and be activated at a later time once a
+	 * dependency is ready.
 	 */
-	boolean isActive();
+	void flagJobToWait();
 
 	/**
-	 * Obtains the {@link FlowMetaData} for the {@link Task} to setup the
-	 * {@link ActiveGovernance}.
+	 * Adds a setup {@link Job} to be executed before the current {@link Job}.
 	 * 
-	 * @return {@link FlowMetaData} for the {@link Task} to setup the
-	 *         {@link ActiveGovernance}.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} for the setup {@link Job}.
+	 * @param parameter
+	 *            Parameter for the {@link Job}.
 	 */
-	FlowMetaData<?> getFlowMetaData();
+	void addSetupJob(FlowMetaData<?> flowMetaData, Object parameter);
 
 }

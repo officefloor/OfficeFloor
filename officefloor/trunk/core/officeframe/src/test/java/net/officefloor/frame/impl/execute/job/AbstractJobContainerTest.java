@@ -18,9 +18,13 @@
 
 package net.officefloor.frame.impl.execute.job;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -41,6 +45,7 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
+import org.easymock.AbstractMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 /**
@@ -254,7 +259,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
 		this.workContainer.loadManagedObjects(
 				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
-				functionalityJob, this.jobActivatableSet);
+				functionalityJob, this.jobActivatableSet, functionalityJob);
 	}
 
 	/**
@@ -272,7 +277,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				.isManagedObjectsReady(
 						functionalityJob.requiredManagedObjectIndexes,
 						this.jobContext, functionalityJob,
-						this.jobActivatableSet), isReady);
+						this.jobActivatableSet, functionalityJob), isReady);
 	}
 
 	/**
@@ -280,18 +285,21 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param job
 	 *            {@link Job}.
-	 * @param isGoverned
-	 *            Indicates if governed.
+	 * @param activeGovernances
+	 *            {@link ActiveGovernance} instances.
 	 */
 	protected void record_WorkContainer_governManagedObjects(Job job,
-			boolean isGoverned) {
+			ActiveGovernance... activeGovernances) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		this.recordReturn(this.workContainer, this.workContainer
-				.governManagedObjects(
-						functionalityJob.requiredManagedObjectIndexes,
-						this.jobContext, functionalityJob,
-						this.jobActivatableSet), isGoverned);
+		this.workContainer.governManagedObjects(
+				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
+				functionalityJob, this.jobActivatableSet, functionalityJob);
 	}
+
+	/**
+	 * List of results from coordinate {@link ManagedObject}.
+	 */
+	private List<Boolean> coordinateJobsToWait = null;
 
 	/**
 	 * Records coordinating the {@link ManagedObject} instances.
@@ -302,13 +310,33 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Indicates if coordinated.
 	 */
 	protected void record_WorkContainer_coordinateManagedObjects(Job job,
-			boolean isCoordinated) {
+			final boolean isCoordinated) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		this.recordReturn(this.workContainer, this.workContainer
-				.coordinateManagedObjects(
-						functionalityJob.requiredManagedObjectIndexes,
-						this.jobContext, functionalityJob,
-						this.jobActivatableSet), isCoordinated);
+		this.workContainer.coordinateManagedObjects(
+				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
+				functionalityJob, this.jobActivatableSet, functionalityJob);
+
+		// Ensure appropriately flags for job to wait
+		if (this.coordinateJobsToWait == null) {
+			this.coordinateJobsToWait = new LinkedList<Boolean>();
+			this.control(this.workContainer).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					for (int i = 0; i < expected.length; i++) {
+						assertEquals("Incorrect argument " + i, expected[i],
+								actual[i]);
+					}
+					Boolean isCoordinate = AbstractJobContainerTest.this.coordinateJobsToWait
+							.remove(0);
+					if (!isCoordinate.booleanValue()) {
+						// Not coordinated so flag to wait
+						functionalityJob.flagJobToWait();
+					}
+					return true;
+				}
+			});
+		}
+		this.coordinateJobsToWait.add(Boolean.valueOf(isCoordinated));
 	}
 
 	/**

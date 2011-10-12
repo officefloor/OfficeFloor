@@ -48,7 +48,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Stress tests coordination of {@link ManagedObject} instances.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
@@ -73,14 +73,17 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Does the coordination stress test.
-	 *
+	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link Task} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
-		int TASK_INVOKE_COUNT = 100000;
-		int MAX_RUN_TIME = 100;
+		boolean isDebugging = false;
+
+		final int MANAGED_OBJECT_WAIT_TIME = 1000 * (isDebugging ? 1000 : 1);
+		final int TASK_INVOKE_COUNT = 100000;
+		final int MAX_RUN_TIME = 100;
 		this.setVerbose(true);
 
 		// Obtain the office name and builder
@@ -100,7 +103,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 						DependencyManagedObjectSource.class);
 		dependencyBuilder.setManagingOffice(officeName)
 				.setInputManagedObjectName("PROCESS_BOUND");
-		dependencyBuilder.setTimeout(1000);
+		dependencyBuilder.setTimeout(MANAGED_OBJECT_WAIT_TIME);
 		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(
 				"MO_TEAM", 100));
 
@@ -108,8 +111,9 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);
 		ReflectiveWorkBuilder workBuilder = this.constructWork(work,
 				"COORDINATE_WORK", "task");
-		workBuilder.getBuilder().addWorkManagedObject("DIRECT_USE",
-				"DIRECT_USE").mapDependency(0, "DEPENDENCY");
+		workBuilder.getBuilder()
+				.addWorkManagedObject("DIRECT_USE", "DIRECT_USE")
+				.mapDependency(0, "DEPENDENCY");
 		workBuilder.getBuilder().addWorkManagedObject("DEPENDENCY",
 				"DEPENDENCY");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
@@ -153,7 +157,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param maxInvokes
 		 *            Maximum number of times to invoke another {@link Task}.
 		 */
@@ -163,7 +167,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Task to run.
-		 *
+		 * 
 		 * @param directUse
 		 *            {@link DependencyManagedObject}.
 		 * @param flow
@@ -215,7 +219,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Obtain the {@link DependencyManagedObject}.
-		 *
+		 * 
 		 * @return {@link DependencyManagedObject}.
 		 */
 		public DependencyManagedObject getDependency() {
@@ -296,7 +300,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Initiate.
-		 *
+		 * 
 		 * @param executeContext
 		 *            {@link ManagedObjectExecuteContext}.
 		 */
@@ -307,7 +311,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Starts the asynchronous operation.
-		 *
+		 * 
 		 * @param expectedState
 		 *            Expected {@link TransitionState}.
 		 * @param nextState
@@ -329,7 +333,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		/**
 		 * Completes the asynchronous operation.
-		 *
+		 * 
 		 * @param nextState
 		 *            Next {@link TransitionState}.
 		 */

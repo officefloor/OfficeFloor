@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -56,7 +57,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	/**
 	 * {@link Governance}.
 	 */
-	private Governance<I> governance = null;
+	private Governance<I, F> governance = null;
 
 	/**
 	 * Initiate.
@@ -86,7 +87,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		}
 
 		// Govern the managed object
-		this.governance.governManagedObject(extensionInterface);
+		this.governance.governManagedObject(extensionInterface, this);
 
 		// Create the active governance
 		ActiveGovernanceImpl activeGovernance = new ActiveGovernanceImpl(
@@ -102,8 +103,22 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	@Override
 	public void disregardGovernance() {
 
-		// Stop the governance
-		this.governance.stopGovernance();
+		// Disregard the governance
+		this.governance.disregardGovernance(this);
+
+		// Unregister the governance
+		this.unregisterGovernance();
+	}
+
+	@Override
+	public GovernanceManager getGovernanceManager() {
+		return this;
+	}
+
+	/**
+	 * Unregisters the {@link Governance}.
+	 */
+	private void unregisterGovernance() {
 
 		// Unregister managed objects from governance
 		for (ActiveGovernanceImpl activeGovernance : this.activeGovernances) {
@@ -112,11 +127,6 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 		// Disregard the governance
 		this.governance = null;
-	}
-
-	@Override
-	public GovernanceManager getGovernanceManager() {
-		return this;
 	}
 
 	/*
@@ -132,20 +142,17 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		}
 
 		// Create the governance
-		this.governance = this.metaData.createGovernance(this);
-
-		// Start governance
-		this.governance.startGovernance();
+		this.governance = this.metaData.createGovernance();
 	}
 
 	@Override
 	public void enforceGovernance() {
 
-		// Apply the governance
-		this.governance.applyGovernance();
+		// Enforce the governance
+		this.governance.enforceGovernance(this);
 
-		// Governance applied, so now stop governance
-		this.disregardGovernance();
+		// Governance applied, so now unregister governance
+		this.unregisterGovernance();
 	}
 
 	/*
@@ -200,6 +207,13 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 		@Override
 		public boolean isActive() {
 			return (GovernanceContainerImpl.this.governance != null);
+		}
+
+		@Override
+		public FlowMetaData<?> getFlowMetaData() {
+			// TODO implement ActiveGovernance.getFlowMetaData
+			throw new UnsupportedOperationException(
+					"TODO implement ActiveGovernance.getFlowMetaData");
 		}
 	}
 

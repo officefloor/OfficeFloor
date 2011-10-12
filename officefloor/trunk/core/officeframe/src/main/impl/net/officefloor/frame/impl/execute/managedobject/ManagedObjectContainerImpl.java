@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -250,7 +251,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public void loadManagedObject(JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet activateSet) {
+			JobNodeActivateSet activateSet, ContainerContext context) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -330,7 +331,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@Override
 	public <W extends Work> boolean governManagedObject(
 			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ContainerContext context) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -353,6 +355,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				throw new IllegalStateException(
 						"Must be able to wait until Managed Object loaded");
 			}
+			context.flagJobToWait();
 			return false;
 
 		case LOADED:
@@ -364,8 +367,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			// Ensure this managed object is ready
 			if (!this.checkManagedObjectReady(jobContext, workContainer,
-					jobNode, activateSet, ManagedObjectContainerState.LOADED)) {
+					jobNode, activateSet, context,
+					ManagedObjectContainerState.LOADED)) {
 				// This object must be ready before governing it
+				context.flagJobToWait();
 				return false;
 			}
 
@@ -399,6 +404,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 							throw new IllegalStateException(
 									"Must be able to wait until Managed Object governed");
 						}
+						context.flagJobToWait();
 						return false;
 					}
 
@@ -423,15 +429,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				}
 				this.activeGovernances[i] = activeGovernance;
 
-				// Determine if governance activated
-				if (!activeGovernance.isActive()) {
-					// Still waiting on being active
-					if (!this.sourcingMonitor.waitOnAsset(jobNode, activateSet)) {
-						throw new IllegalStateException(
-								"Must be able to wait until Managed Object loaded");
-					}
-					return false;
-				}
+				// Add the active governance for activation
+				context.addSetupJob(activeGovernance.getFlowMetaData(),
+						activeGovernance);
 			}
 
 			// Now governed
@@ -459,7 +459,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean coordinateManagedObject(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet activateSet) {
+			JobNodeActivateSet activateSet, ContainerContext context) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -485,16 +485,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 				// Ensure the dependencies are ready for coordination
 				if (!this.metaData.isDependenciesReady(workContainer,
-						executionContext, jobNode, activateSet)) {
+						executionContext, jobNode, activateSet, context)) {
 					// Dependencies must be ready before coordinating
+					context.flagJobToWait();
 					return false;
 				}
 
 				// Ensure this managed object is ready
 				if (!this.checkManagedObjectReady(executionContext,
-						workContainer, jobNode, activateSet,
+						workContainer, jobNode, activateSet, context,
 						ManagedObjectContainerState.GOVERNED)) {
 					// This object must be ready before coordinating it
+					context.flagJobToWait();
 					return false;
 				}
 
@@ -526,9 +528,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			// Wait until managed object ready
 			if (!this.checkManagedObjectReady(executionContext, workContainer,
-					jobNode, activateSet,
+					jobNode, activateSet, context,
 					ManagedObjectContainerState.COORDINATING)) {
 				// Must be ready before obtaining the object
+				context.flagJobToWait();
 				return false;
 			}
 
@@ -565,7 +568,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@SuppressWarnings("rawtypes")
 	public boolean isManagedObjectReady(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet activateSet) {
+			JobNodeActivateSet activateSet, ContainerContext context) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -577,7 +580,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 		// Return check on ready (object must be available)
 		return this.checkManagedObjectReady(executionContext, workContainer,
-				jobNode, activateSet,
+				jobNode, activateSet, context,
 				ManagedObjectContainerState.OBJECT_AVAILABLE);
 	}
 
@@ -592,6 +595,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *            {@link JobNode}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 * @param expectedContainerState
 	 *            Should the {@link ManagedObject} be ready it is illegal for it
 	 *            to be in any other state other than this one.
@@ -600,7 +605,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private boolean checkManagedObjectReady(JobContext executionContext,
 			WorkContainer workContainer, JobNode jobNode,
-			JobNodeActivateSet activateSet,
+			JobNodeActivateSet activateSet, ContainerContext context,
 			ManagedObjectContainerState expectedContainerState) {
 
 		// Handle based on state
@@ -681,7 +686,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					// Loaded, now need governing
 					boolean isGoverned = this.governManagedObject(
 							workContainer, executionContext, jobNode,
-							activateSet);
+							activateSet, context);
 					if (!isGoverned) {
 						return false; // Waiting on governance
 					}
@@ -690,8 +695,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				case GOVERNED:
 					// As this a dependency loaded but not coordinated.
 					// If coordination successful then ready.
-					return this.coordinateManagedObject(workContainer,
-							executionContext, jobNode, activateSet);
+					boolean isCoordinated = this.coordinateManagedObject(
+							workContainer, executionContext, jobNode,
+							activateSet, context);
+					if (!isCoordinated) {
+						return false; // Waiting on coordination
+					}
+					// Coordination in place, so continue on
 
 				case OBJECT_AVAILABLE:
 					// Object available and ready

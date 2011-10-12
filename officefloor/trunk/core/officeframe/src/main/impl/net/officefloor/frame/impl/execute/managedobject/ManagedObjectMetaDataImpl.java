@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -290,9 +291,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public <W extends Work> boolean isDependenciesReady(
 			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ContainerContext context) {
 		return workContainer.isManagedObjectsReady(this.dependencyMapping,
-				jobContext, jobNode, activateSet);
+				jobContext, jobNode, activateSet, context);
 	}
 
 	@Override

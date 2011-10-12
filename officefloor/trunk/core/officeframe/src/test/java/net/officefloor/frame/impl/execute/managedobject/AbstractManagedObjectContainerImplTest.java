@@ -27,9 +27,11 @@ import net.officefloor.frame.api.escalate.ManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
+import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -262,6 +264,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 */
 	private final JobNodeActivateSet jobActivateSet = this
 			.createMock(JobNodeActivatableSet.class);
+
+	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = this
+			.createMock(ContainerContext.class);
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -603,6 +611,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void record_MoContainer_governManagedObject_stillLoading() {
 		this.recordReturn(this.sourcingAssetMonitor, this.sourcingAssetMonitor
 				.waitOnAsset(this.jobNode, this.jobActivateSet), true);
+		this.containerContext.flagJobToWait();
 	}
 
 	/**
@@ -626,7 +635,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.recordReturn(this.managedObjectMetaData,
 					this.managedObjectMetaData.isDependenciesReady(
 							this.workContainer, this.jobContext, this.jobNode,
-							this.jobActivateSet), isDependenciesReady);
+							this.jobActivateSet, this.containerContext),
+					isDependenciesReady);
 			if (!isDependenciesReady) {
 				// Dependencies not ready so no further processing
 				return;
@@ -937,7 +947,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            {@link ManagedObjectContainer}.
 	 */
 	protected void loadManagedObject(ManagedObjectContainer mo) {
-		mo.loadManagedObject(this.jobContext, this.jobNode, this.jobActivateSet);
+		mo.loadManagedObject(this.jobContext, this.jobNode,
+				this.jobActivateSet, this.containerContext);
 	}
 
 	/**
@@ -949,11 +960,11 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            Indicates if should be governed.
 	 */
 	protected void governManagedObject(ManagedObjectContainer mo,
-			boolean isExpectedGoverning) {
+			boolean isGoverned, ActiveGovernance... governances) {
 		boolean isGoverning = mo.governManagedObject(this.workContainer,
-				this.jobContext, this.jobNode, this.jobActivateSet);
-		assertEquals("Incorrect indicating if governed", isExpectedGoverning,
-				isGoverning);
+				this.jobContext, this.jobNode, this.jobActivateSet,
+				this.containerContext);
+		assertEquals("Ensure appropriate governance", isGoverned, isGoverning);
 	}
 
 	/**
@@ -967,7 +978,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void coordinateManagedObject(ManagedObjectContainer mo,
 			boolean isExpectedCoordinate) {
 		boolean isCoordinated = mo.coordinateManagedObject(this.workContainer,
-				this.jobContext, this.jobNode, this.jobActivateSet);
+				this.jobContext, this.jobNode, this.jobActivateSet,
+				this.containerContext);
 		assertEquals("Incorrect indicating if coordinated",
 				isExpectedCoordinate, isCoordinated);
 	}
@@ -983,7 +995,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void isManagedObjectReady(ManagedObjectContainer mo,
 			boolean isExpectedReady) {
 		boolean isReady = mo.isManagedObjectReady(this.workContainer,
-				this.jobContext, this.jobNode, this.jobActivateSet);
+				this.jobContext, this.jobNode, this.jobActivateSet,
+				this.containerContext);
 		assertEquals("Incorrect indicating if ready", isExpectedReady, isReady);
 	}
 

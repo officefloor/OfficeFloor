@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.work;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContext;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -63,34 +64,35 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	public boolean isManagedObjectsReady(
 			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet notifySet) {
+			JobNodeActivateSet notifySet, ContainerContext context) {
 		return this.delegate.isManagedObjectsReady(managedObjectIndexes,
-				executionContext, jobNode, notifySet);
+				executionContext, jobNode, notifySet, context);
 	}
 
 	@Override
 	public void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet notifySet) {
+			JobNodeActivateSet notifySet, ContainerContext context) {
 		this.delegate.loadManagedObjects(managedObjectIndexes,
-				executionContext, jobNode, notifySet);
+				executionContext, jobNode, notifySet, context);
 	}
 
 	@Override
-	public boolean governManagedObjects(
+	public void governManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
-		return this.delegate.governManagedObjects(managedObjectIndexes,
-				jobContext, jobNode, activateSet);
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ContainerContext context) {
+		this.delegate.governManagedObjects(managedObjectIndexes,
+				jobContext, jobNode, activateSet, context);
 	}
 
 	@Override
-	public boolean coordinateManagedObjects(
+	public void coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobNodeActivateSet notifySet) {
-		return this.delegate.coordinateManagedObjects(managedObjectIndexes,
-				executionContext, jobNode, notifySet);
+			JobNodeActivateSet notifySet, ContainerContext context) {
+		this.delegate.coordinateManagedObjects(managedObjectIndexes,
+				executionContext, jobNode, notifySet, context);
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * {@link Governance}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final Governance<MockExtensionInterface> governance = this
+	private final Governance<MockExtensionInterface, Indexed> governance = this
 			.createMock(Governance.class);
 
 	/**
@@ -89,15 +89,14 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	public void testEndOfProcessDisregardGovernance() throws Exception {
 
 		// Record activating governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernance(this.container), this.governance);
-		this.governance.startGovernance();
+		this.recordReturn(this.metaData, this.metaData.createGovernance(),
+				this.governance);
 
 		// Record governing extension
-		this.governance.governManagedObject(this.extension);
+		this.governance.governManagedObject(this.extension, this.container);
 
 		// Record disregard governance
-		this.governance.stopGovernance();
+		this.governance.disregardGovernance(this.container);
 		this.managedObject.unregisterManagedObjectFromGovernance(null);
 		this.control(this.managedObject).setMatcher(
 				new TypeMatcher(ActiveGovernance.class));
@@ -126,18 +125,16 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	public void testEnforceGovernance() throws Exception {
 
 		// Record activating governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernance(this.container), this.governance);
-		this.governance.startGovernance();
+		this.recordReturn(this.metaData, this.metaData.createGovernance(),
+				this.governance);
 
 		// Record governing extension
-		this.governance.governManagedObject(this.extension);
+		this.governance.governManagedObject(this.extension, this.container);
 
 		// Record enforce governance
-		this.governance.applyGovernance();
+		this.governance.enforceGovernance(this.container);
 
 		// Record stopping governance
-		this.governance.stopGovernance();
 		this.managedObject.unregisterManagedObjectFromGovernance(null);
 		this.control(this.managedObject).setMatcher(
 				new TypeMatcher(ActiveGovernance.class));
@@ -166,15 +163,14 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	public void testDisregardGovernance() throws Exception {
 
 		// Record activating governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernance(this.container), this.governance);
-		this.governance.startGovernance();
+		this.recordReturn(this.metaData, this.metaData.createGovernance(),
+				this.governance);
 
 		// Record governing extension
-		this.governance.governManagedObject(this.extension);
+		this.governance.governManagedObject(this.extension, this.container);
 
 		// Record disregard governance
-		this.governance.stopGovernance();
+		this.governance.disregardGovernance(this.container);
 		this.managedObject.unregisterManagedObjectFromGovernance(null);
 		this.control(this.managedObject).setMatcher(
 				new TypeMatcher(ActiveGovernance.class));
@@ -209,19 +205,17 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectContainer.class);
 
 		// Record activating governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernance(this.container), this.governance);
-		this.governance.startGovernance();
+		this.recordReturn(this.metaData, this.metaData.createGovernance(),
+				this.governance);
 
 		// Record governing multiple managed objects
-		this.governance.governManagedObject(this.extension);
-		this.governance.governManagedObject(anotherExtension);
+		this.governance.governManagedObject(this.extension, this.container);
+		this.governance.governManagedObject(anotherExtension, this.container);
 
 		// Record enforce governance
-		this.governance.applyGovernance();
+		this.governance.enforceGovernance(this.container);
 
 		// Record stopping governance
-		this.governance.stopGovernance();
 		this.managedObject.unregisterManagedObjectFromGovernance(null);
 		this.control(this.managedObject).setMatcher(
 				new TypeMatcher(ActiveGovernance.class));
@@ -260,15 +254,11 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	public void testGovernNoManagedObjects() throws Exception {
 
 		// Record activating governance
-		this.recordReturn(this.metaData,
-				this.metaData.createGovernance(this.container), this.governance);
-		this.governance.startGovernance();
+		this.recordReturn(this.metaData, this.metaData.createGovernance(),
+				this.governance);
 
 		// Record enforce governance
-		this.governance.applyGovernance();
-
-		// Record stopping governance
-		this.governance.stopGovernance();
+		this.governance.enforceGovernance(this.container);
 
 		// Test
 		this.replayMockObjects();

@@ -28,6 +28,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -59,7 +60,7 @@ import net.officefloor.frame.spi.team.Team;
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
 		extends AbstractLinkedListSetEntry<JobNode, Flow> implements Job,
-		JobNode, JobExecuteContext {
+		JobNode, JobExecuteContext, ContainerContext {
 
 	/**
 	 * {@link Logger}.
@@ -140,6 +141,29 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	@Override
 	public Flow getLinkedListSetOwner() {
 		return this.flow;
+	}
+
+	/*
+	 * ===================== ContainerContext ===============================
+	 */
+
+	/**
+	 * Flag indicating for the {@link Job} to wait to be activated at a later
+	 * time.
+	 */
+	private boolean isJobToWait = false;
+
+	@Override
+	public void flagJobToWait() {
+		// Flag for Job to wait
+		this.isJobToWait = true;
+	}
+
+	@Override
+	public void addSetupJob(FlowMetaData<?> flowMetaData, Object parameter) {
+		// TODO implement AbstractJobContainer.addSetupJob
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractJobContainer.addSetupJob");
 	}
 
 	/*
@@ -254,14 +278,17 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						} else {
 							// Within process lock, ensure managed objects ready
 							synchronized (processState.getProcessLock()) {
+
+								// Reset flags for managed objects readiness
+								this.isJobToWait = false;
+
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
 									// Load the managed objects
-									this.workContainer
-											.loadManagedObjects(
-													this.requiredManagedObjects,
-													executionContext, this,
-													activateSet);
+									this.workContainer.loadManagedObjects(
+											this.requiredManagedObjects,
+											executionContext, this,
+											activateSet, this);
 
 									// Flag Managed Objects are now to be
 									// governed
@@ -270,14 +297,13 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								case GOVERN_MANAGED_OBJECTS:
 									// Govern the managed objects.
 									// (Handles managed objects not ready)
-									boolean isGoverned = this.workContainer
-											.governManagedObjects(
-													this.requiredManagedObjects,
-													executionContext, this,
-													activateSet);
+									this.workContainer.governManagedObjects(
+											this.requiredManagedObjects,
+											executionContext, this,
+											activateSet, this);
 
-									// Determine if managed objects governed
-									if (!isGoverned) {
+									// Determine if Job to wait
+									if (this.isJobToWait) {
 										// Woken when ready to govern again
 										return true;
 									}
@@ -288,14 +314,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								case COORDINATE_MANAGED_OBJECTS:
 									// Coordinate the managed objects.
 									// (Handles managed objects not ready)
-									boolean isCoordinated = this.workContainer
+									this.workContainer
 											.coordinateManagedObjects(
 													this.requiredManagedObjects,
 													executionContext, this,
-													activateSet);
+													activateSet, this);
 
-									// Determine if managed objects coordinated
-									if (!isCoordinated) {
+									// Determine if Job to wait
+									if (this.isJobToWait) {
 										// Woken when ready to coordinate again
 										return true;
 									}
@@ -310,7 +336,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 											.isManagedObjectsReady(
 													this.requiredManagedObjects,
 													executionContext, this,
-													activateSet)) {
+													activateSet, this)) {
 										// Woken up when ready
 										return true;
 									}
@@ -604,6 +630,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 			// Ensure activate the necessary jobs
 			activateSet.activateJobNodes();
+
+			// TODO determine if activate parallel jobs (for setup)
+			if (false)
+				System.err
+						.println("TODO determine if activate parallel jobs (for setup)");
 		}
 	}
 

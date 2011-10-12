@@ -21,6 +21,7 @@ package net.officefloor.frame.impl.execute.work;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -40,7 +41,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the methods of the {@link WorkContainer}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public class WorkContainerTest extends OfficeFrameTestCase {
@@ -86,6 +87,12 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	private final JobNode jobNode = this.createMock(JobNode.class);
 
 	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = this
+			.createMock(ContainerContext.class);
+
+	/**
 	 * Mock {@link Flow}.
 	 */
 	private final Flow flow = this.createMock(Flow.class);
@@ -113,23 +120,23 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 
 		// Record coordinating
 		this.record_WorkContainer_toProcessState();
-		this.recordReturn(indexes[0], indexes[0]
-				.getIndexOfManagedObjectWithinScope(), 0);
+		this.recordReturn(indexes[0],
+				indexes[0].getIndexOfManagedObjectWithinScope(), 0);
 		this.recordReturn(indexes[0], indexes[0].getManagedObjectScope(),
 				ManagedObjectScope.THREAD);
-		this.recordReturn(this.threadState, this.threadState
-				.getManagedObjectContainer(0), moContainer);
-		this.recordReturn(moContainer,
-				moContainer.coordinateManagedObject(workContainer,
-						this.jobContext, this.jobNode, this.activateSet), true);
+		this.recordReturn(this.threadState,
+				this.threadState.getManagedObjectContainer(0), moContainer);
+		this.recordReturn(moContainer, moContainer.coordinateManagedObject(
+				workContainer, this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), true);
 
 		// Replay mock
 		this.replayMockObjects();
 
 		// Do the coordination
-		assertTrue("Should coordinate", this.workContainer
-				.coordinateManagedObjects(indexes, this.jobContext,
-						this.jobNode, this.activateSet));
+		// TODO handle: assertTrue("Should coordinate",
+		this.workContainer.coordinateManagedObjects(indexes, this.jobContext,
+				this.jobNode, this.activateSet, this.containerContext);
 
 		// Verify
 		this.verifyMockObjects();
@@ -149,24 +156,23 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 
 		// Record coordinating
 		this.record_WorkContainer_toProcessState();
-		this.recordReturn(indexes[0], indexes[0]
-				.getIndexOfManagedObjectWithinScope(), 0);
+		this.recordReturn(indexes[0],
+				indexes[0].getIndexOfManagedObjectWithinScope(), 0);
 		this.recordReturn(indexes[0], indexes[0].getManagedObjectScope(),
 				ManagedObjectScope.THREAD);
-		this.recordReturn(this.threadState, this.threadState
-				.getManagedObjectContainer(0), moContainer);
-		this
-				.recordReturn(moContainer, moContainer.coordinateManagedObject(
-						workContainer, this.jobContext, this.jobNode,
-						this.activateSet), false);
+		this.recordReturn(this.threadState,
+				this.threadState.getManagedObjectContainer(0), moContainer);
+		this.recordReturn(moContainer, moContainer.coordinateManagedObject(
+				workContainer, this.jobContext, this.jobNode, this.activateSet,
+				this.containerContext), false);
 
 		// Replay mock
 		this.replayMockObjects();
 
 		// Do the coordination
-		assertFalse("Should coordinate", this.workContainer
-				.coordinateManagedObjects(indexes, this.jobContext,
-						this.jobNode, this.activateSet));
+		// TODO handle: assertFalse("Should coordinate",
+		this.workContainer.coordinateManagedObjects(indexes, this.jobContext,
+				this.jobNode, this.activateSet, this.containerContext);
 
 		// Verify
 		this.verifyMockObjects();
@@ -199,7 +205,7 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Creates an array of mock {@link ManagedObjectIndex} instances.
-	 *
+	 * 
 	 * @param numberOfIndexes
 	 *            Number of {@link ManagedObjectIndex} instances in the array.
 	 * @return Array of mock {@link ManagedObjectIndex} instances.

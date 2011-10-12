@@ -18,7 +18,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
 
 /**
  * Meta-data of the {@link Governance}.
@@ -44,10 +43,8 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	/**
 	 * Create the {@link Governance}.
 	 * 
-	 * @param context
-	 *            {@link GovernanceContext}.
 	 * @return {@link Governance}.
 	 */
-	Governance<I> createGovernance(GovernanceContext<F> context);
+	Governance<I, F> createGovernance();
 
 }

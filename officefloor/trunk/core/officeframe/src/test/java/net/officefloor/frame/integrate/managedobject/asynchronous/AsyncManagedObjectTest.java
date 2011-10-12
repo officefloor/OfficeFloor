@@ -55,11 +55,6 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 */
 	private TestTeam team;
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
