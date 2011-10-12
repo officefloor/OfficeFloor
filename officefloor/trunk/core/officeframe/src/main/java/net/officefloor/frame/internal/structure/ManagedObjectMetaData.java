@@ -172,12 +172,15 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link JobNode}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 * @return <code>true</code> if all dependency {@link ManagedObject}
 	 *         instances are ready.
 	 */
 	<W extends Work> boolean isDependenciesReady(
 			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet);
+			JobNode jobNode, JobNodeActivateSet activateSet,
+			ContainerContext context);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.

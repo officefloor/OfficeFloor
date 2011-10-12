@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -109,7 +110,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 	@Override
 	public void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobNodeActivateSet notifySet) {
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet notifySet, ContainerContext context) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -153,14 +155,15 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Trigger loading the managed object
-			container.loadManagedObject(jobContext, jobNode, notifySet);
+			container
+					.loadManagedObject(jobContext, jobNode, notifySet, context);
 		}
 	}
 
 	@Override
-	public boolean governManagedObjects(
-			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet) {
+	public void governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -196,21 +199,19 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 						+ index.getManagedObjectScope());
 			}
 
-			// Do not continue onto next unless governed
+			// Govern the managed object
 			if (!container.governManagedObject(this, jobContext, jobNode,
-					activateSet)) {
-				return false;
+					activateSet, context)) {
+				return; // must wait on current managed object
 			}
 		}
-
-		// As here, all managed objects are governed
-		return true;
 	}
 
 	@Override
-	public boolean coordinateManagedObjects(
+	public void coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet notifySet,
+			ContainerContext context) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -248,19 +249,17 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 			// Do not continue onto next unless coordinated
 			if (!container.coordinateManagedObject(this, jobContext, jobNode,
-					notifySet)) {
-				return false;
+					notifySet, context)) {
+				return; // must wait on current managed object
 			}
 		}
-
-		// As here, all managed objects are coordinated
-		return true;
 	}
 
 	@Override
 	public boolean isManagedObjectsReady(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet notifySet,
+			ContainerContext context) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -298,7 +297,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 			// Indicate not ready on first managed object not ready
 			if (!container.isManagedObjectReady(this, jobContext, jobNode,
-					notifySet)) {
+					notifySet, context)) {
 				return false;
 			}
 		}

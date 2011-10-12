@@ -33,6 +33,7 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -265,6 +266,12 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	private final JobNode jobNode = this.createMock(JobNode.class);
 
 	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = this
+			.createMock(ContainerContext.class);
+
+	/**
 	 * {@link Flow}.
 	 */
 	private final Flow flow = this.createMock(Flow.class);
@@ -350,7 +357,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 			// Record loading the managed object
 			managedObjectContainer.loadManagedObject(this.jobContext,
-					this.jobNode, this.jobActivateSet);
+					this.jobNode, this.jobActivateSet, this.containerContext);
 		}
 	}
 
@@ -381,13 +388,15 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			// Record loading the managed object
 			this.recordReturn(managedObjectContainer, managedObjectContainer
 					.coordinateManagedObject(null, this.jobContext,
-							this.jobNode, this.jobActivateSet), true);
+							this.jobNode, this.jobActivateSet,
+							this.containerContext), true);
 			if (!this.coordinatedMangedObjectContainers
 					.contains(managedObjectContainer)) {
 				// Only set the matcher once
 				this.control(managedObjectContainer).setMatcher(
 						new TypeMatcher(WorkContainer.class, JobContext.class,
-								JobNode.class, JobNodeActivateSet.class));
+								JobNode.class, JobNodeActivateSet.class,
+								ContainerContext.class));
 				this.coordinatedMangedObjectContainers
 						.add(managedObjectContainer);
 			}
@@ -432,8 +441,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 				this.recordReturn(managedObjectContainer,
 						managedObjectContainer.isManagedObjectReady(null,
 								this.jobContext, this.jobNode,
-								this.jobActivateSet), true,
-						new AbstractMatcher() {
+								this.jobActivateSet, this.containerContext),
+						true, new AbstractMatcher() {
 							@Override
 							public boolean matches(Object[] expected,
 									Object[] actual) {
@@ -456,7 +465,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 				this.recordReturn(managedObjectContainer,
 						managedObjectContainer.isManagedObjectReady(null,
 								this.jobContext, this.jobNode,
-								this.jobActivateSet), true);
+								this.jobActivateSet, this.containerContext),
+						true);
 			}
 		}
 	}
@@ -694,7 +704,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	protected void loadManagedObjects(WorkContainer<?> workContainer,
 			ManagedObjectIndex... managedObjectIndexes) {
 		workContainer.loadManagedObjects(managedObjectIndexes, this.jobContext,
-				this.jobNode, this.jobActivateSet);
+				this.jobNode, this.jobActivateSet, this.containerContext);
 	}
 
 	/**
@@ -713,7 +723,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			boolean isExpectReady, ManagedObjectIndex... managedObjectIndexes) {
 		boolean isReady = workContainer.isManagedObjectsReady(
 				managedObjectIndexes, this.jobContext, this.jobNode,
-				this.jobActivateSet);
+				this.jobActivateSet, this.containerContext);
 		assertEquals("Incorrect result of checking managed objects ready",
 				isExpectReady, isReady);
 	}
@@ -730,7 +740,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	protected void coordinateManagedObject(WorkContainer<?> workContainer,
 			ManagedObjectIndex... managedObjectIndexes) {
 		workContainer.coordinateManagedObjects(managedObjectIndexes,
-				this.jobContext, this.jobNode, this.jobActivateSet);
+				this.jobContext, this.jobNode, this.jobActivateSet,
+				this.containerContext);
 	}
 
 	/**

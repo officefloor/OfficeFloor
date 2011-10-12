@@ -57,7 +57,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job);
-		this.record_WorkContainer_governManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job);
 		this.record_WorkContainer_coordinateManagedObjects(job, true);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 		this.record_WorkContainer_getObject(moIndex, moObject);
@@ -104,7 +104,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions of attempt to load managed objects
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job);
-		this.record_WorkContainer_governManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job);
 		this.record_WorkContainer_coordinateManagedObjects(job, false);
 		this.record_JobActivatableSet_activateJobs();
 
@@ -160,7 +160,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions of attempt to coordinate managed objects
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job);
-		this.record_WorkContainer_governManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job);
 		this.record_WorkContainer_coordinateManagedObjects(job, false);
 		this.record_JobActivatableSet_activateJobs();
 
@@ -220,7 +220,7 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 		// Record actions of attempt to coordinate managed objects
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job);
-		this.record_WorkContainer_governManagedObjects(job, true);
+		this.record_WorkContainer_governManagedObjects(job);
 		this.record_WorkContainer_coordinateManagedObjects(job, true);
 		this.record_WorkContainer_isManagedObjectsReady(job, false);
 		this.record_JobActivatableSet_activateJobs();

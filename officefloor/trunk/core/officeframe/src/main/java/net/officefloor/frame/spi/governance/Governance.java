@@ -28,32 +28,36 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Governance<I> {
-
-	/**
-	 * Starts the {@link Governance} of the {@link ManagedObject} instances.
-	 */
-	void startGovernance();
+public interface Governance<I, F extends Enum<F>> {
 
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
 	 * 
 	 * @param extensionInterface
 	 *            Extension interface of the {@link ManagedObject}.
+	 * @param context
+	 *            {@link GovernanceContext}.
 	 * @throws Exception
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
-	void governManagedObject(I extensionInterface) throws Exception;
+	void governManagedObject(I extensionInterface, GovernanceContext<F> context)
+			throws Exception;
 
 	/**
-	 * Applies the {@link Governance} to the {@link ManagedObject} instances
+	 * Enforces the {@link Governance} of the {@link ManagedObject} instances
 	 * under {@link Governance}.
+	 * 
+	 * @param context
+	 *            {@link GovernanceContext}.
 	 */
-	void applyGovernance();
+	void enforceGovernance(GovernanceContext<F> context);
 
 	/**
-	 * Stops {@link Governance} of the {@link ManagedObject} instances.
+	 * Disregard {@link Governance} of the {@link ManagedObject} instances.
+	 * 
+	 * @param context
+	 *            {@link GovernanceContext}.
 	 */
-	void stopGovernance();
+	void disregardGovernance(GovernanceContext<F> context);
 
 }

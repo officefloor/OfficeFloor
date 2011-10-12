@@ -53,10 +53,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 */
 	void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet);
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Governs the {@link ManagedObject} instances.
@@ -72,14 +74,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
-	 * @return <code>true</code> if the {@link ManagedObject} instances were
-	 *         under {@link Governance}. <code>false</code> indicates this
-	 *         method must be called again for {@link Governance} of the
-	 *         {@link ManagedObject} instances.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 */
-	boolean governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+	void governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet);
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Coordinates the {@link ManagedObject} instances.
@@ -95,13 +95,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
-	 * @return <code>true</code> if the {@link ManagedObject} instances were
-	 *         coordinated. <code>false</code> indicates this method must be
-	 *         called again to coordinate the {@link ManagedObject} instances.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 */
-	boolean coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+	void coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet);
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Indicates if the particular {@link ManagedObject} is ready for use. In
@@ -119,13 +118,15 @@ public interface WorkContainer<W extends Work> {
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
 	 *            activate.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready for use,
 	 *         otherwise <code>false</code> indicating that waiting on the
 	 *         {@link ManagedObject}.
 	 */
 	boolean isManagedObjectsReady(ManagedObjectIndex[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet);
+			JobNodeActivateSet activateSet, ContainerContext context);
 
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input

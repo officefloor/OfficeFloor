@@ -246,9 +246,9 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public Governance<MockTransaction> createGovernance(
-				GovernanceContext<Indexed> context) throws Throwable {
-			return new MockTransactionalGovernance(context);
+		public Governance<MockTransaction, Indexed> createGovernance()
+				throws Throwable {
+			return new MockTransactionalGovernance();
 		}
 	}
 
@@ -256,38 +256,15 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	 * Mock transactional {@link Governance}.
 	 */
 	private static class MockTransactionalGovernance implements
-			Governance<MockTransaction> {
-
-		/**
-		 * {@link GovernanceContext}.
-		 */
-		private final GovernanceContext<Indexed> context;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param context
-		 *            {@link GovernanceContext}.
-		 */
-		public MockTransactionalGovernance(GovernanceContext<Indexed> context) {
-			this.context = context;
-		}
+			Governance<MockTransaction, Indexed> {
 
 		/*
 		 * ====================== Governance =======================
 		 */
 
 		@Override
-		public void startGovernance() {
-			// TODO implement
-			// Governance<MockTransaction,Indexed>.startGovernance
-			throw new UnsupportedOperationException(
-					"TODO implement Governance<MockTransaction,Indexed>.startGovernance");
-		}
-
-		@Override
-		public void governManagedObject(MockTransaction extensionInterface)
-				throws Exception {
+		public void governManagedObject(MockTransaction extensionInterface,
+				GovernanceContext<Indexed> context) throws Exception {
 			// TODO implement
 			// Governance<MockTransaction,Indexed>.governManagedObject
 			throw new UnsupportedOperationException(
@@ -295,18 +272,19 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public void applyGovernance() {
+		public void enforceGovernance(GovernanceContext<Indexed> context) {
 			// TODO implement
-			// Governance<MockTransaction,Indexed>.applyGovernance
+			// Governance<MockTransaction,Indexed>.enforceGovernance
 			throw new UnsupportedOperationException(
-					"TODO implement Governance<MockTransaction,Indexed>.applyGovernance");
+					"TODO implement Governance<MockTransaction,Indexed>.enforceGovernance");
 		}
 
 		@Override
-		public void stopGovernance() {
-			// TODO implement Governance<MockTransaction,Indexed>.stopGovernance
+		public void disregardGovernance(GovernanceContext<Indexed> context) {
+			// TODO implement
+			// Governance<MockTransaction,Indexed>.disregardGovernance
 			throw new UnsupportedOperationException(
-					"TODO implement Governance<MockTransaction,Indexed>.stopGovernance");
+					"TODO implement Governance<MockTransaction,Indexed>.disregardGovernance");
 		}
 	}
 
