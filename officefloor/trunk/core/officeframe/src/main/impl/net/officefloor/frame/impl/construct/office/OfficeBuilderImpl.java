@@ -33,6 +33,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
+import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.task.TaskEscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
@@ -212,9 +213,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
 			String governanceName, Class<GS> governanceSource) {
-		// TODO implement OfficeBuilder.addGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeBuilder.addGovernance");
+		GovernanceBuilderImpl builder = new GovernanceBuilderImpl();
+		return builder;
 	}
 
 	@Override
