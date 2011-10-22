@@ -53,10 +53,24 @@ public class RawGovernanceMetaDataImpl implements RawGovernanceMetaDataFactory,
 	 */
 
 	@Override
-	public Object getGovernanceName() {
+	public String getGovernanceName() {
 		// TODO implement RawGovernanceMetaData.getGovernanceName
 		throw new UnsupportedOperationException(
 				"TODO implement RawGovernanceMetaData.getGovernanceName");
+	}
+
+	@Override
+	public Class<?> getExtensionInterfaceType() {
+		// TODO implement RawGovernanceMetaData.getExtensionInterfaceType
+		throw new UnsupportedOperationException(
+				"TODO implement RawGovernanceMetaData.getExtensionInterfaceType");
+	}
+
+	@Override
+	public int getGovernanceIndex() {
+		// TODO implement RawGovernanceMetaData.getGovernanceIndex
+		throw new UnsupportedOperationException(
+				"TODO implement RawGovernanceMetaData.getGovernanceIndex");
 	}
 
 }

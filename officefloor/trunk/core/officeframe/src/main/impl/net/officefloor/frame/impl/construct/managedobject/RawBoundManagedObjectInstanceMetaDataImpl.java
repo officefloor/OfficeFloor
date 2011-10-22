@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectGovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
@@ -36,7 +37,9 @@ import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 
 /**
  * {@link RawBoundManagedObjectInstanceMetaData} implementation.
@@ -69,12 +72,6 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	private final RawManagedObjectMetaData<D, ?> rawMoMetaData;
 
 	/**
-	 * {@link RawGovernanceMetaData} of the {@link Office} by its {@link Office}
-	 * registered name.
-	 */
-	private final Map<String, RawGovernanceMetaData> rawGovernanceMetaData;
-
-	/**
 	 * Listing of the {@link ManagedObjectDependencyConfiguration} for the
 	 * {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
@@ -90,6 +87,11 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 * Dependencies.
 	 */
 	private RawBoundManagedObjectMetaData[] dependencies;
+
+	/**
+	 * {@link ManagedObjectGovernanceMetaData}.
+	 */
+	private ManagedObjectGovernanceMetaData<?>[] governanceMetaData;
 
 	/**
 	 * {@link ManagedObjectMetaData}.
@@ -109,9 +111,6 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 *            within its containing {@link RawBoundManagedObjectMetaData}.
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
-	 * @param rawGovernanceMetaData
-	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
-	 *            {@link Office} registered name.
 	 * @param dependenciesConfiguration
 	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
@@ -124,14 +123,12 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 			RawBoundManagedObjectMetaData rawBoundMetaData,
 			int instanceIndex,
 			RawManagedObjectMetaData<D, ?> rawMoMetaData,
-			Map<String, RawGovernanceMetaData> rawGovernanceMetaData,
 			ManagedObjectDependencyConfiguration<D>[] dependenciesConfiguration,
 			ManagedObjectGovernanceConfiguration[] governanceConfiguration) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.rawBoundMetaData = rawBoundMetaData;
 		this.instanceIndex = instanceIndex;
 		this.rawMoMetaData = rawMoMetaData;
-		this.rawGovernanceMetaData = rawGovernanceMetaData;
 		this.dependenciesConfiguration = dependenciesConfiguration;
 		this.governanceConfiguration = governanceConfiguration;
 	}
@@ -287,8 +284,95 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	}
 
 	/**
+	 * Loads the {@link ManagedObjectGovernanceMetaData}.
+	 * 
+	 * @param rawGovernanceMetaDatas
+	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
+	 *            {@link Office} registered name.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void loadGovernance(
+			Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas,
+			OfficeFloorIssues issues) {
+
+		// Determine if governance
+		if ((this.governanceConfiguration == null)
+				|| (this.governanceConfiguration.length == 0)) {
+			this.governanceMetaData = new ManagedObjectGovernanceMetaData<?>[0];
+			return; // No governance
+		}
+
+		// Load the governance
+		this.governanceMetaData = new ManagedObjectGovernanceMetaData<?>[this.governanceConfiguration.length];
+		NEXT_GOVERNANCE: for (int i = 0; i < this.governanceConfiguration.length; i++) {
+			ManagedObjectGovernanceConfiguration configuration = this.governanceConfiguration[i];
+
+			// Obtain the governance
+			String governanceName = configuration.getGovernanceName();
+			RawGovernanceMetaData rawGovernanceMetaData = rawGovernanceMetaDatas
+					.get(governanceName);
+
+			// Ensure have the governance
+			if (rawGovernanceMetaData == null) {
+				// No governance
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						this.boundManagedObjectName, "Unknown governance '"
+								+ governanceName + "'");
+				continue NEXT_GOVERNANCE;
+			}
+
+			// Obtain the index of the governance
+			int governanceIndex = rawGovernanceMetaData.getGovernanceIndex();
+
+			// Obtain the Governance extension interface
+			Class<?> governanceExtensionInterface = rawGovernanceMetaData
+					.getExtensionInterfaceType();
+
+			// Create the extension interface extractor
+			ManagedObjectExtensionInterfaceMetaData<?>[] eiMetaDatas = this.rawMoMetaData
+					.getManagedObjectSourceMetaData()
+					.getExtensionInterfacesMetaData();
+			for (ManagedObjectExtensionInterfaceMetaData<?> eiMetaData : eiMetaDatas) {
+
+				// Determine if extension interface to use
+				Class<?> extensionInterfaceType = eiMetaData
+						.getExtensionInterfaceType();
+				if (governanceExtensionInterface
+						.isAssignableFrom(extensionInterfaceType)) {
+
+					// Found the extension interface, so obtain the factory
+					ExtensionInterfaceFactory<?> factory = eiMetaData
+							.getExtensionInterfaceFactory();
+
+					// Load the governance meta-data
+					this.governanceMetaData[i] = new ManagedObjectGovernanceMetaDataImpl(
+							governanceIndex, factory);
+				}
+			}
+
+			// Ensure have the governance
+			if (this.governanceMetaData[i] == null) {
+				issues.addIssue(
+						AssetType.MANAGED_OBJECT,
+						this.boundManagedObjectName,
+						"Extension interface of type "
+								+ governanceExtensionInterface.getName()
+								+ " is not available from Managed Object for Governance '"
+								+ governanceName + "'");
+			}
+		}
+	}
+
+	/**
 	 * Loads the {@link ManagedObjectMetaData} for the
 	 * {@link RawBoundManagedObjectMetaData}.
+	 * 
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 */
 	public void loadManagedObjectMetaData(
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
@@ -316,14 +400,11 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 			}
 		}
 
-		// TODO Obtain the governance meta-data
-		ManagedObjectGovernanceMetaData<?>[] governanceMetaData = new ManagedObjectGovernanceMetaData[0];
-
 		// Create and specify the managed object meta-data
 		this.managedObjectMetaData = this.rawMoMetaData
 				.createManagedObjectMetaData(this.rawBoundMetaData,
 						this.instanceIndex, this, dependencyMappings,
-						governanceMetaData, assetManagerFactory, issues);
+						this.governanceMetaData, assetManagerFactory, issues);
 	}
 
 	/*

@@ -111,8 +111,6 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 *            Name that the {@link ManagedObject} is bound under.
 	 * @param rawMoMetaData
 	 *            {@link RawManagedObjectMetaData}.
-	 * @param rawGovernanceMetaData
-	 *            Listing of {@link RawGovernanceMetaData}.
 	 * @param dependenciesConfiguration
 	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
@@ -123,7 +121,6 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addInstance(String boundManagedObjectName,
 			RawManagedObjectMetaData rawMoMetaData,
-			Map<String, RawGovernanceMetaData> rawGovernanceMetaData,
 			ManagedObjectDependencyConfiguration[] dependenciesConfiguration,
 			ManagedObjectGovernanceConfiguration[] governanceConfiguration) {
 
@@ -134,8 +131,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 		this.instancesMetaData
 				.add(new RawBoundManagedObjectInstanceMetaDataImpl(
 						boundManagedObjectName, this, instanceIndex,
-						rawMoMetaData, rawGovernanceMetaData,
-						dependenciesConfiguration, governanceConfiguration));
+						rawMoMetaData, dependenciesConfiguration,
+						governanceConfiguration));
 	}
 
 	/*
@@ -221,8 +218,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
 						boundMoName, index, false);
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
-						rawGovernanceMetaData, dependenciesConfiguration,
-						governanceConfiguration);
+						dependenciesConfiguration, governanceConfiguration);
 
 				// Register the bound managed object
 				boundMo.put(boundMoName, rawBoundMoMetaData);
@@ -292,8 +288,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Add the Input ManagedObject instance
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
-						rawGovernanceMetaData, dependenciesConfiguration,
-						governanceConfiguration);
+						dependenciesConfiguration, governanceConfiguration);
 			}
 		}
 
@@ -361,6 +356,9 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Load the dependencies
 				instanceMetaData.loadDependencies(issues, dependencyMo);
+
+				// Load the governance
+				instanceMetaData.loadGovernance(rawGovernanceMetaData, issues);
 
 				// Load the meta-data
 				instanceMetaData.loadManagedObjectMetaData(assetManagerFactory,

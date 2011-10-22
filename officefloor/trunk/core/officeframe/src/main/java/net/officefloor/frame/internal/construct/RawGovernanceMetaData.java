@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -31,6 +32,22 @@ public interface RawGovernanceMetaData {
 	 * 
 	 * @return Name of the {@link Governance}.
 	 */
-	Object getGovernanceName();
+	String getGovernanceName();
+
+	/**
+	 * Obtains the extension interface type used by the {@link Governance}.
+	 * 
+	 * @return Extension interface type used by the {@link Governance}.
+	 */
+	Class<?> getExtensionInterfaceType();
+
+	/**
+	 * Obtains the index to obtain the {@link Governance} from the
+	 * {@link ProcessState}.
+	 * 
+	 * @return Index to obtain the {@link Governance} from the
+	 *         {@link ProcessState}.
+	 */
+	int getGovernanceIndex();
 
 }
