@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.DutyBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
@@ -78,22 +79,35 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	@Override
 	public void linkFlow(int flowIndex, String workName, String taskName,
 			Class<?> argumentType) {
-		this.flows.put(new Integer(flowIndex), new TaskNodeReferenceImpl(
+		this.flows.put(Integer.valueOf(flowIndex), new TaskNodeReferenceImpl(
 				workName, taskName, argumentType));
 	}
 
 	@Override
 	public <G extends Enum<G>> void linkGovernance(G key, String governanceName) {
-		// TODO implement DutyBuilder.linkGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement DutyBuilder.linkGovernance");
+		this.linkGovernance(key, key.ordinal(), governanceName);
 	}
 
 	@Override
 	public void linkGovernance(int governanceIndex, String governanceName) {
-		// TODO implement DutyBuilder.linkGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement DutyBuilder.linkGovernance");
+		this.linkGovernance((Indexed) null, governanceIndex, governanceName);
+	}
+
+	/**
+	 * Links the {@link Governance}.
+	 * 
+	 * @param key
+	 *            Key to access the {@link Governance} from the {@link Duty}.
+	 * @param governanceIndex
+	 *            Index of the {@link Governance} from the {@link Duty}.
+	 * @param governanceName
+	 *            Name of the {@link Governance} to link.
+	 */
+	private <G extends Enum<G>> void linkGovernance(G key, int governanceIndex,
+			String governanceName) {
+		this.governances.put(Integer.valueOf(governanceIndex),
+				new DutyGovernanceConfigurationImpl<G>(governanceName,
+						governanceIndex));
 	}
 
 	/*
@@ -160,22 +174,41 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>>
 			implements DutyGovernanceConfiguration<G> {
 
+		/**
+		 * Name of the {@link Governance}.
+		 */
+		private final String governanceName;
+
+		/**
+		 * Index of the {@link Governance} for the {@link Duty}.
+		 */
+		private final int index;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param governanceName
+		 *            Name of the {@link Governance}.
+		 * @param index
+		 *            Index of the {@link Governance} for the {@link Duty}.
+		 */
+		public DutyGovernanceConfigurationImpl(String governanceName, int index) {
+			this.governanceName = governanceName;
+			this.index = index;
+		}
+
 		/*
 		 * ============= DutyGovernanceConfiguration ==========================
 		 */
 
 		@Override
 		public String getGovernanceName() {
-			// TODO implement DutyGovernanceConfiguration<G>.getGovernanceName
-			throw new UnsupportedOperationException(
-					"TODO implement DutyGovernanceConfiguration<G>.getGovernanceName");
+			return this.governanceName;
 		}
 
 		@Override
 		public int getIndex() {
-			// TODO implement DutyGovernanceConfiguration<G>.getIndex
-			throw new UnsupportedOperationException(
-					"TODO implement DutyGovernanceConfiguration<G>.getIndex");
+			return this.index;
 		}
 
 		@Override
