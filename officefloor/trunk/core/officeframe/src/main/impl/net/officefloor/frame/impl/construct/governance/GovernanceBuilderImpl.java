@@ -18,6 +18,9 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * {@link GovernanceBuilder} implementation.
@@ -26,15 +29,18 @@ import net.officefloor.frame.api.build.GovernanceBuilder;
  */
 public class GovernanceBuilderImpl implements GovernanceBuilder {
 
+	/**
+	 * {@link SourceProperties} for the {@link GovernanceSource}.
+	 */
+	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
 	/*
 	 * ================= GovernanceBuilder =======================
 	 */
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO implement GovernanceBuilder.addProperty
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceBuilder.addProperty");
+		this.properties.addProperty(name, value);
 	}
 
 }

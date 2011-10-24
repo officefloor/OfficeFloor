@@ -618,7 +618,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			DutyGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
 					.getGovernanceConfiguration();
 			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
-			GovernanceMetaData[] governanceMetaDatas = taskLocator
+			GovernanceMetaData<?, ?>[] governanceMetaDatas = taskLocator
 					.getOfficeMetaData().getProcessMetaData()
 					.getGovernanceMetaData();
 			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
@@ -632,7 +632,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 						.getGovernanceName();
 				int processGovernanceIndex = -1;
 				for (int i = 0; i < governanceMetaDatas.length; i++) {
-					GovernanceMetaData governanceMetaData = governanceMetaDatas[i];
+					GovernanceMetaData<?, ?> governanceMetaData = governanceMetaDatas[i];
 					if (governanceName.equals(governanceMetaData
 							.getGovernanceName())) {
 						processGovernanceIndex = i; // found governance
@@ -642,8 +642,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 					// Did not find the process governance
 					issues.addIssue(AssetType.ADMINISTRATOR,
 							this.boundAdministratorName,
-							"Can not find governance " + governanceName
-									+ " for duty " + dutyName);
+							"Can not find governance '" + governanceName
+									+ "' for duty '" + dutyName + "'");
 				}
 
 				// Specify the governance mapping

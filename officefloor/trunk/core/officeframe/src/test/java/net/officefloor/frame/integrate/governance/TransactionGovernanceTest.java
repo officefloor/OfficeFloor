@@ -58,10 +58,10 @@ public class TransactionGovernanceTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void testTransaction() throws Exception {
 		
-		// TODO fix this test
-		System.err.println("TODO fix test");
+		// TODO run test
+		System.err.println("TODO run test");
 		if (true) return;
-
+		
 		// Mocks
 		final TransactionalObject object = this
 				.createMock(TransactionalObject.class);

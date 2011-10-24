@@ -48,7 +48,6 @@ import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -63,6 +62,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
@@ -202,11 +202,6 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	private final DutyConfiguration<?> dutyTwoConfiguration = this
 			.createMock(DutyConfiguration.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Override
 	protected void setUp() throws Exception {
 		// Reset the state of the mock administrator source
@@ -1070,6 +1065,172 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		assertNull(
 				"Parallel instigation so should not have flow asset manager",
 				flow.getFlowManager());
+	}
+
+	/**
+	 * Ensure issue if unknown {@link Governance} linked to {@link Duty}.
+	 */
+	public void testLinkUnkownGovernance() {
+
+		final AdministratorDutyMetaData<?, ?> adminDutyMetaData = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		final DutyGovernanceConfiguration<?> governanceConfiguration = this
+				.createMock(DutyGovernanceConfiguration.class);
+		final int DUTY_GOVERNANCE_INDEX = 0;
+
+		final GovernanceMetaData<?, ?> governanceMetaData = this
+				.createMock(GovernanceMetaData.class);
+
+		final OfficeMetaData officeMetaData = this
+				.createMock(OfficeMetaData.class);
+		final ProcessMetaData processMetaData = this
+				.createMock(ProcessMetaData.class);
+
+		// Record construction of bound administrator meta-data
+		this.record_init();
+		this.record_team();
+		this.record_managedObject();
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { adminDutyMetaData });
+		this.recordReturn(adminDutyMetaData, adminDutyMetaData.getDutyName(),
+				"DUTY");
+		this.recordReturn(adminDutyMetaData, adminDutyMetaData.getKey(),
+				DutyKey.ONE);
+		this.recordReturn(this.configuration,
+				this.configuration.getDutyConfiguration(),
+				new DutyConfiguration<?>[] { this.dutyOneConfiguration });
+		this.recordReturn(this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getDutyName(), "DUTY");
+		this.recordReturn(this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
+				new TaskNodeReference[0]);
+
+		// Record governance configuration
+		this.recordReturn(
+				this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getGovernanceConfiguration(),
+				new DutyGovernanceConfiguration<?>[] { governanceConfiguration });
+		this.recordReturn(governanceConfiguration,
+				governanceConfiguration.getIndex(), DUTY_GOVERNANCE_INDEX);
+		this.recordReturn(governanceConfiguration,
+				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
+
+		// Record unknown governance
+		this.recordReturn(this.taskMetaDataLocator,
+				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
+		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
+				processMetaData);
+		this.recordReturn(processMetaData,
+				processMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData<?, ?>[] { governanceMetaData });
+		this.recordReturn(governanceMetaData,
+				governanceMetaData.getGovernanceName(), "NOT MATCH");
+		this.record_issue("Can not find governance 'GOVERNANCE' for duty 'DUTY'");
+
+		// Construct the administrator and link tasks
+		this.replayMockObjects();
+		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
+				.constructRawAdministratorAndLinkOfficeMetaData();
+		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData
+				.getAdministratorMetaData();
+		this.verifyMockObjects();
+
+		// Verify the duty
+		DutyMetaData duty = adminMetaData
+				.getDutyMetaData(new DutyKeyImpl<DutyKey>(DutyKey.ONE));
+		assertNotNull("Must have duty", duty);
+
+		// Verify the governance not mapped
+		int processIndex = duty
+				.translateGovernanceDutyIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
+		assertEquals("Process index should not be translated", -1, processIndex);
+	}
+
+	/**
+	 * Ensure can link {@link Governance} to {@link DutyMetaData}.
+	 */
+	public void testLinkGovernanceToDuty() {
+
+		final AdministratorDutyMetaData<?, ?> adminDutyMetaData = this
+				.createMock(AdministratorDutyMetaData.class);
+
+		final DutyGovernanceConfiguration<?> governanceConfiguration = this
+				.createMock(DutyGovernanceConfiguration.class);
+		final int DUTY_GOVERNANCE_INDEX = 0;
+
+		final GovernanceMetaData<?, ?> governanceMetaDataOne = this
+				.createMock(GovernanceMetaData.class);
+		final GovernanceMetaData<?, ?> governanceMetaDataTwo = this
+				.createMock(GovernanceMetaData.class);
+
+		final OfficeMetaData officeMetaData = this
+				.createMock(OfficeMetaData.class);
+		final ProcessMetaData processMetaData = this
+				.createMock(ProcessMetaData.class);
+
+		// Record construction of bound administrator meta-data
+		this.record_init();
+		this.record_team();
+		this.record_managedObject();
+		this.recordReturn(this.metaData,
+				this.metaData.getAdministratorDutyMetaData(),
+				new AdministratorDutyMetaData[] { adminDutyMetaData });
+		this.recordReturn(adminDutyMetaData, adminDutyMetaData.getDutyName(),
+				"DUTY");
+		this.recordReturn(adminDutyMetaData, adminDutyMetaData.getKey(),
+				DutyKey.ONE);
+		this.recordReturn(this.configuration,
+				this.configuration.getDutyConfiguration(),
+				new DutyConfiguration<?>[] { this.dutyOneConfiguration });
+		this.recordReturn(this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getDutyName(), "DUTY");
+		this.recordReturn(this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
+				new TaskNodeReference[0]);
+
+		// Record governance configuration
+		this.recordReturn(
+				this.dutyOneConfiguration,
+				this.dutyOneConfiguration.getGovernanceConfiguration(),
+				new DutyGovernanceConfiguration<?>[] { governanceConfiguration });
+		this.recordReturn(governanceConfiguration,
+				governanceConfiguration.getIndex(), DUTY_GOVERNANCE_INDEX);
+		this.recordReturn(governanceConfiguration,
+				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
+
+		// Record configuring links
+		this.recordReturn(this.taskMetaDataLocator,
+				this.taskMetaDataLocator.getOfficeMetaData(), officeMetaData);
+		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
+				processMetaData);
+		this.recordReturn(processMetaData,
+				processMetaData.getGovernanceMetaData(),
+				new GovernanceMetaData<?, ?>[] { governanceMetaDataOne,
+						governanceMetaDataTwo });
+		this.recordReturn(governanceMetaDataOne,
+				governanceMetaDataOne.getGovernanceName(), "NOT MATCH");
+		this.recordReturn(governanceMetaDataTwo,
+				governanceMetaDataTwo.getGovernanceName(), "GOVERNANCE");
+
+		// Construct the administrator and link tasks
+		this.replayMockObjects();
+		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
+				.constructRawAdministratorAndLinkOfficeMetaData();
+		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData
+				.getAdministratorMetaData();
+		this.verifyMockObjects();
+
+		// Verify the duty
+		DutyMetaData duty = adminMetaData
+				.getDutyMetaData(new DutyKeyImpl<DutyKey>(DutyKey.ONE));
+		assertNotNull("Must have duty", duty);
+
+		// Verify the governance
+		int processIndex = duty
+				.translateGovernanceDutyIndexToProcessIndex(DUTY_GOVERNANCE_INDEX);
+		assertEquals("Incorrect process index", 1, processIndex);
 	}
 
 	/**
