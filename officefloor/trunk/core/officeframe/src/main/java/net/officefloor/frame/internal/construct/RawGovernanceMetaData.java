@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 
@@ -49,5 +50,12 @@ public interface RawGovernanceMetaData {
 	 *         {@link ProcessState}.
 	 */
 	int getGovernanceIndex();
+
+	/**
+	 * Obtains the {@link GovernanceMetaData}.
+	 * 
+	 * @return {@link GovernanceMetaData}.
+	 */
+	GovernanceMetaData<?, ?> getGovernanceMetaData();
 
 }

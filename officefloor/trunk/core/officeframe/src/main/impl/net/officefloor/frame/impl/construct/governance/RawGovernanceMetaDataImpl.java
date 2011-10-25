@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -43,9 +45,12 @@ public class RawGovernanceMetaDataImpl implements RawGovernanceMetaDataFactory,
 	 */
 
 	@Override
-	public RawGovernanceMetaData createRawGovernanceMetaData() {
-		// TODO create raw governance meta-data
-		return new RawGovernanceMetaDataImpl();
+	public RawGovernanceMetaData createRawGovernanceMetaData(
+			GovernanceConfiguration configuration, int governanceIndex) {
+		// TODO implement
+		// RawGovernanceMetaDataFactory.createRawGovernanceMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement RawGovernanceMetaDataFactory.createRawGovernanceMetaData");
 	}
 
 	/*
@@ -71,6 +76,13 @@ public class RawGovernanceMetaDataImpl implements RawGovernanceMetaDataFactory,
 		// TODO implement RawGovernanceMetaData.getGovernanceIndex
 		throw new UnsupportedOperationException(
 				"TODO implement RawGovernanceMetaData.getGovernanceIndex");
+	}
+
+	@Override
+	public GovernanceMetaData<?, ?> getGovernanceMetaData() {
+		// TODO implement RawGovernanceMetaData.getGovernanceMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement RawGovernanceMetaData.getGovernanceMetaData");
 	}
 
 }

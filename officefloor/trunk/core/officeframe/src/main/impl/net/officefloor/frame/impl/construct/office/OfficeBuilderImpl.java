@@ -41,6 +41,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
@@ -106,6 +107,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of {@link ProcessState} bound {@link ManagedObjectConfiguration}.
 	 */
 	private final List<ManagedObjectConfiguration<?>> processManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
+
+	/**
+	 * Listing of {@link GovernanceConfiguration}.
+	 */
+	private final List<GovernanceConfiguration> governances = new LinkedList<GovernanceConfiguration>();
 
 	/**
 	 * Listing of {@link ThreadState} bound {@link ManagedObjectConfiguration}.
@@ -214,6 +220,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceBuilder addGovernance(
 			String governanceName, Class<GS> governanceSource) {
 		GovernanceBuilderImpl builder = new GovernanceBuilderImpl();
+		this.governances.add(builder);
 		return builder;
 	}
 
@@ -309,6 +316,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration() {
 		return this.threadManagedObjects
 				.toArray(new ManagedObjectConfiguration[0]);
+	}
+
+	@Override
+	public GovernanceConfiguration[] getGovernanceConfiguration() {
+		return this.governances
+				.toArray(new GovernanceConfiguration[this.governances.size()]);
 	}
 
 	@Override
