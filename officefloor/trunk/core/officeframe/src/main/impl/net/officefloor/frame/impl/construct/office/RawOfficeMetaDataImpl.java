@@ -38,6 +38,7 @@ import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -306,11 +307,35 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			officeTeams.put(officeTeamName, rawTeamMetaData.getTeam());
 		}
 
-		// TODO generate the map of governance to its name
-		RawGovernanceMetaData rawGovernance = rawGovernanceMetaDataFactory
-				.createRawGovernanceMetaData();
-		Map<String, RawGovernanceMetaData> rawGovernanceMetaData = null;
-		GovernanceMetaData[] governanceMetaData = new GovernanceMetaData[0];
+		// Register the governances to office
+		GovernanceConfiguration[] governanceConfigurations = configuration
+				.getGovernanceConfiguration();
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
+		Map<String, RawGovernanceMetaData> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData>();
+		NEXT_GOVERNANCE: for (int i = 0; i < governanceConfigurations.length; i++) {
+			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
+
+			// Create the raw governance
+			RawGovernanceMetaData rawGovernance = rawGovernanceMetaDataFactory
+					.createRawGovernanceMetaData(governanceConfiguration, i);
+			if (rawGovernance == null) {
+				// Not able to create governance
+				issues.addIssue(AssetType.OFFICE, officeName,
+						"Unable to configure governance '"
+								+ governanceConfiguration.getGovernanceName()
+								+ "'");
+				continue NEXT_GOVERNANCE;
+			}
+
+			// Register the raw Governance
+			rawGovernanceMetaData.put(rawGovernance.getGovernanceName(),
+					rawGovernance);
+
+			// Obtain the Governance and add to listing
+			GovernanceMetaData<?, ?> governanceMetaData = rawGovernance
+					.getGovernanceMetaData();
+			governanceMetaDatas[i] = governanceMetaData;
+		}
 
 		// Register the managed object sources to office
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredMo = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
@@ -531,7 +556,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects),
-				governanceMetaData,
+				governanceMetaDatas,
 				this.constructAdministratorMetaData(processBoundAdministrators),
 				threadMetaData);
 

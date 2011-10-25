@@ -15,30 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.construct;
+package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * Factory for the creation of the {@link RawGovernanceMetaData}.
+ * Configuration for the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawGovernanceMetaDataFactory {
+public interface GovernanceConfiguration {
 
 	/**
-	 * Creates the {@link RawGovernanceMetaData}.
+	 * Obtains the name of the {@link Governance}.
 	 * 
-	 * @param configuration
-	 *            {@link GovernanceConfiguration}.
-	 * @param governanceIndex
-	 *            Index of the {@link Governance} within the
-	 *            {@link ProcessState}.
-	 * @return {@link RawGovernanceMetaData}.
+	 * @return Name of the {@link Governance}.
 	 */
-	RawGovernanceMetaData createRawGovernanceMetaData(
-			GovernanceConfiguration configuration, int governanceIndex);
+	String getGovernanceName();
 
 }

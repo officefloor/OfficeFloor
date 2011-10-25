@@ -36,6 +36,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -50,6 +51,7 @@ import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFac
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
@@ -66,12 +68,14 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -863,6 +867,118 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Handles failure to construct {@link Governance}.
+	 */
+	public void testFailConstructGovernance() {
+
+		final GovernanceConfiguration governanceConfiguration = this
+				.createMock(GovernanceConfiguration.class);
+
+		// Record creating a thread bound managed object
+		this.record_enhanceOffice();
+		Map<String, Team> teams = this.record_teams();
+
+		// Record not creating governance meta-data
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				new GovernanceConfiguration[] { governanceConfiguration });
+		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
+				.createRawGovernanceMetaData(governanceConfiguration, 0), null);
+		this.recordReturn(governanceConfiguration,
+				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
+		this.record_issue("Unable to configure governance 'GOVERNANCE'");
+
+		// Configure remaining aspects
+		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
+				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
+		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+				.record_processBoundManagedObjects(registeredManagedObjectSources);
+		this.record_processBoundAdministrators(teams, processManagedObjects);
+		this.record_threadBoundManagedObjects(registeredManagedObjectSources,
+				processManagedObjects);
+		this.record_threadBoundAdministrators(null, null);
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_constructManagedObjectMetaData(processManagedObjects);
+		this.record_processContextListeners();
+
+		// Construct the office
+		this.replayMockObjects();
+		RawOfficeMetaData rawOfficeMetaData = this
+				.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure the correct governance meta-data
+		Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = rawOfficeMetaData
+				.getGovernanceMetaData();
+		assertEquals("Should be no governance", 0,
+				rawGovernanceMetaDatas.size());
+
+		// Ensure correct listing of governance meta-data
+		ProcessMetaData processMetaData = rawOfficeMetaData.getOfficeMetaData()
+				.getProcessMetaData();
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = processMetaData
+				.getGovernanceMetaData();
+		assertEquals("Incorrect number of governances", 1,
+				governanceMetaDatas.length);
+		assertNull("Should be no governance", governanceMetaDatas[0]);
+	}
+
+	/**
+	 * Constructs the {@link GovernanceMetaData}.
+	 */
+	public void testConstructGovernance() {
+
+		// Record creating a thread bound managed object
+		this.record_enhanceOffice();
+		Map<String, Team> teams = this.record_teams();
+		GovernanceMetaData<?, ?>[] expectedGovernances = this
+				.record_governance("GOVERNANCE_ONE", "GOVERNANCE_TWO");
+		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
+				.record_registerManagedObjectSources("MO");
+		this.record_boundInputManagedObjects();
+		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
+				.record_processBoundManagedObjects(registeredManagedObjectSources);
+		this.record_processBoundAdministrators(teams, processManagedObjects);
+		this.record_threadBoundManagedObjects(registeredManagedObjectSources,
+				processManagedObjects);
+		this.record_threadBoundAdministrators(null, null);
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+		this.record_constructManagedObjectMetaData(processManagedObjects);
+		this.record_processContextListeners();
+
+		// Construct the office
+		this.replayMockObjects();
+		RawOfficeMetaData rawOfficeMetaData = this
+				.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure the correct governance meta-data
+		Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = rawOfficeMetaData
+				.getGovernanceMetaData();
+		assertNotNull("Ensure have first governance",
+				rawGovernanceMetaDatas.get("GOVERNANCE_ONE"));
+		assertNotNull("Ensure have second governance",
+				rawGovernanceMetaDatas.get("GOVERNANCE_TWO"));
+
+		// Ensure correct listing of governance meta-data
+		ProcessMetaData processMetaData = rawOfficeMetaData.getOfficeMetaData()
+				.getProcessMetaData();
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = processMetaData
+				.getGovernanceMetaData();
+		assertEquals("Incorrect number of governances",
+				expectedGovernances.length, governanceMetaDatas.length);
+		for (int i = 0; i < expectedGovernances.length; i++) {
+			assertEquals("Incorrect governance meta-data for " + i,
+					expectedGovernances[i], governanceMetaDatas[i]);
+		}
+	}
+
+	/**
 	 * Ensure able to construct a {@link ProcessState} bound
 	 * {@link Administrator}.
 	 */
@@ -1471,9 +1587,44 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records creating the {@link Governance} for the {@link Office}.
 	 */
-	private void record_governance() {
-		this.recordReturn(this.rawGovernanceFactory,
-				this.rawGovernanceFactory.createRawGovernanceMetaData(), null);
+	private GovernanceMetaData<?, ?>[] record_governance(
+			String... governanceNames) {
+
+		// Create the listing of governance configuration
+		GovernanceConfiguration[] governanceConfigurations = new GovernanceConfiguration[governanceNames.length];
+		for (int i = 0; i < governanceConfigurations.length; i++) {
+			governanceConfigurations[i] = this
+					.createMock(GovernanceConfiguration.class);
+		}
+
+		// Record creating the governance meta-data
+		this.recordReturn(this.configuration,
+				this.configuration.getGovernanceConfiguration(),
+				governanceConfigurations);
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData<?, ?>[governanceConfigurations.length];
+		for (int i = 0; i < governanceConfigurations.length; i++) {
+			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
+			String governanceName = governanceNames[i];
+
+			final RawGovernanceMetaData rawGovernanceMetaData = this
+					.createMock(RawGovernanceMetaData.class);
+			final GovernanceMetaData<?, ?> governanceMetaData = this
+					.createMock(GovernanceMetaData.class);
+			governanceMetaDatas[i] = governanceMetaData;
+
+			// Record creating the governance meta-data
+			this.recordReturn(this.rawGovernanceFactory,
+					this.rawGovernanceFactory.createRawGovernanceMetaData(
+							governanceConfiguration, i), rawGovernanceMetaData);
+			this.recordReturn(rawGovernanceMetaData,
+					rawGovernanceMetaData.getGovernanceName(), governanceName);
+			this.recordReturn(rawGovernanceMetaData,
+					rawGovernanceMetaData.getGovernanceMetaData(),
+					governanceMetaData);
+		}
+
+		// Return the governance meta-data
+		return governanceMetaDatas;
 	}
 
 	/**

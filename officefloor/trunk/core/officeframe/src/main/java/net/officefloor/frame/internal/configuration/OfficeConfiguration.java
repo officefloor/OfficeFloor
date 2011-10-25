@@ -37,14 +37,14 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * Configuration of an {@link Office}.
- *
+ * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeConfiguration {
 
 	/**
 	 * Obtains the name of this {@link Office}.
-	 *
+	 * 
 	 * @return Name of this {@link Office}.
 	 */
 	String getOfficeName();
@@ -52,7 +52,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.
-	 *
+	 * 
 	 * @return Interval in milli-seconds between each time the
 	 *         {@link OfficeManager} monitors the {@link Office}.
 	 */
@@ -65,14 +65,14 @@ public interface OfficeConfiguration {
 	 * This is to allow {@link Asset} instances (such as a
 	 * {@link ManagedObjectSource}) to provide additional configuration for the
 	 * {@link Office}.
-	 *
+	 * 
 	 * @return {@link OfficeBuilder}.
 	 */
 	OfficeBuilder getBuilder();
 
 	/**
 	 * Obtains the links to the {@link OfficeFloor} {@link Team} instances.
-	 *
+	 * 
 	 * @return Links to the {@link OfficeFloor} {@link Team} instances.
 	 */
 	LinkedTeamConfiguration[] getRegisteredTeams();
@@ -80,7 +80,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the links to the {@link OfficeFloor} {@link ManagedObjectSource}
 	 * instances.
-	 *
+	 * 
 	 * @return Links to the {@link OfficeFloor} {@link ManagedObjectSource}
 	 *         instances.
 	 */
@@ -89,7 +89,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the configuration of the {@link ManagedObjectSource} to be bound
 	 * for the input {@link ManagedObject}.
-	 *
+	 * 
 	 * @return Configuration of the {@link ManagedObjectSource} to be bound for
 	 *         the input {@link ManagedObject}.
 	 */
@@ -98,7 +98,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the {@link ManagedObject} instances to be bound to the
 	 * {@link ProcessState} of this {@link Office}.
-	 *
+	 * 
 	 * @return Listing of the configuration of the {@link ManagedObject}
 	 *         instances bound to the {@link ProcessState}.
 	 */
@@ -107,16 +107,23 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the {@link ManagedObject} instances to be bound to the
 	 * {@link ThreadState} of this {@link Office}.
-	 *
+	 * 
 	 * @return Listing of the configuration of the {@link ManagedObject}
 	 *         instances bound to the {@link ThreadState}.
 	 */
 	ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration();
 
 	/**
+	 * Obtains the {@link GovernanceConfiguration}.
+	 * 
+	 * @return {@link GovernanceConfiguration}.
+	 */
+	GovernanceConfiguration[] getGovernanceConfiguration();
+
+	/**
 	 * Obtains the configuration of the {@link AdministratorSource} instances
 	 * bound to the {@link ProcessState}.
-	 *
+	 * 
 	 * @return {@link AdministratorSource} configuration of instances bound to
 	 *         the {@link ProcessState}.
 	 */
@@ -125,7 +132,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the configuration of the {@link AdministratorSource} instances
 	 * bound to the {@link ThreadState}.
-	 *
+	 * 
 	 * @return {@link AdministratorSource} configuration of instances bound to
 	 *         the {@link ThreadState}.
 	 */
@@ -133,14 +140,14 @@ public interface OfficeConfiguration {
 
 	/**
 	 * Obtains the configuration of the {@link Work} instances.
-	 *
+	 * 
 	 * @return {@link Work} configuration for the input name.
 	 */
 	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration();
 
 	/**
 	 * Obtains the {@link OfficeEnhancer} instances for this {@link Office}.
-	 *
+	 * 
 	 * @return Listing of the {@link OfficeEnhancer} for this {@link Office}.
 	 */
 	OfficeEnhancer[] getOfficeEnhancers();
@@ -148,7 +155,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the {@link TaskEscalationConfiguration} instances for the
 	 * {@link Office}.
-	 *
+	 * 
 	 * @return {@link TaskEscalationConfiguration} instances for the
 	 *         {@link Office}.
 	 */
@@ -161,7 +168,7 @@ public interface OfficeConfiguration {
 	 * <p>
 	 * This enables addition configuration of {@link Task} instances registered
 	 * by a {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @param namespace
 	 *            Namespace. Likely the {@link ManagedObjectSource} name.
 	 * @param workName
@@ -176,7 +183,7 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the list of {@link TaskNodeReference} instances referencing the
 	 * {@link Task} instances to invoke on Office start up.
-	 *
+	 * 
 	 * @return List of start up {@link TaskNodeReference} references.
 	 */
 	TaskNodeReference[] getStartupTasks();
