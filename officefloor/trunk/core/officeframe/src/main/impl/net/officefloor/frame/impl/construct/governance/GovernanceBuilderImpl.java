@@ -28,8 +28,8 @@ import net.officefloor.frame.spi.source.SourceProperties;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceBuilderImpl implements GovernanceBuilder,
-		GovernanceConfiguration {
+public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSource<I, F>>
+		implements GovernanceBuilder, GovernanceConfiguration<I, F, GS> {
 
 	/**
 	 * {@link SourceProperties} for the {@link GovernanceSource}.
@@ -54,6 +54,28 @@ public class GovernanceBuilderImpl implements GovernanceBuilder,
 		// TODO implement GovernanceConfiguration.getGovernanceName
 		throw new UnsupportedOperationException(
 				"TODO implement GovernanceConfiguration.getGovernanceName");
+	}
+
+	@Override
+	public GS getGovernanceSource() {
+		// TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSource
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSource");
+	}
+
+	@Override
+	public Class<GS> getGovernanceSourceClass() {
+		// TODO implement
+		// GovernanceConfiguration<I,F,GS>.getGovernanceSourceClass
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSourceClass");
+	}
+
+	@Override
+	public SourceProperties getProperties() {
+		// TODO implement GovernanceConfiguration<I,F,GS>.getProperties
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceConfiguration<I,F,GS>.getProperties");
 	}
 
 }
