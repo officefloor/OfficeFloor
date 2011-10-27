@@ -18,13 +18,15 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Configuration for the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceConfiguration {
+public interface GovernanceConfiguration<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -32,5 +34,33 @@ public interface GovernanceConfiguration {
 	 * @return Name of the {@link Governance}.
 	 */
 	String getGovernanceName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link GovernanceSource} instance.
+	 * <p>
+	 * This will override the {@link Class} in being used to configure the
+	 * {@link Governance}.
+	 * 
+	 * @return {@link GovernanceSource} instance. May be <code>null</code> to
+	 *         use {@link Class}.
+	 */
+	GS getGovernanceSource();
+
+	/**
+	 * Obtains the {@link GovernanceSource} {@link Class}.
+	 * 
+	 * @return {@link GovernanceSource} {@link Class}.
+	 */
+	Class<GS> getGovernanceSourceClass();
+
+	/**
+	 * Obtains the {@link SourceProperties} to configure the
+	 * {@link GovernanceSource}.
+	 * 
+	 * @return {@link SourceProperties} to configure the
+	 *         {@link GovernanceSource}.
+	 */
+	SourceProperties getProperties();
 
 }

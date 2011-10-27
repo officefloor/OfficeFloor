@@ -17,9 +17,13 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory for the creation of the {@link RawGovernanceMetaData}.
@@ -36,9 +40,17 @@ public interface RawGovernanceMetaDataFactory {
 	 * @param governanceIndex
 	 *            Index of the {@link Governance} within the
 	 *            {@link ProcessState}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
+	 * @param officeName
+	 *            Name of the {@link Office} having {@link Governance} added.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
-	RawGovernanceMetaData createRawGovernanceMetaData(
-			GovernanceConfiguration configuration, int governanceIndex);
+	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> RawGovernanceMetaData createRawGovernanceMetaData(
+			GovernanceConfiguration<I, F, GS> configuration,
+			int governanceIndex, SourceContext sourceContext,
+			String officeName, OfficeFloorIssues issues);
 
 }

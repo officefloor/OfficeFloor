@@ -883,7 +883,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				this.configuration.getGovernanceConfiguration(),
 				new GovernanceConfiguration[] { governanceConfiguration });
 		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
-				.createRawGovernanceMetaData(governanceConfiguration, 0), null);
+				.createRawGovernanceMetaData(governanceConfiguration, 0,
+						this.sourceContext, OFFICE_NAME, this.issues), null);
 		this.recordReturn(governanceConfiguration,
 				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 		this.record_issue("Unable to configure governance 'GOVERNANCE'");
@@ -1615,7 +1616,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			// Record creating the governance meta-data
 			this.recordReturn(this.rawGovernanceFactory,
 					this.rawGovernanceFactory.createRawGovernanceMetaData(
-							governanceConfiguration, i), rawGovernanceMetaData);
+							governanceConfiguration, i, this.sourceContext,
+							OFFICE_NAME, this.issues), rawGovernanceMetaData);
 			this.recordReturn(rawGovernanceMetaData,
 					rawGovernanceMetaData.getGovernanceName(), governanceName);
 			this.recordReturn(rawGovernanceMetaData,
