@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.construct.governance;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.source.SourceProperties;
 
@@ -32,9 +33,39 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 		implements GovernanceBuilder, GovernanceConfiguration<I, F, GS> {
 
 	/**
+	 * Name of the {@link Governance}.
+	 */
+	private final String governanceName;
+
+	/**
+	 * {@link GovernanceSource} instance.
+	 */
+	private final GS governanceSourceInstance;
+
+	/**
+	 * {@link GovernanceSource} {@link Class}.
+	 */
+	private final Class<GS> governanceSourceClass;
+
+	/**
 	 * {@link SourceProperties} for the {@link GovernanceSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 * @param governanceSourceInstance
+	 *            {@link GovernanceSource} instance.
+	 */
+	public GovernanceBuilderImpl(String governanceName,
+			GS governanceSourceInstance, Class<GS> governanceSourceClass) {
+		this.governanceName = governanceName;
+		this.governanceSourceInstance = governanceSourceInstance;
+		this.governanceSourceClass = governanceSourceClass;
+	}
 
 	/*
 	 * ================= GovernanceBuilder =======================
@@ -51,31 +82,22 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 
 	@Override
 	public String getGovernanceName() {
-		// TODO implement GovernanceConfiguration.getGovernanceName
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceConfiguration.getGovernanceName");
+		return this.governanceName;
 	}
 
 	@Override
 	public GS getGovernanceSource() {
-		// TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSource
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSource");
+		return this.governanceSourceInstance;
 	}
 
 	@Override
 	public Class<GS> getGovernanceSourceClass() {
-		// TODO implement
-		// GovernanceConfiguration<I,F,GS>.getGovernanceSourceClass
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceConfiguration<I,F,GS>.getGovernanceSourceClass");
+		return this.governanceSourceClass;
 	}
 
 	@Override
 	public SourceProperties getProperties() {
-		// TODO implement GovernanceConfiguration<I,F,GS>.getProperties
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceConfiguration<I,F,GS>.getProperties");
+		return this.properties;
 	}
 
 }

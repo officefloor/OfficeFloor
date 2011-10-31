@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.spi.administration;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -33,8 +34,12 @@ public interface GovernanceManager {
 	 * <p>
 	 * The {@link Governance} may not be active on the return of this method as
 	 * it may be waiting for a {@link ManagedObject} to be ready to be governed.
+	 * 
+	 * @throws GovernanceEscalation
+	 *             If fails to active the {@link Governance}. This should be
+	 *             handled by the {@link OfficeFrame} so let propagate.
 	 */
-	void activateGovernance();
+	void activateGovernance() throws GovernanceEscalation;
 
 	/**
 	 * <p>
@@ -43,8 +48,12 @@ public interface GovernanceManager {
 	 * The enforcement my not have completed on the return of this method. Any
 	 * issues with enforcement will however be reported the next time a governed
 	 * {@link ManagedObject} is attempted to be used.
+	 * 
+	 * @throws GovernanceEscalation
+	 *             If fails to active the {@link Governance}. This should be
+	 *             handled by the {@link OfficeFrame} so let propagate.
 	 */
-	void enforceGovernance();
+	void enforceGovernance() throws GovernanceEscalation;
 
 	/**
 	 * <p>
@@ -53,7 +62,11 @@ public interface GovernanceManager {
 	 * The {@link Governance} may not have been disregarded on the return of
 	 * this method. Any issues will however be reported the next time a governed
 	 * {@link ManagedObject} is attempted to be used.
+	 * 
+	 * @throws GovernanceEscalation
+	 *             If fails to active the {@link Governance}. This should be
+	 *             handled by the {@link OfficeFrame} so let propagate.
 	 */
-	void disregardGovernance();
+	void disregardGovernance() throws GovernanceEscalation;
 
 }

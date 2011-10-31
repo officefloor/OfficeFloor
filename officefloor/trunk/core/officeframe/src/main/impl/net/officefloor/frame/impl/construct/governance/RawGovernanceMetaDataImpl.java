@@ -194,7 +194,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 		// Create the Governance Meta-Data
 		GovernanceMetaData<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
-				governanceName);
+				governanceName, governanceSource);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(

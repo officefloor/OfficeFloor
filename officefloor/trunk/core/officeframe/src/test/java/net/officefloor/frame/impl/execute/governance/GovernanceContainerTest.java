@@ -86,7 +86,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disregards {@link Governance} at end of {@link ProcessState}.
 	 */
-	public void testEndOfProcessDisregardGovernance() throws Exception {
+	public void testEndOfProcessDisregardGovernance() throws Throwable {
 
 		// Record activating governance
 		this.recordReturn(this.metaData, this.metaData.createGovernance(),
@@ -122,7 +122,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure enforce {@link Governance}.
 	 */
-	public void testEnforceGovernance() throws Exception {
+	public void testEnforceGovernance() throws Throwable {
 
 		// Record activating governance
 		this.recordReturn(this.metaData, this.metaData.createGovernance(),
@@ -160,7 +160,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure disregard {@link Governance}.
 	 */
-	public void testDisregardGovernance() throws Exception {
+	public void testDisregardGovernance() throws Throwable {
 
 		// Record activating governance
 		this.recordReturn(this.metaData, this.metaData.createGovernance(),
@@ -197,7 +197,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Ensure apply {@link Governance} across multiple {@link ManagedObject}
 	 * instances.
 	 */
-	public void testGovernMultipleManagedObjects() throws Exception {
+	public void testGovernMultipleManagedObjects() throws Throwable {
 
 		final MockExtensionInterface anotherExtension = this
 				.createMock(MockExtensionInterface.class);
@@ -251,7 +251,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	 * Ensure apply {@link Governance} across no {@link ManagedObject}
 	 * instances.
 	 */
-	public void testGovernNoManagedObjects() throws Exception {
+	public void testGovernNoManagedObjects() throws Throwable {
 
 		// Record activating governance
 		this.recordReturn(this.metaData, this.metaData.createGovernance(),

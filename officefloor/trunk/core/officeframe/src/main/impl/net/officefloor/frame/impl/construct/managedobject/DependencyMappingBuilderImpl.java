@@ -237,10 +237,7 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 
 		@Override
 		public String getGovernanceName() {
-			// TODO implement
-			// ManagedObjectGovernanceConfiguration.getGovernanceName
-			throw new UnsupportedOperationException(
-					"TODO implement ManagedObjectGovernanceConfiguration.getGovernanceName");
+			return this.governanceName;
 		}
 	}
 

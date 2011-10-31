@@ -15,40 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.spi.administration;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * Meta-data of the {@link Governance}.
+ * <p>
+ * Escalation of {@link Governance}.
+ * <p>
+ * This is a {@link OfficeFrame} handled {@link Throwable} and hence why it
+ * extends {@link Error}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> {
+public class GovernanceEscalation extends Error {
 
 	/**
-	 * Obtains the name of the {@link Governance}.
+	 * Initiate.
 	 * 
-	 * @return Name of the {@link Governance}.
+	 * @param cause
+	 *            Cause of the {@link GovernanceEscalation}.
 	 */
-	String getGovernanceName();
-
-	/**
-	 * Creates the {@link GovernanceContainer}.
-	 * 
-	 * @param processLock
-	 *            {@link ProcessState} lock.
-	 * @return {@link GovernanceContainer}.
-	 */
-	GovernanceContainer<I> createGovernanceContainer(Object processLock);
-
-	/**
-	 * Create the {@link Governance}.
-	 * 
-	 * @return {@link Governance}.
-	 * @throws Throwable
-	 *             If fails to create the {@link Governance}.
-	 */
-	Governance<I, F> createGovernance() throws Throwable;
-
+	public GovernanceEscalation(Throwable cause) {
+		super(cause);
+	}
 }
