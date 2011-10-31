@@ -379,7 +379,7 @@ public class ProcessStateImpl implements ProcessState {
 		GovernanceContainer container = this.governanceContainers[index];
 		if (container == null) {
 			container = this.processMetaData.getGovernanceMetaData()[index]
-					.createGovernanceContainer();
+					.createGovernanceContainer(this.processLock);
 			this.governanceContainers[index] = container;
 		}
 		return container;

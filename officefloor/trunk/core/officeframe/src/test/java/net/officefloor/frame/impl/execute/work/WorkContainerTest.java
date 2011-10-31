@@ -134,7 +134,6 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Do the coordination
-		// TODO handle: assertTrue("Should coordinate",
 		this.workContainer.coordinateManagedObjects(indexes, this.jobContext,
 				this.jobNode, this.activateSet, this.containerContext);
 
@@ -170,7 +169,6 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Do the coordination
-		// TODO handle: assertFalse("Should coordinate",
 		this.workContainer.coordinateManagedObjects(indexes, this.jobContext,
 				this.jobNode, this.activateSet, this.containerContext);
 

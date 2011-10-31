@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.governance;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.source.GovernanceSource;
 
 /**
  * {@link GovernanceMetaData} implementation.
@@ -35,13 +36,22 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final String governanceName;
 
 	/**
+	 * {@link GovernanceSource}.
+	 */
+	private final GovernanceSource<I, F> governanceSource;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
+	 * @param governanceSource
+	 *            {@link GovernanceSource}.
 	 */
-	public GovernanceMetaDataImpl(String governanceName) {
+	public GovernanceMetaDataImpl(String governanceName,
+			GovernanceSource<I, F> governanceSource) {
 		this.governanceName = governanceName;
+		this.governanceSource = governanceSource;
 	}
 
 	/*
@@ -54,17 +64,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public GovernanceContainer<I> createGovernanceContainer() {
-		// TODO implement GovernanceMetaData<I,F>.createGovernanceContainer
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.createGovernanceContainer");
+	public GovernanceContainer<I> createGovernanceContainer(Object processLock) {
+		return new GovernanceContainerImpl<I, F>(this, processLock);
 	}
 
 	@Override
-	public Governance<I, F> createGovernance() {
-		// TODO implement GovernanceMetaData<I,F>.createGovernance
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.createGovernance");
+	public Governance<I, F> createGovernance() throws Throwable {
+		return this.governanceSource.createGovernance();
 	}
 
 }

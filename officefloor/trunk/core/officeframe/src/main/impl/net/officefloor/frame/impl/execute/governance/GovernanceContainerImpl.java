@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.administration.GovernanceEscalation;
 import net.officefloor.frame.spi.administration.GovernanceManager;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
@@ -81,6 +82,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	public ActiveGovernance governManagedObject(I extensionInterface,
 			ManagedObjectContainer managedobjectContainer) throws Exception {
 
+		// Access Point: Work
+		// Locks: ThreadState, ProcessState
+
 		// Create the governance
 		if (this.governance == null) {
 			return null; // no governance
@@ -134,25 +138,42 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void activateGovernance() {
+	public void activateGovernance() throws GovernanceEscalation {
 
-		// Determine if already active governance
-		if (this.governance != null) {
-			return;
+		// Access Point: Duty
+		// Locks: ThreadState
+
+		try {
+			synchronized (this.processLock) {
+
+				// Determine if already active governance
+				if (this.governance != null) {
+					return;
+				}
+
+				// Create the governance
+				this.governance = this.metaData.createGovernance();
+			}
+		} catch (Throwable ex) {
+			// Propagate to container
+			throw new GovernanceEscalation(ex);
 		}
-
-		// Create the governance
-		this.governance = this.metaData.createGovernance();
 	}
 
 	@Override
 	public void enforceGovernance() {
 
-		// Enforce the governance
-		this.governance.enforceGovernance(this);
+		// Access Point: Duty
+		// Locks: ThreadState
 
-		// Governance applied, so now unregister governance
-		this.unregisterGovernance();
+		synchronized (this.processLock) {
+
+			// Enforce the governance
+			this.governance.enforceGovernance(this);
+
+			// Governance applied, so now unregister governance
+			this.unregisterGovernance();
+		}
 	}
 
 	/*

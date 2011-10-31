@@ -32,6 +32,7 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.spi.administration.GovernanceEscalation;
 import net.officefloor.frame.spi.administration.GovernanceManager;
 
 /**
@@ -118,8 +119,14 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		this.extensionInterfaces = extensionInterfaces;
 		this.dutyMetaData = this.metaData.getDutyMetaData(key);
 
-		// Execute the duty
-		duty.doDuty(this.dutyContextToken);
+		try {
+			// Execute the duty
+			duty.doDuty(this.dutyContextToken);
+
+		} catch (GovernanceEscalation ex) {
+			// Propagate the cause
+			throw ex.getCause();
+		}
 	}
 
 	/**
@@ -171,7 +178,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 					.translateGovernanceIndexToProcess(governanceIndex);
 
 			// Obtain the governance container
-			GovernanceContainer container = AdministratorContainerImpl.this.adminContext
+			GovernanceContainer<?> container = AdministratorContainerImpl.this.adminContext
 					.getThreadState().getProcessState()
 					.getGovernanceContainer(processIndex);
 
