@@ -44,7 +44,7 @@ public interface ProcessMetaData {
 	 * 
 	 * @return {@link GovernanceMetaData} instances.
 	 */
-	GovernanceMetaData[] getGovernanceMetaData();
+	GovernanceMetaData<?, ?>[] getGovernanceMetaData();
 
 	/**
 	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}

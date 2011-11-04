@@ -86,7 +86,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 
 		// Administer the duty
 		this.workContainer.administerManagedObjects(this.taskDutyAssociation,
-				this.administratorContext);
+				this.administratorContext, this);
 
 		// Administration duties do not pass on parameters
 		return null;
@@ -100,7 +100,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 		/*
 		 * ======================= AdministratorContext =======================
 		 */
-		
+
 		@Override
 		public ThreadState getThreadState() {
 			return DutyJob.this.flow.getThreadState();

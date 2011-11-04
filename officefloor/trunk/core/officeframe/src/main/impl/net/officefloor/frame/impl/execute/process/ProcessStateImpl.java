@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -122,7 +123,7 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
 	 */
-	private final GovernanceContainer[] governanceContainers;
+	private final GovernanceContainer<?>[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
@@ -223,7 +224,7 @@ public class ProcessStateImpl implements ProcessState {
 		}
 
 		// Create the array to reference the governances
-		GovernanceMetaData[] governanceMetaData = this.processMetaData
+		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData
 				.getGovernanceMetaData();
 		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
 
@@ -322,19 +323,25 @@ public class ProcessStateImpl implements ProcessState {
 					listener.processComplete();
 				}
 
+				/*
+				 * TODO ProcessState to implement ContainerContext to allow new
+				 * ThreadState for clean up
+				 */
+				ContainerContext containerContext = null;
+
+				// Disregard governance as not enforced and process complete
+				for (int i = 0; i < this.governanceContainers.length; i++) {
+					GovernanceContainer<?> container = this.governanceContainers[i];
+					if (container != null) {
+						container.disregardGovernance(containerContext);
+					}
+				}
+
 				// Unload managed objects (some may not have been used)
 				for (int i = 0; i < this.managedObjectContainers.length; i++) {
 					ManagedObjectContainer container = this.managedObjectContainers[i];
 					if (container != null) {
 						container.unloadManagedObject(activateSet);
-					}
-				}
-
-				// Disregard governance as not enforced and process complete
-				for (int i = 0; i < this.governanceContainers.length; i++) {
-					GovernanceContainer container = this.governanceContainers[i];
-					if (container != null) {
-						container.disregardGovernance();
 					}
 				}
 
@@ -372,11 +379,11 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public GovernanceContainer getGovernanceContainer(int index) {
+	public GovernanceContainer<?> getGovernanceContainer(int index) {
 		// Lazy load the Governance Container
 		// (This should be thread safe as should always be called within the
 		// Process lock of the Thread before the Job uses it).
-		GovernanceContainer container = this.governanceContainers[index];
+		GovernanceContainer<?> container = this.governanceContainers[index];
 		if (container == null) {
 			container = this.processMetaData.getGovernanceMetaData()[index]
 					.createGovernanceContainer(this.processLock);

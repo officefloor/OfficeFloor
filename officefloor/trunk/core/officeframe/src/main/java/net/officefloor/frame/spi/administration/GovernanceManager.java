@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.spi.administration;
 
-import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Manager over a particular {@link Governance}.
@@ -30,43 +30,32 @@ public interface GovernanceManager {
 
 	/**
 	 * <p>
-	 * Triggers the activation of the {@link Governance}.
+	 * Triggers activating the {@link Governance}.
 	 * <p>
-	 * The {@link Governance} may not be active on the return of this method as
-	 * it may be waiting for a {@link ManagedObject} to be ready to be governed.
-	 * 
-	 * @throws GovernanceEscalation
-	 *             If fails to active the {@link Governance}. This should be
-	 *             handled by the {@link OfficeFrame} so let propagate.
+	 * The activation may not have completed on the return of this method. The
+	 * {@link Governance} will however be active before the next {@link Task} is
+	 * executed.
 	 */
-	void activateGovernance() throws GovernanceEscalation;
+	void activateGovernance();
 
 	/**
 	 * <p>
 	 * Triggers enforcing the {@link Governance}.
 	 * <p>
-	 * The enforcement my not have completed on the return of this method. Any
-	 * issues with enforcement will however be reported the next time a governed
-	 * {@link ManagedObject} is attempted to be used.
-	 * 
-	 * @throws GovernanceEscalation
-	 *             If fails to active the {@link Governance}. This should be
-	 *             handled by the {@link OfficeFrame} so let propagate.
+	 * The enforcement may not have completed on the return of this method. The
+	 * {@link Governance} will however be enforced before the next {@link Task}
+	 * is executed or end of {@link ProcessState}.
 	 */
-	void enforceGovernance() throws GovernanceEscalation;
+	void enforceGovernance();
 
 	/**
 	 * <p>
 	 * Triggers disregarding the {@link Governance}.
 	 * <p>
 	 * The {@link Governance} may not have been disregarded on the return of
-	 * this method. Any issues will however be reported the next time a governed
-	 * {@link ManagedObject} is attempted to be used.
-	 * 
-	 * @throws GovernanceEscalation
-	 *             If fails to active the {@link Governance}. This should be
-	 *             handled by the {@link OfficeFrame} so let propagate.
+	 * this method. The {@link Governance} will however be disregarded before
+	 * the next {@link Task} is executed or end of {@link ProcessState}.
 	 */
-	void disregardGovernance() throws GovernanceEscalation;
+	void disregardGovernance();
 
 }

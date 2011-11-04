@@ -596,7 +596,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			// Record administering the managed objects
 			administratorContainer.doDuty(this.taskDutyAssociation,
 					Arrays.asList(extensionInterfaces),
-					this.administratorContext);
+					this.administratorContext, this.containerContext);
 		} catch (Throwable ex) {
 			fail("Recording should not throw exception");
 		}
@@ -755,7 +755,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	protected void administerManagedObjects(WorkContainer<?> workContainer)
 			throws Throwable {
 		workContainer.administerManagedObjects(this.taskDutyAssociation,
-				this.administratorContext);
+				this.administratorContext, this.containerContext);
 	}
 
 	/**

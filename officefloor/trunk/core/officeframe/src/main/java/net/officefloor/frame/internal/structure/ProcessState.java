@@ -135,7 +135,7 @@ public interface ProcessState {
 	 * @return {@link GovernanceContainer} for the index only if active. If not
 	 *         active will return <code>null</code>.
 	 */
-	GovernanceContainer getGovernanceContainer(int index);
+	GovernanceContainer<?> getGovernanceContainer(int index);
 
 	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.

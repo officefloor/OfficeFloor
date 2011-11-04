@@ -118,7 +118,7 @@ public interface OfficeConfiguration {
 	 * 
 	 * @return {@link GovernanceConfiguration}.
 	 */
-	GovernanceConfiguration[] getGovernanceConfiguration();
+	GovernanceConfiguration<?, ?, ?>[] getGovernanceConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link AdministratorSource} instances

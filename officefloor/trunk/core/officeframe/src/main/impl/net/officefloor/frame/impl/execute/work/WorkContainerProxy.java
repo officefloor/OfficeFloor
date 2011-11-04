@@ -78,12 +78,11 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void governManagedObjects(
-			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context) {
-		this.delegate.governManagedObjects(managedObjectIndexes,
-				jobContext, jobNode, activateSet, context);
+	public void governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet, ContainerContext context) {
+		this.delegate.governManagedObjects(managedObjectIndexes, jobContext,
+				jobNode, activateSet, context);
 	}
 
 	@Override
@@ -97,8 +96,10 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 
 	@Override
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
-			AdministratorContext adminContext) throws Throwable {
-		this.delegate.administerManagedObjects(duty, adminContext);
+			AdministratorContext adminContext, ContainerContext containerContext)
+			throws Throwable {
+		this.delegate.administerManagedObjects(duty, adminContext,
+				containerContext);
 	}
 
 	@Override

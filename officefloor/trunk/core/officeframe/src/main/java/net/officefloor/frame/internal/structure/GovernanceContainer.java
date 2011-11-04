@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.administration.GovernanceManager;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -29,31 +28,50 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface GovernanceContainer<I> {
 
 	/**
-	 * Registers the {@link ManagedObject} for {@link Governance}.
+	 * Indicates if this {@link Governance} is active.
+	 * 
+	 * @return <code>true</code> if this {@link Governance} is active.
+	 */
+	boolean isActive();
+
+	/**
+	 * Activates the {@link Governance}.
+	 * 
+	 * @param context
+	 *            {@link ContainerContext}.
+	 */
+	void activateGovernance(ContainerContext context);
+
+	/**
+	 * Creates the {@link ActiveGovernance} to enable activation of
+	 * {@link Governance} of the {@link ManagedObject}.
 	 * 
 	 * @param extensionInterface
 	 *            Appropriate extension interface of the {@link ManagedObject}
 	 *            to allow {@link Governance} over it.
 	 * @param managedobjectContainer
 	 *            {@link ManagedObjectContainer} of the {@link ManagedObject}.
-	 * @return {@link ActiveGovernance} indicate that state of
-	 *         {@link Governance} of the {@link ManagedObject}.
+	 * @return {@link ActiveGovernance}.
 	 * @throws Exception
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
-	ActiveGovernance governManagedObject(I extensionInterface,
-			ManagedObjectContainer managedobjectContainer) throws Exception;
+	ActiveGovernance createActiveGovernance(I extensionInterface,
+			ManagedObjectContainer managedobjectContainer);
+
+	/**
+	 * Enforces the {@link Governance}.
+	 * 
+	 * @param context
+	 *            {@link ContainerContext}.
+	 */
+	void enforceGovernance(ContainerContext context);
 
 	/**
 	 * Disregards the {@link Governance}.
-	 */
-	void disregardGovernance();
-
-	/**
-	 * Obtains the {@link GovernanceManager} to manage the {@link Governance}.
 	 * 
-	 * @return {@link GovernanceManager} to manage the {@link Governance}.
+	 * @param context
+	 *            {@link ContainerContext}.
 	 */
-	GovernanceManager getGovernanceManager();
+	void disregardGovernance(ContainerContext context);
 
 }

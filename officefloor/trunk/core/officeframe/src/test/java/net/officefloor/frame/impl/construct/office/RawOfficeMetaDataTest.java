@@ -871,7 +871,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testFailConstructGovernance() {
 
-		final GovernanceConfiguration governanceConfiguration = this
+		final GovernanceConfiguration<?, ?, ?> governanceConfiguration = this
 				.createMock(GovernanceConfiguration.class);
 
 		// Record creating a thread bound managed object
@@ -1592,7 +1592,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String... governanceNames) {
 
 		// Create the listing of governance configuration
-		GovernanceConfiguration[] governanceConfigurations = new GovernanceConfiguration[governanceNames.length];
+		GovernanceConfiguration<?, ?, ?>[] governanceConfigurations = new GovernanceConfiguration[governanceNames.length];
 		for (int i = 0; i < governanceConfigurations.length; i++) {
 			governanceConfigurations[i] = this
 					.createMock(GovernanceConfiguration.class);
@@ -1604,7 +1604,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				governanceConfigurations);
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData<?, ?>[governanceConfigurations.length];
 		for (int i = 0; i < governanceConfigurations.length; i++) {
-			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
+			GovernanceConfiguration<?, ?, ?> governanceConfiguration = governanceConfigurations[i];
 			String governanceName = governanceNames[i];
 
 			final RawGovernanceMetaData rawGovernanceMetaData = this

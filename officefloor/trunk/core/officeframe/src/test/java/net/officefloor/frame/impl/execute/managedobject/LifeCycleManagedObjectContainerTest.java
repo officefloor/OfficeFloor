@@ -63,7 +63,6 @@ public class LifeCycleManagedObjectContainerTest extends
 		this.loadManagedObject(mo);
 		this.governManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
-		this.governManagedObject(mo, true);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
 		this.unloadManagedObject(mo);

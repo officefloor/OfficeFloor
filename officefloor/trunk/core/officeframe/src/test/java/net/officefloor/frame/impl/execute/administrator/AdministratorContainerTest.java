@@ -22,6 +22,7 @@ import java.util.List;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -33,7 +34,6 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.GovernanceEscalation;
 import net.officefloor.frame.spi.administration.GovernanceManager;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
@@ -106,6 +106,12 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 			.createMock(DutyMetaData.class);
 
 	/**
+	 * {@link ContainerContext}.
+	 */
+	private final ContainerContext containerContext = this
+			.createMock(ContainerContext.class);
+
+	/**
 	 * Ensure can obtain the extension interfaces.
 	 */
 	public void testExtensionInterfaces() throws Throwable {
@@ -158,99 +164,69 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	}
 
 	/**
-	 * Ensure able to invoke {@link Governance}.
+	 * Ensure able to activate {@link Governance}.
 	 */
-	public void testGovernance() throws Throwable {
-
-		final int PROCESS_INDEX = 3;
-		final ThreadState threadState = this.createMock(ThreadState.class);
-		final ProcessState processState = this.createMock(ProcessState.class);
-		final GovernanceContainer<?> governanceContainer = this
-				.createMock(GovernanceContainer.class);
-		final GovernanceManager governanceManager = this
-				.createMock(GovernanceManager.class);
-
-		// Duty to validate context
-		this.recordDoDuty(new Duty<I, F, Governances>() {
-			@Override
-			public void doDuty(DutyContext<I, F, Governances> context)
-					throws Throwable {
-				GovernanceManager manager = context
-						.getGovernance(Governances.GOVERNANCE);
-				manager.activateGovernance();
-			}
-		});
+	public void testGovernance_Activate() throws Throwable {
 
 		// Record activating the governance
-		this.recordReturn(this.dutyMetaData, this.dutyMetaData
-				.translateGovernanceIndexToProcess(Governances.GOVERNANCE
-						.ordinal()), PROCESS_INDEX);
-		this.recordReturn(this.context, this.context.getThreadState(),
-				threadState);
-		this.recordReturn(threadState, threadState.getProcessState(),
-				processState);
-		this.recordReturn(processState,
-				processState.getGovernanceContainer(PROCESS_INDEX),
-				governanceContainer);
-		this.recordReturn(governanceContainer,
-				governanceContainer.getGovernanceManager(), governanceManager);
-		governanceManager.activateGovernance();
+		GovernanceContainer<?> governanceContainer = this
+				.recordGovernance(new Duty<I, F, Governances>() {
+					@Override
+					public void doDuty(DutyContext<I, F, Governances> context)
+							throws Throwable {
+						GovernanceManager manager = context
+								.getGovernance(Governances.GOVERNANCE);
+						manager.activateGovernance();
+					}
+				});
+		governanceContainer.activateGovernance(this.containerContext);
 
 		// Test
 		this.doTest();
 	}
 
 	/**
-	 * Ensure handle issue if {@link Governance} failure.
+	 * Ensure able to enforce {@link Governance}.
 	 */
-	public void testGovernanceFailure() throws Throwable {
+	public void testGovernance_Enforce() throws Throwable {
 
-		final Throwable FAILURE = new Exception("TEST FAILURE");
-
-		final int PROCESS_INDEX = 3;
-		final ThreadState threadState = this.createMock(ThreadState.class);
-		final ProcessState processState = this.createMock(ProcessState.class);
-		final GovernanceContainer<?> governanceContainer = this
-				.createMock(GovernanceContainer.class);
-		final GovernanceManager governanceManager = this
-				.createMock(GovernanceManager.class);
-
-		// Duty to validate context
-		this.recordDoDuty(new Duty<I, F, Governances>() {
-			@Override
-			public void doDuty(DutyContext<I, F, Governances> context)
-					throws Throwable {
-				GovernanceManager manager = context
-						.getGovernance(Governances.GOVERNANCE);
-				manager.activateGovernance();
-			}
-		});
-
-		// Record activating the governance
-		this.recordReturn(this.dutyMetaData, this.dutyMetaData
-				.translateGovernanceIndexToProcess(Governances.GOVERNANCE
-						.ordinal()), PROCESS_INDEX);
-		this.recordReturn(this.context, this.context.getThreadState(),
-				threadState);
-		this.recordReturn(threadState, threadState.getProcessState(),
-				processState);
-		this.recordReturn(processState,
-				processState.getGovernanceContainer(PROCESS_INDEX),
-				governanceContainer);
-		this.recordReturn(governanceContainer,
-				governanceContainer.getGovernanceManager(), governanceManager);
-		governanceManager.activateGovernance();
-		this.control(governanceManager).setThrowable(
-				new GovernanceEscalation(FAILURE));
+		// Record enforcing the governance
+		GovernanceContainer<?> governanceContainer = this
+				.recordGovernance(new Duty<I, F, Governances>() {
+					@Override
+					public void doDuty(DutyContext<I, F, Governances> context)
+							throws Throwable {
+						GovernanceManager manager = context
+								.getGovernance(Governances.GOVERNANCE);
+						manager.enforceGovernance();
+					}
+				});
+		governanceContainer.enforceGovernance(this.containerContext);
 
 		// Test
-		try {
-			this.doTest();
-			fail("Should not be successful");
+		this.doTest();
+	}
 
-		} catch (Exception ex) {
-			assertSame("Incorrect cause", FAILURE, ex);
-		}
+	/**
+	 * Ensure able to disregard {@link Governance}.
+	 */
+	public void testGovernance_Disregard() throws Throwable {
+
+		// Record disregarding the governance
+		GovernanceContainer<?> governanceContainer = this
+				.recordGovernance(new Duty<I, F, Governances>() {
+					@Override
+					public void doDuty(DutyContext<I, F, Governances> context)
+							throws Throwable {
+						GovernanceManager manager = context
+								.getGovernance(Governances.GOVERNANCE);
+						manager.disregardGovernance();
+					}
+				});
+		governanceContainer.disregardGovernance(this.containerContext);
+
+		// Test
+		this.doTest();
 	}
 
 	/**
@@ -258,6 +234,41 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	 */
 	private static enum Governances {
 		GOVERNANCE
+	}
+
+	/**
+	 * Records setup of {@link Governance}.
+	 * 
+	 * @param duty
+	 *            {@link Duty}.
+	 * @return {@link GovernanceContainer}.
+	 */
+	private GovernanceContainer<?> recordGovernance(Duty<?, ?, Governances> duty)
+			throws Throwable {
+
+		final int PROCESS_INDEX = 3;
+		final ThreadState threadState = this.createMock(ThreadState.class);
+		final ProcessState processState = this.createMock(ProcessState.class);
+		final GovernanceContainer<?> governanceContainer = this
+				.createMock(GovernanceContainer.class);
+
+		// Duty to validate context
+		this.recordDoDuty(duty);
+
+		// Record governance setup
+		this.recordReturn(this.dutyMetaData, this.dutyMetaData
+				.translateGovernanceIndexToProcess(Governances.GOVERNANCE
+						.ordinal()), PROCESS_INDEX);
+		this.recordReturn(this.context, this.context.getThreadState(),
+				threadState);
+		this.recordReturn(threadState, threadState.getProcessState(),
+				processState);
+		this.recordReturn(processState,
+				processState.getGovernanceContainer(PROCESS_INDEX),
+				governanceContainer);
+
+		// Return the governance container
+		return governanceContainer;
 	}
 
 	/**
@@ -287,13 +298,10 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 	 */
 	private void doTest() throws Throwable {
 		// Test
-		try {
-			this.replayMockObjects();
-			this.container.doDuty(this.taskDuty, this.extensionInterfaces,
-					this.context);
-		} finally {
-			this.verifyMockObjects();
-		}
+		this.replayMockObjects();
+		this.container.doDuty(this.taskDuty, this.extensionInterfaces,
+				this.context, this.containerContext);
+		this.verifyMockObjects();
 	}
 
 }

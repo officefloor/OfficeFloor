@@ -34,6 +34,8 @@ import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -43,6 +45,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -335,6 +338,17 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private Class<?> objectType;
 
 	/**
+	 * {@link ManagedObjectGovernanceMetaData}.
+	 */
+	private ManagedObjectGovernanceMetaData<?>[] moGovernanceMetaData;
+
+	/**
+	 * {@link ActiveGovernance} instances for the
+	 * {@link ManagedObjectGovernanceMetaData}.
+	 */
+	private ActiveGovernance[] activeGovernances;
+
+	/**
 	 * Checks that not initialised.
 	 */
 	private void checkNotInitialised() {
@@ -392,9 +406,18 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
-	 * Records initialising the {@link ManagedObjectContainer}.
+	 * Records initialising the {@link ManagedObjectContainer} without any
+	 * {@link ManagedObjectGovernanceMetaData}.
 	 */
 	protected void record_MoContainer_init(Class<?> objectType) {
+		this.record_MoContainer_init(objectType, 0);
+	}
+
+	/**
+	 * Records initialising the {@link ManagedObjectContainer}.
+	 */
+	protected void record_MoContainer_init(Class<?> objectType,
+			int governanceCount) {
 
 		// Flag now initialised
 		this.isInitialised = true;
@@ -427,10 +450,19 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 							ManagedObjectContainerImpl.class));
 		}
 
+		// Create the managed object governance meta-data
+		this.moGovernanceMetaData = new ManagedObjectGovernanceMetaData<?>[governanceCount];
+		this.activeGovernances = new ActiveGovernance[governanceCount];
+		for (int i = 0; i < this.moGovernanceMetaData.length; i++) {
+			this.moGovernanceMetaData[i] = this
+					.createMock(ManagedObjectGovernanceMetaData.class);
+			this.activeGovernances[i] = null;
+		}
+
 		// Obtain the governance meta-data
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.getGovernanceMetaData(),
-				new ManagedObjectGovernanceMetaData[0]);
+				this.moGovernanceMetaData);
 	}
 
 	/**
@@ -583,19 +615,31 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
+	 * Flag indicating if initial {@link Governance} setup.
+	 */
+	private boolean isGoverned = false;
+
+	/**
 	 * Records governing the {@link ManagedObject}.
 	 */
-	protected void record_MoContainer_governManagedObject() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void record_MoContainer_governManagedObject(
+			boolean... isActivateGovernances) {
 
-		// Ensure Managed Object ready
-		this.recordReturn(this.managedObjectMetaData,
-				this.managedObjectMetaData.isManagedObjectAsynchronous(),
-				this.isAsynchronous);
+		if (!this.isGoverned) {
+			// Ensure Managed Object loaded
+			this.recordReturn(this.managedObjectMetaData,
+					this.managedObjectMetaData.isManagedObjectAsynchronous(),
+					this.isAsynchronous);
+
+			// Now govern
+			this.isGoverned = true;
+		}
 
 		// Obtain the governance
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.getGovernanceMetaData(),
-				new ManagedObjectGovernanceMetaData[0]);
+				this.moGovernanceMetaData);
 
 		// Obtain the process state
 		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
@@ -603,6 +647,78 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
+
+		// Provide governance
+		NEXT_GOVERNANCE: for (int i = 0; i < this.moGovernanceMetaData.length; i++) {
+			ManagedObjectGovernanceMetaData<?> moGovMetaData = this.moGovernanceMetaData[i];
+
+			// Determine if to activate (default is not activate)
+			boolean isActivateGovernance = (i < isActivateGovernances.length) ? isActivateGovernances[i]
+					: false;
+
+			// Determine if already active
+			ActiveGovernance activeGovernance = this.activeGovernances[i];
+			if (activeGovernance != null) {
+				// Record whether active
+				this.recordReturn(activeGovernance,
+						activeGovernance.isActive(), isActivateGovernance);
+				if (isActivateGovernance) {
+					continue NEXT_GOVERNANCE; // already governed
+				}
+			}
+
+			final GovernanceContainer governanceContainer = this
+					.createMock(GovernanceContainer.class);
+
+			// Record determining if activate governance
+			this.recordReturn(moGovMetaData,
+					moGovMetaData.getGovernanceIndex(), i);
+			this.recordReturn(this.processState,
+					this.processState.getGovernanceContainer(i),
+					governanceContainer);
+			this.recordReturn(governanceContainer,
+					governanceContainer.isActive(), isActivateGovernance);
+
+			// Determine if to activate
+			if (isActivateGovernance) {
+
+				// Create active governance for managed object
+				activeGovernance = this.createMock(ActiveGovernance.class);
+				this.activeGovernances[i] = activeGovernance;
+
+				final ExtensionInterfaceExtractor<?> eiExtractor = this
+						.createMock(ExtensionInterfaceExtractor.class);
+				final Object extension = new Object();
+				final FlowMetaData<?> flowMetaData = this
+						.createMock(FlowMetaData.class);
+
+				// Record governing the managed object
+				this.recordReturn(moGovMetaData,
+						moGovMetaData.getExtensionInterfaceExtractor(),
+						eiExtractor);
+				this.recordReturn(eiExtractor, eiExtractor
+						.extractExtensionInterface(this.managedObject,
+								this.managedObjectMetaData), extension);
+				this.recordReturn(governanceContainer, governanceContainer
+						.createActiveGovernance(extension, null),
+						activeGovernance, new AbstractMatcher() {
+							@Override
+							public boolean matches(Object[] expected,
+									Object[] actual) {
+								assertEquals("Incorrect extension",
+										expected[0], actual[0]);
+								assertTrue(
+										"Must have managed object container",
+										actual[1] instanceof ManagedObjectContainer);
+								return true;
+							}
+						});
+				this.recordReturn(activeGovernance,
+						activeGovernance.getFlowMetaData(), flowMetaData);
+				this.containerContext.addSetupJob(flowMetaData,
+						activeGovernance);
+			}
+		}
 	}
 
 	/**
@@ -960,7 +1076,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 *            Indicates if should be governed.
 	 */
 	protected void governManagedObject(ManagedObjectContainer mo,
-			boolean isGoverned, ActiveGovernance... governances) {
+			boolean isGoverned) {
 		boolean isGoverning = mo.governManagedObject(this.workContainer,
 				this.jobContext, this.jobNode, this.jobActivateSet,
 				this.containerContext);

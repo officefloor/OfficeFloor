@@ -632,7 +632,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			activateSet.activateJobNodes();
 
 			// TODO determine if activate parallel jobs (for setup)
-			if (false)
+			boolean isTodo = false;
+			if (isTodo)
 				System.err
 						.println("TODO determine if activate parallel jobs (for setup)");
 		}

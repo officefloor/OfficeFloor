@@ -309,7 +309,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
-			AdministratorContext adminContext) throws Throwable {
+			AdministratorContext adminContext, ContainerContext containerContext)
+			throws Throwable {
 
 		// Access Point: Job
 		// Locks: ThreadState
@@ -402,7 +403,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		}
 
 		// Administer the managed objects
-		adminContainer.doDuty(duty, ei, adminContext);
+		adminContainer.doDuty(duty, ei, adminContext, containerContext);
 	}
 
 	@Override

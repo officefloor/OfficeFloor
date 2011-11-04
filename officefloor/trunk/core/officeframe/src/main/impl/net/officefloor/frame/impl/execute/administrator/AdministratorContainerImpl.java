@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -32,8 +33,8 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.GovernanceEscalation;
 import net.officefloor.frame.spi.administration.GovernanceManager;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implementation of an {@link AdministratorContainer}.
@@ -44,12 +45,8 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		implements AdministratorContainer<I, A> {
 
 	/**
-	 * {@link DutyContext} that exposes only the required functionality.
-	 */
-	private final DutyContext<I, F, G> dutyContextToken = new DutyContextToken();
-
-	/**
-	 * {@link AdministratorMetaData}.
+	 * {@link AdministratorMetaData}.MetaData} for disregarding the
+	 * {@link Governance}.
 	 */
 	private final AdministratorMetaData<I, A> metaData;
 
@@ -78,26 +75,11 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		return this.metaData.getExtensionInterfaceMetaData();
 	}
 
-	/**
-	 * {@link AdministratorContext}.
-	 */
-	private AdministratorContext adminContext;
-
-	/**
-	 * Extension interfaces.
-	 */
-	private List<I> extensionInterfaces;
-
-	/**
-	 * {@link DutyMetaData}.
-	 */
-	private DutyMetaData dutyMetaData;
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public void doDuty(TaskDutyAssociation<A> taskDuty,
-			List<I> extensionInterfaces, AdministratorContext context)
-			throws Throwable {
+			List<I> extensionInterfaces, AdministratorContext context,
+			ContainerContext containerContext) throws Throwable {
 
 		// Access Point: JobContainer -> WorkContainer
 		// Locks: ThreadState
@@ -114,19 +96,12 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		// Obtain the duty
 		Duty<I, F, G> duty = (Duty<I, F, G>) this.administrator.getDuty(key);
 
-		// Specify state
-		this.adminContext = context;
-		this.extensionInterfaces = extensionInterfaces;
-		this.dutyMetaData = this.metaData.getDutyMetaData(key);
+		// Obtain the duty meta-data
+		DutyMetaData dutyMetaData = this.metaData.getDutyMetaData(key);
 
-		try {
-			// Execute the duty
-			duty.doDuty(this.dutyContextToken);
-
-		} catch (GovernanceEscalation ex) {
-			// Propagate the cause
-			throw ex.getCause();
-		}
+		// Execute the duty
+		duty.doDuty(new DutyContextToken(context, extensionInterfaces,
+				dutyMetaData, containerContext));
 	}
 
 	/**
@@ -139,13 +114,54 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 */
 	private final class DutyContextToken implements DutyContext<I, F, G> {
 
+		/**
+		 * {@link AdministratorContext}.
+		 */
+		private final AdministratorContext adminContext;
+
+		/**
+		 * Extension interfaces.
+		 */
+		private final List<I> extensionInterfaces;
+
+		/**
+		 * {@link DutyMetaData}.
+		 */
+		private final DutyMetaData dutyMetaData;
+
+		/**
+		 * {@link ContainerContext}.
+		 */
+		private final ContainerContext containerContext;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param adminContext
+		 *            {@link AdministratorContext}.
+		 * @param extensionInterfaces
+		 *            Extension interfaces.
+		 * @param dutyMetaData
+		 *            {@link DutyMetaData}.
+		 * @param containerContext
+		 *            {@link ContainerContext}.
+		 */
+		public DutyContextToken(AdministratorContext adminContext,
+				List<I> extensionInterfaces, DutyMetaData dutyMetaData,
+				ContainerContext containerContext) {
+			this.adminContext = adminContext;
+			this.extensionInterfaces = extensionInterfaces;
+			this.dutyMetaData = dutyMetaData;
+			this.containerContext = containerContext;
+		}
+
 		/*
 		 * ==================== DutyContext ===================================
 		 */
 
 		@Override
 		public List<I> getExtensionInterfaces() {
-			return AdministratorContainerImpl.this.extensionInterfaces;
+			return this.extensionInterfaces;
 		}
 
 		@Override
@@ -157,12 +173,10 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		@Override
 		public void doFlow(int flowIndex, Object parameter) {
 			// Obtain the flow meta-data
-			FlowMetaData<?> flowMetaData = AdministratorContainerImpl.this.dutyMetaData
-					.getFlow(flowIndex);
+			FlowMetaData<?> flowMetaData = this.dutyMetaData.getFlow(flowIndex);
 
 			// Do the flow
-			AdministratorContainerImpl.this.adminContext.doFlow(flowMetaData,
-					parameter);
+			this.adminContext.doFlow(flowMetaData, parameter);
 		}
 
 		@Override
@@ -174,16 +188,20 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		public GovernanceManager getGovernance(int governanceIndex) {
 
 			// Obtain the process index for the governance
-			int processIndex = AdministratorContainerImpl.this.dutyMetaData
+			int processIndex = this.dutyMetaData
 					.translateGovernanceIndexToProcess(governanceIndex);
 
 			// Obtain the governance container
-			GovernanceContainer<?> container = AdministratorContainerImpl.this.adminContext
+			GovernanceContainer<?> container = this.adminContext
 					.getThreadState().getProcessState()
 					.getGovernanceContainer(processIndex);
 
-			// Obtain and return the governance manager
-			return container.getGovernanceManager();
+			// Create Governance Manager to wrap Governance Container
+			GovernanceManager manager = new GovernanceManagerImpl(container,
+					this.containerContext);
+
+			// Return the governance manager
+			return manager;
 		}
 	}
 
