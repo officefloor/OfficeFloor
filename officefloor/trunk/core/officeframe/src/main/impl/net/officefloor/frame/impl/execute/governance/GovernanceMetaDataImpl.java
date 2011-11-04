@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -46,6 +47,21 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final GovernanceSource<I, F> governanceSource;
 
 	/**
+	 * {@link FlowMetaData} to activate {@link Governance}.
+	 */
+	private FlowMetaData<?> activateFlow;
+
+	/**
+	 * {@link FlowMetaData} to enforce {@link Governance}.
+	 */
+	private FlowMetaData<?> enforceFlow;
+
+	/**
+	 * {@link FlowMetaData} to disregard {@link Governance}.
+	 */
+	private FlowMetaData<?> disregardFlow;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
@@ -57,6 +73,24 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			GovernanceSource<I, F> governanceSource) {
 		this.governanceName = governanceName;
 		this.governanceSource = governanceSource;
+	}
+
+	/**
+	 * Loads the {@link FlowMetaData} for the {@link Governance} {@link Task}
+	 * instances.
+	 * 
+	 * @param activateFlow
+	 *            {@link FlowMetaData} to activate {@link Governance}.
+	 * @param enforceFlow
+	 *            {@link FlowMetaData} to enforce {@link Governance}.
+	 * @param disregardFlow
+	 *            {@link FlowMetaData} to disregard {@link Governance}.
+	 */
+	public void loadFlows(FlowMetaData<?> activateFlow,
+			FlowMetaData<?> enforceFlow, FlowMetaData<?> disregardFlow) {
+		this.activateFlow = activateFlow;
+		this.enforceFlow = enforceFlow;
+		this.disregardFlow = disregardFlow;
 	}
 
 	/*
@@ -89,23 +123,17 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public FlowMetaData<?> getActivateFlowMetaData() {
-		// TODO implement GovernanceMetaData<I,F>.getActivateFlowMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.getActivateFlowMetaData");
+		return this.activateFlow;
 	}
 
 	@Override
 	public FlowMetaData<?> getEnforceFlowMetaData() {
-		// TODO implement GovernanceMetaData<I,F>.getEnforceFlowMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.getEnforceFlowMetaData");
+		return this.enforceFlow;
 	}
 
 	@Override
 	public FlowMetaData<?> getDisregardFlowMetaData() {
-		// TODO implement GovernanceMetaData<I,F>.getDisregardFlowMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.getDisregardFlowMetaData");
+		return this.disregardFlow;
 	}
 
 	@Override
