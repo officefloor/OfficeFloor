@@ -29,9 +29,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface ActiveGovernance {
 
 	/**
-	 * Indicates if the {@link Governance} is active.
+	 * Indicates if the {@link Governance} is still active.
 	 * 
-	 * @return <code>true</code> if the {@link Governance} is active.
+	 * @return <code>true</code> if the {@link Governance} is still active.
 	 */
 	boolean isActive();
 

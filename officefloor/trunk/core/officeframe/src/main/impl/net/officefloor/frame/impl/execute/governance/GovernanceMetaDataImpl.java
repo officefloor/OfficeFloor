@@ -17,9 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 
 /**
@@ -71,6 +76,44 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public Governance<I, F> createGovernance() throws Throwable {
 		return this.governanceSource.createGovernance();
+	}
+
+	@Override
+	public ActiveGovernanceManager createActiveGovernance(
+			GovernanceContainer<I> governanceContainer,
+			Governance<I, F> governance, I extensionInterface,
+			ManagedObjectContainer managedobjectContainer) {
+		return new ActiveGovernanceImpl<I, F>(governanceContainer, governance,
+				extensionInterface, managedobjectContainer);
+	}
+
+	@Override
+	public FlowMetaData<?> getActivateFlowMetaData() {
+		// TODO implement GovernanceMetaData<I,F>.getActivateFlowMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceMetaData<I,F>.getActivateFlowMetaData");
+	}
+
+	@Override
+	public FlowMetaData<?> getEnforceFlowMetaData() {
+		// TODO implement GovernanceMetaData<I,F>.getEnforceFlowMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceMetaData<I,F>.getEnforceFlowMetaData");
+	}
+
+	@Override
+	public FlowMetaData<?> getDisregardFlowMetaData() {
+		// TODO implement GovernanceMetaData<I,F>.getDisregardFlowMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceMetaData<I,F>.getDisregardFlowMetaData");
+	}
+
+	@Override
+	public GovernanceContext<F> createGovernanceContext(
+			TaskContext<?, ?, F> taskContext) {
+		// TODO implement GovernanceMetaData<I,F>.createGovernanceContext
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceMetaData<I,F>.createGovernanceContext");
 	}
 
 }

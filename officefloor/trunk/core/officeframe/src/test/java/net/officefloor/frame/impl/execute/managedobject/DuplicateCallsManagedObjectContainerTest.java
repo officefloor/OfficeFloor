@@ -51,9 +51,19 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true);
+
+		// Governance is exception as may change between jobs
 		this.record_MoContainer_governManagedObject();
+		this.record_MoContainer_governManagedObject();
+
+		// Record remaining loading (again should only be once)
 		this.record_MoContainer_coordinateManagedObject(true, true, null,
 				object);
+
+		// Record further load attempt
+		this.record_MoContainer_governManagedObject();
+
+		// Recording remaining
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 		this.record_MoContainer_unloadManagedObject(true);
 
@@ -67,7 +77,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		this.loadManagedObject(mo);
 		this.loadManagedObject(mo);
 
-		// Attempt to govern twice (with only first taking effect)
+		// Must determine governance twice as may change between jobs
 		this.governManagedObject(mo, true);
 		this.governManagedObject(mo, true);
 
@@ -75,8 +85,9 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		this.coordinateManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
 
-		// Attempt another load, coordinate that should do nothing
+		// Attempt another load, that should only check governance
 		this.loadManagedObject(mo);
+		this.governManagedObject(mo, true);
 		this.coordinateManagedObject(mo, true);
 
 		// Should be ready and working

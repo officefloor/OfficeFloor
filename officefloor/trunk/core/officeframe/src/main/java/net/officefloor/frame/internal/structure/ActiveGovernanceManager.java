@@ -15,35 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.escalate;
+package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link Escalation} if failure of setting up {@link Governance} for the
- * {@link ManagedObject}.
+ * Provides management functions to the {@link ActiveGovernance}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FailedToGovernManagedObjectEscalation extends
-		ManagedObjectEscalation {
+public interface ActiveGovernanceManager {
 
 	/**
-	 * Initiate.
+	 * Obtains the {@link ActiveGovernance} being managed.
 	 * 
-	 * @param objectType
-	 *            {@link Class} of the {@link Object} returned from the
-	 *            {@link ManagedObject}.
-	 * @param cause
-	 *            Cause from the {@link ManagedObjectSource} on why
-	 *            {@link Governance} could not be set up for the
-	 *            {@link ManagedObject}.
+	 * @return {@link ActiveGovernance} being managed.
 	 */
-	public FailedToGovernManagedObjectEscalation(Class<?> objectType,
-			Throwable cause) {
-		super(objectType, cause);
-	}
+	ActiveGovernance getActiveGovernance();
+
+	/**
+	 * Unregisters the {@link ManagedObject} from {@link Governance}.
+	 */
+	void unregisterManagedObject();
 
 }

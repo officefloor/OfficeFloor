@@ -17,7 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Meta-data of the {@link Governance}.
@@ -50,5 +53,55 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	 *             If fails to create the {@link Governance}.
 	 */
 	Governance<I, F> createGovernance() throws Throwable;
+
+	/**
+	 * Creates the {@link ActiveGovernance}.
+	 * 
+	 * @param governanceContainer
+	 *            {@link GovernanceContainer}.
+	 * @param governance
+	 *            {@link Governances}.
+	 * @param extensionInterface
+	 *            Extension interface to {@link ManagedObject} to enable
+	 *            {@link Governance} over the {@link ManagedObject}.
+	 * @param managedobjectContainer
+	 *            {@link ManagedObjectContainer}.
+	 * @return {@link ActiveGovernanceManager}.
+	 */
+	ActiveGovernanceManager createActiveGovernance(
+			GovernanceContainer<I> governanceContainer,
+			Governance<I, F> governance, I extensionInterface,
+			ManagedObjectContainer managedobjectContainer);
+
+	/**
+	 * Obtains the {@link FlowMetaData} for activating the {@link Governance}.
+	 * 
+	 * @return {@link FlowMetaData} for activating the {@link Governance}.
+	 */
+	FlowMetaData<?> getActivateFlowMetaData();
+
+	/**
+	 * Obtains the {@link FlowMetaData} for enforcing the {@link Governance}.
+	 * 
+	 * @return {@link FlowMetaData} for enforcing the {@link Governance}.
+	 */
+	FlowMetaData<?> getEnforceFlowMetaData();
+
+	/**
+	 * Obtains the {@link FlowMetaData} for disregarding the {@link Governance}.
+	 * 
+	 * @return {@link FlowMetaData} for disregarding the {@link Governance}.
+	 */
+	FlowMetaData<?> getDisregardFlowMetaData();
+
+	/**
+	 * Creates the {@link GovernanceContext}.
+	 * 
+	 * @param taskContext
+	 *            {@link TaskContext}.
+	 * @return {@link GovernanceContext}.
+	 */
+	GovernanceContext<F> createGovernanceContext(
+			TaskContext<?, ?, F> taskContext);
 
 }

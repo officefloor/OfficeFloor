@@ -18,7 +18,6 @@
 
 package net.officefloor.frame.impl.execute.managedobject;
 
-import net.officefloor.frame.api.escalate.FailedToGovernManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
@@ -329,6 +328,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <W extends Work> boolean governManagedObject(
 			WorkContainer<W> workContainer, JobContext jobContext,
 			JobNode jobNode, JobNodeActivateSet activateSet,
@@ -363,16 +363,22 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			this.containerState = ManagedObjectContainerState.GOVERNING;
 
 		case GOVERNING:
-			// Continue to setup governance
-
-			// Ensure this managed object is ready
+			// Ensure this managed object is loaded for governing
 			if (!this.checkManagedObjectReady(jobContext, workContainer,
 					jobNode, activateSet, context,
 					ManagedObjectContainerState.LOADED)) {
-				// This object must be ready before governing it
+				// This object must be loaded before governing it
 				context.flagJobToWait();
 				return false;
 			}
+
+			// Now governed as always need to check governance
+			this.containerState = ManagedObjectContainerState.GOVERNED;
+
+		case GOVERNED:
+		case COORDINATING:
+		case OBJECT_AVAILABLE:
+			// Must always determine governance (as can change between jobs)
 
 			// Identify the applicable governance for this managed object
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaDatas = this.metaData
@@ -384,31 +390,25 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
 				ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
 
-				// Determine if governance is active
-				int governanceIndex = governanceMetaData.getGovernanceIndex();
-				GovernanceContainer governance = process
-						.getGovernanceContainer(governanceIndex);
-				if (governance == null) {
-					continue NEXT_GOVERNANCE; // not active
-				}
-
-				// Determine if already governed by governance
+				// Determine if already under active governance
 				ActiveGovernance activeGovernance = this.activeGovernances[i];
 				if (activeGovernance != null) {
 
-					// Determine if active
-					if (!activeGovernance.isActive()) {
-						// Still waiting on being active
-						if (!this.sourcingMonitor.waitOnAsset(jobNode,
-								activateSet)) {
-							throw new IllegalStateException(
-									"Must be able to wait until Managed Object governed");
-						}
-						context.flagJobToWait();
-						return false;
+					// Ensure still active
+					if (activeGovernance.isActive()) {
+						continue NEXT_GOVERNANCE; // already active
 					}
 
-					continue NEXT_GOVERNANCE; // already active
+					// No longer active
+					this.activeGovernances[i] = null;
+				}
+
+				// Obtain the governance
+				int governanceIndex = governanceMetaData.getGovernanceIndex();
+				GovernanceContainer governance = process
+						.getGovernanceContainer(governanceIndex);
+				if (!governance.isActive()) {
+					continue NEXT_GOVERNANCE; // not active, so not govern
 				}
 
 				// Obtain the extension interface
@@ -417,29 +417,16 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				Object extensionInterface = this
 						.extractExtensionInterface(extractor);
 
-				// Register for governance
-				try {
-					activeGovernance = governance.governManagedObject(
-							extensionInterface, this);
-				} catch (Exception ex) {
-					this.setFailedState(
-							new FailedToGovernManagedObjectEscalation(
-									this.metaData.getObjectType(), ex),
-							activateSet);
-				}
+				// Create and register the governance for the managed object
+				activeGovernance = governance.createActiveGovernance(
+						extensionInterface, this);
 				this.activeGovernances[i] = activeGovernance;
 
-				// Add the active governance for activation
+				// Add the governance for activation
 				context.addSetupJob(activeGovernance.getFlowMetaData(),
 						activeGovernance);
 			}
 
-			// Now governed
-			this.containerState = ManagedObjectContainerState.GOVERNED;
-
-		case GOVERNED:
-		case COORDINATING:
-		case OBJECT_AVAILABLE:
 			// Successfully now governed, or governance ready
 			return true;
 

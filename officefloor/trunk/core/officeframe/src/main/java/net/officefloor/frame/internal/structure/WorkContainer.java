@@ -137,11 +137,14 @@ public interface WorkContainer<W extends Work> {
 	 *            be undertaken.
 	 * @param adminContext
 	 *            {@link AdministratorContext}.
+	 * @param containerContext
+	 *            {@link ContainerContext}.
 	 * @throws Throwable
 	 *             If fails to administer the {@link ManagedObject} instances.
 	 */
 	void administerManagedObjects(TaskDutyAssociation<?> duty,
-			AdministratorContext adminContext) throws Throwable;
+			AdministratorContext adminContext, ContainerContext containerContext)
+			throws Throwable;
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.

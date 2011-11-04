@@ -308,12 +308,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		}
 
 		// Register the governances to office
-		GovernanceConfiguration[] governanceConfigurations = configuration
+		GovernanceConfiguration<?, ?, ?>[] governanceConfigurations = configuration
 				.getGovernanceConfiguration();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
 		Map<String, RawGovernanceMetaData> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData>();
 		NEXT_GOVERNANCE: for (int i = 0; i < governanceConfigurations.length; i++) {
-			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
+			GovernanceConfiguration<?, ?, ?> governanceConfiguration = governanceConfigurations[i];
 
 			// Create the raw governance
 			RawGovernanceMetaData rawGovernance = rawGovernanceMetaDataFactory

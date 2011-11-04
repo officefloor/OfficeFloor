@@ -39,7 +39,7 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	/**
 	 * {@link GovernanceMetaData} instances.
 	 */
-	private final GovernanceMetaData[] governanceMetaData;
+	private final GovernanceMetaData<?, ?>[] governanceMetaData;
 
 	/**
 	 * {@link AdministratorMetaData} instances.
@@ -65,7 +65,7 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	 */
 	public ProcessMetaDataImpl(
 			ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData[] governanceMetaData,
+			GovernanceMetaData<?, ?>[] governanceMetaData,
 			AdministratorMetaData<?, ?>[] administratorMetaData,
 			ThreadMetaData threadMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
@@ -84,7 +84,7 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	}
 
 	@Override
-	public GovernanceMetaData[] getGovernanceMetaData() {
+	public GovernanceMetaData<?, ?>[] getGovernanceMetaData() {
 		return this.governanceMetaData;
 	}
 
