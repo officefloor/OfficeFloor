@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -113,6 +114,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeConfiguration configuration = this
 			.createMock(OfficeConfiguration.class);
+
+	/**
+	 * {@link OfficeBuilder}.
+	 */
+	private final OfficeBuilder officeBuilder = this
+			.createMock(OfficeBuilder.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -879,12 +886,15 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, Team> teams = this.record_teams();
 
 		// Record not creating governance meta-data
+		this.recordReturn(this.configuration, this.configuration.getBuilder(),
+				this.officeBuilder);
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
 				new GovernanceConfiguration[] { governanceConfiguration });
 		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
 				.createRawGovernanceMetaData(governanceConfiguration, 0,
-						this.sourceContext, OFFICE_NAME, this.issues), null);
+						this.sourceContext, OFFICE_NAME, this.officeBuilder,
+						this.issues), null);
 		this.recordReturn(governanceConfiguration,
 				governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 		this.record_issue("Unable to configure governance 'GOVERNANCE'");
@@ -1599,6 +1609,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record creating the governance meta-data
+		this.recordReturn(this.configuration, this.configuration.getBuilder(),
+				this.officeBuilder);
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
 				governanceConfigurations);
@@ -1617,7 +1629,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(this.rawGovernanceFactory,
 					this.rawGovernanceFactory.createRawGovernanceMetaData(
 							governanceConfiguration, i, this.sourceContext,
-							OFFICE_NAME, this.issues), rawGovernanceMetaData);
+							OFFICE_NAME, this.officeBuilder, this.issues),
+					rawGovernanceMetaData);
 			this.recordReturn(rawGovernanceMetaData,
 					rawGovernanceMetaData.getGovernanceName(), governanceName);
 			this.recordReturn(rawGovernanceMetaData,

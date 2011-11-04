@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
@@ -308,6 +309,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		}
 
 		// Register the governances to office
+		OfficeBuilder officeBuilder = configuration.getBuilder();
 		GovernanceConfiguration<?, ?, ?>[] governanceConfigurations = configuration
 				.getGovernanceConfiguration();
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[governanceConfigurations.length];
@@ -318,7 +320,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			// Create the raw governance
 			RawGovernanceMetaData rawGovernance = rawGovernanceMetaDataFactory
 					.createRawGovernanceMetaData(governanceConfiguration, i,
-							sourceContext, officeName, issues);
+							sourceContext, officeName, officeBuilder, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,

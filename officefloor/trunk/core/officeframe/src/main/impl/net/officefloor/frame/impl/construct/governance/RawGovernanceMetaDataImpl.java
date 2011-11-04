@@ -17,15 +17,32 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
+import net.officefloor.frame.impl.execute.governance.GovernanceTaskDependency;
+import net.officefloor.frame.impl.execute.governance.GovernanceWork;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.governance.source.GovernanceSourceMetaData;
@@ -34,6 +51,7 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Governance}.
@@ -44,13 +62,28 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		RawGovernanceMetaDataFactory, RawGovernanceMetaData {
 
 	/**
+	 * Name of the {@link Task} to activate {@link Governance}.
+	 */
+	private static final String TASK_ACTIVATE = "ACTIVATE";
+
+	/**
+	 * Name of the {@link Task} to activate {@link Governance}.
+	 */
+	private static final String TASK_ENFORCE = "ENFORCE";
+
+	/**
+	 * Name of the {@link Task} to activate {@link Governance}.
+	 */
+	private static final String TASK_DISREGARD = "DISREGARD";
+
+	/**
 	 * Obtains the {@link RawGovernanceMetaDataFactory}.
 	 * 
 	 * @return {@link RawGovernanceMetaDataFactory}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static RawGovernanceMetaDataFactory getFactory() {
-		return new RawGovernanceMetaDataImpl(null, -1, null, null);
+		return new RawGovernanceMetaDataImpl(null, -1, null, null, null);
 	}
 
 	/**
@@ -70,9 +103,14 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	private final Class<I> extensionInterfaceType;
 
 	/**
+	 * Name of {@link Work} for the {@link Governance}.
+	 */
+	private final String workName;
+
+	/**
 	 * {@link GovernanceMetaData}.
 	 */
-	private final GovernanceMetaData<I, F> governanceMetaData;
+	private final GovernanceMetaDataImpl<I, F> governanceMetaData;
 
 	/**
 	 * Initiate.
@@ -84,15 +122,18 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 *            {@link ProcessState}.
 	 * @param extensionInterfaceType
 	 *            Extension interface type.
+	 * @param workName
+	 *            Name of {@link Work} for the {@link Governance}.
 	 * @param governanceMetaData
-	 *            {@link GovernanceMetaData}.
+	 *            {@link GovernanceMetaDataImpl}.
 	 */
 	public RawGovernanceMetaDataImpl(String governanceName,
 			int governanceIndex, Class<I> extensionInterfaceType,
-			GovernanceMetaData<I, F> governanceMetaData) {
+			String workName, GovernanceMetaDataImpl<I, F> governanceMetaData) {
 		this.governanceName = governanceName;
 		this.governanceIndex = governanceIndex;
 		this.extensionInterfaceType = extensionInterfaceType;
+		this.workName = workName;
 		this.governanceMetaData = governanceMetaData;
 	}
 
@@ -104,7 +145,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	public <i, f extends Enum<f>, GS extends GovernanceSource<i, f>> RawGovernanceMetaData createRawGovernanceMetaData(
 			GovernanceConfiguration<i, f, GS> configuration,
 			int governanceIndex, SourceContext sourceContext,
-			String officeName, OfficeFloorIssues issues) {
+			String officeName, OfficeBuilder officeBuilder,
+			OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -192,17 +234,63 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			return null; // can not carry on
 		}
 
+		// Obtain the team name for the governance
+		String teamName = configuration.getTeamName();
+		if (ConstructUtil.isBlank(teamName)) {
+			issues.addIssue(AssetType.GOVERNANCE, governanceName,
+					"Must specify Team responsible for executing Governance");
+			return null; // can not carry on
+		}
+
+		// Create the work for the governance tasks
+		final String governanceWorkName = "GOVERNANCE_" + governanceName;
+		WorkBuilder<GovernanceWork> workBuilder = officeBuilder.addWork(
+				governanceWorkName, new GovernanceWork());
+
+		// Register the governance tasks
+		this.registerGovernanceTask(workBuilder, TASK_ACTIVATE,
+				new ActivateGovernanceTask<f>(), teamName);
+		this.registerGovernanceTask(workBuilder, TASK_ENFORCE,
+				new EnforceGovernanceTask<f>(), teamName);
+		this.registerGovernanceTask(workBuilder, TASK_DISREGARD,
+				new DisregardGovernanceTask<f>(), teamName);
+
 		// Create the Governance Meta-Data
-		GovernanceMetaData<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
+		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
 				governanceName, governanceSource);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(
 				governanceName, governanceIndex, extensionInterfaceType,
-				governanceMetaData);
+				governanceWorkName, governanceMetaData);
 
 		// Return the raw governance meta-data
 		return rawGovernanceMetaData;
+	}
+
+	/**
+	 * Registers the {@link Governance} {@link Task}.
+	 * 
+	 * @param workBuilder
+	 *            {@link WorkBuilder} of the {@link Governance} {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param taskFactory
+	 *            {@link TaskFactory}.
+	 * @param teamName
+	 *            Name of the {@link Team} to execute the {@link Governance}
+	 *            {@link Task}.
+	 */
+	private <f extends Enum<f>> void registerGovernanceTask(
+			WorkBuilder<GovernanceWork> workBuilder,
+			String taskName,
+			TaskFactory<GovernanceWork, GovernanceTaskDependency, f> taskFactory,
+			String teamName) {
+		TaskBuilder<GovernanceWork, GovernanceTaskDependency, f> taskBuilder = workBuilder
+				.addTask(taskName, taskFactory);
+		taskBuilder.setTeam(teamName);
+		taskBuilder.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
+				GovernanceControl.class);
 	}
 
 	/*
@@ -227,6 +315,60 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public GovernanceMetaData<I, F> getGovernanceMetaData() {
 		return this.governanceMetaData;
+	}
+
+	@Override
+	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+
+		// Locate the tasks
+		FlowMetaData<?> activateFlow = this.getFlowMetaData(TASK_ACTIVATE,
+				taskLocator, assetManagerFactory, issues);
+		FlowMetaData<?> enforceFlow = this.getFlowMetaData(TASK_ENFORCE,
+				taskLocator, assetManagerFactory, issues);
+		FlowMetaData<?> disregardFlow = this.getFlowMetaData(TASK_DISREGARD,
+				taskLocator, assetManagerFactory, issues);
+
+		// Load flows into governance meta-data
+		this.governanceMetaData.loadFlows(activateFlow, enforceFlow,
+				disregardFlow);
+	}
+
+	/**
+	 * Obtains the {@link FlowMetaData}.
+	 * 
+	 * @param taskName
+	 *            Name of {@link Governance} {@link Task}.
+	 * @param taskLocator
+	 *            {@link OfficeMetaDataLocator}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return {@link FlowMetaData} for the {@link Governance} {@link Task}.
+	 */
+	private FlowMetaData<?> getFlowMetaData(String taskName,
+			OfficeMetaDataLocator taskLocator,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+
+		// Obtain the task meta-data
+		TaskMetaData<?, ?, ?> taskMetaData = taskLocator.getTaskMetaData(
+				this.workName, taskName);
+		if (taskMetaData == null) {
+			issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
+					"Can not obtain " + Governance.class.getSimpleName() + " "
+							+ Task.class.getSimpleName() + " " + taskName);
+			return null; // no flow meta-data for task
+		}
+
+		// Create the flow meta-data
+		FlowMetaData<?> flowMetaData = ConstructUtil.newFlowMetaData(
+				FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
+				assetManagerFactory, AssetType.GOVERNANCE, this.governanceName,
+				this.workName + "-" + taskName, issues);
+
+		// Return the flow meta-data
+		return flowMetaData;
 	}
 
 }

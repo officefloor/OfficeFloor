@@ -20,16 +20,31 @@ package net.officefloor.frame.impl.construct.governance;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.GovernanceTaskDependency;
+import net.officefloor.frame.impl.execute.governance.GovernanceWork;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
@@ -43,6 +58,8 @@ import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link RawGovernanceMetaDataFactory}.
@@ -73,6 +90,12 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private final String OFFICE_NAME = "OFFICE";
 
 	/**
+	 * {@link OfficeBuilder}.
+	 */
+	private final OfficeBuilder officeBuilder = this
+			.createMock(OfficeBuilder.class);
+
+	/**
 	 * {@link SourceContext}.
 	 */
 	private final SourceContext sourceContext = this
@@ -89,6 +112,18 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link MockGovernanceSource} {@link Class}.
 	 */
 	private GovernanceSource<?, ?> governanceSourceInstance = null;
+
+	/**
+	 * {@link OfficeMetaDataLocator}.
+	 */
+	private final OfficeMetaDataLocator officeMetaDataLocator = this
+			.createMock(OfficeMetaDataLocator.class);
+
+	/**
+	 * {@link AssetManagerFactory}.
+	 */
+	private final AssetManagerFactory assetManagerFactory = this
+			.createMock(AssetManagerFactory.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -289,6 +324,13 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record simple governance
 		this.record_initGovernance();
 		this.record_createRawMetaData(String.class);
+		this.record_setupGovernanceTasks();
+		TaskMetaData<?, ?, ?> activateTaskMetaData = this
+				.record_linkGovernanceTask("ACTIVATE", true);
+		TaskMetaData<?, ?, ?> enforceTaskMetaData = this
+				.record_linkGovernanceTask("ENFORCE", true);
+		TaskMetaData<?, ?, ?> disregardTaskMetaData = this
+				.record_linkGovernanceTask("DISREGARD", true);
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -296,6 +338,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.constructRawGovernanceMetaData(true);
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData
 				.getGovernanceMetaData();
+		rawMetaData.linkOfficeMetaData(this.officeMetaDataLocator,
+				this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -307,6 +351,15 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Verify governance meta-data
 		assertEquals("Incorrect governance name", GOVERNANCE_NAME,
 				governanceMetaData.getGovernanceName());
+		assertEquals("Incorrect activate flow meta-data", activateTaskMetaData,
+				governanceMetaData.getActivateFlowMetaData()
+						.getInitialTaskMetaData());
+		assertEquals("Incorrect enforce flow meta-data", enforceTaskMetaData,
+				governanceMetaData.getEnforceFlowMetaData()
+						.getInitialTaskMetaData());
+		assertEquals("Incorrect disregard flow meta-data",
+				disregardTaskMetaData, governanceMetaData
+						.getDisregardFlowMetaData().getInitialTaskMetaData());
 	}
 
 	/**
@@ -329,6 +382,113 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record obtaining details from configuration to init
 		this.recordReturn(this.configuration,
 				this.configuration.getProperties(), new SourcePropertiesImpl());
+	}
+
+	/**
+	 * Records the {@link Governance} {@link Task} setup.
+	 */
+	@SuppressWarnings("unchecked")
+	private void record_setupGovernanceTasks() {
+
+		final String TEAM_NAME = "TEAM";
+		final WorkBuilder<GovernanceWork> workBuilder = this
+				.createMock(WorkBuilder.class);
+		final TaskBuilder<GovernanceWork, GovernanceTaskDependency, Indexed> activateTask = this
+				.createMock(TaskBuilder.class);
+		final TaskBuilder<GovernanceWork, GovernanceTaskDependency, Indexed> enforceTask = this
+				.createMock(TaskBuilder.class);
+		final TaskBuilder<GovernanceWork, GovernanceTaskDependency, Indexed> disregardTask = this
+				.createMock(TaskBuilder.class);
+
+		// Record obtaining the team name
+		this.recordReturn(this.configuration, this.configuration.getTeamName(),
+				TEAM_NAME);
+
+		// Record creating governance work
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
+				"GOVERNANCE_" + GOVERNANCE_NAME, null), workBuilder,
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect work name", expected[0],
+								actual[0]);
+						assertTrue("Should have governance work",
+								actual[1] instanceof GovernanceWork);
+						return true;
+					}
+				});
+
+		// Create matcher for governance task factory
+		AbstractMatcher matcher = new AbstractMatcher() {
+
+			int index = 0;
+
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				String taskName = (String) actual[0];
+				TaskFactory<?, ?, ?> taskFactory = (TaskFactory<?, ?, ?>) actual[1];
+				switch (this.index) {
+				case 0:
+					assertEquals("Incorrect task name", "ACTIVATE", taskName);
+					assertTrue("Incorrect task factory",
+							taskFactory instanceof ActivateGovernanceTask);
+					break;
+				case 1:
+					assertEquals("Incorrect task name", "ENFORCE", taskName);
+					assertTrue("Incorrect task factory",
+							taskFactory instanceof EnforceGovernanceTask);
+					break;
+				case 2:
+					assertEquals("Incorrect task name", "DISREGARD", taskName);
+					assertTrue("Incorrect task factory",
+							taskFactory instanceof DisregardGovernanceTask);
+					break;
+				}
+				if (taskName.equals(expected[0])) {
+					this.index++; // next task as found expected
+				}
+				return true;
+			}
+		};
+
+		// Record creating governance tasks
+		this.recordReturn(workBuilder, workBuilder.addTask("ACTIVATE",
+				new ActivateGovernanceTask<Indexed>()), activateTask, matcher);
+		activateTask.setTeam(TEAM_NAME);
+		activateTask.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
+				GovernanceControl.class);
+		this.recordReturn(workBuilder, workBuilder.addTask("ENFORCE",
+				new EnforceGovernanceTask<Indexed>()), enforceTask);
+		enforceTask.setTeam(TEAM_NAME);
+		enforceTask.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
+				GovernanceControl.class);
+		this.recordReturn(workBuilder, workBuilder.addTask("DISREGARD",
+				new DisregardGovernanceTask<Indexed>()), disregardTask);
+		disregardTask.setTeam(TEAM_NAME);
+		disregardTask.linkParameter(
+				GovernanceTaskDependency.GOVERNANCE_CONTROL,
+				GovernanceControl.class);
+	}
+
+	/**
+	 * Records linking a {@link Governance} {@link Task}.
+	 */
+	private TaskMetaData<?, ?, ?> record_linkGovernanceTask(String taskName,
+			boolean isFound) {
+
+		final TaskMetaData<?, ?, ?> taskMetaData = (isFound ? this
+				.createMock(TaskMetaData.class) : null);
+
+		// Record obtaining the task
+		this.recordReturn(
+				this.officeMetaDataLocator,
+				this.officeMetaDataLocator.getTaskMetaData("GOVERNANCE_"
+						+ GOVERNANCE_NAME, taskName), taskMetaData);
+
+		// Should always be PARALLEL flow so no asset manager required
+
+		// Return the task meta-data
+		return taskMetaData;
 	}
 
 	/**
@@ -389,7 +549,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.getFactory().createRawGovernanceMetaData(
 						(GovernanceConfiguration) this.configuration,
 						GOVERNANCE_INDEX, this.sourceContext, OFFICE_NAME,
-						this.issues);
+						this.officeBuilder, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data",

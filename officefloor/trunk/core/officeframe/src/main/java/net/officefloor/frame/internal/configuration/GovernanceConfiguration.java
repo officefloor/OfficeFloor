@@ -17,9 +17,11 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Configuration for the {@link Governance}.
@@ -62,5 +64,13 @@ public interface GovernanceConfiguration<I, F extends Enum<F>, GS extends Govern
 	 *         {@link GovernanceSource}.
 	 */
 	SourceProperties getProperties();
+
+	/**
+	 * Obtains the name of the {@link Team} to execute the {@link Task}
+	 * instances for {@link Governance}.
+	 * 
+	 * @return Name of {@link Team}.
+	 */
+	String getTeamName();
 
 }

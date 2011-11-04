@@ -100,4 +100,11 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 		return this.properties;
 	}
 
+	@Override
+	public String getTeamName() {
+		// TODO implement GovernanceConfiguration<I,F,GS>.getTeamName
+		throw new UnsupportedOperationException(
+				"TODO implement GovernanceConfiguration<I,F,GS>.getTeamName");
+	}
+
 }
