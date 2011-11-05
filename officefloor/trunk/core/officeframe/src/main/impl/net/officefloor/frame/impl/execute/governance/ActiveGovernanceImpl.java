@@ -17,30 +17,34 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * {@link ActiveGovernance} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ActiveGovernanceImpl<I, F extends Enum<F>> extends
-		AbstractSingleTask<ActiveGovernanceImpl<I, F>, None, None> implements
-		ActiveGovernanceManager, ActiveGovernance, GovernanceContext<F> {
+public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
+		ActiveGovernanceManager, ActiveGovernance, ActiveGovernanceControl<F> {
 
 	/**
 	 * {@link GovernanceContainer}.
 	 */
 	private final GovernanceContainer<I> governanceContainer;
+
+	/**
+	 * {@link GovernanceMetaData}.
+	 */
+	private final GovernanceMetaData<I, F> metaData;
 
 	/**
 	 * {@link Governance}.
@@ -62,6 +66,8 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> extends
 	 * 
 	 * @param governanceContainer
 	 *            {@link GovernanceContainer}.
+	 * @param metaData
+	 *            {@link GovernanceMetaData}.
 	 * @param governance
 	 *            {@link Governance}.
 	 * @param extensionInterface
@@ -70,9 +76,10 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> extends
 	 *            {@link ManagedObjectContainer}.
 	 */
 	public ActiveGovernanceImpl(GovernanceContainer<I> governanceContainer,
-			Governance<I, F> governance, I extensionInterface,
-			ManagedObjectContainer managedObject) {
+			GovernanceMetaData<I, F> metaData, Governance<I, F> governance,
+			I extensionInterface, ManagedObjectContainer managedObject) {
 		this.governanceContainer = governanceContainer;
+		this.metaData = metaData;
 		this.governance = governance;
 		this.extensionInterface = extensionInterface;
 		this.managedObject = managedObject;
@@ -103,43 +110,24 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> extends
 
 	@Override
 	public FlowMetaData<?> getFlowMetaData() {
-		// TODO implement ActiveGovernance.getFlowMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement ActiveGovernance.getFlowMetaData");
+		return this.metaData.getGovernFlowMetaData();
 	}
 
 	/*
-	 * ======================= Task ===============================
+	 * ================== ActiveGovernanceControl =====================
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<ActiveGovernanceImpl<I, F>, None, None> context)
+	public void governManagedObject(TaskContext<?, ?, F> taskContext)
 			throws Throwable {
 
+		// Create the governance context
+		GovernanceContext<F> governanceContext = this.metaData
+				.createGovernanceContext(taskContext);
+
 		// Govern the managed object
-		this.governance.governManagedObject(this.extensionInterface, this);
-
-		// Nothing to return
-		return null;
-	}
-
-	/*
-	 * ==================== GovernanceContext =============================
-	 */
-
-	@Override
-	public void doFlow(F key, Object parameter) {
-		// TODO implement GovernanceContext<F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceContext<F>.doFlow");
-	}
-
-	@Override
-	public void doFlow(int flowIndex, Object parameter) {
-		// TODO implement GovernanceContext<F>.doFlow
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceContext<F>.doFlow");
+		this.governance.governManagedObject(this.extensionInterface,
+				governanceContext);
 	}
 
 }

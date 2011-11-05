@@ -209,6 +209,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(EscalationFlow.class);
 
 	/**
+	 * {@link RawGovernanceMetaData} instances by their registered names.
+	 */
+	private final Map<String, RawGovernanceMetaData> rawGovernanceMetaDatas = new HashMap<String, RawGovernanceMetaData>();
+
+	/**
 	 * Ensure issue if no {@link Office} name.
 	 */
 	public void testNoOfficeName() {
@@ -959,6 +964,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
+		this.record_governanceTasks("GOVERNANCE_ONE", "GOVERNANCE_TWO");
 		this.record_constructManagedObjectMetaData(processManagedObjects);
 		this.record_processContextListeners();
 
@@ -1625,6 +1631,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 					.createMock(GovernanceMetaData.class);
 			governanceMetaDatas[i] = governanceMetaData;
 
+			// Register the raw governance meta-data
+			this.rawGovernanceMetaDatas.put(governanceName,
+					rawGovernanceMetaData);
+
 			// Record creating the governance meta-data
 			this.recordReturn(this.rawGovernanceFactory,
 					this.rawGovernanceFactory.createRawGovernanceMetaData(
@@ -1640,6 +1650,31 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Return the governance meta-data
 		return governanceMetaDatas;
+	}
+
+	/**
+	 * Records the {@link Governance} {@link Task} instances.
+	 */
+	private void record_governanceTasks(String... governanceNames) {
+
+		// Record governance tasks
+		for (int i = 0; i < governanceNames.length; i++) {
+			String governanceName = governanceNames[i];
+
+			// Ensure have raw governance meta-data
+			RawGovernanceMetaData rawGovernanceMetaData = this.rawGovernanceMetaDatas
+					.get(governanceName);
+			assertNotNull("Missing raw Governance meta-data",
+					rawGovernanceMetaData);
+
+			// Link the Office meta-data
+			rawGovernanceMetaData.linkOfficeMetaData(null, null, this.issues);
+			this.control(rawGovernanceMetaData)
+					.setMatcher(
+							new TypeMatcher(OfficeMetaDataLocator.class,
+									AssetManagerFactory.class,
+									OfficeFloorIssues.class));
+		}
 	}
 
 	/**

@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.GovernGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.GovernanceTaskDependency;
 import net.officefloor.frame.impl.execute.governance.GovernanceWork;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
@@ -40,6 +41,9 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
+import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -327,6 +331,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_setupGovernanceTasks();
 		TaskMetaData<?, ?, ?> activateTaskMetaData = this
 				.record_linkGovernanceTask("ACTIVATE", true);
+		TaskMetaData<?, ?, ?> governTaskMetaData = this
+				.record_linkGovernanceTask("GOVERN", true);
 		TaskMetaData<?, ?, ?> enforceTaskMetaData = this
 				.record_linkGovernanceTask("ENFORCE", true);
 		TaskMetaData<?, ?, ?> disregardTaskMetaData = this
@@ -360,6 +366,13 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect disregard flow meta-data",
 				disregardTaskMetaData, governanceMetaData
 						.getDisregardFlowMetaData().getInitialTaskMetaData());
+
+		// Validate correct govern meta-data
+		ActiveGovernanceManager manager = governanceMetaData
+				.createActiveGovernance(null, null, null, null);
+		ActiveGovernance activeGovernance = manager.getActiveGovernance();
+		assertEquals("Incorrect govern flow meta-data", governTaskMetaData,
+				activeGovernance.getFlowMetaData().getInitialTaskMetaData());
 	}
 
 	/**
@@ -434,11 +447,16 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 							taskFactory instanceof ActivateGovernanceTask);
 					break;
 				case 1:
+					assertEquals("Incorrect task name", "GOVERN", taskName);
+					assertTrue("Incorrect task factory",
+							taskFactory instanceof GovernGovernanceTask);
+					break;
+				case 2:
 					assertEquals("Incorrect task name", "ENFORCE", taskName);
 					assertTrue("Incorrect task factory",
 							taskFactory instanceof EnforceGovernanceTask);
 					break;
-				case 2:
+				case 3:
 					assertEquals("Incorrect task name", "DISREGARD", taskName);
 					assertTrue("Incorrect task factory",
 							taskFactory instanceof DisregardGovernanceTask);
@@ -457,6 +475,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		activateTask.setTeam(TEAM_NAME);
 		activateTask.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
 				GovernanceControl.class);
+		this.recordReturn(workBuilder, workBuilder.addTask("GOVERN",
+				new GovernGovernanceTask<Indexed>()), activateTask, matcher);
+		activateTask.setTeam(TEAM_NAME);
+		activateTask.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
+				ActiveGovernanceControl.class);
 		this.recordReturn(workBuilder, workBuilder.addTask("ENFORCE",
 				new EnforceGovernanceTask<Indexed>()), enforceTask);
 		enforceTask.setTeam(TEAM_NAME);

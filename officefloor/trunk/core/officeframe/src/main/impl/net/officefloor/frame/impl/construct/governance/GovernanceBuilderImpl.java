@@ -18,11 +18,13 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link GovernanceBuilder} implementation.
@@ -53,6 +55,12 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
+	 * {@link Team} name responsible to undertake the {@link Governance}
+	 * {@link Task} instances.
+	 */
+	private String teamName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
@@ -74,6 +82,11 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name, value);
+	}
+
+	@Override
+	public void setTeamName(String teamName) {
+		this.teamName = teamName;
 	}
 
 	/*
@@ -102,9 +115,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>, GS extends GovernanceSo
 
 	@Override
 	public String getTeamName() {
-		// TODO implement GovernanceConfiguration<I,F,GS>.getTeamName
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceConfiguration<I,F,GS>.getTeamName");
+		return this.teamName;
 	}
 
 }

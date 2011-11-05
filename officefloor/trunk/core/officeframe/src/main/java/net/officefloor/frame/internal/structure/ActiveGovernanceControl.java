@@ -15,37 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.build;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Builds the {@link Governance}.
+ * Provides control over the {@link ActiveGovernance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceBuilder {
+public interface ActiveGovernanceControl<F extends Enum<F>> {
 
 	/**
-	 * Specifies a property for the {@link GovernanceSource}.
+	 * Provides the {@link Governance} over the {@link ManagedObject}.
 	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param value
-	 *            Value of property.
+	 * @param taskContext
+	 *            {@link TaskContext}.
+	 * @throws Throwable
+	 *             If fails to provide {@link Governance} over the
+	 *             {@link ManagedObject}.
 	 */
-	void addProperty(String name, String value);
-
-	/**
-	 * Specifies the name of the {@link Team} responsible for executing the
-	 * {@link Governance} {@link Task} instances.
-	 * 
-	 * @param teamName
-	 *            {@link Team} name.
-	 */
-	void setTeamName(String teamName);
+	void governManagedObject(TaskContext<?, ?, F> taskContext) throws Throwable;
 
 }
