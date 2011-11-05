@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link GovernanceMetaData} implementation.
@@ -50,6 +51,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * {@link FlowMetaData} to activate {@link Governance}.
 	 */
 	private FlowMetaData<?> activateFlow;
+
+	/**
+	 * {@link FlowMetaData} for {@link Governance} of a {@link ManagedObject}.
+	 */
+	private FlowMetaData<?> governFlow;
 
 	/**
 	 * {@link FlowMetaData} to enforce {@link Governance}.
@@ -81,14 +87,19 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param activateFlow
 	 *            {@link FlowMetaData} to activate {@link Governance}.
+	 * @param governFlow
+	 *            {@link FlowMetaData} for {@link Governance} of a
+	 *            {@link ManagedObject}.
 	 * @param enforceFlow
 	 *            {@link FlowMetaData} to enforce {@link Governance}.
 	 * @param disregardFlow
 	 *            {@link FlowMetaData} to disregard {@link Governance}.
 	 */
 	public void loadFlows(FlowMetaData<?> activateFlow,
-			FlowMetaData<?> enforceFlow, FlowMetaData<?> disregardFlow) {
+			FlowMetaData<?> governFlow, FlowMetaData<?> enforceFlow,
+			FlowMetaData<?> disregardFlow) {
 		this.activateFlow = activateFlow;
+		this.governFlow = governFlow;
 		this.enforceFlow = enforceFlow;
 		this.disregardFlow = disregardFlow;
 	}
@@ -117,13 +128,18 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 			GovernanceContainer<I> governanceContainer,
 			Governance<I, F> governance, I extensionInterface,
 			ManagedObjectContainer managedobjectContainer) {
-		return new ActiveGovernanceImpl<I, F>(governanceContainer, governance,
-				extensionInterface, managedobjectContainer);
+		return new ActiveGovernanceImpl<I, F>(governanceContainer, this,
+				governance, extensionInterface, managedobjectContainer);
 	}
 
 	@Override
 	public FlowMetaData<?> getActivateFlowMetaData() {
 		return this.activateFlow;
+	}
+
+	@Override
+	public FlowMetaData<?> getGovernFlowMetaData() {
+		return this.governFlow;
 	}
 
 	@Override
@@ -139,9 +155,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	@Override
 	public GovernanceContext<F> createGovernanceContext(
 			TaskContext<?, ?, F> taskContext) {
-		// TODO implement GovernanceMetaData<I,F>.createGovernanceContext
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceMetaData<I,F>.createGovernanceContext");
+		return new GovernanceContextImpl<F>(taskContext);
 	}
 
 }

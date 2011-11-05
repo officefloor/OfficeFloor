@@ -391,7 +391,8 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(ActiveGovernanceManager.class);
 
 		final ActiveGovernance activeGovernance = new ActiveGovernanceImpl<MockExtensionInterface, Indexed>(
-				this.container, this.governance, extension, managedObject);
+				this.container, this.metaData, this.governance, extension,
+				managedObject);
 
 		// Record creating the active governance
 		this.recordReturn(this.metaData, this.metaData.createActiveGovernance(

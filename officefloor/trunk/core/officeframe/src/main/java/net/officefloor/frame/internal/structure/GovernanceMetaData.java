@@ -81,6 +81,15 @@ public interface GovernanceMetaData<I, F extends Enum<F>> {
 	FlowMetaData<?> getActivateFlowMetaData();
 
 	/**
+	 * Obtains the {@link FlowMetaData} for {@link Governance} over a
+	 * {@link ManagedObject}.
+	 * 
+	 * @return {@link FlowMetaData} for {@link Governance} over a
+	 *         {@link ManagedObject}.
+	 */
+	FlowMetaData<?> getGovernFlowMetaData();
+
+	/**
 	 * Obtains the {@link FlowMetaData} for enforcing the {@link Governance}.
 	 * 
 	 * @return {@link FlowMetaData} for enforcing the {@link Governance}.

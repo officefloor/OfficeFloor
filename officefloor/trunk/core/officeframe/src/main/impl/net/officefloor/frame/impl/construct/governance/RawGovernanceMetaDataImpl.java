@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.governance.ActivateGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.DisregardGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.EnforceGovernanceTask;
+import net.officefloor.frame.impl.execute.governance.GovernGovernanceTask;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.execute.governance.GovernanceTaskDependency;
 import net.officefloor.frame.impl.execute.governance.GovernanceWork;
@@ -37,6 +38,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
+import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceControl;
@@ -46,6 +48,7 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.source.GovernanceSource;
 import net.officefloor.frame.spi.governance.source.GovernanceSourceMetaData;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
@@ -65,6 +68,12 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * Name of the {@link Task} to activate {@link Governance}.
 	 */
 	private static final String TASK_ACTIVATE = "ACTIVATE";
+
+	/**
+	 * Name of the {@link Task} to provide {@link Governance} over a
+	 * {@link ManagedObject}.
+	 */
+	private static final String TASK_GOVERN = "GOVERN";
 
 	/**
 	 * Name of the {@link Task} to activate {@link Governance}.
@@ -249,11 +258,17 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 
 		// Register the governance tasks
 		this.registerGovernanceTask(workBuilder, TASK_ACTIVATE,
-				new ActivateGovernanceTask<f>(), teamName);
+				new ActivateGovernanceTask<f>(), teamName,
+				GovernanceControl.class);
+		this.registerGovernanceTask(workBuilder, TASK_GOVERN,
+				new GovernGovernanceTask<f>(), teamName,
+				ActiveGovernanceControl.class);
 		this.registerGovernanceTask(workBuilder, TASK_ENFORCE,
-				new EnforceGovernanceTask<f>(), teamName);
+				new EnforceGovernanceTask<f>(), teamName,
+				GovernanceControl.class);
 		this.registerGovernanceTask(workBuilder, TASK_DISREGARD,
-				new DisregardGovernanceTask<f>(), teamName);
+				new DisregardGovernanceTask<f>(), teamName,
+				GovernanceControl.class);
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(
@@ -280,17 +295,20 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	 * @param teamName
 	 *            Name of the {@link Team} to execute the {@link Governance}
 	 *            {@link Task}.
+	 * @param controlType
+	 *            {@link GovernanceControl} or {@link ActiveGovernanceControl}
+	 *            type.
 	 */
 	private <f extends Enum<f>> void registerGovernanceTask(
 			WorkBuilder<GovernanceWork> workBuilder,
 			String taskName,
 			TaskFactory<GovernanceWork, GovernanceTaskDependency, f> taskFactory,
-			String teamName) {
+			String teamName, Class<?> controlType) {
 		TaskBuilder<GovernanceWork, GovernanceTaskDependency, f> taskBuilder = workBuilder
 				.addTask(taskName, taskFactory);
 		taskBuilder.setTeam(teamName);
 		taskBuilder.linkParameter(GovernanceTaskDependency.GOVERNANCE_CONTROL,
-				GovernanceControl.class);
+				controlType);
 	}
 
 	/*
@@ -324,14 +342,16 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>> implements
 		// Locate the tasks
 		FlowMetaData<?> activateFlow = this.getFlowMetaData(TASK_ACTIVATE,
 				taskLocator, assetManagerFactory, issues);
+		FlowMetaData<?> governFlow = this.getFlowMetaData(TASK_GOVERN,
+				taskLocator, assetManagerFactory, issues);
 		FlowMetaData<?> enforceFlow = this.getFlowMetaData(TASK_ENFORCE,
 				taskLocator, assetManagerFactory, issues);
 		FlowMetaData<?> disregardFlow = this.getFlowMetaData(TASK_DISREGARD,
 				taskLocator, assetManagerFactory, issues);
 
 		// Load flows into governance meta-data
-		this.governanceMetaData.loadFlows(activateFlow, enforceFlow,
-				disregardFlow);
+		this.governanceMetaData.loadFlows(activateFlow, governFlow,
+				enforceFlow, disregardFlow);
 	}
 
 	/**

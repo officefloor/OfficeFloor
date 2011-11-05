@@ -153,6 +153,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 	private boolean isJobToWait = false;
 
+	/**
+	 * Flag indicating a setup {@link Job} requires executing.
+	 */
+	private boolean isSetupJob = false;
+
 	@Override
 	public void flagJobToWait() {
 		// Flag for Job to wait
@@ -161,9 +166,24 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 	@Override
 	public void addSetupJob(FlowMetaData<?> flowMetaData, Object parameter) {
-		// TODO implement AbstractJobContainer.addSetupJob
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractJobContainer.addSetupJob");
+
+		// Obtain the task meta-data for instigating the flow
+		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
+
+		// Create a new flow for execution
+		ThreadState threadState = this.flow.getThreadState();
+		Flow parallelFlow = threadState.createFlow(flowMetaData);
+
+		// Create the job node
+		JobNode parallelJobNode = parallelFlow.createJobNode(initTaskMetaData,
+				this, parameter);
+
+		// Load the parallel node
+		this.loadParallelJobNode(parallelJobNode);
+
+		// Flag setup job
+		this.isSetupJob = true;
 	}
 
 	/*
@@ -234,6 +254,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Access Point: Team
 		// Locks: None
 
+		// Flag to determine if activate setup job
+		boolean isActivateSetupJob = false;
+
 		// Ensure activate and wait on flow
 		JobNodeActivatableSet activateSet = this.nodeMetaData
 				.createJobActivableSet();
@@ -267,6 +290,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							throw escalationCause;
 						}
 
+						// Reset flags for managed objects readiness
+						this.isJobToWait = false;
+						this.isSetupJob = false;
+
 						// Only take lock if have required managed objects
 						if (this.requiredManagedObjects.length == 0) {
 							// Only jump forward if initial state
@@ -278,9 +305,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						} else {
 							// Within process lock, ensure managed objects ready
 							synchronized (processState.getProcessLock()) {
-
-								// Reset flags for managed objects readiness
-								this.isJobToWait = false;
 
 								switch (this.jobState) {
 								case LOAD_MANAGED_OBJECTS:
@@ -346,6 +370,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 						switch (this.jobState) {
 						case EXECUTE_JOB:
+							
+							// Determine if setup job
+							if (this.isSetupJob) {
+								return true; // setup before execute
+							}
+							
 							// Flag complete by default and not waiting
 							this.isComplete = true;
 
@@ -357,6 +387,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								headJoinOnFlowAsset = this.joinFlowAssets
 										.purgeEntries();
 							}
+
+							// Will now normally execute setup job as next job
+							this.isSetupJob = false;
 
 							// Now to handle if job is complete
 							this.jobState = JobState.HANDLE_JOB_COMPLETION;
@@ -614,6 +647,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 				} finally {
 					// Job no longer active
 					this.isActive = false;
+
+					// Indicate whether to activate setup job
+					isActivateSetupJob = this.isSetupJob;
 				}
 			}
 
@@ -631,11 +667,13 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			// Ensure activate the necessary jobs
 			activateSet.activateJobNodes();
 
-			// TODO determine if activate parallel jobs (for setup)
-			boolean isTodo = false;
-			if (isTodo)
-				System.err
-						.println("TODO determine if activate parallel jobs (for setup)");
+			// Activate parallel jobs (for setup)
+			if (isActivateSetupJob) {
+				JobNode setupJob = this.getParallelJobNodeToExecute();
+				if (setupJob != null) {
+					setupJob.activateJob();
+				}
+			}
 		}
 	}
 
